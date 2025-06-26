@@ -56,8 +56,9 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
-import org.apache.fineract.portfolio.note.domain.Note;
-import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.portfolio.note.domain.NoteType;
+import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,11 +73,11 @@ public class LoanReAgingServiceImpl {
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
-    private final NoteRepository noteRepository;
     private final LoanChargeValidator loanChargeValidator;
     private final LoanUtilService loanUtilService;
     private final LoanScheduleService loanScheduleService;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
+    private final NoteWritePlatformService noteWritePlatformService;
 
     public CommandProcessingResult reAge(Long loanId, JsonCommand command) {
         Loan loan = loanAssembler.assembleFrom(loanId);
@@ -193,11 +194,12 @@ public class LoanReAgingServiceImpl {
 
     private void persistNote(Loan loan, JsonCommand command, Map<String, Object> changes) {
         if (command.hasParameter("note")) {
-            final String note = command.stringValueOfParameterNamed("note");
-            final Note newNote = Note.loanNote(loan, note);
-            changes.put("note", note);
+            var note = command.stringValueOfParameterNamed("note");
+            var request = NoteCreateRequest.builder().note(note).resourceId(loan.getId()).noteType(NoteType.LOAN).build();
 
-            this.noteRepository.saveAndFlush(newNote);
+            noteWritePlatformService.createNote(request);
+
+            changes.put("note", note);
         }
     }
 }

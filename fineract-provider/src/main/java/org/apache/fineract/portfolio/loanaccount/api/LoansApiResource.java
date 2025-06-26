@@ -167,7 +167,7 @@ import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrat
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.apache.fineract.portfolio.loanproduct.service.LoanDropdownReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
-import org.apache.fineract.portfolio.note.data.NoteData;
+import org.apache.fineract.portfolio.note.data.NoteResponse;
 import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.note.service.NoteReadPlatformService;
 import org.apache.fineract.portfolio.rate.data.RateData;
@@ -932,7 +932,7 @@ public class LoansApiResource {
         Collection<LoanChargeData> charges = null;
         Collection<GuarantorData> guarantors = null;
         CalendarData meeting = null;
-        Collection<NoteData> notes = null;
+        Collection<NoteResponse> notes = null;
         PortfolioAccountData linkedAccount = null;
         Collection<DisbursementData> disbursementData = null;
         List<LoanTermVariationsData> emiAmountVariations = null;

@@ -28,8 +28,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.fineract.client.models.NoteData;
-import org.apache.fineract.client.models.PostResourceTypeResourceIdNotesResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
@@ -217,12 +215,11 @@ public class NotesTest {
 
         // Notes
         final String payload = "{\"note\": \"" + noteText + "\"}";
-        final PostResourceTypeResourceIdNotesResponse postNoteResponse = NotesHelper.createSavingsNote(requestSpec, responseSpec, savingsId,
-                payload);
+        final var postNoteResponse = NotesHelper.createSavingsNote(requestSpec, responseSpec, savingsId, payload);
         Assertions.assertNotNull(postNoteResponse);
         Assertions.assertNotNull(postNoteResponse.getResourceId());
 
-        NoteData getNoteResponse = NotesHelper.retrieveSavingsNote(requestSpec, responseSpec, savingsId,
+        var getNoteResponse = NotesHelper.retrieveSavingsNote(requestSpec, responseSpec, savingsId,
                 Math.toIntExact(postNoteResponse.getResourceId()));
         Assertions.assertNotNull(getNoteResponse);
         Assertions.assertEquals(noteText, getNoteResponse.getNote());

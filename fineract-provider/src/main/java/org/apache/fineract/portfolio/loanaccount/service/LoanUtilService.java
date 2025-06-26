@@ -21,11 +21,9 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepository;
@@ -51,15 +49,12 @@ import org.apache.fineract.portfolio.floatingrates.exception.FloatingRateNotFoun
 import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
-import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
-import org.apache.fineract.portfolio.note.domain.Note;
-import org.apache.fineract.portfolio.note.domain.NoteRepository;
 
 @RequiredArgsConstructor
 public class LoanUtilService {
@@ -72,7 +67,6 @@ public class LoanUtilService {
     private final LoanScheduleGeneratorFactory loanScheduleFactory;
     private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
-    private final NoteRepository noteRepository;
 
     public ScheduleGeneratorDTO buildScheduleGeneratorDTO(final Loan loan, final LocalDate recalculateFrom) {
         final HolidayDetailDTO holidayDetailDTO = null;
@@ -323,15 +317,4 @@ public class LoanUtilService {
             throw new GroupNotActiveException(group.getId());
         }
     }
-
-    public void persistNote(Loan loan, JsonCommand command, Map<String, Object> changes) {
-        if (command.hasParameter(LoanApiConstants.noteParameterName)) {
-            final String note = command.stringValueOfParameterNamed(LoanApiConstants.noteParameterName);
-            final Note newNote = Note.loanNote(loan, note);
-            changes.put(LoanApiConstants.noteParameterName, note);
-
-            noteRepository.save(newNote);
-        }
-    }
-
 }

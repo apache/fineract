@@ -16,23 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.note.service;
+package org.apache.fineract.portfolio.note.command;
 
-import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
-import org.apache.fineract.portfolio.note.data.NoteCreateResponse;
-import org.apache.fineract.portfolio.note.data.NoteDeleteByResourceIdRequest;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
 import org.apache.fineract.portfolio.note.data.NoteDeleteRequest;
-import org.apache.fineract.portfolio.note.data.NoteDeleteResponse;
-import org.apache.fineract.portfolio.note.data.NoteUpdateRequest;
-import org.apache.fineract.portfolio.note.data.NoteUpdateResponse;
 
-public interface NoteWritePlatformService {
-
-    NoteCreateResponse createNote(NoteCreateRequest request);
-
-    NoteUpdateResponse updateNote(NoteUpdateRequest request);
-
-    NoteDeleteResponse deleteNote(NoteDeleteRequest request);
-
-    void deleteByResource(NoteDeleteByResourceIdRequest request);
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class NoteDeleteCommand extends Command<NoteDeleteRequest> {}

@@ -16,14 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.note.service;
+package org.apache.fineract.portfolio.note.data;
 
-import java.util.List;
-import org.apache.fineract.portfolio.note.data.NoteResponse;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public interface NoteReadPlatformService {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class NoteDeleteResponse implements Serializable {
 
-    NoteResponse retrieveNote(Long noteId, Long resourceId, Integer noteTypeId);
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    List<NoteResponse> retrieveNotesByResource(Long resourceId, Integer noteTypeId);
+    private Long noteId;
+    private Long resourceId;
 }

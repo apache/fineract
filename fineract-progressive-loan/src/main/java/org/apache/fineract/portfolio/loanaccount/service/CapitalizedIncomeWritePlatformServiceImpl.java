@@ -47,6 +47,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
@@ -103,7 +105,10 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
         // Create a note if provided
         final String noteText = command.stringValueOfParameterNamed("note");
         if (noteText != null && !noteText.isEmpty()) {
-            noteWritePlatformService.createLoanTransactionNote(capitalizedIncomeTransaction.getId(), noteText);
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(capitalizedIncomeTransaction.getId())
+                    .noteType(NoteType.LOAN_TRANSACTION).build();
+
+            noteWritePlatformService.createNote(request);
         }
 
         // Post journal entries
@@ -153,7 +158,10 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
         // Create a note if provided
         final String noteText = command.stringValueOfParameterNamed("note");
         if (noteText != null && !noteText.isEmpty()) {
-            noteWritePlatformService.createLoanTransactionNote(savedCapitalizedIncomeAdjustment.getId(), noteText);
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(savedCapitalizedIncomeAdjustment.getId())
+                    .noteType(NoteType.LOAN_TRANSACTION).build();
+
+            noteWritePlatformService.createNote(request);
         }
         // Post journal entries
         journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);

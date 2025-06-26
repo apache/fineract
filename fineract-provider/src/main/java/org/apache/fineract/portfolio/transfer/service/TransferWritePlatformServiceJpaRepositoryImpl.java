@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -57,6 +58,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.service.LoanOfficerService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
@@ -466,7 +469,13 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                 client.updateProposedTransferDate(null);
         }
 
-        this.noteWritePlatformService.createAndPersistClientNote(client, jsonCommand);
+        final String noteText = jsonCommand.stringValueOfParameterNamed("note");
+        if (StringUtils.isNotBlank(noteText)) {
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(client.getId()).noteType(NoteType.CLIENT).build();
+
+            noteWritePlatformService.createNote(request);
+        }
+
         this.clientTransferDetailsRepositoryWrapper
                 .save(ClientTransferDetails.instance(client.getId(), client.getOffice().getId(), destinationOffice.getId(), transferDate,
                         transferEventType.getValue(), DateUtils.getBusinessLocalDate(), this.context.authenticatedUser().getId()));

@@ -52,8 +52,9 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanTransactionValidator;
 import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
-import org.apache.fineract.portfolio.note.domain.Note;
-import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.portfolio.note.domain.NoteType;
+import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,7 +66,6 @@ public class LoanContractTerminationServiceImpl {
     private final LoanAssembler loanAssembler;
     private final LoanRepository loanRepository;
     private final LoanTransactionRepository loanTransactionRepository;
-    private final NoteRepository noteRepository;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final LoanUtilService loanUtilService;
     private final ExternalIdFactory externalIdFactory;
@@ -74,6 +74,7 @@ public class LoanContractTerminationServiceImpl {
     private final LoanScheduleService loanScheduleService;
     private final LoanChargeValidator loanChargeValidator;
     private final ProgressiveLoanTransactionValidator loanTransactionValidator;
+    private final NoteWritePlatformService noteWritePlatformService;
 
     public CommandProcessingResult applyContractTermination(final JsonCommand command) {
         final Loan loan = loanAssembler.assembleFrom(command.getLoanId());
@@ -91,9 +92,12 @@ public class LoanContractTerminationServiceImpl {
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(contractTermination.getId())
+                    .noteType(NoteType.LOAN_TRANSACTION).build();
+
+            noteWritePlatformService.createNote(request);
+
             changes.put("note", noteText);
-            final Note note = Note.loanTransactionNote(loan, contractTermination, noteText);
-            noteRepository.save(note);
         }
 
         // Mark Contract Termination, Update Loan SubStatus
@@ -145,9 +149,12 @@ public class LoanContractTerminationServiceImpl {
         // Add note if provided
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(contractTerminationTransaction.getId())
+                    .noteType(NoteType.LOAN_TRANSACTION).build();
+
+            noteWritePlatformService.createNote(request);
+
             changes.put("note", noteText);
-            final Note note = Note.loanTransactionNote(loan, contractTerminationTransaction, noteText);
-            noteRepository.save(note);
         }
 
         loanChargeValidator.validateRepaymentTypeTransactionNotBeforeAChargeRefund(contractTerminationTransaction.getLoan(),

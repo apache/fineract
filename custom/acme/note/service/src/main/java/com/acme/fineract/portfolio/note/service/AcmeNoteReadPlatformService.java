@@ -21,7 +21,7 @@ package com.acme.fineract.portfolio.note.service;
 import java.util.Collections;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.portfolio.note.data.NoteData;
+import org.apache.fineract.portfolio.note.data.NoteResponse;
 import org.apache.fineract.portfolio.note.service.NoteReadPlatformService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -38,12 +38,12 @@ public class AcmeNoteReadPlatformService implements NoteReadPlatformService, Ini
     }
 
     @Override
-    public NoteData retrieveNote(Long noteId, Long resourceId, Integer noteTypeId) {
+    public NoteResponse retrieveNote(Long noteId, Long resourceId, Integer noteTypeId) {
         return null;
     }
 
     @Override
-    public List<NoteData> retrieveNotesByResource(Long resourceId, Integer noteTypeId) {
+    public List<NoteResponse> retrieveNotesByResource(Long resourceId, Integer noteTypeId) {
         return Collections.emptyList();
     }
 }

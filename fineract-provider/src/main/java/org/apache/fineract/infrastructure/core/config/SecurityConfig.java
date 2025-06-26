@@ -147,6 +147,73 @@ public class SecurityConfig {
                             .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_CACHE")
                             .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/caches"))
                             .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_CACHE")
+                            // note
+                            // note: clients
+                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/clients/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_CLIENTNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/clients/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "CREATE_CLIENTNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/clients/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_CLIENTNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.DELETE, "/api/*/clients/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "DELETE_CLIENTNOTE")
+                            // note: loans
+                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/loans/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_LOANNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/loans/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "CREATE_LOANNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/loans/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_LOANNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.DELETE, "/api/*/loans/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "DELETE_LOANNOTE")
+                            // note: loan transactions
+                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/loanTransactions/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_LOANTRANSACTIONNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/loanTransactions/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "CREATE_LOANTRANSACTIONNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/loanTransactions/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_LOANTRANSACTIONNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.DELETE, "/api/*/loanTransactions/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "DELETE_LOANTRANSACTIONNOTE")
+                            // note: savings
+                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/savings/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_SAVINGNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/savings/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "CREATE_SAVINGNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/savings/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_SAVINGNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.DELETE, "/api/*/savings/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "DELETE_SAVINGNOTE")
+                            // note: groups
+                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/groups/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_GROUPNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/groups/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "CREATE_GROUPNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/groups/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_GROUPNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.DELETE, "/api/*/groups/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "DELETE_GROUPNOTE")
+                            // note: share accounts
+                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/accounts/share/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_SHAREACCOUNT")
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/accounts/share/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "CREATE_SHAREACCOUNT")
+                            .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/accounts/share/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_SHAREACCOUNT")
+                            .requestMatchers(antMatcher(HttpMethod.DELETE, "/api/*/accounts/share/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "DELETE_SHAREACCOUNT")
+                            // note: saving transactionsersyxpüß
+                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/savingsTransactions/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_SAVINGTRANSACTIONNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/savingsTransactions/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "CREATE_SAVINGTRANSACTIONNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/savingsTransactions/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_SAVINGTRANSACTIONNOTE")
+                            .requestMatchers(antMatcher(HttpMethod.DELETE, "/api/*/savingsTransactions/*/notes/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "DELETE_SAVINGTRANSACTIONNOTE")
+                            // TODO: this catch-all rule should work and would allow us to remove the explicit checks in
+                            // the API controller class
+                            // .requestMatchers(antMatcher("/api/**/notes/*")).denyAll() //
                             // ...
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated() //
                             .requestMatchers(antMatcher("/api/*/twofactor")).fullyAuthenticated() //

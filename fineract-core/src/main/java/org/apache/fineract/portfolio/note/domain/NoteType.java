@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.portfolio.note.exception.NoteResourceNotSupportedException;
 
 public enum NoteType {
 
@@ -72,7 +73,13 @@ public enum NoteType {
     }
 
     public static NoteType fromApiUrl(final String url) {
-        return BY_API.get(url);
+        var type = BY_API.get(url);
+
+        if (type == null) {
+            throw new NoteResourceNotSupportedException(url);
+        }
+
+        return type;
     }
 
     public static EnumOptionData toEnumOptionData(final Integer id) {

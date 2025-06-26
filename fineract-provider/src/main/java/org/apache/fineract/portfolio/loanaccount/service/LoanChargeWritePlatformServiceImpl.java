@@ -137,8 +137,9 @@ import org.apache.fineract.portfolio.loanaccount.service.adjustment.LoanAdjustme
 import org.apache.fineract.portfolio.loanaccount.service.adjustment.LoanAdjustmentService;
 import org.apache.fineract.portfolio.loanproduct.data.LoanOverdueDTO;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
-import org.apache.fineract.portfolio.note.domain.Note;
-import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.portfolio.note.domain.NoteType;
+import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
@@ -171,7 +172,6 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     private final AccountTransferDetailRepository accountTransferDetailRepository;
     private final LoanChargeAssembler loanChargeAssembler;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
-    private final NoteRepository noteRepository;
     private final LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
     private final LoanDownPaymentTransactionValidator loanDownPaymentTransactionValidator;
@@ -182,6 +182,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     private final LoanAdjustmentService loanAdjustmentService;
     private final LoanAccountingBridgeMapper loanAccountingBridgeMapper;
     private final LoanChargeService loanChargeService;
+    private final NoteWritePlatformService noteWritePlatformService;
 
     private static boolean isPartOfThisInstallment(LoanCharge loanCharge, LoanRepaymentScheduleInstallment e) {
         return DateUtils.isAfter(loanCharge.getDueDate(), e.getFromDate()) && !DateUtils.isAfter(loanCharge.getDueDate(), e.getDueDate());
@@ -765,9 +766,11 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanNote(loan, noteText);
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(loan.getId()).noteType(NoteType.LOAN).build();
+
+            noteWritePlatformService.createNote(request);
+
             changes.put("note", noteText);
-            this.noteRepository.save(note);
         }
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));

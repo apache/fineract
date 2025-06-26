@@ -114,8 +114,9 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
-import org.apache.fineract.portfolio.note.domain.Note;
-import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.portfolio.note.domain.NoteType;
+import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.data.PostDatedChecksStatus;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
@@ -136,7 +137,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
 
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
-    private final NoteRepository noteRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanUtilService loanUtilService;
     private final StandingInstructionRepository standingInstructionRepository;
@@ -165,6 +165,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final LoanBalanceService loanBalanceService;
     private final LoanTransactionService loanTransactionService;
     private final LoanAccountDomainServiceJpaHelper loanAccountDomainServiceJpaHelper;
+    private final NoteWritePlatformService noteWritePlatformService;
 
     @Transactional
     @Override
@@ -278,8 +279,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         loan = loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanTransactionNote(loan, newRepaymentTransaction, noteText);
-            this.noteRepository.save(note);
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(newRepaymentTransaction.getId())
+                    .noteType(NoteType.LOAN_TRANSACTION).build();
+
+            noteWritePlatformService.createNote(request);
         }
 
         loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
@@ -434,8 +437,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanTransactionNote(loan, newPaymentTransaction, noteText);
-            this.noteRepository.save(note);
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(newPaymentTransaction.getId())
+                    .noteType(NoteType.LOAN_TRANSACTION).build();
+
+            noteWritePlatformService.createNote(request);
         }
 
         loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
@@ -552,8 +557,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.loanRepositoryWrapper.saveAndFlush(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanTransactionNote(loan, newRefundTransaction, noteText);
-            this.noteRepository.save(note);
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(newRefundTransaction.getId())
+                    .noteType(NoteType.LOAN_TRANSACTION).build();
+
+            noteWritePlatformService.createNote(request);
         }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
@@ -601,8 +608,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanTransactionNote(loan, disbursementTransaction, noteText);
-            this.noteRepository.save(note);
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(disbursementTransaction.getId())
+                    .noteType(NoteType.LOAN_TRANSACTION).build();
+
+            noteWritePlatformService.createNote(request);
         }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, isLoanToLoanTransfer);
@@ -686,8 +695,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         newCreditBalanceRefundTransaction = this.loanTransactionRepository.saveAndFlush(newCreditBalanceRefundTransaction);
 
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanTransactionNote(loan, newCreditBalanceRefundTransaction, noteText);
-            this.noteRepository.save(note);
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(newCreditBalanceRefundTransaction.getId())
+                    .noteType(NoteType.LOAN_TRANSACTION).build();
+
+            noteWritePlatformService.createNote(request);
         }
 
         loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
@@ -739,8 +750,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.loanTransactionRepository.saveAndFlush(newRefundTransaction);
 
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanTransactionNote(loan, newRefundTransaction, noteText);
-            this.noteRepository.save(note);
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(newRefundTransaction.getId())
+                    .noteType(NoteType.LOAN_TRANSACTION).build();
+
+            noteWritePlatformService.createNote(request);
         }
 
         loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
@@ -820,8 +833,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
-            final Note note = Note.loanNote(loan, noteText);
-            this.noteRepository.save(note);
+
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(loan.getId()).noteType(NoteType.LOAN).build();
+
+            noteWritePlatformService.createNote(request);
         }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, false);

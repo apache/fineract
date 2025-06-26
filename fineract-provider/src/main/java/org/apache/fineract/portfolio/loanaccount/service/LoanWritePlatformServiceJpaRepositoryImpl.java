@@ -212,8 +212,9 @@ import org.apache.fineract.portfolio.loanaccount.service.adjustment.LoanAdjustme
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
-import org.apache.fineract.portfolio.note.domain.Note;
-import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.portfolio.note.domain.NoteType;
+import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
@@ -235,7 +236,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanUpdateCommandFromApiJsonDeserializer loanUpdateCommandFromApiJsonDeserializer;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanAccountDomainService loanAccountDomainService;
-    private final NoteRepository noteRepository;
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanTransactionRelationRepository loanTransactionRelationRepository;
     private final LoanAssembler loanAssembler;
@@ -289,6 +289,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanTransactionProcessingService loanTransactionProcessingService;
     private final LoanBalanceService loanBalanceService;
     private final LoanTransactionService loanTransactionService;
+    private final NoteWritePlatformService noteWritePlatformService;
 
     @Transactional
     @Override
@@ -543,9 +544,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private void createNote(Loan loan, JsonCommand command, Map<String, Object> changes) {
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(loan.getId()).noteType(NoteType.LOAN).build();
+
+            noteWritePlatformService.createNote(request);
+
             changes.put("note", noteText);
-            final Note note = Note.loanNote(loan, noteText);
-            this.noteRepository.save(note);
         }
     }
 
@@ -1095,8 +1098,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     private void saveNote(String noteText, Loan loan, LoanTransaction loanTransaction) {
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanTransactionNote(loan, loanTransaction, noteText);
-            this.noteRepository.save(note);
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(loanTransaction.getId()).noteType(NoteType.LOAN_TRANSACTION)
+                    .build();
+
+            noteWritePlatformService.createNote(request);
         }
     }
 
@@ -1353,9 +1358,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final String noteText = command.stringValueOfParameterNamed(LoanApiConstants.noteParamName);
         if (StringUtils.isNotBlank(noteText)) {
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(newTransaction.getId()).noteType(NoteType.LOAN_TRANSACTION)
+                    .build();
+
+            noteWritePlatformService.createNote(request);
+
             changes.put("note", noteText);
-            Note note = Note.loanTransactionNote(loan, newTransaction, noteText);
-            this.noteRepository.save(note);
         }
 
         journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
@@ -1448,9 +1456,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(waiveInterestTransaction.getId())
+                    .noteType(NoteType.LOAN_TRANSACTION).build();
+
+            noteWritePlatformService.createNote(request);
+
             changes.put("note", noteText);
-            final Note note = Note.loanTransactionNote(loan, waiveInterestTransaction, noteText);
-            this.noteRepository.save(note);
         }
 
         loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
@@ -1543,9 +1554,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             saveLoanWithDataIntegrityViolationChecks(loan);
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
+                var request = NoteCreateRequest.builder().note(noteText).resourceId(loanTransaction.getId())
+                        .noteType(NoteType.LOAN_TRANSACTION).build();
+
+                noteWritePlatformService.createNote(request);
                 changes.put("note", noteText);
-                final Note note = Note.loanTransactionNote(loan, loanTransaction, noteText);
-                this.noteRepository.save(note);
             }
             loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan,
                     loan.isInterestBearingAndInterestRecalculationEnabled(), false);
@@ -1611,9 +1624,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(loan.getId()).noteType(NoteType.LOAN).build();
+
+            noteWritePlatformService.createNote(request);
+
             changes.put("note", noteText);
-            final Note note = Note.loanNote(loan, noteText);
-            this.noteRepository.save(note);
         }
 
         loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
@@ -1685,9 +1700,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(loan.getId()).noteType(NoteType.LOAN).build();
+
+            noteWritePlatformService.createNote(request);
+
             changes.put("note", noteText);
-            final Note note = Note.loanNote(loan, noteText);
-            this.noteRepository.save(note);
         }
         businessEventNotifierService.notifyPostBusinessEvent(new LoanCloseAsRescheduleBusinessEvent(loan));
 
@@ -2835,9 +2852,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         String noteText = command.stringValueOfParameterNamed(LoanApiConstants.noteParameterName);
         if (StringUtils.isNotBlank(noteText)) {
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(chargeOffTransaction.getId())
+                    .noteType(NoteType.LOAN_TRANSACTION).build();
+
+            noteWritePlatformService.createNote(request);
+
             changes.put(LoanApiConstants.noteParameterName, noteText);
-            final Note note = Note.loanTransactionNote(loan, chargeOffTransaction, noteText);
-            this.noteRepository.save(note);
         }
 
         loan.getLoanTransactions().stream().filter(LoanTransaction::isAccrual)

@@ -90,8 +90,11 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanDownPaymentTr
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
-import org.apache.fineract.portfolio.note.domain.Note;
-import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.portfolio.note.data.NoteCreateResponse;
+import org.apache.fineract.portfolio.note.data.NoteDeleteByResourceIdRequest;
+import org.apache.fineract.portfolio.note.domain.NoteType;
+import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.apache.fineract.portfolio.savings.data.GroupSavingsIndividualMonitoringAccountData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
@@ -109,7 +112,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanApplicationTransitionValidator loanApplicationTransitionValidator;
     private final LoanApplicationValidator loanApplicationValidator;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
-    private final NoteRepository noteRepository;
     private final LoanAssembler loanAssembler;
     private final CalendarRepository calendarRepository;
     private final CalendarInstanceRepository calendarInstanceRepository;
@@ -127,6 +129,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
     private final LoanDownPaymentTransactionValidator loanDownPaymentTransactionValidator;
     private final LoanScheduleService loanScheduleService;
+    private final NoteWritePlatformService noteWritePlatformService;
 
     @Transactional
     @Override
@@ -473,8 +476,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             throw new LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted(loanId);
         }
 
-        final List<Note> relatedNotes = this.noteRepository.findByLoanId(loan.getId());
-        this.noteRepository.deleteAllInBatch(relatedNotes);
+        noteWritePlatformService
+                .deleteByResource(NoteDeleteByResourceIdRequest.builder().resourceId(loan.getId()).noteType(NoteType.LOAN).build());
 
         final AccountAssociations accountAssociations = this.accountAssociationsRepository.findByLoanIdAndType(loanId,
                 AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
@@ -560,7 +563,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         if (!changes.isEmpty()) {
             final String noteText = command.stringValueOfParameterNamed("note");
-            createNote(noteText, loan).ifPresent(note -> changes.put("note", noteText));
+            createNote(noteText, loan).ifPresent(response -> changes.put("note", noteText));
             businessEventNotifierService.notifyPostBusinessEvent(new LoanApprovedBusinessEvent(loan));
         }
 
@@ -828,14 +831,17 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         }
     }
 
-    private Optional<Note> createNote(String submittedOnNote, Loan newLoanApplication) {
+    private Optional<NoteCreateResponse> createNote(String submittedOnNote, Loan newLoanApplication) {
         if (StringUtils.isNotBlank(submittedOnNote)) {
-            final Note note = Note.loanNote(newLoanApplication, submittedOnNote);
-            this.noteRepository.save(note);
-            return Optional.of(note);
-        } else {
-            return Optional.empty();
+            var request = NoteCreateRequest.builder().note(submittedOnNote).resourceId(newLoanApplication.getId()).noteType(NoteType.LOAN)
+                    .build();
+
+            var response = noteWritePlatformService.createNote(request);
+
+            return Optional.of(response);
         }
+
+        return Optional.empty();
     }
 
     private void releaseAttachedCollaterals(Loan loan) {

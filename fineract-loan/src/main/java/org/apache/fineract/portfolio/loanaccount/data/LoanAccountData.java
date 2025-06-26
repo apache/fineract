@@ -54,7 +54,7 @@ import org.apache.fineract.portfolio.loanproduct.data.LoanProductBorrowerCycleVa
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditionType;
-import org.apache.fineract.portfolio.note.data.NoteData;
+import org.apache.fineract.portfolio.note.data.NoteResponse;
 import org.apache.fineract.portfolio.rate.data.RateData;
 
 @Data
@@ -147,7 +147,7 @@ public class LoanAccountData {
     private Collection<LoanCollateralManagementData> collateral;
     private Collection<? extends IGuarantor> guarantors;
     private CalendarData meeting;
-    private Collection<NoteData> notes;
+    private Collection<NoteResponse> notes;
     private Collection<DisbursementData> disbursementDetails;
     private LoanScheduleData originalSchedule;
     // template
@@ -552,7 +552,7 @@ public class LoanAccountData {
             final Collection<FundData> fundOptions, final Collection<ChargeData> chargeOptions, final ChargeData chargeTemplate,
             final Collection<StaffData> loanOfficerOptions, final Collection<CodeValueData> loanPurposeOptions,
             final Collection<CodeValueData> loanCollateralOptions, final Collection<CalendarData> calendarOptions,
-            final Collection<NoteData> notes, final Collection<PortfolioAccountData> accountLinkingOptions,
+            final Collection<NoteResponse> notes, final Collection<PortfolioAccountData> accountLinkingOptions,
             final PortfolioAccountData linkedAccount, final Collection<DisbursementData> disbursementDetails,
             final Collection<LoanTermVariationsData> emiAmountVariations, final Collection<ChargeData> overdueCharges,
             final PaidInAdvanceData paidInAdvance, Collection<InterestRatePeriodData> interestRatesPeriods,

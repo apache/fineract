@@ -20,17 +20,24 @@ package org.apache.fineract.portfolio.note.data;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Map;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class NoteRequest implements Serializable {
+public class NoteUpdateResponse implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String note;
+    private Long entityId;
+    private Long officeId;
+    private Long clientId;
+    private Long resourceId;
+    private Map<String, Object> changes;
 }

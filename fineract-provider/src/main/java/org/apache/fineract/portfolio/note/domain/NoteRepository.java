@@ -33,6 +33,18 @@ public interface NoteRepository extends JpaRepository<Note, Long>, JpaSpecificat
 
     List<Note> findByLoanId(Long id);
 
+    List<Note> findByLoanTransactionId(Long id);
+
+    List<Note> findByClientId(Long id);
+
+    List<Note> findBySavingsAccountId(Long id);
+
+    List<Note> findBySavingsAccounTransactiontId(Long id);
+
+    List<Note> findByShareAccountId(Long id);
+
+    List<Note> findByGroupId(Long id);
+
     List<Note> findByClient(Client id);
 
     List<Note> findByGroup(Group group);

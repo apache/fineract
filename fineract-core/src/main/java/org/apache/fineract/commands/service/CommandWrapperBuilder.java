@@ -1837,55 +1837,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder createNote(final CommandWrapper resourceDetails, final String resourceType, final Long resourceId) {
-        this.actionName = "CREATE";
-        this.entityName = resourceDetails.entityName();// Note supports multiple
-                                                       // resources. Note
-                                                       // Permissions are set
-                                                       // for each resource.
-        this.clientId = resourceDetails.getClientId();
-        this.loanId = resourceDetails.getLoanId();
-        this.savingsId = resourceDetails.getSavingsId();
-        this.groupId = resourceDetails.getGroupId();
-        this.subentityId = resourceDetails.subresourceId();
-        this.href = "/" + resourceType + "/" + resourceId + "/notes/template";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateNote(final CommandWrapper resourceDetails, final String resourceType, final Long resourceId,
-            final Long noteId) {
-        this.actionName = "UPDATE";
-        this.entityName = resourceDetails.entityName();// Note supports multiple
-                                                       // resources. Note
-                                                       // Permissions are set
-                                                       // for each resource.
-        this.entityId = noteId;
-        this.clientId = resourceDetails.getClientId();
-        this.loanId = resourceDetails.getLoanId();
-        this.savingsId = resourceDetails.getSavingsId();
-        this.groupId = resourceDetails.getGroupId();
-        this.subentityId = resourceDetails.subresourceId();
-        this.href = "/" + resourceType + "/" + resourceId + "/notes";
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteNote(final CommandWrapper resourceDetails, final String resourceType, final Long resourceId,
-            final Long noteId) {
-        this.actionName = "DELETE";
-        this.entityName = resourceDetails.entityName();// Note supports multiple
-                                                       // resources. Note
-                                                       // Permissions are set
-                                                       // for each resource.
-        this.entityId = noteId;
-        this.clientId = resourceDetails.getClientId();
-        this.loanId = resourceDetails.getLoanId();
-        this.savingsId = resourceDetails.getSavingsId();
-        this.groupId = resourceDetails.getGroupId();
-        this.subentityId = resourceDetails.subresourceId();
-        this.href = "/" + resourceType + "/" + resourceId + "/calendars/" + noteId;
-        return this;
-    }
-
     public CommandWrapperBuilder createGroup() {
         this.actionName = "CREATE";
         this.entityName = "GROUP";
@@ -3578,13 +3529,6 @@ public class CommandWrapperBuilder {
         this.entityName = "RATE";
         this.entityId = rateId;
         this.href = "/rates/" + rateId;
-        return this;
-    }
-
-    public CommandWrapperBuilder updateBusinessDate() {
-        this.actionName = "UPDATE";
-        this.entityName = "BUSINESS_DATE";
-        this.href = "/businessdate";
         return this;
     }
 

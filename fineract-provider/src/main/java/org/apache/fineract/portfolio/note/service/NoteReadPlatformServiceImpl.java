@@ -27,7 +27,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.portfolio.note.data.NoteData;
+import org.apache.fineract.portfolio.note.data.NoteResponse;
 import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.note.exception.NoteNotFoundException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -42,7 +42,7 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private static final class NoteMapper implements RowMapper<NoteData> {
+    private static final class NoteMapper implements RowMapper<NoteResponse> {
 
         public String schema() {
             return " select n.id as id, n.client_id as clientId, n.group_id as groupId, n.loan_id as loanId, n.loan_transaction_id as transactionId, "
@@ -53,7 +53,7 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
         }
 
         @Override
-        public NoteData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public NoteResponse mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final Long id = JdbcSupport.getLong(rs, "id");
             final Long clientId = JdbcSupport.getLong(rs, "clientId");
@@ -74,14 +74,14 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
             final OffsetDateTime createdDate = createdDateUtc != null ? createdDateUtc : createdDateLocal;
             final OffsetDateTime lastModifiedDate = lastModifiedDateUtc != null ? lastModifiedDateUtc : lastModifiedDateLocal;
 
-            return NoteData.builder().id(id).clientId(clientId).groupId(groupId).loanId(loanId).loanTransactionId(transactionId)
+            return NoteResponse.builder().id(id).clientId(clientId).groupId(groupId).loanId(loanId).loanTransactionId(transactionId)
                     .noteType(noteType).note(note).createdOn(createdDate).createdById(createdById).createdByUsername(createdByUsername)
                     .updatedOn(lastModifiedDate).updatedById(lastModifiedById).updatedByUsername(updatedByUsername).build();
         }
     }
 
     @Override
-    public NoteData retrieveNote(final Long noteId, final Long resourceId, final Integer noteTypeId) {
+    public NoteResponse retrieveNote(final Long noteId, final Long resourceId, final Integer noteTypeId) {
         final NoteType noteType = NoteType.fromInt(noteTypeId);
         try {
             final NoteMapper rm = new NoteMapper();
@@ -100,7 +100,7 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
     }
 
     @Override
-    public List<NoteData> retrieveNotesByResource(final Long resourceId, final Integer noteTypeId) {
+    public List<NoteResponse> retrieveNotesByResource(final Long resourceId, final Integer noteTypeId) {
         final NoteType noteType = NoteType.fromInt(noteTypeId);
         final NoteMapper rm = new NoteMapper();
         List<Object> paramList = new ArrayList<>(Arrays.asList(resourceId));

@@ -33,7 +33,6 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
@@ -69,8 +68,9 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerS
 import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
-import org.apache.fineract.portfolio.note.domain.Note;
-import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.portfolio.note.domain.NoteType;
+import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -84,7 +84,6 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
     private final LoanTransactionValidator loanTransactionValidator;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanAccountDomainService loanAccountDomainService;
-    private final NoteRepository noteRepository;
     private final LoanTransactionRepository loanTransactionRepository;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
@@ -100,7 +99,7 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
     private final LoanBalanceService loanBalanceService;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
-    private final ExternalIdFactory externalIdFactory;
+    private final NoteWritePlatformService noteWritePlatformService;
 
     @Override
     public CommandProcessingResult adjustLoanTransaction(Loan loan, LoanTransaction transactionToAdjust, LoanAdjustmentParameter parameter,
@@ -213,16 +212,18 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
 
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
-            Note note;
+
             /**
              * If a new transaction is not created, associate note with the transaction to be adjusted
              **/
+            var request = NoteCreateRequest.builder().note(noteText).noteType(NoteType.LOAN_TRANSACTION);
             if (thereIsNewTransaction) {
-                note = Note.loanTransactionNote(loan, newTransactionDetail, noteText);
+                request = request.resourceId(newTransactionDetail.getId());
             } else {
-                note = Note.loanTransactionNote(loan, transactionToAdjust, noteText);
+                request = request.resourceId(transactionToAdjust.getId());
             }
-            this.noteRepository.save(note);
+
+            noteWritePlatformService.createNote(request.build());
         }
 
         Collection<Long> transactionIds = new ArrayList<>();

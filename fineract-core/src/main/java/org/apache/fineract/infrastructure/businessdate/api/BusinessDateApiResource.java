@@ -19,10 +19,10 @@
 package org.apache.fineract.infrastructure.businessdate.api;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
@@ -64,7 +64,7 @@ public class BusinessDateApiResource {
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Retrieve a specific Business date", description = "")
-    public BusinessDateResponse getBusinessDate(@PathParam("type") @Parameter(description = "type") final String type) {
+    public BusinessDateResponse getBusinessDate(@PathParam("type") final String type) {
         return this.readPlatformService.findByType(type);
     }
 
@@ -72,7 +72,7 @@ public class BusinessDateApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Business Date", description = "")
-    public BusinessDateResponse updateBusinessDate(@HeaderParam("Idempotency-Key") String idempotencyKey,
+    public BusinessDateResponse updateBusinessDate(@HeaderParam("Idempotency-Key") @DefaultValue("") String idempotencyKey,
             @Valid BusinessDateUpdateRequest request) {
 
         final var command = new BusinessDateUpdateCommand();

@@ -57,7 +57,7 @@ import org.apache.fineract.organisation.office.service.OfficeReadPlatformService
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
-import org.apache.fineract.portfolio.note.data.NoteData;
+import org.apache.fineract.portfolio.note.data.NoteResponse;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
@@ -194,11 +194,11 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                     paymentDetailData = new PaymentDetailData(id, paymentType, accountNumber, checkNumber, routingCode, receiptNumber,
                             bankNumber);
                 }
-                NoteData noteData = null;
+                NoteResponse noteResponse = null;
                 final Long noteId = JdbcSupport.getLong(rs, "noteId");
                 if (noteId != null) {
                     final String note = rs.getString("transactionNote");
-                    noteData = NoteData.builder().id(noteId).note(note).build();
+                    noteResponse = NoteResponse.builder().id(noteId).note(note).build();
                 }
                 Long transaction = null;
                 if (entityType != null && transactionId != null) {
@@ -222,7 +222,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                             savingsTransactionType.getValue());
                 }
 
-                transactionDetailData = new TransactionDetailData(transaction, paymentDetailData, noteData, transactionTypeEnumData);
+                transactionDetailData = new TransactionDetailData(transaction, paymentDetailData, noteResponse, transactionTypeEnumData);
             }
             return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glCode, accountType, transactionDate,
                     entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, submittedOnDate,

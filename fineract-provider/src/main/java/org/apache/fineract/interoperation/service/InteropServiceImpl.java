@@ -93,6 +93,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepository;
@@ -121,7 +122,6 @@ public class InteropServiceImpl implements InteropService {
 
     private final PlatformSecurityContext securityContext;
     private final InteropDataValidator dataValidator;
-
     private final SavingsAccountRepository savingsAccountRepository;
     private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
     private final ApplicationCurrencyRepository currencyRepository;
@@ -129,16 +129,11 @@ public class InteropServiceImpl implements InteropService {
     private final PaymentTypeRepository paymentTypeRepository;
     private final InteropIdentifierRepository identifierRepository;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
-
     private final SavingsHelper savingsHelper;
     private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
-
     private final SavingsAccountDomainService savingsAccountService;
-
     private final JdbcTemplate jdbcTemplate;
-
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
     private final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
 
@@ -465,7 +460,8 @@ public class InteropServiceImpl implements InteropService {
 
         String note = request.getNote();
         if (!StringUtils.isBlank(note)) {
-            noteRepository.save(Note.savingsTransactionNote(savingsAccount, transaction, note));
+            noteRepository.save(Note.builder().note(note).savingsAccount(savingsAccount).savingsTransaction(transaction)
+                    .client(savingsAccount.getClient()).noteTypeId(NoteType.SAVINGS_TRANSACTION.getValue()).build());
         }
 
         return InteropTransferResponseData.build(command.commandId(), request.getTransactionCode(), InteropActionState.ACCEPTED,

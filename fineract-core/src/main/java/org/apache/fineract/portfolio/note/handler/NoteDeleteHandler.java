@@ -18,29 +18,26 @@
  */
 package org.apache.fineract.portfolio.note.handler;
 
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.note.data.NoteDeleteRequest;
+import org.apache.fineract.portfolio.note.data.NoteDeleteResponse;
 import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-public class UpdateNoteCommandHandler implements NewCommandSourceHandler {
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class NoteDeleteHandler implements CommandHandler<NoteDeleteRequest, NoteDeleteResponse> {
 
     private final NoteWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateNoteCommandHandler(final NoteWritePlatformService noteWritePlatformService) {
-        this.writePlatformService = noteWritePlatformService;
-    }
-
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-
-        return this.writePlatformService.updateNote(command);
+    public NoteDeleteResponse handle(Command<NoteDeleteRequest> command) {
+        return writePlatformService.deleteNote(command.getPayload());
     }
-
 }

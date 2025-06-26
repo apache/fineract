@@ -75,8 +75,10 @@ import org.apache.fineract.portfolio.group.domain.GroupRepository;
 import org.apache.fineract.portfolio.group.exception.CenterNotActiveException;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.group.exception.GroupNotFoundException;
-import org.apache.fineract.portfolio.note.domain.Note;
-import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.portfolio.note.data.NoteDeleteByResourceIdRequest;
+import org.apache.fineract.portfolio.note.domain.NoteType;
+import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
@@ -111,7 +113,6 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final ClientRepositoryWrapper clientRepository;
     private final GroupRepository groupRepository;
     private final SavingsProductRepository savingsProductRepository;
-    private final NoteRepository noteRepository;
     private final StaffRepositoryWrapper staffRepository;
     private final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator;
     private final SavingsAccountChargeAssembler savingsAccountChargeAssembler;
@@ -121,6 +122,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final ConfigurationDomainService configurationDomainService;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final NoteWritePlatformService noteWritePlatformService;
 
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue is.
@@ -574,8 +576,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             }
         }
 
-        final List<Note> relatedNotes = this.noteRepository.findBySavingsAccount(account);
-        this.noteRepository.deleteAllInBatch(relatedNotes);
+        noteWritePlatformService.deleteByResource(
+                NoteDeleteByResourceIdRequest.builder().resourceId(account.getId()).noteType(NoteType.SAVING_ACCOUNT).build());
 
         this.savingAccountRepository.delete(account);
 
@@ -606,9 +608,12 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
-                final Note note = Note.savingNote(savingsAccount, noteText);
+                var request = NoteCreateRequest.builder().note(noteText).resourceId(savingsAccount.getId())
+                        .noteType(NoteType.SAVING_ACCOUNT).build();
+
+                noteWritePlatformService.createNote(request);
+
                 changes.put("note", noteText);
-                this.noteRepository.save(note);
             }
         }
 
@@ -641,9 +646,12 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
-                final Note note = Note.savingNote(savingsAccount, noteText);
+                var request = NoteCreateRequest.builder().note(noteText).resourceId(savingsAccount.getId())
+                        .noteType(NoteType.SAVING_ACCOUNT).build();
+
+                noteWritePlatformService.createNote(request);
+
                 changes.put("note", noteText);
-                this.noteRepository.save(note);
             }
         }
 
@@ -676,9 +684,12 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
-                final Note note = Note.savingNote(savingsAccount, noteText);
+                var request = NoteCreateRequest.builder().note(noteText).resourceId(savingsAccount.getId())
+                        .noteType(NoteType.SAVING_ACCOUNT).build();
+
+                noteWritePlatformService.createNote(request);
+
                 changes.put("note", noteText);
-                this.noteRepository.save(note);
             }
         }
 
@@ -710,9 +721,12 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
-                final Note note = Note.savingNote(savingsAccount, noteText);
+                var request = NoteCreateRequest.builder().note(noteText).resourceId(savingsAccount.getId())
+                        .noteType(NoteType.SAVING_ACCOUNT).build();
+
+                noteWritePlatformService.createNote(request);
+
                 changes.put("note", noteText);
-                this.noteRepository.save(note);
             }
         }
 

@@ -20,7 +20,6 @@ package com.acme.fineract.portfolio.note.starter;
 
 import static org.mockito.Mockito.mock;
 
-import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSourceServiceFactory;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
@@ -28,7 +27,6 @@ import org.apache.fineract.portfolio.group.domain.GroupRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
-import org.apache.fineract.portfolio.note.serialization.NoteCommandFromApiJsonDeserializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -36,11 +34,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @ComponentScan("com.acme.fineract")
 public class TestOverrideConfiguration {
     // NOTE: unfortunately an abastract base class that contains all these mock functions won't work
-
-    @Bean
-    public FromJsonHelper fromJsonHelper() {
-        return mock(FromJsonHelper.class);
-    }
 
     @Bean
     public RoutingDataSourceServiceFactory routingDataSourceServiceFactory() {
@@ -80,10 +73,5 @@ public class TestOverrideConfiguration {
     @Bean
     public LoanTransactionRepository loanTransactionRepository() {
         return mock(LoanTransactionRepository.class);
-    }
-
-    @Bean
-    public NoteCommandFromApiJsonDeserializer fromApiJsonDeserializer(FromJsonHelper fromJsonHelper) {
-        return new NoteCommandFromApiJsonDeserializer(fromJsonHelper);
     }
 }

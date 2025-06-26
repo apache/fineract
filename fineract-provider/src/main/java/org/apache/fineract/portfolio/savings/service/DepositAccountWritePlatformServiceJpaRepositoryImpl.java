@@ -53,7 +53,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavaila
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
-import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -80,8 +79,9 @@ import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
-import org.apache.fineract.portfolio.note.domain.Note;
-import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.portfolio.note.domain.NoteType;
+import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
@@ -123,21 +123,19 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     private final DepositAccountTransactionDataValidator depositAccountTransactionDataValidator;
     private final SavingsAccountChargeDataValidator savingsAccountChargeDataValidator;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
-    private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final DepositAccountDomainService depositAccountDomainService;
-    private final NoteRepository noteRepository;
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
     private final ChargeRepositoryWrapper chargeRepository;
     private final SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepository;
     private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
-    private final DepositAccountReadPlatformService depositAccountReadPlatformService;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final ConfigurationDomainService configurationDomainService;
     private final HolidayRepositoryWrapper holidayRepository;
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
     private final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository;
+    private final NoteWritePlatformService noteWritePlatformService;
 
     @Transactional
     @Override
@@ -777,9 +775,11 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.savingNote(account, noteText);
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(account.getId()).noteType(NoteType.SAVING_ACCOUNT).build();
+
+            noteWritePlatformService.createNote(request);
+
             changes.put("note", noteText);
-            this.noteRepository.save(note);
         }
 
         return new CommandProcessingResultBuilder() //
@@ -810,9 +810,11 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.savingNote(account, noteText);
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(account.getId()).noteType(NoteType.SAVING_ACCOUNT).build();
+
+            noteWritePlatformService.createNote(request);
+
             changes.put("note", noteText);
-            this.noteRepository.save(note);
         }
 
         return new CommandProcessingResultBuilder() //
@@ -843,9 +845,11 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.savingNote(account, noteText);
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(account.getId()).noteType(NoteType.SAVING_ACCOUNT).build();
+
+            noteWritePlatformService.createNote(request);
+
             changes.put("note", noteText);
-            this.noteRepository.save(note);
         }
 
         return new CommandProcessingResultBuilder() //
@@ -885,9 +889,11 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.savingNote(account, noteText);
+            var request = NoteCreateRequest.builder().note(noteText).resourceId(account.getId()).noteType(NoteType.SAVING_ACCOUNT).build();
+
+            noteWritePlatformService.createNote(request);
+
             changes.put("note", noteText);
-            this.noteRepository.save(note);
         }
 
         return new CommandProcessingResultBuilder() //
