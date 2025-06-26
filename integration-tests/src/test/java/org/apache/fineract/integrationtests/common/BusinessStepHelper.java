@@ -24,6 +24,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.fineract.client.models.BusinessStep;
 import org.apache.fineract.client.models.BusinessStepRequest;
+import org.apache.fineract.client.models.JobBusinessStepConfigData;
 import org.apache.fineract.client.util.Calls;
 
 public class BusinessStepHelper {
@@ -31,10 +32,9 @@ public class BusinessStepHelper {
     public BusinessStepHelper() {}
 
     public BusinessStepsSnapshot getConfigurationSnapshot(String jobName) {
-        List<BusinessStep> businessSteps = Calls
-                .ok(FineractClientHelper.getFineractClient().businessStepConfiguration.retrieveAllConfiguredBusinessStep(jobName))
-                .getBusinessSteps();
-        return new BusinessStepsSnapshot(jobName, businessSteps);
+        JobBusinessStepConfigData businessConfig = Calls
+                .ok(FineractClientHelper.getFineractClient().businessStepConfiguration.retrieveAllConfiguredBusinessStep(jobName));
+        return new BusinessStepsSnapshot(jobName, businessConfig.getBusinessSteps());
     }
 
     public void updateSteps(String jobName, String... steps) {

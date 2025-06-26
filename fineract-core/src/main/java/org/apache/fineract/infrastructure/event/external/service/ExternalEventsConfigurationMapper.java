@@ -20,12 +20,12 @@ package org.apache.fineract.infrastructure.event.external.service;
 
 import java.util.List;
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
-import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationItemData;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationItemResponse;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventConfiguration;
 import org.mapstruct.Mapper;
 
 @Mapper(config = MapstructMapperConfig.class)
 public interface ExternalEventsConfigurationMapper {
 
-    List<ExternalEventConfigurationItemData> map(List<ExternalEventConfiguration> source);
+    List<ExternalEventConfigurationItemResponse> map(List<ExternalEventConfiguration> source);
 }

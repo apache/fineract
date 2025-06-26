@@ -134,10 +134,15 @@ public class SecurityConfig {
                             .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/instance-mode")).permitAll() //
                             // businessdate
                             .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/businessdate/*"))
-                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_BUSINESS_DATE") //
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_BUSINESS_DATE")
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/businessdate"))
-                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_BUSINESS_DATE") //
-                            //
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_BUSINESS_DATE")
+                            // external
+                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/externalevents/configuration"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_EXTERNAL_EVENT_CONFIGURATION")
+                            .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/externalevents/configuration"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_EXTERNAL_EVENT_CONFIGURATION")
+                            // ...
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated() //
                             .requestMatchers(antMatcher("/api/*/twofactor")).fullyAuthenticated() //
                             .requestMatchers(antMatcher("/api/**"))

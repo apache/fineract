@@ -16,12 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.service;
+package org.apache.fineract.infrastructure.event.external.data;
 
-import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationUpdateRequest;
-import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationUpdateResponse;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public interface ExternalEventConfigurationWritePlatformService {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ExternalEventConfigurationResponse implements Serializable {
 
-    ExternalEventConfigurationUpdateResponse updateConfigurations(ExternalEventConfigurationUpdateRequest request);
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    // TODO: why wrap things in this useless class?!? Just more boilerplate! Keeping for compatibility...
+    private List<ExternalEventConfigurationItemResponse> externalEventConfiguration;
 }
