@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -72,12 +73,17 @@ public class LoanRescheduleRequestDataValidatorImpl implements LoanRescheduleReq
     @Qualifier("progressiveLoanRescheduleRequestDataValidatorImpl")
     private final LoanRescheduleRequestDataValidator progressiveLoanRescheduleRequestDataValidatorDelegate;
 
-    public static BigDecimal validateInterestRate(FromJsonHelper fromJsonHelper, JsonElement jsonElement,
-            DataValidatorBuilder dataValidatorBuilder) {
+    public static BigDecimal validateInterestRate(final BigDecimal currentInterestRate, final FromJsonHelper fromJsonHelper,
+            final JsonElement jsonElement, DataValidatorBuilder dataValidatorBuilder) {
         final BigDecimal interestRate = fromJsonHelper
                 .extractBigDecimalWithLocaleNamed(RescheduleLoansApiConstants.newInterestRateParamName, jsonElement);
         dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.newInterestRateParamName).value(interestRate).ignoreIfNull()
                 .positiveAmount();
+        if (interestRate != null && MathUtil.isZero(currentInterestRate) && !MathUtil.isZero(interestRate)) {
+            dataValidatorBuilder.reset().failWithCode(RescheduleLoansApiConstants.newInterestRateParamName,
+                    RescheduleLoansApiConstants.rescheduleNotAllowedFromInterestRateZeroErrorCode,
+                    "Loan rescheduling is not allowed from interest rate 0 (zero)");
+        }
         return interestRate;
     }
 
@@ -246,7 +252,8 @@ public class LoanRescheduleRequestDataValidatorImpl implements LoanRescheduleReq
             validateLoanIsActive(loan, dataValidatorBuilder);
             validateSubmittedOnDate(fromJsonHelper, loan, jsonElement, dataValidatorBuilder);
             final LocalDate rescheduleFromDate = validateAndRetrieveRescheduleFromDate(fromJsonHelper, jsonElement, dataValidatorBuilder);
-            validateInterestRate(fromJsonHelper, jsonElement, dataValidatorBuilder);
+            validateInterestRate(loan.getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate(), fromJsonHelper, jsonElement,
+                    dataValidatorBuilder);
             validateGraceOnPrincipal(fromJsonHelper, jsonElement, dataValidatorBuilder);
             validateGraceOnInterest(fromJsonHelper, jsonElement, dataValidatorBuilder);
             validateExtraTerms(fromJsonHelper, jsonElement, dataValidatorBuilder);

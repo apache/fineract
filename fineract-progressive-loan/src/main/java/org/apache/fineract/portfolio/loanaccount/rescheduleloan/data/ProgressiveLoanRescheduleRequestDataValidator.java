@@ -78,7 +78,8 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
         validateRescheduleReasonId(fromJsonHelper, jsonElement, dataValidatorBuilder);
         validateRescheduleReasonComment(fromJsonHelper, jsonElement, dataValidatorBuilder);
         LocalDate adjustedDueDate = validateAndRetrieveAdjustedDate(fromJsonHelper, jsonElement, rescheduleFromDate, dataValidatorBuilder);
-        BigDecimal interestRate = validateInterestRate(fromJsonHelper, jsonElement, dataValidatorBuilder);
+        BigDecimal interestRate = validateInterestRate(loan.getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate(), fromJsonHelper,
+                jsonElement, dataValidatorBuilder);
         validateUnsupportedParams(jsonElement, dataValidatorBuilder);
 
         boolean hasInterestRateChange = interestRate != null;

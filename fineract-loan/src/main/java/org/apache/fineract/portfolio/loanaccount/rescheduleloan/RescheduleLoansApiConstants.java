@@ -53,6 +53,7 @@ public final class RescheduleLoansApiConstants {
     public static final String rescheduleForMultiDisbursementNotSupportedErrorCode = "loan.reschedule.tranche.multidisbursement.error.code";
     public static final String rescheduleMultipleOperationsNotSupportedErrorCode = "loan.reschedule.multioperations.error.code";
     public static final String rescheduleSelectedOperationNotSupportedErrorCode = "loan.reschedule.selectedoperationnotsupported.error.code";
+    public static final String rescheduleNotAllowedFromInterestRateZeroErrorCode = "loan.reschedule.not.allowed.from.current.interest.rate.zero";
     public static final String allCommandParamName = "all";
     public static final String approveCommandParamName = "approve";
     public static final String pendingCommandParamName = "pending";

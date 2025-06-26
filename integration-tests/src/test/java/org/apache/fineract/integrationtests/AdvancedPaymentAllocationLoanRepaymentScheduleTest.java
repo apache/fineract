@@ -6000,6 +6000,115 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         });
     }
 
+    // uc156: Avoid Loan Reschedule to modify Interest Rate from X value to Zero
+    // 1. Create a Loan product
+    // 2. Submit, Approve and Disburse Loan with Nominal Interest equal to 4%
+    // 3. Apply a Loan repayment
+    // 4. Try to create Loan Reschedule with new Interest Rate equal to zero to get the exception
+    @Test
+    public void uc156() {
+        final String operationDate = "1 April 2025";
+        AtomicLong createdLoanId = new AtomicLong();
+        runAt("1 April 2025", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            PostLoanProductsRequest product = create4IProgressive().interestRatePerPeriod(4.0).numberOfRepayments(4)//
+                    .installmentAmountInMultiplesOf(null)//
+                    .multiDisburseLoan(false)//
+                    .disallowExpectedDisbursements(null)//
+                    .allowApprovedDisbursedAmountsOverApplied(false)//
+                    .overAppliedCalculationType(null)//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY)//
+                    .overAppliedNumber(null)//
+            ;//
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoansRequest applicationRequest = applyLP2ProgressiveLoanRequest(clientId, loanProductResponse.getResourceId(),
+                    operationDate, 1000.0, 4.0, 4, null);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            createdLoanId.set(loanResponse.getLoanId());
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest()
+                    .approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN).approvedOnDate(operationDate).locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().actualDisbursementDate(operationDate)
+                    .dateFormat(DATETIME_PATTERN).locale("en").transactionAmount(BigDecimal.valueOf(1000.0)));
+        });
+
+        runAt("1 May 2025", () -> {
+            executeInlineCOB(createdLoanId.get());
+
+            loanTransactionHelper.makeLoanRepayment(createdLoanId.get(), new PostLoansLoanIdTransactionsRequest()
+                    .transactionDate("1 May 2025").dateFormat("dd MMMM yyyy").locale("en").transactionAmount(250.00));
+        });
+
+        runAt("6 May 2025", () -> {
+            executeInlineCOB(createdLoanId.get());
+
+            CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
+                    () -> loanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()
+                            .loanId(createdLoanId.get()).dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("6 May 2025")
+                            .newInterestRate(BigDecimal.ZERO).rescheduleReasonId(1L).rescheduleFromDate("1 June 2025")));
+
+            Assertions.assertTrue(
+                    callFailedRuntimeException.getMessage().contains("The parameter `newInterestRate` must be greater than 0."));
+        });
+    }
+
+    // uc157: Avoid Loan Reschedule to modify Interest Rate from Zero to X value
+    // 1. Create a Loan product
+    // 2. Submit, Approve and Disburse Loan with Nominal Interest equal to 0 (zero)
+    // 3. Apply a Loan repayment
+    // 4. Try to create Loan Reschedule with new Interest Rate greater than zero to get the exception
+    @Test
+    public void uc157() {
+        final String operationDate = "1 April 2025";
+        AtomicLong createdLoanId = new AtomicLong();
+        runAt("1 April 2025", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            PostLoanProductsRequest product = create4IProgressive().interestRatePerPeriod(0.0).numberOfRepayments(4)//
+                    .installmentAmountInMultiplesOf(null)//
+                    .multiDisburseLoan(false)//
+                    .disallowExpectedDisbursements(null)//
+                    .allowApprovedDisbursedAmountsOverApplied(false)//
+                    .overAppliedCalculationType(null)//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY)//
+                    .overAppliedNumber(null)//
+            ;//
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoansRequest applicationRequest = applyLP2ProgressiveLoanRequest(clientId, loanProductResponse.getResourceId(),
+                    operationDate, 1000.0, 0.0, 4, null);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            createdLoanId.set(loanResponse.getLoanId());
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest()
+                    .approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN).approvedOnDate(operationDate).locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().actualDisbursementDate(operationDate)
+                    .dateFormat(DATETIME_PATTERN).locale("en").transactionAmount(BigDecimal.valueOf(1000.0)));
+        });
+
+        runAt("1 May 2025", () -> {
+            executeInlineCOB(createdLoanId.get());
+
+            loanTransactionHelper.makeLoanRepayment(createdLoanId.get(), new PostLoansLoanIdTransactionsRequest()
+                    .transactionDate("1 May 2025").dateFormat("dd MMMM yyyy").locale("en").transactionAmount(250.00));
+        });
+
+        runAt("6 May 2025", () -> {
+            executeInlineCOB(createdLoanId.get());
+
+            CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
+                    () -> loanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()
+                            .loanId(createdLoanId.get()).dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("6 May 2025")
+                            .newInterestRate(BigDecimal.valueOf(4.0)).rescheduleReasonId(1L).rescheduleFromDate("1 June 2025")));
+
+            LOG.info("ERROR: {}", callFailedRuntimeException.getMessage());
+            Assertions.assertTrue(
+                    callFailedRuntimeException.getMessage().contains("Loan rescheduling is not allowed from interest rate 0 (zero)"));
+        });
+    }
+
     private Long applyAndApproveLoanProgressiveAdvancedPaymentAllocationStrategyMonthlyRepayments(Long clientId, Long loanProductId,
             Integer numberOfRepayments, String loanDisbursementDate, double amount) {
         LOG.info("------------------------------APPLY AND APPROVE LOAN ---------------------------------------");
