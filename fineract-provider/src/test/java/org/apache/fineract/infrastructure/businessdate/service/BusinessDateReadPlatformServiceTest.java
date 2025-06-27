@@ -51,7 +51,7 @@ public class BusinessDateReadPlatformServiceTest {
     private BusinessDateRepository repository;
 
     @Mock
-    private BusinessDateMapper mapper;
+    private BusinessDateMapper businessDateMapper;
 
     @Test
     public void notFoundByTypeNonexistentType() {
@@ -73,7 +73,7 @@ public class BusinessDateReadPlatformServiceTest {
         given(repository.findAll()).willReturn(resultList);
         businessDateReadPlatformService.findAll();
         verify(repository, times(1)).findAll();
-        verify(mapper, times(1)).map(resultList);
+        verify(businessDateMapper, times(1)).map(resultList);
     }
 
     @Test
@@ -82,7 +82,7 @@ public class BusinessDateReadPlatformServiceTest {
         given(repository.findByType(BusinessDateType.COB_DATE)).willReturn(result);
         businessDateReadPlatformService.findByType("COB_DATE");
         verify(repository, times(1)).findByType(BusinessDateType.COB_DATE);
-        verify(mapper, times(1)).map(result.get());
+        verify(businessDateMapper, times(1)).map(result.get());
     }
 
     @Test
@@ -91,6 +91,6 @@ public class BusinessDateReadPlatformServiceTest {
         given(repository.findByType(BusinessDateType.BUSINESS_DATE)).willReturn(result);
         businessDateReadPlatformService.findByType("BUSINESS_DATE");
         verify(repository, times(1)).findByType(BusinessDateType.BUSINESS_DATE);
-        verify(mapper, times(1)).map(result.get());
+        verify(businessDateMapper, times(1)).map(result.get());
     }
 }

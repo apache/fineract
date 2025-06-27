@@ -34,6 +34,8 @@ public class Command<T> implements Serializable {
 
     private UUID id;
 
+    private String idempotencyKey;
+
     private OffsetDateTime createdAt;
 
     private String tenantId;

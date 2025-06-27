@@ -203,4 +203,5 @@
     <include file="parts/0182_transaction_summary_with_asset_owner_report_fix_charge_reason_and_add_buyback_intermediate.xml" relativeToChangelogFile="true" />
     <include file="parts/0183_add_LoanCapitalizedIncomeTransactionCreatedBusinessEvent.xml" relativeToChangelogFile="true" />
     <include file="parts/0184_add_document_event_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0185_loan_buy_down_fee.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

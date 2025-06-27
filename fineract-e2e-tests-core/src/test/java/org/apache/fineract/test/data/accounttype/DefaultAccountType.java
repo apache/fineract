@@ -36,6 +36,7 @@ public enum DefaultAccountType implements AccountType {
     FEE_CHARGE_OFF("Fee Charge Off"), //
     RECOVERIES("Recoveries"), //
     INTEREST_INCOME_CHARGE_OFF("Interest Income Charge Off"), //
+    INCOME_FROM_BUY_DOWN("Income From Buy Down"), //
     // Liability
     AA_SUSPENSE_BALANCE("AA Suspense Balance"), //
     SUSPENSE_CLEARING_ACCOUNT("Suspense/Clearing account"), //
@@ -45,7 +46,8 @@ public enum DefaultAccountType implements AccountType {
     CREDIT_LOSS_BAD_DEBT("Credit Loss/Bad Debt"), //
     CREDIT_LOSS_BAD_DEBT_FRAUD("Credit Loss/Bad Debt-Fraud"), //
     GOODWILL_EXPENSE_ACCOUNT("Goodwill Expense Account"), //
-    WRITTEN_OFF("Written off"); //
+    WRITTEN_OFF("Written off"), //
+    BUY_DOWN_EXPENSE("Buy Down Expense"); //
 
     private final String customName;
 

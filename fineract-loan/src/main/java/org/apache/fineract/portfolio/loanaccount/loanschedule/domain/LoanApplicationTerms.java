@@ -46,6 +46,9 @@ import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsDataWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeCalculationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeIncomeType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeStrategy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeType;
@@ -239,6 +242,10 @@ public final class LoanApplicationTerms {
     private LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType;
     private LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy;
     private LoanCapitalizedIncomeType capitalizedIncomeType;
+    private boolean enableBuyDownFee;
+    private LoanBuyDownFeeCalculationType buyDownFeeCalculationType;
+    private LoanBuyDownFeeStrategy buyDownFeeStrategy;
+    private LoanBuyDownFeeIncomeType buyDownFeeIncomeType;
 
     private LoanApplicationTerms(Builder builder) {
         this.currency = builder.currency;
@@ -279,6 +286,10 @@ public final class LoanApplicationTerms {
         this.capitalizedIncomeCalculationType = builder.capitalizedIncomeCalculationType;
         this.capitalizedIncomeStrategy = builder.capitalizedIncomeStrategy;
         this.capitalizedIncomeType = builder.capitalizedIncomeType;
+        this.enableBuyDownFee = builder.enableBuyDownFee;
+        this.buyDownFeeCalculationType = builder.buyDownFeeCalculationType;
+        this.buyDownFeeStrategy = builder.buyDownFeeStrategy;
+        this.buyDownFeeIncomeType = builder.buyDownFeeIncomeType;
     }
 
     public static class Builder {
@@ -312,6 +323,10 @@ public final class LoanApplicationTerms {
         private LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType;
         private LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy;
         private LoanCapitalizedIncomeType capitalizedIncomeType;
+        private boolean enableBuyDownFee;
+        private LoanBuyDownFeeCalculationType buyDownFeeCalculationType;
+        private LoanBuyDownFeeStrategy buyDownFeeStrategy;
+        private LoanBuyDownFeeIncomeType buyDownFeeIncomeType;
 
         public Builder currency(CurrencyData currency) {
             this.currency = currency;
@@ -448,6 +463,26 @@ public final class LoanApplicationTerms {
             return this;
         }
 
+        public Builder enableBuyDownFee(boolean value) {
+            this.enableBuyDownFee = value;
+            return this;
+        }
+
+        public Builder buyDownFeeCalculationType(LoanBuyDownFeeCalculationType value) {
+            this.buyDownFeeCalculationType = value;
+            return this;
+        }
+
+        public Builder buyDownFeeStrategy(LoanBuyDownFeeStrategy value) {
+            this.buyDownFeeStrategy = value;
+            return this;
+        }
+
+        public Builder buyDownFeeIncomeType(LoanBuyDownFeeIncomeType value) {
+            this.buyDownFeeIncomeType = value;
+            return this;
+        }
+
         public LoanApplicationTerms build() {
             return new LoanApplicationTerms(this);
         }
@@ -517,7 +552,9 @@ public final class LoanApplicationTerms {
             final LoanChargeOffBehaviour chargeOffBehaviour, final boolean interestRecognitionOnDisbursementDate,
             final DaysInYearCustomStrategyType daysInYearCustomStrategy, final boolean enableIncomeCapitalization,
             final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
-            final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy, final LoanCapitalizedIncomeType capitalizedIncomeType) {
+            final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy, final LoanCapitalizedIncomeType capitalizedIncomeType,
+            final boolean enableBuyDownFee, final LoanBuyDownFeeCalculationType buyDownFeeCalculationType,
+            final LoanBuyDownFeeStrategy buyDownFeeStrategy, final LoanBuyDownFeeIncomeType buyDownFeeIncomeType) {
 
         final LoanRescheduleStrategyMethod rescheduleStrategyMethod = null;
         final CalendarHistoryDataWrapper calendarHistoryDataWrapper = null;
@@ -538,7 +575,8 @@ public final class LoanApplicationTerms {
                 isAutoRepaymentForDownPaymentEnabled, repaymentStartDateType, submittedOnDate, loanScheduleType, loanScheduleProcessingType,
                 fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour,
                 interestRecognitionOnDisbursementDate, daysInYearCustomStrategy, enableIncomeCapitalization,
-                capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType);
+                capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, enableBuyDownFee,
+                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType);
 
     }
 
@@ -614,7 +652,9 @@ public final class LoanApplicationTerms {
                 loanProductRelatedDetail.getSupportedInterestRefundTypes(), loanProductRelatedDetail.getChargeOffBehaviour(),
                 loanProductRelatedDetail.isInterestRecognitionOnDisbursementDate(), loanProductRelatedDetail.getDaysInYearCustomStrategy(),
                 loanProductRelatedDetail.isEnableIncomeCapitalization(), loanProductRelatedDetail.getCapitalizedIncomeCalculationType(),
-                loanProductRelatedDetail.getCapitalizedIncomeStrategy(), loanProductRelatedDetail.getCapitalizedIncomeType());
+                loanProductRelatedDetail.getCapitalizedIncomeStrategy(), loanProductRelatedDetail.getCapitalizedIncomeType(),
+                loanProductRelatedDetail.isEnableBuyDownFee(), loanProductRelatedDetail.getBuyDownFeeCalculationType(),
+                loanProductRelatedDetail.getBuyDownFeeStrategy(), loanProductRelatedDetail.getBuyDownFeeIncomeType());
     }
 
     private LoanApplicationTerms(final CurrencyData currency, final Integer loanTermFrequency,
@@ -647,7 +687,9 @@ public final class LoanApplicationTerms {
             final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes, final LoanChargeOffBehaviour chargeOffBehaviour,
             final boolean interestRecognitionOnDisbursementDate, final DaysInYearCustomStrategyType daysInYearCustomStrategy,
             final boolean enableIncomeCapitalization, final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
-            final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy, final LoanCapitalizedIncomeType capitalizedIncomeType) {
+            final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy, final LoanCapitalizedIncomeType capitalizedIncomeType,
+            final boolean enableBuyDownFee, final LoanBuyDownFeeCalculationType buyDownFeeCalculationType,
+            final LoanBuyDownFeeStrategy buyDownFeeStrategy, final LoanBuyDownFeeIncomeType buyDownFeeIncomeType) {
 
         this.currency = currency;
         this.loanTermFrequency = loanTermFrequency;
@@ -753,6 +795,10 @@ public final class LoanApplicationTerms {
         this.capitalizedIncomeCalculationType = capitalizedIncomeCalculationType;
         this.capitalizedIncomeStrategy = capitalizedIncomeStrategy;
         this.capitalizedIncomeType = capitalizedIncomeType;
+        this.enableBuyDownFee = enableBuyDownFee;
+        this.buyDownFeeCalculationType = buyDownFeeCalculationType;
+        this.buyDownFeeStrategy = buyDownFeeStrategy;
+        this.buyDownFeeIncomeType = buyDownFeeIncomeType;
     }
 
     public Money adjustPrincipalIfLastRepaymentPeriod(final Money principalForPeriod, final Money totalCumulativePrincipalToDate,
@@ -1616,7 +1662,8 @@ public final class LoanApplicationTerms {
                 this.loanScheduleProcessingType, this.fixedLength, this.enableAccrualActivityPosting, this.supportedInterestRefundTypes,
                 this.chargeOffBehaviour, this.interestRecognitionOnDisbursementDate, this.daysInYearCustomStrategy,
                 this.enableIncomeCapitalization, this.capitalizedIncomeCalculationType, this.capitalizedIncomeStrategy,
-                this.capitalizedIncomeType, this.installmentAmountInMultiplesOf);
+                this.capitalizedIncomeType, this.installmentAmountInMultiplesOf, this.enableBuyDownFee, this.buyDownFeeCalculationType,
+                this.buyDownFeeStrategy, this.buyDownFeeIncomeType);
     }
 
     public LoanProductMinimumRepaymentScheduleRelatedDetail toLoanProductRelatedDetailMinimumData() {

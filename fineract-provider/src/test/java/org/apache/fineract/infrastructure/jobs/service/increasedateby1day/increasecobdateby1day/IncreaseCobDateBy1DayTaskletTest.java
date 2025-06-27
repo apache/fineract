@@ -24,8 +24,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.businessdate.service.BusinessDateWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.apache.fineract.infrastructure.jobs.service.increasedateby1day.IncreaseDateBy1DayService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,7 +52,7 @@ class IncreaseCobDateBy1DayTaskletTest {
     private ConfigurationDomainService configurationDomainService;
 
     @Mock
-    private IncreaseDateBy1DayService increaseDateBy1DayService;
+    private BusinessDateWritePlatformService businessDateWritePlatformService;
 
     @InjectMocks
     private IncreaseCobDateBy1DayTasklet underTest;
@@ -73,7 +73,7 @@ class IncreaseCobDateBy1DayTaskletTest {
 
         RepeatStatus repeatStatus = underTest.execute(stepContribution, chunkContext);
 
-        verify(increaseDateBy1DayService, times(1)).increaseDateByTypeByOneDay(BusinessDateType.COB_DATE);
+        verify(businessDateWritePlatformService, times(1)).increaseDateByTypeByOneDay(BusinessDateType.COB_DATE);
         assertEquals(RepeatStatus.FINISHED, repeatStatus);
     }
 

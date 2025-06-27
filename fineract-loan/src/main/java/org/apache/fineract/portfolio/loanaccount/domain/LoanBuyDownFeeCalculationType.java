@@ -16,10 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.command.persistence;
+package org.apache.fineract.portfolio.loanaccount.domain;
 
-import org.apache.fineract.command.persistence.domain.CommandEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 
-public interface CommandRepository extends JpaRepository<CommandEntity, Long>, JpaSpecificationExecutor<CommandEntity> {}
+@Getter
+@RequiredArgsConstructor
+public enum LoanBuyDownFeeCalculationType implements ApiFacingEnum<LoanBuyDownFeeCalculationType> {
+
+    FLAT("loanBuyDownFeeCalculationType.flat", "Flat");
+
+    private final String code;
+    private final String humanReadableName;
+}

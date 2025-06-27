@@ -18,19 +18,14 @@
  */
 package org.apache.fineract.infrastructure.businessdate.service;
 
-import java.util.Map;
-import org.apache.fineract.infrastructure.businessdate.data.BusinessDateData;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.businessdate.data.BusinessDateResponse;
+import org.apache.fineract.infrastructure.businessdate.data.BusinessDateUpdateRequest;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 
 public interface BusinessDateWritePlatformService {
 
-    CommandProcessingResult updateBusinessDate(JsonCommand command);
+    BusinessDateResponse updateBusinessDate(BusinessDateUpdateRequest request);
 
-    void adjustDate(BusinessDateData data, Map<String, Object> changes);
-
-    void increaseCOBDateByOneDay() throws JobExecutionException;
-
-    void increaseBusinessDateByOneDay() throws JobExecutionException;
+    void increaseDateByTypeByOneDay(BusinessDateType businessDateType) throws JobExecutionException;
 }

@@ -21,8 +21,8 @@ package org.apache.fineract.infrastructure.jobs.service.increasedateby1day.incre
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.businessdate.service.BusinessDateWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.apache.fineract.infrastructure.jobs.service.increasedateby1day.IncreaseDateBy1DayService;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -33,13 +33,13 @@ import org.springframework.batch.repeat.RepeatStatus;
 @RequiredArgsConstructor
 public class IncreaseBusinessDateBy1DayTasklet implements Tasklet {
 
-    private final IncreaseDateBy1DayService increaseDateBy1DayService;
+    private final BusinessDateWritePlatformService businessDateWritePlatformService;
     private final ConfigurationDomainService configurationDomainService;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         if (configurationDomainService.isBusinessDateEnabled()) {
-            increaseDateBy1DayService.increaseDateByTypeByOneDay(BusinessDateType.BUSINESS_DATE);
+            businessDateWritePlatformService.increaseDateByTypeByOneDay(BusinessDateType.BUSINESS_DATE);
         } else {
             contribution.setExitStatus(ExitStatus.NOOP);
         }

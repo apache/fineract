@@ -550,7 +550,11 @@ public class LoanScheduleAssembler {
                 loanProduct.getLoanProductRelatedDetail().isEnableIncomeCapitalization(),
                 loanProduct.getLoanProductRelatedDetail().getCapitalizedIncomeCalculationType(),
                 loanProduct.getLoanProductRelatedDetail().getCapitalizedIncomeStrategy(),
-                loanProduct.getLoanProductRelatedDetail().getCapitalizedIncomeType());
+                loanProduct.getLoanProductRelatedDetail().getCapitalizedIncomeType(),
+                loanProduct.getLoanProductRelatedDetail().isEnableBuyDownFee(),
+                loanProduct.getLoanProductRelatedDetail().getBuyDownFeeCalculationType(),
+                loanProduct.getLoanProductRelatedDetail().getBuyDownFeeStrategy(),
+                loanProduct.getLoanProductRelatedDetail().getBuyDownFeeIncomeType());
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,

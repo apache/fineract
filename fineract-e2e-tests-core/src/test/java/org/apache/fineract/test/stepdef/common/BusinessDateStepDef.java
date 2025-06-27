@@ -25,7 +25,7 @@ import io.cucumber.java.en.When;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import org.apache.fineract.client.models.BusinessDateData;
+import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.services.BusinessDateManagementApi;
 import org.apache.fineract.test.helper.BusinessDateHelper;
 import org.apache.fineract.test.helper.ErrorHelper;
@@ -53,7 +53,7 @@ public class BusinessDateStepDef extends AbstractStepDef {
 
     @Then("Admin checks that the business date is correctly set to {string}")
     public void checkBusinessDate(String businessDate) throws IOException {
-        Response<BusinessDateData> businessDateResponse = businessDateManagementApi.getBusinessDate(BusinessDateHelper.BUSINESS_DATE)
+        Response<BusinessDateResponse> businessDateResponse = businessDateManagementApi.getBusinessDate(BusinessDateHelper.BUSINESS_DATE)
                 .execute();
         ErrorHelper.checkSuccessfulApiCall(businessDateResponse);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM yyyy");

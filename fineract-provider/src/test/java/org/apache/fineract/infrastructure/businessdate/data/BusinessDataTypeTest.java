@@ -23,11 +23,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.junit.jupiter.api.Test;
 
-public class BusinessDataTypeTest {
+class BusinessDataTypeTest {
 
     @Test
-    public void typoCheck() {
-        for (BusinessDateType businessDateType : BusinessDateType.values()) {
+    void typoCheck() {
+        for (var businessDateType : BusinessDateType.values()) {
             switch (businessDateType) {
                 case BUSINESS_DATE -> assertEquals("Business Date", businessDateType.getDescription());
                 case COB_DATE -> assertEquals("Close of Business Date", businessDateType.getDescription());

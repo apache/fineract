@@ -16,17 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.businessdate.data.request;
+package org.apache.fineract.validation.constraints;
 
-import java.io.Serial;
-import java.io.Serializable;
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public record BusinessDateRequest(String dateFormat, String type, String date, String locale) implements Serializable {
+@Documented
+@Constraint(validatedBy = LocalDateValidator.class)
+@Target({ ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface LocalDate {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    String message() default "{org.apache.fineract.validation.local-date}";
 
-    public static BusinessDateRequest ofNull() {
-        return new BusinessDateRequest(null, null, null, null);
-    }
+    String dateField();
+
+    String formatField();
+
+    String localeField();
+
+    Class<?>[] groups() default {};
+
+    Class<? extends Payload>[] payload() default {};
 }

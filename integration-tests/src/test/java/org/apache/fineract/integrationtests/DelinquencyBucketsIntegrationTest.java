@@ -41,7 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.fineract.client.models.BusinessDateData;
+import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.DeleteDelinquencyBucketResponse;
 import org.apache.fineract.client.models.DeleteDelinquencyRangeResponse;
 import org.apache.fineract.client.models.DelinquencyBucketData;
@@ -320,7 +320,7 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             final LocalDate bussinesLocalDate = Utils.getDateAsLocalDate("01 March 2012");
             log.info("Current date {}", bussinesLocalDate);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, bussinesLocalDate);
-            final BusinessDateData businessDateResponse = this.businessDateHelper.getBusinessDateByType(requestSpec, responseSpec,
+            final BusinessDateResponse businessDateResponse = this.businessDateHelper.getBusinessDateByType(requestSpec, responseSpec,
                     BusinessDateType.BUSINESS_DATE);
 
             ArrayList<Integer> rangeIds = new ArrayList<>();
