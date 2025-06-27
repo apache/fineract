@@ -19,12 +19,14 @@
 package org.apache.fineract.portfolio.loanaccount.mapper;
 
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
+import org.apache.fineract.organisation.monetary.mapper.CurrencyMapper;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(config = MapstructMapperConfig.class, uses = { LoanTransactionRelationMapper.class, LoanChargePaidByMapper.class })
+@Mapper(config = MapstructMapperConfig.class, uses = { LoanTransactionRelationMapper.class, LoanChargePaidByMapper.class,
+        CurrencyMapper.class })
 public interface LoanTransactionMapper {
 
     @Mapping(target = "numberOfRepayments", ignore = true)
@@ -46,6 +48,6 @@ public interface LoanTransactionMapper {
     @Mapping(target = "netDisbursalAmount", source = "loan.netDisbursalAmount")
     @Mapping(target = "transactionType", expression = "java(org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.transactionType(loanTransaction.getTypeOf()))")
     @Mapping(target = "paymentDetailData", expression = "java(loanTransaction.getPaymentDetail() != null ? loanTransaction.getPaymentDetail().toData() : null)")
-    @Mapping(target = "currency", expression = "java(loanTransaction.getLoan().getCurrency().toData())")
+    @Mapping(target = "currency", source = "loan.currency")
     LoanTransactionData mapLoanTransaction(LoanTransaction loanTransaction);
 }

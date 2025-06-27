@@ -41,6 +41,7 @@ import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.organisation.monetary.mapper.CurrencyMapper;
 import org.apache.fineract.organisation.workingdays.data.AdjustedDateDetailsDTO;
 import org.apache.fineract.organisation.workingdays.domain.RepaymentRescheduleType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
@@ -69,6 +70,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanScheduleGenerator {
 
     private final LoanTransactionService loanTransactionService;
+    private final CurrencyMapper currencyMapper;
 
     @Override
     public LoanScheduleModel generate(final MathContext mc, final LoanApplicationTerms loanApplicationTerms,
@@ -2508,7 +2510,7 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
                         totalOutstandingInterestPaymentDueToGrace, reducePrincipal, principalPortionMap, latePaymentMap, compoundingMap,
                         uncompoundedAmount, disburseDetailMap, principalToBeScheduled, outstandingBalance, outstandingBalanceAsPerRest,
                         newRepaymentScheduleInstallments, recalculationDetails, loanRepaymentScheduleTransactionProcessor, scheduleTillDate,
-                        currency.toData(), applyInterestRecalculation, mc);
+                        currencyMapper.map(currency), applyInterestRecalculation, mc);
                 retainedInstallments.addAll(newRepaymentScheduleInstallments);
                 loanScheduleParams.getCompoundingDateVariations().putAll(compoundingDateVariations);
                 loanApplicationTerms.updateTotalInterestDue(Money.of(currency, loan.getSummary().getTotalInterestCharged()));

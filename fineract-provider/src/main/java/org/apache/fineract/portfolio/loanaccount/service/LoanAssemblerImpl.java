@@ -568,7 +568,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
             changes.put(LoanApiConstants.productIdParameterName, newValue);
             loan.updateLoanProduct(loanProduct);
             final MonetaryCurrency currency = new MonetaryCurrency(loanProduct.getCurrency().getCode(),
-                    loanProduct.getCurrency().getDigitsAfterDecimal(), loanProduct.getCurrency().getCurrencyInMultiplesOf());
+                    loanProduct.getCurrency().getDigitsAfterDecimal(), loanProduct.getCurrency().getInMultiplesOf());
             loan.getLoanRepaymentScheduleDetail().setCurrency(currency);
 
             if (!changes.containsKey(LoanApiConstants.interestRateFrequencyTypeParameterName)) {

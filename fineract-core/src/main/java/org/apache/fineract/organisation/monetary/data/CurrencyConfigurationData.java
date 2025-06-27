@@ -16,14 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.data.request;
+package org.apache.fineract.organisation.monetary.data;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record CurrencyRequest(List<String> currencies) implements Serializable {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CurrencyConfigurationData implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
+
+    private List<CurrencyData> selectedCurrencyOptions;
+    private List<CurrencyData> currencyOptions;
 }
