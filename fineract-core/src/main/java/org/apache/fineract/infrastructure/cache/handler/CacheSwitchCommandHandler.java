@@ -16,29 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.handler;
+package org.apache.fineract.infrastructure.cache.handler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.Command;
 import org.apache.fineract.command.core.CommandHandler;
-import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationUpdateRequest;
-import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationUpdateResponse;
-import org.apache.fineract.infrastructure.event.external.service.ExternalEventConfigurationWritePlatformService;
+import org.apache.fineract.infrastructure.cache.data.CacheSwitchRequest;
+import org.apache.fineract.infrastructure.cache.data.CacheSwitchResponse;
+import org.apache.fineract.infrastructure.cache.domain.CacheType;
+import org.apache.fineract.infrastructure.cache.service.CacheWritePlatformService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ExternalEventConfigurationUpdateHandler
-        implements CommandHandler<ExternalEventConfigurationUpdateRequest, ExternalEventConfigurationUpdateResponse> {
+public class CacheSwitchCommandHandler implements CommandHandler<CacheSwitchRequest, CacheSwitchResponse> {
 
-    private final ExternalEventConfigurationWritePlatformService writePlatformService;
+    private final CacheWritePlatformService cacheService;
 
     @Transactional
     @Override
-    public ExternalEventConfigurationUpdateResponse handle(Command<ExternalEventConfigurationUpdateRequest> command) {
-        return writePlatformService.updateConfigurations(command.getPayload());
+    public CacheSwitchResponse handle(final Command<CacheSwitchRequest> command) {
+        var request = command.getPayload();
+        var cacheType = CacheType.fromInt(request.getCacheType());
+        var changes = cacheService.switchToCache(cacheType);
+
+        return CacheSwitchResponse.builder().changes(changes).cacheType(request.getCacheType()).build();
     }
 }
