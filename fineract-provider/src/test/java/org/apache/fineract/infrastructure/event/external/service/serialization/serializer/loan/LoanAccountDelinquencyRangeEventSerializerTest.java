@@ -173,8 +173,8 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         when(loanAccountData.getAccountNo()).thenReturn("0001");
         when(loanAccountData.getExternalId()).thenReturn(ExternalIdFactory.produce("externalId"));
         when(loanAccountData.getDelinquencyRange()).thenReturn(new DelinquencyRangeData(1L, "classification", 1, 10));
-        when(loanAccountData.getCurrency()).thenAnswer(a -> new CurrencyData(loanCurrency.getCode(), loanCurrency.getDigitsAfterDecimal(),
-                loanCurrency.getCurrencyInMultiplesOf()));
+        when(loanAccountData.getCurrency()).thenAnswer(
+                a -> new CurrencyData(loanCurrency.getCode(), loanCurrency.getDigitsAfterDecimal(), loanCurrency.getInMultiplesOf()));
         when(loanForProcessing.getCurrency()).thenReturn(loanCurrency);
         when(loanForProcessing.isEnableInstallmentLevelDelinquency()).thenReturn(false);
         when(delinquentData.getDelinquentDate()).thenReturn(delinquentDate);
@@ -238,8 +238,8 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         when(loanAccountData.getAccountNo()).thenReturn("0001");
         when(loanAccountData.getExternalId()).thenReturn(ExternalIdFactory.produce("externalId"));
         when(loanAccountData.getDelinquencyRange()).thenReturn(new DelinquencyRangeData(1L, "classification", 1, 10));
-        when(loanAccountData.getCurrency()).thenAnswer(a -> new CurrencyData(loanCurrency.getCode(), loanCurrency.getDigitsAfterDecimal(),
-                loanCurrency.getCurrencyInMultiplesOf()));
+        when(loanAccountData.getCurrency()).thenAnswer(
+                a -> new CurrencyData(loanCurrency.getCode(), loanCurrency.getDigitsAfterDecimal(), loanCurrency.getInMultiplesOf()));
         when(loanForProcessing.getCurrency()).thenReturn(loanCurrency);
         when(loanForProcessing.isEnableInstallmentLevelDelinquency()).thenReturn(true);
         when(delinquentData.getDelinquentDate()).thenReturn(delinquentDate);

@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.service;
+package org.apache.fineract.organisation.monetary.command;
 
-import org.apache.fineract.organisation.monetary.data.CurrencyConfigurationData;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.organisation.monetary.data.CurrencyUpdateRequest;
 
-public interface OrganisationCurrencyReadPlatformService {
-
-    CurrencyConfigurationData retrieveCurrencyConfiguration();
-
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class CurrencyUpdateCommand extends Command<CurrencyUpdateRequest> {}

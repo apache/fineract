@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.serialization.gson;
+package org.apache.fineract.organisation.monetary.serialization;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
@@ -25,6 +25,7 @@ import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
+@Deprecated(forRemoval = true)
 public class MoneySerializer implements JsonSerializer<Money> {
 
     @Override
