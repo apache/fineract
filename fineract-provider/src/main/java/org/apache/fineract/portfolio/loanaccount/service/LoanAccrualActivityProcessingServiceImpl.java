@@ -177,7 +177,7 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
         }
         // grab the latest AccrualActivityTransaction
         // it does not matter if it is on an installment due date or not because it was posted due to loan close
-        final Optional<LoanTransaction> lastAccrualActivityMarkedToReverse = loanTransactionRepository
+        Optional<LoanTransaction> lastAccrualActivityMarkedToReverse = loanTransactionRepository
                 .findNonReversedByLoanAndType(loan, LoanTransactionType.ACCRUAL_ACTIVITY, PageRequest.of(0, 1)) //
                 .stream().findFirst();
 
@@ -195,9 +195,10 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
             return isDueBefore && isAfterOrEqualToLastAccrualDate;
         }).sorted(Comparator.comparing(LoanRepaymentScheduleInstallment::getDueDate)).toList();
 
-        installments.forEach(installment -> {
+        for (LoanRepaymentScheduleInstallment installment : installments) {
             makeOrReplayActivity(loan, installment, lastAccrualActivityMarkedToReverse.orElse(null));
-        });
+            lastAccrualActivityMarkedToReverse = Optional.empty();
+        }
 
         if (installments.isEmpty()) {
             lastAccrualActivityMarkedToReverse.ifPresent(this::reverseAccrualActivityTransaction);

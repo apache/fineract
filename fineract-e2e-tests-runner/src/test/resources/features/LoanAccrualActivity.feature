@@ -7556,4 +7556,36 @@ Feature: LoanAccrualActivity
     And Customer makes "AUTOPAY" repayment on "26 May 2025" with 107.75 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Loan has 0 outstanding amount
-  
+
+  @TestRailId:C3802
+  Scenario: Correct Accrual Activity event publishing after loan reactivation
+    Given Admin sets the business date to "05 May 2023"
+    And Admin creates a client with random data
+    When Admin sets the business date to "24 June 2025"
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_REFUND_INTEREST_RECALC_DOWNPAYMENT_ACCRUAL_ACTIVITY | 05 May 2023       | 359.79         | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "05 May 2023" with "359.79" amount and expected disbursement date on "05 May 2023"
+    And Admin successfully disburse the loan on "05 May 2023" with "359.79" EUR transaction amount
+    When Customer makes "GOODWILL_CREDIT" transaction with "AUTOPAY" payment type on "19 May 2023" with 270.85 EUR transaction amount and system-generated Idempotency key
+    Then LoanTransactionAccrualActivityPostBusinessEvent is raised on "19 May 2023"
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    When Customer undo "1"th transaction made on "19 May 2023"
+    Then Loan status will be "ACTIVE"
+    And Loan Transactions tab has the following data:
+      | Transaction date    | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 05 May 2023         | Disbursement       | 359.79 | 0.0       | 0.0      | 0.0  | 0.0       | 359.79       | false    | false    |
+      | 05 May 2023         | Down Payment       | 89.95  | 89.95     | 0.0      | 0.0  | 0.0       | 269.84       | false    | false    |
+      | 19 May 2023         | Goodwill Credit    | 270.85 | 269.84    | 1.01     | 0.0  | 0.0       | 0.0          | true     | false    |
+      | 05 June 2023        | Accrual Activity   | 2.25   | 0.0       | 2.25     | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 05 July 2023        | Accrual Activity   | 2.25   | 0.0       | 2.25     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 August 2023      | Accrual Activity   | 2.25   | 0.0       | 2.25     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 September 2023   | Accrual Activity   | 2.25   | 0.0       | 2.25     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 October 2023     | Accrual Activity   | 2.25   | 0.0       | 2.25     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 November 2023    | Accrual            | 1.01   | 0.0       | 1.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 November 2023    | Accrual Activity   | 2.25   | 0.0       | 2.25     | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then LoanTransactionAccrualActivityPostBusinessEvent is raised on "05 July 2023"
+    Then LoanTransactionAccrualActivityPostBusinessEvent is raised on "05 August 2023"
+    Then LoanTransactionAccrualActivityPostBusinessEvent is raised on "05 September 2023"
+    Then LoanTransactionAccrualActivityPostBusinessEvent is raised on "05 October 2023"
+    Then LoanTransactionAccrualActivityPostBusinessEvent is raised on "05 November 2023"
