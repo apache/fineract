@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -679,6 +682,46 @@ public class LoanCOBCreateAccrualsTest extends BaseLoanIntegrationTest {
                     transaction(0.30, "Accrual", "20 February 2025", 0.0, 0.0, 0.30, 0.0, 0.0, 0.0, 0.0), //
                     transaction(0.33, "Accrual", "21 February 2025", 0.0, 0.0, 0.33, 0.0, 0.0, 0.0, 0.0), //
                     transaction(0.34, "Accrual", "22 February 2025", 0.0, 0.0, 0.34, 0.0, 0.0, 0.0, 0.0)); //
+        });
+    }
+
+    @Test
+    public void testRunCOBJobAfterUndoDisbursement() {
+        AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        setup();
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                .createLoanProduct(create4IProgressive().enableAccrualActivityPosting(true));
+
+        runAt("1 April 2025", () -> {
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 March 2025", 430.0,
+                    26.0, 6, null);
+
+            loanIdRef.set(loanId);
+
+            disburseLoan(loanId, BigDecimal.valueOf(430), "1 March 2025");
+
+            executeInlineCOB(loanId);
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            validateTransactionsExist(loanDetails, //
+                    transaction(9.02, "Accrual", "31 March 2025", 0.0, 0.0, 9.02, 0.0, 0.0, 0.0, 0.0));
+            assertEquals(LocalDate.of(2025, 3, 31), loanDetails.getLastClosedBusinessDate());
+
+            undoDisbursement(loanId.intValue());
+            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertNull(loanDetails.getLastClosedBusinessDate());
+
+            disburseLoan(loanIdRef.get(), BigDecimal.valueOf(430), "2 March 2025");
+            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertNull(loanDetails.getLastClosedBusinessDate());
+        });
+
+        runAt("2 April 2025", () -> {
+            executeInlineCOB(loanIdRef.get());
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanIdRef.get());
+            validateTransactionsExist(loanDetails, //
+                    transaction(9.02, "Accrual", "01 April 2025", 0.0, 0.0, 9.02, 0.0, 0.0, 0.0, 0.0));
+            assertEquals(LocalDate.of(2025, 4, 1), loanDetails.getLastClosedBusinessDate());
         });
     }
 
