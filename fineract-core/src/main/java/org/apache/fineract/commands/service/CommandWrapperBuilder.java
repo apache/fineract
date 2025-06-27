@@ -434,6 +434,13 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createCurrencies() {
+        this.actionName = "CREATE";
+        this.entityName = "CURRENCY";
+        this.href = "/currencies";
+        return this;
+    }
+
     public CommandWrapperBuilder createSms() {
         this.actionName = "CREATE";
         this.entityName = "SMS";

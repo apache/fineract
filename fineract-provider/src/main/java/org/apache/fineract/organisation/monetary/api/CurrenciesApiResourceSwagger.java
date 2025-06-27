@@ -60,4 +60,47 @@ public final class CurrenciesApiResourceSwagger {
                 + "        \"XOF\",\n" + "        \"AED\",\n" + "        \"AMD\"]")
         public String[] currencies;
     }
+
+    @Schema(description = "PostCurrenciesRequest")
+    public static final class PostCurrenciesRequest {
+
+        private PostCurrenciesRequest() {
+
+        }
+
+        @Schema(example = "USD")
+        public String code;
+        @Schema(example = "US Dollar")
+        public String name;
+        @Schema(example = "2")
+        public Integer decimalPlaces;
+        @Schema(example = "100")
+        public Integer inMultiplesOf;
+        @Schema(example = "$")
+        public String displaySymbol;
+        @Schema(example = "currency.USD")
+        public String nameCode;
+    }
+
+    @Schema(description = "PostCurrenciesResponse")
+    public static final class PostCurrenciesResponse {
+
+        private PostCurrenciesResponse() {
+
+        }
+
+        @Schema(example = "USD")
+        public String code;
+        @Schema(example = "2")
+        public Integer decimalPlaces;
+        @Schema(example = "100")
+        public Integer inMultiplesOf;
+        @Schema(example = "US Dollar")
+        public String name;
+        @Schema(example = "currency.USD")
+        public String nameCode;
+        @Schema(example = "$")
+        public String displaySymbol;
+    }
+
 }

@@ -1,6 +1,6 @@
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
+ * or more contributor license agreements. See the NOTICE fileAdd commentMore actions
  * distributed with this work for additional information
  * regarding copyright ownership. The ASF licenses this file
  * to you under the Apache License, Version 2.0 (the
@@ -16,14 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.service;
+package org.apache.fineract.organisation.monetary.data.request;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import java.io.Serializable;
 
-public interface CurrencyWritePlatformService {
+public record CurrencyCreateRequest(String code,String name,Integer decimalPlaces,Integer inMultiplesOf,String displaySymbol,String nameCode) implements Serializable {
 
-    CommandProcessingResult updateAllowedCurrencies(JsonCommand command);
-
-    CommandProcessingResult createAllowedCurrencies(JsonCommand command);
 }

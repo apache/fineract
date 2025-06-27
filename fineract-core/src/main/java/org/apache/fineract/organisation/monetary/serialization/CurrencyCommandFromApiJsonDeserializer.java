@@ -24,6 +24,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -39,10 +40,12 @@ import org.springframework.stereotype.Component;
 public final class CurrencyCommandFromApiJsonDeserializer {
 
     public static final String CURRENCIES = "currencies";
+    public static final String CREATE_CURRENCY = "createCurrency";
     /**
      * The parameters supported for this command.
      */
     private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(List.of(CURRENCIES));
+    private static final Set<String> CREATE_NEW_CURRENCY_PARAMETERS = Set.of("code","name","decimalPlaces","inMultiplesOf","displaySymbol","nameCode");
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -69,6 +72,41 @@ public final class CurrencyCommandFromApiJsonDeserializer {
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
+
+    public void validateForCreate(final String json) {
+
+      if (StringUtils.isBlank(json)) {
+          throw new InvalidJsonException();
+      }
+
+      final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+      this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, CREATE_NEW_CURRENCY_PARAMETERS);
+
+      final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+      final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(CREATE_CURRENCY);
+
+      final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+      final String code = this.fromApiJsonHelper.extractStringNamed("code", element);
+      baseDataValidator.reset().parameter("code").value(code).notBlank().notExceedingLengthOf(3);
+
+      final String name = this.fromApiJsonHelper.extractStringNamed("name", element);
+      baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(50);
+
+      final Integer decimalPlaces = this.fromApiJsonHelper.extractIntegerNamed("decimalPlaces", element, Locale.getDefault());
+      baseDataValidator.reset().parameter("decimalPlaces").value(decimalPlaces).notNull().integerGreaterThanZero();
+
+      final Integer inMultiplesOf = this.fromApiJsonHelper.extractIntegerNamed("inMultiplesOf", element, Locale.getDefault());
+      baseDataValidator.reset().parameter("inMultiplesOf").value(inMultiplesOf).ignoreIfNull().integerGreaterThanZero();
+
+      final String nameCode = this.fromApiJsonHelper.extractStringNamed("nameCode", element);
+      baseDataValidator.reset().parameter("nameCode").value(nameCode).notBlank().notExceedingLengthOf(50);
+
+      final String displaySymbol = this.fromApiJsonHelper.extractStringNamed("displaySymbol", element);
+      baseDataValidator.reset().parameter("displaySymbol").value(displaySymbol).ignoreIfNull().notExceedingLengthOf(10);
+
+      throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {

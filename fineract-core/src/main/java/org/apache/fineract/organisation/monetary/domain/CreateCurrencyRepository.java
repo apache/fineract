@@ -1,5 +1,5 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one
+ * Licensed to the Apache Software Foundation (ASF) under oneAdd commentMore actions
  * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
  * regarding copyright ownership. The ASF licenses this file
@@ -16,14 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.service;
+package org.apache.fineract.organisation.monetary.domain;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CurrencyWritePlatformService {
+public interface CreateCurrencyRepository extends JpaRepository<CreateCurrency, Long> {
 
-    CommandProcessingResult updateAllowedCurrencies(JsonCommand command);
-
-    CommandProcessingResult createAllowedCurrencies(JsonCommand command);
 }

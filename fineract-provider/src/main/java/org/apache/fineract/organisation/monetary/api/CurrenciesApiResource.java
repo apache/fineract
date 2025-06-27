@@ -28,6 +28,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -40,6 +41,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.ApplicationCurrencyConfigurationData;
+import org.apache.fineract.organisation.monetary.data.request.CurrencyCreateRequest;
 import org.apache.fineract.organisation.monetary.data.request.CurrencyRequest;
 import org.apache.fineract.organisation.monetary.service.OrganisationCurrencyReadPlatformService;
 import org.springframework.stereotype.Component;
@@ -85,4 +87,19 @@ public class CurrenciesApiResource {
 
         return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
+
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Create New Currency", description = "Creates a new currency for use.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CurrenciesApiResourceSwagger.PostCurrenciesRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CurrenciesApiResourceSwagger.PostCurrenciesResponse.class))) })
+    public CommandProcessingResult createNewCurrency(@Parameter(hidden = true) CurrencyCreateRequest currencyCreateRequest) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createCurrencies()
+                .withJson(toApiJsonSerializer.serialize(currencyCreateRequest)).build();
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    }
+
 }
