@@ -16,14 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.data.request;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
+package org.apache.fineract.infrastructure.core.filters;
 
-public record CurrencyRequest(List<String> currencies) implements Serializable {
+public class ClientIpHolder {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    private static final ThreadLocal<String> clientIpHolder = new ThreadLocal<>();
+
+    public static void setClientIp(String ip) {
+        clientIpHolder.set(ip);
+    }
+
+    public static String getClientIp() {
+        return clientIpHolder.get();
+    }
+
+    public static void clear() {
+        clientIpHolder.remove();
+    }
 }

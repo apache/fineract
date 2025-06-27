@@ -18,17 +18,20 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import org.apache.fineract.integrationtests.common.CurrenciesHelper;
 import org.apache.fineract.integrationtests.common.CurrencyDomain;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -52,43 +55,32 @@ public class CurrenciesTest {
         CurrencyDomain currency = CurrenciesHelper.getCurrencybyCode(requestSpec, responseSpec, "USD");
         CurrencyDomain usd = CurrencyDomain.create("USD", "US Dollar", 2, "$", "currency.USD", "US Dollar ($)").build();
 
-        Assertions.assertTrue(currency.getDecimalPlaces() >= 0);
-        Assertions.assertNotNull(currency.getName());
-        Assertions.assertNotNull(currency.getDisplaySymbol());
-        Assertions.assertNotNull(currency.getDisplayLabel());
-        Assertions.assertNotNull(currency.getNameCode());
+        assertNotNull(currency);
+        assertTrue(currency.getDecimalPlaces() >= 0);
+        assertNotNull(currency.getName());
+        assertNotNull(currency.getDisplaySymbol());
+        assertNotNull(currency.getDisplayLabel());
+        assertNotNull(currency.getNameCode());
 
-        Assertions.assertEquals(usd, currency);
+        assertEquals(usd, currency);
     }
 
     @Test
     public void testUpdateCurrencySelection() {
+        var currenciestoUpdate = List.of("KES", "BND", "LBP", "GHC", "USD", "INR");
 
-        // Test updation
-        ArrayList<String> currenciestoUpdate = new ArrayList<String>();
-        currenciestoUpdate.add("KES");
-        currenciestoUpdate.add("BND");
-        currenciestoUpdate.add("LBP");
-        currenciestoUpdate.add("GHC");
-        currenciestoUpdate.add("USD");
-        currenciestoUpdate.add("INR");
+        var currenciesOutput = CurrenciesHelper.updateSelectedCurrencies(this.requestSpec, this.responseSpec, currenciestoUpdate);
 
-        ArrayList<String> currenciesOutput = CurrenciesHelper.updateSelectedCurrencies(this.requestSpec, this.responseSpec,
-                currenciestoUpdate);
-        Assertions.assertNotNull(currenciesOutput);
+        assertNotNull(currenciesOutput);
+        assertEquals(currenciestoUpdate, currenciesOutput, "Verifying returned currencies match after update");
 
-        Assertions.assertEquals(currenciestoUpdate, currenciesOutput, "Verifying Do Outputed Currencies Match after Updation");
+        var currenciesBeforeUpdate = currenciestoUpdate.stream()
+                .map(currency -> CurrenciesHelper.getCurrencybyCode(requestSpec, responseSpec, currency)).filter(Objects::nonNull).sorted()
+                .toList();
 
-        // Test that output matches updation
-        ArrayList<CurrencyDomain> currenciesBeforeUpdate = new ArrayList<CurrencyDomain>();
-        for (String e : currenciestoUpdate) {
-            currenciesBeforeUpdate.add(CurrenciesHelper.getCurrencybyCode(requestSpec, responseSpec, e));
-        }
-        Collections.sort(currenciesBeforeUpdate);
+        var currenciesAfterUpdate = CurrenciesHelper.getSelectedCurrencies(requestSpec, responseSpec);
 
-        ArrayList<CurrencyDomain> currenciesAfterUpdate = CurrenciesHelper.getSelectedCurrencies(requestSpec, responseSpec);
-        Assertions.assertNotNull(currenciesAfterUpdate);
-
-        Assertions.assertEquals(currenciesBeforeUpdate, currenciesAfterUpdate, "Verifying Do Selected Currencies Match after Updation");
+        assertNotNull(currenciesAfterUpdate);
+        assertEquals(currenciesBeforeUpdate, currenciesAfterUpdate, "Verifying selected currencies match after update");
     }
 }

@@ -16,28 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.serialization.gson;
+package org.apache.fineract.organisation.monetary.mapper;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import java.lang.reflect.Type;
-import java.math.MathContext;
-import lombok.AllArgsConstructor;
+import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
-import org.apache.fineract.organisation.monetary.domain.Money;
+import org.mapstruct.Mapping;
 
-@AllArgsConstructor
-public class MoneyDeserializer implements JsonDeserializer<Money> {
+@org.mapstruct.Mapper(config = MapstructMapperConfig.class)
+public interface CurrencyMapper {
 
-    private final MathContext mc;
-    private final MonetaryCurrency currency;
-
-    @Override
-    public Money deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext)
-            throws JsonParseException {
-        return Money.of(currency, jsonElement.getAsBigDecimal(), mc);
-    }
-
+    @Mapping(target = "nameCode", ignore = true)
+    @Mapping(target = "name", ignore = true)
+    @Mapping(target = "displaySymbol", ignore = true)
+    @Mapping(target = "displayLabel", ignore = true)
+    @Mapping(source = "code", target = "code")
+    @Mapping(source = "digitsAfterDecimal", target = "decimalPlaces")
+    @Mapping(source = "inMultiplesOf", target = "inMultiplesOf")
+    CurrencyData map(MonetaryCurrency source);
 }

@@ -16,12 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.service;
+package org.apache.fineract.organisation.monetary.serialization;
 
-import org.apache.fineract.organisation.monetary.data.CurrencyConfigurationData;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import java.lang.reflect.Type;
+import org.apache.fineract.organisation.monetary.domain.Money;
 
-public interface OrganisationCurrencyReadPlatformService {
+@Deprecated(forRemoval = true)
+public class MoneySerializer implements JsonSerializer<Money> {
 
-    CurrencyConfigurationData retrieveCurrencyConfiguration();
+    @Override
+    public JsonElement serialize(Money money, Type type, JsonSerializationContext jsonSerializationContext) {
+        return new JsonPrimitive(money.getAmount());
+    }
 
 }

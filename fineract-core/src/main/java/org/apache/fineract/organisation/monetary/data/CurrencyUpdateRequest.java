@@ -18,33 +18,26 @@
  */
 package org.apache.fineract.organisation.monetary.data;
 
-import java.math.BigDecimal;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * Immutable data object representing currency.
- */
-public class MoneyData {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CurrencyUpdateRequest implements Serializable {
 
-    private final String code;
-    private final BigDecimal amount;
-    private final int decimalPlaces;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    public MoneyData(final String code, final BigDecimal amount, final int decimalPlaces) {
-        this.code = code;
-        this.amount = amount;
-        this.decimalPlaces = decimalPlaces;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
-
-    public int getDecimalPlaces() {
-        return this.decimalPlaces;
-    }
-
+    @NotNull(message = "{org.apache.fineract.organisation.monetary.currencies.not-null}")
+    @NotEmpty(message = "{org.apache.fineract.organisation.monetary.currencies.not-empty}")
+    private List<String> currencies;
 }

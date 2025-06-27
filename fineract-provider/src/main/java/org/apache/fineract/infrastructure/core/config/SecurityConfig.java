@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.cache.service.CacheWritePlatformServic
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.filters.CorrelationHeaderFilter;
+import org.apache.fineract.infrastructure.core.filters.GeolocationHeaderFilter;
 import org.apache.fineract.infrastructure.core.filters.IdempotencyStoreFilter;
 import org.apache.fineract.infrastructure.core.filters.IdempotencyStoreHelper;
 import org.apache.fineract.infrastructure.core.filters.RequestResponseFilter;
@@ -147,6 +148,11 @@ public class SecurityConfig {
                             .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_CACHE")
                             .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/caches"))
                             .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_CACHE")
+                            // currency
+                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/currencies"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_CURRENCY")
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/currencies"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_CURRENCY")
                             // ...
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated() //
                             .requestMatchers(antMatcher("/api/*/twofactor")).fullyAuthenticated() //
@@ -160,7 +166,8 @@ public class SecurityConfig {
                 .addFilterBefore(tenantAwareBasicAuthenticationFilter(), SecurityContextHolderFilter.class) //
                 .addFilterAfter(requestResponseFilter(), ExceptionTranslationFilter.class) //
                 .addFilterAfter(correlationHeaderFilter(), RequestResponseFilter.class) //
-                .addFilterAfter(fineractInstanceModeApiFilter(), CorrelationHeaderFilter.class); //
+                .addFilterAfter(fineractInstanceModeApiFilter(), CorrelationHeaderFilter.class) //
+                .addFilterAfter(geolocationHeaderFilter(), RequestResponseFilter.class); //
         if (!Objects.isNull(loanCOBFilterHelper)) {
             http.addFilterAfter(loanCOBApiFilter(), FineractInstanceModeApiFilter.class) //
                     .addFilterAfter(idempotencyStoreFilter(), LoanCOBApiFilter.class); //
@@ -220,6 +227,10 @@ public class SecurityConfig {
                 userNotificationService, basicAuthTenantDetailsService, businessDateReadPlatformService);
         filter.setRequestMatcher(antMatcher("/api/**"));
         return filter;
+    }
+
+    public GeolocationHeaderFilter geolocationHeaderFilter() {
+        return new GeolocationHeaderFilter(fineractProperties);
     }
 
     @Bean

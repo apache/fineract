@@ -25,6 +25,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.investor.config.InvestorModuleIsEnabledCondition;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.organisation.monetary.mapper.CurrencyMapper;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
@@ -41,6 +42,7 @@ public class ExternalAssetOwnerTransferOutstandingInterestCalculation {
     private final LoanSummaryProviderDelegate loanSummaryDataProvider;
     private final ConfigurationDomainService configurationDomainService;
     private final LoanReadPlatformService loanReadPlatformService;
+    private final CurrencyMapper currencyMapper;
 
     private LoanSummaryDataProvider fetchLoanSummaryDataProvider(Loan loan) {
         return this.loanSummaryDataProvider.resolveLoanSummaryDataProvider(loan.getTransactionProcessingStrategyCode());
@@ -58,7 +60,7 @@ public class ExternalAssetOwnerTransferOutstandingInterestCalculation {
                         .map(i -> i.getInterestOutstanding(loan.getCurrency())).reduce(Money.zero(loan.getCurrency()), MathUtil::plus);
                 BigDecimal notDuePayableAmount = fetchLoanSummaryDataProvider(loan)
                         .computeTotalUnpaidPayableNotDueInterestAmountOnActualPeriod(loan, data.getRepaymentSchedule().getPeriods(),
-                                DateUtils.getBusinessLocalDate(), loan.getCurrency().toData(), duePayableAmount.getAmount());
+                                DateUtils.getBusinessLocalDate(), currencyMapper.map(loan.getCurrency()), duePayableAmount.getAmount());
 
                 yield MathUtil.add(duePayableAmount.getAmount(), notDuePayableAmount);
             }

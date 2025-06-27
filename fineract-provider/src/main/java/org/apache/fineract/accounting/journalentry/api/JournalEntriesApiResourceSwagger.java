@@ -22,7 +22,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import org.apache.fineract.organisation.monetary.api.CurrenciesApiResourceSwagger.CurrencyItem;
 import org.apache.fineract.portfolio.note.data.NoteData;
 import org.apache.fineract.portfolio.paymenttype.api.PaymentTypeApiResourceSwagger.GetPaymentTypesResponse;
 
@@ -67,6 +66,26 @@ final class JournalEntriesApiResourceSwagger {
 
         @Schema(description = "1")
         public Long officeId;
+    }
+
+    public static final class CurrencyItem {
+
+        private CurrencyItem() {}
+
+        @Schema(example = "USD")
+        public String code;
+        @Schema(example = "US Dollar")
+        public String name;
+        @Schema(example = "2")
+        public Integer decimalPlaces;
+        @Schema(example = "100")
+        public Integer inMultiplesOf;
+        @Schema(example = "$")
+        public String displaySymbol;
+        @Schema(example = "currency.USD")
+        public String nameCode;
+        @Schema(example = "US Dollar ($)")
+        public String displayLabel;
     }
 
     static final class EnumOptionType {

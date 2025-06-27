@@ -21,15 +21,13 @@ package org.apache.fineract.test.initializer.global;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.client.models.CurrencyRequest;
-import org.apache.fineract.client.models.PutCurrenciesResponse;
+import org.apache.fineract.client.models.CurrencyUpdateRequest;
 import org.apache.fineract.client.services.CurrencyApi;
 import org.apache.fineract.test.support.TestContext;
 import org.apache.fineract.test.support.TestContextKey;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import retrofit2.Response;
 
 @RequiredArgsConstructor
 @Component
@@ -42,9 +40,8 @@ public class CurrencyGlobalInitializerStep implements FineractGlobalInitializerS
 
     @Override
     public void initialize() throws Exception {
-        CurrencyRequest currencyRequest = new CurrencyRequest();
-        Response<PutCurrenciesResponse> putCurrenciesResponse = currencyApi.updateCurrencies(currencyRequest.currencies(CURRENCIES))
-                .execute();
-        TestContext.INSTANCE.set(TestContextKey.PUT_CURRENCIES_RESPONSE, putCurrenciesResponse);
+        var request = new CurrencyUpdateRequest();
+        var response = currencyApi.updateCurrencies(request.currencies(CURRENCIES)).execute();
+        TestContext.INSTANCE.set(TestContextKey.PUT_CURRENCIES_RESPONSE, response);
     }
 }

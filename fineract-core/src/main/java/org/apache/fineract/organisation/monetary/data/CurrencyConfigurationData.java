@@ -16,20 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.serialization.gson;
+package org.apache.fineract.organisation.monetary.data;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-import java.lang.reflect.Type;
-import org.apache.fineract.organisation.monetary.domain.Money;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public class MoneySerializer implements JsonSerializer<Money> {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CurrencyConfigurationData implements Serializable {
 
-    @Override
-    public JsonElement serialize(Money money, Type type, JsonSerializationContext jsonSerializationContext) {
-        return new JsonPrimitive(money.getAmount());
-    }
+    @Serial
+    private static final long serialVersionUID = 1L;
 
+    private List<CurrencyData> selectedCurrencyOptions;
+    private List<CurrencyData> currencyOptions;
 }
