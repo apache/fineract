@@ -192,6 +192,8 @@ public class UndoRepaymentWithDownPaymentIntegrationTest extends BaseLoanIntegra
 
         loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
         assertEquals(500.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                new PutGlobalConfigurationsRequest().enabled(false));
     }
 
     private Integer createLoanProductWithPeriodicAccrualAccountingAndAdvancedPaymentAllocationStrategy() {

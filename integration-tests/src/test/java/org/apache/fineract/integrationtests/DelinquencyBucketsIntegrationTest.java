@@ -76,7 +76,6 @@ import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
-import org.apache.fineract.integrationtests.common.loans.CobHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
@@ -867,9 +866,8 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             assertTrue(jobBusinessStepConfigData.getBusinessSteps().stream().anyMatch(
                     businessStep -> BusinessConfigurationApiTest.LOAN_DELINQUENCY_CLASSIFICATION.equals(businessStep.getStepName())));
 
-            // Run first time the Loan COB Job
-            final String jobName = "Loan COB";
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
 
             // Get loan details expecting to have not a delinquency classification
             GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
@@ -885,13 +883,11 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             }
 
             // Move the Business date to get older the loan and to have an overdue loan
-            LocalDate lastLoanCOBBusinessDate = bussinesLocalDate;
             bussinesLocalDate = bussinesLocalDate.plusDays(3);
-            schedulerJobHelper.fastForwardTime(lastLoanCOBBusinessDate, bussinesLocalDate, jobName, responseSpec);
-            log.info("Current date {}", bussinesLocalDate);
+
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, bussinesLocalDate);
-            // Run Second time the Job
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
 
             // Get loan details expecting to have a delinquency classification
             getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
@@ -968,15 +964,11 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             log.info("Loan Delinquency Range is null {}", (firstTestCase == null));
             loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
 
-            final String jobName = "Loan COB";
-
             bussinesLocalDate = Utils.getDateAsLocalDate("31 January 2012");
-            LocalDate lastLoanCOBBusinessDate = bussinesLocalDate.minusDays(1);
-            schedulerJobHelper.fastForwardTime(lastLoanCOBBusinessDate, bussinesLocalDate, jobName, responseSpec);
-            log.info("Current date {}", bussinesLocalDate);
+
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, bussinesLocalDate);
-            // Run Second time the Job
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
 
             // Get loan details expecting to have a delinquency classification
             getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
@@ -1059,15 +1051,11 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             log.info("Loan Product Arrears: {}", loanProductsProductIdResponseUpd.getInArrearsTolerance());
             assertEquals(0, loanProductsProductIdResponseUpd.getInArrearsTolerance());
 
-            final String jobName = "Loan COB";
-
             bussinesLocalDate = Utils.getDateAsLocalDate("31 January 2012");
-            LocalDate lastLoanCOBBusinessDate = bussinesLocalDate.minusDays(1);
-            schedulerJobHelper.fastForwardTime(lastLoanCOBBusinessDate, bussinesLocalDate, jobName, responseSpec);
-            log.info("Current date {}", bussinesLocalDate);
+
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, bussinesLocalDate);
-            // Run Second time the Job
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
 
             // Get loan details expecting to have a delinquency classification
             getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
@@ -1114,24 +1102,22 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             log.info("Loan Account Arrears {}", getLoansLoanIdResponse.getInArrearsTolerance());
             assertEquals(3, getLoansLoanIdResponse.getInArrearsTolerance());
 
-            final String jobName = "Loan COB";
-
-            CobHelper.fastForwardLoansLastCOBDate(requestSpec, responseSpec204, loanId, "04 February 2012");
             updateBusinessDate("06 February 2012");
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
             verifyDelinquency(loanId, "01 February 2012", 1033.33, 5);
 
             PostLoansDelinquencyActionResponse pauseDelinquencyResponse = loanTransactionHelper
                     .createLoanDelinquencyAction(loanId.longValue(), PAUSE, "06 February 2012", "10 February 2012");
 
-            CobHelper.fastForwardLoansLastCOBDate(requestSpec, responseSpec204, loanId, "07 February 2012");
             updateBusinessDate("09 February 2012");
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
             verifyDelinquency(loanId, "01 February 2012", 1033.33, 5);
 
-            CobHelper.fastForwardLoansLastCOBDate(requestSpec, responseSpec204, loanId, "10 March 2012");
             updateBusinessDate("12 March 2012");
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
             verifyDelinquency(loanId, "01 February 2012", 2049.99, 36);
         });
     }
@@ -1165,28 +1151,26 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             log.info("Loan Account Arrears {}", getLoansLoanIdResponse.getInArrearsTolerance());
             assertEquals(3, getLoansLoanIdResponse.getInArrearsTolerance());
 
-            final String jobName = "Loan COB";
-
-            CobHelper.fastForwardLoansLastCOBDate(requestSpec, responseSpec204, loanId, "04 February 2012");
             updateBusinessDate("06 February 2012");
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
             verifyDelinquency(loanId, "01 February 2012", 1033.33, 5);
 
             PostLoansDelinquencyActionResponse pauseDelinquencyResponse = loanTransactionHelper
                     .createLoanDelinquencyAction(loanId.longValue(), PAUSE, "06 February 2012", "10 March 2012");
 
-            CobHelper.fastForwardLoansLastCOBDate(requestSpec, responseSpec204, loanId, "07 February 2012");
             updateBusinessDate("09 February 2012");
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
             verifyDelinquency(loanId, "01 February 2012", 1033.33, 5);
 
             bussinesLocalDate = Utils.getDateAsLocalDate("10 February 2012");
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, bussinesLocalDate);
             loanTransactionHelper.createLoanDelinquencyAction(loanId.longValue(), RESUME, "10 February 2012");
 
-            CobHelper.fastForwardLoansLastCOBDate(requestSpec, responseSpec204, loanId, "10 March 2012");
             updateBusinessDate("12 March 2012");
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
             verifyDelinquency(loanId, "01 February 2012", 2049.99, 36);
         });
     }
@@ -1217,38 +1201,36 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             log.info("Loan Account Arrears {}", getLoansLoanIdResponse.getInArrearsTolerance());
             assertEquals(3, getLoansLoanIdResponse.getInArrearsTolerance());
 
-            final String jobName = "Loan COB";
-
             // delinquent days: 5
-            CobHelper.fastForwardLoansLastCOBDate(requestSpec, responseSpec204, loanId, "04 February 2012");
             updateBusinessDate("06 February 2012");
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
             verifyDelinquency(loanId, "01 February 2012", 1033.33, 5);
 
             // Add delinquency pause on 06 February 2012
             PostLoansDelinquencyActionResponse pauseDelinquencyResponse = loanTransactionHelper
                     .createLoanDelinquencyAction(loanId.longValue(), PAUSE, "06 February 2012", "10 March 2012");
-            CobHelper.fastForwardLoansLastCOBDate(requestSpec, responseSpec204, loanId, "07 February 2012");
             updateBusinessDate("09 February 2012");
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
             verifyDelinquency(loanId, "01 February 2012", 1033.33, 5);
 
             // Add delinquency resume on 10 February 2012
             updateBusinessDate("10 February 2012");
             loanTransactionHelper.createLoanDelinquencyAction(loanId.longValue(), RESUME, "10 February 2012");
 
-            CobHelper.fastForwardLoansLastCOBDate(requestSpec, responseSpec204, loanId, "11 February 2012");
             updateBusinessDate("13 February 2012");
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
             verifyDelinquency(loanId, "01 February 2012", 1033.33, 8);
 
             // Add new pause on 13 February 2012
             pauseDelinquencyResponse = loanTransactionHelper.createLoanDelinquencyAction(loanId.longValue(), PAUSE, "13 February 2012",
                     "18 February 2012");
 
-            CobHelper.fastForwardLoansLastCOBDate(requestSpec, responseSpec204, loanId, "21 February 2012");
             updateBusinessDate("23 February 2012");
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
             verifyDelinquency(loanId, "01 February 2012", 1033.33, 13);
 
             // Add new pause on 23 February 2012
@@ -1256,9 +1238,9 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
                     "28 February 2012");
             updateBusinessDate("25 February 2012");
             loanTransactionHelper.createLoanDelinquencyAction(loanId.longValue(), RESUME, "25 February 2012");
-            CobHelper.fastForwardLoansLastCOBDate(requestSpec, responseSpec204, loanId, "10 March 2012");
             updateBusinessDate("12 March 2012");
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
             verifyDelinquency(loanId, "01 February 2012", 2049.99, 29);
         });
     }
@@ -1299,36 +1281,34 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             log.info("Loan Account Arrears {}", getLoansLoanIdResponse.getInArrearsTolerance());
             assertEquals(3, getLoansLoanIdResponse.getInArrearsTolerance());
 
-            final String jobName = "Loan COB";
-
             // delinquent days: 5
-            CobHelper.fastForwardLoansLastCOBDate(requestSpec, responseSpec204, loanId, "04 February 2012");
             updateBusinessDate("06 February 2012");
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
             verifyDelinquency(loanId, "01 February 2012", 1033.33, 5);
 
             PostLoansDelinquencyActionResponse pauseDelinquencyResponse = loanTransactionHelper
                     .createLoanDelinquencyAction(loanId.longValue(), PAUSE, "06 February 2012", "10 March 2012");
 
-            CobHelper.fastForwardLoansLastCOBDate(requestSpec, responseSpec204, loanId, "07 February 2012");
             updateBusinessDate("09 February 2012");
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
             verifyDelinquency(loanId, "01 February 2012", 1033.33, 5);
 
             updateBusinessDate("10 February 2012");
             loanTransactionHelper.createLoanDelinquencyAction(loanId.longValue(), RESUME, "10 February 2012");
 
-            CobHelper.fastForwardLoansLastCOBDate(requestSpec, responseSpec204, loanId, "11 February 2012");
             updateBusinessDate("13 February 2012");
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
             verifyDelinquency(loanId, "01 February 2012", 1033.33, 8);
 
             pauseDelinquencyResponse = loanTransactionHelper.createLoanDelinquencyAction(loanId.longValue(), PAUSE, "13 February 2012",
                     "18 February 2012");
 
-            CobHelper.fastForwardLoansLastCOBDate(requestSpec, responseSpec204, loanId, "21 February 2012");
             updateBusinessDate("23 February 2012");
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
             verifyDelinquency(loanId, "01 February 2012", 1033.33, 13);
 
             pauseDelinquencyResponse = loanTransactionHelper.createLoanDelinquencyAction(loanId.longValue(), PAUSE, "23 February 2012",
@@ -1337,9 +1317,9 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             updateBusinessDate("25 February 2012");
             loanTransactionHelper.createLoanDelinquencyAction(loanId.longValue(), RESUME, "25 February 2012");
 
-            CobHelper.fastForwardLoansLastCOBDate(requestSpec, responseSpec204, loanId, "12 March 2012");
             updateBusinessDate("14 March 2012");
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
 
             getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
             loanTransactionHelper.printDelinquencyData(getLoansLoanIdResponse);
@@ -1447,10 +1427,10 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
                     getLoanProductsProductResponse.getId().toString(), operationDate, null);
 
             // run cob for business date 01 January 2012
-            final String jobName = "Loan COB";
             bussinesLocalDate = Utils.getDateAsLocalDate(operationDate);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, bussinesLocalDate);
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
 
             // Loan delinquency data
             GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);

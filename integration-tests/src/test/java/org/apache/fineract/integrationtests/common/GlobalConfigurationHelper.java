@@ -544,7 +544,7 @@ public class GlobalConfigurationHelper {
         assetOwnerTransferInterestOutstandingStrategy.put("name",
                 GlobalConfigurationConstants.ASSET_OWNER_TRANSFER_OUTSTANDING_INTEREST_CALCULATION_STRATEGY);
         assetOwnerTransferInterestOutstandingStrategy.put("value", 0L);
-        assetOwnerTransferInterestOutstandingStrategy.put("enabled", false);
+        assetOwnerTransferInterestOutstandingStrategy.put("enabled", true);
         assetOwnerTransferInterestOutstandingStrategy.put("trapDoor", false);
         assetOwnerTransferInterestOutstandingStrategy.put("string_value", "TOTAL_OUTSTANDING_INTEREST");
         defaults.add(assetOwnerTransferInterestOutstandingStrategy);

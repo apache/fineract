@@ -168,9 +168,8 @@ public class DelinquencyAndChargebackIntegrationTest extends BaseLoanIntegration
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
             log.info("Current Business date {}", businessDate);
 
-            // Run the Loan COB Job
-            final String jobName = "Loan COB";
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
 
             // Get loan details expecting to have a delinquency classification
             getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
@@ -293,9 +292,8 @@ public class DelinquencyAndChargebackIntegrationTest extends BaseLoanIntegration
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
             log.info("Current Business date {}", businessDate);
 
-            // Run the Loan COB Job
-            final String jobName = "Loan COB";
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
 
             // Get loan details expecting to have a delinquency classification
             getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);

@@ -1,0 +1,165 @@
+name: Fineract E2E Tests
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: E2E Tests (Shard ${{ matrix.shard_index }} of ${{ matrix.total_shards }})
+    runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Define the number of shards (1-based indexing)
+        shard_index: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        total_shards: [10]
+
+    env:
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+      IMAGE_NAME: fineract
+      BASE_URL: https://localhost:8443
+      TEST_USERNAME: mifos
+      TEST_PASSWORD: password
+      TEST_STRONG_PASSWORD: A1b2c3d4e5f$
+      TEST_TENANT_ID: default
+      INITIALIZATION_ENABLED: true
+      EVENT_VERIFICATION_ENABLED: true
+      ACTIVEMQ_BROKER_URL: tcp://localhost:61616
+      ACTIVEMQ_TOPIC_NAME: events
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4.4.1
+
+      - name: Make scripts executable
+        run: chmod +x scripts/split-features.sh
+
+      - name: Split feature files into shards
+        id: split-features
+        run: |
+          ./scripts/split-features.sh ${{ matrix.total_shards }} ${{ matrix.shard_index }}
+          echo "Shard ${{ matrix.shard_index }} feature files:"
+          cat feature_shard_${{ matrix.shard_index }}.txt
+
+      - name: Build the image
+        run: ./gradlew --no-daemon --console=plain :fineract-provider:jibDockerBuild -Djib.to.image=$IMAGE_NAME -x test -x cucumber
+
+      - name: Start the Fineract stack
+        run: docker compose -f docker-compose-postgresql-test-activemq.yml up -d
+
+      - name: Check the stack
+        run: docker ps
+
+      - name: Wait for Manager to be ready
+        run: |
+          # Wait for the container to be running
+          echo "Waiting for Manager container to be ready..."
+          timeout 300 bash -c 'until docker ps --filter "health=healthy" --filter "name=fineract" --format "{{.Status}}" | grep -q "healthy"; do
+            if docker ps --filter "name=fineract" --format "{{.Status}}" | grep -q "unhealthy"; then
+              echo "Container is unhealthy. Stopping..."
+              docker ps -a
+              docker logs $(docker ps -q --filter name=fineract) || true
+              exit 1
+            fi
+            echo "Waiting for Manager to be ready..."
+            sleep 5
+          done'
+
+          # Check the health endpoint
+          echo "Checking Manager health endpoint..."
+          curl -f -k --retry 30 --retry-all-errors --connect-timeout 10 --retry-delay 10 \
+            https://localhost:8443/fineract-provider/actuator/health
+
+      - name: Execute tests for shard ${{ matrix.shard_index }}
+        run: |
+          # Read feature files from the shard file
+          FEATURES=$(tr '\n' ',' < "feature_shard_${{ matrix.shard_index }}.txt" | sed 's/,$//')
+
+          if [ -z "$FEATURES" ]; then
+            echo "No features to test in this shard. Skipping..."
+            exit 0
+          fi
+
+          # Create a directory for individual allure results
+          mkdir -p "allure-results-shard-${{ matrix.shard_index }}"
+
+          # Read each feature file path and run tests one by one
+          while IFS= read -r feature_file || [ -n "$feature_file" ]; do
+            # Skip empty lines
+            [ -z "$feature_file" ] && continue
+
+            # Create a safe filename for the results
+            safe_name=$(echo "$feature_file" | tr '/' '-' | tr ' ' '_')
+
+            echo "Testing feature: $feature_file"
+
+            # Run tests with individual allure results directory
+            ./gradlew --no-daemon --console=plain \
+              :fineract-e2e-tests-runner:cucumber \
+              -Pcucumber.features="$feature_file" \
+              -Dallure.results.directory="allure-results-shard-${{ matrix.shard_index }}/$safe_name" \
+              allureReport || echo "Test failed for $feature_file, continuing with next feature..."
+
+            # Copy the results to a merged directory
+            if [ -d "allure-results-shard-${{ matrix.shard_index }}/$safe_name" ]; then
+              cp -r "allure-results-shard-${{ matrix.shard_index }}/$safe_name/." "allure-results-merged/" || true
+            fi
+          done < "feature_shard_${{ matrix.shard_index }}.txt"
+
+          # Generate individual report for this shard
+          if [ -d "allure-results-merged" ]; then
+            mkdir -p "allure-report-shard-${{ matrix.shard_index }}"
+            allure generate "allure-results-merged" --clean -o "allure-report-shard-${{ matrix.shard_index }}" || echo "Failed to generate Allure report for shard ${{ matrix.shard_index }}"
+          fi
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-shard-${{ matrix.shard_index }}
+          path: |
+            allure-results-shard-${{ matrix.shard_index }}
+            allure-results-merged
+            **/build/allure-results
+            **/build/reports/tests/test
+            **/build/test-results/test
+          retention-days: 5
+
+      - name: Upload Allure Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-shard-${{ matrix.shard_index }}
+          path: allure-report-shard-${{ matrix.shard_index }}
+          retention-days: 5
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-shard-${{ matrix.shard_index }}
+          path: |
+            **/build/reports/tests/
+            **/logs/
+            **/out/
+          retention-days: 5
+
+      - name: Clean up
+        if: always()
+        run: |
+          docker compose -f docker-compose-postgresql-test-activemq.yml down -v
+          docker system prune -f

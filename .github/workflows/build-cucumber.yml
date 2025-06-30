@@ -1,0 +1,111 @@
+name: Fineract Build & Cucumber tests (without E2E tests)
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - task: build-core
+            job_type: main
+          - task: cucumber
+            job_type: main
+          - task: build-progressive-loan
+            job_type: progressive-loan
+
+    env:
+      TZ: Asia/Kolkata
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
+      - name: Setup Gradle and Validate Wrapper
+        uses: gradle/actions/setup-gradle@v4.4.1
+        with:
+          validate-wrappers: true
+
+      - name: Run Gradle Task
+        if: matrix.job_type == 'main'
+        run: |
+          case "${{ matrix.task }}" in
+            build-core)
+              ./gradlew --no-daemon build -x test -x cucumber -x doc
+              ;;
+            cucumber)
+              ./gradlew --no-daemon cucumber -x :fineract-e2e-tests-runner:cucumber -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer
+              ;;
+          esac
+
+      - name: Build and Test Progressive Loan
+        if: matrix.job_type == 'progressive-loan'
+        run: |
+          # Build the JAR
+          ./gradlew --no-daemon --console=plain :fineract-progressive-loan-embeddable-schedule-generator:shadowJar
+
+          # Store the JAR filename in an environment variable
+          EMBEDDABLE_JAR_FILE=$(ls fineract-progressive-loan-embeddable-schedule-generator/build/libs/*-all.jar | head -n 1)
+          echo "EMBEDDABLE_JAR_FILE=$EMBEDDABLE_JAR_FILE" >> $GITHUB_ENV
+          echo "JAR file: $EMBEDDABLE_JAR_FILE"
+
+          # Run unit tests
+          ./gradlew --no-daemon --console=plain :fineract-progressive-loan-embeddable-schedule-generator:test
+
+          # Build and run sample application
+          mkdir -p sample-app
+          javac -cp "$EMBEDDABLE_JAR_FILE" -d sample-app fineract-progressive-loan-embeddable-schedule-generator/misc/Main.java
+          java -cp "$EMBEDDABLE_JAR_FILE:sample-app" Main
+          java -cp "$EMBEDDABLE_JAR_FILE:sample-app" Main 25
+
+      - name: Archive test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.task }}
+          path: |
+            **/build/reports/
+            **/fineract-progressive-loan-embeddable-schedule-generator/build/reports/
+          if-no-files-found: ignore
+          retention-days: 5
+
+      - name: Archive Progressive Loan JAR
+        if: matrix.job_type == 'progressive-loan' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: progressive-loan-jar
+          path: ${{ env.EMBEDDABLE_JAR_FILE }}
+          retention-days: 5
+          if-no-files-found: ignore
+
+      - name: Archive server logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-logs-${{ matrix.task }}
+          path: '**/build/cargo/'
+          retention-days: 5

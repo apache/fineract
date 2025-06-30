@@ -109,6 +109,7 @@ public class SearchExternalAssetOwnerTransferTest extends ExternalAssetOwnerTran
 
     @Test
     public void initialSearchExternalAssetOwnerTransferUsingTextTest() {
+        saleActiveLoanToExternalAssetOwnerWithSearching();
         String textToSearch = UUID.randomUUID().toString();
         PagedRequestExternalAssetOwnerSearchRequest searchRequest = EXTERNAL_ASSET_OWNER_HELPER
                 .buildExternalAssetOwnerSearchRequest(textToSearch, "", null, null, 0, 10);
@@ -118,10 +119,10 @@ public class SearchExternalAssetOwnerTransferTest extends ExternalAssetOwnerTran
 
         // Search over the current Asset Transfers and get just the first five
         textToSearch = "";
-        searchRequest = EXTERNAL_ASSET_OWNER_HELPER.buildExternalAssetOwnerSearchRequest(textToSearch, "", null, null, 0, 5);
+        searchRequest = EXTERNAL_ASSET_OWNER_HELPER.buildExternalAssetOwnerSearchRequest(textToSearch, "", null, null, 0, 1);
         response = EXTERNAL_ASSET_OWNER_HELPER.searchExternalAssetOwnerTransfer(searchRequest);
         assertNotNull(response);
-        assertEquals(5, response.getContent().size(), "Expecting first five results");
+        assertEquals(1, response.getContent().size(), "Expecting first result");
 
         textToSearch = response.getContent().iterator().next().getOwner().getExternalId();
         searchRequest = EXTERNAL_ASSET_OWNER_HELPER.buildExternalAssetOwnerSearchRequest(textToSearch, "", null, null, 0, 5);
@@ -133,6 +134,7 @@ public class SearchExternalAssetOwnerTransferTest extends ExternalAssetOwnerTran
 
     @Test
     public void initialSearchExternalAssetOwnerTransferUsingEffectiveDateTest() {
+        saleActiveLoanToExternalAssetOwnerWithSearching();
         final String attribute = "effective";
         LocalDate fromDate = Utils.getDateAsLocalDate("01 March 2023");
         LocalDate toDate = fromDate.plusMonths(3);

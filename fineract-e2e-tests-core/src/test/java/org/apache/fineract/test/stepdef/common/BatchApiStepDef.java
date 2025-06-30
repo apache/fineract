@@ -947,10 +947,10 @@ public class BatchApiStepDef extends AbstractStepDef {
 
         if (batchResponseList.isSuccessful() && batchResponseList.body() != null && !batchResponseList.body().isEmpty()) {
             BatchResponse response = batchResponseList.body().get(0);
-            log.info("Batch charge-off API status code: {}", response.getStatusCode());
-            log.info("Batch charge-off API response body: {}", response.getBody());
+            log.debug("Batch charge-off API status code: {}", response.getStatusCode());
+            log.debug("Batch charge-off API response body: {}", response.getBody());
         } else {
-            log.info("Batch charge-off API call failed or returned empty response");
+            log.warn("Batch charge-off API call failed or returned empty response");
         }
     }
 

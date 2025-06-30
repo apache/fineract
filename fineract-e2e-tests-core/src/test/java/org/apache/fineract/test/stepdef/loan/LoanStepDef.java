@@ -4029,7 +4029,7 @@ public class LoanStepDef extends AbstractStepDef {
         ErrorHelper.checkSuccessfulApiCall(transactionsByLoanIdFiltered);
 
         List<GetLoansLoanIdTransactionsTransactionIdResponse> transactions = transactionsByLoanIdFiltered.body().getContent();
-        log.info("Filtered transactions: {}", transactions);
+        log.debug("Filtered transactions: {}", transactions);
 
         List<String> excludedTypesList = Arrays.stream(excludedTypes.toLowerCase().split(",")).map(String::trim)
                 .collect(Collectors.toList());
@@ -4052,7 +4052,7 @@ public class LoanStepDef extends AbstractStepDef {
         ErrorHelper.checkSuccessfulApiCall(transactionsByLoanExternalIdFiltered);
 
         List<GetLoansLoanIdTransactionsTransactionIdResponse> transactions = transactionsByLoanExternalIdFiltered.body().getContent();
-        log.info("Filtered transactions: {}", transactions);
+        log.debug("Filtered transactions: {}", transactions);
 
         List<String> excludedTypesList = Arrays.stream(excludedTypes.toLowerCase().split(",")).map(String::trim)
                 .collect(Collectors.toList());
@@ -4514,7 +4514,7 @@ public class LoanStepDef extends AbstractStepDef {
 
         // Get current business date to ensure we're not creating backdated transactions
         String currentBusinessDate = businessDateHelper.getBusinessDate();
-        log.info("Current business date: {}, Transaction date: {}", currentBusinessDate, transactionDate);
+        log.debug("Current business date: {}, Transaction date: {}", currentBusinessDate, transactionDate);
 
         final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
@@ -4530,7 +4530,7 @@ public class LoanStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_CAPITALIZED_INCOME_ADJUSTMENT_RESPONSE, adjustmentResponse);
         ErrorHelper.checkSuccessfulApiCall(adjustmentResponse);
 
-        log.info("Capitalized Income Adjustment created: Transaction ID {}", adjustmentResponse.body().getResourceId());
+        log.debug("Capitalized Income Adjustment created: Transaction ID {}", adjustmentResponse.body().getResourceId());
     }
 
     @And("Admin adds capitalized income adjustment with {string} payment type to the loan on {string} with {string} EUR trn amount with {string} date for capitalized income")
@@ -4554,7 +4554,7 @@ public class LoanStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_CAPITALIZED_INCOME_ADJUSTMENT_RESPONSE, adjustmentResponse);
         ErrorHelper.checkSuccessfulApiCall(adjustmentResponse);
 
-        log.info("Capitalized Income Adjustment created: Transaction ID {}", adjustmentResponse.body().getResourceId());
+        log.debug("Capitalized Income Adjustment created: Transaction ID {}", adjustmentResponse.body().getResourceId());
     }
 
     @And("Admin adds invalid capitalized income adjustment with {string} payment type to the loan on {string} with {string} EUR transaction amount")
@@ -4565,7 +4565,7 @@ public class LoanStepDef extends AbstractStepDef {
 
         // Get current business date to ensure we're not creating backdated transactions
         String currentBusinessDate = businessDateHelper.getBusinessDate();
-        log.info("Current business date: {}, Transaction date: {}", currentBusinessDate, transactionDate);
+        log.debug("Current business date: {}, Transaction date: {}", currentBusinessDate, transactionDate);
 
         final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
