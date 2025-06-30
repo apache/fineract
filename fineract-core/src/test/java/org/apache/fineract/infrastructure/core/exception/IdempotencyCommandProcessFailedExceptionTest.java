@@ -56,6 +56,7 @@ public class IdempotencyCommandProcessFailedExceptionTest {
 
     @Test
     public void testInconsistentStatus() {
+
         IdempotentCommandExceptionMapper mapper = new IdempotentCommandExceptionMapper();
         CommandWrapper command = new CommandWrapper(null, null, null, null, null, null, null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null);
@@ -64,5 +65,6 @@ public class IdempotencyCommandProcessFailedExceptionTest {
         Response result = mapper.toResponse(exception);
         assertEquals(500, result.getStatus());
         assertEquals("true", result.getHeaderString(IDEMPOTENT_CACHE_HEADER));
+
     }
 }

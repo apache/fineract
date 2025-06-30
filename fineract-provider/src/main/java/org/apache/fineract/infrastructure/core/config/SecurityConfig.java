@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadP
 import org.apache.fineract.infrastructure.cache.service.CacheWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
+import org.apache.fineract.infrastructure.core.filters.CallerIpTrackingFilter;
 import org.apache.fineract.infrastructure.core.filters.CorrelationHeaderFilter;
 import org.apache.fineract.infrastructure.core.filters.IdempotencyStoreFilter;
 import org.apache.fineract.infrastructure.core.filters.IdempotencyStoreHelper;
@@ -172,7 +173,9 @@ public class SecurityConfig {
         } else {
             http.addFilterAfter(idempotencyStoreFilter(), FineractInstanceModeApiFilter.class); //
         }
-
+        if (fineractProperties.getIpTracking().isEnabled()) {
+            http.addFilterAfter(callerIpTrackingFilter(), RequestResponseFilter.class);
+        }
         if (fineractProperties.getSecurity().getTwoFactor().isEnabled()) {
             http.addFilterAfter(twoFactorAuthenticationFilter(), CorrelationHeaderFilter.class);
         } else {
@@ -217,6 +220,10 @@ public class SecurityConfig {
 
     public CorrelationHeaderFilter correlationHeaderFilter() {
         return new CorrelationHeaderFilter(fineractProperties, mdcWrapper);
+    }
+
+    public CallerIpTrackingFilter callerIpTrackingFilter() {
+        return new CallerIpTrackingFilter(fineractProperties);
     }
 
     public TenantAwareBasicAuthenticationFilter tenantAwareBasicAuthenticationFilter() throws Exception {

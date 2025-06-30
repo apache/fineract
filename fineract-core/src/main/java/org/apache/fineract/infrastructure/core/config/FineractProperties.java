@@ -50,6 +50,8 @@ public class FineractProperties {
 
     private FineractCorrelationProperties correlation;
 
+    private FineractIpTrackingProperties ipTracking;
+
     private FineractPartitionedJob partitionedJob;
 
     private FineractRemoteJobMessageHandlerProperties remoteJobMessageHandler;
@@ -151,6 +153,13 @@ public class FineractProperties {
 
         private boolean enabled;
         private String headerName;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractIpTrackingProperties {
+
+        private boolean enabled;
     }
 
     @Getter
