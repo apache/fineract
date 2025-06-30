@@ -645,26 +645,57 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         }
     }
 
-    protected void verifyTransactions(Long loanId, TransactionExt... transactions) {
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
+    protected void verifyTransactions(final Long loanId, final TransactionExt... transactions) {
+        final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
         if (transactions == null || transactions.length == 0) {
             assertNull(loanDetails.getTransactions(), "No transaction is expected on loan " + loanId);
         } else {
+            Assertions.assertNotNull(loanDetails.getTransactions());
             Assertions.assertEquals(transactions.length, loanDetails.getTransactions().size(), "Number of transactions on loan " + loanId);
+
             Arrays.stream(transactions).forEach(tr -> {
-                boolean found = loanDetails.getTransactions().stream()
-                        .anyMatch(item -> Objects.equals(Utils.getDoubleValue(item.getAmount()), tr.amount) //
-                                && Objects.equals(item.getType().getValue(), tr.type) //
-                                && Objects.equals(item.getDate(), LocalDate.parse(tr.date, dateTimeFormatter)) //
-                                && Objects.equals(Utils.getDoubleValue(item.getOutstandingLoanBalance()), tr.outstandingPrincipal) //
-                                && Objects.equals(Utils.getDoubleValue(item.getPrincipalPortion()), tr.principalPortion) //
-                                && Objects.equals(Utils.getDoubleValue(item.getInterestPortion()), tr.interestPortion) //
-                                && Objects.equals(Utils.getDoubleValue(item.getFeeChargesPortion()), tr.feePortion) //
-                                && Objects.equals(Utils.getDoubleValue(item.getPenaltyChargesPortion()), tr.penaltyPortion) //
-                                && Objects.equals(Utils.getDoubleValue(item.getOverpaymentPortion()), tr.overpaymentPortion) //
-                                && Objects.equals(Utils.getDoubleValue(item.getUnrecognizedIncomePortion()), tr.unrecognizedPortion) //
-                );
-                Assertions.assertTrue(found, "Required transaction not found: " + tr + " on loan " + loanId);
+                final List<GetLoansLoanIdTransactions> transactionsByDate = loanDetails.getTransactions().stream()
+                        .filter(item -> Objects.equals(item.getDate(), LocalDate.parse(tr.date, dateTimeFormatter))).toList();
+
+                if (transactionsByDate.isEmpty()) {
+                    Assertions.fail("No transactions found for date " + tr.date + " on loan " + loanId);
+                    return;
+                }
+
+                final boolean found = transactionsByDate.stream()
+                        .anyMatch(item -> Objects.equals(Utils.getDoubleValue(item.getAmount()), tr.amount)
+                                && Objects.equals(item.getType().getValue(), tr.type)
+                                && Objects.equals(Utils.getDoubleValue(item.getOutstandingLoanBalance()), tr.outstandingPrincipal)
+                                && Objects.equals(Utils.getDoubleValue(item.getPrincipalPortion()), tr.principalPortion)
+                                && Objects.equals(Utils.getDoubleValue(item.getInterestPortion()), tr.interestPortion)
+                                && Objects.equals(Utils.getDoubleValue(item.getFeeChargesPortion()), tr.feePortion)
+                                && Objects.equals(Utils.getDoubleValue(item.getPenaltyChargesPortion()), tr.penaltyPortion)
+                                && Objects.equals(Utils.getDoubleValue(item.getOverpaymentPortion()), tr.overpaymentPortion)
+                                && Objects.equals(Utils.getDoubleValue(item.getUnrecognizedIncomePortion()), tr.unrecognizedPortion));
+
+                if (!found) {
+                    final StringBuilder errorMessage = new StringBuilder();
+                    errorMessage.append("Required transaction not found: ").append(tr).append(" on loan ").append(loanId);
+                    errorMessage.append("\nTransactions found for date ").append(tr.date).append(":");
+
+                    for (int i = 0; i < transactionsByDate.size(); i++) {
+                        GetLoansLoanIdTransactions item = transactionsByDate.get(i);
+                        errorMessage.append("\n  Transaction ").append(i + 1).append(": ");
+                        errorMessage.append("amount=").append(Utils.getDoubleValue(item.getAmount()));
+                        errorMessage.append(", type=").append(item.getType().getValue());
+                        errorMessage.append(", date=").append(item.getDate().format(dateTimeFormatter));
+                        errorMessage.append(", outstandingPrincipal=").append(Utils.getDoubleValue(item.getOutstandingLoanBalance()));
+                        errorMessage.append(", principalPortion=").append(Utils.getDoubleValue(item.getPrincipalPortion()));
+                        errorMessage.append(", interestPortion=").append(Utils.getDoubleValue(item.getInterestPortion()));
+                        errorMessage.append(", feePortion=").append(Utils.getDoubleValue(item.getFeeChargesPortion()));
+                        errorMessage.append(", penaltyPortion=").append(Utils.getDoubleValue(item.getPenaltyChargesPortion()));
+                        errorMessage.append(", unrecognizedPortion=").append(Utils.getDoubleValue(item.getUnrecognizedIncomePortion()));
+                        errorMessage.append(", overpaymentPortion=").append(Utils.getDoubleValue(item.getOverpaymentPortion()));
+                        errorMessage.append(", reversed=").append(item.getManuallyReversed() != null ? item.getManuallyReversed() : false);
+                    }
+
+                    Assertions.fail(errorMessage.toString());
+                }
             });
         }
     }

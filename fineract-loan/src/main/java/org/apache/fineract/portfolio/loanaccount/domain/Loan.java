@@ -49,11 +49,13 @@ import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
@@ -79,6 +81,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRef
 import org.apache.fineract.portfolio.rate.domain.Rate;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.lang.NonNull;
 
 @Entity
 @Table(name = "m_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "loan_account_no_UNIQUE"),
@@ -1240,6 +1243,22 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public Set<LoanCharge> getActiveCharges() {
         return this.charges == null ? new HashSet<>() : this.charges.stream().filter(LoanCharge::isActive).collect(Collectors.toSet());
+    }
+
+    public boolean hasChargesAffectedByBackdatedRepaymentLikeTransaction(@NonNull final LoanTransaction transaction) {
+        if (!transaction.isRepaymentLikeType() || CollectionUtils.isEmpty(this.charges) || !isProgressiveSchedule()
+                || !DateUtils.isBeforeBusinessDate(transaction.getTransactionDate())) {
+            return false;
+        }
+
+        final BiFunction<LocalDate, LocalDate, LocalDate> earlierDate = (date1, date2) -> DateUtils.isBefore(date1, date2) ? date1 : date2;
+
+        return this.charges.stream().filter(LoanCharge::isActive)
+                .filter(loanCharge -> loanCharge.isSpecifiedDueDate() || loanCharge.isOverdueInstallmentCharge())
+                .filter(loanCharge -> loanCharge.getDueLocalDate() != null).anyMatch(loanCharge -> {
+                    final LocalDate comparisonDate = earlierDate.apply(loanCharge.getDueLocalDate(), loanCharge.getSubmittedOnDate());
+                    return comparisonDate != null && comparisonDate.isAfter(transaction.getTransactionDate());
+                });
     }
 
     public LoanCharge fetchLoanChargesById(final Long id) {

@@ -3302,6 +3302,38 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_INTEREST_FLAT_ADV_PMT_ALLOC_MULTIDISBURSE_PART_PERIOD_CALC_DISABLED,
                 responseLoanProductsRequestDownPaymentAdvInterestFlatMultiDisbPartPeriodIntCalcDisabled);
+
+        // LP2 without Down-payment + interest recalculation disabled + advanced payment allocation + progressive loan
+        // schedule + horizontal + allocation penalty first
+        // (LP2_NO_INTEREST_RECALCULATION_ALLOCATION_PENALTY_FIRST)
+        String name127 = DefaultLoanProduct.LP2_NO_INTEREST_RECALCULATION_ALLOCATION_PENALTY_FIRST.getName();
+        PostLoanProductsRequest loanProductsRequestNoInterestRecalculationAllocationPenaltyFirst = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2()//
+                .name(name127)//
+                .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
+                .loanScheduleType("PROGRESSIVE") //
+                .loanScheduleProcessingType("HORIZONTAL")//
+                .enableDownPayment(false)//
+                .enableAutoRepaymentForDownPayment(null)//
+                .disbursedAmountPercentageForDownPayment(null)//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "LAST_INSTALLMENT",
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_PENALTY, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_INTEREST, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_PRINCIPAL, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_FEE, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_PENALTY, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_INTEREST, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_PRINCIPAL, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_FEE, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PENALTY, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_INTEREST, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PRINCIPAL, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_FEE)));//
+        Response<PostLoanProductsResponse> responseLoanProductsRequestNoInterestRecalculationAllocationPenaltyFirst = loanProductsApi
+                .createLoanProduct(loanProductsRequestNoInterestRecalculationAllocationPenaltyFirst).execute();
+        TestContext.INSTANCE.set(TestContextKey.LP2_NO_INTEREST_RECALCULATION_ALLOCATION_PENALTY_FIRST_RESPONSE,
+                responseLoanProductsRequestNoInterestRecalculationAllocationPenaltyFirst);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,
