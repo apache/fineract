@@ -69,9 +69,19 @@ final class SavingsProductsApiResourceSwagger {
         public Integer interestCalculationDaysInYearType;
         @Schema(example = "1")
         public Integer accountingRule;
-        public Set<PostSavingsCharges> charges;
+        public List<PostSavingsCharges> charges;
         @Schema(example = "accountMappingForPayment")
         public String accountMappingForPayment;
+        @Schema(example = "false")
+        public Boolean withdrawalFeeForTransfers;
+        @Schema(example = "false")
+        public Boolean enforceMinRequiredBalance;
+        @Schema(example = "false")
+        public Boolean allowOverdraft;
+        @Schema(example = "false")
+        public Boolean withHoldTax;
+        @Schema(example = "false")
+        public Boolean isDormancyTrackingActive;
     }
 
     @Schema(description = "PostSavingsProductsResponse")
