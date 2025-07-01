@@ -65,7 +65,7 @@ public final class ErrorMessageHelper {
     }
 
     public static String addDisbursementExceedApprovedAmountFailure() {
-        return "Loan can't be disbursed,disburse amount is exceeding approved principal ";
+        return "Loan can't be disbursed, disburse amount is exceeding approved principal.";
     }
 
     public static String addDisbursementExceedMaxAppliedAmountFailure(String totalDisbAmount, String maxDisbursalAmount) {
@@ -979,5 +979,13 @@ public final class ErrorMessageHelper {
 
     public static String addInstallmentFeePrincipalPercentageChargeFailure() {
         return "Failed data validation due to: installment.loancharge.with.calculation.type.principal.not.allowed.";
+    }
+
+    public static String updateApprovedLoanExceedPrincipalFailure() {
+        return "Failed data validation due to: less.than.disbursed.principal.and.capitalized.income.";
+    }
+
+    public static String updateApprovedLoanLessMinAllowedAmountFailure() {
+        return "The parameter `amount` must be greater than 0.";
     }
 }

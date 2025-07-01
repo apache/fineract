@@ -158,7 +158,7 @@ public final class LoanTransactionValidatorImpl implements LoanTransactionValida
             validateLoanClientIsActive(loan);
             validateLoanGroupIsActive(loan);
 
-            final BigDecimal disbursedAmount = loan.getDisbursedAmount();
+            final BigDecimal disbursedAmount = loan.getSummary().getTotalPrincipalDisbursed();
             loanDisbursementValidator.compareDisbursedToApprovedOrProposedPrincipal(loan, principal, disbursedAmount);
 
             if (loan.isChargedOff()) {

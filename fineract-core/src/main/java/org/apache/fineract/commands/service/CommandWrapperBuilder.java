@@ -3876,4 +3876,13 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId + "/transactions/template?command=buyDownFee";
         return this;
     }
+
+    public CommandWrapperBuilder updateLoanApprovedAmount(final Long loanId) {
+        this.actionName = "UPDATE";
+        this.entityName = "LOAN_APPROVED_AMOUNT";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
 }

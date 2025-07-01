@@ -161,6 +161,7 @@ public class LoanDisbursementService {
             } else {
                 loan.getLoanRepaymentScheduleDetail()
                         .setPrincipal(loan.getLoanRepaymentScheduleDetail().getPrincipal().minus(diff).getAmount());
+                totalAmount = loan.getLoanRepaymentScheduleDetail().getPrincipal().getAmount();
             }
             loanDisbursementValidator.compareDisbursedToApprovedOrProposedPrincipal(loan, disburseAmount.getAmount(), totalAmount);
         }

@@ -24,6 +24,7 @@ import static org.apache.fineract.test.data.loanproduct.DefaultLoanProduct.LP2_A
 import static org.apache.fineract.test.data.loanproduct.DefaultLoanProduct.LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_ZERO_INTEREST_CHARGE_OFF_BEHAVIOUR;
 import static org.apache.fineract.test.data.loanproduct.DefaultLoanProduct.LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_BEHAVIOUR;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.CHARGE_OFF_REASONS;
+import static org.apache.fineract.test.factory.LoanProductsRequestFactory.LOCALE_EN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -98,6 +99,8 @@ import org.apache.fineract.client.models.PostLoansRequestChargeData;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.PutLoansApprovedAmountRequest;
+import org.apache.fineract.client.models.PutLoansApprovedAmountResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.services.BusinessDateManagementApi;
@@ -572,6 +575,12 @@ public class LoanStepDef extends AbstractStepDef {
     public void createFullyCustomizedLoanWithDisbursementsDetails(final DataTable table) throws IOException {
         final List<List<String>> data = table.asLists();
         createFullyCustomizedLoanWithExpectedTrancheDisbursementsDetails(data.get(1));
+    }
+
+    @When("Admin creates a fully customized loan with three expected disbursements details and following data:")
+    public void createFullyCustomizedLoanWithThreeDisbursementsDetails(final DataTable table) throws IOException {
+        final List<List<String>> data = table.asLists();
+        createFullyCustomizedLoanWithThreeExpectedTrancheDisbursementsDetails(data.get(1));
     }
 
     @When("Admin creates a fully customized loan with forced disabled downpayment with the following data:")
@@ -3688,6 +3697,27 @@ public class LoanStepDef extends AbstractStepDef {
         createFullyCustomizedLoanExpectsTrancheDisbursementDetails(loanData, disbursementDetail);
     }
 
+    public void createFullyCustomizedLoanWithThreeExpectedTrancheDisbursementsDetails(final List<String> loanData) throws IOException {
+        final String expectedDisbursementDateFirstDisbursal = loanData.get(16);
+        final Double disbursementPrincipalAmountFirstDisbursal = Double.valueOf(loanData.get(17));
+
+        final String expectedDisbursementDateSecondDisbursal = loanData.get(18);
+        final Double disbursementPrincipalAmountSecondDisbursal = Double.valueOf(loanData.get(19));
+
+        final String expectedDisbursementDateThirdDisbursal = loanData.get(20);
+        final Double disbursementPrincipalAmountThirdDisbursal = Double.valueOf(loanData.get(21));
+
+        List<PostLoansDisbursementData> disbursementDetail = new ArrayList<>();
+        disbursementDetail.add(new PostLoansDisbursementData().expectedDisbursementDate(expectedDisbursementDateFirstDisbursal)
+                .principal(BigDecimal.valueOf(disbursementPrincipalAmountFirstDisbursal)));
+        disbursementDetail.add(new PostLoansDisbursementData().expectedDisbursementDate(expectedDisbursementDateSecondDisbursal)
+                .principal(BigDecimal.valueOf(disbursementPrincipalAmountSecondDisbursal)));
+        disbursementDetail.add(new PostLoansDisbursementData().expectedDisbursementDate(expectedDisbursementDateThirdDisbursal)
+                .principal(BigDecimal.valueOf(disbursementPrincipalAmountThirdDisbursal)));
+
+        createFullyCustomizedLoanExpectsTrancheDisbursementDetails(loanData, disbursementDetail);
+    }
+
     public void createFullyCustomizedLoanExpectsTrancheDisbursementDetails(final List<String> loanData,
             List<PostLoansDisbursementData> disbursementDetail) throws IOException {
         final String loanProduct = loanData.get(0);
@@ -4859,4 +4889,72 @@ public class LoanStepDef extends AbstractStepDef {
         log.debug("BuyDown Fee Adjustment created: Transaction ID {}", adjustmentResponse.body().getResourceId());
     }
 
+    @Then("Update loan approved amount with new amount {string} value")
+    public void updateLoanApprovedAmount(final String amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        final PutLoansApprovedAmountRequest modifyLoanApprovedAmountRequest = new PutLoansApprovedAmountRequest().locale(LOCALE_EN)
+                .amount(new BigDecimal(amount));
+
+        final Response<PutLoansApprovedAmountResponse> modifyLoanApprovedAmountResponse = loansApi
+                .modifyLoanApprovedAmount(loanId, modifyLoanApprovedAmountRequest).execute();
+
+        ErrorHelper.checkSuccessfulApiCall(modifyLoanApprovedAmountResponse);
+
+    }
+
+    @Then("Update loan approved amount is forbidden with amount {string} due to exceed applied amount")
+    public void updateLoanApprovedAmountForbiddenExceedAppliedAmount(final String amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        final PutLoansApprovedAmountRequest modifyLoanApprovedAmountRequest = new PutLoansApprovedAmountRequest().locale(LOCALE_EN)
+                .amount(new BigDecimal(amount));
+
+        final Response<PutLoansApprovedAmountResponse> modifyLoanApprovedAmountResponse = loansApi
+                .modifyLoanApprovedAmount(loanId, modifyLoanApprovedAmountRequest).execute();
+
+        ErrorResponse errorDetails = ErrorResponse.from(modifyLoanApprovedAmountResponse);
+        assertThat(errorDetails.getHttpStatusCode()).isEqualTo(403);
+
+        Object errorArgs = errorDetails.getErrors().getFirst().getArgs().getFirst().getValue();
+        String developerMessage;
+        if (errorArgs instanceof Map errorArgsMap) {
+            developerMessage = (String) errorArgsMap.get("developerMessage");
+        } else {
+            developerMessage = errorDetails.getDeveloperMessage();
+        }
+        assertThat(developerMessage).isEqualTo(ErrorMessageHelper.updateApprovedLoanExceedPrincipalFailure());
+    }
+
+    @Then("Update loan approved amount is forbidden with amount {string} due to min allowed amount")
+    public void updateLoanApprovedAmountForbiddenMinAllowedAmount(final String amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        final PutLoansApprovedAmountRequest modifyLoanApprovedAmountRequest = new PutLoansApprovedAmountRequest().locale(LOCALE_EN)
+                .amount(new BigDecimal(amount));
+
+        final Response<PutLoansApprovedAmountResponse> modifyLoanApprovedAmountResponse = loansApi
+                .modifyLoanApprovedAmount(loanId, modifyLoanApprovedAmountRequest).execute();
+
+        ErrorResponse errorDetails = ErrorResponse.from(modifyLoanApprovedAmountResponse);
+        assertThat(errorDetails.getHttpStatusCode()).isEqualTo(400);
+
+        Object errorArgs = errorDetails.getErrors().getFirst().getArgs().getFirst().getValue();
+        String developerMessage;
+        if (errorArgs instanceof Map errorArgsMap) {
+            developerMessage = (String) errorArgsMap.get("developerMessage");
+        } else {
+            developerMessage = errorDetails.getDeveloperMessage();
+        }
+        assertThat(developerMessage).isEqualTo(ErrorMessageHelper.updateApprovedLoanLessMinAllowedAmountFailure());
+    }
 }
