@@ -241,30 +241,6 @@ bootJar {
     dependsOn resolve
 }
 
-// Task to copy files from resources/main to the compiled output directory
-tasks.register('injectDefaultResources', Copy) {
-    dependsOn bootJar, jar
-    from layout.buildDirectory.dir("resources/main")
-    into "$buildDir/classes/java/main"
-}
-tasks.injectDefaultResources.dependsOn(bootJar)
-
-// Ensure this runs before the Jib build
-tasks.named("jib").configure {
-    dependsOn injectDefaultResources
-    finalizedBy removeMergedClasses
-}
-
-tasks.named("jibDockerBuild").configure {
-    dependsOn injectDefaultResources
-    finalizedBy removeMergedClasses
-}
-
-// Task to delete files from the merged output directory
-tasks.register('removeMergedClasses', Delete) {
-    delete layout.buildDirectory.dir("classes/java/main")
-}
-
 jib {
     from {
         image = 'azul/zulu-openjdk-alpine:21'
@@ -304,19 +280,6 @@ jib {
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client'
         implementation 'org.postgresql:postgresql'
-    }
-
-    pluginExtensions {
-        pluginExtension {
-            implementation = 'com.google.cloud.tools.jib.gradle.extension.layerfilter.JibLayerFilterExtension'
-            configuration {
-                filters {
-                    filter {
-                        glob = '/app/resources/**'
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -375,7 +338,6 @@ rat.dependsOn prepareInputYaml
 spotbugsTest.dependsOn resolve
 compileTestJava.dependsOn ':fineract-client:processResources', ':fineract-avro-schemas:processResources'
 resolveMainClassName.dependsOn resolve
-processResources.dependsOn compileJava
 
 javadoc {
     dependsOn resolve
