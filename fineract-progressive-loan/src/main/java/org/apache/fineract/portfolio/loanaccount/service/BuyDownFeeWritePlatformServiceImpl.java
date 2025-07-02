@@ -38,8 +38,10 @@ import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeBalance;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeesBalanceRepository;
 import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
@@ -56,6 +58,7 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
     private final LoanJournalEntryPoster loanJournalEntryPoster;
     private final NoteWritePlatformService noteWritePlatformService;
     private final ExternalIdFactory externalIdFactory;
+    private final LoanBuyDownFeesBalanceRepository loanBuyDownFeesBalanceRepository;
 
     @Transactional
     @Override
@@ -89,6 +92,9 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
         // Save transaction
         loanTransactionRepository.saveAndFlush(buyDownFeeTransaction);
 
+        // Create Buy Down Fee balances
+        createBuyDownFeeBalance(buyDownFeeTransaction);
+
         // Update loan derived fields
         loan.updateLoanScheduleDependentDerivedFields();
 
@@ -119,5 +125,15 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
         if (group != null && group.isNotActive()) {
             throw new GroupNotActiveException(group.getId());
         }
+    }
+
+    private void createBuyDownFeeBalance(final LoanTransaction buyDownFeeTransaction) {
+        LoanBuyDownFeeBalance buyDownFeeBalance = new LoanBuyDownFeeBalance();
+        buyDownFeeBalance.setLoan(buyDownFeeTransaction.getLoan());
+        buyDownFeeBalance.setLoanTransaction(buyDownFeeTransaction);
+        buyDownFeeBalance.setDate(buyDownFeeTransaction.getTransactionDate());
+        buyDownFeeBalance.setAmount(buyDownFeeTransaction.getAmount());
+        buyDownFeeBalance.setUnrecognizedAmount(buyDownFeeTransaction.getAmount());
+        loanBuyDownFeesBalanceRepository.saveAndFlush(buyDownFeeBalance);
     }
 }

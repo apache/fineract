@@ -144,6 +144,7 @@
         <class>org.apache.fineract.portfolio.floatingrates.domain.FloatingRatePeriod</class>
 
         <!-- Progressive Loan Module Entities -->
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeBalance</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeBalance</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.ProgressiveLoanModel</class>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
