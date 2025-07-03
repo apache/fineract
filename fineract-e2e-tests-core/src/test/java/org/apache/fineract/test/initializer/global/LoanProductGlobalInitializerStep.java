@@ -2946,6 +2946,12 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .name(name114)//
                 .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
                 .loanScheduleType("PROGRESSIVE") //
+                .isInterestRecalculationEnabled(true)//
+                .preClosureInterestCalculationStrategy(1)//
+                .rescheduleStrategyMethod(4)//
+                .interestRecalculationCompoundingMethod(0)//
+                .recalculationRestFrequencyType(2)//
+                .recalculationRestFrequencyInterval(1)//
                 .paymentAllocation(List.of(//
                         createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //

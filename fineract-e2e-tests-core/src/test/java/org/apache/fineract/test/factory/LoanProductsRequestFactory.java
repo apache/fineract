@@ -1658,10 +1658,10 @@ public class LoanProductsRequestFactory {
         return new PostLoanProductsRequest()//
                 .name(name)//
                 .shortName(shortName)//
-                .description(DESCRIPTION_LP2)//
-                .enableDownPayment(true)//
-                .enableAutoRepaymentForDownPayment(true)//
-                .disbursedAmountPercentageForDownPayment(new BigDecimal(25))//
+                .description(DESCRIPTION_LP2_EMI)//
+                .loanScheduleType("PROGRESSIVE") //
+                .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value)//
+                .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
                 .fundId(FUND_ID)//
                 .startDate(null)//
                 .closeDate(null)//
@@ -1669,20 +1669,20 @@ public class LoanProductsRequestFactory {
                 .currencyCode(CURRENCY_CODE)//
                 .digitsAfterDecimal(2)//
                 .inMultiplesOf(0)//
-                .installmentAmountInMultiplesOf(1)//
                 .useBorrowerCycle(false)//
-                .minPrincipal(100.0)//
+                .minPrincipal(10.0)//
                 .principal(1000.0)//
                 .maxPrincipal(10000.0)//
                 .minNumberOfRepayments(1)//
-                .numberOfRepayments(3)//
+                .numberOfRepayments(4)//
                 .maxNumberOfRepayments(30)//
                 .isLinkedToFloatingInterestRates(false)//
                 .minInterestRatePerPeriod((double) 0)//
-                .interestRatePerPeriod((double) 7)//
-                .maxInterestRatePerPeriod((double) 60)//
-                .interestRateFrequencyType(INTEREST_RATE_FREQUENCY_TYPE_MONTH)//
+                .interestRatePerPeriod((double) 12)//
+                .maxInterestRatePerPeriod((double) 90)//
+                .interestRateFrequencyType(INTEREST_RATE_FREQUENCY_TYPE_YEAR)//
                 .repaymentEvery(15)//
+                .repaymentStartDateType(1)//
                 .repaymentFrequencyType(REPAYMENT_FREQUENCY_TYPE_DAYS)//
                 .principalVariationsForBorrowerCycle(principalVariationsForBorrowerCycle)//
                 .numberOfRepaymentVariationsForBorrowerCycle(numberOfRepaymentVariationsForBorrowerCycle)//
@@ -1690,10 +1690,10 @@ public class LoanProductsRequestFactory {
                 .amortizationType(AMORTIZATION_TYPE)//
                 .interestType(INTEREST_TYPE_DECLINING_BALANCE)//
                 .isEqualAmortization(false)//
-                .interestCalculationPeriodType(INTEREST_CALCULATION_PERIOD_TYPE_SAME_AS_REPAYMENT)//
-                .transactionProcessingStrategyCode(TRANSACTION_PROCESSING_STRATEGY_CODE)//
-                .daysInYearType(360)//
-                .daysInMonthType(30)//
+                .interestCalculationPeriodType(INTEREST_CALCULATION_PERIOD_TYPE_DAILY)//
+                .transactionProcessingStrategyCode(TRANSACTION_PROCESSING_STRATEGY_CODE_ADVANCED)//
+                .daysInYearType(DAYS_IN_YEAR_TYPE_360)//
+                .daysInMonthType(DAYS_IN_MONTH_TYPE_30)//
                 .canDefineInstallmentAmount(true)//
                 .graceOnArrearsAgeing(3)//
                 .overdueDaysForNPA(179)//
@@ -1703,7 +1703,7 @@ public class LoanProductsRequestFactory {
                 .canUseForTopup(false)//
                 .isInterestRecalculationEnabled(false)//
                 .holdGuaranteeFunds(false)//
-                .multiDisburseLoan(true)//
+                .multiDisburseLoan(false)//
                 .allowAttributeOverrides(new AllowAttributeOverrides()//
                         .amortizationType(true)//
                         .interestType(true)//
@@ -1713,7 +1713,7 @@ public class LoanProductsRequestFactory {
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
                         .graceOnArrearsAgeing(true))//
-                .allowPartialPeriodInterestCalcualtion(true)//
+                .allowPartialPeriodInterestCalcualtion(false)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
                 .charges(charges)//
@@ -1732,10 +1732,7 @@ public class LoanProductsRequestFactory {
                 .receivablePenaltyAccountId(accountTypeResolver.resolve(DefaultAccountType.INTEREST_FEE_RECEIVABLE))//
                 .dateFormat(DATE_FORMAT)//
                 .locale(LOCALE_EN)//
-                .disallowExpectedDisbursements(true)//
-                .allowApprovedDisbursedAmountsOverApplied(true)//
-                .overAppliedCalculationType(OVER_APPLIED_CALCULATION_TYPE)//
-                .overAppliedNumber(OVER_APPLIED_NUMBER)//
+                .disallowExpectedDisbursements(false)//
                 .delinquencyBucketId(DELINQUENCY_BUCKET_ID.longValue())//
                 .goodwillCreditAccountId(accountTypeResolver.resolve(DefaultAccountType.GOODWILL_EXPENSE_ACCOUNT))//
                 .incomeFromGoodwillCreditInterestAccountId(accountTypeResolver.resolve(DefaultAccountType.INTEREST_INCOME_CHARGE_OFF))//
@@ -1749,6 +1746,14 @@ public class LoanProductsRequestFactory {
                 .chargeOffExpenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT))//
                 .chargeOffFraudExpenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT_FRAUD))//
                 .incomeFromChargeOffPenaltyAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_CHARGE_OFF))//
+
+                .enableIncomeCapitalization(true)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)//
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)//
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.INTEREST)//
+                .deferredIncomeLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.DEFERRED_CAPITALIZED_INCOME))//
+                .incomeFromCapitalizationAccountId(accountTypeResolver.resolve(DefaultAccountType.INTEREST_INCOME))//
+
                 .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)//
                 .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)//
                 .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.INTEREST)//

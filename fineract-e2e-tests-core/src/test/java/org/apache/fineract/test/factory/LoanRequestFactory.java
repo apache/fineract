@@ -320,6 +320,11 @@ public class LoanRequestFactory {
         return new PostLoansLoanIdRequest().dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE).note("Contract Termination");
     }
 
+    public static PostLoansLoanIdTransactionsRequest defaultBuyDownFeeIncomeRequest() {
+        return new PostLoansLoanIdTransactionsRequest().transactionDate(DEFAULT_TRANSACTION_DATE).dateFormat(DATE_FORMAT)
+                .locale(DEFAULT_LOCALE).note("Buy Down Fee");
+    }
+
     public JournalEntryCommand defaultManualJournalEntryRequest(BigDecimal amount) {
         final Long glAccountDebit = accountTypeResolver.resolve(DefaultAccountType.LOANS_RECEIVABLE);
         final Long glAccountCredit = accountTypeResolver.resolve(DefaultAccountType.SUSPENSE_CLEARING_ACCOUNT);
