@@ -189,7 +189,7 @@ public final class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public String getValue() {
@@ -233,7 +233,7 @@ public final class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public String getValue() {
@@ -265,7 +265,7 @@ public final class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public Integer getValue() {
@@ -313,7 +313,7 @@ public final class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public Integer getValue() {
@@ -368,7 +368,7 @@ public final class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public String getValue() {
@@ -405,7 +405,7 @@ public final class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public String getValue() {
@@ -445,7 +445,7 @@ public final class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public Integer getValue() {
@@ -510,7 +510,7 @@ public final class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public Integer getValue() {
@@ -549,7 +549,7 @@ public final class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public String getValue() {

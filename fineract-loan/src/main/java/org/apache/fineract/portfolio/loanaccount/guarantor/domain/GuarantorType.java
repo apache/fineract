@@ -79,7 +79,7 @@ public enum GuarantorType {
 
     @Override
     public String toString() {
-        return name().toString();
+        return name();
     }
 
     public boolean isCustomer() {
