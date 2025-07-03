@@ -51,7 +51,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
-import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeesBalanceRepository;
+import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeeBalanceRepository;
 import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
@@ -68,7 +68,7 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
     private final LoanJournalEntryPoster loanJournalEntryPoster;
     private final NoteWritePlatformService noteWritePlatformService;
     private final ExternalIdFactory externalIdFactory;
-    private final LoanBuyDownFeesBalanceRepository loanBuyDownFeesBalanceRepository;
+    private final LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final LoanBalanceService loanBalanceService;
     private final LoanLifecycleStateMachine loanLifecycleStateMachine;
@@ -177,13 +177,13 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
         LoanTransaction savedBuyDownFeeAdjustment = loanTransactionRepository.saveAndFlush(buyDownFeeAdjustment);
 
         // Update buy down fee balance
-        LoanBuyDownFeeBalance buydownFeeBalance = loanBuyDownFeesBalanceRepository.findByLoanIdAndLoanTransactionId(loanId,
+        LoanBuyDownFeeBalance buydownFeeBalance = loanBuyDownFeeBalanceRepository.findByLoanIdAndLoanTransactionId(loanId,
                 buyDownFeeTransactionId);
         if (buydownFeeBalance != null) {
             buydownFeeBalance.setAmountAdjustment(MathUtil.nullToZero(buydownFeeBalance.getAmountAdjustment()).add(transactionAmount));
             buydownFeeBalance
                     .setUnrecognizedAmount(MathUtil.negativeToZero(buydownFeeBalance.getUnrecognizedAmount().subtract(transactionAmount)));
-            loanBuyDownFeesBalanceRepository.save(buydownFeeBalance);
+            loanBuyDownFeeBalanceRepository.save(buydownFeeBalance);
         }
 
         // Update outstanding loan balances
@@ -236,6 +236,6 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
         buyDownFeeBalance.setDate(buyDownFeeTransaction.getTransactionDate());
         buyDownFeeBalance.setAmount(buyDownFeeTransaction.getAmount());
         buyDownFeeBalance.setUnrecognizedAmount(buyDownFeeTransaction.getAmount());
-        loanBuyDownFeesBalanceRepository.saveAndFlush(buyDownFeeBalance);
+        loanBuyDownFeeBalanceRepository.saveAndFlush(buyDownFeeBalance);
     }
 }

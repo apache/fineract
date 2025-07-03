@@ -43,6 +43,8 @@ public class LoanTransactionTest extends BaseLoanIntegrationTest {
 
     private final String capitalizedIncomeCommand = "capitalizedIncome";
     private final String capitalizedIncomeAdjustmentCommand = "capitalizedIncomeAdjustment";
+    private final String buyDownFeeCommand = "buyDownFee";
+    private final String buyDownFeeAdjustmentCommand = "buyDownFeeAdjustment";
 
     @Test
     public void testGetLoanTransactionsFiltering() {
@@ -162,6 +164,46 @@ public class LoanTransactionTest extends BaseLoanIntegrationTest {
 
             assertNotNull(transactionTemplate);
             assertEquals("loanTransactionType." + capitalizedIncomeAdjustmentCommand, transactionTemplate.getType().getCode());
+            assertEquals(transactionTemplate.getAmount(), 150);
+        });
+    }
+
+    @Test
+    public void testGetLoanTransactionTemplateForBuyDownFeeAdjustment() {
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive()
+                .enableBuyDownFee(true).buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)//
+                .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)//
+                .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.INTEREST)//
+                .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue()) //
+                .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue()) //
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE) //
+                .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())//
+                .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue()));
+
+        final String loanExternalIdStr = UUID.randomUUID().toString();
+
+        runAt("20 December 2024", () -> {
+            final Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(),
+                    "20 December 2024", 430.0, 7.0, 6, (request) -> request.externalId(loanExternalIdStr));
+
+            disburseLoan(loanId, BigDecimal.valueOf(230), "20 December 2024");
+
+            PostLoansLoanIdTransactionsResponse loanTransactionResponse = loanTransactionHelper.executeLoanTransaction(loanId,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("20 December 2024").locale("en")
+                            .transactionAmount(150.0),
+                    buyDownFeeCommand);
+            assertNotNull(loanTransactionResponse);
+            final Long transactionId = loanTransactionResponse.getResourceId();
+            assertNotNull(transactionId);
+            log.info("Loan Id {} with transaction id {}", loanId, transactionId);
+
+            final GetLoansLoanIdTransactionsTemplateResponse transactionTemplate = loanTransactionHelper.retrieveTransactionTemplate(loanId,
+                    buyDownFeeAdjustmentCommand, null, null, null, transactionId);
+
+            assertNotNull(transactionTemplate);
+            assertEquals("loanTransactionType." + buyDownFeeAdjustmentCommand, transactionTemplate.getType().getCode());
             assertEquals(transactionTemplate.getAmount(), 150);
         });
     }

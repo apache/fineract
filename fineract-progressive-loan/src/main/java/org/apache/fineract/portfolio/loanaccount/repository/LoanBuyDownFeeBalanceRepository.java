@@ -21,29 +21,29 @@ package org.apache.fineract.portfolio.loanaccount.repository;
 import java.math.BigDecimal;
 import java.util.List;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeBalance;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepaymentPeriodData;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-public interface LoanBuyDownFeesBalanceRepository
+@Repository
+public interface LoanBuyDownFeeBalanceRepository
         extends JpaRepository<LoanBuyDownFeeBalance, Long>, JpaSpecificationExecutor<LoanBuyDownFeeBalance> {
-
-    String FIND_BALANCE_REPAYMENT_SCHEDULE_DATA = "SELECT new org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepaymentPeriodData(lbfb.loanTransaction.id, lbfb.loan.id, lbfb.loanTransaction.dateOf, lbfb.loanTransaction.reversed, lbfb.amount, lbfb.unrecognizedAmount, lbfb.loanTransaction.feeChargesPortion) FROM LoanBuyDownFeeBalance lbfb ";
 
     List<LoanBuyDownFeeBalance> findAllByLoanId(Long loanId);
 
     LoanBuyDownFeeBalance findByLoanIdAndLoanTransactionId(Long loanId, Long transactionId);
 
-    @Query(FIND_BALANCE_REPAYMENT_SCHEDULE_DATA + " WHERE lbfb.loan.id = :loanId")
-    List<LoanTransactionRepaymentPeriodData> findRepaymentPeriodDataByLoanId(Long loanId);
+    @Query("SELECT lbfb FROM LoanBuyDownFeeBalance lbfb WHERE lbfb.loan.id = :loanId ORDER BY lbfb.date ASC")
+    List<LoanBuyDownFeeBalance> findRepaymentPeriodDataByLoanId(@Param("loanId") Long loanId);
 
-    @Query("SELECT SUM(lbfb.amount) FROM LoanBuyDownFeeBalance lbfb WHERE lbfb.loan.id = :loanId")
-    BigDecimal calculateBuydownFeeAmount(Long loanId);
+    @Query("SELECT COALESCE(SUM(lbfb.amount), 0) FROM LoanBuyDownFeeBalance lbfb WHERE lbfb.loan.id = :loanId")
+    BigDecimal calculateBuyDownFee(@Param("loanId") Long loanId);
 
-    @Query("SELECT SUM(lbfb.amountAdjustment) FROM LoanBuyDownFeeBalance lbfb WHERE lbfb.loan.id = :loanId")
-    BigDecimal calculateBuydownFeeAdjustment(Long loanId);
+    @Query("SELECT COALESCE(SUM(lbfb.amountAdjustment), 0) FROM LoanBuyDownFeeBalance lbfb WHERE lbfb.loan.id = :loanId")
+    BigDecimal calculateBuyDownFeeAdjustment(@Param("loanId") Long loanId);
 
-    @Query("SELECT lbfb FROM LoanBuyDownFeeBalance lbfb, LoanTransaction lt, LoanTransactionRelation ltr WHERE lt.loan.id = lbfb.loan.id AND ltr.fromTransaction.id =:transactionId AND ltr.toTransaction.id=lt.id AND lbfb.loanTransaction.id = lt.id")
-    LoanBuyDownFeeBalance findBalanceForAdjustment(Long transactionId);
+    @Query("SELECT lbfb FROM LoanBuyDownFeeBalance lbfb WHERE lbfb.loan.id = :loanId AND lbfb.amountAdjustment IS NULL ORDER BY lbfb.date DESC")
+    List<LoanBuyDownFeeBalance> findBalanceForAdjustment(@Param("loanId") Long loanId);
 }

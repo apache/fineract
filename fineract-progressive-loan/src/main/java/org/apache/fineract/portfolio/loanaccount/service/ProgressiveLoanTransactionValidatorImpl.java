@@ -58,7 +58,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionProcessingException;
-import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeesBalanceRepository;
+import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
@@ -71,7 +71,7 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
     private final LoanTransactionValidator loanTransactionValidator;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
-    private final LoanBuyDownFeesBalanceRepository loanBuydownFeeBalanceRepository;
+    private final LoanBuyDownFeeBalanceRepository loanBuydownFeeBalanceRepository;
     private final LoanTransactionRepository loanTransactionRepository;
 
     @Override
