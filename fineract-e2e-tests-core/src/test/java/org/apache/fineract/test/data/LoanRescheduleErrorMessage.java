@@ -22,7 +22,9 @@ public enum LoanRescheduleErrorMessage {
 
     LOAN_CHARGED_OFF("Loan: %s reschedule installment is not allowed. Loan Account is Charged-off"), //
     LOAN_RESCHEDULE_DATE_NOT_IN_FUTURE("Loan Reschedule From date (%s) for Loan: %s should be in the future."), //
-    LOAN_LOCKED_BY_COB("Loan is locked by the COB job. Loan ID: %s");//
+    LOAN_LOCKED_BY_COB("Loan is locked by the COB job. Loan ID: %s"), //
+    LOAN_RESCHEDULE_NOT_ALLOWED_FROM_ZERO_TO_NEW_INTEREST_RATE("Failed data validation due to: newInterestRate."), //
+    LOAN_RESCHEDULE_NOT_ALLOWED_FROM_CURRENT_INTEREST_RATE_TO_ZERO("The parameter `newInterestRate` must be greater than 0.");//
 
     private final String messageTemplate;
 

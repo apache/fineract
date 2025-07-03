@@ -146,7 +146,9 @@ public class LoanRescheduleStepDef extends AbstractStepDef {
         String rescheduleFromDateFormatted = localDate.format(FORMATTER_HU);
         String errorMessageExpected = "";
         int expectedParameterCount = loanRescheduleErrorMessage.getExpectedParameterCount();
-        if (expectedParameterCount == 1) {
+        if (expectedParameterCount == 0) {
+            errorMessageExpected = loanRescheduleErrorMessage.getMessageTemplate();
+        } else if (expectedParameterCount == 1) {
             errorMessageExpected = loanRescheduleErrorMessage.getValue(loanId);
         } else if (expectedParameterCount == 2) {
             errorMessageExpected = loanRescheduleErrorMessage.getValue(rescheduleFromDateFormatted, loanId);
