@@ -46,6 +46,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
@@ -900,6 +901,57 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
         });
     }
 
+    @Test
+    public void verifyLoanApplicationModifiedBusinessEvent01() {
+        runAt("1 March 2024", () -> {
+
+            externalEventHelper.enableBusinessEvent("LoanApplicationModifiedBusinessEvent");
+
+            PostLoansRequest loanRequest = applyForLoanApplication(client.getClientId(), loanProductId, BigDecimal.valueOf(4000),
+                    "1 March 2023", "1 March 2024");
+            PostLoansResponse applicationResponse = loanTransactionHelper.applyLoan(loanRequest);
+            Long loanId = applicationResponse.getResourceId();
+            Assertions.assertNotNull(loanId);
+
+            PutLoansLoanIdRequest modification = new PutLoansLoanIdRequest().clientId(client.getClientId()).productId(loanProductId)
+                    .transactionProcessingStrategyCode(DEFAULT_STRATEGY).interestRatePerPeriod(BigDecimal.valueOf(2)).repaymentEvery(1)
+                    .principal(550L).amortizationType(1).interestType(1).interestCalculationPeriodType(0)
+                    .expectedDisbursementDate("1 March 2024").repaymentFrequencyType(2).numberOfRepayments(4).loanTermFrequency(4)
+                    .loanTermFrequencyType(2).loanType("individual").dateFormat("dd MMMM yyyy").locale("en_GB");
+
+            loanTransactionHelper.modifyApplicationForLoan(loanId, "modify", modification);
+
+            List<ExternalEventResponse> modifiedEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec).stream()
+                    .filter(e -> "LoanApplicationModifiedBusinessEvent".equals(e.getType())).toList();
+
+            Assertions.assertEquals(1, modifiedEvents.size());
+            ExternalEventResponse event = modifiedEvents.get(0);
+
+            Assertions.assertEquals(550.0D, event.getPayLoad().get("principal")); // the new principal
+        });
+    }
+
+    @Test
+    public void verifyLoanWithdrawnByApplicantBusinessEvent01() {
+        runAt("01 March 2024", () -> {
+
+            externalEventHelper.enableBusinessEvent("LoanWithdrawnByApplicantBusinessEvent");
+
+            PostLoansRequest loanRequest = applyForLoanApplication(client.getClientId(), loanProductId, BigDecimal.valueOf(4000),
+                    "1 March 2023", "01 March 2024");
+            PostLoansResponse applicationResponse = loanTransactionHelper.applyLoan(loanRequest);
+            Long loanId = applicationResponse.getLoanId();
+            Assertions.assertNotNull(loanId);
+
+            loanTransactionHelper.withdrawLoanApplicationByClient("01 March 2024", loanId.intValue());
+
+            List<ExternalEventResponse> events = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec).stream()
+                    .filter(e -> "LoanWithdrawnByApplicantBusinessEvent".equals(e.getType())).toList();
+
+            Assertions.assertEquals(1, events.size());
+        });
+    }
+
     @Nested
     class ExternalIdGenerationTest {
 
@@ -1052,6 +1104,17 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
         Long loanId = loanTransactionHelper.applyLoan(loanRequest).getLoanId();
         log.info("Test MultiDisbursed Loan with Interest. clientId: {} loanId: {}", client.getClientId(), loanId);
         return loanId;
+    }
+
+    private static PostLoansRequest applyForLoanApplication(final Long clientId, final Long loanProductId, BigDecimal principal,
+            String submittedOnDate, String expectedDisburmentDate) {
+        final PostLoansRequest loanRequest = new PostLoansRequest() //
+                .loanTermFrequency(4).locale("en_GB").loanTermFrequencyType(2).numberOfRepayments(4).repaymentFrequencyType(2)
+                .interestRatePerPeriod(BigDecimal.valueOf(2)).repaymentEvery(1).principal(principal).amortizationType(1).interestType(1)
+                .interestCalculationPeriodType(0).dateFormat("dd MMMM yyyy").transactionProcessingStrategyCode(DEFAULT_STRATEGY)
+                .loanType("individual").submittedOnDate(submittedOnDate).expectedDisbursementDate(expectedDisburmentDate).clientId(clientId)
+                .productId(loanProductId);
+        return loanRequest;
     }
 
     private void enableLoanInterestRefundPstBusinessEvent(boolean enabled) {

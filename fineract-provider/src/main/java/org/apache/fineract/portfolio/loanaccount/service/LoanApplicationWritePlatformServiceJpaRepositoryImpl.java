@@ -49,10 +49,12 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanApplicationModifiedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanApprovedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanRejectedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanUndoApprovalBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanWithdrawnByApplicantBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
@@ -286,6 +288,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     && changes.containsKey(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME)) {
                 createAndPersistCalendarInstanceForInterestRecalculation(loan);
             }
+
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanApplicationModifiedBusinessEvent(loan));
 
             return new CommandProcessingResultBuilder() //
                     .withEntityId(loanId) //
@@ -739,6 +743,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final String noteText = command.stringValueOfParameterNamed("note");
             createNote(noteText, loan);
         }
+
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanWithdrawnByApplicantBusinessEvent(loan));
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
