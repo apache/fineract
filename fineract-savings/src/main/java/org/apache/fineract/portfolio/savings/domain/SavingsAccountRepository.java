@@ -35,10 +35,6 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
     @Query("select s_acc from SavingsAccount s_acc where s_acc.client.id = :clientId")
     List<SavingsAccount> findSavingAccountByClientId(@Param("clientId") Long clientId);
 
-    @Query("select s_acc from SavingsAccount s_acc where s_acc.client.id = :clientId and s_acc.depositType = :depositAccountTypeId")
-    SavingsAccount findSavingAccountByClientIdAndDepositAccountType(@Param("clientId") Long clientId,
-            @Param("depositAccountTypeId") Integer depositAccountTypeId);
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select sa from SavingsAccount sa where sa.id = :savingsId")
     SavingsAccount findOneLocked(@Param("savingsId") Long id);

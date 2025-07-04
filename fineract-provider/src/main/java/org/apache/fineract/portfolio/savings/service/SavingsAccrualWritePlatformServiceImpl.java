@@ -44,8 +44,6 @@ import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccrualData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargePaidBy;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsHelper;
@@ -130,30 +128,6 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
         }
 
         return CommandProcessingResult.empty();
-    }
-
-    @Override
-    public boolean isChargeToBeRecognizedAsAccrual(final Collection<Long> chargeIds, final SavingsAccountCharge savingsAccountCharge) {
-        if (chargeIds.isEmpty()) {
-            return false;
-        }
-        return chargeIds.contains(savingsAccountCharge.getCharge().getId());
-    }
-
-    @Transactional
-    @Override
-    public SavingsAccountTransaction addSavingsChargeAccrualTransaction(SavingsAccount savingsAccount,
-            SavingsAccountCharge savingsAccountCharge, LocalDate transactionDate) {
-        final MonetaryCurrency currency = savingsAccount.getCurrency();
-        final Money chargeAmount = savingsAccountCharge.getAmount(currency);
-        SavingsAccountTransaction savingsAccountTransaction = SavingsAccountTransaction.accrual(savingsAccount, savingsAccount.office(),
-                transactionDate, chargeAmount, false, false);
-        final SavingsAccountChargePaidBy chargePaidBy = SavingsAccountChargePaidBy.instance(savingsAccountTransaction, savingsAccountCharge,
-                savingsAccountTransaction.getAmount(currency).getAmount());
-        savingsAccountTransaction.getSavingsAccountChargesPaid().add(chargePaidBy);
-
-        savingsAccount.addTransaction(savingsAccountTransaction);
-        return savingsAccountTransaction;
     }
 
     private void addAccrualTransactions(SavingsAccount savingsAccount, final LocalDate fromDate, final LocalDate tillDate,

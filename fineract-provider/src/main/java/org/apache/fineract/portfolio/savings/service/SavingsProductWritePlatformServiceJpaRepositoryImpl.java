@@ -28,6 +28,7 @@ import jakarta.persistence.PersistenceException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -42,6 +43,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.data.SavingsProductDataValidator;
@@ -140,10 +142,12 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
             final Map<String, Object> changes = product.update(command);
 
             if (changes.containsKey(chargesParamName) || changes.containsKey(accrualChargesParamName)) {
-                product.setCharges(savingsProductAssembler.assembleListOfSavingsProductCharges(command, product.currency().getCode(),
-                        chargesParamName));
-                product.setAccrualCharges(savingsProductAssembler.assembleListOfSavingsProductCharges(command, product.currency().getCode(),
-                        accrualChargesParamName));
+                final Set<Charge> savingsProductCharges = this.savingsProductAssembler.assembleListOfSavingsProductCharges(command,
+                        product.currency().getCode());
+                final boolean updated = product.update(savingsProductCharges);
+                if (!updated) {
+                    changes.remove(chargesParamName);
+                }
             }
 
             if (changes.containsKey(taxGroupIdParamName)) {

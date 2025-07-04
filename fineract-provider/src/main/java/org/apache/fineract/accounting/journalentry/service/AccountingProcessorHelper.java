@@ -207,14 +207,13 @@ public class AccountingProcessorHelper {
             if (map.containsKey("savingsChargesPaid")) {
                 @SuppressWarnings("unchecked")
                 final List<Map<String, Object>> savingsChargesPaidData = (List<Map<String, Object>>) map.get("savingsChargesPaid");
-                for (final Map<String, Object> savingsChargesPaid : savingsChargesPaidData) {
-                    final Long chargeId = (Long) savingsChargesPaid.get("chargeId");
-                    final Long savingsChargeId = (Long) savingsChargesPaid.get("savingsChargeId");
-                    final boolean isPenalty = (Boolean) savingsChargesPaid.get("isPenalty");
-                    final boolean accrualRecognized = (Boolean) savingsChargesPaid.get("accrualRecognized");
-
-                    final BigDecimal chargeAmountPaid = (BigDecimal) savingsChargesPaid.get("amount");
-                    ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, chargeAmountPaid, savingsChargeId);
+                for (final Map<String, Object> loanChargePaid : savingsChargesPaidData) {
+                    final Long chargeId = (Long) loanChargePaid.get("chargeId");
+                    final Long loanChargeId = (Long) loanChargePaid.get("savingsChargeId");
+                    final boolean isPenalty = (Boolean) loanChargePaid.get("isPenalty");
+                    final boolean accrualRecognized = (Boolean) loanChargePaid.get("accrualRecognized");
+                    final BigDecimal chargeAmountPaid = (BigDecimal) loanChargePaid.get("amount");
+                    ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, chargeAmountPaid, loanChargeId);
                     chargePaymentDTO.setAccrualRecognized(accrualRecognized);
                     if (isPenalty) {
                         penaltyPayments.add(chargePaymentDTO);

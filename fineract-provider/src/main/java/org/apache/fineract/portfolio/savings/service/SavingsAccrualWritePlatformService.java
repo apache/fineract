@@ -19,21 +19,12 @@
 package org.apache.fineract.portfolio.savings.service;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.MultiException;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 
 public interface SavingsAccrualWritePlatformService {
 
     void addAccrualEntries(LocalDate tillDate) throws MultiException;
-
-    boolean isChargeToBeRecognizedAsAccrual(Collection<Long> chargeIds, SavingsAccountCharge savingsAccountCharge);
-
-    SavingsAccountTransaction addSavingsChargeAccrualTransaction(SavingsAccount savingsAccount, SavingsAccountCharge savingsAccountCharge,
-            LocalDate transactionDate);
 
     CommandProcessingResult addAccrualEntries(Long savingsAccountId) throws MultiException;
 
