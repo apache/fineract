@@ -3841,6 +3841,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder buyDownFeeAdjustment(final Long loanId, final Long transactionId) {
+        this.actionName = "BUYDOWNFEEADJUSTMENT";
+        this.entityName = "LOAN";
+        this.entityId = transactionId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions/" + transactionId;
+        return this;
+    }
+
     public CommandWrapperBuilder applyContractTermination(final Long loanId) {
         this.actionName = "CONTRACT_TERMINATION";
         this.entityName = "LOAN";

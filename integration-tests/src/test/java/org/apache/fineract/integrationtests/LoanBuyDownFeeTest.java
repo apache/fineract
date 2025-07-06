@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -241,6 +243,168 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
                 .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                 .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
                 .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE).locale("en").dateFormat("dd MMMM yyyy");
+    }
+
+    @Test
+    public void testBuyDownFeeAdjustment() {
+        runAt("06 September 2024", () -> {
+            // Add initial buy down fee
+            Long buyDownFeeTransactionId = addBuyDownFeeForLoan(loanId, 500.0, "06 September 2024");
+            assertNotNull(buyDownFeeTransactionId);
+
+            // Create buy down fee adjustment (use same date as business date)
+            PostLoansLoanIdTransactionsResponse adjustmentResponse = loanTransactionHelper.buyDownFeeAdjustment(loanId,
+                    buyDownFeeTransactionId, "06 September 2024", 100.0);
+
+            assertNotNull(adjustmentResponse);
+            assertNotNull(adjustmentResponse.getLoanId());
+            assertNotNull(adjustmentResponse.getClientId());
+            assertNotNull(adjustmentResponse.getOfficeId());
+            assertEquals(loanId, adjustmentResponse.getLoanId());
+
+            // Verify loan details show both transactions
+            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertNotNull(loanDetails);
+
+            List<GetLoansLoanIdTransactions> transactions = loanDetails.getTransactions();
+            assertTrue(transactions.size() >= 3); // Disbursement, Buy Down Fee, Buy Down Fee Adjustment
+
+            // Find the buy down fee adjustment transaction
+            GetLoansLoanIdTransactions adjustmentTransaction = transactions.stream()
+                    .filter(txn -> "Buy Down Fee Adjustment".equals(txn.getType().getValue())).findFirst().orElse(null);
+
+            assertNotNull(adjustmentTransaction);
+            assertEquals(0, BigDecimal.valueOf(100.0).compareTo(adjustmentTransaction.getAmount()));
+            assertEquals("06 September 2024", adjustmentTransaction.getDate().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")));
+        });
+    }
+
+    @Test
+    public void testBuyDownFeeAdjustmentValidations() {
+        runAt("08 September 2024", () -> {
+            // Add initial buy down fee
+            Long buyDownFeeTransactionId = addBuyDownFeeForLoan(loanId, 300.0, "08 September 2024");
+            assertNotNull(buyDownFeeTransactionId);
+
+            // Test 1: Adjustment amount more than original amount (should fail)
+            try {
+                loanTransactionHelper.buyDownFeeAdjustment(loanId, buyDownFeeTransactionId, "08 September 2024", 400.0);
+                assertTrue(false, "Expected validation error for adjustment amount exceeding original amount");
+            } catch (Exception e) {
+                log.info("Expected validation error for excessive adjustment amount: {}", e.getMessage());
+                assertTrue(e.getMessage().contains("amount") || e.getMessage().contains("exceed"));
+            }
+
+            // Test 2: Adjustment date before original transaction date (should fail)
+            try {
+                loanTransactionHelper.buyDownFeeAdjustment(loanId, buyDownFeeTransactionId, "07 September 2024", 100.0);
+                assertTrue(false, "Expected validation error for adjustment date before original transaction date");
+            } catch (Exception e) {
+                log.info("Expected validation error for early adjustment date: {}", e.getMessage());
+                assertTrue(e.getMessage().contains("date") || e.getMessage().contains("before"));
+            }
+
+            // Test 3: Valid adjustment should succeed
+            PostLoansLoanIdTransactionsResponse validAdjustment = loanTransactionHelper.buyDownFeeAdjustment(loanId,
+                    buyDownFeeTransactionId, "08 September 2024", 150.0);
+            assertNotNull(validAdjustment);
+
+            // Test 4: Second adjustment that would exceed total should fail
+            try {
+                loanTransactionHelper.buyDownFeeAdjustment(loanId, buyDownFeeTransactionId, "08 September 2024", 200.0);
+                assertTrue(false, "Expected validation error for total adjustments exceeding original amount");
+            } catch (Exception e) {
+                log.info("Expected validation error for cumulative adjustment excess: {}", e.getMessage());
+                assertTrue(e.getMessage().contains("amount") || e.getMessage().contains("exceed"));
+            }
+        });
+    }
+
+    @Test
+    public void testBuyDownFeeAdjustmentAccountingEntries() {
+        runAt("10 September 2024", () -> {
+            // Add initial buy down fee
+            Long buyDownFeeTransactionId = addBuyDownFeeForLoan(loanId, 400.0, "10 September 2024");
+            assertNotNull(buyDownFeeTransactionId);
+
+            // Verify initial buy down fee accounting entries
+            verifyTRJournalEntries(buyDownFeeTransactionId, debit(buyDownExpenseAccount, 400.0),
+                    credit(deferredIncomeLiabilityAccount, 400.0));
+
+            // Create buy down fee adjustment
+            PostLoansLoanIdTransactionsResponse adjustmentResponse = loanTransactionHelper.buyDownFeeAdjustment(loanId,
+                    buyDownFeeTransactionId, "10 September 2024", 120.0);
+            assertNotNull(adjustmentResponse);
+        });
+    }
+
+    @Test
+    public void testMultipleBuyDownFeeAdjustments() {
+        runAt("12 September 2024", () -> {
+            // Add initial buy down fee
+            Long buyDownFeeTransactionId = addBuyDownFeeForLoan(loanId, 600.0, "12 September 2024");
+            assertNotNull(buyDownFeeTransactionId);
+
+            // First adjustment
+            PostLoansLoanIdTransactionsResponse adjustment1 = loanTransactionHelper.buyDownFeeAdjustment(loanId, buyDownFeeTransactionId,
+                    "12 September 2024", 100.0);
+            assertNotNull(adjustment1);
+
+            // Second adjustment
+            PostLoansLoanIdTransactionsResponse adjustment2 = loanTransactionHelper.buyDownFeeAdjustment(loanId, buyDownFeeTransactionId,
+                    "12 September 2024", 150.0);
+            assertNotNull(adjustment2);
+
+            // Verify both adjustments are recorded
+            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertNotNull(loanDetails);
+
+            List<GetLoansLoanIdTransactions> adjustmentTransactions = loanDetails.getTransactions().stream()
+                    .filter(txn -> "Buy Down Fee Adjustment".equals(txn.getType().getValue())).toList();
+
+            assertEquals(2, adjustmentTransactions.size());
+
+            // Verify total adjustment amounts
+            BigDecimal totalAdjustments = adjustmentTransactions.stream().map(GetLoansLoanIdTransactions::getAmount).reduce(BigDecimal.ZERO,
+                    BigDecimal::add);
+            assertEquals(0, BigDecimal.valueOf(250.0).compareTo(totalAdjustments));
+
+            // Third adjustment that would exceed limit should fail
+            try {
+                loanTransactionHelper.buyDownFeeAdjustment(loanId, buyDownFeeTransactionId, "12 September 2024", 400.0);
+                assertTrue(false, "Expected validation error for total adjustments exceeding original amount");
+            } catch (Exception e) {
+                log.info("Expected validation error for cumulative adjustments exceeding limit: {}", e.getMessage());
+            }
+        });
+    }
+
+    @Test
+    public void testBuyDownFeeAdjustmentWithExternalId() {
+        runAt("16 September 2024", () -> {
+            // Add initial buy down fee
+            Long buyDownFeeTransactionId = addBuyDownFeeForLoan(loanId, 350.0, "16 September 2024");
+            assertNotNull(buyDownFeeTransactionId);
+
+            // Create adjustment with external ID
+            String adjustmentExternalId = UUID.randomUUID().toString();
+            PostLoansLoanIdTransactionsResponse adjustmentResponse = loanTransactionHelper.buyDownFeeAdjustment(loanId,
+                    buyDownFeeTransactionId,
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("16 September 2024").transactionAmount(80.0)
+                            .externalId(adjustmentExternalId).note("Buy Down Fee Adjustment with external ID").dateFormat("dd MMMM yyyy")
+                            .locale("en"));
+
+            assertNotNull(adjustmentResponse);
+            assertEquals(adjustmentExternalId, adjustmentResponse.getResourceExternalId());
+
+            // Verify adjustment transaction details
+            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdTransactions adjustmentTransaction = loanDetails.getTransactions().stream()
+                    .filter(txn -> adjustmentExternalId.equals(txn.getExternalId())).findFirst().orElse(null);
+
+            assertNotNull(adjustmentTransaction);
+            assertEquals(0, BigDecimal.valueOf(80.0).compareTo(adjustmentTransaction.getAmount()));
+        });
     }
 
     /**

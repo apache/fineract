@@ -26,4 +26,7 @@ public interface BuyDownFeePlatformService {
 
     @Transactional
     CommandProcessingResult makeLoanBuyDownFee(Long loanId, JsonCommand command);
+
+    @Transactional
+    CommandProcessingResult buyDownFeeAdjustment(Long loanId, Long buyDownFeeTransactionId, JsonCommand command);
 }

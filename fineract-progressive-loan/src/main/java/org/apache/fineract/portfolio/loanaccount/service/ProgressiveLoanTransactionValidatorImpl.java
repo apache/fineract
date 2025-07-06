@@ -48,6 +48,7 @@ import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.portfolio.common.service.Validator;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeBalance;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeBalance;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
@@ -57,6 +58,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionProcessingException;
+import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeesBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
@@ -69,6 +71,7 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
     private final LoanTransactionValidator loanTransactionValidator;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
+    private final LoanBuyDownFeesBalanceRepository loanBuydownFeeBalanceRepository;
     private final LoanTransactionRepository loanTransactionRepository;
 
     @Override
@@ -320,6 +323,94 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
         }
     }
 
+    @Override
+    public void validateBuyDownFeeAdjustment(JsonCommand command, Long loanId, Long buyDownFeeTransactionId) {
+        final String json = command.json();
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, getBuyDownFeeAdjustmentParameters());
+
+        Validator.validateOrThrow("loan.buyDownFeeAdjustment", baseDataValidator -> {
+            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+            validateLoanClientIsActive(loan);
+            validateLoanGroupIsActive(loan);
+
+            // Validate loan is progressive
+            if (!loan.isProgressiveSchedule()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.progressive.loan");
+            }
+
+            // Validate buy down fee is enabled
+            if (!loan.getLoanProductRelatedDetail().isEnableBuyDownFee()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("buy.down.fee.not.enabled");
+            }
+
+            // Validate loan is active, or closed or overpaid
+            final LoanStatus loanStatus = loan.getStatus();
+            if (!loanStatus.isActive() && !loanStatus.isClosed() && !loanStatus.isOverpaid()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.valid.loan.status");
+            }
+
+            final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
+            baseDataValidator.reset().parameter("transactionDate").value(transactionDate).notNull();
+
+            // Validate transaction date is not before disbursement date
+            if (transactionDate != null && loan.getDisbursementDate() != null && transactionDate.isBefore(loan.getDisbursementDate())) {
+                baseDataValidator.reset().parameter("transactionDate").failWithCode("before.disbursement.date",
+                        "Transaction date cannot be before disbursement date");
+            }
+
+            // Validate transaction date is not in the future
+            if (transactionDate != null && transactionDate.isAfter(DateUtils.getBusinessLocalDate())) {
+                baseDataValidator.reset().parameter("transactionDate").failWithCode("cannot.be.in.the.future",
+                        "Transaction date cannot be in the future");
+            }
+
+            final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("transactionAmount", element);
+            baseDataValidator.reset().parameter("transactionAmount").value(transactionAmount).notNull().positiveAmount();
+
+            Optional<LoanTransaction> buyDownFeeTransactionOpt = loanTransactionRepository.findById(buyDownFeeTransactionId);
+            if (buyDownFeeTransactionOpt.isEmpty()) {
+                baseDataValidator.reset().parameter("buyDownFeeTransactionId").failWithCode("loan.transaction.not.found",
+                        "Buy Down Fee transaction not found.");
+            } else {
+                // Validate that the transaction is actually a buy down fee transaction
+                if (!buyDownFeeTransactionOpt.get().isBuyDownFee()) {
+                    baseDataValidator.reset().parameter("buyDownFeeTransactionId").failWithCode("not.buyDownFee.transaction",
+                            "The specified transaction is not a Buy Down Fee transaction.");
+                }
+                // Validate not before buy down fee transaction
+                if (transactionDate != null && transactionDate.isBefore(buyDownFeeTransactionOpt.get().getTransactionDate())) {
+                    baseDataValidator.reset().parameter("transactionDate").failWithCode("before.buyDownFee.transaction.date",
+                            "Transaction date cannot be before buy down fee transaction date");
+
+                }
+                if (transactionAmount != null) {
+                    LoanBuyDownFeeBalance buydownFeeBalance = loanBuydownFeeBalanceRepository.findByLoanIdAndLoanTransactionId(loanId,
+                            buyDownFeeTransactionId);
+                    if (buydownFeeBalance == null) {
+                        baseDataValidator.reset().parameter("buyDownFeeTransactionId").failWithCode("buydown.fee.balance.not.found",
+                                "Buy down fee balance not found for the specified transaction.");
+                    } else if (MathUtil.isLessThan(
+                            buydownFeeBalance.getAmount().subtract(MathUtil.nullToZero(buydownFeeBalance.getAmountAdjustment())),
+                            transactionAmount)) {
+                        baseDataValidator.reset().parameter("transactionAmount").value(transactionAmount).failWithCode(
+                                "cannot.be.more.than.remaining.amount",
+                                " Buy down fee adjustment amount cannot be more than remaining amount");
+                    }
+                }
+            }
+
+            validatePaymentDetails(baseDataValidator, element);
+            validateNote(baseDataValidator, element);
+            validateExternalId(baseDataValidator, element);
+        });
+    }
+
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
@@ -493,6 +584,11 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
 
     private Set<String> getContractTerminationUndoParameters() {
         return new HashSet<>(Arrays.asList("note", "reversalExternalId"));
+    }
+
+    private Set<String> getBuyDownFeeAdjustmentParameters() {
+        return new HashSet<>(
+                Arrays.asList("transactionDate", "dateFormat", "locale", "transactionAmount", "paymentTypeId", "note", "externalId"));
     }
 
     private BigDecimal getOverAppliedMax(final Loan loan) {

@@ -24,6 +24,7 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeesBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
 import org.apache.fineract.portfolio.loanaccount.service.CapitalizedIncomeBalanceService;
@@ -65,9 +66,9 @@ public class ProgressiveLoanAccountConfiguration {
     public ProgressiveLoanTransactionValidator progressiveLoanTransactionValidator(FromJsonHelper fromApiJsonHelper,
             LoanTransactionValidator loanTransactionValidator, LoanRepositoryWrapper loanRepositoryWrapper,
             LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository,
-            LoanTransactionRepository loanTransactionRepository) {
+            LoanBuyDownFeesBalanceRepository loanBuydownFeesBalanceRepository, LoanTransactionRepository loanTransactionRepository) {
         return new ProgressiveLoanTransactionValidatorImpl(fromApiJsonHelper, loanTransactionValidator, loanRepositoryWrapper,
-                loanCapitalizedIncomeBalanceRepository, loanTransactionRepository);
+                loanCapitalizedIncomeBalanceRepository, loanBuydownFeesBalanceRepository, loanTransactionRepository);
     }
 
     @Bean

@@ -149,6 +149,10 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             if (transactionType.isBuyDownFee()) {
                 createJournalEntriesForBuyDownFee(loanDTO, loanTransactionDTO, office);
             }
+            // Handle Buy Down Fee Adjustment
+            if (transactionType.isBuyDownFeeAdjustment()) {
+                createJournalEntriesForBuyDownFeeAdjustment(loanDTO, loanTransactionDTO, office);
+            }
         }
     }
 
@@ -432,6 +436,28 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         if (MathUtil.isGreaterThanZero(amount)) {
             this.helper.createJournalEntriesForLoan(office, currencyCode, AccrualAccountsForLoan.BUY_DOWN_EXPENSE.getValue(),
                     AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
+                    transactionDate, amount);
+        }
+    }
+
+    private void createJournalEntriesForBuyDownFeeAdjustment(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
+            final Office office) {
+        // loan properties
+        final Long loanProductId = loanDTO.getLoanProductId();
+        final Long loanId = loanDTO.getLoanId();
+        final String currencyCode = loanDTO.getCurrencyCode();
+
+        // transaction properties
+        final String transactionId = loanTransactionDTO.getTransactionId();
+        final LocalDate transactionDate = loanTransactionDTO.getTransactionDate();
+        final BigDecimal amount = loanTransactionDTO.getAmount();
+        final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
+
+        if (MathUtil.isGreaterThanZero(amount)) {
+            // Mirror of Buy Down Fee entries (as per PS-2574 requirements)
+            // Debit: Deferred Income Liability, Credit: Buy Down Expense
+            this.helper.createJournalEntriesForLoan(office, currencyCode, AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
+                    AccrualAccountsForLoan.BUY_DOWN_EXPENSE.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
                     transactionDate, amount);
         }
     }

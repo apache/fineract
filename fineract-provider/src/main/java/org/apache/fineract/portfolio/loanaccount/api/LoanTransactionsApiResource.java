@@ -710,6 +710,8 @@ public class LoanTransactionsApiResource {
             commandRequest = builder.chargebackTransaction(resolvedLoanId, resolvedTransactionId).build();
         } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.CAPITALIZED_INCOME_ADJUSTMENT_TRANSACTION_COMMAND)) {
             commandRequest = builder.capitalizedIncomeAdjustment(resolvedLoanId, resolvedTransactionId).build();
+        } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.BUY_DOWN_FEE_ADJUSTMENT_COMMAND)) {
+            commandRequest = builder.buyDownFeeAdjustment(resolvedLoanId, resolvedTransactionId).build();
         } else { // Default to adjust the Loan Transaction
             commandRequest = builder.adjustTransaction(resolvedLoanId, resolvedTransactionId).build();
         }

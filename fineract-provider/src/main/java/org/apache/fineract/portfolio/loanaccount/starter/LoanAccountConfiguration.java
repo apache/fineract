@@ -383,10 +383,13 @@ public class LoanAccountConfiguration {
             LoanAssembler loanAssembler, LoanTransactionRepository loanTransactionRepository,
             PaymentDetailWritePlatformService paymentDetailWritePlatformService, LoanJournalEntryPoster loanJournalEntryPoster,
             NoteWritePlatformService noteWritePlatformService, ExternalIdFactory externalIdFactory,
-            LoanBuyDownFeesBalanceRepository loanBuyDownFeesBalanceRepository) {
+            LoanBuyDownFeesBalanceRepository loanBuyDownFeesBalanceRepository,
+            ReprocessLoanTransactionsService reprocessLoanTransactionsService, LoanBalanceService loanBalanceService,
+            LoanLifecycleStateMachine loanLifecycleStateMachine, BusinessEventNotifierService businessEventNotifierService) {
         return new BuyDownFeeWritePlatformServiceImpl(loanTransactionValidator, loanAssembler, loanTransactionRepository,
                 paymentDetailWritePlatformService, loanJournalEntryPoster, noteWritePlatformService, externalIdFactory,
-                loanBuyDownFeesBalanceRepository);
+                loanBuyDownFeesBalanceRepository, reprocessLoanTransactionsService, loanBalanceService, loanLifecycleStateMachine,
+                businessEventNotifierService);
     }
 
     @Bean

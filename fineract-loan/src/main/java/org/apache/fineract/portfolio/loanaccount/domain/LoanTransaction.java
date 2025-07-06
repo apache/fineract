@@ -332,6 +332,12 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
                 amount.getAmount(), amount.getAmount(), null, null, null, null, false, paymentDetail, externalId);
     }
 
+    public static LoanTransaction buyDownFeeAdjustment(final Loan loan, final Money amount, final PaymentDetail paymentDetail,
+            final LocalDate transactionDate, final ExternalId externalId) {
+        return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT, transactionDate, amount.getAmount(),
+                amount.getAmount(), null, null, null, null, false, paymentDetail, externalId);
+    }
+
     public static LoanTransaction capitalizedIncomeAmortizationAdjustment(final Loan loan, final Money amount,
             final LocalDate transactionDate, final ExternalId externalId) {
         return switch (loan.getLoanProductRelatedDetail().getCapitalizedIncomeType()) {

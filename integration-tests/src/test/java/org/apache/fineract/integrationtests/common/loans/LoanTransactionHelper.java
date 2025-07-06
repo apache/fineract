@@ -963,6 +963,36 @@ public class LoanTransactionHelper {
                 .transactionAmount(amount).transactionDate(transactionDate).dateFormat("dd MMMM yyyy").locale("en"));
     }
 
+    public PostLoansLoanIdTransactionsResponse buyDownFeeAdjustment(final Long loanId, final Long buyDownFeeTransactionId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.adjustLoanTransaction(loanId, buyDownFeeTransactionId,
+                request, "buyDownFeeAdjustment"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse buyDownFeeAdjustment(final String loanExternalId, final Long transactionId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.adjustLoanTransaction2(loanExternalId, transactionId,
+                request, "buyDownFeeAdjustment"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse buyDownFeeAdjustment(final String loanExternalId, final String transactionExternalId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.adjustLoanTransaction3(loanExternalId,
+                transactionExternalId, request, "buyDownFeeAdjustment"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse buyDownFeeAdjustment(final Long loanId, final String transactionExternalId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.adjustLoanTransaction1(loanId, transactionExternalId,
+                request, "buyDownFeeAdjustment"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse buyDownFeeAdjustment(final Long loanId, final Long buyDownFeeTransactionId,
+            final String transactionDate, final double amount) {
+        return buyDownFeeAdjustment(loanId, buyDownFeeTransactionId, new PostLoansLoanIdTransactionsTransactionIdRequest()
+                .transactionAmount(amount).transactionDate(transactionDate).dateFormat("dd MMMM yyyy").locale("en"));
+    }
+
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
