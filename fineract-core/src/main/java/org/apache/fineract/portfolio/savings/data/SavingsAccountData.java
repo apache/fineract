@@ -142,6 +142,7 @@ public final class SavingsAccountData implements Serializable {
     private transient Set<Long> existingReversedTransactionIds = new HashSet<>();
     private transient Long glAccountIdForSavingsControl;
     private transient Long glAccountIdForInterestOnSavings;
+    private transient LocalDate birthDate;
 
     public static SavingsAccountData importInstanceIndividual(Long clientId, Long productId, Long fieldOfficerId, LocalDate submittedOnDate,
             BigDecimal nominalAnnualInterestRate, EnumOptionData interestCompoundingPeriodTypeEnum,
@@ -966,5 +967,9 @@ public final class SavingsAccountData implements Serializable {
 
     public boolean isIsDormancyTrackingActive() {
         return this.isDormancyTrackingActive;
+    }
+
+    public void setBirthDate(final LocalDate birthDate) {
+        this.birthDate = birthDate;
     }
 }
