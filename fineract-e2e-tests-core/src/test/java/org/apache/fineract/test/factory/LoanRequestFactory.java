@@ -19,12 +19,14 @@
 package org.apache.fineract.test.factory;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.models.DisbursementDetail;
 import org.apache.fineract.client.models.InterestPauseRequestDto;
+import org.apache.fineract.client.models.JournalEntryCommand;
 import org.apache.fineract.client.models.PostAddAndDeleteDisbursementDetailRequest;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
@@ -34,11 +36,14 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionI
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdRequest;
+import org.apache.fineract.client.models.SingleDebitOrCreditEntryCommand;
 import org.apache.fineract.test.data.InterestCalculationPeriodTime;
 import org.apache.fineract.test.data.InterestType;
 import org.apache.fineract.test.data.LoanTermFrequencyType;
 import org.apache.fineract.test.data.RepaymentFrequencyType;
 import org.apache.fineract.test.data.TransactionProcessingStrategyCode;
+import org.apache.fineract.test.data.accounttype.AccountTypeResolver;
+import org.apache.fineract.test.data.accounttype.DefaultAccountType;
 import org.apache.fineract.test.data.loanproduct.DefaultLoanProduct;
 import org.apache.fineract.test.data.loanproduct.LoanProductResolver;
 import org.apache.fineract.test.helper.Utils;
@@ -86,6 +91,8 @@ public class LoanRequestFactory {
     public static final String DATE_REJECT_STRING = FORMATTER.format(Utils.now().minusMonths(1L));
     public static final String DATE_WITHDRAWN_STRING = FORMATTER.format(Utils.now().minusMonths(1L));
     public static final String DEFAULT_TRANSACTION_DATE = FORMATTER.format(Utils.now().minusMonths(1L));
+
+    private final AccountTypeResolver accountTypeResolver;
 
     public PostLoansRequest defaultLoansRequest(Long clientId) {
         return new PostLoansRequest()//
@@ -311,5 +318,19 @@ public class LoanRequestFactory {
 
     public static PostLoansLoanIdRequest defaultLoanContractTerminationRequest() {
         return new PostLoansLoanIdRequest().dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE).note("Contract Termination");
+    }
+
+    public JournalEntryCommand defaultManualJournalEntryRequest(BigDecimal amount) {
+        final Long glAccountDebit = accountTypeResolver.resolve(DefaultAccountType.LOANS_RECEIVABLE);
+        final Long glAccountCredit = accountTypeResolver.resolve(DefaultAccountType.SUSPENSE_CLEARING_ACCOUNT);
+
+        return new JournalEntryCommand().amount(BigDecimal.TEN).officeId(1L).currencyCode("USD").locale(DEFAULT_LOCALE)
+                .dateFormat("uuuu-MM-dd").transactionDate(LocalDate.of(2024, 1, 1))
+                .addCreditsItem(new SingleDebitOrCreditEntryCommand().glAccountId(glAccountCredit).amount(amount))
+                .addDebitsItem(new SingleDebitOrCreditEntryCommand().glAccountId(glAccountDebit).amount(amount));
+    }
+
+    public JournalEntryCommand defaultManualJournalEntryRequest(BigDecimal amount, String externalAssetOwner) {
+        return defaultManualJournalEntryRequest(amount).externalAssetOwner(externalAssetOwner);
     }
 }
