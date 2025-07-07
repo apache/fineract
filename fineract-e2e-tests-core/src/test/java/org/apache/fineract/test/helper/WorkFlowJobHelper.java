@@ -50,8 +50,9 @@ public class WorkFlowJobHelper {
                 new BusinessStep().stepName("ADD_PERIODIC_ACCRUAL_ENTRIES").order(7L), //
                 new BusinessStep().stepName("ACCRUAL_ACTIVITY_POSTING").order(8L), //
                 new BusinessStep().stepName("CAPITALIZED_INCOME_AMORTIZATION").order(9L), //
-                new BusinessStep().stepName("LOAN_INTEREST_RECALCULATION").order(10L), //
-                new BusinessStep().stepName("EXTERNAL_ASSET_OWNER_TRANSFER").order(11L)//
+                new BusinessStep().stepName("BUY_DOWN_FEE_AMORTIZATION").order(10L), //
+                new BusinessStep().stepName("LOAN_INTEREST_RECALCULATION").order(11L), //
+                new BusinessStep().stepName("EXTERNAL_ASSET_OWNER_TRANSFER").order(12L)//
         );
         BusinessStepRequest request = new BusinessStepRequest().businessSteps(businessSteps);
         Response<Void> response = businessStepConfigurationApi.updateJobBusinessStepConfig(WORKFLOW_NAME_LOAN_CLOSE_OF_BUSINESS, request)

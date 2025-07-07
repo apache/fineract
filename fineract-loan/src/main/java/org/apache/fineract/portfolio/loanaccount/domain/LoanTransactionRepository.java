@@ -361,16 +361,27 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
             AND (lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION
               OR lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT)
             """)
-    BigDecimal getAmortizedAmount(@Param("loan") Loan loan);
+    BigDecimal getAmortizedAmountCapitalizedIncome(@Param("loan") Loan loan);
+
+    @Query("""
+            SELECT COALESCE(SUM(CASE WHEN lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION THEN lt.amount
+              WHEN lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT THEN -lt.amount
+              ELSE 0 END), 0) FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+            AND lt.reversed = false
+            AND (lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION
+              OR lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT)
+            """)
+    BigDecimal getAmortizedAmountBuyDownFee(@Param("loan") Loan loan);
 
     @Query("""
             SELECT lt FROM LoanTransaction lt, LoanTransactionRelation ltr
             WHERE lt.reversed = false
             AND lt = ltr.fromTransaction
-            AND ltr.toTransaction = :capitalizedIncome
+            AND ltr.toTransaction = :transaction
             AND ltr.relationType = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum.ADJUSTMENT
             """)
-    List<LoanTransaction> findAdjustmentsForCapitalizedIncome(@Param("capitalizedIncome") LoanTransaction capitalizedIncome);
+    List<LoanTransaction> findAdjustments(@Param("transaction") LoanTransaction transaction);
 
     @Query("""
             SELECT lt FROM LoanTransaction lt

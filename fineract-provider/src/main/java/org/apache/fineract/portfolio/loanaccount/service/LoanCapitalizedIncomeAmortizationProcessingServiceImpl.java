@@ -125,7 +125,7 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
 
         BigDecimal totalAmortizationAmount = BigDecimal.ZERO;
         for (LoanCapitalizedIncomeBalance balance : balances) {
-            List<LoanTransaction> adjustments = loanTransactionRepository.findAdjustmentsForCapitalizedIncome(balance.getLoanTransaction());
+            List<LoanTransaction> adjustments = loanTransactionRepository.findAdjustments(balance.getLoanTransaction());
             LocalDate maturityDate = loan.getMaturityDate() != null ? loan.getMaturityDate() : transactionDate;
             final Money amortizationTillDate = CapitalizedIncomeAmortizationUtil.calculateTotalAmortizationTillDate(balance, adjustments,
                     maturityDate, loan.getLoanProductRelatedDetail().getCapitalizedIncomeStrategy(), maturityDate, loan.getCurrency());
@@ -136,7 +136,7 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
             balance.setUnrecognizedAmount(BigDecimal.ZERO);
         }
 
-        BigDecimal amortizedAmount = loanTransactionRepository.getAmortizedAmount(loan);
+        BigDecimal amortizedAmount = loanTransactionRepository.getAmortizedAmountCapitalizedIncome(loan);
         BigDecimal totalUnrecognizedAmount = totalAmortizationAmount.subtract(amortizedAmount);
         if (MathUtil.isZero(totalUnrecognizedAmount)) {
             return Optional.empty();
@@ -203,7 +203,7 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
 
         Money totalAmortization = Money.zero(loan.getCurrency());
         for (LoanCapitalizedIncomeBalance balance : balances) {
-            List<LoanTransaction> adjustments = loanTransactionRepository.findAdjustmentsForCapitalizedIncome(balance.getLoanTransaction());
+            List<LoanTransaction> adjustments = loanTransactionRepository.findAdjustments(balance.getLoanTransaction());
             Money amortizationTillDate = CapitalizedIncomeAmortizationUtil.calculateTotalAmortizationTillDate(balance, adjustments,
                     maturityDate, loan.getLoanProductRelatedDetail().getCapitalizedIncomeStrategy(), tillDatePlusOne, loan.getCurrency());
             totalAmortization = totalAmortization.add(amortizationTillDate);
@@ -214,7 +214,7 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
 
         loanCapitalizedIncomeBalanceRepository.saveAll(balances);
 
-        BigDecimal totalAmortized = loanTransactionRepository.getAmortizedAmount(loan);
+        BigDecimal totalAmortized = loanTransactionRepository.getAmortizedAmountCapitalizedIncome(loan);
         BigDecimal totalAmortizationAmount = totalAmortization.getAmount().subtract(totalAmortized);
 
         if (!MathUtil.isZero(totalAmortizationAmount)) {

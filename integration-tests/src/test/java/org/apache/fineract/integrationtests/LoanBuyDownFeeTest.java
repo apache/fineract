@@ -23,22 +23,28 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
+import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -424,5 +430,147 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
                 new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate(date).locale("en")
                         .transactionAmount(amount).externalId(buyDownFeeExternalId).note("Buy Down Fee Transaction"));
         return response.getResourceId();
+    }
+
+    @Test
+    public void testBuyDownFeeDailyAmortization() {
+        new BusinessStepHelper().updateSteps("LOAN_CLOSE_OF_BUSINESS", "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION",
+                "CHECK_LOAN_REPAYMENT_DUE", "CHECK_LOAN_REPAYMENT_OVERDUE", "CHECK_DUE_INSTALLMENTS", "UPDATE_LOAN_ARREARS_AGING",
+                "ADD_PERIODIC_ACCRUAL_ENTRIES", "ACCRUAL_ACTIVITY_POSTING", "CAPITALIZED_INCOME_AMORTIZATION", "BUY_DOWN_FEE_AMORTIZATION",
+                "LOAN_INTEREST_RECALCULATION", "EXTERNAL_ASSET_OWNER_TRANSFER");
+
+        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        final AtomicReference<Long> buyDownFeeTransactionIdIdRef = new AtomicReference<>();
+
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive()
+                .enableBuyDownFee(true).buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
+                .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
+                .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE)
+                .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())
+                .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue()));
+
+        runAt("1 January 2024", () -> {
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
+                    500.0, 7.0, 3, null);
+            loanIdRef.set(loanId);
+
+            disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
+            PostLoansLoanIdTransactionsResponse transactionsResponse = loanTransactionHelper.makeLoanBuyDownFee(loanId, "1 January 2024",
+                    50.0);
+            buyDownFeeTransactionIdIdRef.set(transactionsResponse.getResourceId());
+        });
+        runAt("31 January 2024", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            // summarized amortization
+            verifyTransactions(loanId, //
+                    transaction(100.0, "Disbursement", "01 January 2024"), //
+                    transaction(0.55, "Accrual", "30 January 2024"), //
+                    transaction(50.0, "Buy Down Fee", "01 January 2024"), //
+                    transaction(16.48, "Buy Down Fee Amortization", "30 January 2024"));
+        });
+        runAt("1 February 2024", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            // daily amortization
+            verifyTransactions(loanId, //
+                    transaction(100.0, "Disbursement", "01 January 2024"), //
+                    transaction(50.0, "Buy Down Fee", "01 January 2024"), //
+                    transaction(0.55, "Accrual", "30 January 2024"), //
+                    transaction(16.48, "Buy Down Fee Amortization", "30 January 2024"), //
+                    transaction(0.01, "Accrual", "31 January 2024"), //
+                    transaction(0.55, "Buy Down Fee Amortization", "31 January 2024"));
+
+            loanTransactionHelper.buyDownFeeAdjustment(loanId, buyDownFeeTransactionIdIdRef.get(), "1 February 2024", 10.0);
+        });
+        runAt("2 February 2024", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            // not backdated and not large buy down fee adjustment -> lowered daily amount
+            verifyTransactions(loanId, //
+                    transaction(100.0, "Disbursement", "01 January 2024"), //
+                    transaction(50.0, "Buy Down Fee", "01 January 2024"), //
+                    transaction(0.55, "Accrual", "30 January 2024"), //
+                    transaction(16.48, "Buy Down Fee Amortization", "30 January 2024"), //
+                    transaction(0.01, "Accrual", "31 January 2024"), //
+                    transaction(0.55, "Buy Down Fee Amortization", "31 January 2024"), //
+                    transaction(10.0, "Buy Down Fee Adjustment", "01 February 2024"), //
+                    transaction(0.02, "Accrual", "01 February 2024"), //
+                    transaction(0.39, "Buy Down Fee Amortization", "01 February 2024"));
+
+            loanTransactionHelper.buyDownFeeAdjustment(loanId, buyDownFeeTransactionIdIdRef.get(), "10 January 2024", 10.0);
+        });
+        runAt("3 February 2024", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            // backdated buy down fee adjustment -> amortization adjustment
+            verifyTransactions(loanId, //
+                    transaction(100.0, "Disbursement", "01 January 2024"), //
+                    transaction(50.0, "Buy Down Fee", "01 January 2024"), //
+                    transaction(10.0, "Buy Down Fee Adjustment", "10 January 2024"), //
+                    transaction(0.55, "Accrual", "30 January 2024"), //
+                    transaction(16.48, "Buy Down Fee Amortization", "30 January 2024"), //
+                    transaction(0.01, "Accrual", "31 January 2024"), //
+                    transaction(0.55, "Buy Down Fee Amortization", "31 January 2024"), //
+                    transaction(10.0, "Buy Down Fee Adjustment", "01 February 2024"), //
+                    transaction(0.02, "Accrual", "01 February 2024"), //
+                    transaction(0.39, "Buy Down Fee Amortization", "01 February 2024"), //
+                    transaction(0.02, "Accrual", "02 February 2024"), //
+                    transaction(2.55, "Buy Down Fee Amortization Adjustment", "02 February 2024"));
+
+            loanTransactionHelper.buyDownFeeAdjustment(loanId, buyDownFeeTransactionIdIdRef.get(), "03 February 2024", 20.0);
+        });
+        runAt("4 February 2024", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            // large (more than remaining unrecognized (15.13)) buy down fee adjustment -> amortization adjustment
+            verifyTransactions(loanId, //
+                    transaction(100.0, "Disbursement", "01 January 2024"), //
+                    transaction(50.0, "Buy Down Fee", "01 January 2024"), //
+                    transaction(10.0, "Buy Down Fee Adjustment", "10 January 2024"), //
+                    transaction(0.55, "Accrual", "30 January 2024"), //
+                    transaction(16.48, "Buy Down Fee Amortization", "30 January 2024"), //
+                    transaction(0.01, "Accrual", "31 January 2024"), //
+                    transaction(0.55, "Buy Down Fee Amortization", "31 January 2024"), //
+                    transaction(10.0, "Buy Down Fee Adjustment", "01 February 2024"), //
+                    transaction(0.02, "Accrual", "01 February 2024"), //
+                    transaction(0.39, "Buy Down Fee Amortization", "01 February 2024"), //
+                    transaction(0.02, "Accrual", "02 February 2024"), //
+                    transaction(2.55, "Buy Down Fee Amortization Adjustment", "02 February 2024"), //
+                    transaction(20.0, "Buy Down Fee Adjustment", "03 February 2024"), //
+                    transaction(0.02, "Accrual", "03 February 2024"), //
+                    transaction(4.87, "Buy Down Fee Amortization Adjustment", "03 February 2024"));
+
+            // Check journal entries of amortization and amortization adjustment
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+
+            Optional<GetLoansLoanIdTransactions> amortizationTransactionOpt = loanDetails.getTransactions().stream()
+                    .filter(transaction -> LocalDate.of(2024, 2, 1).equals(transaction.getDate())
+                            && transaction.getType().getBuyDownFeeAmortization())
+                    .findFirst();
+            Assertions.assertTrue(amortizationTransactionOpt.isPresent());
+
+            verifyTRJournalEntries(amortizationTransactionOpt.get().getId(), //
+                    journalEntry(0.39, feeIncomeAccount, "CREDIT"), //
+                    journalEntry(0.39, deferredIncomeLiabilityAccount, "DEBIT"));
+
+            Optional<GetLoansLoanIdTransactions> amortizationAdjustmentTransactionOpt = loanDetails.getTransactions().stream()
+                    .filter(transaction -> LocalDate.of(2024, 2, 3).equals(transaction.getDate())
+                            && transaction.getType().getBuyDownFeeAmortizationAdjustment())
+                    .findFirst();
+            Assertions.assertTrue(amortizationAdjustmentTransactionOpt.isPresent());
+
+            verifyTRJournalEntries(amortizationAdjustmentTransactionOpt.get().getId(), //
+                    journalEntry(4.87, deferredIncomeLiabilityAccount, "CREDIT"), //
+                    journalEntry(4.87, feeIncomeAccount, "DEBIT"));
+        });
     }
 }

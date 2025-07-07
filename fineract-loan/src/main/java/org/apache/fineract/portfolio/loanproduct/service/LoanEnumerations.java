@@ -342,6 +342,12 @@ public final class LoanEnumerations {
                     LoanTransactionType.BUY_DOWN_FEE.getCode(), "Buy Down Fee");
             case BUY_DOWN_FEE_ADJUSTMENT -> new LoanTransactionEnumData(LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT.getValue().longValue(),
                     LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT.getCode(), "Buy Down Fee Adjustment");
+            case BUY_DOWN_FEE_AMORTIZATION ->
+                new LoanTransactionEnumData(LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION.getValue().longValue(),
+                        LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION.getCode(), "Buy Down Fee Amortization");
+            case BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT ->
+                new LoanTransactionEnumData(LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT.getValue().longValue(),
+                        LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT.getCode(), "Buy Down Fee Amortization Adjustment");
         };
     }
 

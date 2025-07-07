@@ -123,9 +123,12 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanArrearsAgingService
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssemblerImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanBuyDownFeeAmortizationProcessingService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanBuyDownFeeAmortizationProcessingServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanCalculateRepaymentPastDueService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanCapitalizedIncomeAmortizationEventService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanCapitalizedIncomeAmortizationProcessingService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanCapitalizedIncomeAmortizationProcessingServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
@@ -548,4 +551,25 @@ public class LoanAccountConfiguration {
                 loanCapitalizedIncomeAmortizationProcessingService);
     }
 
+    @Bean
+    @ConditionalOnMissingBean(LoanCapitalizedIncomeAmortizationProcessingService.class)
+    public LoanCapitalizedIncomeAmortizationProcessingService loanCapitalizedIncomeAmortizationProcessingService(
+            final ConfigurationDomainService configurationDomainService, final LoanTransactionRepository loanTransactionRepository,
+            final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository,
+            final BusinessEventNotifierService businessEventNotifierService, final LoanJournalEntryPoster journalEntryPoster,
+            final ExternalIdFactory externalIdFactory) {
+        return new LoanCapitalizedIncomeAmortizationProcessingServiceImpl(configurationDomainService, loanTransactionRepository,
+                loanCapitalizedIncomeBalanceRepository, businessEventNotifierService, journalEntryPoster, externalIdFactory);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(LoanBuyDownFeeAmortizationProcessingService.class)
+    public LoanBuyDownFeeAmortizationProcessingService loanBuyDownFeeAmortizationProcessingService(
+            final LoanTransactionRepository loanTransactionRepository,
+            final LoanBuyDownFeesBalanceRepository loanBuyDownFeesBalanceRepository,
+            final BusinessEventNotifierService businessEventNotifierService, final LoanJournalEntryPoster journalEntryPoster,
+            final ExternalIdFactory externalIdFactory) {
+        return new LoanBuyDownFeeAmortizationProcessingServiceImpl(loanTransactionRepository, loanBuyDownFeesBalanceRepository,
+                businessEventNotifierService, journalEntryPoster, externalIdFactory);
+    }
 }

@@ -208,4 +208,5 @@
     <include file="parts/0187_add_Loan_modified_and_withdrawn_event_configuration.xml" relativeToChangelogFile="true" />
     <include file="parts/0188_create_loan_buy_down_fee_balance.xml" relativeToChangelogFile="true" />
     <include file="parts/0189_add_loan_buydown_fee_event.xml" relativeToChangelogFile="true" />
+    <include file="parts/0190_buy_down_fee_amortization.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
