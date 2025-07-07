@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -32,10 +31,10 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.fineract.commands.service.CommandProcessingService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
@@ -65,10 +64,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class LoanWritePlatformServiceJpaRepositoryImplTest {
@@ -134,12 +131,12 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
     }
 
     private void setupMoneyHelper() {
-        ConfigurationDomainService cds = Mockito.mock(ConfigurationDomainService.class);
-        lenient().when(cds.getRoundingMode()).thenReturn(6);
+        // Set up a test tenant context
+        FineractPlatformTenant tenant = new FineractPlatformTenant(1L, "test", "Test Tenant", "Asia/Kolkata", null);
+        ThreadLocalContextUtil.setTenant(tenant);
 
-        MoneyHelper moneyHelper = new MoneyHelper();
-        ReflectionTestUtils.setField(moneyHelper, "configurationDomainService", cds);
-        moneyHelper.initialize();
+        // Initialize MoneyHelper with tenant configuration (HALF_EVEN = 6)
+        MoneyHelper.initializeTenantRoundingMode("test", 6);
     }
 
     @Test
