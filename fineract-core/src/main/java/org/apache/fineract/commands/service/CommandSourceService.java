@@ -65,20 +65,16 @@ public class CommandSourceService {
 
     @NonNull
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
-    public CommandSource saveInitialNewTransaction(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
-        return saveInitial(wrapper, jsonCommand, maker, idempotencyKey);
+    public CommandSource saveInitialNewTransaction(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey,
+            String batchId) {
+        return saveInitial(wrapper, jsonCommand, maker, idempotencyKey, batchId);
     }
 
     @NonNull
-    @Transactional(propagation = Propagation.REQUIRED)
-    public CommandSource saveInitialSameTransaction(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
-        return saveInitial(wrapper, jsonCommand, maker, idempotencyKey);
-    }
-
-    @NonNull
-    private CommandSource saveInitial(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
+    private CommandSource saveInitial(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey,
+            String batchId) {
         try {
-            CommandSource initialCommandSource = getInitialCommandSource(wrapper, jsonCommand, maker, idempotencyKey);
+            CommandSource initialCommandSource = buildInitialCommandSource(wrapper, jsonCommand, maker, idempotencyKey, batchId);
             return commandSourceRepository.saveAndFlush(initialCommandSource);
         } catch (JpaSystemException jse) {
             final String message = (jse.getRootCause() != null) ? jse.getRootCause().getMessage() : null;
@@ -119,9 +115,10 @@ public class CommandSourceService {
                 idempotencyKey);
     }
 
-    public CommandSource getInitialCommandSource(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
+    public CommandSource buildInitialCommandSource(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey,
+            String batchId) {
         CommandSource commandSourceResult = CommandSource.fullEntryFrom(wrapper, jsonCommand, maker, idempotencyKey,
-                UNDER_PROCESSING.getValue(), false);
+                UNDER_PROCESSING.getValue(), false, batchId);
         sanitizeJson(commandSourceResult, wrapper.getSanitizeJsonKeys());
         if (commandSourceResult.getCommandAsJson() == null) {
             commandSourceResult.setCommandAsJson("{}");

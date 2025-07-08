@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,11 +38,15 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.command.CommandStrategyProvider;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
-import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.commands.configuration.RetryConfigurationAssembler;
+import org.apache.fineract.commands.domain.CommandSource;
+import org.apache.fineract.commands.service.CommandSourceMapper;
+import org.apache.fineract.commands.service.CommandSourceService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.domain.BatchRequestContextHolder;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
+import org.apache.fineract.infrastructure.core.exceptionmapper.DefaultExceptionMapper;
 import org.apache.fineract.infrastructure.core.filters.BatchRequestPreprocessor;
 import org.apache.fineract.infrastructure.core.persistence.ExtendedJpaTransactionManager;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -56,6 +59,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,6 +76,10 @@ class BatchApiServiceImplTest {
     @Mock
     private UriInfo uriInfo;
     @Mock
+    private ApplicationContext applicationContext;
+    @Spy
+    private DefaultExceptionMapper defaultExceptionMapper;
+    @InjectMocks
     private ErrorHandler errorHandler;
 
     @Mock
@@ -79,6 +87,12 @@ class BatchApiServiceImplTest {
 
     @Mock
     private FineractProperties fineractProperties;
+
+    @Mock
+    private CommandSourceMapper commandSourceMapper;
+
+    @Mock
+    private CommandSourceService commandSourceService;
 
     @Spy
     private FineractRequestContextHolder fineractRequestContextHolder;
@@ -97,7 +111,7 @@ class BatchApiServiceImplTest {
     @BeforeEach
     void setUp() {
         batchApiService = new BatchApiServiceImpl(strategyProvider, resolutionHelper, transactionManager, errorHandler, List.of(),
-                batchPreprocessors, retryConfigurationAssembler);
+                batchPreprocessors, retryConfigurationAssembler, commandSourceService, commandSourceMapper);
         batchApiService.setEntityManager(entityManager);
         request = new BatchRequest();
         request.setRequestId(1L);
@@ -138,7 +152,7 @@ class BatchApiServiceImplTest {
         // throw exception at transaction commit to verify If OptimisticLockException or similar exceptions are on the
         // retry list, they can perform a retry.
         // do nothing on 2nd hit to simulate success commit
-        doThrow(new RetryException()).doNothing().when(transactionManager).commit(any());
+        doThrow(new RetryException("ERROR")).doNothing().when(transactionManager).commit(any());
 
         // Regular transaction
         when(transactionManager.getTransaction(any()))
@@ -156,14 +170,9 @@ class BatchApiServiceImplTest {
     @Test
     void testHandleBatchRequestsWithEnclosingTransactionResult200WithRetry() {
 
-        ErrorInfo errorInfo = mock(ErrorInfo.class);
-        when(errorInfo.getMessage()).thenReturn("Failed");
-        when(errorInfo.getStatusCode()).thenReturn(500);
-        when(errorHandler.handle(any())).thenReturn(errorInfo);
-
         List<BatchRequest> requestList = List.of(request);
         when(strategyProvider.getCommandStrategy(any())).thenReturn(commandStrategy);
-        when(commandStrategy.execute(any(), any())).thenThrow(new RetryException()).thenReturn(response);
+        when(commandStrategy.execute(any(), any())).thenThrow(new RetryException("ERROR")).thenReturn(response);
         // Regular transaction
         when(transactionManager.getTransaction(any()))
                 .thenReturn(new DefaultTransactionStatus("txn_name", null, true, true, false, false, false, null));
@@ -177,23 +186,19 @@ class BatchApiServiceImplTest {
     @Test
     void testHandleBatchRequestsWithEnclosingTransactionFailsWithRetry() {
 
-        List<BatchRequest> requestList = List.of(request);
+        List<BatchRequest> requestList = List.of(request, request);
         when(strategyProvider.getCommandStrategy(any())).thenReturn(commandStrategy);
-        when(commandStrategy.execute(any(), any())).thenThrow(new RetryException()).thenThrow(new RetryException())
-                .thenThrow(new RetryException());
-
-        ErrorInfo errorInfo = mock(ErrorInfo.class);
-        when(errorInfo.getMessage()).thenReturn("Failed");
-        when(errorInfo.getStatusCode()).thenReturn(500);
-        when(errorHandler.handle(any())).thenReturn(errorInfo);
-
+        when(commandStrategy.execute(any(), any())).thenReturn(response).thenThrow(new RetryException("ERROR"))
+                .thenThrow(new RetryException("ERROR")).thenThrow(new RetryException("ERROR"));
+        BatchRequestContextHolder.addCommandSource(CommandSource.builder().result("SUCCESS").resultStatusCode(200).build());
+        BatchRequestContextHolder.addCommandSource(CommandSource.builder().result("ERROR").resultStatusCode(500).build());
         // Regular transaction
         when(transactionManager.getTransaction(any()))
                 .thenReturn(new DefaultTransactionStatus("txn_name", null, true, true, false, false, false, null));
         List<BatchResponse> result = batchApiService.handleBatchRequestsWithEnclosingTransaction(requestList, uriInfo);
         assertEquals(1, result.size());
         assertEquals(500, result.getFirst().getStatusCode());
-        assertTrue(result.getFirst().getBody().contains("Failed"));
+        assertTrue(result.getFirst().getBody().contains("ERROR"));
         Mockito.verify(entityManager, times(3)).flush();
     }
 
@@ -227,6 +232,11 @@ class BatchApiServiceImplTest {
         Mockito.verifyNoInteractions(entityManager);
     }
 
-    private static final class RetryException extends RuntimeException {}
+    private static final class RetryException extends RuntimeException {
+
+        RetryException(String message) {
+            super(message);
+        }
+    }
 
 }

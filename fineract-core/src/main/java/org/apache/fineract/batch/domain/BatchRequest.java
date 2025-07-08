@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.batch.domain;
 
+import java.util.HashSet;
 import java.util.Set;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,4 +45,14 @@ public class BatchRequest {
     private Set<Header> headers;
     private Long reference;
     private String body;
+
+    /**
+     * Creates and returns a deep copy of this BatchRequest.
+     *
+     * @return a new BatchRequest instance with the same field values as this instance
+     */
+    public BatchRequest copy() {
+        return new BatchRequest().setRequestId(this.requestId).setRelativeUrl(this.relativeUrl).setMethod(this.method)
+                .setHeaders(this.headers != null ? new HashSet<>(this.headers) : null).setReference(this.reference).setBody(this.body);
+    }
 }

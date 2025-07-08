@@ -18,8 +18,12 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import org.apache.fineract.commands.domain.CommandSource;
 import org.springframework.transaction.TransactionStatus;
 
 public final class BatchRequestContextHolder {
@@ -27,10 +31,10 @@ public final class BatchRequestContextHolder {
     private BatchRequestContextHolder() {}
 
     private static final ThreadLocal<Map<String, Object>> batchAttributes = new ThreadLocal<>();
-
     private static final ThreadLocal<Optional<TransactionStatus>> batchTransaction = ThreadLocal.withInitial(Optional::empty);
-
     private static final ThreadLocal<Boolean> isEnclosingTransaction = new ThreadLocal<>();
+    private static final ThreadLocal<List<CommandSource>> commandSources = ThreadLocal.withInitial(ArrayList::new);
+    private static final ThreadLocal<String> batchRequestId = ThreadLocal.withInitial(() -> UUID.randomUUID().toString());
 
     /**
      * True if the batch attributes are set
@@ -129,5 +133,27 @@ public final class BatchRequestContextHolder {
 
     public static void resetTransaction() {
         batchTransaction.set(Optional.empty());
+    }
+
+    public static void addCommandSource(final CommandSource commandSource) {
+        if (isEnclosingTransaction() && commandSource != null) {
+            commandSources.get().add(commandSource);
+        }
+    }
+
+    public static List<CommandSource> getCommandSources() {
+        return new ArrayList<>(commandSources.get());
+    }
+
+    public static void resetCommandSources() {
+        commandSources.get().clear();
+    }
+
+    public static String getBatchRequestId() {
+        return batchRequestId.get();
+    }
+
+    public static void resetBatchRequestId() {
+        batchRequestId.remove();
     }
 }

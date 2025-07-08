@@ -140,8 +140,11 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
     @Column(name = "is_sanitized", nullable = false)
     private boolean sanitized;
 
+    @Column(name = "batch_id")
+    private String batchId;
+
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker,
-            String idempotencyKey, Integer status, boolean sanitized) {
+            String idempotencyKey, Integer status, boolean sanitized, String batchId) {
         return CommandSource.builder() //
                 .actionName(wrapper.actionName()) //
                 .entityName(wrapper.entityName()) //
@@ -162,6 +165,7 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
                 .transactionId(command.getTransactionId()) //
                 .creditBureauId(command.getCreditBureauId()) //
                 .organisationCreditBureauId(command.getOrganisationCreditBureauId()) //
+                .batchId(batchId) //
                 .loanExternalId(command.getLoanExternalId()).sanitized(sanitized).build(); //
     }
 

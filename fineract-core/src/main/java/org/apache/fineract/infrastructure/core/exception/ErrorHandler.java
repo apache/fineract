@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.naming.AuthenticationException;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.fortuna.ical4j.validate.ValidationException;
 import org.apache.commons.collections4.SetUtils;
@@ -63,7 +62,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
-@AllArgsConstructor
 public final class ErrorHandler {
 
     private static final Gson JSON_HELPER = GoogleGsonSerializerHelper.createGsonBuilder().create();
@@ -110,10 +108,10 @@ public final class ErrorHandler {
     }
 
     @Autowired
-    private final ApplicationContext ctx;
+    private ApplicationContext ctx;
 
     @Autowired
-    private final DefaultExceptionMapper defaultExceptionMapper;
+    private DefaultExceptionMapper defaultExceptionMapper;
 
     @NotNull
     public <T extends RuntimeException> ExceptionMapper<T> findMostSpecificExceptionHandler(T exception) {

@@ -59,10 +59,13 @@ public class IdempotencyCommandProcessFailedExceptionTest {
         IdempotentCommandExceptionMapper mapper = new IdempotentCommandExceptionMapper();
         CommandWrapper command = new CommandWrapper(null, null, null, null, null, null, null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null);
-        CommandSource source = CommandSource.fullEntryFrom(command, JsonCommand.from("{}"), null, "dummy-key", null, false);
+        CommandSource source = CommandSource.fullEntryFrom(command, JsonCommand.from("{}"), null, "dummy-key", null, false, null);
+        source.setResult("error message");
+        source.setResultStatusCode(403);
         IdempotentCommandProcessFailedException exception = new IdempotentCommandProcessFailedException(command, null, source);
         Response result = mapper.toResponse(exception);
-        assertEquals(500, result.getStatus());
+        assertEquals(403, result.getStatus());
+        assertEquals("error message", result.getEntity());
         assertEquals("true", result.getHeaderString(IDEMPOTENT_CACHE_HEADER));
     }
 }

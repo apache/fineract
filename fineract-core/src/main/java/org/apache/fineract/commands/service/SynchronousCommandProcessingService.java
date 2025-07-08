@@ -122,9 +122,10 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             AppUser user = context.authenticatedUser(wrapper);
             if (commandSource == null) {
                 if (isEnclosingTransaction) {
-                    commandSource = commandSourceService.getInitialCommandSource(wrapper, command, user, idempotencyKey);
+                    String batchId = BatchRequestContextHolder.getBatchRequestId();
+                    commandSource = commandSourceService.buildInitialCommandSource(wrapper, command, user, idempotencyKey, batchId);
                 } else {
-                    commandSource = commandSourceService.saveInitialNewTransaction(wrapper, command, user, idempotencyKey);
+                    commandSource = commandSourceService.saveInitialNewTransaction(wrapper, command, user, idempotencyKey, null);
                     commandId = commandSource.getId();
                 }
             }
@@ -173,7 +174,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 // Critical: Refetch on retry attempts (not on first attempt)
                 CommandSource currentSource = finalCommandSource;
                 if (attemptNumber > 1) {
-                    log.info("Retrying command result save - attempt {} for command ID {}", attemptNumber, finalCommandSource.getId());
+                    log.warn("Retrying command result save - attempt {} for command ID {}", attemptNumber, finalCommandSource.getId());
                     currentSource = commandSourceService.getCommandSource(finalCommandSource.getId());
                 }
 

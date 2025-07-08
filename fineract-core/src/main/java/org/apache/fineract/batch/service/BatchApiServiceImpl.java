@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.batch.service;
 
+import static org.apache.http.HttpStatus.SC_FAILED_DEPENDENCY;
 import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
 import static org.apache.http.HttpStatus.SC_OK;
 
@@ -48,16 +49,22 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.command.CommandStrategyProvider;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.batch.domain.FailedDependencyResult;
 import org.apache.fineract.batch.domain.Header;
 import org.apache.fineract.batch.exception.BatchReferenceInvalidException;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.batch.service.ResolutionHelper.BatchRequestNode;
 import org.apache.fineract.commands.configuration.RetryConfigurationAssembler;
+import org.apache.fineract.commands.domain.CommandSource;
+import org.apache.fineract.commands.service.CommandSourceData;
+import org.apache.fineract.commands.service.CommandSourceMapper;
+import org.apache.fineract.commands.service.CommandSourceService;
 import org.apache.fineract.infrastructure.core.domain.BatchRequestContextHolder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.filters.BatchCallHandler;
 import org.apache.fineract.infrastructure.core.filters.BatchFilter;
 import org.apache.fineract.infrastructure.core.filters.BatchRequestPreprocessor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.lang.NonNull;
@@ -87,12 +94,11 @@ public class BatchApiServiceImpl implements BatchApiService {
     private final ResolutionHelper resolutionHelper;
     private final PlatformTransactionManager transactionManager;
     private final ErrorHandler errorHandler;
-
     private final List<BatchFilter> batchFilters;
-
     private final List<BatchRequestPreprocessor> batchPreprocessors;
-
     private final RetryConfigurationAssembler retryConfigurationAssembler;
+    private final CommandSourceService commandSourceService;
+    private final CommandSourceMapper commandSourceMapper;
 
     private EntityManager entityManager;
 
@@ -128,6 +134,10 @@ public class BatchApiServiceImpl implements BatchApiService {
                     : handleRequestNodes(requestList, uriInfo);
         } finally {
             BatchRequestContextHolder.resetIsEnclosingTransaction();
+            BatchRequestContextHolder.resetCommandSources();
+            BatchRequestContextHolder.resetRequestAttributes();
+            BatchRequestContextHolder.resetBatchRequestId();
+            BatchRequestContextHolder.resetTransaction();
         }
     }
 
@@ -149,6 +159,7 @@ public class BatchApiServiceImpl implements BatchApiService {
         List<BatchResponse> responseList = new ArrayList<>();
         Supplier<List<BatchResponse>> batchSupplier = () -> {
             responseList.clear();
+            BatchRequestContextHolder.resetCommandSources();
             try {
                 TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
                 transactionTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
@@ -166,9 +177,11 @@ public class BatchApiServiceImpl implements BatchApiService {
         try {
             return retryingBatch.get();
         } catch (TransactionException | NonTransientDataAccessException ex) {
+            saveFailedCommandSourceEntries(ex);
             return buildErrorResponses(ex, responseList);
         } catch (BatchExecutionException ex) {
             log.error("Exception during the batch request processing", ex);
+            saveFailedCommandSourceEntries(ex.getCause());
             responseList.add(buildErrorResponse(ex.getCause(), ex.getRequest()));
             return responseList;
         }
@@ -184,8 +197,10 @@ public class BatchApiServiceImpl implements BatchApiService {
      */
     private List<BatchResponse> handleRequestNodes(final List<BatchRequest> requestList, final UriInfo uriInfo) {
         final List<BatchRequestNode> rootNodes;
+        // Create a deep copy of requests to avoid modifying the original list
+        final List<BatchRequest> copyOfRequests = deepCopyRequests(requestList);
         try {
-            rootNodes = this.resolutionHelper.buildNodesTree(requestList);
+            rootNodes = this.resolutionHelper.buildNodesTree(copyOfRequests);
         } catch (BatchReferenceInvalidException e) {
             return List.of(buildOrThrowErrorResponse(e, null));
         }
@@ -196,6 +211,11 @@ public class BatchApiServiceImpl implements BatchApiService {
         }
         responseList.sort(Comparator.comparing(BatchResponse::getRequestId));
         return responseList;
+    }
+
+    @NotNull
+    private static List<BatchRequest> deepCopyRequests(List<BatchRequest> requestList) {
+        return requestList.stream().map(BatchRequest::copy).collect(Collectors.toList());
     }
 
     /**
@@ -394,5 +414,38 @@ public class BatchApiServiceImpl implements BatchApiService {
     @PersistenceContext
     public void setEntityManager(EntityManager entityManager) {
         this.entityManager = entityManager;
+    }
+
+    private void saveFailedCommandSourceEntries(final Throwable ex) {
+        Retry persistenceRetry = retryConfigurationAssembler.getRetryConfigurationForCommandResultPersistence();
+        final List<CommandSource> commandSources = new ArrayList<>();
+        try {
+            persistenceRetry.executeRunnable(() -> {
+                commandSources.addAll(BatchRequestContextHolder.getCommandSources());
+                commandSources.forEach(commandSource -> {
+                    if (commandSource.getResultStatusCode() != null //
+                            && commandSource.getResultStatusCode() > 199 //
+                            && commandSource.getResultStatusCode() < 300) { //
+                        commandSource.setResultStatusCode(SC_FAILED_DEPENDENCY);
+                        commandSource.setResult(FailedDependencyResult.builder().batchId(BatchRequestContextHolder.getBatchRequestId()) //
+                                .dependentErrorMessage(
+                                        "Request was successful but got rollback as principal request failed with error. Batch id: "
+                                                + BatchRequestContextHolder.getBatchRequestId()) //
+                                .build().toString()); //
+                    }
+                    if (log.isDebugEnabled()) {
+                        CommandSourceData commandSourceData = commandSourceMapper.map(commandSource);
+                        log.debug("Saving failed CommandSource entry for batch audit: {}", commandSourceData);
+                    }
+
+                    commandSourceService.saveResultNewTransaction(commandSource);
+                });
+            });
+        } catch (Exception e) {
+            commandSources.forEach(commandSource -> {
+                CommandSourceData commandSourceData = commandSourceMapper.map(commandSource);
+                log.error("Failed to save failed CommandSource entry for batch audit: {}", commandSourceData);
+            });
+        }
     }
 }
