@@ -39,6 +39,8 @@ public enum TransactionType {
     CAPITALIZED_INCOME_ADJUSTMENT("capitalizedIncomeAdjustment"), //
     CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT("capitalizedIncomeAmortizationAdjustment"), //
     BUY_DOWN_FEE("buyDownFee"), //
+    BUY_DOWN_FEE_ADJUSTMENT("buyDownFeeAdjustment"), //
+    BUY_DOWN_FEE_AMORTIZATION("buyDownFeeAmortization"), //
     ;
 
     public final String value;

@@ -225,13 +225,14 @@ public abstract class TestContextKey {
     public static final String LOAN_DELINQUENCY_ACTION_RESPONSE = "loanDelinquencyActionResponse";
     public static final String LOAN_TRANSACTION_RESPONSE = "loanTransactionResponse";
     public static final String LOAN_CAPITALIZED_INCOME_RESPONSE = "loanCapitalizedIncomeResponse";
-    public static final String LOAN_BUY_DOWN_FEE_RESPONSE = "loanCapitalizedBuyDownFeeResponse";
     public static final String LOAN_DISBURSEMENT_DETAIL_RESPONSE = "loanDisbursementDetailResponse";
     public static final String LOAN_CAPITALIZED_INCOME_AMORTIZATION_ID = "loanCapitalizedIncomeAmortizationId";
     public static final String LOAN_CAPITALIZED_INCOME_ADJUSTMENT_RESPONSE = "loanCapitalizedIncomeAdjustmentResponse";
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_CONTRACT_TERMINATION = "loanProductCreateResponseLP2AdvancedPaymentInterestDailyInterestRecalculationContractTermination";
     public static final String LOAN_CONTRACT_TERMINATION_RESPONSE = "loanContractTerminationResponse";
     public static final String LOAN_UNDO_CONTRACT_TERMINATION_RESPONSE = "loanUndoContractTerminationResponse";
+    public static final String LOAN_BUY_DOWN_FEE_RESPONSE = "loanBuyDownFeeResponse";
+    public static final String LOAN_BUY_DOWN_FEE_ADJUSTMENT_RESPONSE = "loanBuyDownFeeAdjustmentResponse";
     public static final String MANUAL_JOURNAL_ENTRIES_REQUEST = "manualJournalEntriesRequest";
     public static final String MANUAL_JOURNAL_ENTRIES_RESPONSE = "manualJournalEntriesResponse";
 }
