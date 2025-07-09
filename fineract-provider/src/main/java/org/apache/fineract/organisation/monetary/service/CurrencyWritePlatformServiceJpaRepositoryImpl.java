@@ -23,10 +23,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.data.CurrencyUpdateRequest;
 import org.apache.fineract.organisation.monetary.data.CurrencyUpdateResponse;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
+import org.apache.fineract.organisation.monetary.domain.CreateCurrency;
+import org.apache.fineract.organisation.monetary.domain.CreateCurrencyRepository;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrency;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepository;
 import org.apache.fineract.organisation.monetary.exception.CurrencyInUseException;
@@ -40,6 +43,7 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
 
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
     private final OrganisationCurrencyRepository organisationCurrencyRepository;
+    private final CreateCurrencyRepository createCurrencyRepository;
     private final LoanProductReadPlatformService loanProductService;
     private final SavingsProductReadPlatformService savingsProductService;
     private final ChargeReadPlatformService chargeService;
@@ -76,5 +80,14 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
         organisationCurrencyRepository.saveAll(allowedCurrencies);
 
         return CurrencyUpdateResponse.builder().currencies(allowedCurrencyCodes).build();
+    }
+
+    @Override
+    public CurrencyData createCurrency(CurrencyData request) {
+        CreateCurrency currency = CreateCurrency.fromCurrencyData(request);
+        CreateCurrency savedResults = createCurrencyRepository.save(currency);
+        CurrencyData finalResults = CreateCurrency.toCurrencyData(savedResults);
+
+        return finalResults;
     }
 }

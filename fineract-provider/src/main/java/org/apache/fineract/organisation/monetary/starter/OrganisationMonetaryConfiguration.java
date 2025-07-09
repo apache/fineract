@@ -19,6 +19,7 @@
 package org.apache.fineract.organisation.monetary.starter;
 
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
+import org.apache.fineract.organisation.monetary.domain.CreateCurrencyRepository;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepository;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformServiceImpl;
@@ -45,11 +46,12 @@ public class OrganisationMonetaryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(CurrencyWritePlatformService.class)
-    public CurrencyWritePlatformService currencyWritePlatformService(ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
-            OrganisationCurrencyRepository organisationCurrencyRepository, LoanProductReadPlatformService loanProductService,
-            SavingsProductReadPlatformService savingsProductService, ChargeReadPlatformService chargeService) {
+    CurrencyWritePlatformService currencyWritePlatformService(ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
+            OrganisationCurrencyRepository organisationCurrencyRepository, CreateCurrencyRepository createCurrencyRepository,
+            LoanProductReadPlatformService loanProductService, SavingsProductReadPlatformService savingsProductService,
+            ChargeReadPlatformService chargeService) {
         return new CurrencyWritePlatformServiceJpaRepositoryImpl(applicationCurrencyRepository, organisationCurrencyRepository,
-                loanProductService, savingsProductService, chargeService);
+                createCurrencyRepository, loanProductService, savingsProductService, chargeService);
     }
 
     @Bean

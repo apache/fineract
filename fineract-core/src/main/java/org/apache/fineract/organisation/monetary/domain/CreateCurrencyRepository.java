@@ -16,18 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.service;
+package org.apache.fineract.organisation.monetary.domain;
 
-import java.util.List;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface CurrencyReadPlatformService {
+public interface CreateCurrencyRepository extends JpaRepository<CreateCurrency, Long>, JpaSpecificationExecutor<CreateCurrency> {
 
-    List<CurrencyData> retrieveAllowedCurrencies();
-
-    List<CurrencyData> retrieveAllPlatformCurrencies();
-
-    CurrencyData retrieveCurrency(String code);
-
-    Boolean checkExistingCurrencyCode(String currencyCode);
 }

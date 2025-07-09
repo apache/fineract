@@ -73,4 +73,11 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
             return " c.code as code, c.name as name, c.decimal_places as decimalPlaces,c.currency_multiplesof as inMultiplesOf, c.display_symbol as displaySymbol, c.internationalized_name_code as nameCode ";
         }
     }
+
+    @Override
+    public Boolean checkExistingCurrencyCode(String currencyCode) {
+        final String sql = "select exists (select 1 from m_currency where code = ?);";
+        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, currencyCode);
+        return Boolean.TRUE.equals(exists);
+    }
 }

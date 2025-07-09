@@ -38,4 +38,10 @@ public class OrganisationCurrencyReadPlatformServiceImpl implements Organisation
         return CurrencyConfigurationData.builder().selectedCurrencyOptions(selectedCurrencyOptions).currencyOptions(currencyOptions)
                 .build();
     }
+
+    @Override
+    public Boolean checkExistingCurrencyCode(String currencyCode) {
+        Boolean isExistingCurrency = currencyReadPlatformService.checkExistingCurrencyCode(currencyCode);
+        return isExistingCurrency;
+    }
 }

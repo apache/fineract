@@ -1,0 +1,1410 @@
+[
+    {
+        "code" : "AED",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "UAE Dirham",
+        "nameCode" : "currency.AED"
+    },
+    {
+        "code" : "AFN",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Afghanistan Afghani",
+        "nameCode" : "currency.AFN"
+    },
+    {
+        "code" : "ALL",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Albanian Lek",
+        "nameCode" : "currency.ALL"
+    },
+    {
+        "code" : "AMD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Armenian Dram",
+        "nameCode" : "currency.AMD"
+    },
+    {
+        "code" : "ANG",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Netherlands Antillian Guilder",
+        "nameCode" : "currency.ANG"
+    },
+    {
+        "code" : "AOA",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Angolan Kwanza",
+        "nameCode" : "currency.AOA"
+    },
+    {
+        "code" : "ARS",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "$",
+        "name" : "Argentine Peso",
+        "nameCode" : "currency.ARS"
+    },
+    {
+        "code" : "AUD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "A$",
+        "name" : "Australian Dollar",
+        "nameCode" : "currency.AUD"
+    },
+    {
+        "code" : "AWG",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Aruban Guilder",
+        "nameCode" : "currency.AWG"
+    },
+    {
+        "code" : "AZM",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Azerbaijanian Manat",
+        "nameCode" : "currency.AZM"
+    },
+    {
+        "code" : "BAM",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Bosnia and Herzegovina Convertible Marks",
+        "nameCode" : "currency.BAM"
+    },
+    {
+        "code" : "BBD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Barbados Dollar",
+        "nameCode" : "currency.BBD"
+    },
+    {
+        "code" : "BDT",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Bangladesh Taka",
+        "nameCode" : "currency.BDT"
+    },
+    {
+        "code" : "BGN",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Bulgarian Lev",
+        "nameCode" : "currency.BGN"
+    },
+    {
+        "code" : "BHD",
+        "decimalPlaces" : 3,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Bahraini Dinar",
+        "nameCode" : "currency.BHD"
+    },
+    {
+        "code" : "BIF",
+        "decimalPlaces" : 0,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Burundi Franc",
+        "nameCode" : "currency.BIF"
+    },
+    {
+        "code" : "BMD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Bermudian Dollar",
+        "nameCode" : "currency.BMD"
+    },
+    {
+        "code" : "BND",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "B$",
+        "name" : "Brunei Dollar",
+        "nameCode" : "currency.BND"
+    },
+    {
+        "code" : "BOB",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "Bs.",
+        "name" : "Bolivian Boliviano",
+        "nameCode" : "currency.BOB"
+    },
+    {
+        "code" : "BRL",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "R$",
+        "name" : "Brazilian Real",
+        "nameCode" : "currency.BRL"
+    },
+    {
+        "code" : "BSD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Bahamian Dollar",
+        "nameCode" : "currency.BSD"
+    },
+    {
+        "code" : "BTN",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Bhutan Ngultrum",
+        "nameCode" : "currency.BTN"
+    },
+    {
+        "code" : "BWP",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Botswana Pula",
+        "nameCode" : "currency.BWP"
+    },
+    {
+        "code" : "BYR",
+        "decimalPlaces" : 0,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Belarussian Ruble",
+        "nameCode" : "currency.BYR"
+    },
+    {
+        "code" : "BZD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "BZ$",
+        "name" : "Belize Dollar",
+        "nameCode" : "currency.BZD"
+    },
+    {
+        "code" : "CAD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Canadian Dollar",
+        "nameCode" : "currency.CAD"
+    },
+    {
+        "code" : "CDF",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Franc Congolais",
+        "nameCode" : "currency.CDF"
+    },
+    {
+        "code" : "CHF",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Swiss Franc",
+        "nameCode" : "currency.CHF"
+    },
+    {
+        "code" : "CLP",
+        "decimalPlaces" : 0,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "$",
+        "name" : "Chilean Peso",
+        "nameCode" : "currency.CLP"
+    },
+    {
+        "code" : "CNY",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Chinese Yuan Renminbi",
+        "nameCode" : "currency.CNY"
+    },
+    {
+        "code" : "COP",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "$",
+        "name" : "Colombian Peso",
+        "nameCode" : "currency.COP"
+    },
+    {
+        "code" : "CRC",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "₡",
+        "name" : "Costa Rican Colon",
+        "nameCode" : "currency.CRC"
+    },
+    {
+        "code" : "CSD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Serbian Dinar",
+        "nameCode" : "currency.CSD"
+    },
+    {
+        "code" : "CUP",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "$MN",
+        "name" : "Cuban Peso",
+        "nameCode" : "currency.CUP"
+    },
+    {
+        "code" : "CVE",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Cape Verde Escudo",
+        "nameCode" : "currency.CVE"
+    },
+    {
+        "code" : "CYP",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Cyprus Pound",
+        "nameCode" : "currency.CYP"
+    },
+    {
+        "code" : "CZK",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Czech Koruna",
+        "nameCode" : "currency.CZK"
+    },
+    {
+        "code" : "DJF",
+        "decimalPlaces" : 0,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Djibouti Franc",
+        "nameCode" : "currency.DJF"
+    },
+    {
+        "code" : "DKK",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Danish Krone",
+        "nameCode" : "currency.DKK"
+    },
+    {
+        "code" : "DOP",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "RD$",
+        "name" : "Dominican Peso",
+        "nameCode" : "currency.DOP"
+    },
+    {
+        "code" : "DZD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Algerian Dinar",
+        "nameCode" : "currency.DZD"
+    },
+    {
+        "code" : "EEK",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Estonian Kroon",
+        "nameCode" : "currency.EEK"
+    },
+    {
+        "code" : "EGP",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Egyptian Pound",
+        "nameCode" : "currency.EGP"
+    },
+    {
+        "code" : "ERN",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Eritrea Nafka",
+        "nameCode" : "currency.ERN"
+    },
+    {
+        "code" : "ETB",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Ethiopian Birr",
+        "nameCode" : "currency.ETB"
+    },
+    {
+        "code" : "EUR",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "€",
+        "name" : "Euro",
+        "nameCode" : "currency.EUR"
+    },
+    {
+        "code" : "FJD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Fiji Dollar",
+        "nameCode" : "currency.FJD"
+    },
+    {
+        "code" : "FKP",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Falkland Islands Pound",
+        "nameCode" : "currency.FKP"
+    },
+    {
+        "code" : "GBP",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Pound Sterling",
+        "nameCode" : "currency.GBP"
+    },
+    {
+        "code" : "GEL",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Georgian Lari",
+        "nameCode" : "currency.GEL"
+    },
+    {
+        "code" : "GHC",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "GHc",
+        "name" : "Ghana Cedi",
+        "nameCode" : "currency.GHC"
+    },
+    {
+        "code" : "GIP",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Gibraltar Pound",
+        "nameCode" : "currency.GIP"
+    },
+    {
+        "code" : "GMD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Gambian Dalasi",
+        "nameCode" : "currency.GMD"
+    },
+    {
+        "code" : "GNF",
+        "decimalPlaces" : 0,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Guinea Franc",
+        "nameCode" : "currency.GNF"
+    },
+    {
+        "code" : "GTQ",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "Q",
+        "name" : "Guatemala Quetzal",
+        "nameCode" : "currency.GTQ"
+    },
+    {
+        "code" : "GYD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Guyana Dollar",
+        "nameCode" : "currency.GYD"
+    },
+    {
+        "code" : "HKD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Hong Kong Dollar",
+        "nameCode" : "currency.HKD"
+    },
+    {
+        "code" : "HNL",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "L",
+        "name" : "Honduras Lempira",
+        "nameCode" : "currency.HNL"
+    },
+    {
+        "code" : "HRK",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Croatian Kuna",
+        "nameCode" : "currency.HRK"
+    },
+    {
+        "code" : "HTG",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "G",
+        "name" : "Haiti Gourde",
+        "nameCode" : "currency.HTG"
+    },
+    {
+        "code" : "HUF",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Hungarian Forint",
+        "nameCode" : "currency.HUF"
+    },
+    {
+        "code" : "IDR",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Indonesian Rupiah",
+        "nameCode" : "currency.IDR"
+    },
+    {
+        "code" : "ILS",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "New Israeli Shekel",
+        "nameCode" : "currency.ILS"
+    },
+    {
+        "code" : "INR",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "₹",
+        "name" : "Indian Rupee",
+        "nameCode" : "currency.INR"
+    },
+    {
+        "code" : "IQD",
+        "decimalPlaces" : 3,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Iraqi Dinar",
+        "nameCode" : "currency.IQD"
+    },
+    {
+        "code" : "IRR",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Iranian Rial",
+        "nameCode" : "currency.IRR"
+    },
+    {
+        "code" : "ISK",
+        "decimalPlaces" : 0,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Iceland Krona",
+        "nameCode" : "currency.ISK"
+    },
+    {
+        "code" : "JMD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Jamaican Dollar",
+        "nameCode" : "currency.JMD"
+    },
+    {
+        "code" : "JOD",
+        "decimalPlaces" : 3,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Jordanian Dinar",
+        "nameCode" : "currency.JOD"
+    },
+    {
+        "code" : "JPY",
+        "decimalPlaces" : 0,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Japanese Yen",
+        "nameCode" : "currency.JPY"
+    },
+    {
+        "code" : "KES",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "KSh",
+        "name" : "Kenyan Shilling",
+        "nameCode" : "currency.KES"
+    },
+    {
+        "code" : "KGS",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Kyrgyzstan Som",
+        "nameCode" : "currency.KGS"
+    },
+    {
+        "code" : "KHR",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Cambodia Riel",
+        "nameCode" : "currency.KHR"
+    },
+    {
+        "code" : "KMF",
+        "decimalPlaces" : 0,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Comoro Franc",
+        "nameCode" : "currency.KMF"
+    },
+    {
+        "code" : "KPW",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "North Korean Won",
+        "nameCode" : "currency.KPW"
+    },
+    {
+        "code" : "KRW",
+        "decimalPlaces" : 0,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Korean Won",
+        "nameCode" : "currency.KRW"
+    },
+    {
+        "code" : "KWD",
+        "decimalPlaces" : 3,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Kuwaiti Dinar",
+        "nameCode" : "currency.KWD"
+    },
+    {
+        "code" : "KYD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Cayman Islands Dollar",
+        "nameCode" : "currency.KYD"
+    },
+    {
+        "code" : "KZT",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Kazakhstan Tenge",
+        "nameCode" : "currency.KZT"
+    },
+    {
+        "code" : "LAK",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Lao Kip",
+        "nameCode" : "currency.LAK"
+    },
+    {
+        "code" : "LBP",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "L£",
+        "name" : "Lebanese Pound",
+        "nameCode" : "currency.LBP"
+    },
+    {
+        "code" : "LKR",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Sri Lanka Rupee",
+        "nameCode" : "currency.LKR"
+    },
+    {
+        "code" : "LRD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Liberian Dollar",
+        "nameCode" : "currency.LRD"
+    },
+    {
+        "code" : "LSL",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Lesotho Loti",
+        "nameCode" : "currency.LSL"
+    },
+    {
+        "code" : "LTL",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Lithuanian Litas",
+        "nameCode" : "currency.LTL"
+    },
+    {
+        "code" : "LVL",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Latvian Lats",
+        "nameCode" : "currency.LVL"
+    },
+    {
+        "code" : "LYD",
+        "decimalPlaces" : 3,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Libyan Dinar",
+        "nameCode" : "currency.LYD"
+    },
+    {
+        "code" : "MAD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Moroccan Dirham",
+        "nameCode" : "currency.MAD"
+    },
+    {
+        "code" : "MDL",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Moldovan Leu",
+        "nameCode" : "currency.MDL"
+    },
+    {
+        "code" : "MGA",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Malagasy Ariary",
+        "nameCode" : "currency.MGA"
+    },
+    {
+        "code" : "MKD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Macedonian Denar",
+        "nameCode" : "currency.MKD"
+    },
+    {
+        "code" : "MMK",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "K",
+        "name" : "Myanmar Kyat",
+        "nameCode" : "currency.MMK"
+    },
+    {
+        "code" : "MNT",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Mongolian Tugrik",
+        "nameCode" : "currency.MNT"
+    },
+    {
+        "code" : "MOP",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Macau Pataca",
+        "nameCode" : "currency.MOP"
+    },
+    {
+        "code" : "MRO",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Mauritania Ouguiya",
+        "nameCode" : "currency.MRO"
+    },
+    {
+        "code" : "MTL",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Maltese Lira",
+        "nameCode" : "currency.MTL"
+    },
+    {
+        "code" : "MUR",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Mauritius Rupee",
+        "nameCode" : "currency.MUR"
+    },
+    {
+        "code" : "MVR",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Maldives Rufiyaa",
+        "nameCode" : "currency.MVR"
+    },
+    {
+        "code" : "MWK",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Malawi Kwacha",
+        "nameCode" : "currency.MWK"
+    },
+    {
+        "code" : "MXN",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "$",
+        "name" : "Mexican Peso",
+        "nameCode" : "currency.MXN"
+    },
+    {
+        "code" : "MYR",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Malaysian Ringgit",
+        "nameCode" : "currency.MYR"
+    },
+    {
+        "code" : "MZM",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Mozambique Metical",
+        "nameCode" : "currency.MZM"
+    },
+    {
+        "code" : "NAD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Namibia Dollar",
+        "nameCode" : "currency.NAD"
+    },
+    {
+        "code" : "NGN",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Nigerian Naira",
+        "nameCode" : "currency.NGN"
+    },
+    {
+        "code" : "NIO",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "C$",
+        "name" : "Nicaragua Cordoba Oro",
+        "nameCode" : "currency.NIO"
+    },
+    {
+        "code" : "NOK",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Norwegian Krone",
+        "nameCode" : "currency.NOK"
+    },
+    {
+        "code" : "NPR",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Nepalese Rupee",
+        "nameCode" : "currency.NPR"
+    },
+    {
+        "code" : "NZD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "New Zealand Dollar",
+        "nameCode" : "currency.NZD"
+    },
+    {
+        "code" : "OMR",
+        "decimalPlaces" : 3,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Rial Omani",
+        "nameCode" : "currency.OMR"
+    },
+    {
+        "code" : "PAB",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "B/.",
+        "name" : "Panama Balboa",
+        "nameCode" : "currency.PAB"
+    },
+    {
+        "code" : "PEN",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "S/.",
+        "name" : "Peruvian Nuevo Sol",
+        "nameCode" : "currency.PEN"
+    },
+    {
+        "code" : "PGK",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Papua New Guinea Kina",
+        "nameCode" : "currency.PGK"
+    },
+    {
+        "code" : "PHP",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Philippine Peso",
+        "nameCode" : "currency.PHP"
+    },
+    {
+        "code" : "PKR",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Pakistan Rupee",
+        "nameCode" : "currency.PKR"
+    },
+    {
+        "code" : "PLN",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Polish Zloty",
+        "nameCode" : "currency.PLN"
+    },
+    {
+        "code" : "PYG",
+        "decimalPlaces" : 0,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "₲",
+        "name" : "Paraguayan Guarani",
+        "nameCode" : "currency.PYG"
+    },
+    {
+        "code" : "QAR",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Qatari Rial",
+        "nameCode" : "currency.QAR"
+    },
+    {
+        "code" : "RON",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Romanian Leu",
+        "nameCode" : "currency.RON"
+    },
+    {
+        "code" : "RUB",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Russian Ruble",
+        "nameCode" : "currency.RUB"
+    },
+    {
+        "code" : "RWF",
+        "decimalPlaces" : 0,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Rwanda Franc",
+        "nameCode" : "currency.RWF"
+    },
+    {
+        "code" : "SAR",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Saudi Riyal",
+        "nameCode" : "currency.SAR"
+    },
+    {
+        "code" : "SBD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Solomon Islands Dollar",
+        "nameCode" : "currency.SBD"
+    },
+    {
+        "code" : "SCR",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Seychelles Rupee",
+        "nameCode" : "currency.SCR"
+    },
+    {
+        "code" : "SDD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Sudanese Dinar",
+        "nameCode" : "currency.SDD"
+    },
+    {
+        "code" : "SEK",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Swedish Krona",
+        "nameCode" : "currency.SEK"
+    },
+    {
+        "code" : "SGD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Singapore Dollar",
+        "nameCode" : "currency.SGD"
+    },
+    {
+        "code" : "SHP",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "St Helena Pound",
+        "nameCode" : "currency.SHP"
+    },
+    {
+        "code" : "SIT",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Slovenian Tolar",
+        "nameCode" : "currency.SIT"
+    },
+    {
+        "code" : "SKK",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Slovak Koruna",
+        "nameCode" : "currency.SKK"
+    },
+    {
+        "code" : "SLL",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Sierra Leone Leone",
+        "nameCode" : "currency.SLL"
+    },
+    {
+        "code" : "SOS",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Somali Shilling",
+        "nameCode" : "currency.SOS"
+    },
+    {
+        "code" : "SRD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Surinam Dollar",
+        "nameCode" : "currency.SRD"
+    },
+    {
+        "code" : "STD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Sao Tome and Principe Dobra",
+        "nameCode" : "currency.STD"
+    },
+    {
+        "code" : "SVC",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "El Salvador Colon",
+        "nameCode" : "currency.SVC"
+    },
+    {
+        "code" : "SYP",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Syrian Pound",
+        "nameCode" : "currency.SYP"
+    },
+    {
+        "code" : "SZL",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Eswatini Lilangeni",
+        "nameCode" : "currency.SZL"
+    },
+    {
+        "code" : "THB",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Thai Baht",
+        "nameCode" : "currency.THB"
+    },
+    {
+        "code" : "TJS",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Tajik Somoni",
+        "nameCode" : "currency.TJS"
+    },
+    {
+        "code" : "TMM",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Turkmenistan Manat",
+        "nameCode" : "currency.TMM"
+    },
+    {
+        "code" : "TND",
+        "decimalPlaces" : 3,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "DT",
+        "name" : "Tunisian Dinar",
+        "nameCode" : "currency.TND"
+    },
+    {
+        "code" : "TOP",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Tonga Pa'anga",
+        "nameCode" : "currency.TOP"
+    },
+    {
+        "code" : "TRY",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Turkish Lira",
+        "nameCode" : "currency.TRY"
+    },
+    {
+        "code" : "TTD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Trinidad and Tobago Dollar",
+        "nameCode" : "currency.TTD"
+    },
+    {
+        "code" : "TWD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "New Taiwan Dollar",
+        "nameCode" : "currency.TWD"
+    },
+    {
+        "code" : "TZS",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Tanzanian Shilling",
+        "nameCode" : "currency.TZS"
+    },
+    {
+        "code" : "UAH",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Ukraine Hryvnia",
+        "nameCode" : "currency.UAH"
+    },
+    {
+        "code" : "UGX",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "USh",
+        "name" : "Uganda Shilling",
+        "nameCode" : "currency.UGX"
+    },
+    {
+        "code" : "USD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "$",
+        "name" : "US Dollar",
+        "nameCode" : "currency.USD"
+    },
+    {
+        "code" : "UYU",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "$U",
+        "name" : "Peso Uruguayo",
+        "nameCode" : "currency.UYU"
+    },
+    {
+        "code" : "UZS",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Uzbekistan Sum",
+        "nameCode" : "currency.UZS"
+    },
+    {
+        "code" : "VEB",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "Bs.F.",
+        "name" : "Venezuelan Bolivar",
+        "nameCode" : "currency.VEB"
+    },
+    {
+        "code" : "VND",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Vietnamese Dong",
+        "nameCode" : "currency.VND"
+    },
+    {
+        "code" : "VUV",
+        "decimalPlaces" : 0,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Vanuatu Vatu",
+        "nameCode" : "currency.VUV"
+    },
+    {
+        "code" : "WST",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Samoa Tala",
+        "nameCode" : "currency.WST"
+    },
+    {
+        "code" : "XAF",
+        "decimalPlaces" : 0,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "CFA Franc BEAC",
+        "nameCode" : "currency.XAF"
+    },
+    {
+        "code" : "XCD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "East Caribbean Dollar",
+        "nameCode" : "currency.XCD"
+    },
+    {
+        "code" : "XDR",
+        "decimalPlaces" : 5,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "SDR (Special Drawing Rights)",
+        "nameCode" : "currency.XDR"
+    },
+    {
+        "code" : "XOF",
+        "decimalPlaces" : 0,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "CFA",
+        "name" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF"
+    },
+    {
+        "code" : "XPF",
+        "decimalPlaces" : 0,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "CFP Franc",
+        "nameCode" : "currency.XPF"
+    },
+    {
+        "code" : "YER",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Yemeni Rial",
+        "nameCode" : "currency.YER"
+    },
+    {
+        "code" : "ZAR",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "R",
+        "name" : "South African Rand",
+        "nameCode" : "currency.ZAR"
+    },
+    {
+        "code" : "ZMK",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Zambian Kwacha",
+        "nameCode" : "currency.ZMK"
+    },
+    {
+        "code" : "ZWD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "Zimbabwe Dollar",
+        "nameCode" : "currency.ZWD"
+    },
+    {
+        "code" : "SSP",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : "SS£",
+        "name" : "South Sudanese Pound",
+        "nameCode" : "currency.SSP"
+    },
+    {
+        "code" : "ABC",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : 100,
+        "displaySymbol" : "$",
+        "name" : "Currency1",
+        "nameCode" : "currency.ABC"
+    },
+    {
+        "code" : "AAA",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : 100,
+        "displaySymbol" : "$",
+        "name" : "Currency2",
+        "nameCode" : "currency.AAA"
+    },
+    {
+        "code" : "AAB",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : 100,
+        "displaySymbol" : "$",
+        "name" : "Currency3",
+        "nameCode" : "currency.AAB"
+    },
+    {
+        "code" : "AAC",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : 100,
+        "displaySymbol" : "$",
+        "name" : "Currency3",
+        "nameCode" : "currency.AAC"
+    },
+    {
+        "code" : "AAD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : 100,
+        "displaySymbol" : "$",
+        "name" : "Currency3",
+        "nameCode" : "currency.AAD"
+    },
+    {
+        "code" : "AAE",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : 1,
+        "displaySymbol" : "$",
+        "name" : "Currency3",
+        "nameCode" : "currency.AAE"
+    },
+    {
+        "code" : "BBB",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : 1,
+        "displaySymbol" : "$",
+        "name" : "Currency4",
+        "nameCode" : "currency.BBB"
+    },
+    {
+        "code" : "CCC",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : 1,
+        "displaySymbol" : "$",
+        "name" : "Currency5",
+        "nameCode" : "currency.CCC"
+    },
+    {
+        "code" : "DDD",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : 1,
+        "displaySymbol" : "$",
+        "name" : "Currency6",
+        "nameCode" : "currency.DDD"
+    },
+    {
+        "code" : "EEE",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : 1,
+        "displaySymbol" : "$",
+        "name" : "Currency7",
+        "nameCode" : "currency.EEE"
+    },
+    {
+        "code" : "FFF",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : 1,
+        "displaySymbol" : "$",
+        "name" : "Currency8",
+        "nameCode" : "currency.FFF"
+    },
+    {
+        "code" : "GGG",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : 1,
+        "displaySymbol" : "$",
+        "name" : "Currency8",
+        "nameCode" : "currency.GGG"
+    }
+]

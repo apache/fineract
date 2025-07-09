@@ -16,18 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.service;
+package org.apache.fineract.organisation.monetary.handler;
 
-import java.util.List;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.service.CurrencyWritePlatformService;
+import org.springframework.stereotype.Component;
 
-public interface CurrencyReadPlatformService {
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class CurrencyCreateCommandHandler implements CommandHandler<CurrencyData, CurrencyData> {
 
-    List<CurrencyData> retrieveAllowedCurrencies();
+    private final CurrencyWritePlatformService writePlatformService;
 
-    List<CurrencyData> retrieveAllPlatformCurrencies();
-
-    CurrencyData retrieveCurrency(String code);
-
-    Boolean checkExistingCurrencyCode(String currencyCode);
+    @Transactional
+    @Override
+    public CurrencyData handle(Command<CurrencyData> command) {
+        return writePlatformService.createCurrency(command.getPayload());
+    }
 }

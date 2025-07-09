@@ -1,0 +1,98 @@
+[
+    {},
+    {
+        "code" : "AAB",
+        "decimalPlaces" : 5,
+        "inMultiplesOf" : 100000000,
+        "displaySymbol" : null,
+        "name" : "currencyname",
+        "nameCode" : "currency.AAB"
+    },
+    {
+        "code" : "132321AF",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : -1,
+        "displaySymbol" : -1,
+        "name" : "Name1",
+        "nameCode" : "currency.DSFSDF"
+    },
+    {
+        "code" : "AAA",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "_Wer_!@#!@#",
+        "nameCode" : "currency.AAA"
+    },
+    {
+        "code" : "aaa",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "name",
+        "nameCode" : "name"
+    },
+    {
+        "code" : "@#$@",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "countryname32132321",
+        "nameCode" : "currency"
+    },
+    {
+        "code" : "",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null
+    },
+    {
+        "code" : "   ",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null
+    },
+    {
+        "code" : "___",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : 113213,
+        "name" : "name",
+        "nameCode" : "currency"
+    },
+    {
+        "code" : "---",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "name",
+        "nameCode" : "currency.12132"
+    },
+    {
+        "code" : "===",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "sdfsdfsdfsd",
+        "nameCode" : "currency.---"
+    },
+    {
+        "code" : "1223",
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "name",
+        "nameCode" : "currency.1223"
+    },
+    {
+        "decimalPlaces" : 2,
+        "inMultiplesOf" : null,
+        "displaySymbol" : null,
+        "name" : "currency",
+        "nameCode" : "currency.currency"
+    },
+    {
+        "code" : "AAA",
+        "inMultiplesOf" : null,
+        "displaySymbol" : null
+    }
+]
