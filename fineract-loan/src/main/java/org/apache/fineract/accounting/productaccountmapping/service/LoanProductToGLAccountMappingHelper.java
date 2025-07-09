@@ -255,7 +255,8 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
      * @param accountingRuleType
      */
     public void handleChangesToLoanProductToGLAccountMappings(final Long loanProductId, final Map<String, Object> changes,
-            final JsonElement element, final AccountingRuleType accountingRuleType) {
+            final JsonElement element, final AccountingRuleType accountingRuleType, final boolean enableIncomeCapitalization,
+            final boolean enableBuyDownFee) {
         switch (accountingRuleType) {
             case NONE:
             break;
@@ -365,12 +366,22 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                 mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(),
                         loanProductId, AccrualAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(),
                         AccrualAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY.toString(), changes);
-                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_CAPITALIZATION.getValue(),
-                        loanProductId, AccrualAccountsForLoan.INCOME_FROM_CAPITALIZATION.getValue(),
-                        AccrualAccountsForLoan.INCOME_FROM_CAPITALIZATION.toString(), changes);
-                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_BUY_DOWN.getValue(), loanProductId,
-                        AccrualAccountsForLoan.INCOME_FROM_BUY_DOWN.getValue(), AccrualAccountsForLoan.INCOME_FROM_BUY_DOWN.toString(),
-                        changes);
+                if (!enableIncomeCapitalization) {
+                    deleteProductToGLAccountMapping(loanProductId, PortfolioProductType.LOAN,
+                            AccrualAccountsForLoan.INCOME_FROM_CAPITALIZATION.getValue());
+                } else {
+                    mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_CAPITALIZATION.getValue(),
+                            loanProductId, AccrualAccountsForLoan.INCOME_FROM_CAPITALIZATION.getValue(),
+                            AccrualAccountsForLoan.INCOME_FROM_CAPITALIZATION.toString(), changes);
+                }
+                if (!enableBuyDownFee) {
+                    deleteProductToGLAccountMapping(loanProductId, PortfolioProductType.LOAN,
+                            AccrualAccountsForLoan.INCOME_FROM_BUY_DOWN.getValue());
+                } else {
+                    mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_BUY_DOWN.getValue(),
+                            loanProductId, AccrualAccountsForLoan.INCOME_FROM_BUY_DOWN.getValue(),
+                            AccrualAccountsForLoan.INCOME_FROM_BUY_DOWN.toString(), changes);
+                }
 
                 // expenses
                 mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), loanProductId,
@@ -384,15 +395,26 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                 mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(),
                         loanProductId, AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.getValue(),
                         AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.toString(), changes);
-                mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.BUY_DOWN_EXPENSE.getValue(), loanProductId,
-                        AccrualAccountsForLoan.BUY_DOWN_EXPENSE.getValue(), AccrualAccountsForLoan.BUY_DOWN_EXPENSE.toString(), changes);
+                if (!enableBuyDownFee) {
+                    deleteProductToGLAccountMapping(loanProductId, PortfolioProductType.LOAN,
+                            AccrualAccountsForLoan.BUY_DOWN_EXPENSE.getValue());
+                } else {
+                    mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.BUY_DOWN_EXPENSE.getValue(), loanProductId,
+                            AccrualAccountsForLoan.BUY_DOWN_EXPENSE.getValue(), AccrualAccountsForLoan.BUY_DOWN_EXPENSE.toString(),
+                            changes);
+                }
 
                 // liabilities
                 mergeLoanToLiabilityAccountMappingChanges(element, LoanProductAccountingParams.OVERPAYMENT.getValue(), loanProductId,
                         CashAccountsForLoan.OVERPAYMENT.getValue(), CashAccountsForLoan.OVERPAYMENT.toString(), changes);
-                mergeLoanToLiabilityAccountMappingChanges(element, LoanProductAccountingParams.DEFERRED_INCOME_LIABILITY.getValue(),
-                        loanProductId, AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
-                        AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.toString(), changes);
+                if (!enableBuyDownFee && !enableIncomeCapitalization) {
+                    deleteProductToGLAccountMapping(loanProductId, PortfolioProductType.LOAN,
+                            AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue());
+                } else {
+                    mergeLoanToLiabilityAccountMappingChanges(element, LoanProductAccountingParams.DEFERRED_INCOME_LIABILITY.getValue(),
+                            loanProductId, AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
+                            AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.toString(), changes);
+                }
             break;
         }
     }
