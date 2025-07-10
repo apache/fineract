@@ -327,12 +327,17 @@ Feature:Feature: Buy Down Fees
     When Loan Pay-off is made on "1 March 2024"
     Then Loan's all installments have obligations met
     Then Loan Transactions tab has the following data:
-      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
-      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 February 2024 | Repayment        | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
-      | 01 March 2024    | Repayment        | 67.25  | 66.86     | 0.39     | 0.0  | 0.0       | 0.0          | false    |
-      | 01 March 2024    | Accrual          | 0.97   | 0.0       | 0.97     | 0.0  | 0.0       | 0.0          | false    |
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 February 2024 | Repayment                 | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
+      | 01 March 2024    | Repayment                 | 67.25  | 66.86     | 0.39     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 March 2024    | Accrual                   | 0.97   | 0.0       | 0.97     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 March 2024    | Buy Down Fee Amortization | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "BUY_DOWN_FEE_AMORTIZATION" transaction with date "01 March 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 450281       | Income From Buy Down        |       | 50.0   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 50.0  |        |
 
   @TestRailId:C3828
   Scenario: Verify loan with Buy Down fees and early payoff and daily amortization - UC2.2
@@ -508,6 +513,11 @@ Feature:Feature: Buy Down Fees
 
       | 01 March 2024    | Repayment                 | 67.25  | 66.86     | 0.39     | 0.0  | 0.0       | 0.0          | false    |
       | 01 March 2024    | Accrual                   | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 March 2024    | Buy Down Fee Amortization | 17.03  | 0.0       | 17.03    | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "BUY_DOWN_FEE_AMORTIZATION" transaction with date "01 March 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 450281       | Income From Buy Down        |       | 17.03  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 17.03 |        |
 
   @TestRailId:C3772
   Scenario: Verify loan with Buy Down fees and charge-off - UC3.1
@@ -556,12 +566,18 @@ Feature:Feature: Buy Down Fees
       | EXPENSE   | 744007       | Credit Loss/Bad Debt       |  66.86 |        |
       | INCOME    | 404001       | Interest Income Charge Off |   0.59 |        |
     Then Loan Transactions tab has the following data:
-      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
-      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 February 2024 | Repayment        | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
-      | 01 March 2024    | Accrual          | 0.97   | 0.0       | 0.97     | 0.0  | 0.0       | 0.0          | false    |
-      | 01 March 2024    | Charge-off       | 67.45  | 66.86     | 0.59     | 0.0  | 0.0       | 0.0          | false    |
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 February 2024 | Repayment                 | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
+      | 01 March 2024    | Buy Down Fee Amortization | 33.52  | 0.0       | 33.52    | 0.0  | 0.0       | 0.0          | false    |
+      | 01 March 2024    | Accrual                   | 0.97   | 0.0       | 0.97     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 March 2024    | Charge-off                | 67.45  | 66.86     | 0.59     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 March 2024    | Buy Down Fee Amortization | 16.48  | 0.0       | 16.48    | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "BUY_DOWN_FEE_AMORTIZATION" transaction with date "01 March 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt        |       | 16.48  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 16.48 |        |
 
     When Loan Pay-off is made on "1 March 2024"
     Then Loan's all installments have obligations met
@@ -745,8 +761,14 @@ Feature:Feature: Buy Down Fees
       | 29 February 2024 | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 29 February 2024 | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
 
+      | 01 March 2024    | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 01 March 2024    | Accrual                   | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    |
       | 01 March 2024    | Charge-off                | 67.45  | 66.86     | 0.59     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 March 2024    | Buy Down Fee Amortization | 16.48  | 0.0       | 16.48    | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "BUY_DOWN_FEE_AMORTIZATION" transaction with date "01 March 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt        |       | 16.48  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 16.48 |        |
 
     When Loan Pay-off is made on "1 March 2024"
     Then Loan's all installments have obligations met
