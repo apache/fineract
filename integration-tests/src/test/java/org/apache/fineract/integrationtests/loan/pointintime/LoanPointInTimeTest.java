@@ -712,7 +712,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .charges(List.of(//
                             new PostLoansRequestChargeData().chargeId(charge1Id).amount(BigDecimal.valueOf(charge1Amount)), //
                             new PostLoansRequestChargeData().chargeId(charge2Id).amount(BigDecimal.valueOf(charge2Amount))//
-                    ));//
+            ));//
 
             PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
 
