@@ -5407,6 +5407,7 @@ Feature: LoanRepayment
       | 01 February 2024 | Repayment        | 40.0   | 39.42     | 0.58     | 0.0  | 0.0       | 60.58        | false    | false    |
     When Admin set "LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
+  @TestRailId:C3840
   Scenario: Verify progressive loan repayment reversals with penalty charge and backdated repayment
     When Admin sets the business date to "20 October 2024"
     When Admin creates a client with random data
@@ -5489,3 +5490,99 @@ Feature: LoanRepayment
       | 26 October 2024  | Repayment        | 101.0  | 100.0     | 0.0      | 0.0  | 1.0       | 0.0          | false    | false    |
     When Customer makes "AUTOPAY" repayment on "27 October 2024" with 9 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  @TestRailId:C3841
+  Scenario: Verify backdated repayment allocation respects payment order for future dated penalties
+    When Admin sets the business date to "20 October 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                            | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_NO_INTEREST_RECALCULATION_ALLOCATION_PENALTY_FIRST | 20 October 2024   | 100            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "20 October 2024" with "100" amount and expected disbursement date on "20 October 2024"
+    And Admin successfully disburse the loan on "20 October 2024" with "100" EUR transaction amount
+    Then Loan Repayment schedule has 1 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 20 October 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 30   | 19 November 2024 |           | 0.0             | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 20 October 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        |
+  # Step 2: First repayment on 22 October
+    When Admin sets the business date to "22 October 2024"
+    And Customer makes "AUTOPAY" repayment on "22 October 2024" with 100 EUR transaction amount
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan Repayment schedule has 1 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 20 October 2024  |                 | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 30   | 19 November 2024 | 22 October 2024 | 0.0             | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 100.0 | 100.0      | 0.0  | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 20 October 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        |
+      | 22 October 2024  | Repayment        | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 0.0          |
+  # Step 3: First repayment reversal on 24 October
+    When Admin sets the business date to "24 October 2024"
+    And Customer makes a repayment undo on "22 October 2024"
+    Then Loan status will be "ACTIVE"
+    And Loan has 100 outstanding amount
+    Then Loan Repayment schedule has 1 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 20 October 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 30   | 19 November 2024 |           | 0.0             | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 20 October 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 22 October 2024  | Repayment        | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+  # Step 4: Second repayment on 26 October
+    When Admin sets the business date to "26 October 2024"
+    And Customer makes "AUTOPAY" repayment on "26 October 2024" with 100 EUR transaction amount
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan Repayment schedule has 1 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 20 October 2024  |                 | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 30   | 19 November 2024 | 26 October 2024 | 0.0             | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 100.0 | 100.0      | 0.0  | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 20 October 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 22 October 2024  | Repayment        | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+      | 26 October 2024  | Repayment        | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+  # Step 5: Second repayment reversal on 28 October
+    When Admin sets the business date to "28 October 2024"
+    And Customer makes a repayment undo on "26 October 2024"
+    Then Loan status will be "ACTIVE"
+    And Loan has 100 outstanding amount
+    Then Loan Repayment schedule has 1 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 20 October 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 30   | 19 November 2024 |           | 0.0             | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 20 October 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 22 October 2024  | Repayment        | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+      | 26 October 2024  | Repayment        | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+  # Step 6: Add penalty charge on 28 October
+    When Admin adds "LOAN_NSF_FEE" due date charge with "28 October 2024" due date and 10 EUR transaction amount
+    Then Loan Repayment schedule has 1 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 20 October 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 30   | 19 November 2024 |           | 0.0             | 100.0         | 0.0      | 0.0  | 10.0      | 110.0 | 0.0  | 0.0        | 0.0  | 110.0       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      | 100.0         | 0.0      | 0.0  | 10.0      | 110.0 | 0.0  | 0.0        | 0.0  | 110.0       |
+  # Step 7: Backdated repayment on 26 October (while business date is 28 October)
+    And Customer makes "AUTOPAY" repayment on "26 October 2024" with 101 EUR transaction amount
+    Then Loan Repayment schedule has 1 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 20 October 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 30   | 19 November 2024 |           | 0.0             | 100.0         | 0.0      | 0.0  | 10.0      | 110.0 | 101.0 | 101.0      | 0.0  | 9.0         |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      | 100.0         | 0.0      | 0.0  | 10.0      | 110.0 | 101.0 | 101.0      | 0.0  | 9.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 20 October 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 22 October 2024  | Repayment        | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+      | 26 October 2024  | Repayment        | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+      | 26 October 2024  | Repayment        | 101.0  | 100.0     | 0.0      | 0.0  | 1.0       | 0.0          | false    |
