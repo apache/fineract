@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.arrears.LoanArrearsData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 
 public interface LoanArrearsAgingService {
@@ -35,4 +36,6 @@ public interface LoanArrearsAgingService {
             boolean isInsertStatement);
 
     void updateScheduleWithPaidDetail(Map<Long, List<LoanSchedulePeriodData>> scheduleDate, List<Map<String, Object>> loanSummary);
+
+    LoanArrearsData calculateArrearsForLoan(Loan loan);
 }

@@ -669,6 +669,15 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         }
     }
 
+    protected void verifyArreals(LoanPointInTimeData pointInTimeData, boolean isOverDue, String overdueSince) {
+        assertThat(Objects.requireNonNull(pointInTimeData.getArrears()).getOverdue()).isEqualTo(isOverDue);
+        if (isOverDue) {
+            assertThat(Objects.requireNonNull(pointInTimeData.getArrears().getOverDueSince()).toString()).isEqualTo(overdueSince);
+        } else {
+            assertThat(pointInTimeData.getArrears().getOverDueSince()).isNull();
+        }
+    }
+
     protected void placeHardLockOnLoan(Long loanId) {
         loanAccountLockHelper.placeSoftLockOnLoanAccount(loanId.intValue(), "LOAN_COB_CHUNK_PROCESSING");
     }
