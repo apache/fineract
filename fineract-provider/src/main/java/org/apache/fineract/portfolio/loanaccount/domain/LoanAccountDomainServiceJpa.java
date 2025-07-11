@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -871,7 +872,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Override
     public Pair<LoanTransaction, LoanTransaction> makeRefund(final Loan loan, final ScheduleGeneratorDTO scheduleGeneratorDTO,
             final LoanTransactionType loanTransactionType, final LocalDate transactionDate, final BigDecimal transactionAmount,
-            final PaymentDetail paymentDetail, final ExternalId txnExternalId) {
+            final PaymentDetail paymentDetail, final ExternalId txnExternalId, final Boolean interestRefundCalculationOverride) {
         // Pre-processing business event
         switch (loanTransactionType) {
             case MERCHANT_ISSUED_REFUND ->
@@ -887,9 +888,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final boolean isTransactionChronologicallyLatest = loanTransactionService.isChronologicallyLatestRepaymentOrWaiver(loan,
                 refundTransaction);
 
-        boolean shouldCreateInterestRefundTransaction = loan.getLoanProductRelatedDetail().getSupportedInterestRefundTypes().stream()
-                .map(LoanSupportedInterestRefundTypes::getTransactionType)
-                .anyMatch(transactionType -> transactionType.equals(loanTransactionType));
+        final boolean shouldCreateInterestRefundTransaction = Objects.requireNonNullElseGet(interestRefundCalculationOverride,
+                () -> loan.getLoanProductRelatedDetail().getSupportedInterestRefundTypes().stream()
+                        .map(LoanSupportedInterestRefundTypes::getTransactionType)
+                        .anyMatch(transactionType -> transactionType.equals(loanTransactionType)));
         LoanTransaction interestRefundTransaction = null;
 
         if (shouldCreateInterestRefundTransaction) {

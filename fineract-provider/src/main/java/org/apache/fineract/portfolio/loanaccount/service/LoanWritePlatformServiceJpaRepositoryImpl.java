@@ -2957,8 +2957,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
         final List<Long> existingReversedTransactionIds = loanTransactionRepository.findReversedTransactionIdsByLoan(loan);
         // Create refund transaction(s)
+        final Boolean interestRefundCalculation = command.booleanObjectValueOfParameterNamed("interestRefundCalculation");
         Pair<LoanTransaction, LoanTransaction> refundTransactions = loanAccountDomainService.makeRefund(loan, scheduleGeneratorDTO,
-                loanTransactionType, transactionDate, transactionAmount, paymentDetail, txnExternalId);
+                loanTransactionType, transactionDate, transactionAmount, paymentDetail, txnExternalId, interestRefundCalculation);
         LoanTransaction refundTransaction = refundTransactions.getLeft();
         LoanTransaction interestRefundTransaction = refundTransactions.getRight();
         // Accrual reprocessing
