@@ -20,24 +20,24 @@ package org.apache.fineract.cob.loan;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.apache.fineract.cob.data.LoanCOBParameter;
-import org.apache.fineract.cob.data.LoanCOBPartition;
-import org.apache.fineract.cob.data.LoanIdAndExternalIdAndAccountNo;
-import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
+import org.apache.fineract.cob.data.COBIdAndExternalIdAndAccountNo;
+import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
+import org.apache.fineract.cob.data.COBParameter;
+import org.apache.fineract.cob.data.COBPartition;
 import org.springframework.data.repository.query.Param;
 
 public interface RetrieveLoanIdService {
 
-    List<LoanCOBPartition> retrieveLoanCOBPartitions(Long numberOfDays, LocalDate businessDate, boolean isCatchUp, int partitionSize);
+    List<COBPartition> retrieveLoanCOBPartitions(Long numberOfDays, LocalDate businessDate, boolean isCatchUp, int partitionSize);
 
-    List<LoanIdAndLastClosedBusinessDate> retrieveLoanIdsBehindDate(LocalDate businessDate, List<Long> loanIds);
+    List<COBIdAndLastClosedBusinessDate> retrieveLoanIdsBehindDate(LocalDate businessDate, List<Long> loanIds);
 
-    List<LoanIdAndLastClosedBusinessDate> retrieveLoanIdsBehindDateOrNull(LocalDate businessDate, List<Long> loanIds);
+    List<COBIdAndLastClosedBusinessDate> retrieveLoanIdsBehindDateOrNull(LocalDate businessDate, List<Long> loanIds);
 
-    List<LoanIdAndLastClosedBusinessDate> retrieveLoanIdsOldestCobProcessed(LocalDate businessDate);
+    List<COBIdAndLastClosedBusinessDate> retrieveLoanIdsOldestCobProcessed(LocalDate businessDate);
 
-    List<Long> retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(LoanCOBParameter loanCOBParameter, boolean isCatchUp);
+    List<Long> retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(COBParameter loanCOBParameter, boolean isCatchUp);
 
-    List<LoanIdAndExternalIdAndAccountNo> findAllStayedLockedByCobBusinessDate(@Param("cobBusinessDate") LocalDate cobBusinessDate);
+    List<COBIdAndExternalIdAndAccountNo> findAllStayedLockedByCobBusinessDate(@Param("cobBusinessDate") LocalDate cobBusinessDate);
 
 }

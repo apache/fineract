@@ -16,17 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.data;
+package org.apache.fineract.cob.exceptions;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+public class AccountLockCannotBeOverruledException extends RuntimeException {
 
-@Data
-@AllArgsConstructor
-public class LoanCOBPartition {
+    public AccountLockCannotBeOverruledException(String message) {
+        super(message);
+    }
 
-    private Long minId;
-    private Long maxId;
-    private Long pageNo;
-    private Long count;
+    public AccountLockCannotBeOverruledException(String message, Exception e) {
+        super(message, e);
+    }
+
 }

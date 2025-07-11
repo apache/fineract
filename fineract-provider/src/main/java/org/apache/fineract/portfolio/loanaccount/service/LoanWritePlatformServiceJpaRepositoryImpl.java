@@ -52,7 +52,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
-import org.apache.fineract.cob.exceptions.LoanAccountLockCannotBeOverruledException;
+import org.apache.fineract.cob.exceptions.AccountLockCannotBeOverruledException;
 import org.apache.fineract.cob.service.LoanAccountLockService;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
@@ -1901,7 +1901,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
         }
         if (!lockedLoanIds.isEmpty()) {
-            throw new LoanAccountLockCannotBeOverruledException("There are hard-lcoked loan accounts: " + lockedLoanIds);
+            throw new AccountLockCannotBeOverruledException("There are hard-lcoked loan accounts: " + lockedLoanIds);
         }
         this.loanRepositoryWrapper.flush();
 

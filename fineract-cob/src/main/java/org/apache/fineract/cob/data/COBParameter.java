@@ -16,16 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.exceptions;
+package org.apache.fineract.cob.data;
 
-public class LoanAccountLockCannotBeOverruledException extends RuntimeException {
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-    public LoanAccountLockCannotBeOverruledException(String message) {
-        super(message);
-    }
+@AllArgsConstructor
+@Getter
+@NoArgsConstructor
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+@EqualsAndHashCode
+public class COBParameter {
 
-    public LoanAccountLockCannotBeOverruledException(String message, Exception e) {
-        super(message, e);
-    }
-
+    private Long minAccountId;
+    private Long maxAccountId;
 }

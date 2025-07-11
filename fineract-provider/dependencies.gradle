@@ -25,6 +25,7 @@ dependencies {
     }
 
     implementation(project(path: ':fineract-core'))
+    implementation(project(path: ':fineract-cob'))
     implementation(project(path: ':fineract-command'))
     implementation(project(path: ':fineract-validation'))
     implementation(project(path: ':fineract-accounting'))

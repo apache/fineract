@@ -24,7 +24,7 @@ import org.apache.fineract.cob.loan.LoanCOBBusinessStep;
 import org.springframework.stereotype.Service;
 
 @Service
-public class BusinessStepCategoryServiceImpl implements BusinessStepCategoryService {
+public class LoanBusinessStepCategoryServiceImpl implements BusinessStepCategoryService {
 
     private static final Map<BusinessStepCategory, Class<? extends COBBusinessStep>> businessSteps = Map.of(BusinessStepCategory.LOAN,
             LoanCOBBusinessStep.class);

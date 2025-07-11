@@ -28,8 +28,8 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
-import org.apache.fineract.cob.data.LoanCOBParameter;
-import org.apache.fineract.cob.data.LoanCOBPartition;
+import org.apache.fineract.cob.data.COBParameter;
+import org.apache.fineract.cob.data.COBPartition;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.junit.jupiter.api.Assertions;
@@ -68,7 +68,7 @@ class LoanCOBPartitionerTest {
         when(cobBusinessStepService.getCOBBusinessSteps(LoanCOBBusinessStep.class, LoanCOBConstant.LOAN_COB_JOB_NAME))
                 .thenReturn(BUSINESS_STEP_SET);
         when(retrieveLoanIdService.retrieveLoanCOBPartitions(1L, BUSINESS_DATE, false, 5))
-                .thenReturn(List.of(new LoanCOBPartition(1L,10L, 1L, 5L), new LoanCOBPartition(11L,20L, 2L, 4L)));
+                .thenReturn(List.of(new COBPartition(1L,10L, 1L, 5L), new COBPartition(11L,20L, 2L, 4L)));
         LoanCOBPartitioner loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, retrieveLoanIdService, jobOperator, jobExplorer, 1L);
         loanCOBPartitioner.setBusinessDate(BUSINESS_DATE);
         loanCOBPartitioner.setIsCatchUp(false);
@@ -128,7 +128,7 @@ class LoanCOBPartitionerTest {
     private void validatePartitions(Map<String, ExecutionContext> partitions, int index, long min, long max) {
         Assertions.assertEquals(BUSINESS_STEP_SET,
                 partitions.get(LoanCOBPartitioner.PARTITION_PREFIX + index).get(LoanCOBConstant.BUSINESS_STEPS));
-        Assertions.assertEquals(new LoanCOBParameter(min, max),
+        Assertions.assertEquals(new COBParameter(min, max),
                 partitions.get(LoanCOBPartitioner.PARTITION_PREFIX + index).get(LoanCOBConstant.LOAN_COB_PARAMETER));
         Assertions.assertEquals("partition_" + index, partitions.get(LoanCOBPartitioner.PARTITION_PREFIX + index).get("partition"));
     }

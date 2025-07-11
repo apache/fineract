@@ -16,24 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.cob.data;
 
-import org.apache.fineract.cob.COBConstant;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 
-public final class LoanCOBConstant extends COBConstant {
+public interface COBIdAndExternalIdAndAccountNo {
 
-    public static final String JOB_NAME = "LOAN_COB";
-    public static final String JOB_HUMAN_READABLE_NAME = "Loan COB";
-    public static final String LOAN_COB_JOB_NAME = "LOAN_CLOSE_OF_BUSINESS";
-    public static final String LOAN_COB_PARAMETER = "loanCobParameter";
-    public static final String LOAN_COB_WORKER_STEP = "loanCOBWorkerStep";
+    Long getId();
 
-    public static final String INLINE_LOAN_COB_JOB_NAME = "INLINE_LOAN_COB";
-    public static final String LOAN_IDS_PARAMETER_NAME = "LoanIds";
+    ExternalId getExternalId();
 
-    public static final String LOAN_COB_PARTITIONER_STEP = "Loan COB partition - Step";
-
-    private LoanCOBConstant() {
-
-    }
+    String getAccountNo();
 }

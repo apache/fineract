@@ -18,11 +18,15 @@
  */
 package org.apache.fineract.cob.data;
 
-import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-public interface LoanIdAndLastClosedBusinessDate {
+@Data
+@AllArgsConstructor
+public class COBPartition {
 
-    Long getId();
-
-    LocalDate getLastClosedBusinessDate();
+    private Long minId;
+    private Long maxId;
+    private Long pageNo;
+    private Long count;
 }

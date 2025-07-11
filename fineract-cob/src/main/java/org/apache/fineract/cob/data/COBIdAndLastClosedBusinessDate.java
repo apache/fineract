@@ -18,13 +18,11 @@
  */
 package org.apache.fineract.cob.data;
 
-import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import java.time.LocalDate;
 
-public interface LoanIdAndExternalIdAndAccountNo {
+public interface COBIdAndLastClosedBusinessDate {
 
     Long getId();
 
-    ExternalId getExternalId();
-
-    String getAccountNo();
+    LocalDate getLastClosedBusinessDate();
 }

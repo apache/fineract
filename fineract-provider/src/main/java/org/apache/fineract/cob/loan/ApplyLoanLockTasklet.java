@@ -29,7 +29,7 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
-import org.apache.fineract.cob.data.LoanCOBParameter;
+import org.apache.fineract.cob.data.COBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.exceptions.LoanLockCannotBeAppliedException;
@@ -61,11 +61,11 @@ public class ApplyLoanLockTasklet implements Tasklet {
             throws LoanLockCannotBeAppliedException {
         ExecutionContext executionContext = contribution.getStepExecution().getExecutionContext();
         long numberOfExecutions = contribution.getStepExecution().getCommitCount();
-        LoanCOBParameter loanCOBParameter = (LoanCOBParameter) executionContext.get(LoanCOBConstant.LOAN_COB_PARAMETER);
+        COBParameter loanCOBParameter = (COBParameter) executionContext.get(LoanCOBConstant.LOAN_COB_PARAMETER);
         List<Long> loanIds;
         if (Objects.isNull(loanCOBParameter)
-                || (Objects.isNull(loanCOBParameter.getMinLoanId()) && Objects.isNull(loanCOBParameter.getMaxLoanId()))
-                || (loanCOBParameter.getMinLoanId().equals(0L) && loanCOBParameter.getMaxLoanId().equals(0L))) {
+                || (Objects.isNull(loanCOBParameter.getMinAccountId()) && Objects.isNull(loanCOBParameter.getMaxAccountId()))
+                || (loanCOBParameter.getMinAccountId().equals(0L) && loanCOBParameter.getMaxAccountId().equals(0L))) {
             loanIds = Collections.emptyList();
         } else {
             loanIds = new ArrayList<>(

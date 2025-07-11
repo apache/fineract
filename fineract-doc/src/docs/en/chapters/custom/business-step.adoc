@@ -9,7 +9,7 @@ It is very easy to add your own business steps to Fineract's default steps:
 .Business Step Interface
 [source,java]
 ----
-include::{rootdir}/fineract-core/src/main/java/org/apache/fineract/cob/COBBusinessStep.java[lines=19..]
+include::{rootdir}/fineract-cob/src/main/java/org/apache/fineract/cob/COBBusinessStep.java[lines=19..]
 ----
 
 == Business Step Implementation

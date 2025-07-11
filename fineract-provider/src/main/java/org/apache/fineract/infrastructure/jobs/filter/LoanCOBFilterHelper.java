@@ -39,7 +39,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
-import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
+import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.loan.RetrieveLoanIdService;
 import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
@@ -195,7 +195,7 @@ public class LoanCOBFilterHelper implements InitializingBean {
     }
 
     public boolean isLoanBehind(List<Long> loanIds) {
-        List<LoanIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDates = new ArrayList<>();
+        List<COBIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDates = new ArrayList<>();
         List<List<Long>> partitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());
         partitions.forEach(partition -> loanIdAndLastClosedBusinessDates.addAll(retrieveLoanIdService
                 .retrieveLoanIdsBehindDate(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE), partition)));

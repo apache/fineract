@@ -28,6 +28,7 @@ buildscript {
             [
                 'fineract-api',
                 'fineract-core',
+                'fineract-cob',
                 'fineract-validation',
                 'fineract-command',
                 'fineract-accounting',
@@ -58,6 +59,7 @@ buildscript {
                 'fineract-api',
                 'fineract-client',
                 'fineract-core',
+                'fineract-cob',
                 'fineract-validation',
                 'fineract-command',
                 'fineract-accounting',

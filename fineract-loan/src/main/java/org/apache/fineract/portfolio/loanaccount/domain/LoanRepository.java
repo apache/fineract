@@ -23,9 +23,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.accounting.common.AccountingRuleType;
+import org.apache.fineract.cob.data.COBIdAndExternalIdAndAccountNo;
+import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.data.LoanDataForExternalTransfer;
-import org.apache.fineract.cob.data.LoanIdAndExternalIdAndAccountNo;
-import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -230,11 +230,11 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     List<Long> findIdsByExternalIds(@Param("externalIds") List<ExternalId> externalIds);
 
     @Query(FIND_ALL_LOANS_BEHIND_BY_LOAN_IDS_AND_STATUSES)
-    List<LoanIdAndLastClosedBusinessDate> findAllLoansBehindByLoanIdsAndStatuses(@Param("cobBusinessDate") LocalDate cobBusinessDate,
+    List<COBIdAndLastClosedBusinessDate> findAllLoansBehindByLoanIdsAndStatuses(@Param("cobBusinessDate") LocalDate cobBusinessDate,
             @Param("loanIds") List<Long> loanIds, @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 
     @Query(FIND_ALL_LOANS_BEHIND_OR_NULL_BY_LOAN_IDS_AND_STATUSES)
-    List<LoanIdAndLastClosedBusinessDate> findAllLoansBehindOrNullByLoanIdsAndStatuses(@Param("cobBusinessDate") LocalDate cobBusinessDate,
+    List<COBIdAndLastClosedBusinessDate> findAllLoansBehindOrNullByLoanIdsAndStatuses(@Param("cobBusinessDate") LocalDate cobBusinessDate,
             @Param("loanIds") List<Long> loanIds, @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 
     @Query(FIND_ALL_LOANS_BY_LAST_CLOSED_BUSINESS_DATE_AND_MIN_AND_MAX_LOAN_ID_AND_STATUSES)
@@ -248,11 +248,11 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
             @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 
     @Query(FIND_OLDEST_COB_PROCESSED_LOAN)
-    List<LoanIdAndLastClosedBusinessDate> findOldestCOBProcessedLoan(@Param("cobBusinessDate") LocalDate cobBusinessDate,
+    List<COBIdAndLastClosedBusinessDate> findOldestCOBProcessedLoan(@Param("cobBusinessDate") LocalDate cobBusinessDate,
             @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 
     @Query(FIND_ALL_STAYED_LOCKED_BY_COB_BUSINESS_DATE)
-    List<LoanIdAndExternalIdAndAccountNo> findAllStayedLockedByCobBusinessDate(@Param("cobBusinessDate") LocalDate cobBusinessDate);
+    List<COBIdAndExternalIdAndAccountNo> findAllStayedLockedByCobBusinessDate(@Param("cobBusinessDate") LocalDate cobBusinessDate);
 
     @Query(FIND_ALL_LOAN_IDS_BY_STATUS)
     List<Long> findLoanIdByStatus(@Param("loanStatus") LoanStatus loanStatus);
