@@ -27,10 +27,12 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -47,6 +49,7 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.apache.fineract.portfolio.calendar.domain.CalendarRepositoryWrapper;
 import org.apache.fineract.portfolio.calendar.exception.NotValidRecurringDateException;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
+import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetRequest;
 import org.apache.fineract.portfolio.collectionsheet.data.IndividualClientData;
 import org.apache.fineract.portfolio.collectionsheet.data.IndividualCollectionSheetData;
 import org.apache.fineract.portfolio.collectionsheet.data.IndividualCollectionSheetLoanFlatData;
@@ -743,13 +746,13 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             sb.append("ln.fee_charges_repaid_derived As feePaid ");
             sb.append("FROM m_loan ln ");
             sb.append("JOIN m_client cl ON cl.id = ln.client_id  ");
-            sb.append("LEFT JOIN m_office of ON of.id = cl.office_id  AND of.hierarchy like :officeHierarchy ");
+            sb.append("LEFT JOIN m_office ofc ON ofc.id = cl.office_id  AND ofc.hierarchy like :officeHierarchy ");
             sb.append("LEFT JOIN m_product_loan pl ON pl.id = ln.product_id ");
             sb.append("LEFT JOIN m_currency rc on rc." + sqlGenerator.escape("code") + " = ln.currency_code ");
             sb.append("JOIN m_loan_repayment_schedule ls ON ls.loan_id = ln.id AND ls.completed_derived = 0 AND ls.duedate <= :dueDate ");
             sb.append("where ");
             if (checkForOfficeId) {
-                sb.append("of.id = :officeId and ");
+                sb.append("ofc.id = :officeId and ");
             }
             if (checkforStaffId) {
                 sb.append("ln.loan_officer_id = :staffId and ");
@@ -831,12 +834,12 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     "LEFT JOIN m_deposit_account_recurring_detail dard ON sa.id = dard.savings_account_id AND dard.is_mandatory = true AND dard.is_calendar_inherited = false ");
             sb.append(
                     "LEFT JOIN m_mandatory_savings_schedule mss ON mss.savings_account_id=sa.id AND mss.completed_derived = 0 AND mss.duedate <= :dueDate ");
-            sb.append("LEFT JOIN m_office of ON of.id = cl.office_id AND of.hierarchy like :officeHierarchy ");
+            sb.append("LEFT JOIN m_office ofc ON ofc.id = cl.office_id AND ofc.hierarchy like :officeHierarchy ");
             sb.append("LEFT JOIN m_currency rc on rc." + sqlGenerator.escape("code") + " = sa.currency_code ");
             sb.append("WHERE sa.status_enum=300 and sa.group_id is null and sa.deposit_type_enum in (100,300,400) ");
             sb.append("and (cl.status_enum = 300 or (cl.status_enum = 600 and cl.closedon_date >= :dueDate)) ");
             if (checkForOfficeId) {
-                sb.append("and of.id = :officeId ");
+                sb.append("and ofc.id = :officeId ");
             }
             if (checkforStaffId) {
                 sb.append("and sa.field_officer_id = :staffId ");
@@ -899,5 +902,51 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             }
             clientSavingsData.addLoans(loanFlatData.getLoanDueData());
         }
+    }
+
+    @Override
+    public IndividualCollectionSheetData generateIndividualCollectionSheet(CollectionSheetRequest collectionSheetRequest) {
+        final String transactionDateString = collectionSheetRequest.getTransactionDate();
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
+        final LocalDate transactionDate = LocalDate.parse(transactionDateString, formatter);// query.localDateValueOfParameterNamed(transactionDateParamName);
+        final String transactionDateStr = DateUtils.DEFAULT_DATE_FORMATTER.format(transactionDate);
+
+        final AppUser currentUser = this.context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final String officeHierarchy = hierarchy + "%";
+
+        final Long officeId = collectionSheetRequest.getOfficeId();// query.longValueOfParameterNamed(officeIdParamName);
+        final Long staffId = null;// query.longValueOfParameterNamed(staffIdParamName);
+        final boolean checkForOfficeId = officeId != null;
+        final boolean checkForStaffId = staffId != null;
+
+        final IndividualCollectionSheetFaltDataMapper mapper = new IndividualCollectionSheetFaltDataMapper(checkForOfficeId,
+                checkForStaffId, sqlGenerator);
+
+        final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("dueDate", transactionDateStr)
+                .addValue("officeHierarchy", officeHierarchy);
+
+        if (checkForOfficeId) {
+            ((MapSqlParameterSource) namedParameters).addValue("officeId", officeId);
+        }
+        if (checkForStaffId) {
+            ((MapSqlParameterSource) namedParameters).addValue("staffId", staffId);
+        }
+
+        final Collection<IndividualCollectionSheetLoanFlatData> collectionSheetFlatDatas = this.namedParameterJdbcTemplate
+                .query(mapper.sqlSchema(), namedParameters, mapper);
+
+        IndividualMandatorySavingsCollectionsheetExtractor mandatorySavingsExtractor = new IndividualMandatorySavingsCollectionsheetExtractor(
+                checkForOfficeId, checkForStaffId, sqlGenerator);
+        // mandatory savings data for collection sheet
+        Collection<IndividualClientData> clientData = this.namedParameterJdbcTemplate
+                .query(mandatorySavingsExtractor.collectionSheetSchema(), namedParameters, mandatorySavingsExtractor);
+
+        // merge savings data into loan data
+        mergeLoanData(collectionSheetFlatDatas, (List<IndividualClientData>) clientData);
+
+        final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
+
+        return new IndividualCollectionSheetData(transactionDate, clientData, paymentOptions);
     }
 }

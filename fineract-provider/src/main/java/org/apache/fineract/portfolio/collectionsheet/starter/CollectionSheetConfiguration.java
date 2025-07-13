@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.collectionsheet.starter;
 
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
@@ -70,15 +72,16 @@ public class CollectionSheetConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(CollectionSheetWritePlatformService.class)
-    public CollectionSheetWritePlatformService collectionSheetWritePlatformService(LoanWritePlatformService loanWritePlatformService,
+    CollectionSheetWritePlatformService collectionSheetWritePlatformService(LoanWritePlatformService loanWritePlatformService,
             CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer bulkRepaymentCommandFromApiJsonDeserializer,
             CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer bulkDisbursalCommandFromApiJsonDeserializer,
             CollectionSheetTransactionDataValidator transactionDataValidator, MeetingWritePlatformService meetingWritePlatformService,
             DepositAccountAssembler accountAssembler, DepositAccountWritePlatformService accountWritePlatformService,
-            PaymentDetailAssembler paymentDetailAssembler, PaymentDetailWritePlatformService paymentDetailWritePlatformService) {
+            PaymentDetailAssembler paymentDetailAssembler, PaymentDetailWritePlatformService paymentDetailWritePlatformService,
+            ToApiJsonSerializer<Object> toApiJsonSerializer, FromJsonHelper fromApiJsonHelper) {
         return new CollectionSheetWritePlatformServiceJpaRepositoryImpl(loanWritePlatformService,
                 bulkRepaymentCommandFromApiJsonDeserializer, bulkDisbursalCommandFromApiJsonDeserializer, transactionDataValidator,
                 meetingWritePlatformService, accountAssembler, accountWritePlatformService, paymentDetailAssembler,
-                paymentDetailWritePlatformService);
+                paymentDetailWritePlatformService, toApiJsonSerializer, fromApiJsonHelper);
     }
 }

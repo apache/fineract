@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.collectionsheet.service;
 
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
+import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetRequest;
 import org.apache.fineract.portfolio.collectionsheet.data.IndividualCollectionSheetData;
 import org.apache.fineract.portfolio.collectionsheet.data.JLGCollectionSheetData;
 
@@ -30,4 +31,5 @@ public interface CollectionSheetReadPlatformService {
 
     IndividualCollectionSheetData generateIndividualCollectionSheet(JsonQuery query);
 
+    IndividualCollectionSheetData generateIndividualCollectionSheet(CollectionSheetRequest collectionSheetRequest);
 }

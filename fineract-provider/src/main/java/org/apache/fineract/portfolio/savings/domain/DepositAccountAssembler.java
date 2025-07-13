@@ -484,4 +484,44 @@ public class DepositAccountAssembler {
 
         return savingsAccountTransactions;
     }
+
+    public Collection<SavingsAccountTransactionDTO> assembleBulkMandatorySavingsAccountTransactionDTOs(final String json,
+            final PaymentDetail paymentDetail) {
+        // final String json = command.json();
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        final Collection<SavingsAccountTransactionDTO> savingsAccountTransactions = new ArrayList<>();
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
+        final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(element.getAsJsonObject());
+        final JsonObject topLevelJsonElement = element.getAsJsonObject();
+        final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat).withLocale(locale);
+
+        if (element.isJsonObject()) {
+            if (topLevelJsonElement.has(bulkSavingsDueTransactionsParamName)
+                    && topLevelJsonElement.get(bulkSavingsDueTransactionsParamName).isJsonArray()) {
+                final JsonArray array = topLevelJsonElement.get(bulkSavingsDueTransactionsParamName).getAsJsonArray();
+
+                for (int i = 0; i < array.size(); i++) {
+                    final JsonObject savingsTransactionElement = array.get(i).getAsJsonObject();
+                    final Long savingsId = this.fromApiJsonHelper.extractLongNamed(savingsIdParamName, savingsTransactionElement);
+                    final BigDecimal dueAmount = this.fromApiJsonHelper.extractBigDecimalNamed(transactionAmountParamName,
+                            savingsTransactionElement, locale);
+                    final Integer depositAccountType = this.fromApiJsonHelper
+                            .extractIntegerNamed(CollectionSheetConstants.depositAccountTypeParamName, savingsTransactionElement, locale);
+                    PaymentDetail detail = paymentDetail;
+                    if (paymentDetail == null) {
+                        detail = this.paymentDetailAssembler.fetchPaymentDetail(savingsTransactionElement);
+                    }
+                    final SavingsAccountTransactionDTO savingsAccountTransactionDTO = new SavingsAccountTransactionDTO(formatter,
+                            transactionDate, dueAmount, detail, savingsId, depositAccountType);
+                    savingsAccountTransactions.add(savingsAccountTransactionDTO);
+                }
+            }
+        }
+
+        return savingsAccountTransactions;
+    }
 }

@@ -269,4 +269,42 @@ public class CollectionSheetTransactionDataValidator {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
     }
+
+    /**
+     * 1) Changed this method to accept String json changed from original (JsonCommand command)
+     *
+     */
+    public void validateIndividualCollectionSheet(final String json) {
+        // final String json = command;
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, INDIVIDUAL_COLLECTIONSHEET_REQUEST_DATA_PARAMETERS);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(CollectionSheetConstants.COLLECTIONSHEET_RESOURCE_NAME);
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(CollectionSheetConstants.transactionDateParamName,
+                element);
+        baseDataValidator.reset().parameter(CollectionSheetConstants.transactionDateParamName).value(transactionDate).notNull()
+                .validateDateBeforeOrEqual(DateUtils.getBusinessLocalDate());
+
+        final String note = this.fromApiJsonHelper.extractStringNamed(CollectionSheetConstants.noteParamName, element);
+        if (StringUtils.isNotBlank(note)) {
+            baseDataValidator.reset().parameter(CollectionSheetConstants.noteParamName).value(note).notExceedingLengthOf(1000);
+        }
+
+        validateDisbursementTransactions(element, baseDataValidator);
+
+        validateRepaymentTransactions(element, baseDataValidator);
+
+        validateSavingsDueTransactions(element, baseDataValidator);
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
 }
