@@ -225,16 +225,27 @@ public class LoanTransactionTest extends BaseLoanIntegrationTest {
         runAt("20 December 2024", () -> {
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "20 December 2024",
                     430.0, 7.0, 6, (request) -> request.externalId(loanExternalIdStr));
+            // Loan with 50% overapplied amount, then total amount available 430 * 1.5 = 645
 
             disburseLoan(loanId, BigDecimal.valueOf(230), "20 December 2024");
 
-            final GetLoansLoanIdTransactionsTemplateResponse transactionTemplate = loanTransactionHelper.retrieveTransactionTemplate(loanId,
+            GetLoansLoanIdTransactionsTemplateResponse transactionTemplate = loanTransactionHelper.retrieveTransactionTemplate(loanId,
                     buyDownFeeCommand, null, null, null);
 
             assertNotNull(transactionTemplate);
             assertEquals("loanTransactionType." + buyDownFeeCommand, transactionTemplate.getType().getCode());
-            assertEquals(transactionTemplate.getAmount(), 200);
+            // Total amount 645 substract 230 currently disbursed = 415
+            assertEquals(transactionTemplate.getAmount(), 415);
             assertThat(transactionTemplate.getPaymentTypeOptions().size() > 0);
+
+            // Second disbursement to complete the total approved amount including the overapplied percentage
+            disburseLoan(loanId, BigDecimal.valueOf(415), "20 December 2024");
+            transactionTemplate = loanTransactionHelper.retrieveTransactionTemplate(loanId, buyDownFeeCommand, null, null, null);
+
+            assertNotNull(transactionTemplate);
+            assertEquals("loanTransactionType." + buyDownFeeCommand, transactionTemplate.getType().getCode());
+            // Evaluate 0 (zero) amount
+            assertEquals(transactionTemplate.getAmount(), 0);
         });
     }
 }

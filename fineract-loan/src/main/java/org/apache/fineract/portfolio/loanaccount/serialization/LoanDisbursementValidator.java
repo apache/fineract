@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public final class LoanDisbursementValidator {
 
-    private final LoanApplicationValidator loanApplicationValidator;
+    private final LoanMaximumAmountValidator loanMaximumAmountValidator;
 
     public void compareDisbursedToApprovedOrProposedPrincipal(final Loan loan, final BigDecimal disbursedAmount,
             final BigDecimal totalDisbursed) {
@@ -53,7 +53,7 @@ public final class LoanDisbursementValidator {
     }
 
     public void validateOverMaximumAmount(final Loan loan, final BigDecimal totalDisbursed, final BigDecimal capitalizedIncome) {
-        final BigDecimal maxDisbursedAmount = loanApplicationValidator.getOverAppliedMax(loan);
+        final BigDecimal maxDisbursedAmount = loanMaximumAmountValidator.getOverAppliedMax(loan);
         if (totalDisbursed.add(capitalizedIncome).compareTo(maxDisbursedAmount) > 0) {
             final String errorMessage = String.format(
                     "Loan disbursal amount can't be greater than maximum applied loan amount calculation. "

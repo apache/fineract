@@ -204,6 +204,7 @@ public final class LoanApplicationValidator {
     private final LoanUtilService loanUtilService;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
     private final LoanMapper loanMapper;
+    private final LoanMaximumAmountValidator loanMaximumAmountValidator;
 
     public void validateForCreate(final Loan loan) {
         final LocalDate expectedFirstRepaymentOnDate = loan.getExpectedFirstRepaymentOnDate();
@@ -2152,7 +2153,7 @@ public final class LoanApplicationValidator {
 
     private void compareApprovedToProposedPrincipal(Loan loan, BigDecimal approvedLoanAmount) {
         if (loan.loanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
-            BigDecimal maxApprovedLoanAmount = getOverAppliedMax(loan);
+            BigDecimal maxApprovedLoanAmount = loanMaximumAmountValidator.getOverAppliedMax(loan);
             if (approvedLoanAmount.compareTo(maxApprovedLoanAmount) > 0) {
                 final String errorMessage = "Loan approved amount can't be greater than maximum applied loan amount calculation.";
                 throw new InvalidLoanStateTransitionException("approval",
@@ -2165,17 +2166,6 @@ public final class LoanApplicationValidator {
                 throw new InvalidLoanStateTransitionException("approval", "amount.can't.be.greater.than.loan.amount.demanded", errorMessage,
                         loan.getProposedPrincipal(), approvedLoanAmount);
             }
-        }
-    }
-
-    public BigDecimal getOverAppliedMax(Loan loan) {
-        LoanProduct loanProduct = loan.getLoanProduct();
-        if ("percentage".equals(loanProduct.getOverAppliedCalculationType())) {
-            BigDecimal overAppliedNumber = BigDecimal.valueOf(loanProduct.getOverAppliedNumber());
-            BigDecimal totalPercentage = BigDecimal.valueOf(1).add(overAppliedNumber.divide(BigDecimal.valueOf(100)));
-            return loan.getProposedPrincipal().multiply(totalPercentage);
-        } else {
-            return loan.getProposedPrincipal().add(BigDecimal.valueOf(loanProduct.getOverAppliedNumber()));
         }
     }
 
