@@ -1809,15 +1809,15 @@ Feature: Asset Externalization
   @TestRailId:C3800 @AssetExternalizationJournalEntry
   Scenario: Verify manual journal entry with External Asset Owner empty value if asset-externalization is enabled - UC2
     Given Global configuration "asset-externalization-of-non-active-loans" is enabled
-    When Admin sets the business date to "25 June 2025"
-    Then Admin creates manual Journal entry with "88" amount and "20 June 2025" date and without External Asset Owner
+    When Admin sets the business date to "10 June 2025"
+    Then Admin creates manual Journal entry with "88" amount and "10 June 2025" date and without External Asset Owner
     Then Verify manual Journal entry with External Asset Owner "true" and with the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit | Manual Entry |
       | ASSET     | 112601       | Loans Receivable          | 88.0  |        | true         |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 88.0   | true         |
     Given Global configuration "asset-externalization-of-non-active-loans" is enabled
 
-  @TestRailId:C38001 @AssetExternalizationJournalEntry
+  @TestRailId:C3801 @AssetExternalizationJournalEntry
   Scenario: Verify manual journal entry with External Asset Owner empty value if asset-externalization is enabled for existing loan - UC3
     Given Global configuration "asset-externalization-of-non-active-loans" is enabled
 
@@ -1835,18 +1835,18 @@ Feature: Asset Externalization
       | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
       | 2025-06-01     | 1                  | PENDING | 2025-06-01    | 9999-12-31  | SALE             |
 
-    When Admin sets the business date to "25 June 2025"
-    Then Admin creates manual Journal entry with "99" amount and "20 June 2025" date and without External Asset Owner
+    When Admin sets the business date to "27 June 2025"
+    Then Admin creates manual Journal entry with "99" amount and "27 June 2025" date and unique External Asset Owner
     Then Verify manual Journal entry with External Asset Owner "true" and with the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit | Manual Entry |
       | ASSET     | 112601       | Loans Receivable          | 99.0  |        | true         |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 99.0   | true         |
     Given Global configuration "asset-externalization-of-non-active-loans" is enabled
 
-    When Loan Pay-off is made on "25 June 2025"
+    When Loan Pay-off is made on "26 June 2025"
     Then Loan's all installments have obligations met
 
-  @TestRailId:C3802 @AssetExternalizationJournalEntry
+  @TestRailId:C3821 @AssetExternalizationJournalEntry
   Scenario: Verify manual journal entry with no External Asset Owner value if asset-externalization is disabled - UC4
     Given Global configuration "asset-externalization-of-non-active-loans" is disabled
     When Admin sets the business date to "25 June 2025"

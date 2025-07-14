@@ -69,7 +69,6 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
-        String resourceId = String.valueOf(loanId);
 
         Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
@@ -83,38 +82,12 @@ public class JournalEntriesStepDef extends AbstractStepDef {
                         && transactionTypeExpected.equals(t.getType().getCode().substring(20)))
                 .collect(Collectors.toList());
 
-        List<List<JournalEntryTransactionItem>> journalLinesActualList = transactionsMatch.stream().map(t -> {
-            String transactionId = "L" + t.getId();
-            Response<GetJournalEntriesTransactionIdResponse> journalEntryDataResponse = null;
-            try {
-                journalEntryDataResponse = journalEntriesApi.retrieveAll1(//
-                        null, //
-                        null, //
-                        null, //
-                        null, //
-                        null, //
-                        null, //
-                        null, //
-                        transactionId, //
-                        null, //
-                        null, //
-                        null, //
-                        null, //
-                        null, //
-                        null, //
-                        null, //
-                        null, //
-                        null, //
-                        null, //
-                        true//
-                ).execute();
-                ErrorHelper.checkSuccessfulApiCall(journalEntryDataResponse);
-            } catch (IOException e) {
-                log.error("Exception", e);
-            }
+        List<List<JournalEntryTransactionItem>> journalLinesActualList = getJournalLinesActualList(transactionsMatch);
+        checkJournalEntryData(journalLinesActualList, loanId, table);
+    }
 
-            return journalEntryDataResponse.body().getPageItems();
-        }).collect(Collectors.toList());
+    public void checkJournalEntryData(List<List<JournalEntryTransactionItem>> journalLinesActualList, long loanId, DataTable table) {
+        String resourceId = String.valueOf(loanId);
 
         List<List<String>> data = table.asLists();
         final int expectedCount = data.size() - 1;
@@ -150,6 +123,69 @@ public class JournalEntriesStepDef extends AbstractStepDef {
                     .as(ErrorMessageHelper.wrongValueInLineInJournalEntries(resourceId, i, possibleActualValuesList, expectedValues))
                     .isTrue();
         }
+    }
+
+    public List<List<JournalEntryTransactionItem>> getJournalLinesActualList(List<GetLoansLoanIdTransactions> transactionsMatch) {
+        List<List<JournalEntryTransactionItem>> journalLinesActualList = transactionsMatch.stream().map(t -> {
+            String transactionId = "L" + t.getId();
+            Response<GetJournalEntriesTransactionIdResponse> journalEntryDataResponse = null;
+            try {
+                journalEntryDataResponse = journalEntriesApi.retrieveAll1(//
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        transactionId, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        true//
+                ).execute();
+                ErrorHelper.checkSuccessfulApiCall(journalEntryDataResponse);
+            } catch (IOException e) {
+                log.error("Exception", e);
+            }
+
+            return journalEntryDataResponse.body().getPageItems();
+        }).collect(Collectors.toList());
+
+        return journalLinesActualList;
+    }
+
+    @Then("Loan Transactions tab has {int} a {string} transactions with date {string} which has the following Journal entries:")
+    public void journalEntryDataCheck(int numberTrns, String transactionType, String transactionDate, DataTable table) throws IOException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        TransactionType transactionType1 = TransactionType.valueOf(transactionType);
+        String transactionTypeExpected = transactionType1.getValue();
+
+        List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+        List<GetLoansLoanIdTransactions> transactionsMatch = transactions.stream()
+                .filter(t -> transactionDate.equals(formatter.format(t.getDate()))
+                        && transactionTypeExpected.equals(t.getType().getCode().substring(20)))
+                .collect(Collectors.toList());
+        assertThat(transactionsMatch.size())
+                .as("The number of journal entries for the transaction does not match the expected count! Expected: " + numberTrns
+                        + ", Actual: " + transactionsMatch.size())
+                .isEqualTo(numberTrns);
+
+        List<List<JournalEntryTransactionItem>> journalLinesActualList = getJournalLinesActualList(transactionsMatch);
+        checkJournalEntryData(journalLinesActualList, loanId, table);
     }
 
     @Then("Reversed loan capitalized income amortization transaction has the following Journal entries:")
