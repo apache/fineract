@@ -1570,10 +1570,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 } else {
                     lastOverdueBalanceChange = currentDate;
                 }
-                if (DateUtils.isBefore(ctx.getModel().lastOverdueBalanceChange(), toDate)) {
-                    emiCalculator.addBalanceCorrection(ctx.getModel(), lastOverdueBalanceChange, aggregatedOverDuePrincipal.negated());
-                    ctx.getModel().lastOverdueBalanceChange(lastOverdueBalanceChange);
-                }
+                emiCalculator.addBalanceCorrection(ctx.getModel(), lastOverdueBalanceChange, aggregatedOverDuePrincipal.negated());
+                ctx.getModel().lastOverdueBalanceChange(lastOverdueBalanceChange);
             }
         }
 
@@ -1599,8 +1597,30 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         if (loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
             loanTransaction.resetDerivedComponents();
         }
+        calculateUnrecognizedInterestForClosedPeriodByInterestRecalculationStrategy(loanTransaction, transactionCtx);
+
         Money transactionAmountUnprocessed = loanTransaction.getAmount(transactionCtx.getCurrency());
         processTransaction(loanTransaction, transactionCtx, transactionAmountUnprocessed);
+    }
+
+    private void calculateUnrecognizedInterestForClosedPeriodByInterestRecalculationStrategy(LoanTransaction loanTransaction,
+            TransactionCtx transactionCtx) {
+        if (transactionCtx instanceof ProgressiveTransactionCtx progressiveTransactionCtx && progressiveTransactionCtx.isPrepayAttempt()
+                && loanTransaction.isRepaymentLikeType() && loanTransaction.getLoan().getLoanInterestRecalculationDetails()
+                        .getPreCloseInterestCalculationStrategy().calculateTillRestFrequencyEnabled()) {
+            Optional<RepaymentPeriod> oCurrentRepaymentPeriod = progressiveTransactionCtx.getModel().repaymentPeriods().stream()
+                    .filter(rm -> DateUtils.isDateInRangeFromInclusiveToExclusive(rm.getFromDate(), rm.getDueDate(),
+                            loanTransaction.getTransactionDate()))
+                    .findFirst();
+            if (oCurrentRepaymentPeriod.isPresent() && oCurrentRepaymentPeriod.get().isFullyPaid()) {
+                RepaymentPeriod currentRepaymentPeriod = oCurrentRepaymentPeriod.get();
+                OutstandingDetails outstandingAmountsTillDate = emiCalculator
+                        .getOutstandingAmountsTillDate(progressiveTransactionCtx.getModel(), currentRepaymentPeriod.getDueDate());
+                if (outstandingAmountsTillDate.getOutstandingInterest().isGreaterThanZero()) {
+                    currentRepaymentPeriod.setFutureUnrecognizedInterest(outstandingAmountsTillDate.getOutstandingInterest());
+                }
+            }
+        }
     }
 
     private LoanTransactionToRepaymentScheduleMapping getTransactionMapping(

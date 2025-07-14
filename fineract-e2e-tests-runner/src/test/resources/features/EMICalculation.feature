@@ -2949,12 +2949,12 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 1  | 31   | 01 February 2024 | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
       | 2  | 29   | 01 March 2024    |                  | 67.05           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 10.0  | 0.0        | 10.0 | 7.01        |
       | 3  | 31   | 01 April 2024    |                  | 50.53           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
-      | 4  | 30   | 01 May 2024      |                  | 33.91           | 16.62         | 0.39     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
-      | 5  | 31   | 01 June 2024     |                  | 17.19           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
-      | 6  | 30   | 01 July 2024     |                  | 0.0             | 17.19         | 0.2      | 0.0  | 0.0       | 17.39 | 0.0   | 0.0        | 0.0  | 17.39       |
+      | 4  | 30   | 01 May 2024      |                  | 33.81           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
+      | 5  | 31   | 01 June 2024     |                  | 17.0            | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
+      | 6  | 30   | 01 July 2024     |                  | 0.0             | 17.0          | 0.1      | 0.0  | 0.0       | 17.1  | 0.0   | 0.0        | 0.0  | 17.1        |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 2.44     | 0.0  | 0.0       | 102.44 | 27.01 | 0.0        | 10.0 | 75.43       |
+      | 100.0         | 2.15     | 0.0  | 0.0       | 102.15 | 27.01 | 0.0        | 10.0 | 75.14       |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -2969,12 +2969,12 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 1  | 31   | 01 February 2024 | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
       | 2  | 29   | 01 March 2024    |                  | 67.05           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 10.0  | 0.0        | 10.0 | 7.01        |
       | 3  | 31   | 01 April 2024    |                  | 50.53           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
-      | 4  | 30   | 01 May 2024      |                  | 33.95           | 16.58         | 0.43     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
-      | 5  | 31   | 01 June 2024     |                  | 17.27           | 16.68         | 0.33     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
-      | 6  | 30   | 01 July 2024     |                  | 0.0             | 17.27         | 0.24     | 0.0  | 0.0       | 17.51 | 0.0   | 0.0        | 0.0  | 17.51       |
+      | 4  | 30   | 01 May 2024      |                  | 33.81           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
+      | 5  | 31   | 01 June 2024     |                  | 17.0            | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
+      | 6  | 30   | 01 July 2024     |                  | 0.0             | 17.0          | 0.1      | 0.0  | 0.0       | 17.1  | 0.0   | 0.0        | 0.0  | 17.1        |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 2.56     | 0.0  | 0.0       | 102.56 | 27.01 | 0.0        | 10.0 | 75.55       |
+      | 100.0         | 2.15     | 0.0  | 0.0       | 102.15 | 27.01 | 0.0        | 10.0 | 75.14       |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -7890,10 +7890,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 3  | 31   | 01 April 2025    |           | 4661.9          | 1112.7        | 576.13   | 0.0  | 0.0       | 1688.83 | 0.0  | 0.0        | 0.0  | 1688.83     |
       | 4  | 30   | 01 May 2025      |           | 3549.2          | 1112.7        | 576.13   | 0.0  | 0.0       | 1688.83 | 0.0  | 0.0        | 0.0  | 1688.83     |
       | 5  | 31   | 01 June 2025     |           | 2436.5          | 1112.7        | 576.13   | 0.0  | 0.0       | 1688.83 | 0.0  | 0.0        | 0.0  | 1688.83     |
-      | 6  | 30   | 01 July 2025     |           | 0.0             | 2436.5        | 896.66   | 0.0  | 0.0       | 3333.16 | 0.0  | 0.0        | 0.0  | 3333.16     |
+      | 6  | 30   | 01 July 2025     |           | 0.0             | 2436.5        | 576.13   | 0.0  | 0.0       | 3012.63 | 0.0  | 0.0        | 0.0  | 3012.63     |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
-      | 8000.0        | 3777.31  | 0.0  | 0.0       | 11777.31 | 0.05 | 0.0        | 0.04 | 11777.26    |
+      | 8000.0        | 3456.78  | 0.0  | 0.0       | 11456.78 | 0.05 | 0.0        | 0.04 | 11456.73    |
 
   @TestRailId:C3657
   Scenario: Verify tranche interest bearing progressive loan that expects two tranches with repayment and undo last disbursement - UC1
