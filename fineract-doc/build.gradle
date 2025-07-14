@@ -19,9 +19,9 @@
 apply plugin: 'org.asciidoctor.jvm.convert'
 apply plugin: 'org.asciidoctor.jvm.pdf'
 
-asciidoctorj {
-    version = '2.5.3'
+// see also: https://asciidoctor.github.io/asciidoctor-gradle-plugin/master/user-guide/
 
+asciidoctorj {
     attributes = [
         version: "${project.version}",
         docdate: new Date(),
@@ -35,14 +35,21 @@ asciidoctorj {
     ]
 
     modules {
-        pdf.version '1.6.2'
-        diagram.version '2.2.1'
-        epub.version '1.5.1'
-        //        revealjs.version '4.1.0'
+        diagram.use()
     }
 
     fatalWarnings ~/include file not found|missing callout|image to embed not found or not readable/
     fatalWarnings missingIncludes()
+}
+
+task copyImages(type: Copy) {
+    from "${projectDir}/src/docs/en/images"
+    into "${buildDir}/generated/images"
+}
+
+task copyDiagrams(type: Copy) {
+    from "${projectDir}/src/docs/en/diagrams"
+    into "${buildDir}/generated/diagrams"
 }
 
 asciidoctor {
@@ -57,17 +64,9 @@ asciidoctor {
 
     logging.captureStandardError LogLevel.INFO
 
+    dependsOn copyImages, copyDiagrams
+
     dependsOn(':fineract-client:clean', ':fineract-client:buildAsciidoc')
-}
-
-task copyImages(type: Copy) {
-    from "${projectDir}/src/docs/en/images"
-    into "${buildDir}/generated/images"
-}
-
-task copyDiagrams(type: Copy) {
-    from "${projectDir}/src/docs/en/diagrams"
-    into "${buildDir}/generated/diagrams"
 }
 
 asciidoctorPdf {

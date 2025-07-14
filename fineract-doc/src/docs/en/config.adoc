@@ -1,20 +1,14 @@
 :doctype: book
-:compat-mode!:
-:optimize: printer
-:media: printer
 :compress:
-:pdf-page-size: LETTER
 :experimental:
-:pdf-version: 1.8
 :page-layout: base
 :toc-title: Table of Contents
 :toc: left
 :toclevels: 2
 :icons: font
-:source-highlighter: coderay
+:source-highlighter: rouge
 :experimental:
 :source-language: java
-:years: 2015-2024
 :lang: en
 :encoding: utf-8
 :linkattrs:

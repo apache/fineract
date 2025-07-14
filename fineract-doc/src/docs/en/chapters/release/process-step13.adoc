@@ -2,28 +2,26 @@
 
 == Description
 
-As discussed in https://issues.apache.org/jira/browse/FINERACT-1154[FINERACT-1154], now that everything is final, please do the following to remove the release branch (and just keep the tag), and make sure that everything on the release tag is merged to develop and that e.g. git describe works:
+As discussed in https://issues.apache.org/jira/browse/FINERACT-1154[FINERACT-1154], now that everything is final, please do the following to remove the release branch (and just keep the tag), and make sure that everything on the release tag is merged to develop and that e.g. `git describe` works:
 
 [source,bash,subs="attributes+,+macros"]
 ----
-% git checkout develop
-% git branch -D {revnumber}
-% git push origin :{revnumber}
-% git checkout develop
-% git checkout -b merge-{revnumber}
-% git merge -s recursive -Xignore-all-space {revnumber}  <1>
-% git commit
-% git push $USER
-% hub pull-request
+git checkout develop
+git merge release/{revnumber} <1>
+git push origin develop
+git branch -D release/{revnumber}
+git push origin :release/{revnumber}
+git describe <2>
 ----
-<1> Manually resolve merge conflicts, if any
+<1> This merge is necessary for posterity: It's how we're able to preserve and trace lineage from releases to descendent commit. Note this is a traditional merge. This is for simplicity, and is an exception to our otherwise https://github.com/apache/fineract#merge-strategy[flat git commit history].
+<2> The output must refer to the most recent release. For example, if your working copy is checked out to the `develop` branch, the current commit is `0762a012e`, and the latest release tag (28 commits ago) was `1.12.1`, the output of `git describe` would be `1.12.1-28-g0762a012e`.
 
 == Gradle Task
 
 .Command
 [source,bash,subs="attributes+,+macros"]
 ----
-% ./gradlew fineractReleaseStep13 -Pfineract.release.version={revnumber}
+./gradlew fineractReleaseStep13 -Pfineract.release.version={revnumber}
 ----
 
 CAUTION: This task is not yet automated!

@@ -13,26 +13,25 @@ gpg --version
 ----
 +
 .Output GPG version
-[source,bash]
+[source,text]
 ----
-gpg (GnuPG) 2.2.27
-libgcrypt 1.9.4
-Copyright (C) 2021 Free Software Foundation, Inc.
+gpg (GnuPG) 2.4.4
+libgcrypt 1.10.3
+Copyright (C) 2024 g10 Code GmbH
 License GNU GPL-3.0-or-later <https://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 
-Home: /home/aleks/.gnupg
+Home: /home/user/.gnupg
 Supported algorithms:
 Pubkey: RSA, ELG, DSA, ECDH, ECDSA, EDDSA
 Cipher: IDEA, 3DES, CAST5, BLOWFISH, AES, AES192, AES256, TWOFISH,
         CAMELLIA128, CAMELLIA192, CAMELLIA256
 Hash: SHA1, RIPEMD160, SHA256, SHA384, SHA512, SHA224
 Compression: Uncompressed, ZIP, ZLIB, BZIP2
-
 ----
 +
-CAUTION: The insecure hash algorithm SHA1 is still supported in version 2.2.27. SHA1 is obsolete and you don't want to use it to generate your signature.
+CAUTION: The insecure hash algorithm SHA1 is still supported in version 2.4.4. SHA1 is obsolete and you don't want to use it to generate your signature.
 
 2. Generate your GPG key pair:
 +
@@ -43,60 +42,61 @@ gpg --full-gen-key
 ----
 +
 .Output generate GPG key pair (step 1: key type selection)
-[source,bash]
+[source,text]
 ----
-gpg (GnuPG) 2.2.27; Copyright (C) 2021 Free Software Foundation, Inc.
-This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.
-
 Please select what kind of key you want:
-   (1) RSA and RSA (default)
+   (1) RSA and RSA
    (2) DSA and Elgamal
    (3) DSA (sign only)
    (4) RSA (sign only)
+   (9) ECC (sign and encrypt) *default*
+  (10) ECC (sign only)
   (14) Existing key from card
+Your selection? 
+----
++
+Choose the default.
++
+.Output generate GPG key pair (step 2: elliptic curve selection)
+[source,text]
+----
+Please select which elliptic curve you want:
+   (1) Curve 25519 *default*
+   (4) NIST P-384
+   (6) Brainpool P-256
 Your selection?
 ----
 +
-There are four options. The default is to use RSA to create the key pair. Good enough for us.
-+
-.Output generate GPG key pair (step 2: key length selection)
-[source,bash]
-----
-RSA keys may be between 1024 and 4096 bits long.
-What keysize do you want? (2048)
-----
-+
-The default key length is 2048 bits. 1024 is obsolete and a longer 4096 RSA key will not provide more security than 2048 RSA key. Use the default.
+Again, choose the default.
 +
 .Output generate GPG key pair (step 3: validity selection)
-[source,bash]
+[source,text]
 ----
-Requested keysize is 2048 bits
 Please specify how long the key should be valid.
- 0 = key does not expire
- <n> = key expires in n days
- <n>w = key expires in n weeks
- <n>m = key expires in n months
- <n>y = key expires in n years
-Key is valid for? (0)2y
+         0 = key does not expire
+      <n>  = key expires in n days
+      <n>w = key expires in n weeks
+      <n>m = key expires in n months
+      <n>y = key expires in n years
+Key is valid for? (0) 2y
 ----
 +
 2 years for the validity of your keys should be fine. You can always update the expiration time later on.
 +
 .Output generate GPG key pair (step 4: confirmation)
-[source,bash]
+[source,text]
 ----
 Key expires at Sun 16 Apr 2024 08:10:24 PM UTC
-Is this correct? (y/N)y
+Is this correct? (y/N) y
 ----
 +
 Confirm if everything is correct.
 +
 .Output generate GPG key pair (step 5: provide user details)
-[source,bash]
+[source,text]
 ----
 GnuPG needs to construct a user ID to identify your key.
+
 Real name: Aleksandar Vidakovic
 Email address: aleks@apache.org
 Comment:
@@ -105,7 +105,7 @@ Comment:
 Provide your user details for the key. This is important because this information will be included in our key. It's one way of indicating who is owner of this key. The email address is a unique identifier for a person. You can leave Comment blank.
 +
 .Output generate GPG key pair (step 6: user ID selection)
-[source,bash]
+[source,text]
 ----
 You selected this USER-ID:
 "Aleksandar Vidakovic <aleks@apache.org>"
@@ -119,7 +119,7 @@ After the selection of your user ID GPG will ask for a passphrase to protect you
 CAUTION: Don't lose your private key password. You won't be able to unlock and use your private key without it.
 +
 .Output generate GPG key pair (step 7: gpg key pair generation)
-[source,bash]
+[source,text]
 ----
 We need to generate a lot of random bytes. It is a good idea to perform
 some other action (type on the keyboard, move the mouse, utilize the
@@ -130,7 +130,7 @@ generator a better chance to gain enough entropy.
 Generating the GPG keys will take a while.
 +
 .Output generate GPG key pair (step 8: gpg key pair finished)
-[source,bash]
+[source,text]
 ----
 gpg: key 7890ABCD marked as ultimately trusted <1>
 gpg: directory '/home/aleks/.gnupg/openpgp-revocs.d' created
@@ -141,20 +141,22 @@ gpg: checking the trustdb
 gpg: marginals needed: 3 completes needed: 1 trust model: PGP
 gpg: depth: 0 valid: 1 signed: 0 trust: 0-, 0q, 0n, 0m, 0f, 1u
 gpg: next trustdb check due at 2024-04-16
-pub rsa2048/7890ABCD 2022-04-16 [S] [expires: 2024-04-16] <3>
+pub ed25519/7890ABCD 2022-04-16 [SC] [expires: 2024-04-16] <3>
 Key fingerprint = ABCD EFGH IJKL MNOP QRST UVWX YZ12 3456 7890 ABCD <4>
 uid     [ultimate] Aleksandar Vidakovic <aleks@apache.org> <5>
-sub rsa2048/4FGHIJ56 2022-04-16 [] [expires: 2024-04-16]
+sub cv25519/4FGHIJ56 2022-04-16 [E] [expires: 2024-04-16] <6>
 ----
 +
-<1> GPG created a unique identifier in HEX format for your public key. When someone wants to download your public key, they can refer to it either with your email address or this HEX value.
+<1> GPG created a unique identifier in hexadecimal format for your public key. When someone wants to download your public key, they can refer to it either with your email address or this hex value. The hex value is sometimes prefixed with `0x` as is commonly done with hexadecimal numbers.
 +
-<2> GPG created a revocation certificate and its directory. You should never share your private key. If your private key is compromised, you need to use your revocation certificate to revoke your key.
+<2> GPG created a revocation certificate and its directory. If your private key is compromised, you need to use your revocation certificate to revoke your key.
 +
-<3> The public key is 2048 bits using RSA algorithm and shows the expiration date of 16 Apr 2024. The public key ID `7890ABCD` matches the last 8 bits of key fingerprint.
+<3> The public key uses the Ed25519 ECC (Elliptic Curve Cryptography) algorithm and shows the expiration date of 16 Apr 2024. The public key ID `0x7890ABCD` matches the last 8 characters of key fingerprint. The `[SC]` indicates this key is used to sign (prove authorship) and certify (issue subkeys for encryption, signature and authentication operations).
 <4> The key fingerprint (`ABCD EFGH IJKL MNOP QRST UVWX YZ12 3456 7890 ABCD`) is a hash of your public key.
 +
 <5> Your name and your email address are shown with information about the subkey.
++
+<6> This Curve25519 subkey is used for encryption.
 +
 Now you can find that there are two files created under ~/.gnupg/private-keys-v1.d/ directory. These two files are binary files with .key extension.
 
@@ -177,7 +179,7 @@ gpg --export-secret-keys --armor aleks@apache.org > privkey.asc
 Your private key should be kept in a safe place, like an encrypted flash drive. Treat it like your house key. Only you can have it and don't lose it. And you must remember your passphrase, otherwise you can't unlock your private key.
 +
 You should protect your revocation certificate. Anyone in possession of your revocation certificate, could immediately revoke your public/private key pair and generate fake ones.
-
++
 IMPORTANT: Please contact a PMC member to add your GPG public key in Fineract's Subversion repository. This is necessary to be able to validate published releases.
 
 1. Upload your GPG key to a keyserver:
@@ -189,7 +191,7 @@ gpg --send-keys ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD
 +
 Before doing this, make sure that your default keyserver is hkp://keyserver.ubuntu.com/. You can do this by changing the default keyserver in ~/.gnupg/dirmngr.conf:
 +
-[source,bash]
+[source,text]
 ----
 keyserver hkp://keyserver.ubuntu.com/
 ----
@@ -198,7 +200,9 @@ Alternatively you can provide the keyserver with the send command:
 +
 [source,bash]
 ----
-gpg --keyserver 'hkp://keyserver.ubuntu.com:11371' --send-keys ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD
+gpg \
+  --keyserver 'hkp://keyserver.ubuntu.com:11371' \
+  --send-keys ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD
 ----
 +
 Another option to publish your key is to submit an armored public key directly at https://keyserver.ubuntu.com/. You can create the necessary data with this command by providing the email address that you used when you created your key pair:
@@ -210,7 +214,7 @@ gpg --armor --export aleks@apache.org
 +
 Output:
 +
-[source,bash]
+[source,text]
 ----
 -----BEGIN PGP PUBLIC KEY BLOCK-----
 
@@ -222,4 +226,3 @@ gXXeWjafxBmHT1cM8hoBZBYzgTu9nK5UnllWunfaHXiCBG4oQQ==
 =85/F
 -----END PGP PUBLIC KEY BLOCK-----
 ----
-+

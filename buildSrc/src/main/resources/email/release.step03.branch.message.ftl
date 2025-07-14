@@ -24,7 +24,7 @@ Hello everyone,
 
 You can continue working and merging PRs to the develop branch for future releases, as always.
 
-The DRAFT release notes are on https://cwiki.apache.org/confluence/display/FINERACT/${project['fineract.release.version']}+-+Apache+Fineract.  Does anyone see anything missing?
+The DRAFT release notes are on https://cwiki.apache.org/confluence/display/FINERACT/${project['fineract.release.version']}+-+Apache+Fineract . Does anyone see anything missing?
 
 Does anyone have any last minutes changes they would like to see cherry-picked to branch ${project['fineract.release.version']}, or are we good go and actually cut the release based on this branch as it is?
 

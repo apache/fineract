@@ -271,6 +271,8 @@ Additionally, IDEs such as IntelliJ are useful for editing the AsciiDoc source f
 
 HTML rendered from the AsciiDoc source files is also available online at <https://fineract.apache.org/docs/current/>.
 
+A release version is derived from source control. The version will include `-SNAPSHOT` unless the current branch looks like a release or release maintenance branch. See `gitVersioning` settings in `build.gradle` for details.
+
 Connection pool configuration
 =============================
 

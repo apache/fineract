@@ -156,7 +156,7 @@ For example the OfficeDataV1 Avro schema looks the following:
 .`OfficeDataV1.avsc`
 [%collapsible]
 ====
-[source,avroschema]
+[source,json]
 ----
 include::{rootdir}/fineract-avro-schemas/src/main/avro/office/v1/OfficeDataV1.avsc[]
 ----
@@ -175,7 +175,7 @@ This implies that for putting a single event message onto a message queue for ex
 The message schema looks the following:
 
 .`MessageV1.avsc`
-[source,avroschema]
+[source,json]
 ----
 include::{rootdir}/fineract-avro-schemas/src/main/avro/MessageV1.avsc[]
 ----
@@ -370,7 +370,7 @@ New Avro schemas can be easily created. Just create a new Avro schema file in th
 === BigDecimal support in Avro schemas
 Apache Avro by default doesn't support complex types like a BigDecimal. It has to be implemented using a custom snippet like this:
 
-[source,avroschema]
+[source,json]
 ----
 include::{rootdir}/fineract-avro-schemas/src/main/resources/avro-templates/bigdecimal.avsc[]
 ----
@@ -380,7 +380,7 @@ It's a 20 precision and 8 scale BigDecimal.
 Obviously it's quite challenging to copy-paste this snippet to every single BigDecimal field, so there's a customization in place for Fineract.
 The type `bigdecimal` is supported natively, and you're free to use it like this:
 
-[source,avroschema]
+[source,json]
 ----
 {
     "default": null,

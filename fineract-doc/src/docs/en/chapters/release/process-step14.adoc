@@ -11,7 +11,7 @@ CAUTION: This step is not yet automated. We are working on a static site generat
 .Command
 [source,bash]
 ----
-% ./gradlew fineractReleaseStep14 <1>
+./gradlew fineractReleaseStep14 <1>
 ----
 <1> Currently doing nothing. Will trigger in the future the static site generator and publish on Github.
 

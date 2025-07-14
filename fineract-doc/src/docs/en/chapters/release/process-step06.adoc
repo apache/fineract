@@ -4,10 +4,13 @@
 
 Create source and binary tarballs.
 
+// FIXME - clean this up? focus on what commands should actually be run
+
 [source,bash,subs="attributes+"]
 ----
-% ./gradlew build -x test
+./gradlew --rerun-tasks srcDistTar binaryDistTar <1>
 ----
+<1> The source tarball might not be created if `--rerun-tasks` is omitted.
 
 Look in `fineract-war/build/distributions/` for the tarballs.
 
@@ -15,23 +18,34 @@ Make sure to do some sanity checks. The source tarball and the code in the relea
 
 [source,bash,subs="attributes+"]
 ----
-% cd /fineract-release-preparations
-% tar -xvf path/to/apache-fineract-src-{revnumber}.tar.gz
-% git clone git@github.com:apache/fineract.git
-% cd fineract/
-% git checkout tags/{revnumber}
-% cd ..
-% diff -r fineract apache-fineract-src-{revnumber}
+cd /fineract-release-preparations
+tar -xvf path/to/apache-fineract-src-{revnumber}.tar.gz
+git clone git@github.com:apache/fineract.git
+cd fineract/
+git checkout tags/{revnumber}
+cd ..
+diff -r fineract apache-fineract-src-{revnumber}
 ----
 
-Make sure the code compiles and tests pass on the uncompressed source. Do as much testing as you can and share what you did. Ideally you'd build code and docs and run every possible test and check, but https://github.com/apache/fineract/actions[running everything has complex dependencies, caches, and takes many hours]. It is rarely done in practice offline / local / on developer machines. But please, go ahead and run the test and doc tasks, and more! Grab a cup of coffee and run everything you can. See the various builds in `.github/workflows/` and try the same things on your own. We should all hammer on a release candidate as much as we can to see if it breaks and fix it if so. All that of course improves our final release.
+// FIXME - add output example
 
-Finally, inspect `apache-fineract-{revnumber}-binary.tar.gz`. Make sure the `fineract-provider-{revnumber}.jar` can be run directly, and the `fineract-provider.war` can be run with Tomcat.
+Make sure the code compiles and tests pass on the uncompressed source. Do as much testing as you can and share what you did. Here's the bare minimum check:
+
+[source,bash,subs="attributes+"]
+----
+./gradlew build -x test -x doc
+----
+
+Ideally you'd build code and docs and run every possible test and check, but https://github.com/apache/fineract/actions[running everything has complex dependencies, caches, and takes many hours]. It is rarely done in practice offline / local / on developer machines. But please, go ahead and run the test and doc tasks, and more! Grab a cup of coffee and run everything you can. See the various builds in `.github/workflows/` and try the same things on your own. We should all hammer on a release candidate as much as we can to see if it breaks and fix it if so. All that of course improves our final release.
+
+Finally, inspect `apache-fineract-bin-{revnumber}.tar.gz`. Make sure the `fineract-provider-{revnumber}.jar` can be run directly, and the `fineract-provider.war` can be run with Tomcat.
 
 == Gradle Task
 
 .Command
 [source,bash]
 ----
-% ./gradlew fineractReleaseStep6
+./gradlew fineractReleaseStep6
 ----
+
+CAUTION: This task doesn't work. Build release artifacts manually as indicated above.

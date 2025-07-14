@@ -13,14 +13,79 @@ Make sure release artifacts are hosted at https://dist.apache.org/repos/dist/dev
 * Verify DISCLAIMER, NOTICE and LICENSE (year etc)
 * All files have correct headers (Rat check should be clean - `./gradlew rat`)
 * No jar files in the source artifacts
-* Integration tests should work
+* All tests pass both in CI and locally
+
+=== Artifact verification
+
+[source,bash,subs="attributes+"]
+----
+# source tarball signature and checksum verification steps
+# we'll check the source tarball first
+version={revnumber}
+src=apache-fineract-src-$version.tar.gz
+
+# upon success: prints "Good signature" and returns successful exit code
+# upon failure: prints "BAD signature" and returns error exit code
+gpg --verify $src.asc
+
+# upon success: prints nothing and returns successful exit code
+# upon failure: prints checksum differences and returns error exit code
+gpg --print-md SHA512 $src | diff - $src.sha512
+
+# binary tarball signature and checksum verification steps and outputs are similar
+bin=apache-fineract-bin-$version.tar.gz
+gpg --verify $bin.asc
+gpg --print-md SHA512 $bin | diff - $bin.sha512
+----
+
+For folks new to https://www.gnupg.org/[GnuPG], there are a couple things to note. First, if it says the source or binary tarball detached signature is correct, that's great! That's the most important part.
+
+Second, if you've imported `KEYS` but gpg warns you the key used for signing is not trusted, you can tell gpg you trust the key to squelch the warning. Ideally you meet the alleged key owner in person and check their ID first. Once you trust their identity matches, you then indicate your trust for their key.
+
+Start with `gpg --edit-key KEYID`, substituting the signing key id for `KEYID`. At the `gpg>` prompt, run the `trust` command and choose `4` (I trust fully). You could also choose `3` (marginal), but do _not_ choose `5` (ultimate).
+
+TIP: Consider also https://en.wikipedia.org/wiki/Key_signing_party[signing] and https://en.wikipedia.org/wiki/Web_of_trust[uploading] each other's keys.
+
+=== Build from source
+
+[source,bash]
+----
+tar -xzf $src
+cd apache-fineract-src-$version
+gradle build -x test -x doc
+cd ..
+----
+
+=== Run from binary
+
+Before running this you must first start a database server and ensure the `fineract_default` and `fineract_tenant` databases exist. Then:
+
+[source,bash]
+----
+tar -xzf $bin
+cd apache-fineract-bin-$version
+cat << 'EndOfRcenv' >> rcenv
+FINERACT_SERVER_SSL_ENABLED=false
+FINERACT_SERVER_PORT=8080
+BACKEND_PROTOCOL=http
+BACKEND_PORT=$FINERACT_SERVER_PORT
+EndOfRcenv
+docker run --rm -it -v "$(pwd):/usr/local/tomcat/webapps" \
+  --net=host --env-file=rcenv tomcat:jre21
+----
+
+Confirm the following:
+
+. http://localhost:8080/fineract-provider/actuator/health works
+. http://localhost:8080/fineract-provider/actuator/info displays the expected information
+. API calls work against http://localhost:8080/fineract-provider/api/v1
 
 == Gradle Task
 
 .Command
 [source,bash,subs="attributes+,+macros"]
 ----
-% ./gradlew fineractReleaseStep9 -Pfineract.release.version={revnumber}
+./gradlew fineractReleaseStep9 -Pfineract.release.version={revnumber}
 ----
 
 CAUTION: This task is not yet automated!

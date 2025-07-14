@@ -37,6 +37,7 @@ include::{rootdir}/custom/acme/note/service/build.gradle[lines=19..]
 NOTE: You don't need to edit `settings.gradle` to add your modules/libraries. If you follow above convention they'll get included automatically.
 +
 5. The dependency.gradle file could look something like this:
++
 [source,groovy]
 ----
 include::{rootdir}/custom/acme/note/service/dependencies.gradle[lines=19..]

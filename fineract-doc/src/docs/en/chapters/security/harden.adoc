@@ -18,7 +18,7 @@ Also, we recommend you familiarize yourself with the OWASP foundation and the "C
 
 In the world of Microfinance or small banking operations (in some geographies), it is possible that you can run Fineract on a private network, or isolated from the internet by being hosted locally and securing all connections. This could involve establishing a VPN with limited ports open, and only accepting connections within that VPN. At the far end of this spectrum, is running it isolated and air-gapped as a backend accounting system, where there is no internet connection on that device. In such scenarios, you are limiting the vectors of attack to just those employees you give access to. You are also limiting the functionality to accounting and basic operations, so this is rarely appropriate.  Even in these scenarios, it is important that you establish reviews of logs and accounts on a periodic basis to determine if any internal fraud is occurring. Such things should be part of your operational manual. There are a number of resources available for this topic, please find them online. For Fineract in particular, be mindful of the set up of approvals and and the access you give to each person or role in your organization
 
-=== Running it connected but behind a firewalls
+=== Running it connected but behind a firewall
 
 It should be clear that running it on the internet directly, without API monitoring and filtering, is a bad idea. This is especially true if your Fineract instance is connected to a payment mechanism of any kind. Imagine an exploit being used to gain access and then to send funds from an account to an outside merchant or bank. An attacker could drain an account before you can detect the issue.  And, then it will depend on the payment scheme rules whether any of those funds are recoverable.
 
@@ -46,7 +46,7 @@ There is a way to run those APIs endpoint (re-written but consistent) in a separ
 
 === User Education and Training
 
-Educating and training your team is another limb of your organizational cybersecurity defense. Equipped with engaging security awareness training sessions, end-users can be prepared with both knowledge and skills on how to identify potential security threats and react to them. You can get more information from some of the resources offered in the course during CISA Training: https://www.cisa.gov/c
+Educating and training your team is another limb of your organizational cybersecurity defense. Equipped with engaging security awareness training sessions, end-users can be prepared with both knowledge and skills on how to identify potential security threats and react to them. You can get more information from some of the resources offered in the course during CISA Training: https://www.cisa.gov
 
 === Regular Security Audits and Compliance Checks
 

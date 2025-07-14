@@ -28,7 +28,7 @@ Finally, check out the output of the JIRA release note tool to see which tickets
 .Command
 [source,bash,subs="attributes+,+macros"]
 ----
-% ./gradlew fineractReleaseStep2 -Pfineract.release.version={revnumber}
+./gradlew fineractReleaseStep2 -Pfineract.release.version={revnumber}
 ----
 
 CAUTION: This task is not yet automated!

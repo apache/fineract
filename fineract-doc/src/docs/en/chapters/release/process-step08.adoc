@@ -17,11 +17,11 @@ Upload these files to ASF's distribution dev (staging) area:
 
 [source,bash,subs="attributes+"]
 ----
-% svn co https://dist.apache.org/repos/dist/dev/fineract/ fineract-dist-dev
-% mkdir fineract-dist-dev/{revnumber}
-% cp path/to/files/* fineract-dist-dev/{revnumber}/
-% cd fineract-dist-dev
-% svn commit
+svn mkdir https://dist.apache.org/repos/dist/dev/fineract/{revnumber}
+svn checkout https://dist.apache.org/repos/dist/dev/fineract/{revnumber}
+cp path/to/files/* {revnumber}/
+cd {revnumber}/
+svn add * && svn commit
 ----
 
 NOTE: You will need your ASF Committer credentials to be able to access the Subversion host at `dist.apache.org`.
@@ -31,5 +31,7 @@ NOTE: You will need your ASF Committer credentials to be able to access the Subv
 .Command
 [source,bash,subs="attributes+,+macros"]
 ----
-% ./gradlew fineractReleaseStep8 -Pfineract.release.version={revnumber}
+./gradlew fineractReleaseStep8 -Pfineract.release.version={revnumber}
 ----
+
+CAUTION: This task is inefficient. Follow `svn mkdir` and other manual steps above.

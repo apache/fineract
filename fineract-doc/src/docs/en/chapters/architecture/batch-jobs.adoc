@@ -213,7 +213,7 @@ The business steps are configurable through APIs:
 
 Retrieving the configuration for a job:
 
-[source]
+[source,text]
 ----
 GET /fineract-provider/api/v1/jobs/{jobName}/steps?tenantIdentifier={tenantId}
 HTTP 200
@@ -235,7 +235,7 @@ HTTP 200
 
 Updating the business step configuration for a job:
 
-[source]
+[source,text]
 ----
 PUT /fineract-provider/api/v1/jobs/{jobName}/steps?tenantIdentifier={tenantId}
 
@@ -274,7 +274,7 @@ When the Inline job gets triggered then the corresponding existing job will run 
 
 Triggering the Inline Loan COB Job:
 
-[source]
+[source,text]
 ----
 POST /fineract-provider/api/v1/jobs/LOAN_COB/inline?tenantIdentifier={tenantId}
 

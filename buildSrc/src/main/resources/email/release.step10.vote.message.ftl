@@ -30,7 +30,7 @@ Tagged as ${project['fineract.release.version']}
 
 Committer PGP keys, including the release signing key: https://dist.apache.org/repos/dist/dev/fineract/KEYS
 
-Note that this release contains source and binary artifacts.
+Note that this release candidate contains source and binary artifacts.
 
 This vote will be open for 72 hours:
 
@@ -38,7 +38,7 @@ This vote will be open for 72 hours:
 [ ] +0 no opinion
 [ ] -1 disapprove (and reason why)
 
-Please indicate if you are a binding vote (member of the PMC).
+Please indicate if you are a binding vote (member of the PMC). Note: PMC members are required to download, compile, and test the artifacts before submitting their +1 vote.
 
 Please also indicate with "Tested: YES/NO/PARTIAL" if you have locally built and/or tested these artifacts and/or a clone of the code checked out to the release commit, following the form:
 
