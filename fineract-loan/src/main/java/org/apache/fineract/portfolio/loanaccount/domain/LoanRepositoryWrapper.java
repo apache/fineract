@@ -309,4 +309,8 @@ public class LoanRepositoryWrapper {
     public boolean existsByLoanId(Long loanId) {
         return repository.existsById(loanId);
     }
+
+    public boolean isEnabledCapitalizedIncome(Long loanId) {
+        return repository.isEnabledCapitalizedIncome(loanId);
+    }
 }

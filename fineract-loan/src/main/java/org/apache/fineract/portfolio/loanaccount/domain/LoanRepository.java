@@ -268,4 +268,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     @Query(FIND_LOAN_BY_EXTERNAL_ID)
     Optional<Loan> findByExternalId(@Param("externalId") ExternalId externalId);
+
+    @Query("select loan.loanRepaymentScheduleDetail.enableIncomeCapitalization from Loan loan where loan.id = :loanId")
+    Boolean isEnabledCapitalizedIncome(Long loanId);
 }

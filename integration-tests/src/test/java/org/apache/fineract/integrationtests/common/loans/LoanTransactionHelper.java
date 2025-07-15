@@ -68,6 +68,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateRespo
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoansResponse;
 import org.apache.fineract.client.models.InterestPauseRequestDto;
+import org.apache.fineract.client.models.LoanDeferredIncomeData;
 import org.apache.fineract.client.models.PaymentTypeData;
 import org.apache.fineract.client.models.PostAddAndDeleteDisbursementDetailRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
@@ -3044,6 +3045,10 @@ public class LoanTransactionHelper {
     public PostLoansLoanIdTransactionsResponse undoChargeOffLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         return Calls
                 .ok(FineractClientHelper.getFineractClient().loanTransactions.executeLoanTransaction(loanId, request, "undo-charge-off"));
+    }
+
+    public LoanDeferredIncomeData fetchDeferredIncomeDetails(Long loanId) {
+        return Calls.ok(FineractClientHelper.getFineractClient().loanDeferredIncome.fetchDeferredIncomeDetails(loanId));
     }
 
     // TODO: Rewrite to use fineract-client instead!
