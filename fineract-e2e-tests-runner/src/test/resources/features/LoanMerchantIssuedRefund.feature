@@ -189,3 +189,148 @@ Feature: MerchantIssuedRefund
       | 10 July 2024     | Repayment              | 338.9  | 336.48    | 2.42     | 0.0  | 0.0       | 663.52       | false    | false    |
       | 15 July 2024     | Merchant Issued Refund | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 613.52       | false    | false    |
       | 15 July 2024     | Interest Refund        | 0.19   | 0.0       | 0.19     | 0.0  | 0.0       | 613.52       | false    | false    |
+
+  @TestRailId:C3854
+  Scenario: Verify reversal of Merchant Issued Refund when interestRefundCalculation=false (no Interest Refund to reverse)
+    When Admin sets the business date to "01 July 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 July 2024      | 1000           | 10                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 July 2024" with "1000" amount and expected disbursement date on "01 July 2024"
+    And Admin successfully disburse the loan on "01 July 2024" with "1000" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2024      |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2024    |           | 669.43          | 330.57        | 8.33     | 0.0  | 0.0       | 338.9  | 0.0  | 0.0        | 0.0  | 338.9       |
+      | 2  | 31   | 01 September 2024 |           | 336.11          | 333.32        | 5.58     | 0.0  | 0.0       | 338.9  | 0.0  | 0.0        | 0.0  | 338.9       |
+      | 3  | 30   | 01 October 2024   |           | 0.0             | 336.11        | 2.8      | 0.0  | 0.0       | 338.91 | 0.0  | 0.0        | 0.0  | 338.91      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 1000.0        | 16.71    | 0.0  | 0.0       | 1016.71 | 0.0  | 0.0        | 0.0  | 1016.71     |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 July 2024     | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+    When Admin sets the business date to "15 July 2024"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "15 July 2024" with 50 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation false
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2024      |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2024    |           | 669.2           | 330.8         | 8.1      | 0.0  | 0.0       | 338.9  | 0.0  |  0.0       | 0.0  | 338.9       |
+      | 2  | 31   | 01 September 2024 |           | 335.46          | 333.74        | 5.16     | 0.0  | 0.0       | 338.9  | 0.0  | 0.0        | 0.0  | 338.9       |
+      | 3  | 30   | 01 October 2024   |           | 0.0             | 335.46        | 2.38     | 0.0  | 0.0       | 337.84 | 50.0 | 50.0       | 0.0  | 287.84      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 1000.0        | 15.64    | 0.0  | 0.0       | 1015.64 | 50.0 | 50.0       | 0.0  | 965.64      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 July 2024     | Disbursement           | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 15 July 2024     | Merchant Issued Refund | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 950.0        | false    | false    |
+    When Customer undo "1"th "Merchant Issued Refund" transaction made on "15 July 2024"
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2024      |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2024    |           | 669.43          | 330.57        | 8.33     | 0.0  | 0.0       | 338.9  | 0.0  | 0.0        | 0.0  | 338.9       |
+      | 2  | 31   | 01 September 2024 |           | 336.11          | 333.32        | 5.58     | 0.0  | 0.0       | 338.9  | 0.0  | 0.0        | 0.0  | 338.9       |
+      | 3  | 30   | 01 October 2024   |           | 0.0             | 336.11        | 2.8      | 0.0  | 0.0       | 338.91 | 0.0  | 0.0        | 0.0  | 338.91      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 1000.0        | 16.71    | 0.0  | 0.0       | 1016.71 | 0.0  | 0.0        | 0.0  | 1016.71     |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 July 2024     | Disbursement           | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 15 July 2024     | Merchant Issued Refund | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 950.0        | true     | false    |
+
+  @TestRailId:C3855
+  Scenario: Multiple refunds on same loan with different interestRefundCalculation settings
+    When Admin sets the business date to "01 July 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 July 2024      | 1000           | 10                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 July 2024" with "1000" amount and expected disbursement date on "01 July 2024"
+    And Admin successfully disburse the loan on "01 July 2024" with "1000" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2024      |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2024    |           | 669.43          | 330.57        | 8.33     | 0.0  | 0.0       | 338.9  | 0.0  | 0.0        | 0.0  | 338.9       |
+      | 2  | 31   | 01 September 2024 |           | 336.11          | 333.32        | 5.58     | 0.0  | 0.0       | 338.9  | 0.0  | 0.0        | 0.0  | 338.9       |
+      | 3  | 30   | 01 October 2024   |           | 0.0             | 336.11        | 2.8      | 0.0  | 0.0       | 338.91 | 0.0  | 0.0        | 0.0  | 338.91      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 1000.0        | 16.71    | 0.0  | 0.0       | 1016.71 | 0.0  | 0.0        | 0.0  | 1016.71     |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 July 2024     | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+    When Admin sets the business date to "10 July 2024"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "10 July 2024" with 30 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation true
+    And Customer makes "PAYOUT_REFUND" transaction with "AUTOPAY" payment type on "10 July 2024" with 20 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation false
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 July 2024      |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 31   | 01 August 2024    |           | 669.14          | 330.86        | 8.04     | 0.0  | 0.0       | 338.9  | 20.07 | 20.07      | 0.0  | 318.83      |
+      | 2  | 31   | 01 September 2024 |           | 335.57          | 333.57        | 5.33     | 0.0  | 0.0       | 338.9  | 0.0   | 0.0        | 0.0  | 338.9       |
+      | 3  | 30   | 01 October 2024   |           | 0.0             | 335.57        | 2.55     | 0.0  | 0.0       | 338.12 | 30.0  | 30.0       | 0.0  | 308.12      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late | Outstanding |
+      | 1000.0        | 15.92    | 0.0  | 0.0       | 1015.92 | 50.07 | 50.07      | 0.0  | 965.85      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 July 2024     | Disbursement           | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 10 July 2024     | Merchant Issued Refund | 30.0   | 30.0      | 0.0      | 0.0  | 0.0       | 970.0        | false    | false    |
+      | 10 July 2024     | Interest Refund        | 0.07   | 0.0       | 0.07     | 0.0  | 0.0       | 970.0        | false    | false    |
+      | 10 July 2024     | Payout Refund          | 20.0   | 20.0      | 0.0      | 0.0  | 0.0       | 950.0        | false    | false    |
+
+  @TestRailId:C3856
+  Scenario: Merchant Issued Refund on fully paid loan with interestRefundCalculation variations
+    When Admin sets the business date to "01 July 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 July 2024      | 1000           | 10                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 July 2024" with "1000" amount and expected disbursement date on "01 July 2024"
+    And Admin successfully disburse the loan on "01 July 2024" with "1000" EUR transaction amount
+    Then Loan Repayment schedule has 1 periods, with the following data for periods:
+      | Nr | Days | Date           | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2024   |           | 1000.0          |               |          | 0.0  |           | 0.0     | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2024 |           | 0.0             | 1000.0        | 8.33     | 0.0  | 0.0       | 1008.33 | 0.0  | 0.0        | 0.0  | 1008.33     |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 1000.0        | 8.33     | 0.0  | 0.0       | 1008.33 | 0.0  | 0.0        | 0.0  | 1008.33     |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 July 2024     | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+    When Admin sets the business date to "01 August 2024"
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 August 2024" with 1008.33 EUR transaction amount and system-generated Idempotency key
+    Then Loan Repayment schedule has 1 periods, with the following data for periods:
+      | Nr | Days | Date           | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
+      |    |      | 01 July 2024   |                | 1000.0          |               |          | 0.0  |           | 0.0     | 0.0     |            |      |             |
+      | 1  | 31   | 01 August 2024 | 01 August 2024 | 0.0             | 1000.0        | 8.33     | 0.0  | 0.0       | 1008.33 | 1008.33 | 0.0        | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
+      | 1000.0        | 8.33     | 0.0  | 0.0       | 1008.33 | 1008.33 | 0.0        | 0.0  | 0.0         |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount  | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 July 2024     | Disbursement     | 1000.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 01 August 2024   | Repayment        | 1008.33 | 1000.0    | 8.33     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 August 2024   | Accrual          | 8.33    | 0.0       | 8.33     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 August 2024   | Accrual Activity | 8.33    | 0.0       | 8.33     | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Loan status will be "CLOSED_OBLIGATIONS_MET"
+    When Admin sets the business date to "05 August 2024"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "05 August 2024" with 10 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation false
+    Then Loan Repayment schedule has 1 periods, with the following data for periods:
+      | Nr | Days | Date           | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
+      |    |      | 01 July 2024   |                | 1000.0          |               |          | 0.0  |           | 0.0     | 0.0     |            |      |             |
+      | 1  | 31   | 01 August 2024 | 01 August 2024 | 0.0             | 1000.0        | 8.33     | 0.0  | 0.0       | 1008.33 | 1008.33 | 0.0        | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
+      | 1000.0        | 8.33     | 0.0  | 0.0       | 1008.33 | 1008.33 | 0.0        | 0.0  | 0.0         |
+    #verify that "Interest Refund" transaction is not created
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount  | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 July 2024     | Disbursement           | 1000.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 01 August 2024   | Repayment              | 1008.33 | 1000.0    | 8.33     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 August 2024   | Accrual                | 8.33    | 0.0       | 8.33     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 August 2024   | Accrual Activity       | 8.33    | 0.0       | 8.33     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 August 2024   | Merchant Issued Refund | 10.0    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan status will be "OVERPAID"
