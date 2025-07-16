@@ -324,47 +324,94 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
             if (postedAsOnDates.contains(periodInterval.endDate().plusDays(1))) {
                 isUserPosting = true;
             }
-            List<SavingsAccountTransactionData> listOfTransactions = retreiveOrderedNonInterestPostingTransactions(savingsAccountData);
+            if (savingsAccountData.isAllowOverdraft() && !MathUtil.isZero(savingsAccountData.getGlAccountIdForInterestReceivableNegative())){
+                List<SavingsAccountTransactionData> listOfTransactions = retreiveOrderedNonInterestPostingTransactions(savingsAccountData);
 
-            List<SavingsAccountTransactionData> listOfTransactionsNegative = new ArrayList<>();
-            List<SavingsAccountTransactionData> listOfTransactionsPositive = new ArrayList<>();
-            boolean firstIsNegative = false;
-            boolean firstIsSet = false;
+                List<SavingsAccountTransactionData> listOfTransactionsNegative = new ArrayList<>();
+                List<SavingsAccountTransactionData> listOfTransactionsPositive = new ArrayList<>();
+                boolean firstIsNegative = false;
+                boolean firstIsSet = false;
 
-            for (SavingsAccountTransactionData lists : listOfTransactions) {
+                for (SavingsAccountTransactionData lists : listOfTransactions) {
 
-                if (MathUtil.isLessThanZero(lists.getRunningBalance())
-                        && periodInterval.startDate().getMonth() == lists.getDate().getMonth()) {
-                    listOfTransactionsNegative.add(lists);
-                    if (!firstIsSet) {
-                        firstIsNegative = true;
-                        firstIsSet = true;
-                    }
-                } else if (periodInterval.startDate().getMonth() == lists.getDate().getMonth()) {
-                    BigDecimal bd = new BigDecimal(String.valueOf(lists.getRunningBalance())).setScale(2, RoundingMode.DOWN);
-                    if (!MathUtil.isZero(bd)) {
-                        listOfTransactionsPositive.add(lists);
+                    if (MathUtil.isLessThanZero(lists.getRunningBalance())
+                            && periodInterval.startDate().getMonth() == lists.getDate().getMonth()) {
+                        listOfTransactionsNegative.add(lists);
                         if (!firstIsSet) {
-                            firstIsNegative = false;
+                            firstIsNegative = true;
                             firstIsSet = true;
+                        }
+                    } else if (periodInterval.startDate().getMonth() == lists.getDate().getMonth()) {
+                        BigDecimal bd = new BigDecimal(String.valueOf(lists.getRunningBalance())).setScale(2, RoundingMode.DOWN);
+                        if (!MathUtil.isZero(bd)) {
+                            listOfTransactionsPositive.add(lists);
+                            if (!firstIsSet) {
+                                firstIsNegative = false;
+                                firstIsSet = true;
+                            }
+                        }
+                    }
+
+                }
+                List<SavingsAccountTransactionData> firstList = null;
+                List<SavingsAccountTransactionData> secondList = null;
+
+                if (firstIsNegative) {
+                    firstList = listOfTransactionsNegative;
+                    secondList = listOfTransactionsPositive;
+                } else {
+                    firstList = listOfTransactionsPositive;
+                    secondList = listOfTransactionsNegative;
+                }
+                Boolean flagIntroduce = false;
+
+                if (firstList.isEmpty() && secondList.isEmpty()) {
+                    final PostingPeriod postingPeriod = PostingPeriod.createFromDTO(periodInterval, periodStartingBalance,
+                            retreiveOrderedNonInterestPostingTransactions(savingsAccountData), monetaryCurrency, compoundingPeriodType,
+                            interestCalculationType, interestRateAsFraction, daysInYearType.getValue(), upToInterestCalculationDate,
+                            interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation,
+                            isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation,
+                            isUserPosting, financialYearBeginningMonth, savingsAccountData.isAllowOverdraft(), false);
+
+                    periodStartingBalance = postingPeriod.closingBalance();
+
+                    allPostingPeriods.add(postingPeriod);
+                    continue;
+                } else {
+
+                    if (!firstList.isEmpty()) {
+                        final PostingPeriod postingPeriod = PostingPeriod.createFromDTO(periodInterval, periodStartingBalance, firstList,
+                                monetaryCurrency, compoundingPeriodType, interestCalculationType, interestRateAsFraction,
+                                daysInYearType.getValue(), upToInterestCalculationDate, interestPostTransactions, isInterestTransfer,
+                                minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction,
+                                minOverdraftForInterestCalculation, isUserPosting, financialYearBeginningMonth,
+                                savingsAccountData.isAllowOverdraft(), flagIntroduce);
+                        flagIntroduce = postingPeriod.getEndTransaction();
+                        periodStartingBalance = postingPeriod.closingBalance();
+                        if (!(MathUtil.isZero(postingPeriod.getOpeningBalance().getAmount())
+                                && MathUtil.isZero(postingPeriod.closingBalance().getAmount()))) {
+                            allPostingPeriods.add(postingPeriod);
+                        }
+                    }
+
+                    if (!secondList.isEmpty()) {
+                        final PostingPeriod postingPeriod = PostingPeriod.createFromDTO(periodInterval, periodStartingBalance, secondList,
+                                monetaryCurrency, compoundingPeriodType, interestCalculationType, interestRateAsFraction,
+                                daysInYearType.getValue(), upToInterestCalculationDate, interestPostTransactions, isInterestTransfer,
+                                minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction,
+                                minOverdraftForInterestCalculation, isUserPosting, financialYearBeginningMonth,
+                                savingsAccountData.isAllowOverdraft(), flagIntroduce);
+
+                        periodStartingBalance = postingPeriod.closingBalance();
+                        if (!(MathUtil.isZero(postingPeriod.getOpeningBalance().getAmount())
+                                && MathUtil.isZero(postingPeriod.closingBalance().getAmount()))) {
+                            allPostingPeriods.add(postingPeriod);
                         }
                     }
                 }
 
             }
-            List<SavingsAccountTransactionData> firstList = null;
-            List<SavingsAccountTransactionData> secondList = null;
-
-            if (firstIsNegative) {
-                firstList = listOfTransactionsNegative;
-                secondList = listOfTransactionsPositive;
-            } else {
-                firstList = listOfTransactionsPositive;
-                secondList = listOfTransactionsNegative;
-            }
-            Boolean flagIntroduce = false;
-
-            if (firstList.isEmpty() && secondList.isEmpty()) {
+            else{
                 final PostingPeriod postingPeriod = PostingPeriod.createFromDTO(periodInterval, periodStartingBalance,
                         retreiveOrderedNonInterestPostingTransactions(savingsAccountData), monetaryCurrency, compoundingPeriodType,
                         interestCalculationType, interestRateAsFraction, daysInYearType.getValue(), upToInterestCalculationDate,
@@ -375,39 +422,8 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                 periodStartingBalance = postingPeriod.closingBalance();
 
                 allPostingPeriods.add(postingPeriod);
-                continue;
-            } else {
-
-                if (!firstList.isEmpty()) {
-                    final PostingPeriod postingPeriod = PostingPeriod.createFromDTO(periodInterval, periodStartingBalance, firstList,
-                            monetaryCurrency, compoundingPeriodType, interestCalculationType, interestRateAsFraction,
-                            daysInYearType.getValue(), upToInterestCalculationDate, interestPostTransactions, isInterestTransfer,
-                            minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction,
-                            minOverdraftForInterestCalculation, isUserPosting, financialYearBeginningMonth,
-                            savingsAccountData.isAllowOverdraft(), flagIntroduce);
-                    flagIntroduce = postingPeriod.getEndTransaction();
-                    periodStartingBalance = postingPeriod.closingBalance();
-                    if (!(MathUtil.isZero(postingPeriod.getOpeningBalance().getAmount())
-                            && MathUtil.isZero(postingPeriod.closingBalance().getAmount()))) {
-                        allPostingPeriods.add(postingPeriod);
-                    }
-                }
-
-                if (!secondList.isEmpty()) {
-                    final PostingPeriod postingPeriod = PostingPeriod.createFromDTO(periodInterval, periodStartingBalance, secondList,
-                            monetaryCurrency, compoundingPeriodType, interestCalculationType, interestRateAsFraction,
-                            daysInYearType.getValue(), upToInterestCalculationDate, interestPostTransactions, isInterestTransfer,
-                            minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction,
-                            minOverdraftForInterestCalculation, isUserPosting, financialYearBeginningMonth,
-                            savingsAccountData.isAllowOverdraft(), flagIntroduce);
-
-                    periodStartingBalance = postingPeriod.closingBalance();
-                    if (!(MathUtil.isZero(postingPeriod.getOpeningBalance().getAmount())
-                            && MathUtil.isZero(postingPeriod.closingBalance().getAmount()))) {
-                        allPostingPeriods.add(postingPeriod);
-                    }
-                }
             }
+
         }
 
         this.savingsHelper.calculateInterestForAllPostingPeriods(monetaryCurrency, allPostingPeriods,

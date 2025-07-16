@@ -364,9 +364,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("left join m_savings_account_transaction_tax_details txd on txd.savings_transaction_id = tr.id ");
             sqlBuilder.append("left join m_tax_component mtc on mtc.id = txd.tax_component_id ");
             sqlBuilder.append(
-                    "left join acc_product_mapping apm on apm.product_type = 2 and apm.product_id = sp.id and apm.financial_account_type=2 ");
+                    "left join acc_product_mapping apm on apm.product_type = 2 and apm.product_id = sp.id and apm.financial_account_type=3 ");
             sqlBuilder.append(
-                    "left join acc_product_mapping apm1 on apm1.product_type = 2 and apm1.product_id = sp.id and apm1.financial_account_type=17 ");
+                    "left join acc_product_mapping apm1 on apm1.product_type = 2 and apm1.product_id = sp.id and apm1.financial_account_type=2 ");
             sqlBuilder.append("left join acc_product_mapping apm2 on apm2.product_id = sp.id and apm2.financial_account_type=18 ");
             sqlBuilder.append("left join acc_product_mapping apm3 on apm3.product_id = sp.id and apm3.financial_account_type = 11 ");
             sqlBuilder.append("left join acc_product_mapping apm4 on apm4.product_id = sp.id and apm4.financial_account_type = 2 ");

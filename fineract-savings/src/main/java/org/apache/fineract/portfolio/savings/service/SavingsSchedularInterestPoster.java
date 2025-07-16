@@ -116,12 +116,7 @@ public class SavingsSchedularInterestPoster {
                             && savingsAccountData.getGlAccountIdForInterestOnSavings() != 0) {
                         OffsetDateTime auditDatetime = DateUtils.getAuditOffsetDateTime();
                         paramsForGLInsertion.add(new Object[] {
-                                isNegativeBalance
-                                        ? MathUtil.isLessThanZero(savingsAccountTransactionData.getRunningBalance())
-                                                ? savingsAccountData.getGlAccountIdForInterestReceivableNegative()
-                                                : savingsAccountData.getGlAccountIdForInterestReceivableNegative()
-                                        : savingsAccountData.getGlAccountIdForSavingsControl(),
-
+                                validateAccountForCreditAllowOverdraft(savingsAccountData.isAllowOverdraft(),isNegativeBalance,savingsAccountData, savingsAccountTransactionData),
                                 savingsAccountData.getOfficeId(), null, currencyCode,
                                 SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
                                 savingsAccountTransactionData.getId(), null, false, null, false,
@@ -132,11 +127,7 @@ public class SavingsSchedularInterestPoster {
                                 DateUtils.getBusinessLocalDate() });
 
                         paramsForGLInsertion.add(new Object[] {
-                                isNegativeBalance
-                                        ? MathUtil.isLessThanZero(savingsAccountTransactionData.getRunningBalance())
-                                                ? savingsAccountData.getGlAccountIdForOverdraftPorfolioNegative()
-                                                : savingsAccountData.getGlAccountIdForSavingsControlAcountPositiveInterestNegative()
-                                        : savingsAccountData.getGlAccountIdForInterestOnSavings(),
+                                validateAccountForDebitAllowOverdraft(savingsAccountData.isAllowOverdraft(),isNegativeBalance,savingsAccountData, savingsAccountTransactionData),
                                 savingsAccountData.getOfficeId(), null, currencyCode,
                                 SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
                                 savingsAccountTransactionData.getId(), null, false, null, false,
@@ -167,6 +158,40 @@ public class SavingsSchedularInterestPoster {
 
     private List<SavingsAccountTransactionData> fetchTransactionsFromIds(final List<String> refNo) throws DataAccessException {
         return this.savingsAccountReadPlatformService.retrieveAllTransactionData(refNo);
+    }
+    private Long validateAccountForCreditAllowOverdraft(Boolean allowOverdraft, Boolean isNegativeBalance, SavingsAccountData savingsAccountData, SavingsAccountTransactionData savingsAccountTransactionData){
+       Long accountId = 0L;
+        if (allowOverdraft){
+            if (!MathUtil.isZero(savingsAccountData.getGlAccountIdForInterestReceivableNegative())){
+               accountId = isNegativeBalance ? MathUtil.isLessThanZero(savingsAccountTransactionData.getRunningBalance())
+                                            ? savingsAccountData.getGlAccountIdForInterestReceivableNegative()
+                                            : savingsAccountData.getGlAccountIdForInterestReceivableNegative()
+                                : savingsAccountData.getGlAccountIdForSavingsControl();
+            }else{
+                accountId =  savingsAccountData.getGlAccountIdForSavingsControl();
+            }
+        }else{
+            accountId =  savingsAccountData.getGlAccountIdForSavingsControl();
+        }
+        return accountId;
+    }
+
+    private Long validateAccountForDebitAllowOverdraft(Boolean allowOverdraft, Boolean isNegativeBalance, SavingsAccountData savingsAccountData, SavingsAccountTransactionData savingsAccountTransactionData){
+        Long accountId = 0L;
+        if (allowOverdraft){
+            if (!MathUtil.isZero(savingsAccountData.getGlAccountIdForInterestReceivableNegative())){
+                accountId = isNegativeBalance
+                        ? MathUtil.isLessThanZero(savingsAccountTransactionData.getRunningBalance())
+                        ? savingsAccountData.getGlAccountIdForOverdraftPorfolioNegative()
+                        : savingsAccountData.getGlAccountIdForSavingsControlAcountPositiveInterestNegative()
+                        : savingsAccountData.getGlAccountIdForInterestOnSavings();
+            }else{
+                accountId = savingsAccountData.getGlAccountIdForInterestOnSavings();
+            }
+        }else{
+            accountId = savingsAccountData.getGlAccountIdForInterestOnSavings();
+        }
+        return accountId;
     }
 
     @SuppressWarnings("unused")
