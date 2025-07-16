@@ -28,19 +28,23 @@
             <column defaultValueComputed="NULL" name="installment_amount_in_multiples_of" type="DECIMAL(19, 6)"/>
         </addColumn>
     </changeSet>
-    <changeSet author="fineract" id="1029-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <renameColumn tableName="m_product_loan" oldColumnName="instalment_amount_in_multiples_of" newColumnName="installment_amount_in_multiples_of" columnDataType="DECIMAL(19, 6)"/>
-    </changeSet>
     <changeSet author="fineract" id="1029-3-postgresql" context="postgresql">
+        <validCheckSum>9:e513a98940f115bc53cdd5e656b19bcd</validCheckSum>
         <sql>
-            UPDATE m_loan SET installment_amount_in_multiples_of = lp.installment_amount_in_multiples_of FROM (
-                SELECT id, installment_amount_in_multiples_of FROM m_product_loan
-            ) lp WHERE lp.id = m_loan.product_id
+            UPDATE m_loan SET installment_amount_in_multiples_of = lp.instalment_amount_in_multiples_of FROM (
+                SELECT id, instalment_amount_in_multiples_of FROM m_product_loan
+            ) lp WHERE lp.id = m_loan.product_id AND lp.instalment_amount_in_multiples_of IS NOT NULL
         </sql>
     </changeSet>
     <changeSet author="fineract" id="1029-3-mysql" context="mysql">
+        <validCheckSum>9:e7490702ae64f9df7509a1c4fc37d2ba</validCheckSum>
         <sql>
-            UPDATE m_loan l inner join m_product_loan lp on lp.id = l.product_id set l.installment_amount_in_multiples_of = lp.installment_amount_in_multiples_of
+            UPDATE m_loan JOIN m_product_loan lp ON lp.id = m_loan.product_id
+                SET m_loan.installment_amount_in_multiples_of = lp.instalment_amount_in_multiples_of
+            WHERE lp.instalment_amount_in_multiples_of IS NOT NULL
         </sql>
+    </changeSet>
+    <changeSet author="fineract" id="1029-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <renameColumn tableName="m_product_loan" oldColumnName="instalment_amount_in_multiples_of" newColumnName="installment_amount_in_multiples_of" columnDataType="DECIMAL(19, 6)"/>
     </changeSet>
 </databaseChangeLog>

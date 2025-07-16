@@ -20,9 +20,16 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.time.LocalDate;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.springframework.lang.NonNull;
 
 public interface LoanBuyDownFeeAmortizationProcessingService {
 
     void processBuyDownFeeAmortizationTillDate(@NonNull Loan loan, @NonNull LocalDate tillDate, boolean addJournal);
+
+    void processBuyDownFeeAmortizationOnLoanClosure(@NonNull Loan loan, boolean addJournal);
+
+    void processBuyDownFeeAmortizationOnLoanChargeOff(@NonNull Loan loan, @NonNull LoanTransaction chargeOffTransaction);
+
+    void processBuyDownFeeAmortizationOnLoanUndoChargeOff(@NonNull LoanTransaction loanTransaction);
 }

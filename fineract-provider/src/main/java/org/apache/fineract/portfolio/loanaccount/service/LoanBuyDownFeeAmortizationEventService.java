@@ -35,10 +35,10 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
 @Slf4j
 @RequiredArgsConstructor
-public class LoanCapitalizedIncomeAmortizationEventService {
+public class LoanBuyDownFeeAmortizationEventService {
 
     private final BusinessEventNotifierService businessEventNotifierService;
-    private final LoanCapitalizedIncomeAmortizationProcessingService loanCapitalizedIncomeAmortizationProcessingService;
+    private final LoanBuyDownFeeAmortizationProcessingService loanBuyDownFeeAmortizationProcessingService;
 
     @PostConstruct
     public void addListeners() {
@@ -56,10 +56,10 @@ public class LoanCapitalizedIncomeAmortizationEventService {
         public void onBusinessEvent(final LoanCloseBusinessEvent event) {
             final Loan loan = event.get();
             final LoanStatus status = loan.getStatus();
-            if (loan.getLoanProductRelatedDetail().isEnableIncomeCapitalization()
+            if (loan.getLoanProductRelatedDetail().isEnableBuyDownFee()
                     && (status.isClosedObligationsMet() || status.isClosedWrittenOff() || status.isOverpaid())) {
-                log.debug("Loan closure on capitalized income amortization for loan {}", loan.getId());
-                loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationOnLoanClosure(loan, false);
+                log.debug("Loan closure on buy down fee amortization for loan {}", loan.getId());
+                loanBuyDownFeeAmortizationProcessingService.processBuyDownFeeAmortizationOnLoanClosure(loan, false);
             }
         }
     }
@@ -70,10 +70,10 @@ public class LoanCapitalizedIncomeAmortizationEventService {
         public void onBusinessEvent(final LoanBalanceChangedBusinessEvent event) {
             final Loan loan = event.get();
             final LoanStatus status = loan.getStatus();
-            if (loan.getLoanProductRelatedDetail().isEnableIncomeCapitalization()
+            if (loan.getLoanProductRelatedDetail().isEnableBuyDownFee()
                     && (status.isClosedObligationsMet() || status.isClosedWrittenOff() || status.isOverpaid())) {
-                log.debug("Loan balance change on capitalized income amortization for loan {}", loan.getId());
-                loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationOnLoanClosure(loan, true);
+                log.debug("Loan balance change on buy down fee amortization for loan {}", loan.getId());
+                loanBuyDownFeeAmortizationProcessingService.processBuyDownFeeAmortizationOnLoanClosure(loan, true);
             }
         }
     }
@@ -84,10 +84,9 @@ public class LoanCapitalizedIncomeAmortizationEventService {
         public void onBusinessEvent(final LoanChargeOffPostBusinessEvent event) {
             final LoanTransaction loanTransaction = event.get();
             final Loan loan = loanTransaction.getLoan();
-            if (loan.getLoanProductRelatedDetail().isEnableIncomeCapitalization() && loan.isChargedOff() && loanTransaction.isChargeOff()) {
-                log.debug("Loan charge-off on capitalized income amortization for loan {}", loan.getId());
-                loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationOnLoanChargeOff(loan,
-                        loanTransaction);
+            if (loan.getLoanProductRelatedDetail().isEnableBuyDownFee() && loan.isChargedOff() && loanTransaction.isChargeOff()) {
+                log.debug("Loan charge-off on buy down fee amortization for loan {}", loan.getId());
+                loanBuyDownFeeAmortizationProcessingService.processBuyDownFeeAmortizationOnLoanChargeOff(loan, loanTransaction);
             }
         }
     }
@@ -97,10 +96,10 @@ public class LoanCapitalizedIncomeAmortizationEventService {
         @Override
         public void onBusinessEvent(final LoanChargeOffPreBusinessEvent event) {
             final Loan loan = event.get();
-            if (loan.getLoanProductRelatedDetail().isEnableIncomeCapitalization()) {
-                log.debug("Loan pre charge-off capitalized income amortization for loan {}", loan.getId());
-                loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationTillDate(loan,
-                        DateUtils.getBusinessLocalDate(), true);
+            if (loan.getLoanProductRelatedDetail().isEnableBuyDownFee()) {
+                log.debug("Loan pre charge-off buy down fee amortization for loan {}", loan.getId());
+                loanBuyDownFeeAmortizationProcessingService.processBuyDownFeeAmortizationTillDate(loan, DateUtils.getBusinessLocalDate(),
+                        true);
             }
         }
     }
@@ -112,10 +111,10 @@ public class LoanCapitalizedIncomeAmortizationEventService {
             final LoanTransaction loanTransaction = event.get();
             final Loan loan = loanTransaction.getLoan();
             final LoanStatus status = loan.getStatus();
-            if (loan.getLoanProductRelatedDetail().isEnableIncomeCapitalization() && loanTransaction.getTypeOf().isChargeOff()
+            if (loan.getLoanProductRelatedDetail().isEnableBuyDownFee() && loanTransaction.getTypeOf().isChargeOff()
                     && !(loan.isChargedOff() || status.isClosedObligationsMet() || status.isClosedWrittenOff() || status.isOverpaid())) {
-                log.debug("Loan undo charge-off on capitalized income amortization for loan {}", loan.getId());
-                loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationOnLoanUndoChargeOff(loanTransaction);
+                log.debug("Loan undo charge-off on buy down fee amortization for loan {}", loan.getId());
+                loanBuyDownFeeAmortizationProcessingService.processBuyDownFeeAmortizationOnLoanUndoChargeOff(loanTransaction);
             }
         }
     }
