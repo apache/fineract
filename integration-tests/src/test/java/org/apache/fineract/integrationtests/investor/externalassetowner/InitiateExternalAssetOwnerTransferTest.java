@@ -698,8 +698,8 @@ public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationT
                             new BigDecimal("757.420000"), new BigDecimal("0.000000"), new BigDecimal("0.000000"),
                             new BigDecimal("0.000000")),
                     ExpectedExternalTransferData.expected(BUYBACK, buybackTransferResponse.getResourceExternalId(), "2020-03-06",
-                            "2020-03-05", "2020-03-05", true, new BigDecimal("15757.420000"), new BigDecimal("15000.000000"),
-                            new BigDecimal("757.420000"), new BigDecimal("0.000000"), new BigDecimal("0.000000"),
+                            "2020-03-05", "2020-03-05", true, new BigDecimal("0.000000"), new BigDecimal("0.000000"),
+                            new BigDecimal("0.000000"), new BigDecimal("0.000000"), new BigDecimal("0.000000"),
                             new BigDecimal("0.000000")));
             getAndValidateThereIsNoActiveMapping(saleTransferResponse.getResourceExternalId());
         } finally {

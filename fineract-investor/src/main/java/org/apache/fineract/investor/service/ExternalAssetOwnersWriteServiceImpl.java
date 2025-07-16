@@ -21,11 +21,6 @@ package org.apache.fineract.investor.service;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.ACTIVE_INTERMEDIATE;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.PENDING;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.PENDING_INTERMEDIATE;
-import static org.apache.fineract.portfolio.loanaccount.domain.LoanStatus.ACTIVE;
-import static org.apache.fineract.portfolio.loanaccount.domain.LoanStatus.CLOSED_OBLIGATIONS_MET;
-import static org.apache.fineract.portfolio.loanaccount.domain.LoanStatus.OVERPAID;
-import static org.apache.fineract.portfolio.loanaccount.domain.LoanStatus.TRANSFER_IN_PROGRESS;
-import static org.apache.fineract.portfolio.loanaccount.domain.LoanStatus.TRANSFER_ON_HOLD;
 
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
@@ -43,6 +38,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.cob.data.LoanDataForExternalTransfer;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -74,9 +70,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersWriteService {
 
     private static final LocalDate FUTURE_DATE_9999_12_31 = LocalDate.of(9999, 12, 31);
-    private static final List<LoanStatus> ACTIVE_LOAN_STATUSES = List.of(ACTIVE, TRANSFER_IN_PROGRESS, TRANSFER_ON_HOLD);
-    private static final List<LoanStatus> VALID_DELAYED_SETTLEMENT_LOAN_STATUSES_BUYBACK_AND_SALE = List.of(ACTIVE, TRANSFER_IN_PROGRESS,
-            TRANSFER_ON_HOLD, OVERPAID, CLOSED_OBLIGATIONS_MET);
     private static final List<ExternalTransferStatus> BUYBACK_READY_STATUSES = List.of(ExternalTransferStatus.PENDING,
             ExternalTransferStatus.ACTIVE);
     private static final List<ExternalTransferStatus> BUYBACK_READY_STATUSES_FOR_DELAY_SETTLEMENT = List
@@ -86,6 +79,7 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     private final FromJsonHelper fromApiJsonHelper;
     private final LoanRepository loanRepository;
     private final DelayedSettlementAttributeService delayedSettlementAttributeService;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Override
     @Transactional
@@ -388,16 +382,16 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
 
     private void validateLoanStatusIntermediarySale(LoanDataForExternalTransfer loanDataForExternalTransfer) {
         LoanStatus loanStatus = loanDataForExternalTransfer.getLoanStatus();
-        if (!ACTIVE_LOAN_STATUSES.contains(loanStatus)) {
+        if (!getAllowedLoanStatuses().contains(loanStatus)) {
             throw new ExternalAssetOwnerInitiateTransferException(String.format("Loan status %s is not valid for transfer.", loanStatus));
         }
     }
 
     private List<LoanStatus> getValidLoanStatusList(boolean isDelayedSettlementEnabled) {
         if (isDelayedSettlementEnabled) {
-            return VALID_DELAYED_SETTLEMENT_LOAN_STATUSES_BUYBACK_AND_SALE;
+            return getAllowedLoanStatusesForDelayedSettlement();
         } else {
-            return ACTIVE_LOAN_STATUSES;
+            return getAllowedLoanStatuses();
         }
     }
 
@@ -576,5 +570,15 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
         ExternalAssetOwner externalAssetOwner = new ExternalAssetOwner();
         externalAssetOwner.setExternalId(ExternalIdFactory.produce(externalId));
         return externalAssetOwnerRepository.saveAndFlush(externalAssetOwner);
+    }
+
+    private List<LoanStatus> getAllowedLoanStatuses() {
+        return configurationDomainService.getAllowedLoanStatusesForExternalAssetTransfer().stream().map(LoanStatus::valueOf)
+                .collect(Collectors.toList());
+    }
+
+    private List<LoanStatus> getAllowedLoanStatusesForDelayedSettlement() {
+        return configurationDomainService.getAllowedLoanStatusesOfDelayedSettlementForExternalAssetTransfer().stream()
+                .map(LoanStatus::valueOf).collect(Collectors.toList());
     }
 }

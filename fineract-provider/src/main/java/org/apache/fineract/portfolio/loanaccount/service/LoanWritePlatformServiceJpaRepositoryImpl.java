@@ -3315,9 +3315,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             return Optional.empty();
         }
 
-        loanLifecycleStateMachine.transition(LoanEvent.WRITE_OFF_OUTSTANDING, loan);
-        changes.put(PARAM_STATUS, LoanEnumerations.status(loan.getLoanStatus()));
-
         existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
         existingReversedTransactionIds.addAll(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
 
@@ -3359,7 +3356,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                         new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
 
         loanBalanceService.updateLoanSummaryDerivedFields(loan);
-
+        loanLifecycleStateMachine.transition(LoanEvent.WRITE_OFF_OUTSTANDING, loan);
+        changes.put(PARAM_STATUS, LoanEnumerations.status(loan.getLoanStatus()));
         return Optional.of(loanTransaction);
     }
 

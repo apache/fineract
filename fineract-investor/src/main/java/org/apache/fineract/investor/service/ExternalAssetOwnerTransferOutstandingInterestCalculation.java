@@ -49,6 +49,11 @@ public class ExternalAssetOwnerTransferOutstandingInterestCalculation {
     }
 
     public BigDecimal calculateOutstandingInterest(Loan loan) {
+        // If loan is not active, there should be no outstanding interest
+        if (!loan.isOpen()) {
+            return BigDecimal.ZERO;
+        }
+
         String outstandingInterestCalculationStrategy = configurationDomainService.getAssetOwnerTransferOustandingInterestStrategy();
         return switch (outstandingInterestCalculationStrategy) {
             case "TOTAL_OUTSTANDING_INTEREST" -> loan.getSummary().getTotalInterestOutstanding();

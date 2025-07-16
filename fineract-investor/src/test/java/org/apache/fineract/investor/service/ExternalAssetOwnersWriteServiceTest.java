@@ -50,6 +50,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.fineract.cob.data.LoanDataForExternalTransfer;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -418,8 +419,8 @@ public class ExternalAssetOwnersWriteServiceTest {
     }
 
     private static Stream<Arguments> loanStatusValidationDataProviderInvalidDelayedSettlement() {
-        return Stream.of(Arguments.of("Invalid Loan Status", LoanStatus.INVALID), Arguments.of("Approved Loan Status", LoanStatus.APPROVED),
-                Arguments.of("Rejected Loan Status", LoanStatus.REJECTED),
+        return Stream.of(Arguments.of("Invalid Loan Status", LoanStatus.INVALID), Arguments.of("Rejected Loan Status", LoanStatus.REJECTED),
+                Arguments.of("Approved Loan Status", LoanStatus.APPROVED),
                 Arguments.of("Submitted and Pending Approval Loan Status", LoanStatus.SUBMITTED_AND_PENDING_APPROVAL),
                 Arguments.of("Withdrawn By Client Loan Status", LoanStatus.WITHDRAWN_BY_CLIENT),
                 Arguments.of("Closed Written Off Loan Status", LoanStatus.CLOSED_WRITTEN_OFF),
@@ -860,6 +861,9 @@ public class ExternalAssetOwnersWriteServiceTest {
         @Mock
         private LoanDataForExternalTransfer loanDataForExternalTransfer;
 
+        @Mock
+        private ConfigurationDomainService configurationDomainService;
+
         @InjectMocks
         private ExternalAssetOwnersWriteServiceImpl externalAssetOwnersWriteServiceImpl;
 
@@ -926,6 +930,11 @@ public class ExternalAssetOwnersWriteServiceTest {
             lenient().when(loanDataForExternalTransfer.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);
             lenient().when(loanDataForExternalTransfer.getLoanProductId()).thenReturn(loanProductId);
             lenient().when(loanDataForExternalTransfer.getLoanProductShortName()).thenReturn(loanProductShortName);
+            lenient().when(configurationDomainService.getAllowedLoanStatusesForExternalAssetTransfer())
+                    .thenReturn(List.of("ACTIVE", "TRANSFER_IN_PROGRESS", "TRANSFER_ON_HOLD"));
+            lenient().when(configurationDomainService.getAllowedLoanStatusesOfDelayedSettlementForExternalAssetTransfer())
+                    .thenReturn(List.of("ACTIVE", "TRANSFER_IN_PROGRESS", "TRANSFER_ON_HOLD", "OVERPAID", "CLOSED_OBLIGATIONS_MET"));
+
         }
     }
 }

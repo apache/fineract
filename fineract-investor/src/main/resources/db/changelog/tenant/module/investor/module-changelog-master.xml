@@ -40,4 +40,5 @@
   <include relativeToChangelogFile="true" file="parts/0016_add_external_reference_id.xml"/>
   <include relativeToChangelogFile="true" file="parts/0017_add_external_asset_owner_loan_product_attr_index.xml"/>
   <include relativeToChangelogFile="true" file="parts/0018_add_external_asset_owner_transfer_outstanding_interest_strategy.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0019_add_configurable_allowed_loan_statuses.xml"/>
 </databaseChangeLog>
