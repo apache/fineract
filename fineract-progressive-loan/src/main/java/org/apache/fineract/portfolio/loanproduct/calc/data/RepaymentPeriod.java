@@ -377,6 +377,15 @@ public final class RepaymentPeriod {
         return previous == null;
     }
 
+    /**
+     * Gives back getDueInterest minus paid interest
+     *
+     * @return
+     */
+    public Money getOutstandingInterest() {
+        return MathUtil.negativeToZero(getDueInterest().minus(getPaidInterest()), mc);
+    }
+
     public Money getOutstandingPrincipal() {
         return MathUtil.negativeToZero(getDuePrincipal().minus(getPaidPrincipal()), mc);
     }

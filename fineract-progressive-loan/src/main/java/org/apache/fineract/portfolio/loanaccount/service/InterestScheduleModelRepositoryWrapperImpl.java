@@ -23,6 +23,7 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.persistence.FlushModeHandler;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -76,6 +77,15 @@ public class InterestScheduleModelRepositoryWrapperImpl implements InterestSched
             progressiveLoanModel[0] = loanModelRepository.findOneByLoanId(loanId);
         });
         return progressiveLoanModel[0];
+    }
+
+    @Override
+    public Optional<ProgressiveLoanModel> findOneByLoan(Loan loan) {
+        AtomicReference<Optional<ProgressiveLoanModel>> progressiveLoanModelRef = new AtomicReference<>();
+        flushModeHandler.withFlushMode(FlushModeType.COMMIT, () -> {
+            progressiveLoanModelRef.set(loanModelRepository.findOneByLoan(loan));
+        });
+        return progressiveLoanModelRef.get();
     }
 
     @Override

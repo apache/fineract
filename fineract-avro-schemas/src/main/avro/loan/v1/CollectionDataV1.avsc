@@ -29,6 +29,14 @@
         },
         {
             "default": null,
+            "name": "nextPaymentAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
             "name": "delinquentDays",
             "type": [
                 "null",

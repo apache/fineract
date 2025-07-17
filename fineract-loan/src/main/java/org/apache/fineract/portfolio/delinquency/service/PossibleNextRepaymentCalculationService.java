@@ -16,18 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.repository;
+package org.apache.fineract.portfolio.delinquency.service;
 
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.ProgressiveLoanModel;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface ProgressiveLoanModelRepository
-        extends JpaSpecificationExecutor<ProgressiveLoanModel>, JpaRepository<ProgressiveLoanModel, Long> {
+public interface PossibleNextRepaymentCalculationService {
 
-    Optional<ProgressiveLoanModel> findOneByLoanId(Long loanId);
+    boolean canAccept(Loan loan);
 
-    Optional<ProgressiveLoanModel> findOneByLoan(Loan loan);
+    BigDecimal possibleNextRepaymentAmount(Loan loan, LocalDate nextPaymentDueDate);
 }

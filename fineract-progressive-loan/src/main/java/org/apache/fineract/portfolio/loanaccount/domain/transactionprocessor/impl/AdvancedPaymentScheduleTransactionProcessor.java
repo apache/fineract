@@ -1480,104 +1480,97 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         super.handleWriteOff(transaction, ctx.getCurrency(), ctx.getInstallments());
     }
 
-    private List<LoanRepaymentScheduleInstallment> findOverdueInstallmentsBeforeDateSortedByInstallmentNumber(LocalDate targetDate,
-            ProgressiveTransactionCtx transactionCtx) {
-        return transactionCtx.getInstallments().stream() //
-                .filter(installment -> !installment.isDownPayment() && !installment.isAdditional())
-                .filter(installment -> installment.isOverdueOn(targetDate))
-                .sorted(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).toList();
+    private List<RepaymentPeriod> findPossiblyOverdueRepaymentPeriods(LocalDate targetDate, ProgressiveLoanInterestScheduleModel model) {
+        return model.repaymentPeriods().stream() //
+                .filter(repaymentPeriod -> DateUtils.isAfter(targetDate, repaymentPeriod.getDueDate())).toList();
+    }
+
+    public boolean rework(LocalDate targetDate, ProgressiveTransactionCtx ctx) {
+        boolean hasChange = false;
+        ProgressiveLoanInterestScheduleModel model = ctx.getModel();
+        List<RepaymentPeriod> overdueInstallmentsSortedByInstallmentNumber = findPossiblyOverdueRepaymentPeriods(targetDate, model);
+        if (!overdueInstallmentsSortedByInstallmentNumber.isEmpty()) {
+            RepaymentPeriod lastPeriod = model.getLastRepaymentPeriod();
+            RepaymentPeriod currentPeriod = model.findRepaymentPeriod(targetDate).orElse(lastPeriod);
+            MonetaryCurrency currency = model.zero().getCurrency();
+            Money overDuePrincipal = Money.zero(currency);
+            Money aggregatedOverDuePrincipal = Money.zero(currency);
+            for (RepaymentPeriod processingPeriod : overdueInstallmentsSortedByInstallmentNumber) {
+                // add and subtract outstanding principal
+                if (!overDuePrincipal.isZero()) {
+                    boolean currentChanges = adjustOverduePrincipal(targetDate, processingPeriod, overDuePrincipal,
+                            aggregatedOverDuePrincipal, ctx);
+
+                    hasChange = hasChange || currentChanges;
+                }
+
+                overDuePrincipal = processingPeriod.getOutstandingPrincipal();
+                aggregatedOverDuePrincipal = aggregatedOverDuePrincipal.add(overDuePrincipal);
+            }
+
+            if (!currentPeriod.equals(lastPeriod) || !targetDate.isAfter(lastPeriod.getDueDate())) {
+                boolean currentChanges = adjustOverduePrincipal(targetDate, currentPeriod, overDuePrincipal, aggregatedOverDuePrincipal,
+                        ctx);
+                hasChange = hasChange || currentChanges;
+
+            }
+            if (aggregatedOverDuePrincipal.isGreaterThanZero()
+                    && (model.lastOverdueBalanceChange() == null || model.lastOverdueBalanceChange().isBefore(targetDate))) {
+                model.lastOverdueBalanceChange(targetDate);
+            }
+        }
+
+        return hasChange;
     }
 
     public void recalculateInterestForDate(LocalDate targetDate, ProgressiveTransactionCtx ctx) {
+        recalculateInterestForDate(targetDate, ctx, true);
+    }
+
+    public void recalculateInterestForDate(LocalDate targetDate, ProgressiveTransactionCtx ctx, boolean updateInstallments) {
         if (ctx.getInstallments() != null && !ctx.getInstallments().isEmpty()) {
             Loan loan = ctx.getInstallments().getFirst().getLoan();
             if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isNpa() && !ctx.isChargedOff()
-                    && !ctx.isContractTerminated()) {
+                    && !ctx.isContractTerminated() && !loan.getLoanInterestRecalculationDetails().disallowInterestCalculationOnPastDue()) {
 
-                List<LoanRepaymentScheduleInstallment> overdueInstallmentsSortedByInstallmentNumber = findOverdueInstallmentsBeforeDateSortedByInstallmentNumber(
-                        targetDate, ctx);
-                if (!overdueInstallmentsSortedByInstallmentNumber.isEmpty()) {
-                    List<LoanRepaymentScheduleInstallment> normalInstallments = ctx.getInstallments().stream() //
-                            .filter(installment -> !installment.isAdditional() && !installment.isDownPayment()).toList();
-
-                    Optional<LoanRepaymentScheduleInstallment> currentInstallmentOptional = normalInstallments.stream().filter(
-                            installment -> installment.getFromDate().isBefore(targetDate) && !installment.getDueDate().isBefore(targetDate))
-                            .findAny();
-
-                    // get DUE installment or last installment
-                    LoanRepaymentScheduleInstallment lastInstallment = normalInstallments.stream()
-                            .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).get();
-                    LoanRepaymentScheduleInstallment currentInstallment = currentInstallmentOptional.orElse(lastInstallment);
-
-                    Money overDuePrincipal = Money.zero(ctx.getCurrency());
-                    Money aggregatedOverDuePrincipal = Money.zero(ctx.getCurrency());
-                    for (LoanRepaymentScheduleInstallment processingInstallment : overdueInstallmentsSortedByInstallmentNumber) {
-                        // add and subtract outstanding principal
-                        if (!overDuePrincipal.isZero()) {
-                            adjustOverduePrincipalForInstallment(targetDate, processingInstallment, overDuePrincipal,
-                                    aggregatedOverDuePrincipal, ctx);
-                        }
-
-                        overDuePrincipal = processingInstallment.getPrincipalOutstanding(ctx.getCurrency());
-                        aggregatedOverDuePrincipal = aggregatedOverDuePrincipal.add(overDuePrincipal);
-                    }
-
-                    boolean adjustNeeded = !currentInstallment.equals(lastInstallment) || !lastInstallment.isOverdueOn(targetDate);
-                    if (adjustNeeded) {
-                        adjustOverduePrincipalForInstallment(targetDate, currentInstallment, overDuePrincipal, aggregatedOverDuePrincipal,
-                                ctx);
-                    }
-                    if (aggregatedOverDuePrincipal.isGreaterThanZero() && (ctx.getModel().lastOverdueBalanceChange() == null
-                            || ctx.getModel().lastOverdueBalanceChange().isBefore(targetDate))) {
-                        ctx.getModel().lastOverdueBalanceChange(targetDate);
-                    }
+                boolean modelHasUpdates = rework(targetDate, ctx);
+                if (modelHasUpdates && updateInstallments) {
+                    updateInstallmentsPrincipalAndInterestByModel(ctx);
                 }
             }
         }
     }
 
-    private void adjustOverduePrincipalForInstallment(LocalDate currentDate, LoanRepaymentScheduleInstallment currentInstallment,
-            Money overduePrincipal, Money aggregatedOverDuePrincipal, ProgressiveTransactionCtx ctx) {
-        if (currentInstallment.getLoan().getLoanInterestRecalculationDetails().disallowInterestCalculationOnPastDue()) {
-            return;
-        }
+    private boolean adjustOverduePrincipal(LocalDate currentDate, RepaymentPeriod currentInstallment, Money overduePrincipal,
+            Money aggregatedOverDuePrincipal, ProgressiveTransactionCtx ctx) {
 
         LocalDate fromDate = currentInstallment.getFromDate();
         LocalDate toDate = currentInstallment.getDueDate();
-        boolean hasUpdate = false;
+        ProgressiveLoanInterestScheduleModel model = ctx.getModel();
+        boolean prepayAttempt = ctx.isPrepayAttempt();
+        LoanInterestRecalculationDetails loanInterestRecalculationDetails = ctx.getInstallments().getFirst().getLoan()
+                .getLoanInterestRecalculationDetails();
 
-        if (!currentDate.equals(ctx.getModel().lastOverdueBalanceChange())) {
-            // if we have same date for fromDate & last overdue balance change then it means we have the up-to-date
-            // model.
-            if (ctx.getModel().lastOverdueBalanceChange() == null
-                    || currentInstallment.getFromDate().isAfter(ctx.getModel().lastOverdueBalanceChange())) {
-                // first overdue hit for installment. setting overdue balance correction from instalment from date.
-                emiCalculator.addBalanceCorrection(ctx.getModel(), fromDate, overduePrincipal);
+        if (!currentDate.equals(model.lastOverdueBalanceChange())) {
+            if (model.lastOverdueBalanceChange() == null || currentInstallment.getFromDate().isAfter(model.lastOverdueBalanceChange())) {
+                emiCalculator.addBalanceCorrection(model, fromDate, overduePrincipal);
             } else {
-                // not the first balance correction on installment period, then setting overdue balance correction from
-                // last balance change's current date. previous interest period already has the correct balance
-                // correction.
-                emiCalculator.addBalanceCorrection(ctx.getModel(), ctx.getModel().lastOverdueBalanceChange(), overduePrincipal);
+                emiCalculator.addBalanceCorrection(model, model.lastOverdueBalanceChange(), overduePrincipal);
             }
-
-            hasUpdate = true;
 
             if (currentDate.isAfter(fromDate) && !currentDate.isAfter(toDate)) {
                 LocalDate lastOverdueBalanceChange;
-                if (shouldRecalculateTillInstallmentDueDate(currentInstallment.getLoan().getLoanInterestRecalculationDetails(),
-                        ctx.isPrepayAttempt())) {
+                if (shouldRecalculateTillInstallmentDueDate(loanInterestRecalculationDetails, prepayAttempt)) {
                     lastOverdueBalanceChange = toDate;
                 } else {
                     lastOverdueBalanceChange = currentDate;
                 }
-                emiCalculator.addBalanceCorrection(ctx.getModel(), lastOverdueBalanceChange, aggregatedOverDuePrincipal.negated());
-                ctx.getModel().lastOverdueBalanceChange(lastOverdueBalanceChange);
+                emiCalculator.addBalanceCorrection(model, lastOverdueBalanceChange, aggregatedOverDuePrincipal.negated());
+                model.lastOverdueBalanceChange(lastOverdueBalanceChange);
             }
+            return true;
         }
-
-        if (hasUpdate) {
-            updateInstallmentsPrincipalAndInterestByModel(ctx);
-        }
+        return false;
     }
 
     private void updateInstallmentsPrincipalAndInterestByModel(ProgressiveTransactionCtx ctx) {

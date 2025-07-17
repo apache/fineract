@@ -56,6 +56,11 @@ public class EmbeddableProgressiveLoanScheduleGenerator {
         }
 
         @Override
+        public Optional<ProgressiveLoanModel> findOneByLoan(Loan loan) {
+            return Optional.empty();
+        }
+
+        @Override
         public Optional<ProgressiveLoanInterestScheduleModel> extractModel(Optional<ProgressiveLoanModel> progressiveLoanModel) {
             return Optional.empty();
         }
