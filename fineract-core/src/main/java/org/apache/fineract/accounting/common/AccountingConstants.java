@@ -312,7 +312,8 @@ public final class AccountingConstants {
         ESCHEAT_LIABILITY(14), //
         FEES_RECEIVABLE(15), //
         PENALTIES_RECEIVABLE(16), //
-        INTEREST_PAYABLE(17);
+        INTEREST_PAYABLE(17), //
+        INTEREST_RECEIVABLE(18);
 
         private final Integer value;
 
@@ -366,6 +367,7 @@ public final class AccountingConstants {
         LOSSES_WRITTEN_OFF("writeOffAccountId"), //
         ESCHEAT_LIABILITY("escheatLiabilityId"), //
         PENALTIES_RECEIVABLE("penaltiesReceivableAccountId"), //
+        INTEREST_RECEIVABLE("interestReceivableAccountId"), //
         FEES_RECEIVABLE("feesReceivableAccountId"), //
         INTEREST_PAYABLE("interestPayableAccountId");
 
@@ -404,7 +406,8 @@ public final class AccountingConstants {
         ESCHEAT_LIABILITY("escheatLiabilityAccount"), //
         FEES_RECEIVABLE("feeReceivableAccount"), //
         PENALTIES_RECEIVABLE("penaltyReceivableAccount"), //
-        INTEREST_PAYABLE("interestPayableAccount"); //
+        INTEREST_PAYABLE("interestPayableAccount"), //
+        INTEREST_RECEIVABLE("interestReceivableAccount"); //
 
         private final String value;
 

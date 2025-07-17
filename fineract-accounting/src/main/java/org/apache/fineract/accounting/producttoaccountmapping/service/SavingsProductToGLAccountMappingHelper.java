@@ -263,6 +263,10 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
                         savingsProductId, AccrualAccountsForSavings.FEES_RECEIVABLE.getValue(),
                         AccrualAccountsForSavings.FEES_RECEIVABLE.toString(), changes);
 
+                mergeSavingsToAssetAccountMappingChanges(element, SavingProductAccountingParams.INTEREST_RECEIVABLE.getValue(),
+                        savingsProductId, AccrualAccountsForSavings.INTEREST_RECEIVABLE.getValue(),
+                        AccrualAccountsForSavings.INTEREST_RECEIVABLE.toString(), changes);
+
                 mergeSavingsToAssetAccountMappingChanges(element, SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue(),
                         savingsProductId, AccrualAccountsForSavings.PENALTIES_RECEIVABLE.getValue(),
                         AccrualAccountsForSavings.PENALTIES_RECEIVABLE.toString(), changes);

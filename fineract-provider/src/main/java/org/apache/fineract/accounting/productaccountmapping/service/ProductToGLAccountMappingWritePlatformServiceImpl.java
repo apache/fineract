@@ -292,6 +292,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
         final Integer accountingRuleTypeId = this.fromApiJsonHelper.extractIntegerNamed(accountingRuleParamName, element,
                 Locale.getDefault());
+
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(accountingRuleTypeId);
         switch (accountingRuleType) {
             case NONE:
@@ -303,6 +304,10 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
             case ACCRUAL_PERIODIC:
                 saveSavingsBaseAccountMapping(savingProductId, accountType, command, element);
                 // assets
+                this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
+                        SavingProductAccountingParams.INTEREST_RECEIVABLE.getValue(), savingProductId,
+                        AccrualAccountsForSavings.INTEREST_RECEIVABLE.getValue());
+
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
                         SavingProductAccountingParams.FEES_RECEIVABLE.getValue(), savingProductId,
                         AccrualAccountsForSavings.FEES_RECEIVABLE.getValue());
