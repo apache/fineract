@@ -982,6 +982,10 @@ public final class ErrorMessageHelper {
     }
 
     public static String updateApprovedLoanExceedPrincipalFailure() {
+        return "Failed data validation due to: can't.be.greater.than.maximum.applied.loan.amount.calculation.";
+    }
+
+    public static String updateApprovedLoanLessThanDisbursedPrincipalAndCapitalizedIncomeFailure() {
         return "Failed data validation due to: less.than.disbursed.principal.and.capitalized.income.";
     }
 

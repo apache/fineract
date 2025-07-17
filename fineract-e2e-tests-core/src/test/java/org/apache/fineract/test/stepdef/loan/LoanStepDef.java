@@ -4932,6 +4932,33 @@ public class LoanStepDef extends AbstractStepDef {
         assertThat(developerMessage).isEqualTo(ErrorMessageHelper.updateApprovedLoanExceedPrincipalFailure());
     }
 
+    @Then("Update loan approved amount is forbidden with amount {string} due to higher principal amount on loan")
+    public void updateLoanApprovedAmountForbiddenHigherPrincipalAmountOnLoan(final String amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        final PutLoansApprovedAmountRequest modifyLoanApprovedAmountRequest = new PutLoansApprovedAmountRequest().locale(LOCALE_EN)
+                .amount(new BigDecimal(amount));
+
+        final Response<PutLoansApprovedAmountResponse> modifyLoanApprovedAmountResponse = loansApi
+                .modifyLoanApprovedAmount(loanId, modifyLoanApprovedAmountRequest).execute();
+
+        ErrorResponse errorDetails = ErrorResponse.from(modifyLoanApprovedAmountResponse);
+        assertThat(errorDetails.getHttpStatusCode()).isEqualTo(403);
+
+        Object errorArgs = errorDetails.getErrors().getFirst().getArgs().getFirst().getValue();
+        String developerMessage;
+        if (errorArgs instanceof Map errorArgsMap) {
+            developerMessage = (String) errorArgsMap.get("developerMessage");
+        } else {
+            developerMessage = errorDetails.getDeveloperMessage();
+        }
+        assertThat(developerMessage)
+                .isEqualTo(ErrorMessageHelper.updateApprovedLoanLessThanDisbursedPrincipalAndCapitalizedIncomeFailure());
+    }
+
     @Then("Update loan approved amount is forbidden with amount {string} due to min allowed amount")
     public void updateLoanApprovedAmountForbiddenMinAllowedAmount(final String amount) throws IOException {
         final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
@@ -4946,7 +4973,7 @@ public class LoanStepDef extends AbstractStepDef {
                 .modifyLoanApprovedAmount(loanId, modifyLoanApprovedAmountRequest).execute();
 
         ErrorResponse errorDetails = ErrorResponse.from(modifyLoanApprovedAmountResponse);
-        assertThat(errorDetails.getHttpStatusCode()).isEqualTo(400);
+        assertThat(errorDetails.getHttpStatusCode()).isEqualTo(403);
 
         Object errorArgs = errorDetails.getErrors().getFirst().getArgs().getFirst().getValue();
         String developerMessage;
