@@ -88,22 +88,22 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
 
     @Transactional
     @Override
-    public CurrencyCreateResponse createCurrency(CurrencyCreateRequest request) {
+    public CurrencyCreateResponse createCurrency(final CurrencyCreateRequest request) {
 
         validateData(request);
 
-        ApplicationCurrency currency = currencyMapper.mapToEntity(request);
-        ApplicationCurrency savedResults = applicationCurrencyRepository.save(currency);
-        CurrencyCreateResponse response = currencyMapper.mapToResponse(savedResults);
+        final ApplicationCurrency currency = currencyMapper.mapToEntity(request);
+        final ApplicationCurrency savedResults = applicationCurrencyRepository.save(currency);
+        final CurrencyCreateResponse response = currencyMapper.mapToResponse(savedResults);
 
         return response;
     }
 
-    private void validateData(CurrencyCreateRequest request) {
+    private void validateData(final CurrencyCreateRequest request) {
         Set<Integer> allowedDecimalPlaceValues = Set.of(0, 1, 2, 3, 4, 5);
 
         // Case where the currency code is not an alphabet == 3
-        if (!request.getCode().matches("^[A-Z]{3}$")) {
+        if (request.getCode() == null || !request.getCode().matches("^[A-Z]{3}$")) {
             final String errorMessage = "Currency Code should be non-null, 3 characters long, non-numeric and uppercase.";
             final String errorArgs = request.getCode();
             throw new InvalidCurrencyException("currency", "code", errorMessage, errorArgs);
@@ -142,6 +142,5 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
             final String errorArgs = String.valueOf(request.getCode());
             throw new InvalidCurrencyException("existing", "currency.code", errorMessage, errorArgs);
         }
-
     }
 }

@@ -1,12 +1,11 @@
 [
-    {},
     {
         "code" : "AAB",
         "decimalPlaces" : 5,
         "inMultiplesOf" : 100000000,
         "displaySymbol" : null,
         "name" : "currencyname",
-        "nameCode" : "currency.AAB"
+        "nameCode" : "currency.AAA"
     },
     {
         "code" : "132321AF",
@@ -17,7 +16,7 @@
         "nameCode" : "currency.DSFSDF"
     },
     {
-        "code" : "AAA",
+        "code" : "aAA",
         "decimalPlaces" : 2,
         "inMultiplesOf" : null,
         "displaySymbol" : null,
@@ -89,10 +88,5 @@
         "displaySymbol" : null,
         "name" : "currency",
         "nameCode" : "currency.currency"
-    },
-    {
-        "code" : "AAA",
-        "inMultiplesOf" : null,
-        "displaySymbol" : null
     }
 ]

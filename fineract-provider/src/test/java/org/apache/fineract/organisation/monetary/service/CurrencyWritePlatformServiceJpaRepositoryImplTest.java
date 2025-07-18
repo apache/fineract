@@ -18,50 +18,74 @@
  */
 package org.apache.fineract.organisation.monetary.service;
 
-import org.junit.jupiter.api.Disabled;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.io.InputStream;
+import java.util.List;
+import org.apache.fineract.organisation.monetary.data.CurrencyCreateRequest;
+import org.apache.fineract.organisation.monetary.data.CurrencyCreateResponse;
+import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
+import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
+import org.apache.fineract.organisation.monetary.exception.InvalidCurrencyException;
+import org.apache.fineract.organisation.monetary.mapper.CurrencyMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class CurrencyWritePlatformServiceJpaRepositoryImplTest {
 
-    // private List<CurrencyData> currenciesGood;
-    // private List<CurrencyData> currenciesCorrupted;
+     private List<CurrencyCreateRequest> currenciesGood;
+     private List<CurrencyCreateRequest> currenciesCorrupted;
 
-    // @InjectMocks
-    // private CurrencyWritePlatformServiceJpaRepositoryImpl underTest;
+     @InjectMocks
+     private CurrencyWritePlatformServiceJpaRepositoryImpl underTest;
 
-    // @Mock
-    // private CreateCurrencyRepository createCurrencyRepository;
+     @Mock
+     private ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
 
-    // @BeforeEach
-    // void setUp() throws Exception {
-    // ObjectMapper objectMapper = new ObjectMapper();
-    // InputStream inputStream =
-    // getClass().getClassLoader().getResourceAsStream("test-resources/currenciesGoodData.json");
-    // currenciesGood = objectMapper.readValue(inputStream, new TypeReference<List<CurrencyData>>() {});
-    // inputStream = getClass().getClassLoader().getResourceAsStream("test-resources/currenciesCorruptedData.json");
-    // currenciesCorrupted = objectMapper.readValue(inputStream, new TypeReference<List<CurrencyData>>() {});
-    // }
+     @Mock
+     private CurrencyMapper currencyMapper;
 
-    @Disabled
+     @BeforeEach
+     void setUp() throws Exception {
+       ObjectMapper objectMapper = new ObjectMapper();
+       InputStream inputStream = getClass().getClassLoader().getResourceAsStream("test-resources/currenciesGoodData.json");
+       currenciesGood = objectMapper.readValue(inputStream, new TypeReference<List<CurrencyCreateRequest>>() {});
+       inputStream = getClass().getClassLoader().getResourceAsStream("test-resources/currenciesCorruptedData.json");
+       currenciesCorrupted = objectMapper.readValue(inputStream, new TypeReference<List<CurrencyCreateRequest>>() {});
+     }
+
     @Test
     void testHappyPathForGoodData() {
-        // for (CurrencyData element : currenciesGood) {
-        // CreateCurrency currency = CreateCurrency.fromCurrencyData(element);
-        // Mockito.when(createCurrencyRepository.save(Mockito.refEq(currency))).thenReturn(currency);
-        // assertEquals(underTest.createCurrency(element), element);
-        // }
+         for (CurrencyCreateRequest element : currenciesGood) {
+           ApplicationCurrency currency = currencyMapper.mapToEntity(element);
+           Mockito.when(applicationCurrencyRepository.save(Mockito.refEq(currency))).thenReturn(currency);
+           CurrencyCreateResponse response = currencyMapper.mapToResponse(currency);
+           assertEquals(underTest.createCurrency(element), response);
+         }
     }
 
-    @Disabled
     @Test
     void testCorruptedDataShouldThrowException() {
-        // for (CurrencyData element : currenciesCorrupted) {
-        // Throwable thrown = assertThrows(Throwable.class, () -> {
-        // underTest.createCurrency(element);
-        // });
-        // }
+         for (CurrencyCreateRequest element : currenciesCorrupted) {
+           Mockito.when(applicationCurrencyRepository.existsByCode(element.getCode())).thenReturn(false);
+           
+           // Assert the validation throws exception
+           InvalidCurrencyException e = assertThrows(InvalidCurrencyException.class, () -> {
+               underTest.createCurrency(element);
+           });
+         }
     }
 }
