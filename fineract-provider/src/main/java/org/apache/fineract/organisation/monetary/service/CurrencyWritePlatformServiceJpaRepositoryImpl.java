@@ -18,35 +18,39 @@
  */
 package org.apache.fineract.organisation.monetary.service;
 
+import com.google.common.base.Splitter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.data.CurrencyCreateRequest;
+import org.apache.fineract.organisation.monetary.data.CurrencyCreateResponse;
 import org.apache.fineract.organisation.monetary.data.CurrencyUpdateRequest;
 import org.apache.fineract.organisation.monetary.data.CurrencyUpdateResponse;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
-import org.apache.fineract.organisation.monetary.domain.CreateCurrency;
-import org.apache.fineract.organisation.monetary.domain.CreateCurrencyRepository;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrency;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepository;
 import org.apache.fineract.organisation.monetary.exception.CurrencyInUseException;
+import org.apache.fineract.organisation.monetary.exception.InvalidCurrencyException;
+import org.apache.fineract.organisation.monetary.mapper.CurrencyMapper;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Service
 @RequiredArgsConstructor
 public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWritePlatformService {
 
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
     private final OrganisationCurrencyRepository organisationCurrencyRepository;
-    private final CreateCurrencyRepository createCurrencyRepository;
     private final LoanProductReadPlatformService loanProductService;
     private final SavingsProductReadPlatformService savingsProductService;
     private final ChargeReadPlatformService chargeService;
+    private final CurrencyMapper currencyMapper;
 
     @Transactional
     @Override
@@ -82,12 +86,62 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
         return CurrencyUpdateResponse.builder().currencies(allowedCurrencyCodes).build();
     }
 
+    @Transactional
     @Override
-    public CurrencyData createCurrency(CurrencyData request) {
-        CreateCurrency currency = CreateCurrency.fromCurrencyData(request);
-        CreateCurrency savedResults = createCurrencyRepository.save(currency);
-        CurrencyData finalResults = CreateCurrency.toCurrencyData(savedResults);
+    public CurrencyCreateResponse createCurrency(CurrencyCreateRequest request) {
 
-        return finalResults;
+        validateData(request);
+
+        ApplicationCurrency currency = currencyMapper.mapToEntity(request);
+        ApplicationCurrency savedResults = applicationCurrencyRepository.save(currency);
+        CurrencyCreateResponse response = currencyMapper.mapToResponse(savedResults);
+
+        return response;
+    }
+
+    private void validateData(CurrencyCreateRequest request) {
+        Set<Integer> allowedDecimalPlaceValues = Set.of(0, 1, 2, 3, 4, 5);
+
+        // Case where the currency code is not an alphabet == 3
+        if (!request.getCode().matches("^[A-Z]{3}$")) {
+            final String errorMessage = "Currency Code should be non-null, 3 characters long, non-numeric and uppercase.";
+            final String errorArgs = request.getCode();
+            throw new InvalidCurrencyException("currency", "code", errorMessage, errorArgs);
+        }
+
+        // Case where the currency code does not match the currency Name Code
+        // e.g. AAA != currency.BBB
+        final List<String> nameCodeParts = Splitter.on('.').splitToList(request.getNameCode().trim());
+        if (nameCodeParts.size() < 2 || !request.getCode().trim().equals(nameCodeParts.get(1).trim())) {
+            final String errorMessage = "Currency Code does not match NameCode currency suffix.";
+            final String errorArgsCode = request.getCode();
+            final String errorArgsNameCode = request.getNameCode();
+            throw new InvalidCurrencyException("code", "name.code", errorMessage, errorArgsCode, errorArgsNameCode);
+        }
+
+        // Check if the decimal places are within 0,1,2,3
+        if (!allowedDecimalPlaceValues.contains(request.getDecimalPlaces())) {
+            final String errorMessage = "Decimal Places allowed are inclusive of values in the range 0 - 5.";
+            final String errorArgs = String.valueOf(request.getDecimalPlaces());
+            throw new InvalidCurrencyException("decimal", "places", errorMessage, errorArgs);
+        }
+
+        // Check if inMultiplesOf is between 0 and 1
+        if (request.getInMultiplesOf() != null && !(request.getInMultiplesOf() >= 0 && request.getInMultiplesOf() <= 1000)) {
+            final String errorMessage = "In Multiples of (sub-units) allowed are inclusive of values in the range 0 - 1000.";
+            final String errorArgs = String.valueOf(request.getInMultiplesOf());
+            throw new InvalidCurrencyException("sub", "unit", errorMessage, errorArgs);
+        }
+
+        // Check if this is a duplicate request. Query Database
+        // if present throw exception.
+        Boolean isExistingCurrency = applicationCurrencyRepository.existsByCode(request.getCode());
+
+        if (isExistingCurrency) {
+            final String errorMessage = "Duplicate Request. Request cannot be accepted as the currency is already present in the system.";
+            final String errorArgs = String.valueOf(request.getCode());
+            throw new InvalidCurrencyException("existing", "currency.code", errorMessage, errorArgs);
+        }
+
     }
 }

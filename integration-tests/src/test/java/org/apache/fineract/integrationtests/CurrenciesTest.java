@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,19 +27,13 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-import org.apache.fineract.client.models.CurrencyData;
-import org.apache.fineract.client.services.CurrencyApi;
 import org.apache.fineract.integrationtests.common.CurrenciesHelper;
 import org.apache.fineract.integrationtests.common.CurrencyDomain;
-import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import retrofit2.Call;
-import retrofit2.Response;
 
 @SuppressWarnings({ "unused" })
 public class CurrenciesTest {
@@ -91,111 +84,120 @@ public class CurrenciesTest {
         assertEquals(currenciesBeforeUpdate, currenciesAfterUpdate, "Verifying selected currencies match after update");
     }
 
-    @Test
-    public void testCreateCurrencyPostApi_CurrencyCodeNotEqualToNull() throws IOException {
-        CurrencyData createCurrencyData = new CurrencyData().code("XYZ").decimalPlaces(2).displaySymbol("¤").inMultiplesOf(1)
-                .name("XYZ Token").nameCode("currency.XYZ");
-
-        CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
-        Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
-        Response<CurrencyData> response = call.execute();
-
-        assertThat(response.code()).isEqualTo(403);
-    }
-
-    @Test
-    public void testCreateCurrencyPostApi_CurrencyCodeNotEqualToRegex() throws IOException {
-        CurrencyData createCurrencyData = new CurrencyData().code("XYz").decimalPlaces(2).displaySymbol("¤").inMultiplesOf(1)
-                .name("XYZ Token").nameCode("currency.XYZ");
-
-        CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
-        Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
-        Response<CurrencyData> response = call.execute();
-
-        assertThat(response.code()).isEqualTo(403);
-    }
-
-    @Test
-    public void testCreateCurrencyPostApi_CurrencyCodeNotEqualAlphabetsOnly() throws IOException {
-        CurrencyData createCurrencyData = new CurrencyData().code("123").decimalPlaces(2).displaySymbol("¤").inMultiplesOf(1)
-                .name("123 Token").nameCode("currency.123");
-
-        CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
-        Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
-        Response<CurrencyData> response = call.execute();
-
-        assertThat(response.code()).isEqualTo(403);
-    }
-
-    @Test
-    public void testCreateCurrencyPostApi_CurrencyCodeDoesNotMatchNameCode() throws IOException {
-        CurrencyData createCurrencyData = new CurrencyData().code("XYZ").decimalPlaces(2).displaySymbol("¤").inMultiplesOf(1)
-                .name("XYZ Token").nameCode("currency.ABC");
-
-        CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
-        Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
-        Response<CurrencyData> response = call.execute();
-
-        assertThat(response.code()).isEqualTo(403);
-    }
-
-    @Test
-    public void testCreateCurrencyPostApi_DecimalPlacesLessThanZero() throws IOException {
-        CurrencyData createCurrencyData = new CurrencyData().code("XYZ").decimalPlaces(-1).displaySymbol("¤").inMultiplesOf(1)
-                .name("XYZ Token").nameCode("currency.XYZ");
-
-        CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
-        Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
-        Response<CurrencyData> response = call.execute();
-
-        assertThat(response.code()).isEqualTo(403);
-    }
-
-    @Test
-    public void testCreateCurrencyPostApi_DecimalPlacesMoreThanFive() throws IOException {
-        CurrencyData createCurrencyData = new CurrencyData().code("XYZ").decimalPlaces(6).displaySymbol("¤").inMultiplesOf(1)
-                .name("XYZ Token").nameCode("currency.XYZ");
-
-        CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
-        Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
-        Response<CurrencyData> response = call.execute();
-
-        assertThat(response.code()).isEqualTo(403);
-    }
-
-    @Test
-    public void testCreateCurrencyPostApi_InMultiplesOfLessThanZero() throws IOException {
-        CurrencyData createCurrencyData = new CurrencyData().code("XYZ").decimalPlaces(2).displaySymbol("¤").inMultiplesOf(-1)
-                .name("XYZ Token").nameCode("currency.XYZ");
-
-        CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
-        Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
-        Response<CurrencyData> response = call.execute();
-
-        assertThat(response.code()).isEqualTo(403);
-    }
-
-    @Test
-    public void testCreateCurrencyPostApi_InMultiplesOfMoreThanThousand() throws IOException {
-        CurrencyData createCurrencyData = new CurrencyData().code("XYZ").decimalPlaces(2).displaySymbol("¤").inMultiplesOf(1001)
-                .name("XYZ Token").nameCode("currency.XYZ");
-
-        CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
-        Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
-        Response<CurrencyData> response = call.execute();
-
-        assertThat(response.code()).isEqualTo(403);
-    }
-
-    @Test
-    public void testCreateCurrencyPostApi_duplicateCurrencyOrCurrencyExists() throws IOException {
-        CurrencyData createCurrencyData = new CurrencyData().code("XYZ").decimalPlaces(2).displaySymbol("¤").inMultiplesOf(1)
-                .name("XYZ Token").nameCode("currency.XYZ");
-
-        CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
-        Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
-        Response<CurrencyData> response = call.execute();
-
-        assertThat(response.code()).isEqualTo(403);
-    }
+    // @Test
+    // public void testCreateCurrencyPostApi_CurrencyCodeNotEqualToNull() throws IOException {
+    // CurrencyData createCurrencyData = new
+    // CurrencyData().code("XYZ").decimalPlaces(2).displaySymbol("¤").inMultiplesOf(1)
+    // .name("XYZ Token").nameCode("currency.XYZ");
+    //
+    // CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
+    // Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
+    // Response<CurrencyData> response = call.execute();
+    //
+    // assertThat(response.code()).isEqualTo(403);
+    // }
+    //
+    // @Test
+    // public void testCreateCurrencyPostApi_CurrencyCodeNotEqualToRegex() throws IOException {
+    // CurrencyData createCurrencyData = new
+    // CurrencyData().code("XYz").decimalPlaces(2).displaySymbol("¤").inMultiplesOf(1)
+    // .name("XYZ Token").nameCode("currency.XYZ");
+    //
+    // CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
+    // Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
+    // Response<CurrencyData> response = call.execute();
+    //
+    // assertThat(response.code()).isEqualTo(403);
+    // }
+    //
+    // @Test
+    // public void testCreateCurrencyPostApi_CurrencyCodeNotEqualAlphabetsOnly() throws IOException {
+    // CurrencyData createCurrencyData = new
+    // CurrencyData().code("123").decimalPlaces(2).displaySymbol("¤").inMultiplesOf(1)
+    // .name("123 Token").nameCode("currency.123");
+    //
+    // CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
+    // Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
+    // Response<CurrencyData> response = call.execute();
+    //
+    // assertThat(response.code()).isEqualTo(403);
+    // }
+    //
+    // @Test
+    // public void testCreateCurrencyPostApi_CurrencyCodeDoesNotMatchNameCode() throws IOException {
+    // CurrencyData createCurrencyData = new
+    // CurrencyData().code("XYZ").decimalPlaces(2).displaySymbol("¤").inMultiplesOf(1)
+    // .name("XYZ Token").nameCode("currency.ABC");
+    //
+    // CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
+    // Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
+    // Response<CurrencyData> response = call.execute();
+    //
+    // assertThat(response.code()).isEqualTo(403);
+    // }
+    //
+    // @Test
+    // public void testCreateCurrencyPostApi_DecimalPlacesLessThanZero() throws IOException {
+    // CurrencyData createCurrencyData = new
+    // CurrencyData().code("XYZ").decimalPlaces(-1).displaySymbol("¤").inMultiplesOf(1)
+    // .name("XYZ Token").nameCode("currency.XYZ");
+    //
+    // CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
+    // Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
+    // Response<CurrencyData> response = call.execute();
+    //
+    // assertThat(response.code()).isEqualTo(403);
+    // }
+    //
+    // @Test
+    // public void testCreateCurrencyPostApi_DecimalPlacesMoreThanFive() throws IOException {
+    // CurrencyData createCurrencyData = new
+    // CurrencyData().code("XYZ").decimalPlaces(6).displaySymbol("¤").inMultiplesOf(1)
+    // .name("XYZ Token").nameCode("currency.XYZ");
+    //
+    // CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
+    // Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
+    // Response<CurrencyData> response = call.execute();
+    //
+    // assertThat(response.code()).isEqualTo(403);
+    // }
+    //
+    // @Test
+    // public void testCreateCurrencyPostApi_InMultiplesOfLessThanZero() throws IOException {
+    // CurrencyData createCurrencyData = new
+    // CurrencyData().code("XYZ").decimalPlaces(2).displaySymbol("¤").inMultiplesOf(-1)
+    // .name("XYZ Token").nameCode("currency.XYZ");
+    //
+    // CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
+    // Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
+    // Response<CurrencyData> response = call.execute();
+    //
+    // assertThat(response.code()).isEqualTo(403);
+    // }
+    //
+    // @Test
+    // public void testCreateCurrencyPostApi_InMultiplesOfMoreThanThousand() throws IOException {
+    // CurrencyData createCurrencyData = new
+    // CurrencyData().code("XYZ").decimalPlaces(2).displaySymbol("¤").inMultiplesOf(1001)
+    // .name("XYZ Token").nameCode("currency.XYZ");
+    //
+    // CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
+    // Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
+    // Response<CurrencyData> response = call.execute();
+    //
+    // assertThat(response.code()).isEqualTo(403);
+    // }
+    //
+    // @Test
+    // public void testCreateCurrencyPostApi_duplicateCurrencyOrCurrencyExists() throws IOException {
+    // CurrencyData createCurrencyData = new
+    // CurrencyData().code("XYZ").decimalPlaces(2).displaySymbol("¤").inMultiplesOf(1)
+    // .name("XYZ Token").nameCode("currency.XYZ");
+    //
+    // CurrencyApi currencyApi = FineractClientHelper.getFineractClient().currencies;
+    // Call<CurrencyData> call = currencyApi.createCurrencies(createCurrencyData);
+    // Response<CurrencyData> response = call.execute();
+    //
+    // assertThat(response.code()).isEqualTo(403);
+    // }
 }

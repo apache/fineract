@@ -18,15 +18,17 @@
  */
 package org.apache.fineract.organisation.monetary.command;
 
+import java.io.Serial;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.fineract.command.core.Command;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.data.CurrencyCreateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CurrencyCreateCommand extends Command<CurrencyData> {
+public class CurrencyCreateCommand extends Command<CurrencyCreateRequest> {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
 }

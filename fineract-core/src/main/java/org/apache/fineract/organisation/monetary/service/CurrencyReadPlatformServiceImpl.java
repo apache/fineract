@@ -74,10 +74,4 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
         }
     }
 
-    @Override
-    public Boolean checkExistingCurrencyCode(String currencyCode) {
-        final String sql = "select exists (select 1 from m_currency where code = ?);";
-        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, currencyCode);
-        return Boolean.TRUE.equals(exists);
-    }
 }

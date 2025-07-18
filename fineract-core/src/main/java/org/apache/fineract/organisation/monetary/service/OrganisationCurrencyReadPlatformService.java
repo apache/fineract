@@ -24,5 +24,4 @@ public interface OrganisationCurrencyReadPlatformService {
 
     CurrencyConfigurationData retrieveCurrencyConfiguration();
 
-    Boolean checkExistingCurrencyCode(String currencyCode);
 }

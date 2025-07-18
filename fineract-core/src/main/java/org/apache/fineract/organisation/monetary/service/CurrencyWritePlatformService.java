@@ -18,7 +18,8 @@
  */
 package org.apache.fineract.organisation.monetary.service;
 
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.data.CurrencyCreateRequest;
+import org.apache.fineract.organisation.monetary.data.CurrencyCreateResponse;
 import org.apache.fineract.organisation.monetary.data.CurrencyUpdateRequest;
 import org.apache.fineract.organisation.monetary.data.CurrencyUpdateResponse;
 
@@ -26,5 +27,5 @@ public interface CurrencyWritePlatformService {
 
     CurrencyUpdateResponse updateAllowedCurrencies(CurrencyUpdateRequest request);
 
-    CurrencyData createCurrency(CurrencyData payload);
+    CurrencyCreateResponse createCurrency(CurrencyCreateRequest payload);
 }

@@ -29,5 +29,4 @@ public interface CurrencyReadPlatformService {
 
     CurrencyData retrieveCurrency(String code);
 
-    Boolean checkExistingCurrencyCode(String currencyCode);
 }

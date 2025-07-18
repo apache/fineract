@@ -39,9 +39,4 @@ public class OrganisationCurrencyReadPlatformServiceImpl implements Organisation
                 .build();
     }
 
-    @Override
-    public Boolean checkExistingCurrencyCode(String currencyCode) {
-        Boolean isExistingCurrency = currencyReadPlatformService.checkExistingCurrencyCode(currencyCode);
-        return isExistingCurrency;
-    }
 }

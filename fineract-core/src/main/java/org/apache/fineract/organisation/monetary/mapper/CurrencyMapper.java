@@ -22,7 +22,7 @@ import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.organisation.monetary.data.CurrencyCreateRequest;
 import org.apache.fineract.organisation.monetary.data.CurrencyCreateResponse;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
-import org.apache.fineract.organisation.monetary.domain.CreateCurrency;
+import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.mapstruct.Mapping;
 
@@ -38,13 +38,14 @@ public interface CurrencyMapper {
     @Mapping(source = "inMultiplesOf", target = "inMultiplesOf")
     CurrencyData map(MonetaryCurrency source);
 
-    CreateCurrency mapToEntity(CurrencyCreateRequest request);
+    @Mapping(target = "id", ignore = true)
+    ApplicationCurrency mapToEntity(CurrencyCreateRequest request);
 
     @Mapping(target = "displayLabel", expression = "java(computeDisplayLabel(entity))")
-    CurrencyCreateResponse mapToResponse(CreateCurrency entity);
+    CurrencyCreateResponse mapToResponse(ApplicationCurrency entity);
 
     // Helper method for generating displayLabel
-    default String computeDisplayLabel(CreateCurrency entity) {
+    default String computeDisplayLabel(ApplicationCurrency entity) {
         StringBuilder builder = new StringBuilder(20);
 
         if (entity.getName() != null) {

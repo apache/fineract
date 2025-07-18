@@ -23,20 +23,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.Command;
 import org.apache.fineract.command.core.CommandHandler;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.data.CurrencyCreateRequest;
+import org.apache.fineract.organisation.monetary.data.CurrencyCreateResponse;
 import org.apache.fineract.organisation.monetary.service.CurrencyWritePlatformService;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class CurrencyCreateCommandHandler implements CommandHandler<CurrencyData, CurrencyData> {
+public class CurrencyCreateCommandHandler implements CommandHandler<CurrencyCreateRequest, CurrencyCreateResponse> {
 
     private final CurrencyWritePlatformService writePlatformService;
 
     @Transactional
     @Override
-    public CurrencyData handle(Command<CurrencyData> command) {
+    public CurrencyCreateResponse handle(Command<CurrencyCreateRequest> command) {
         return writePlatformService.createCurrency(command.getPayload());
     }
 }
