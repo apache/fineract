@@ -58,6 +58,8 @@ import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.filters.BatchCallHandler;
 import org.apache.fineract.infrastructure.core.filters.BatchFilter;
 import org.apache.fineract.infrastructure.core.filters.BatchRequestPreprocessor;
+import org.apache.fineract.infrastructure.core.persistence.ExtendedJpaTransactionManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.lang.NonNull;
@@ -74,9 +76,9 @@ import org.springframework.transaction.support.TransactionTemplate;
  * CommandStrategy from CommandStrategyProvider.
  *
  * @author Rishabh Shukla
- * @see org.apache.fineract.batch.domain.BatchRequest
- * @see org.apache.fineract.batch.domain.BatchResponse
- * @see org.apache.fineract.batch.command.CommandStrategyProvider
+ * @see BatchRequest
+ * @see BatchResponse
+ * @see CommandStrategyProvider
  */
 @Service
 @RequiredArgsConstructor
@@ -85,7 +87,6 @@ public class BatchApiServiceImpl implements BatchApiService {
 
     private final CommandStrategyProvider strategyProvider;
     private final ResolutionHelper resolutionHelper;
-    private final PlatformTransactionManager transactionManager;
     private final ErrorHandler errorHandler;
 
     private final List<BatchFilter> batchFilters;
@@ -94,6 +95,7 @@ public class BatchApiServiceImpl implements BatchApiService {
 
     private final RetryConfigurationAssembler retryConfigurationAssembler;
 
+    private PlatformTransactionManager transactionManager;
     private EntityManager entityManager;
 
     /**
@@ -152,6 +154,9 @@ public class BatchApiServiceImpl implements BatchApiService {
             try {
                 TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
                 transactionTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
+                if (transactionManager instanceof ExtendedJpaTransactionManager extendedJpaTransactionManager) {
+                    transactionTemplate.setReadOnly(extendedJpaTransactionManager.isReadOnlyConnection());
+                }
                 transactionConfigurator.accept(transactionTemplate);
                 return transactionTemplate.execute(status -> {
                     BatchRequestContextHolder.setEnclosingTransaction(status);
@@ -175,8 +180,8 @@ public class BatchApiServiceImpl implements BatchApiService {
     }
 
     /**
-     * Returns the response list by getting a proper {@link org.apache.fineract.batch.command.CommandStrategy}.
-     * execute() method of acquired commandStrategy is then provided with the separate Request.
+     * Returns the response list by getting a proper {@link CommandStrategy}. execute() method of acquired
+     * commandStrategy is then provided with the separate Request.
      *
      * @param requestList
      * @param uriInfo
@@ -394,5 +399,10 @@ public class BatchApiServiceImpl implements BatchApiService {
     @PersistenceContext
     public void setEntityManager(EntityManager entityManager) {
         this.entityManager = entityManager;
+    }
+
+    @Autowired
+    public void setTransactionManager(PlatformTransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
     }
 }

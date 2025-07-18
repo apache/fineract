@@ -55,6 +55,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.arrears.LoanArrearsData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -138,8 +139,8 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private String constructUpdateStatement(final Loan loan, boolean isInsertStatement) {
-        String updateSql = null;
+    @Override
+    public LoanArrearsData calculateArrearsForLoan(Loan loan) {
         List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
         BigDecimal principalOverdue = BigDecimal.ZERO;
         BigDecimal interestOverdue = BigDecimal.ZERO;
@@ -158,9 +159,33 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
                 }
             }
         }
-
         BigDecimal totalOverDue = principalOverdue.add(interestOverdue).add(feeOverdue).add(penaltyOverdue);
-        if (totalOverDue.compareTo(BigDecimal.ZERO) > 0) {
+        boolean isOverdue = totalOverDue.compareTo(BigDecimal.ZERO) > 0;
+        if (!isOverdue) {
+            overDueSince = null;
+        }
+
+        LoanArrearsData result = new LoanArrearsData();
+        result.setPrincipalOverdue(principalOverdue);
+        result.setInterestOverdue(interestOverdue);
+        result.setFeeOverdue(feeOverdue);
+        result.setPenaltyOverdue(penaltyOverdue);
+        result.setTotalOverdue(totalOverDue);
+        result.setOverDueSince(overDueSince);
+        result.setOverdue(isOverdue);
+        return result;
+    }
+
+    private String constructUpdateStatement(final Loan loan, boolean isInsertStatement) {
+        String updateSql = null;
+        LoanArrearsData arrearsData = calculateArrearsForLoan(loan);
+        BigDecimal principalOverdue = arrearsData.getPrincipalOverdue();
+        BigDecimal interestOverdue = arrearsData.getInterestOverdue();
+        BigDecimal feeOverdue = arrearsData.getFeeOverdue();
+        BigDecimal penaltyOverdue = arrearsData.getPenaltyOverdue();
+        LocalDate overDueSince = arrearsData.getOverDueSince();
+
+        if (arrearsData.isOverdue()) {
             if (isInsertStatement) {
                 updateSql = constructInsertStatement(loan.getId(), principalOverdue, interestOverdue, feeOverdue, penaltyOverdue,
                         overDueSince);
@@ -201,6 +226,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
             BigDecimal penaltyOverdue = BigDecimal.ZERO;
             LocalDate overDueSince = DateUtils.getBusinessLocalDate();
 
+            // TODO: this needs to be refactored to use the calculateArrearsForLoan method.
             for (LoanSchedulePeriodData loanSchedulePeriodData : entry.getValue()) {
                 if (!loanSchedulePeriodData.getComplete()) {
                     principalOverdue = principalOverdue

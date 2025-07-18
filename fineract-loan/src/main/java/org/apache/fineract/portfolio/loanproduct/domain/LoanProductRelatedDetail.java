@@ -86,7 +86,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     private InterestCalculationPeriodMethod interestCalculationPeriodMethod;
 
     @Column(name = "allow_partial_period_interest_calcualtion", nullable = false)
-    private boolean allowPartialPeriodInterestCalcualtion;
+    private boolean allowPartialPeriodInterestCalculation;
 
     @Column(name = "repay_every", nullable = false)
     private Integer repayEvery;
@@ -248,7 +248,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public LoanProductRelatedDetail(final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
             final BigDecimal defaultNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType,
             final BigDecimal defaultAnnualNominalInterestRate, final InterestMethod interestMethod,
-            final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final boolean allowPartialPeriodInterestCalcualtion,
+            final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final boolean allowPartialPeriodInterestCalculation,
             final Integer repayEvery, final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfRepayments,
             final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods,
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final AmortizationMethod amortizationMethod,
@@ -272,7 +272,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         this.annualNominalInterestRate = defaultAnnualNominalInterestRate;
         this.interestMethod = interestMethod;
         this.interestCalculationPeriodMethod = interestCalculationPeriodMethod;
-        this.allowPartialPeriodInterestCalcualtion = allowPartialPeriodInterestCalcualtion;
+        this.allowPartialPeriodInterestCalculation = allowPartialPeriodInterestCalculation;
         this.repayEvery = repayEvery;
         this.repaymentPeriodFrequencyType = repaymentFrequencyType;
         this.numberOfRepayments = defaultNumberOfRepayments;

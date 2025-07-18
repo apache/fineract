@@ -199,18 +199,8 @@ public class ProgressiveLoanInterestScheduleModel {
         if (balanceChangeDate == null) {
             return Optional.empty();
         }
-        // TODO use isInPeriod
         return repaymentPeriods.stream()//
-                .filter(repaymentPeriod -> {
-                    final boolean isFirstPeriod = repaymentPeriod.getPrevious().isEmpty();
-                    if (isFirstPeriod) {
-                        return !balanceChangeDate.isBefore(repaymentPeriod.getFromDate())
-                                && !balanceChangeDate.isAfter(repaymentPeriod.getDueDate());
-                    } else {
-                        return balanceChangeDate.isAfter(repaymentPeriod.getFromDate())
-                                && !balanceChangeDate.isAfter(repaymentPeriod.getDueDate());
-                    }
-                })//
+                .filter(period -> isInPeriod(balanceChangeDate, period.getFromDate(), period.getDueDate(), period.isFirstRepaymentPeriod()))//
                 .findFirst();
     }
 

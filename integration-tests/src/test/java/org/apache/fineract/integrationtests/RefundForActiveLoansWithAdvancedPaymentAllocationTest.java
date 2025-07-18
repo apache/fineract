@@ -389,11 +389,11 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends BaseL
             assertEquals(LocalDate.of(2023, 1, 31), firstRepaymentInstallment.getDueDate());
 
             assertEquals(feePortion, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesDue()));
-            assertEquals(0.00, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesOutstanding()));
+            assertEquals(50.00, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesOutstanding()));
             assertEquals(penaltyPortion, Utils.getDoubleValue(secondRepaymentInstallment.getPenaltyChargesDue()));
-            assertEquals(0.00, Utils.getDoubleValue(secondRepaymentInstallment.getPenaltyChargesOutstanding()));
+            assertEquals(100.00, Utils.getDoubleValue(secondRepaymentInstallment.getPenaltyChargesOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalDueForPeriod()));
-            assertEquals(0.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalOutstandingForPeriod()));
+            assertEquals(150.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalOutstandingForPeriod()));
             assertEquals(LocalDate.of(2023, 3, 2), secondRepaymentInstallment.getDueDate());
 
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesDue()));
@@ -401,7 +401,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends BaseL
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getPenaltyChargesDue()));
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getPenaltyChargesOutstanding()));
             assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalDueForPeriod()));
-            assertEquals(240.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalOutstandingForPeriod()));
+            assertEquals(90.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalOutstandingForPeriod()));
             assertEquals(LocalDate.of(2023, 4, 1), thirdRepaymentInstallment.getDueDate());
 
             loanTransactionHelper.makeRefundByCash("28 January 2023", 15.0f, loanId);
@@ -424,13 +424,13 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends BaseL
             assertEquals(LocalDate.of(2023, 1, 31), firstRepaymentInstallment.getDueDate());
 
             assertEquals(feePortion, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesDue()));
-            assertEquals(0.00, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesOutstanding()));
+            assertEquals(50.00, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesOutstanding()));
             assertEquals(penaltyPortion, Utils.getDoubleValue(secondRepaymentInstallment.getPenaltyChargesDue()));
-            assertEquals(0.00, Utils.getDoubleValue(secondRepaymentInstallment.getPenaltyChargesOutstanding()));
+            assertEquals(100.00, Utils.getDoubleValue(secondRepaymentInstallment.getPenaltyChargesOutstanding()));
             assertEquals(250.00, Utils.getDoubleValue(secondRepaymentInstallment.getPrincipalDue()));
-            assertEquals(5.00, Utils.getDoubleValue(secondRepaymentInstallment.getPrincipalOutstanding()));
+            assertEquals(0.00, Utils.getDoubleValue(secondRepaymentInstallment.getPrincipalOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalDueForPeriod()));
-            assertEquals(5.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalOutstandingForPeriod()));
+            assertEquals(150.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalOutstandingForPeriod()));
             assertEquals(LocalDate.of(2023, 3, 2), secondRepaymentInstallment.getDueDate());
 
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesDue()));
@@ -438,7 +438,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends BaseL
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getPenaltyChargesDue()));
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getPenaltyChargesOutstanding()));
             assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalDueForPeriod()));
-            assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalOutstandingForPeriod()));
+            assertEquals(105.0, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalOutstandingForPeriod()));
             assertEquals(LocalDate.of(2023, 4, 1), thirdRepaymentInstallment.getDueDate());
 
             // fully unpaying the second installment

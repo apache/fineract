@@ -16,20 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.domain.arrears;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.springframework.lang.NonNull;
+import lombok.Data;
 
-public interface LoanBuyDownFeeAmortizationProcessingService {
+@Data
+public class LoanArrearsData {
 
-    void processBuyDownFeeAmortizationTillDate(@NonNull Loan loan, @NonNull LocalDate tillDate, boolean addJournal);
+    private BigDecimal principalOverdue;
+    private BigDecimal interestOverdue;
+    private BigDecimal feeOverdue;
+    private BigDecimal penaltyOverdue;
+    private BigDecimal totalOverdue;
 
-    void processBuyDownFeeAmortizationOnLoanClosure(@NonNull Loan loan, boolean addJournal);
+    private LocalDate overDueSince;
 
-    void processBuyDownFeeAmortizationOnLoanChargeOff(@NonNull Loan loan, @NonNull LoanTransaction chargeOffTransaction);
-
-    void processBuyDownFeeAmortizationOnLoanUndoChargeOff(@NonNull LoanTransaction loanTransaction);
+    private boolean isOverdue;
 }

@@ -194,7 +194,19 @@ public class CommandStrategyProviderTest {
                 Arguments.of("datatables/test_dt_table/query?columnFilter=id&valueFilter=12&resultColumns=id", HttpMethod.GET,
                         "getDatatableEntryByQueryCommandStrategy", mock(GetDatatableEntryByQueryCommandStrategy.class)),
                 Arguments.of("datatables/test_dt_table/query?columnFilter=custom_id&valueFilter=10a62-d438-2319&resultColumns=id",
-                        HttpMethod.GET, "getDatatableEntryByQueryCommandStrategy", mock(GetDatatableEntryByQueryCommandStrategy.class)));
+                        HttpMethod.GET, "getDatatableEntryByQueryCommandStrategy", mock(GetDatatableEntryByQueryCommandStrategy.class)),
+                Arguments.of("loans/123/interest-pauses", HttpMethod.GET, "getLoanInterestPausesByExternalIdCommandStrategy",
+                        mock(CommandStrategy.class)),
+                Arguments.of("loans/123/interest-pauses", HttpMethod.POST, "createLoanInterestPauseByExternalIdCommandStrategy",
+                        mock(CommandStrategy.class)),
+                Arguments.of("loans/123/interest-pauses/123", HttpMethod.PUT, "updateLoanInterestPauseByExternalIdCommandStrategy",
+                        mock(CommandStrategy.class)),
+                Arguments.of("loans/external-id/8dfad438-2319-48ce-8520-10a62801e9a1/interest-pauses", HttpMethod.GET,
+                        "getLoanInterestPausesByExternalIdCommandStrategy", mock(CommandStrategy.class)),
+                Arguments.of("loans/external-id/8dfad438-2319-48ce-8520-10a62801e9a1/interest-pauses", HttpMethod.POST,
+                        "createLoanInterestPauseByExternalIdCommandStrategy", mock(CommandStrategy.class)),
+                Arguments.of("loans/external-id/8dfad438-2319-48ce-8520-10a62801e9a1/interest-pauses/123", HttpMethod.PUT,
+                        "updateLoanInterestPauseByExternalIdCommandStrategy", mock(CommandStrategy.class)));
     }
 
     /**

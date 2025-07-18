@@ -402,6 +402,34 @@ public class LoanStepDef extends AbstractStepDef {
                 transactionAmount, transferExternalOwnerId);
     }
 
+    @When("Customer makes {string} transaction with {string} payment type on {string} with {double} EUR transaction amount and system-generated Idempotency key and interestRefundCalculation {booleanValue}")
+    public void createTransactionWithAutoIdempotencyKeyAndWithInterestRefundCalculationFlagProvided(final String transactionTypeInput,
+            final String transactionPaymentType, final String transactionDate, final double transactionAmount,
+            final boolean interestRefundCalculation) throws IOException {
+        eventStore.reset();
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanResponse.body() != null;
+        final long loanId = loanResponse.body().getLoanId();
+
+        final TransactionType transactionType = TransactionType.valueOf(transactionTypeInput);
+        final String transactionTypeValue = transactionType.getValue();
+        final DefaultPaymentType paymentType = DefaultPaymentType.valueOf(transactionPaymentType);
+        final Long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
+
+        final PostLoansLoanIdTransactionsRequest paymentTransactionRequest = LoanRequestFactory.defaultPaymentTransactionRequest()
+                .transactionDate(transactionDate).transactionAmount(transactionAmount).paymentTypeId(paymentTypeValue)
+                .interestRefundCalculation(interestRefundCalculation);
+
+        final Response<PostLoansLoanIdTransactionsResponse> paymentTransactionResponse = loanTransactionsApi
+                .executeLoanTransaction(loanId, paymentTransactionRequest, transactionTypeValue).execute();
+        testContext().set(TestContextKey.LOAN_PAYMENT_TRANSACTION_RESPONSE, paymentTransactionResponse);
+        testContext().set(TestContextKey.LOAN_REPAYMENT_RESPONSE, paymentTransactionResponse);
+        ErrorHelper.checkSuccessfulApiCall(paymentTransactionResponse);
+
+        eventCheckHelper.transactionEventCheck(paymentTransactionResponse, transactionType, null);
+        eventCheckHelper.loanBalanceChangedEventCheck(loanId);
+    }
+
     private void createTransactionWithAutoIdempotencyKeyAndWithExternalOwner(String transactionTypeInput, String transactionPaymentType,
             String transactionDate, double transactionAmount, String externalOwnerId) throws IOException {
         eventStore.reset();

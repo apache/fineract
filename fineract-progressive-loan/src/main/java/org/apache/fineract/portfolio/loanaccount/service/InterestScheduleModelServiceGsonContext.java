@@ -42,7 +42,7 @@ public class InterestScheduleModelServiceGsonContext {
     public RepaymentPeriod createRepaymentPeriodInstance(Type type) {
         if (type == RepaymentPeriod.class) {
 
-            setPrev(RepaymentPeriod.empty(getPrev(), getMc()));
+            setPrev(RepaymentPeriod.empty(getPrev(), getMc(), getLoanProductRelatedDetail()));
             return getPrev();
         }
         throw new IllegalArgumentException("Unsupported RepaymentPeriod type: " + type);
