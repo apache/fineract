@@ -214,6 +214,8 @@ public final class LoanApplicationValidator {
                     expectedFirstRepaymentOnDate);
         }
 
+        validateCumulativeMultiDisburse(loan);
+
         validateLoanTermAndRepaidEveryValues(loan.getTermFrequency(), loan.getTermPeriodFrequencyType().getValue(),
                 loan.getLoanProductRelatedDetail().getNumberOfRepayments(), loan.getLoanProductRelatedDetail().getRepayEvery(),
                 loan.getLoanProductRelatedDetail().getRepaymentPeriodFrequencyType().getValue(), loan);
@@ -227,6 +229,8 @@ public final class LoanApplicationValidator {
                     "submittedOnDate cannot be after the loans  expectedFirstRepaymentOnDate.", submittedOnDate,
                     expectedFirstRepaymentOnDate);
         }
+
+        validateCumulativeMultiDisburse(loan);
 
         validateLoanTermAndRepaidEveryValues(loan.getTermFrequency(), loan.getTermPeriodFrequencyType().getValue(),
                 loan.getLoanProductRelatedDetail().getNumberOfRepayments(), loan.getLoanProductRelatedDetail().getRepayEvery(),
@@ -2187,6 +2191,19 @@ public final class LoanApplicationValidator {
         if (calendar != null && !calendar.isValidRecurringDate(expectedDisbursementDate, isSkipRepaymentOnFirstMonth, numberOfDays)) {
             final String errorMessage = "Expected disbursement date '" + expectedDisbursementDate + "' do not fall on a meeting date";
             throw new LoanApplicationDateException("disbursement.date.do.not.match.meeting.date", errorMessage, expectedDisbursementDate);
+        }
+    }
+
+    private static void validateCumulativeMultiDisburse(Loan loan) {
+        if (loan.isCumulativeSchedule() && loan.isMultiDisburmentLoan()
+                && loan.getLoanProductRelatedDetail().getInterestMethod().isFlat()) {
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final ApiParameterError error = ApiParameterError.generalError(
+                    "validation.msg.loan.cumulative.multidisburse.does.not.support.flat.interest.mode",
+                    "Cumulative multidisburse loan does NOT support FLAT interest mode.");
+            dataValidationErrors.add(error);
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
         }
     }
 

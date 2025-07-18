@@ -695,7 +695,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         Double expectedDownPaymentAmount = 250.00;
         LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, 9, 3);
         Double expectedRepaymentAmount = 750.00;
-        Double expectedTotalDueForRepaymentInstallment = 770.0;
+        Double expectedTotalDueForRepaymentInstallment = 767.50;
         LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
 
         assertTrue(periods.stream() //
@@ -708,7 +708,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
                         && expectedRepaymentAmount.equals(Utils.getDoubleValue(period.getPrincipalDue())) //
                         && expectedRepaymentDueDate.equals(period.getDueDate()) //
                         && feeAmount.equals(Utils.getDoubleValue(period.getFeeChargesDue())) //
-                        && Double.valueOf(10.0).equals(Utils.getDoubleValue(period.getInterestDue()))));
+                        && Double.valueOf(7.5).equals(Utils.getDoubleValue(period.getInterestDue()))));
     }
 
     @Test
@@ -769,9 +769,12 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         Double expectedSecondDownPaymentAmount = 75.00;
         LocalDate expectedSecondDownPaymentDueDate = LocalDate.of(2022, 9, 4);
         Double expectedRepaymentAmount = 250.00;
-        Double expectedRepaymentAmountWithInterest = 260.00;
-        Double expectedRepaymentInterest = 10.0;
-        Double expectedRepaymentTotalDueWithChargeAndInterest = 270.0;
+        Double expectedRepaymentAmountWithInterest = 255.0;
+        Double expectedRepaymentAmountWithInterest2 = 252.5;
+        Double expectedRepaymentInterest = 7.42;
+        Double expectedRepaymentInterest2 = 5.0;
+        Double expectedRepaymentInterest3 = 2.5;
+        Double expectedRepaymentTotalDueWithChargeAndInterest = 267.42;
         LocalDate expectedFirstRepaymentDueDate = LocalDate.of(2022, 10, 3);
         Double outstandingBalanceOnFirstRepayment = 500.00;
         LocalDate expectedSecondRepaymentDueDate = LocalDate.of(2022, 11, 3);
@@ -813,13 +816,13 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         assertEquals(expectedRepaymentAmountWithInterest, Utils.getDoubleValue(secondRepaymentPeriod.getTotalDueForPeriod()));
         assertEquals(expectedSecondRepaymentDueDate, secondRepaymentPeriod.getDueDate());
         assertEquals(outstandingBalanceOnSecondRepayment, Utils.getDoubleValue(secondRepaymentPeriod.getPrincipalLoanBalanceOutstanding()));
-        assertEquals(expectedRepaymentInterest, Utils.getDoubleValue(secondRepaymentPeriod.getInterestDue()));
+        assertEquals(expectedRepaymentInterest2, Utils.getDoubleValue(secondRepaymentPeriod.getInterestDue()));
 
         GetLoansLoanIdRepaymentPeriod thirdRepaymentPeriod = periods.get(6);
-        assertEquals(expectedRepaymentAmountWithInterest, Utils.getDoubleValue(thirdRepaymentPeriod.getTotalDueForPeriod()));
+        assertEquals(expectedRepaymentAmountWithInterest2, Utils.getDoubleValue(thirdRepaymentPeriod.getTotalDueForPeriod()));
         assertEquals(expectedThirdRepaymentDueDate, thirdRepaymentPeriod.getDueDate());
         assertEquals(outstandingBalanceOnThirdRepayment, Utils.getDoubleValue(thirdRepaymentPeriod.getPrincipalLoanBalanceOutstanding()));
-        assertEquals(expectedRepaymentInterest, Utils.getDoubleValue(thirdRepaymentPeriod.getInterestDue()));
+        assertEquals(expectedRepaymentInterest3, Utils.getDoubleValue(thirdRepaymentPeriod.getInterestDue()));
     }
 
     @Test
@@ -1737,7 +1740,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("30")
                 .withLoanTermFrequencyAsDays().withNumberOfRepayments("1").withRepaymentEveryAfter("30").withRepaymentFrequencyTypeAsDays()
-                .withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance().withAmortizationTypeAsEqualPrincipalPayments()
+                .withInterestRatePerPeriod("0").withInterestTypeAsDecliningBalance().withAmortizationTypeAsEqualPrincipalPayments()
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("03 March 2023")
                 .withSubmittedOnDate("03 March 2023").withLoanType("individual").withExternalId(externalId)
                 .build(clientID.toString(), loanProductID.toString(), null);
@@ -1816,7 +1819,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency(numberOfRepayments)
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments(numberOfRepayments).withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod(interestRate).withInterestTypeAsFlatBalance()
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod(interestRate).withInterestTypeAsDecliningBalance()
                 .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
                 .withExpectedDisbursementDate("03 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
                 .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);
@@ -1839,7 +1842,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency(numberOfRepayments)
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments(numberOfRepayments).withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod(interestRate).withInterestTypeAsFlatBalance()
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod(interestRate).withInterestTypeAsDecliningBalance()
                 .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
                 .withExpectedDisbursementDate("04 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
                 .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);
