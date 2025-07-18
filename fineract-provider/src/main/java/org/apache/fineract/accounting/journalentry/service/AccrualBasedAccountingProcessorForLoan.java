@@ -34,14 +34,11 @@ import org.apache.fineract.accounting.journalentry.data.ChargePaymentDTO;
 import org.apache.fineract.accounting.journalentry.data.GLAccountBalanceHolder;
 import org.apache.fineract.accounting.journalentry.data.LoanDTO;
 import org.apache.fineract.accounting.journalentry.data.LoanTransactionDTO;
-import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMapping;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
-import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -50,9 +47,6 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
     private final AccountingProcessorHelper helper;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
-    private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
-    private final JournalEntryRepository journalEntryRepository;
-    private final LoanTransactionRepository loanTransactionRepository;
 
     @Override
     public void createJournalEntriesForLoan(final LoanDTO loanDTO) {

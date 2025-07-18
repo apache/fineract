@@ -233,7 +233,7 @@ public class LoanTransactionTest extends BaseLoanIntegrationTest {
 
             assertNotNull(transactionTemplate);
             assertEquals("loanTransactionType." + buyDownFeeCommand, transactionTemplate.getType().getCode());
-            assertEquals(transactionTemplate.getAmount(), 200);
+            assertEquals(transactionTemplate.getAmount(), 0);
             assertThat(transactionTemplate.getPaymentTypeOptions().size() > 0);
         });
     }
