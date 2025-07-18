@@ -27,7 +27,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 @Builder
 @Getter
@@ -58,15 +57,15 @@ public class CreateCurrency extends AbstractPersistableCustom<Long> {
     @Column(name = "internationalized_name_code", nullable = false, length = 50)
     public String nameCode;
 
-    public static CreateCurrency fromCurrencyData(CurrencyData currencyData) {
-        return CreateCurrency.builder().code(currencyData.getCode()).name(currencyData.getName())
-                .decimalPlaces(currencyData.getDecimalPlaces()).inMultiplesOf(currencyData.getInMultiplesOf())
-                .displaySymbol(currencyData.getDisplaySymbol()).nameCode(currencyData.getNameCode()).build();
-    }
-
-    public static CurrencyData toCurrencyData(CreateCurrency createCurrencyData) {
-        return CurrencyData.builder().code(createCurrencyData.getCode()).name(createCurrencyData.getName())
-                .decimalPlaces(createCurrencyData.getDecimalPlaces()).inMultiplesOf(createCurrencyData.getInMultiplesOf())
-                .displaySymbol(createCurrencyData.getDisplaySymbol()).nameCode(createCurrencyData.getNameCode()).build();
-    }
+//    public static CreateCurrency fromCurrencyData(CurrencyData currencyData) {
+//        return CreateCurrency.builder().code(currencyData.getCode()).name(currencyData.getName())
+//                .decimalPlaces(currencyData.getDecimalPlaces()).inMultiplesOf(currencyData.getInMultiplesOf())
+//                .displaySymbol(currencyData.getDisplaySymbol()).nameCode(currencyData.getNameCode()).build();
+//    }
+//
+//    public static CurrencyData toCurrencyData(CreateCurrency createCurrencyData) {
+//        return CurrencyData.builder().code(createCurrencyData.getCode()).name(createCurrencyData.getName())
+//                .decimalPlaces(createCurrencyData.getDecimalPlaces()).inMultiplesOf(createCurrencyData.getInMultiplesOf())
+//                .displaySymbol(createCurrencyData.getDisplaySymbol()).nameCode(createCurrencyData.getNameCode()).build();
+//    }
 }

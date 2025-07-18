@@ -19,7 +19,10 @@
 package org.apache.fineract.organisation.monetary.mapper;
 
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
+import org.apache.fineract.organisation.monetary.data.CurrencyCreateRequest;
+import org.apache.fineract.organisation.monetary.data.CurrencyCreateResponse;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.domain.CreateCurrency;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.mapstruct.Mapping;
 
@@ -34,4 +37,26 @@ public interface CurrencyMapper {
     @Mapping(source = "digitsAfterDecimal", target = "decimalPlaces")
     @Mapping(source = "inMultiplesOf", target = "inMultiplesOf")
     CurrencyData map(MonetaryCurrency source);
+
+    CreateCurrency mapToEntity(CurrencyCreateRequest request);
+
+    @Mapping(target = "displayLabel", expression = "java(computeDisplayLabel(entity))")
+    CurrencyCreateResponse mapToResponse(CreateCurrency entity);
+
+    // Helper method for generating displayLabel
+    default String computeDisplayLabel(CreateCurrency entity) {
+        StringBuilder builder = new StringBuilder(20);
+
+        if (entity.getName() != null) {
+            builder.append(entity.getName()).append(' ');
+        }
+
+        if (entity.getDisplaySymbol() != null && !entity.getDisplaySymbol().trim().isEmpty()) {
+            builder.append('(').append(entity.getDisplaySymbol()).append(')');
+        } else {
+            builder.append('[').append(entity.getCode()).append(']');
+        }
+
+        return builder.toString();
+    }
 }
