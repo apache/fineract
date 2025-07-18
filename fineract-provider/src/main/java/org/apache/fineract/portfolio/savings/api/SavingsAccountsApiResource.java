@@ -128,13 +128,16 @@ public class SavingsAccountsApiResource {
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
-            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
+            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
+            @QueryParam("month") @Parameter(description = "month") final Integer month,
+            @QueryParam("day") @Parameter(description = "day") final Integer day) {
 
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
-        final SearchParameters searchParameters = SearchParameters.forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder);
+        final SearchParameters searchParameters = SearchParameters.forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder,
+                month, day);
 
-        final Page<SavingsAccountData> products = savingsAccountReadPlatformService.retrieveAll(searchParameters);
+        final Page<SavingsAccountData> products = savingsAccountReadPlatformService.retrieveAllByBirthday(searchParameters);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return toApiJsonSerializer.serialize(settings, products, SavingsApiSetConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);

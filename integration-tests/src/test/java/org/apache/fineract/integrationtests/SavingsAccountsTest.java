@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.apache.fineract.client.models.GetSavingsAccountsResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsRequest;
@@ -37,7 +38,7 @@ import retrofit2.Response;
  * @author Danish Jamal
  *
  */
-public class SavingsAccountsTest extends IntegrationTest {
+class SavingsAccountsTest extends IntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountsTest.class);
     private final String dateFormat = "dd MMMM yyyy";
@@ -94,4 +95,41 @@ public class SavingsAccountsTest extends IntegrationTest {
         assertThat(response.body()).isNotNull();
     }
 
+    @Test
+    @Order(4)
+    void retrieveSavingsAccountsByBirthday_Success() {
+        LOG.info("------------------------------ RETRIEVE SAVINGS ACCOUNTS BY BIRTHDAY -----------------------------");
+
+        // This test assumes test data already exists
+        int month = 4;
+        int day = 3;
+
+        Response<GetSavingsAccountsResponse> response = okR(
+                fineract().savingsAccounts.retrieveAll33(null, null, 0, 10, null, null, month, day));
+
+        assertThat(response.isSuccessful()).isTrue();
+        assertThat(response.body()).isNotNull();
+        assertThat(response.body().getPageItems()).isNotEmpty();
+
+        response.body().getPageItems().forEach(account -> {
+            LOG.info("Savings Account ID: {}, Client: {}", account.getId(), account.getClientName());
+        });
+    }
+
+    @Test
+    @Order(4)
+    void retrieveSavingsAccountsByBirthday_EmptySet() {
+        LOG.info("------------------------------ RETRIEVE SAVINGS ACCOUNTS BY BIRTHDAY -----------------------------");
+
+        // Data does not exist for these dates
+        int month = 13;
+        int day = 32;
+
+        Response<GetSavingsAccountsResponse> response = okR(
+                fineract().savingsAccounts.retrieveAll33(null, null, 0, 10, null, null, month, day));
+
+        assertThat(response.isSuccessful()).isTrue();
+        assertThat(response.body()).isNotNull();
+        assertThat(response.body().getPageItems()).isEmpty();
+    }
 }

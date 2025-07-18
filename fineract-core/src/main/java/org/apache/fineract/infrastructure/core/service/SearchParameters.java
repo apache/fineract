@@ -50,6 +50,10 @@ public final class SearchParameters {
     private final Long categoryId;
     private final boolean isSelfUser;
 
+    // Birthday search params
+    private final Integer birthMonth;
+    private final Integer birthDay;
+
     public static SearchParameters from(final String sqlSearch, final Long officeId, final String externalId, final String name,
             final String hierarchy) {
         final Long staffId = null;
@@ -181,9 +185,9 @@ public final class SearchParameters {
         return new SearchParameters(provisioningEntryId, officeId, productId, categoryId, offset, limit);
     }
 
+    // Updated method with birthday parameters
     public static SearchParameters forSavings(final String sqlSearch, final String externalId, final Integer offset, final Integer limit,
-            final String orderBy, final String sortOrder) {
-
+            final String orderBy, final String sortOrder, final Integer birthMonth, final Integer birthDay) {
         final Integer maxLimitAllowed = getCheckedLimit(limit);
         final Long staffId = null;
         final String accountNo = null;
@@ -192,8 +196,14 @@ public final class SearchParameters {
         final Boolean orphansOnly = false;
         final boolean isSelfUser = false;
 
-        return new SearchParameters(sqlSearch, null, externalId, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder,
-                staffId, accountNo, loanId, savingsId, orphansOnly, isSelfUser);
+        return new SearchParameters(sqlSearch, null, externalId, null, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder,
+                staffId, accountNo, null, loanId, savingsId, orphansOnly, null, null, null, isSelfUser, birthMonth, birthDay);
+    }
+
+    // Create an overloaded method to maintain backward compatibility
+    public static SearchParameters forSavings(final String sqlSearch, final String externalId, final Integer offset, final Integer limit,
+            final String orderBy, final String sortOrder) {
+        return forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder, null, null);
     }
 
     public static SearchParameters forAccountTransfer(final String sqlSearch, final String externalId, final Integer offset,
@@ -269,7 +279,8 @@ public final class SearchParameters {
         this.categoryId = null;
         this.isSelfUser = isSelfUser;
         this.status = null;
-
+        this.birthDay = null;
+        this.birthMonth = null;
     }
 
     private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
@@ -298,7 +309,8 @@ public final class SearchParameters {
         this.categoryId = null;
         this.isSelfUser = isSelfUser;
         this.status = status;
-
+        this.birthDay = null;
+        this.birthMonth = null;
     }
 
     private SearchParameters(final Long officeId, final String externalId, final String name, final String hierarchy,
@@ -327,6 +339,8 @@ public final class SearchParameters {
         this.categoryId = null;
         this.isSelfUser = isSelfUser;
         this.status = null;
+        this.birthDay = null;
+        this.birthMonth = null;
     }
 
     private SearchParameters(final Long provisioningEntryId, final Long officeId, final Long productId, final Long categoryId,
@@ -353,7 +367,8 @@ public final class SearchParameters {
         this.categoryId = categoryId;
         this.isSelfUser = false;
         this.status = null;
-
+        this.birthDay = null;
+        this.birthMonth = null;
     }
 
     public SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name, final String hierarchy,
@@ -382,7 +397,54 @@ public final class SearchParameters {
         this.categoryId = null;
         this.isSelfUser = false;
         this.status = null;
+        this.birthDay = null;
+        this.birthMonth = null;
+    }
 
+    // Updated constructor to include birthMonth and birthDay
+    private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
+            final String hierarchy, final String firstname, final String lastname, final String status, final Integer offset,
+            final Integer limit, final String orderBy, final String sortOrder, final Long staffId, final String accountNo,
+            final String currencyCode, final Long loanId, final Long savingsId, final Boolean orphansOnly, final Long provisioningEntryId,
+            final Long productId, final Long categoryId, final boolean isSelfUser, final Integer birthMonth, final Integer birthDay) {
+        this.sqlSearch = sqlSearch;
+        this.officeId = officeId;
+        this.externalId = externalId;
+        this.name = name;
+        this.hierarchy = hierarchy;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.status = status;
+        this.offset = offset;
+        this.limit = limit;
+        this.orderBy = orderBy;
+        this.sortOrder = sortOrder;
+        this.staffId = staffId;
+        this.accountNo = accountNo;
+        this.currencyCode = currencyCode;
+        this.loanId = loanId;
+        this.savingsId = savingsId;
+        this.orphansOnly = orphansOnly;
+        this.provisioningEntryId = provisioningEntryId;
+        this.productId = productId;
+        this.categoryId = categoryId;
+        this.isSelfUser = isSelfUser;
+        this.birthMonth = birthMonth;
+        this.birthDay = birthDay;
+    }
+
+    // Add getters for the birthday fields
+    public Integer getBirthMonth() {
+        return this.birthMonth;
+    }
+
+    public Integer getBirthDay() {
+        return this.birthDay;
+    }
+
+    // Include hasBirthdayFilter convenience method
+    public boolean hasBirthdayFilter() {
+        return this.birthMonth != null || this.birthDay != null;
     }
 
     public boolean isOrderByRequested() {
