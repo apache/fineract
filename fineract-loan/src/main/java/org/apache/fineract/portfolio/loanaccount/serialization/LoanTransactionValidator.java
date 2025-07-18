@@ -94,4 +94,6 @@ public interface LoanTransactionValidator {
     void validateExternalId(DataValidatorBuilder baseDataValidator, JsonElement element);
 
     void validateReversalExternalId(DataValidatorBuilder baseDataValidator, JsonElement element);
+
+    void validateManualInterestRefundTransaction(String json);
 }

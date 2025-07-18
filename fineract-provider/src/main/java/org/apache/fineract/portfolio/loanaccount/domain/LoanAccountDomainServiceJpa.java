@@ -206,7 +206,13 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final ExternalId txnExternalId = externalIdFactory.create();
         businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionInterestRefundPreBusinessEvent(loan));
         return LoanTransaction.interestRefund(loan, interestRefundAmount, refundTransaction.getDateOf(), txnExternalId);
+    }
 
+    @Override
+    public LoanTransaction createManualInterestRefundWithAmount(final Loan loan, final LoanTransaction targetTransaction,
+            final BigDecimal interestRefundAmount, final PaymentDetail paymentDetail, final ExternalId txnExternalId) {
+        businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionInterestRefundPreBusinessEvent(loan));
+        return LoanTransaction.interestRefund(loan, interestRefundAmount, targetTransaction.getDateOf(), paymentDetail, txnExternalId);
     }
 
     @Transactional

@@ -68,6 +68,10 @@ public final class ErrorMessageHelper {
         return "Loan can't be disbursed, disburse amount is exceeding approved principal.";
     }
 
+    public static String addManualInterestRefundIfAlreadyExistsFailure() {
+        return "Interest Refund already exists for this transaction";
+    }
+
     public static String addDisbursementExceedMaxAppliedAmountFailure(String totalDisbAmount, String maxDisbursalAmount) {
         return String.format("Loan disbursal amount can't be greater than maximum applied loan amount calculation. "
                 + "Total disbursed amount: %s  Maximum disbursal amount: %s", totalDisbAmount, maxDisbursalAmount);

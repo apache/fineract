@@ -97,4 +97,7 @@ public interface LoanAccountDomainService {
     LoanTransaction applyInterestRefund(Loan loan, LoanRefundRequestData loanRefundRequest);
 
     void updateAndSaveLoanCollateralTransactionsForIndividualAccounts(Loan loan, LoanTransaction transaction);
+
+    LoanTransaction createManualInterestRefundWithAmount(Loan loan, LoanTransaction targetTransaction, BigDecimal amount,
+            PaymentDetail paymentDetail, ExternalId txnExternalId);
 }
