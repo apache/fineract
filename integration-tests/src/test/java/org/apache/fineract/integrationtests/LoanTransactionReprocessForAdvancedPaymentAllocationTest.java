@@ -120,7 +120,7 @@ public class LoanTransactionReprocessForAdvancedPaymentAllocationTest extends Ba
                             .transactionAmount(50.0).externalId(loanTransactionExternalIdStr));
 
             // verify transaction amounts
-            verifyTransaction(LocalDate.of(2023, 2, 20), 50.0f, 0.0f, 0.0f, 50.0f, 0.0f, loanId, "repayment");
+            verifyTransaction(LocalDate.of(2023, 2, 20), 50.0f, 50.0f, 0.0f, 0.0f, 0.0f, loanId, "repayment");
 
             // add loan charge for a date later than repayment date
             // apply penalty

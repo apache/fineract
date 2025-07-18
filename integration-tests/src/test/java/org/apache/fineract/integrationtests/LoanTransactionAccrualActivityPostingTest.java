@@ -714,7 +714,6 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
         final String creationBusinessDay = "15 January 2023";
         AtomicReference<Long> loanId = new AtomicReference<>();
         runAt(creationBusinessDay, () -> {
-
             Long localLoanProductId = createLoanProductAccountingAccrualPeriodicAdvancedPaymentAllocation();
             loanId.set(applyForLoanApplicationAdvancedPaymentAllocation(client.getClientId(), localLoanProductId, BigDecimal.valueOf(40000),
                     disbursementDay, BigDecimal.ZERO));
@@ -723,53 +722,52 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
                     .dateFormat(DATETIME_PATTERN).approvedOnDate(disbursementDay).locale("en"));
 
             loanTransactionHelper.disburseLoan(loanId.get(), new PostLoansLoanIdRequest().actualDisbursementDate(disbursementDay)
-                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(1000.0)).locale("en"));
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(1000)).locale("en"));
 
             chargePenalty(loanId.get(), 20.0, chargeDueDate1st);
 
             addRepaymentForLoan(loanId.get(), 50.0, "10 January 2023");
             verifyTransactions(loanId.get(), //
-                    transaction(1000.0, "Disbursement", disbursementDay, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
-                    transaction(50.0, "Repayment", "10 January 2023", 970, 30, 0, 0, 20, 0.0, 0.0));
+                    transaction(1000, "Disbursement", disbursementDay, 1000, 0, 0, 0, 0, 0, 0),
+                    transaction(50, "Repayment", "10 January 2023", 950, 50, 0, 0, 0, 0, 0));
 
         });
         runAt(repaymentPeriod1CloseDate, () -> {
             inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.get()));
             verifyTransactions(loanId.get(), //
-                    transaction(1000.0, "Disbursement", disbursementDay, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
-                    transaction(20.0, "Accrual", "01 February 2023", 0, 0, 0, 0, 20, 0.0, 0.0),
-                    transaction(50.0, "Repayment", "10 January 2023", 970, 30, 0, 0, 20, 0.0, 0.0),
-                    transaction(20.0, "Accrual Activity", "01 February 2023", 0, 0, 0.0, 0.0, 20.0, 0.0, 0.0));
+                    transaction(1000, "Disbursement", disbursementDay, 1000, 0, 0, 0, 0, 0, 0),
+                    transaction(20, "Accrual", "01 February 2023", 0, 0, 0, 0, 20, 0, 0),
+                    transaction(50, "Repayment", "10 January 2023", 950, 50, 0, 0, 0, 0, 0),
+                    transaction(20, "Accrual Activity", "01 February 2023", 0, 0, 0, 0, 20, 0, 0));
 
         });
         runAt(repaymentPeriod1OneDayAfterCloseDate, () -> {
-
             addRepaymentForLoan(loanId.get(), 220.0, "8 January 2023");
 
             verifyTransactions(loanId.get(), //
-                    transaction(1000.0, "Disbursement", disbursementDay, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
-                    transaction(20.0, "Accrual", "01 February 2023", 0, 0, 0, 0, 20, 0.0, 0.0),
-                    transaction(50.0, "Repayment", "10 January 2023", 730, 50, 0, 0, 0, 0.0, 0.0),
-                    transaction(220.0, "Repayment", "08 January 2023", 780, 220, 0, 0, 0, 0.0, 0.0),
-                    transaction(20.0, "Accrual Activity", "01 February 2023", 0, 0, 0.0, 0.0, 20.0, 0.0, 0.0));
+                    transaction(1000, "Disbursement", disbursementDay, 1000, 0, 0, 0, 0, 0, 0),
+                    transaction(20, "Accrual", "01 February 2023", 0, 0, 0, 0, 20, 0, 0),
+                    transaction(50, "Repayment", "10 January 2023", 730, 50, 0, 0, 0, 0, 0),
+                    transaction(220, "Repayment", "08 January 2023", 780, 220, 0, 0, 0, 0, 0),
+                    transaction(20, "Accrual Activity", "01 February 2023", 0, 0, 0, 0, 20, 0, 0));
 
             chargePenalty(loanId.get(), 33.0, chargeDueDate2st);
 
             verifyTransactions(loanId.get(), //
-                    transaction(1000.0, "Disbursement", disbursementDay, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
-                    transaction(20.0, "Accrual", "01 February 2023", 0, 0, 0, 0, 20, 0.0, 0.0),
-                    transaction(50.0, "Repayment", "10 January 2023", 730, 50, 0, 0, 0, 0.0, 0.0),
-                    transaction(220.0, "Repayment", "08 January 2023", 780, 220, 0, 0, 0, 0.0, 0.0),
-                    transaction(53.0, "Accrual Activity", "01 February 2023", 0, 0, 0.0, 0.0, 53.0, 0.0, 0.0));
+                    transaction(1000, "Disbursement", disbursementDay, 1000, 0, 0, 0, 0, 0, 0),
+                    transaction(20, "Accrual", "01 February 2023", 0, 0, 0, 0, 20, 0, 0),
+                    transaction(50, "Repayment", "10 January 2023", 730, 50, 0, 0, 0, 0, 0),
+                    transaction(220, "Repayment", "08 January 2023", 780, 220, 0, 0, 0, 0, 0),
+                    transaction(53, "Accrual Activity", "01 February 2023", 0, 0, 0, 0, 53, 0, 0));
 
             chargeFee(loanId.get(), 12.0, chargeDueDate3st);
 
             verifyTransactions(loanId.get(), //
-                    transaction(1000.0, "Disbursement", disbursementDay, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
-                    transaction(20.0, "Accrual", "01 February 2023", 0, 0, 0, 0, 20, 0.0, 0.0),
-                    transaction(50.0, "Repayment", "10 January 2023", 730, 50, 0, 0, 0, 0.0, 0.0),
-                    transaction(220.0, "Repayment", "08 January 2023", 780, 220, 0, 0, 0, 0.0, 0.0),
-                    transaction(65.0, "Accrual Activity", "01 February 2023", 0, 0, 0.0, 12.0, 53.0, 0.0, 0.0));
+                    transaction(1000, "Disbursement", disbursementDay, 1000, 0, 0, 0, 0, 0, 0),
+                    transaction(20, "Accrual", "01 February 2023", 0, 0, 0, 0, 20, 0, 0),
+                    transaction(50, "Repayment", "10 January 2023", 730, 50, 0, 0, 0, 0, 0),
+                    transaction(220, "Repayment", "08 January 2023", 780, 220, 0, 0, 0, 0, 0),
+                    transaction(65, "Accrual Activity", "01 February 2023", 0, 0, 0, 12, 53, 0, 0));
 
         });
     }

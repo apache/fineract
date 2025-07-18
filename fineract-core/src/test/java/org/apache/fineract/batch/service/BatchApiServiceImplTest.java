@@ -19,11 +19,14 @@
 package org.apache.fineract.batch.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,6 +54,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -86,8 +91,8 @@ class BatchApiServiceImplTest {
     @InjectMocks
     private RetryConfigurationAssembler retryConfigurationAssembler;
 
-    private final ResolutionHelper resolutionHelper = Mockito.spy(new ResolutionHelper(new FromJsonHelper()));
-    private final List<BatchRequestPreprocessor> batchPreprocessors = Mockito.spy(List.of());
+    private final ResolutionHelper resolutionHelper = spy(new ResolutionHelper(new FromJsonHelper()));
+    private final List<BatchRequestPreprocessor> batchPreprocessors = spy(List.of());
 
     @InjectMocks
     private BatchApiServiceImpl batchApiService;
@@ -96,8 +101,9 @@ class BatchApiServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        batchApiService = new BatchApiServiceImpl(strategyProvider, resolutionHelper, transactionManager, errorHandler, List.of(),
-                batchPreprocessors, retryConfigurationAssembler);
+        batchApiService = new BatchApiServiceImpl(strategyProvider, resolutionHelper, errorHandler, List.of(), batchPreprocessors,
+                retryConfigurationAssembler);
+        batchApiService.setTransactionManager(transactionManager);
         batchApiService.setEntityManager(entityManager);
         request = new BatchRequest();
         request.setRequestId(1L);
@@ -225,6 +231,43 @@ class BatchApiServiceImplTest {
         assertEquals(200, result.get(0).getStatusCode());
         assertTrue(result.get(0).getBody().contains("Success"));
         Mockito.verifyNoInteractions(entityManager);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void testCallInTransactionReadOnlyFlag(boolean isReadOnly) {
+        // Given
+        ExtendedJpaTransactionManager extendedJpaTransactionManager = mock(ExtendedJpaTransactionManager.class);
+
+        // Create a transaction status with the correct read-only flag
+        DefaultTransactionStatus transactionStatus = new DefaultTransactionStatus("txn_name", null, true, true, false, isReadOnly, false,
+                null);
+
+        // Mock getTransaction to return our status when the read-only flag matches
+        when(extendedJpaTransactionManager.isReadOnlyConnection()).thenReturn(isReadOnly);
+        when(extendedJpaTransactionManager
+                .getTransaction(argThat(definition -> definition != null && definition.isReadOnly() == isReadOnly)))
+                .thenReturn(transactionStatus);
+
+        // Mock other required dependencies
+        when(strategyProvider.getCommandStrategy(any())).thenReturn(commandStrategy);
+        when(commandStrategy.execute(any(), any())).thenReturn(response);
+
+        batchApiService.setTransactionManager(extendedJpaTransactionManager);
+
+        // Set up a request that will trigger the read-only behavior we want to test
+        BatchRequest testRequest = new BatchRequest();
+        testRequest.setRequestId(1L);
+        testRequest.setMethod(isReadOnly ? "GET" : "POST"); // Use GET for read-only, POST for read-write
+        testRequest.setRelativeUrl("/test/endpoint");
+
+        // When
+        List<BatchResponse> responses = batchApiService.handleBatchRequestsWithEnclosingTransaction(List.of(testRequest), uriInfo);
+
+        // Then
+        assertFalse(responses.isEmpty());
+        verify(extendedJpaTransactionManager)
+                .getTransaction(argThat(definition -> definition != null && definition.isReadOnly() == isReadOnly));
     }
 
     private static final class RetryException extends RuntimeException {}

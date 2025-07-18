@@ -258,10 +258,20 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                 }
             }
 
+            boolean enableIncomeCapitalization = product.getLoanProductRelatedDetail().isEnableIncomeCapitalization();
+            if (changes.containsKey(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME)) {
+                enableIncomeCapitalization = (boolean) changes.get(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME);
+            }
+            boolean enableBuyDownFee = product.getLoanProductRelatedDetail().isEnableBuyDownFee();
+            if (changes.containsKey(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME)) {
+                enableBuyDownFee = (boolean) changes.get(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME);
+            }
+
             // accounting related changes
             final boolean accountingTypeChanged = changes.containsKey("accountingRule");
             final Map<String, Object> accountingMappingChanges = this.accountMappingWritePlatformService
-                    .updateLoanProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingRule());
+                    .updateLoanProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingRule(),
+                            enableIncomeCapitalization, enableBuyDownFee);
             changes.putAll(accountingMappingChanges);
 
             if (changes.containsKey(LoanProductConstants.RATES_PARAM_NAME)) {

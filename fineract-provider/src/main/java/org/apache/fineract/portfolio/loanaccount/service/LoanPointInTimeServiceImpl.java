@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.loanaccount.data.LoanPointInTimeData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.arrears.LoanArrearsData;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
@@ -49,6 +50,7 @@ public class LoanPointInTimeServiceImpl implements LoanPointInTimeService {
     private final LoanAssembler loanAssembler;
     private final LoanPointInTimeData.Mapper dataMapper;
     private final EntityManager entityManager;
+    private final LoanArrearsAgingService arrearsAgingService;
 
     @Override
     public LoanPointInTimeData retrieveAt(Long loanId, LocalDate date) {
@@ -69,7 +71,11 @@ public class LoanPointInTimeServiceImpl implements LoanPointInTimeService {
             ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null, null);
             loanScheduleService.recalculateSchedule(loan, scheduleGeneratorDTO);
 
-            return dataMapper.map(loan);
+            LoanArrearsData arrearsData = arrearsAgingService.calculateArrearsForLoan(loan);
+
+            LoanPointInTimeData result = dataMapper.map(loan);
+            result.setArrears(arrearsData);
+            return result;
         } finally {
             entityManager.clear();
             TransactionInterceptor.currentTransactionStatus().setRollbackOnly();

@@ -133,6 +133,7 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
         boolean processLatest = isTransactionChronologicallyLatest //
                 && adjustedTransaction == null // covers reversals
                 && !loan.isForeclosure() //
+                && !loan.hasChargesAffectedByBackdatedRepaymentLikeTransaction(loanTransaction)
                 && loanTransactionProcessingService.canProcessLatestTransactionOnly(loan, loanTransaction, currentInstallment); //
         if (processLatest) {
             loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), loanTransaction,

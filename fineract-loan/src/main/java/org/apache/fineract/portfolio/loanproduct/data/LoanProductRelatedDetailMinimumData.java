@@ -48,6 +48,7 @@ public class LoanProductRelatedDetailMinimumData implements LoanProductMinimumRe
     private final Integer numberOfRepayments;
     private final boolean interestRecognitionOnDisbursementDate;
     private final DaysInYearCustomStrategyType daysInYearCustomStrategy;
+    private final boolean allowPartialPeriodInterestCalculation;
 
     public LoanProductRelatedDetailMinimumData(CurrencyData currency, BigDecimal interestRatePerPeriod,
             BigDecimal annualNominalInterestRate, Integer interestChargingGrace, Integer interestPaymentGrace, Integer principalGrace,
@@ -55,7 +56,7 @@ public class LoanProductRelatedDetailMinimumData implements LoanProductMinimumRe
             InterestCalculationPeriodMethod interestCalculationPeriodMethod, DaysInYearType daysInYearType, DaysInMonthType daysInMonthType,
             AmortizationMethod amortizationMethod, PeriodFrequencyType repaymentPeriodFrequencyType, Integer repaymentEvery,
             Integer numberOfRepayments, boolean interestRecognitionOnDisbursementDate,
-            DaysInYearCustomStrategyType daysInYearCustomStrategy) {
+            DaysInYearCustomStrategyType daysInYearCustomStrategy, boolean allowPartialPeriodInterestCalculation) {
         this.currency = currency;
         this.interestRatePerPeriod = interestRatePerPeriod;
         this.annualNominalInterestRate = annualNominalInterestRate;
@@ -73,6 +74,7 @@ public class LoanProductRelatedDetailMinimumData implements LoanProductMinimumRe
         this.numberOfRepayments = numberOfRepayments;
         this.interestRecognitionOnDisbursementDate = interestRecognitionOnDisbursementDate;
         this.daysInYearCustomStrategy = daysInYearCustomStrategy;
+        this.allowPartialPeriodInterestCalculation = allowPartialPeriodInterestCalculation;
     }
 
     private Integer defaultToNullIfZero(final Integer value) {
@@ -81,6 +83,11 @@ public class LoanProductRelatedDetailMinimumData implements LoanProductMinimumRe
             defaultTo = null;
         }
         return defaultTo;
+    }
+
+    @Override
+    public boolean isAllowPartialPeriodInterestCalculation() {
+        return allowPartialPeriodInterestCalculation;
     }
 
     @Override

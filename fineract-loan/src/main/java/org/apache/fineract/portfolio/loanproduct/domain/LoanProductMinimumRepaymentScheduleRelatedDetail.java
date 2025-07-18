@@ -48,6 +48,8 @@ public interface LoanProductMinimumRepaymentScheduleRelatedDetail {
 
     InterestCalculationPeriodMethod getInterestCalculationPeriodMethod();
 
+    boolean isAllowPartialPeriodInterestCalculation();
+
     Integer getRepayEvery();
 
     PeriodFrequencyType getRepaymentPeriodFrequencyType();

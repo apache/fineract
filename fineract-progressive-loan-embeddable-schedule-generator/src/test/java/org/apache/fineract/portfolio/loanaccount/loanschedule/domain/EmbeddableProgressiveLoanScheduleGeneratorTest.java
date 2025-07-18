@@ -30,6 +30,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleP
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlanDisbursementPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlanPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlanRepaymentPeriod;
+import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,11 +61,13 @@ class EmbeddableProgressiveLoanScheduleGeneratorTest {
         final Integer fixedLength = null;
         final Boolean interestRecognitionOnDisbursementDate = false;
         final DaysInYearCustomStrategyType daysInYearCustomStrategy = null;
+        final InterestMethod interestMethod = InterestMethod.DECLINING_BALANCE;
+        final boolean allowPartialPeriodInterestCalculation = true;
 
         var config = new LoanRepaymentScheduleModelData(startDate, currency, disbursedAmount, disbursementDate, noRepayments,
                 repaymentFrequency, repaymentFrequencyType, annualNominalInterestRate, isDownPaymentEnabled, daysInMonthType,
                 daysInYearType, downPaymentPercentage, installmentAmountInMultiplesOf, fixedLength, interestRecognitionOnDisbursementDate,
-                daysInYearCustomStrategy);
+                daysInYearCustomStrategy, interestMethod, allowPartialPeriodInterestCalculation);
 
         final LoanSchedulePlan plan = calculator.generate(mc, config);
 

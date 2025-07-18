@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.core.serialization.gson.JsonExclude;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 
 @Getter
 @ToString(exclude = { "repaymentPeriod" })
@@ -55,7 +56,7 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
 
     /** Stores credited principals. Related transactions: Chargeback or Credit Balance Refound */
     private Money creditedPrincipal;
-    /** Stores credited principals. Related transaction: Chargeback */
+    /** Stores credited interest. Related transaction: Chargeback */
     private Money creditedInterest;
 
     private Money disbursementAmount;
@@ -139,13 +140,24 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
         }
 
         long lengthTillPeriodDueDate = getLengthTillPeriodDueDate();
-        final BigDecimal interestDueTillRepaymentDueDate = lengthTillPeriodDueDate == 0 //
-                ? BigDecimal.ZERO //
-                : getOutstandingLoanBalance().getAmount() //
-                        .multiply(getRateFactorTillPeriodDueDate(), mc) //
-                        .divide(BigDecimal.valueOf(lengthTillPeriodDueDate), mc) //
-                        .multiply(BigDecimal.valueOf(getLength()), mc); //
+        final BigDecimal interestDueTillRepaymentDueDate = getCalculatedDueInterest(
+                getRepaymentPeriod().getLoanProductRelatedDetail().getInterestMethod(), lengthTillPeriodDueDate); //
         return MathUtil.negativeToZero(MathUtil.add(mc, creditedInterest.getAmount(), interestDueTillRepaymentDueDate));
+    }
+
+    public BigDecimal getCalculatedDueInterest(InterestMethod method, long lengthTillPeriodDueDate) {
+        if (lengthTillPeriodDueDate == 0) {
+            return BigDecimal.ZERO;
+        }
+        BigDecimal baseAmount = switch (method) {
+            case FLAT -> MathUtil.nullToZero(getRepaymentPeriod().calculateTotalDisbursedAmountTillGivenPeriod(this));
+            case DECLINING_BALANCE -> getOutstandingLoanBalance().getAmount();
+            default -> throw new UnsupportedOperationException("Method not implemented: " + method);
+        };
+        return baseAmount //
+                .multiply(getRateFactorTillPeriodDueDate(), mc) //
+                .divide(BigDecimal.valueOf(lengthTillPeriodDueDate), mc) //
+                .multiply(BigDecimal.valueOf(getLength()), mc);
     }
 
     public long getLength() {
