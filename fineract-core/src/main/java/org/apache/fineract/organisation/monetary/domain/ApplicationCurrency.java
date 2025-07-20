@@ -21,12 +21,26 @@ package org.apache.fineract.organisation.monetary.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.io.Serial;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
+@Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "m_currency")
 public class ApplicationCurrency extends AbstractPersistableCustom<Long> {
+
+    @Serial
+    private static final long serialVersionUID = -3798289178887195935L;
 
     @Column(name = "code", nullable = false, length = 3)
     private String code;
@@ -45,15 +59,6 @@ public class ApplicationCurrency extends AbstractPersistableCustom<Long> {
 
     @Column(name = "display_symbol", nullable = true, length = 10)
     private String displaySymbol;
-
-    protected ApplicationCurrency() {
-        this.code = null;
-        this.name = null;
-        this.decimalPlaces = null;
-        this.inMultiplesOf = null;
-        this.nameCode = null;
-        this.displaySymbol = null;
-    }
 
     public static ApplicationCurrency from(final ApplicationCurrency currency, final int decimalPlaces, final Integer inMultiplesOf) {
         return new ApplicationCurrency(currency.code, currency.name, decimalPlaces, inMultiplesOf, currency.nameCode,

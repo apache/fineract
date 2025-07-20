@@ -16,16 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.service;
+package org.apache.fineract.organisation.monetary.command;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
 import org.apache.fineract.organisation.monetary.data.CurrencyCreateRequest;
-import org.apache.fineract.organisation.monetary.data.CurrencyCreateResponse;
-import org.apache.fineract.organisation.monetary.data.CurrencyUpdateRequest;
-import org.apache.fineract.organisation.monetary.data.CurrencyUpdateResponse;
 
-public interface CurrencyWritePlatformService {
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class CurrencyCreateCommand extends Command<CurrencyCreateRequest> {
 
-    CurrencyUpdateResponse updateAllowedCurrencies(CurrencyUpdateRequest request);
+    private static final long serialVersionUID = 1L;
 
-    CurrencyCreateResponse createCurrency(CurrencyCreateRequest payload);
 }

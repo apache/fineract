@@ -242,7 +242,8 @@ allprojects  {
             "**/build.gradle.mustache",
             "**/pom.mustache",
             "**/avro/**/*.java",
-            "**/org/apache/fineract/client/**/*.java"
+            "**/org/apache/fineract/client/**/*.java",
+            "**/*.json"
         ])
         strictCheck true
     }
@@ -342,7 +343,9 @@ allprojects  {
             '**/META-INF/fineract-test.config',
             // Apache-specific GitHub metadata settings file
             '/.asf.yaml',
-            '**/*.sh'
+            '**/*.sh',
+            '**/.metadata/**',
+            "**/*.json"
         ]
     }
 }
