@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.configuration.service;
 
-import java.math.RoundingMode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
@@ -66,9 +65,6 @@ public class MoneyHelperInitializationService {
 
             // Initialize MoneyHelper for this tenant
             MoneyHelper.initializeTenantRoundingMode(tenantIdentifier, roundingModeValue);
-
-            log.info("MoneyHelper initialized for tenant '{}' with rounding mode: {}", tenantIdentifier, roundingModeValue);
-
         } catch (Exception e) {
             log.error("Failed to initialize MoneyHelper for tenant '{}'", tenantIdentifier, e);
             throw new RuntimeException("Failed to initialize MoneyHelper for tenant: " + tenantIdentifier, e);
@@ -90,26 +86,13 @@ public class MoneyHelperInitializationService {
     }
 
     /**
-     * Get the rounding mode from configuration with fallback to default. This method safely handles cases where
-     * configuration might not be available.
+     * Get the rounding mode from configuration with fallback to default.
      *
      * @return the rounding mode value
      */
     private int getRoundingModeFromConfiguration() {
-        try {
-            GlobalConfigurationProperty roundingModeProperty = globalConfigurationRepository
-                    .findOneByNameWithNotFoundDetection(GlobalConfigurationConstants.ROUNDING_MODE);
-
-            if (roundingModeProperty != null && roundingModeProperty.getValue() != null) {
-                return roundingModeProperty.getValue().intValue();
-            }
-        } catch (Exception e) {
-            log.warn("Failed to read rounding mode from configuration: {}", e.getMessage());
-        }
-
-        // Default to HALF_UP if configuration is not available
-        int defaultRoundingMode = RoundingMode.HALF_UP.ordinal();
-        log.info("Using default rounding mode: {} (HALF_UP)", defaultRoundingMode);
-        return defaultRoundingMode;
+        GlobalConfigurationProperty roundingModeProperty = globalConfigurationRepository
+                .findOneByNameWithNotFoundDetection(GlobalConfigurationConstants.ROUNDING_MODE);
+        return roundingModeProperty.getValue().intValue();
     }
 }

@@ -33,7 +33,6 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 public final class MoneyHelper {
 
     public static final int PRECISION = 19;
-    private static final RoundingMode DEFAULT_ROUNDING_MODE = RoundingMode.HALF_EVEN;
 
     private static final ConcurrentHashMap<String, RoundingMode> roundingModeCache = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, MathContext> mathContextCache = new ConcurrentHashMap<>();
@@ -62,7 +61,7 @@ public final class MoneyHelper {
         // Clear math context cache to force recreation with new rounding mode
         mathContextCache.remove(tenantIdentifier);
 
-        log.info("Initialized rounding mode for tenant {}: {}", tenantIdentifier, roundingMode.name());
+        log.info("Initialized rounding mode for tenant `{}`: {}", tenantIdentifier, roundingMode.name());
     }
 
     /**
@@ -77,9 +76,7 @@ public final class MoneyHelper {
         RoundingMode roundingMode = roundingModeCache.get(tenantId);
 
         if (roundingMode == null) {
-            // For integration tests and development, use default if not initialized
-            log.warn("Rounding mode not initialized for tenant: {}. Using default: {}", tenantId, DEFAULT_ROUNDING_MODE);
-            return DEFAULT_ROUNDING_MODE;
+            throw new IllegalStateException("Rounding mode is not initialized for tenant: " + tenantId);
         }
         return roundingMode;
     }

@@ -23,9 +23,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.core.annotation.Order;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,7 +34,8 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class MoneyHelperStartupInitializationService {
+@DependsOn({ "tenantDetailsService", "moneyHelperInitializationService", "tenantDatabaseUpgradeService" })
+public class MoneyHelperStartupInitializationService implements InitializingBean {
 
     private final TenantDetailsService tenantDetailsService;
     private final MoneyHelperInitializationService moneyHelperInitializationService;
@@ -43,54 +43,30 @@ public class MoneyHelperStartupInitializationService {
     /**
      * Initialize MoneyHelper for all tenants after the application is ready. This method runs after
      * ApplicationReadyEvent to ensure all database migrations and tenant configurations are complete.
+     *
+     * If it fails (for any reason), it will fail the application startup!
+     *
      */
-    @EventListener(ApplicationReadyEvent.class)
-    @Order(1000) // Run after other startup processes
-    public void initializeMoneyHelperForAllTenants() {
+    @Override
+    public void afterPropertiesSet() throws Exception {
         log.info("Starting MoneyHelper initialization for all tenants...");
 
-        try {
-            List<FineractPlatformTenant> tenants = tenantDetailsService.findAllTenants();
-
-            if (tenants.isEmpty()) {
-                log.warn("No tenants found during MoneyHelper initialization");
-                return;
-            }
-
-            int successCount = 0;
-            int failureCount = 0;
-
-            for (FineractPlatformTenant tenant : tenants) {
-                try {
-                    String tenantIdentifier = tenant.getTenantIdentifier();
-
-                    // Check if already initialized (in case of restart scenarios)
-                    if (moneyHelperInitializationService.isTenantInitialized(tenantIdentifier)) {
-                        log.debug("MoneyHelper already initialized for tenant: {}", tenantIdentifier);
-                        successCount++;
-                        continue;
-                    }
-
-                    // Initialize MoneyHelper for this tenant
-                    moneyHelperInitializationService.initializeTenantRoundingMode(tenant);
-                    successCount++;
-
-                } catch (Exception e) {
-                    failureCount++;
-                    log.error("Failed to initialize MoneyHelper for tenant '{}'", tenant.getTenantIdentifier(), e);
-                }
-            }
-
-            log.info("MoneyHelper initialization completed - Success: {}, Failures: {}, Total: {}", successCount, failureCount,
-                    tenants.size());
-
-            if (failureCount > 0) {
-                log.warn("Some tenants failed MoneyHelper initialization. "
-                        + "These tenants may experience issues with rounding mode configuration.");
-            }
-
-        } catch (Exception e) {
-            log.error("Critical error during MoneyHelper initialization for all tenants", e);
+        List<FineractPlatformTenant> tenants = tenantDetailsService.findAllTenants();
+        if (tenants.isEmpty()) {
+            log.warn("No tenants found during MoneyHelper initialization");
+            return;
         }
+
+        for (FineractPlatformTenant tenant : tenants) {
+            String tenantIdentifier = tenant.getTenantIdentifier();
+            // Check if already initialized (in case of restart scenarios)
+            if (moneyHelperInitializationService.isTenantInitialized(tenantIdentifier)) {
+                log.debug("MoneyHelper already initialized for tenant: {}", tenantIdentifier);
+                continue;
+            }
+            // Initialize MoneyHelper for this tenant
+            moneyHelperInitializationService.initializeTenantRoundingMode(tenant);
+        }
+        log.info("MoneyHelper initialization completed");
     }
 }
