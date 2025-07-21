@@ -21,6 +21,7 @@ package org.apache.fineract.batch.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -103,5 +104,94 @@ public class ResolutionHelperTest {
         assertNotNull(resolvedRequest);
         assertEquals("{\"key1\":\"value1\",\"key2\":{\"subKey\":false},\"key3\":[1,2,3],\"key4\":null}", resolvedRequest.getBody());
         assertEquals("/resource/id", resolvedRequest.getRelativeUrl());
+    }
+
+    @Test
+    void testResolveRequestWithArrayDateParameter() {
+        // Test resolving a JSON primitive with array date format
+        BatchRequest batchRequest = new BatchRequest();
+        batchRequest
+                .setBody("{\"dateFormat\":\"dd MMMM yyyy\",\"startDate\":\"$[ARRAYDATE].dates[0]\",\"endDate\":\"$[ARRAYDATE].dates[1]\"}");
+        batchRequest.setRelativeUrl("/resource/endpoint");
+
+        BatchResponse parentResponse = new BatchResponse();
+        parentResponse.setBody("{\"dates\":[[2023,5,15],[2023,6,15]]}");
+
+        // Mock the response context
+        ReadContext readContext = mock(ReadContext.class);
+        when(readContext.read("$.dates[0]")).thenReturn(new int[] { 2023, 5, 15 });
+        when(readContext.read("$.dates[1]")).thenReturn(new int[] { 2023, 6, 15 });
+
+        BatchRequest resolvedRequest = resolutionHelper.resolveRequest(batchRequest, parentResponse);
+        assertNotNull(resolvedRequest);
+
+        // Check for possible date formats
+        String body = resolvedRequest.getBody();
+        assertTrue(body.contains("\"startDate\":\"15 May 2023\"") || body.contains("\"startDate\":\"15 May, 2023\"")
+                || body.contains("\"startDate\":\"15 May. 2023\"") || body.contains("\"startDate\":\"May 15, 2023\""));
+        assertTrue(body.contains("\"endDate\":\"15 June 2023\"") || body.contains("\"endDate\":\"15 June, 2023\"")
+                || body.contains("\"endDate\":\"15 Jun. 2023\"") || body.contains("\"endDate\":\"June 15, 2023\""));
+    }
+
+    @Test
+    void testResolveRequestWithNestedJsonPrimitives() {
+        // Test resolving nested JSON primitives
+        BatchRequest batchRequest = new BatchRequest();
+        batchRequest.setBody("{\"nested\":{\"key1\":\"$.value1\",\"key2\":123,\"key3\":true,\"key4\":null}}");
+        batchRequest.setRelativeUrl("/resource/endpoint");
+
+        BatchResponse parentResponse = new BatchResponse();
+        parentResponse.setBody("{\"value1\":\"resolvedValue\"}");
+
+        // Mock the response context
+        ReadContext readContext = mock(ReadContext.class);
+        when(readContext.read("$.value1")).thenReturn("resolvedValue");
+
+        BatchRequest resolvedRequest = resolutionHelper.resolveRequest(batchRequest, parentResponse);
+        assertNotNull(resolvedRequest);
+        assertEquals("{\"nested\":{\"key1\":\"resolvedValue\",\"key2\":123,\"key3\":true,\"key4\":null}}", resolvedRequest.getBody());
+    }
+
+    @Test
+    void testResolveRequestWithPrimitiveTypes() {
+        // Test resolving different primitive types
+        BatchRequest batchRequest = new BatchRequest();
+        batchRequest.setBody("{\"string\":\"text\",\"number\":123.45,\"boolean\":true,\"nullValue\":null}");
+        batchRequest.setRelativeUrl("/resource/endpoint");
+
+        BatchResponse parentResponse = new BatchResponse();
+        parentResponse.setBody("{}"); // Empty response as we're not using any references
+
+        BatchRequest resolvedRequest = resolutionHelper.resolveRequest(batchRequest, parentResponse);
+        assertNotNull(resolvedRequest);
+
+        // The JSON might be reordered, so we need to check for existence of each key-value pair
+        String body = resolvedRequest.getBody();
+        assertTrue(body.contains("\"string\":\"text\""));
+        assertTrue(body.contains("\"number\":123.45"));
+        assertTrue(body.contains("\"boolean\":true"));
+        assertTrue(body.contains("\"nullValue\":null"));
+    }
+
+    @Test
+    void testResolveRequestWithComplexReferencePath() {
+        // Test resolving with complex reference paths
+        BatchRequest batchRequest = new BatchRequest();
+        batchRequest.setBody("{\"user\": {\"name\": \"$.userData.name\",\"age\": \"$.userData.age\"}}");
+        batchRequest.setRelativeUrl("/users/$.userData.id");
+
+        BatchResponse parentResponse = new BatchResponse();
+        parentResponse.setBody("{\"userData\":{\"id\": 42,\"name\": \"John\",\"age\": 30}}");
+
+        // Mock the response context
+        ReadContext readContext = mock(ReadContext.class);
+        when(readContext.read("$.userData.name")).thenReturn("John");
+        when(readContext.read("$.userData.age")).thenReturn(30);
+        when(readContext.read("$.userData.id")).thenReturn(42);
+
+        BatchRequest resolvedRequest = resolutionHelper.resolveRequest(batchRequest, parentResponse);
+        assertNotNull(resolvedRequest);
+        assertEquals("{\"user\":{\"name\":\"John\",\"age\":30}}", resolvedRequest.getBody());
+        assertEquals("/users/42", resolvedRequest.getRelativeUrl());
     }
 }
