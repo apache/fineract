@@ -164,7 +164,7 @@ public final class ErrorMessageHelper {
     }
 
     public static String addCapitalizedIncomeUndoFailureTransactionTypeNonReversal() {
-        return "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income or capitalized income adjustment can be adjusted.";
+        return "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment or buy down fee adjustment can be adjusted.";
     }
 
     public static String addCapitalizedIncomeUndoFailureAdjustmentExists() {
