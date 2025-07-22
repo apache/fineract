@@ -72,6 +72,10 @@ public final class ErrorMessageHelper {
         return "Interest Refund already exists for this transaction";
     }
 
+    public static String addManualInterestRefundIfReversedFailure() {
+        return "Target transaction must be Merchant Issued Refund or Payout Refund";
+    }
+
     public static String addDisbursementExceedMaxAppliedAmountFailure(String totalDisbAmount, String maxDisbursalAmount) {
         return String.format("Loan disbursal amount can't be greater than maximum applied loan amount calculation. "
                 + "Total disbursed amount: %s  Maximum disbursal amount: %s", totalDisbAmount, maxDisbursalAmount);
