@@ -6005,18 +6005,18 @@ Feature: Charge-off
       | Nr | Days | Date             | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
       |    |      | 01 January 2024  |               | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
       | 1  | 31   | 01 February 2024 | 01 March 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 17.01 | 0.0         |
-      | 2  | 29   | 01 March 2024    | 01 March 2024 | 67.05           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0   | 0.0         |
-      | 3  | 30   | 31 March 2024    |               | 0.0             | 67.05         | 0.18     | 0.0  | 0.0       | 67.23 | 35.98 | 35.98      | 0.0   | 31.25       |
+      | 2  | 29   | 01 March 2024    | 01 March 2024 | 67.14           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0   | 0.0         |
+      | 3  | 30   | 31 March 2024    |               | 0.0             | 67.14         | 0.0      | 0.0  | 0.0       | 67.14 | 35.98 | 35.98      | 0.0   | 31.16       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
-      | 100.0         | 1.25     | 0.0  | 0.0       | 101.25 | 70.0  | 35.98      | 17.01 | 31.25       |
+      | 100.0         | 1.16     | 0.0  | 0.0       | 101.16 | 70.0  | 35.98      | 17.01 | 31.16       |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement       | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
-      | 01 March 2024    | Repayment          | 70.0   | 68.93     | 1.07     | 0.0  | 0.0       | 31.07        | false    | false    |
+      | 01 March 2024    | Repayment          | 70.0   | 68.84     | 1.16     | 0.0  | 0.0       | 31.16        | false    | false    |
       | 31 March 2024    | Accrual            | 1.72   | 0.0       | 1.72     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 31 March 2024    | Accrual Adjustment | 0.47   | 0.0       | 0.47     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 31 March 2024    | Charge-off         | 31.25  | 31.07     | 0.18     | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 31 March 2024    | Accrual Adjustment | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 31 March 2024    | Charge-off         | 31.16  | 31.16     | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
     And Global configuration "is-principal-compounding-disabled-for-overdue-loans" is disabled
 
   @TestRailId:C3499 @AdvancedPaymentAllocation
