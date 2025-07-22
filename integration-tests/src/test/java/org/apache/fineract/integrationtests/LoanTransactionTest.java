@@ -101,7 +101,7 @@ public class LoanTransactionTest extends BaseLoanIntegrationTest {
     }
 
     @Test
-    public void testGetLoanTransactionTemplateForCapitalizedIncome() {
+    public void testGetLoanTransactionTemplateForCapitalizedIncomeWithOverAppliedAmount() {
         final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
 
         final PostLoanProductsResponse loanProductsResponse = loanProductHelper
@@ -111,6 +111,37 @@ public class LoanTransactionTest extends BaseLoanIntegrationTest {
                         .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
                         .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
                         .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+
+        final String loanExternalIdStr = UUID.randomUUID().toString();
+
+        runAt("20 December 2024", () -> {
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "20 December 2024",
+                    430.0, 7.0, 6, (request) -> request.externalId(loanExternalIdStr));
+
+            disburseLoan(loanId, BigDecimal.valueOf(230), "20 December 2024");
+
+            final GetLoansLoanIdTransactionsTemplateResponse transactionTemplate = loanTransactionHelper.retrieveTransactionTemplate(loanId,
+                    capitalizedIncomeCommand, null, null, null);
+
+            assertNotNull(transactionTemplate);
+            assertEquals("loanTransactionType." + capitalizedIncomeCommand, transactionTemplate.getType().getCode());
+            assertEquals(transactionTemplate.getAmount(), 415);
+            assertThat(transactionTemplate.getPaymentTypeOptions().size() > 0);
+        });
+    }
+
+    @Test
+    public void testGetLoanTransactionTemplateForCapitalizedIncomeWithoutOverAppliedAmount() {
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
+                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE).overAppliedCalculationType(null)
+                        .overAppliedNumber(null).allowApprovedDisbursedAmountsOverApplied(false));
 
         final String loanExternalIdStr = UUID.randomUUID().toString();
 

@@ -43,7 +43,6 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
-import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.portfolio.common.service.Validator;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
@@ -61,7 +60,6 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionProces
 import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -73,6 +71,7 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
     private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
     private final LoanBuyDownFeeBalanceRepository loanBuydownFeeBalanceRepository;
     private final LoanTransactionRepository loanTransactionRepository;
+    private final LoanMaximumAmountCalculator loanMaximumAmountCalculator;
 
     @Override
     public void validateCapitalizedIncome(final JsonCommand command, final Long loanId) {
@@ -137,7 +136,7 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
                 final BigDecimal newTotal = totalDisbursed.add(capitalizedIncome).add(transactionAmount);
 
                 if (loan.loanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
-                    final BigDecimal maxAppliedAmount = getOverAppliedMax(loan);
+                    final BigDecimal maxAppliedAmount = loanMaximumAmountCalculator.getOverAppliedMax(loan);
                     if (newTotal.compareTo(maxAppliedAmount) > 0) {
                         baseDataValidator.reset().parameter("transactionAmount").failWithCode("exceeds.approved.amount",
                                 "Sum of disbursed amount and capitalized income can't be greater than maximum applied loan amount calculation.");
@@ -594,17 +593,5 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
     private Set<String> getBuyDownFeeAdjustmentParameters() {
         return new HashSet<>(
                 Arrays.asList("transactionDate", "dateFormat", "locale", "transactionAmount", "paymentTypeId", "note", "externalId"));
-    }
-
-    private BigDecimal getOverAppliedMax(final Loan loan) {
-        final LoanProduct loanProduct = loan.getLoanProduct();
-        if ("percentage".equals(loanProduct.getOverAppliedCalculationType())) {
-            final BigDecimal overAppliedNumber = BigDecimal.valueOf(loanProduct.getOverAppliedNumber());
-            final BigDecimal totalPercentage = BigDecimal.valueOf(1)
-                    .add(overAppliedNumber.divide(BigDecimal.valueOf(100L), MoneyHelper.getMathContext()));
-            return loan.getProposedPrincipal().multiply(totalPercentage);
-        } else {
-            return loan.getProposedPrincipal().add(BigDecimal.valueOf(loanProduct.getOverAppliedNumber()));
-        }
     }
 }
