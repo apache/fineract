@@ -18,8 +18,10 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import java.util.Optional;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface BuyDownFeePlatformService {
@@ -29,4 +31,7 @@ public interface BuyDownFeePlatformService {
 
     @Transactional
     CommandProcessingResult buyDownFeeAdjustment(Long loanId, Long buyDownFeeTransactionId, JsonCommand command);
+
+    @Transactional
+    Optional<LoanTransaction> reverseBuyDownFee(LoanTransaction buyDownFeeTransaction);
 }

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -33,7 +34,6 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
@@ -64,6 +64,7 @@ import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeeBalanc
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
+import org.apache.fineract.portfolio.loanaccount.service.BuyDownFeePlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualTransactionBusinessEventService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
@@ -102,7 +103,7 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
     private final LoanBalanceService loanBalanceService;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
-    private final ExternalIdFactory externalIdFactory;
+    private final BuyDownFeePlatformService buyDownFeePlatformService;
     private final LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository;
 
     @Override
@@ -145,7 +146,6 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
             });
         }
 
-        LoanTransaction capitalizedIncomeAmortizationAdjustmentTransaction = null;
         if (transactionToAdjust.isCapitalizedIncome()) {
             if (newTransactionDetail.isNotZero()) {
                 throw new InvalidLoanTransactionTypeException("transaction", "capitalizedIncome.cannot.be.adjusted",
@@ -287,7 +287,7 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
 
         if (!transactionForAdjustment.isAccrualRelated() && transactionForAdjustment.isNotRepaymentLikeType()
                 && transactionForAdjustment.isNotWaiver() && transactionForAdjustment.isNotCreditBalanceRefund()
-                && !transactionForAdjustment.isCapitalizedIncome() && !transactionForAdjustment.isCapitalizedIncomeAdjustment()
+                && !transactionForAdjustment.isDeferredIncome() && !transactionForAdjustment.isCapitalizedIncomeAdjustment()
                 && !transactionForAdjustment.isBuyDownFeeAdjustment()) {
             final String errorMessage = "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment or buy down fee adjustment can be adjusted.";
             throw new InvalidLoanTransactionTypeException("transaction",
@@ -315,6 +315,13 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
                         LoanAdjustTransactionBusinessEvent.Data eventData = new LoanAdjustTransactionBusinessEvent.Data(loanTransaction);
                         businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(eventData));
                     });
+        } else if (transactionForAdjustment.isBuyDownFee()) {
+            Optional<LoanTransaction> optAmortizationAdjustmentTransaction = buyDownFeePlatformService
+                    .reverseBuyDownFee(transactionForAdjustment);
+            if (optAmortizationAdjustmentTransaction.isPresent()) {
+                loan.addLoanTransaction(optAmortizationAdjustmentTransaction.get());
+                loanTransactionRepository.saveAndFlush(optAmortizationAdjustmentTransaction.get());
+            }
         }
 
         if (loan.isClosedWrittenOff()) {

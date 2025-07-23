@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
@@ -49,6 +50,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeBalance;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeeBalanceRepository;
@@ -73,6 +75,7 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
     private final LoanBalanceService loanBalanceService;
     private final LoanLifecycleStateMachine loanLifecycleStateMachine;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final LoanTransactionRelationRepository loanTransactionRelationRepository;
 
     @Transactional
     @Override
@@ -208,6 +211,37 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
         return new CommandProcessingResultBuilder().withEntityId(savedBuyDownFeeAdjustment.getId())
                 .withEntityExternalId(savedBuyDownFeeAdjustment.getExternalId()).withOfficeId(loan.getOfficeId())
                 .withClientId(loan.getClientId()).withLoanId(loan.getId()).build();
+    }
+
+    @Override
+    @Transactional
+    public Optional<LoanTransaction> reverseBuyDownFee(LoanTransaction buyDownFeeTransaction) {
+        LoanTransaction amortizationTransaction = null;
+        Loan loan = buyDownFeeTransaction.getLoan();
+        BigDecimal totalAmortizationAmount = BigDecimal.ZERO;
+
+        if (loanTransactionRelationRepository.hasLoanTransactionRelationsWithType(buyDownFeeTransaction,
+                LoanTransactionRelationTypeEnum.ADJUSTMENT)) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.transaction.with.not.reversed.transaction.related", "Undo Loan Transaction: "
+                            + buyDownFeeTransaction.getId() + " is not allowed. Loan transaction has not reversed transaction related",
+                    buyDownFeeTransaction.getId());
+        }
+
+        LoanBuyDownFeeBalance buydownFeeBalance = loanBuyDownFeeBalanceRepository
+                .findByLoanIdAndLoanTransactionId(buyDownFeeTransaction.getLoan().getId(), buyDownFeeTransaction.getId());
+        if (buydownFeeBalance != null) {
+            totalAmortizationAmount = buydownFeeBalance.getAmount().subtract(MathUtil.nullToZero(buydownFeeBalance.getAmountAdjustment())
+                    .add(MathUtil.nullToZero(buydownFeeBalance.getUnrecognizedAmount())));
+            loanBuyDownFeeBalanceRepository.delete(buydownFeeBalance);
+        }
+
+        if (MathUtil.isGreaterThanZero(totalAmortizationAmount)) {
+            amortizationTransaction = LoanTransaction.buyDownFeeAmortizationAdjustment(loan,
+                    Money.of(loan.getCurrency(), totalAmortizationAmount), DateUtils.getBusinessLocalDate(), externalIdFactory.create());
+        }
+
+        return (amortizationTransaction == null) ? Optional.empty() : Optional.of(amortizationTransaction);
     }
 
     private void recalculateLoanTransactions(Loan loan, LocalDate transactionDate, LoanTransaction transaction) {
