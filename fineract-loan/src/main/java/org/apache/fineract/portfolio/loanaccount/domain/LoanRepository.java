@@ -271,4 +271,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     @Query("select loan.loanRepaymentScheduleDetail.enableIncomeCapitalization from Loan loan where loan.id = :loanId")
     Boolean isEnabledCapitalizedIncome(Long loanId);
+
+    @Query("select loan.loanRepaymentScheduleDetail.enableBuyDownFee from Loan loan where loan.id = :loanId")
+    Boolean isEnabledBuyDownFee(@Param("loanId") Long loanId);
+
 }

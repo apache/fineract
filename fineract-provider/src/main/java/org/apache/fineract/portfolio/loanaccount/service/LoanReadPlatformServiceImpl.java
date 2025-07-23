@@ -2465,6 +2465,19 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 interestRefundAmount, paymentTypeOptions, loan.getCurrency().toData());
     }
 
+    @Override
+    public Long getResolvedLoanId(final ExternalId loanExternalId) {
+        loanExternalId.throwExceptionIfEmpty();
+
+        final Long resolvedLoanId = retrieveLoanIdByExternalId(loanExternalId);
+
+        if (resolvedLoanId == null) {
+            throw new LoanNotFoundException(loanExternalId);
+        }
+
+        return resolvedLoanId;
+    }
+
     private LoanTransaction deriveDefaultInterestWaiverTransaction(final Loan loan) {
         final Money totalInterestOutstanding = loan.getTotalInterestOutstandingOnLoan();
         Money possibleInterestToWaive = totalInterestOutstanding.copy();

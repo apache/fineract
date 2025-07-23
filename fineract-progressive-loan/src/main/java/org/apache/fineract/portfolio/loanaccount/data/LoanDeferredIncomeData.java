@@ -33,4 +33,5 @@ import lombok.ToString;
 public class LoanDeferredIncomeData {
 
     private List<CapitalizedIncomeDetails> capitalizedIncomeData;
+
 }

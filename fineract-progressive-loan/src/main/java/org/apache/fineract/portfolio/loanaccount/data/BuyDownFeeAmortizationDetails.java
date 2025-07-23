@@ -16,18 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.repository;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import java.util.List;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeBalance;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
-public interface LoanBuyDownFeeBalanceRepository
-        extends JpaRepository<LoanBuyDownFeeBalance, Long>, JpaSpecificationExecutor<LoanBuyDownFeeBalance> {
-
-    List<LoanBuyDownFeeBalance> findAllByLoanId(Long loanId);
-
-    LoanBuyDownFeeBalance findByLoanIdAndLoanTransactionId(Long loanId, Long transactionId);
+public record BuyDownFeeAmortizationDetails(Long id, Long loanId, Long transactionId, LocalDate buyDownFeeDate, BigDecimal buyDownFeeAmount,
+        BigDecimal amortizedAmount, BigDecimal notYetAmortizedAmount, BigDecimal adjustedAmount, BigDecimal chargedOffAmount) {
 
 }

@@ -157,4 +157,7 @@ public interface LoanReadPlatformService {
     boolean existsByLoanId(Long loanId);
 
     LoanTransactionData retrieveManualInterestRefundTemplate(Long loanId, Long targetTransactionId);
+
+    Long getResolvedLoanId(ExternalId loanExternalId);
+
 }

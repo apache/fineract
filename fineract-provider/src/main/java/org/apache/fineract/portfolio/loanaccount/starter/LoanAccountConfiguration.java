@@ -105,6 +105,8 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanUpdateCommand
 import org.apache.fineract.portfolio.loanaccount.service.BulkLoansReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.BulkLoansReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.BuyDownFeePlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.BuyDownFeeReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.BuyDownFeeReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.BuyDownFeeWritePlatformServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoReadPlatformServiceImpl;
@@ -399,6 +401,13 @@ public class LoanAccountConfiguration {
                 paymentDetailWritePlatformService, loanJournalEntryPoster, noteWritePlatformService, externalIdFactory,
                 loanBuyDownFeeBalanceRepository, reprocessLoanTransactionsService, loanBalanceService, loanLifecycleStateMachine,
                 businessEventNotifierService, loanTransactionRelationRepository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(BuyDownFeeReadPlatformService.class)
+    public BuyDownFeeReadPlatformService buyDownFeeReadPlatformService(
+            final LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository, final LoanRepository loanRepository) {
+        return new BuyDownFeeReadPlatformServiceImpl(loanBuyDownFeeBalanceRepository, loanRepository);
     }
 
     @Bean

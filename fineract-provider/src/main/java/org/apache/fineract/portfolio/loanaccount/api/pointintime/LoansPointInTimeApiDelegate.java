@@ -30,7 +30,6 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.loanaccount.api.pointintime.data.RetrieveLoansPointInTimeExternalIdsRequest;
 import org.apache.fineract.portfolio.loanaccount.api.pointintime.data.RetrieveLoansPointInTimeRequest;
 import org.apache.fineract.portfolio.loanaccount.data.LoanPointInTimeData;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.service.LoanPointInTimeService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.stereotype.Component;
@@ -56,9 +55,9 @@ public class LoansPointInTimeApiDelegate implements LoansPointInTimeApi {
             String locale) {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         ExternalId loanExternalId = ExternalIdFactory.produce(loanExternalIdStr);
-        Long loanId = resolveExternalId(loanExternalId);
+        Long resolvedLoanId = loanReadPlatformService.getResolvedLoanId(loanExternalId);
 
-        return getLoanPointInTime(loanId, dateParam, dateFormat, locale);
+        return getLoanPointInTime(resolvedLoanId, dateParam, dateFormat, locale);
     }
 
     @Override
@@ -103,12 +102,4 @@ public class LoansPointInTimeApiDelegate implements LoansPointInTimeApi {
         return loanReadPlatformService.retrieveLoanIdsByExternalIds(loanExternalIds);
     }
 
-    private Long resolveExternalId(ExternalId loanExternalId) {
-        loanExternalId.throwExceptionIfEmpty();
-        Long resolvedLoanId = loanReadPlatformService.retrieveLoanIdByExternalId(loanExternalId);
-        if (resolvedLoanId == null) {
-            throw new LoanNotFoundException(loanExternalId);
-        }
-        return resolvedLoanId;
-    }
 }

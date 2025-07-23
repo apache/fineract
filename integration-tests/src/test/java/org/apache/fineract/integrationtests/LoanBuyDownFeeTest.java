@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,6 +32,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.BuyDownFeeAmortizationDetails;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.PostClientsResponse;
@@ -574,6 +576,57 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
                     journalEntry(4.87, deferredIncomeLiabilityAccount, "CREDIT"), //
                     journalEntry(4.87, feeIncomeAccount, "DEBIT"));
         });
+    }
+
+    @Test
+    public void testRetrieveBuyDownFeeAmortizationDetails() {
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(createProgressiveLoanProductWithBuyDownFee());
+
+        final long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 February 2024", 1000.0,
+                7.0, 6, null);
+
+        disburseLoan(loanId, BigDecimal.valueOf(1000), "1 February 2024");
+
+        addBuyDownFeeForLoan(loanId, 100.0, "1 February 2024");
+
+        final List<BuyDownFeeAmortizationDetails> amortizationDetails = loanTransactionHelper.fetchBuyDownFeeAmortizationDetails(loanId);
+
+        assertNotNull(amortizationDetails);
+        assertFalse(amortizationDetails.isEmpty());
+
+        final BuyDownFeeAmortizationDetails amortizationDetail = amortizationDetails.getFirst();
+        assertNotNull(amortizationDetail);
+        assertNotNull(amortizationDetail.getId());
+        assertEquals(loanId, amortizationDetail.getLoanId());
+        assertNotNull(amortizationDetail.getTransactionId());
+        assertEquals(LocalDate.of(2024, 2, 1), amortizationDetail.getBuyDownFeeDate());
+        assertNotNull(amortizationDetail.getBuyDownFeeAmount());
+        assertEquals(0, BigDecimal.valueOf(100.0).compareTo(amortizationDetail.getBuyDownFeeAmount()));
+        assertNotNull(amortizationDetail.getAmortizedAmount());
+        assertEquals(0, amortizationDetail.getAmortizedAmount().signum());
+        assertNotNull(amortizationDetail.getNotYetAmortizedAmount());
+        assertEquals(0, BigDecimal.valueOf(100.0).compareTo(amortizationDetail.getNotYetAmortizedAmount()));
+    }
+
+    @Test
+    public void testRetrieveBuyDownFeeAmortizationDetails_notEnabled() {
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final PostLoanProductsResponse loanProduct = loanProductHelper
+                .createLoanProduct(createProgressiveLoanProductWithBuyDownFee().enableBuyDownFee(false));
+
+        final long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 February 2024", 1000.0,
+                7.0, 6, null);
+
+        disburseLoan(loanId, BigDecimal.valueOf(1000), "1 February 2024");
+
+        final CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class, () -> {
+            addBuyDownFeeForLoan(loanId, 100.0, "1 February 2024");
+        });
+
+        assertEquals(400, exception.getResponse().code());
+        assertTrue(exception.getMessage().contains("buy.down.fee.not.enabled"));
+        assertTrue(exception.getMessage().contains("Buy down fee is not enabled for this loan product"));
     }
 
     @Test
