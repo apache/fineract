@@ -924,6 +924,34 @@ public class LoansApiResource {
         return getLoanApprovedAmountHistory(null, ExternalIdFactory.produce(loanExternalId));
     }
 
+    @PUT
+    @Path("{loanId}/available-disbursement-amount")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Modifies the available disbursement amount of the loan", description = "Modifies the available disbursement amount of the loan, this indirectly modifies the approved amount that can be disbursed on the loan")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PutLoansAvailableDisbursementAmountRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PutLoansAvailableDisbursementAmountResponse.class))) })
+    public CommandProcessingResult modifyLoanAvailableDisbursementAmount(
+            @PathParam("loanId") @Parameter(description = "loanId", required = true) final Long loanId, @Context final UriInfo uriInfo,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+        return modifyLoanAvailableDisbursementAmount(loanId, ExternalId.empty(), apiRequestBodyAsJson);
+    }
+
+    @PUT
+    @Path("external-id/{loanExternalId}/available-disbursement-amount")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Modifies the available disbursement amount of the loan", description = "Modifies the available disbursement amount of the loan, this indirectly modifies the approved amount that can be disbursed on the loan")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PutLoansAvailableDisbursementAmountRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PutLoansAvailableDisbursementAmountResponse.class))) })
+    public CommandProcessingResult modifyLoanAvailableDisbursementAmount(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId", required = true) final String loanExternalId,
+            @Context final UriInfo uriInfo, @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+        return modifyLoanAvailableDisbursementAmount(null, ExternalIdFactory.produce(loanExternalId), apiRequestBodyAsJson);
+    }
+
     private String retrieveApprovalTemplate(final Long loanId, final String loanExternalIdStr, final String templateType,
             final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
@@ -1348,6 +1376,15 @@ public class LoansApiResource {
         Long resolvedLoanId = loanId == null ? loanReadPlatformService.getResolvedLoanId(loanExternalId) : loanId;
         Pageable sortedByCreationDate = Pageable.unpaged(Sort.by("createdDate").ascending());
         return loanApprovedAmountHistoryRepository.findAllByLoanId(resolvedLoanId, sortedByCreationDate);
+    }
+
+    private CommandProcessingResult modifyLoanAvailableDisbursementAmount(Long loanId, ExternalId loanExternalId,
+            String apiRequestBodyAsJson) {
+        Long resolvedLoanId = loanId == null ? loanReadPlatformService.getResolvedLoanId(loanExternalId) : loanId;
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+        CommandWrapper commandRequest = builder.updateLoanAvailableDisbursementAmount(resolvedLoanId).build();
+
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
 }

@@ -23,4 +23,6 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 public interface LoanApprovedAmountValidator {
 
     void validateLoanApprovedAmountModification(JsonCommand command);
+
+    void validateLoanAvailableDisbursementAmountModification(JsonCommand command);
 }

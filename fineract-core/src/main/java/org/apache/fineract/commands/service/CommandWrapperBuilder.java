@@ -3894,4 +3894,13 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId + "/transactions/" + transactionId + "?command=interest-refund";
         return this;
     }
+
+    public CommandWrapperBuilder updateLoanAvailableDisbursementAmount(final Long loanId) {
+        this.actionName = "UPDATE";
+        this.entityName = "LOAN_AVAILABLE_DISBURSEMENT_AMOUNT";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
 }

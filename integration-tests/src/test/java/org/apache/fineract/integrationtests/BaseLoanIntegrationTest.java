@@ -84,6 +84,8 @@ import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.PutLoansApprovedAmountRequest;
 import org.apache.fineract.client.models.PutLoansApprovedAmountResponse;
+import org.apache.fineract.client.models.PutLoansAvailableDisbursementAmountRequest;
+import org.apache.fineract.client.models.PutLoansAvailableDisbursementAmountResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.models.RetrieveLoansPointInTimeRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
@@ -787,6 +789,12 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
 
     protected List<LoanApprovedAmountHistoryData> getLoanApprovedAmountHistory(Long loanId) {
         return Calls.ok(fineractClient().loans.getLoanApprovedAmountHistory(loanId));
+    }
+
+    protected PutLoansAvailableDisbursementAmountResponse modifyLoanAvailableDisbursementAmount(Long loanId, BigDecimal approvedAmount) {
+        PutLoansAvailableDisbursementAmountRequest request = new PutLoansAvailableDisbursementAmountRequest().amount(approvedAmount)
+                .locale("en");
+        return Calls.ok(fineractClient().loans.modifyLoanAvailableDisbursementAmount(loanId, request));
     }
 
     protected void verifyOutstanding(LoanPointInTimeData loan, OutstandingAmounts outstanding) {

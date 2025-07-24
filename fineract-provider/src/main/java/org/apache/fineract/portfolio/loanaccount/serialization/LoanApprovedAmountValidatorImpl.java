@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.portfolio.common.service.Validator;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
@@ -95,9 +96,63 @@ public final class LoanApprovedAmountValidatorImpl implements LoanApprovedAmount
             }
 
             BigDecimal totalPrincipalOnLoan = loan.getSummary().getTotalPrincipal();
-            if (MathUtil.isLessThan(newApprovedAmount, totalPrincipalOnLoan)) {
+            BigDecimal totalExpectedPrincipal = loan.getDisbursementDetails().stream().filter(t -> t.actualDisbursementDate() == null)
+                    .map(LoanDisbursementDetails::principal).reduce(BigDecimal.ZERO, BigDecimal::add);
+            if (MathUtil.isLessThan(newApprovedAmount, totalPrincipalOnLoan.add(totalExpectedPrincipal))) {
                 baseDataValidator.reset().parameter(LoanApiConstants.amountParameterName)
                         .failWithCode("less.than.disbursed.principal.and.capitalized.income");
+            }
+        });
+    }
+
+    @Override
+    public void validateLoanAvailableDisbursementAmountModification(JsonCommand command) {
+        String json = command.json();
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        final Set<String> supportedParameters = new HashSet<>(
+                Arrays.asList(LoanApiConstants.amountParameterName, LoanApiConstants.localeParameterName));
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+
+        final BigDecimal newAvailableDisbursementAmount = this.fromApiJsonHelper
+                .extractBigDecimalWithLocaleNamed(LoanApiConstants.amountParameterName, element);
+
+        Validator.validateOrThrow("loan.available.disbursement.amount", baseDataValidator -> {
+            baseDataValidator.reset().parameter(LoanApiConstants.amountParameterName).value(newAvailableDisbursementAmount).notNull();
+        });
+
+        Validator.validateOrThrowDomainViolation("loan.available.disbursement.amount", baseDataValidator -> {
+            baseDataValidator.reset().parameter(LoanApiConstants.amountParameterName).value(newAvailableDisbursementAmount)
+                    .zeroOrPositiveAmount();
+
+            final Long loanId = command.getLoanId();
+            Loan loan = this.loanRepository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId));
+
+            if (INVALID_LOAN_STATUSES_FOR_APPROVED_AMOUNT_MODIFICATION.contains(loan.getStatus())) {
+                baseDataValidator.reset()
+                        .failWithCodeNoParameterAddedToErrorCode("loan.status.not.valid.for.available.disbursement.amount.modification");
+            }
+
+            BigDecimal maximumThresholdForApprovedAmount;
+            if (loan.loanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
+                maximumThresholdForApprovedAmount = loanApplicationValidator.getOverAppliedMax(loan);
+            } else {
+                maximumThresholdForApprovedAmount = loan.getProposedPrincipal();
+            }
+
+            BigDecimal expectedDisbursementAmount = loan.getDisbursementDetails().stream().filter(t -> t.actualDisbursementDate() == null)
+                    .map(LoanDisbursementDetails::principal).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            BigDecimal maximumAvailableDisbursementThreshold = maximumThresholdForApprovedAmount
+                    .subtract(loan.getSummary().getTotalPrincipal()).subtract(expectedDisbursementAmount);
+            if (MathUtil.isGreaterThan(newAvailableDisbursementAmount, maximumAvailableDisbursementThreshold)) {
+                baseDataValidator.reset().parameter(LoanApiConstants.amountParameterName)
+                        .failWithCode("can't.be.greater.than.maximum.available.disbursement.amount.calculation");
             }
         });
     }

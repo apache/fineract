@@ -7451,7 +7451,7 @@ Feature: Loan
 #    --- disbursement - 1 January, 2025  ---
     When Admin successfully disburse the loan on "01 January 2025" with "300" EUR transaction amount
     When Admin sets the business date to "03 January 2025"
-    Then Update loan approved amount with new amount "800" value
+    Then Update loan approved amount is forbidden with amount "800" due to higher principal amount on loan
 
   @TestRailId:C3868
   Scenario: Verify approved amount change with greater value for progressive multidisbursal loan that expects two tranches - UC7_2

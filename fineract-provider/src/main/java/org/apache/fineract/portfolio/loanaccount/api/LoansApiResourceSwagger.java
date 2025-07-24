@@ -1814,4 +1814,51 @@ final class LoansApiResourceSwagger {
         @Schema(description = "PutLoansApprovedAmountChanges")
         public PutLoansApprovedAmountChanges changes;
     }
+
+    @Schema(description = "PutLoansAvailableDisbursementAmountRequest")
+    public static final class PutLoansAvailableDisbursementAmountRequest {
+
+        private PutLoansAvailableDisbursementAmountRequest() {}
+
+        @Schema(example = "1000")
+        public BigDecimal amount;
+        @Schema(example = "en")
+        public String locale;
+    }
+
+    @Schema(description = "PutLoansAvailableDisbursementAmountResponse")
+    public static final class PutLoansAvailableDisbursementAmountResponse {
+
+        private PutLoansAvailableDisbursementAmountResponse() {}
+
+        static final class PutLoansAvailableDisbursementAmountChanges {
+
+            private PutLoansAvailableDisbursementAmountChanges() {}
+
+            @Schema(example = "1000")
+            public BigDecimal oldApprovedAmount;
+            @Schema(example = "1000")
+            public BigDecimal newApprovedAmount;
+            @Schema(example = "1000")
+            public BigDecimal oldAvailableDisbursementAmount;
+            @Schema(example = "1000")
+            public BigDecimal newAvailableDisbursementAmount;
+            @Schema(example = "en_GB")
+            public String locale;
+        }
+
+        @Schema(example = "3")
+        public Long resourceId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String resourceExternalId;
+        @Schema(example = "2")
+        public Long officeId;
+        @Schema(example = "6")
+        public Long clientId;
+        @Schema(example = "10")
+        public Long groupId;
+
+        @Schema(description = "PutLoansAvailableDisbursementAmountChanges")
+        public PutLoansAvailableDisbursementAmountChanges changes;
+    }
 }

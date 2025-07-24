@@ -31,6 +31,7 @@ import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovedAmountHistory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovedAmountHistoryRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApprovedAmountValidator;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +57,47 @@ public class LoanApprovedAmountWritePlatformServiceImpl implements LoanApprovedA
         changes.put("oldApprovedAmount", loan.getApprovedPrincipal());
 
         BigDecimal newApprovedAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.amountParameterName);
+
+        LoanApprovedAmountHistory loanApprovedAmountHistory = new LoanApprovedAmountHistory(loan.getId(), newApprovedAmount,
+                loan.getApprovedPrincipal());
+
+        loan.setApprovedPrincipal(newApprovedAmount);
+        loanApprovedAmountHistoryRepository.saveAndFlush(loanApprovedAmountHistory);
+
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanApprovedAmountChangedBusinessEvent(loan));
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()) //
+                .withEntityId(loan.getId()) //
+                .withEntityExternalId(loan.getExternalId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .with(changes) //
+                .build();
+    }
+
+    @Override
+    public CommandProcessingResult modifyLoanAvailableDisbursementAmount(Long loanId, JsonCommand command) {
+        // API rule validations
+        this.loanApprovedAmountValidator.validateLoanAvailableDisbursementAmountModification(command);
+
+        final Map<String, Object> changes = new LinkedHashMap<>();
+        changes.put("newAvailableDisbursementAmount", command.stringValueOfParameterNamed(LoanApiConstants.amountParameterName));
+        changes.put("locale", command.locale());
+
+        Loan loan = this.loanAssembler.assembleFrom(loanId);
+        changes.put("oldApprovedAmount", loan.getApprovedPrincipal());
+
+        BigDecimal expectedDisbursementAmount = loan.getDisbursementDetails().stream().filter(t -> t.actualDisbursementDate() == null)
+                .map(LoanDisbursementDetails::principal).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal oldAvailableDisbursement = loan.getApprovedPrincipal().subtract(loan.getSummary().getTotalPrincipal())
+                .subtract(expectedDisbursementAmount);
+        changes.put("oldAvailableDisbursementAmount", oldAvailableDisbursement);
+
+        BigDecimal newAvailableDisbursementAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.amountParameterName);
+        BigDecimal newApprovedAmount = loan.getSummary().getTotalPrincipal().add(expectedDisbursementAmount)
+                .add(newAvailableDisbursementAmount);
+        changes.put("newApprovedAmount", newApprovedAmount);
 
         LoanApprovedAmountHistory loanApprovedAmountHistory = new LoanApprovedAmountHistory(loan.getId(), newApprovedAmount,
                 loan.getApprovedPrincipal());
