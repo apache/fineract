@@ -16,17 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.guarantor.service;
+package org.apache.fineract.portfolio.loanaccount.guarantor.command;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import java.io.Serial;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.loanaccount.guarantor.data.UpdateGuarantorsRequest;
 
-public interface GuarantorWritePlatformService {
+public class UpdateGuarantorsCommand extends Command<UpdateGuarantorsRequest> {
 
-    CommandProcessingResult createGuarantor(Long loanId, JsonCommand command);
-
-    CommandProcessingResult updateGuarantor(Long loanId, Long guarantorId, JsonCommand command);
-
-    CommandProcessingResult removeGuarantor(Long loanId, Long guarantorId, Long guarantorFundingId);
+    @Serial
+    private static final long serialVersionUID = 1L;
 
 }

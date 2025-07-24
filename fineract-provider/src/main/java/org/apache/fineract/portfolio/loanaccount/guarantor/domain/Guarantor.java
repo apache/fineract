@@ -27,16 +27,25 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.command.core.Command;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants.GuarantorJSONinputParams;
+import org.apache.fineract.portfolio.loanaccount.guarantor.data.CreateGuarantorsRequest;
+import org.apache.fineract.portfolio.loanaccount.guarantor.data.GuarantorsRequest;
+import org.apache.fineract.portfolio.loanaccount.guarantor.data.GuarantorsRequestMapper;
+import org.apache.fineract.portfolio.loanaccount.guarantor.data.UpdateGuarantorsRequest;
 
 @Entity
 @Table(name = "m_guarantor")
@@ -359,5 +368,154 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
             isSelf = true;
         }
         return isSelf;
+    }
+
+    public static Guarantor fromJson(final Loan loan, final CodeValue clientRelationshipType,
+            final Command<CreateGuarantorsRequest> command, final List<GuarantorFundingDetails> fundingDetails) {
+        final Integer gurantorType = command.getPayload().getGuarantorTypeId();// command.integerValueSansLocaleOfParameterNamed(GuarantorJSONinputParams.GUARANTOR_TYPE_ID.getValue());
+        final Long entityId = command.getPayload().getEntityId(); // command.longValueOfParameterNamed(GuarantorJSONinputParams.ENTITY_ID.getValue());
+        final boolean active = true;
+        if (GuarantorType.EXTERNAL.getValue().equals(gurantorType)) {
+            final String firstname = command.getPayload().getFirstname(); // command.stringValueOfParameterNamed(GuarantorJSONinputParams.FIRSTNAME.getValue());
+            final String lastname = command.getPayload().getLastname(); // command.stringValueOfParameterNamed(GuarantorJSONinputParams.LASTNAME.getValue());
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
+            final LocalDate dateOfBirth = LocalDate.parse(command.getPayload().getDob(), formatter); // command.localDateValueOfParameterNamed(GuarantorJSONinputParams.DATE_OF_BIRTH.getValue());
+            final String addressLine1 = command.getPayload().getAddressLine1(); // command.stringValueOfParameterNamed(GuarantorJSONinputParams.ADDRESS_LINE_1.getValue());
+            final String addressLine2 = command.getPayload().getAddressLine1(); // command.stringValueOfParameterNamed(GuarantorJSONinputParams.ADDRESS_LINE_2.getValue());
+            final String city = command.getPayload().getCity(); // command.stringValueOfParameterNamed(GuarantorJSONinputParams.CITY.getValue());
+            final String state = command.getPayload().getState(); // command.stringValueOfParameterNamed(GuarantorJSONinputParams.STATE.getValue());
+            final String country = command.getPayload().getCountry(); // command.stringValueOfParameterNamed(GuarantorJSONinputParams.COUNTRY.getValue());
+            final String zip = command.getPayload().getZip(); // command.stringValueOfParameterNamed(GuarantorJSONinputParams.ZIP.getValue());
+            final String housePhoneNumber = command.getPayload().getHousePhoneNumber(); // command.stringValueOfParameterNamed(GuarantorJSONinputParams.PHONE_NUMBER.getValue());
+            final String mobilePhoneNumber = command.getPayload().getMobileNumber(); // command.stringValueOfParameterNamed(GuarantorJSONinputParams.MOBILE_NUMBER.getValue());
+            final String comment = command.getPayload().getComment(); // command.stringValueOfParameterNamed(GuarantorJSONinputParams.COMMENT.getValue());
+
+            return new Guarantor(loan, clientRelationshipType, gurantorType, entityId, firstname, lastname, dateOfBirth, addressLine1,
+                    addressLine2, city, state, country, zip, housePhoneNumber, mobilePhoneNumber, comment, active, fundingDetails);
+        }
+
+        return new Guarantor(loan, clientRelationshipType, gurantorType, entityId, null, null, null, null, null, null, null, null, null,
+                null, null, null, active, fundingDetails);
+
+    }
+
+    public Map<String, Object> update(Command<UpdateGuarantorsRequest> command, GuarantorsRequestMapper guarantorsRequestMapper) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>();
+
+        handlePropertyUpdate(command, actualChanges, GuarantorJSONinputParams.CLIENT_RELATIONSHIP_TYPE_ID.getValue(), 0);
+
+        if (isExternalGuarantor()) {
+            handlePropertyUpdate(command, actualChanges, GuarantorJSONinputParams.FIRSTNAME.getValue(), this.firstname,
+                    guarantorsRequestMapper);
+            handlePropertyUpdate(command, actualChanges, GuarantorJSONinputParams.LASTNAME.getValue(), this.lastname,
+                    guarantorsRequestMapper);
+            handlePropertyUpdate(command, actualChanges, GuarantorJSONinputParams.DATE_OF_BIRTH.getValue(), this.dateOfBirth);
+            handlePropertyUpdate(command, actualChanges, GuarantorJSONinputParams.ADDRESS_LINE_1.getValue(), this.addressLine1,
+                    guarantorsRequestMapper);
+            handlePropertyUpdate(command, actualChanges, GuarantorJSONinputParams.ADDRESS_LINE_2.getValue(), this.addressLine2,
+                    guarantorsRequestMapper);
+            handlePropertyUpdate(command, actualChanges, GuarantorJSONinputParams.CITY.getValue(), this.city, guarantorsRequestMapper);
+            handlePropertyUpdate(command, actualChanges, GuarantorJSONinputParams.STATE.getValue(), this.state, guarantorsRequestMapper);
+            handlePropertyUpdate(command, actualChanges, GuarantorJSONinputParams.COUNTRY.getValue(), this.country,
+                    guarantorsRequestMapper);
+            handlePropertyUpdate(command, actualChanges, GuarantorJSONinputParams.ZIP.getValue(), this.zip, guarantorsRequestMapper);
+            handlePropertyUpdate(command, actualChanges, GuarantorJSONinputParams.PHONE_NUMBER.getValue(), this.housePhoneNumber,
+                    guarantorsRequestMapper);
+            handlePropertyUpdate(command, actualChanges, GuarantorJSONinputParams.MOBILE_NUMBER.getValue(), this.mobilePhoneNumber,
+                    guarantorsRequestMapper);
+            handlePropertyUpdate(command, actualChanges, GuarantorJSONinputParams.COMMENT.getValue(), this.comment,
+                    guarantorsRequestMapper);
+            updateExistingEntityToNull();
+        }
+
+        return actualChanges;
+    }
+
+    private void handlePropertyUpdate(final Command<UpdateGuarantorsRequest> command, final Map<String, Object> actualChanges,
+            final String paramName, Integer propertyToBeUpdated) {
+
+        if (!command.getPayload().getClientRelationshipTypeId().equals(propertyToBeUpdated.longValue())) {
+            Integer newValue = command.getPayload().getClientRelationshipTypeId().intValue();
+            actualChanges.put(paramName, newValue);
+            // propertyToBeUpdated = newValue;
+
+            // now update actual property
+            if (paramName.equals(GuarantorJSONinputParams.GUARANTOR_TYPE_ID.getValue())) {
+                this.gurantorType = newValue;
+            }
+        }
+    }
+
+    private void handlePropertyUpdate(final Command<UpdateGuarantorsRequest> command, final Map<String, Object> actualChanges,
+            final String paramName, String propertyToBeUpdated, GuarantorsRequestMapper guarantorsRequestMapper) {
+
+        final GuarantorsRequest request = guarantorsRequestMapper.fromUpdateRequest(command.getPayload());
+
+        // Current entity field values
+        Map<String, Supplier<String>> currentValues = Map.ofEntries(
+                Map.entry(GuarantorJSONinputParams.FIRSTNAME.getValue(), (Supplier<String>) () -> this.firstname),
+                Map.entry(GuarantorJSONinputParams.LASTNAME.getValue(), (Supplier<String>) () -> this.lastname),
+                Map.entry(GuarantorJSONinputParams.ADDRESS_LINE_1.getValue(), (Supplier<String>) () -> this.addressLine1),
+                Map.entry(GuarantorJSONinputParams.ADDRESS_LINE_2.getValue(), (Supplier<String>) () -> this.addressLine2),
+                Map.entry(GuarantorJSONinputParams.CITY.getValue(), (Supplier<String>) () -> this.city),
+                Map.entry(GuarantorJSONinputParams.STATE.getValue(), (Supplier<String>) () -> this.state),
+                Map.entry(GuarantorJSONinputParams.COUNTRY.getValue(), (Supplier<String>) () -> this.country),
+                Map.entry(GuarantorJSONinputParams.ZIP.getValue(), (Supplier<String>) () -> this.zip),
+                Map.entry(GuarantorJSONinputParams.PHONE_NUMBER.getValue(), (Supplier<String>) () -> this.housePhoneNumber),
+                Map.entry(GuarantorJSONinputParams.MOBILE_NUMBER.getValue(), (Supplier<String>) () -> this.mobilePhoneNumber),
+                Map.entry(GuarantorJSONinputParams.COMMENT.getValue(), (Supplier<String>) () -> this.comment));
+
+        // Incoming request field values
+        Map<String, Supplier<String>> requestValues = Map.ofEntries(
+                Map.entry(GuarantorJSONinputParams.FIRSTNAME.getValue(), request::getFirstname),
+                Map.entry(GuarantorJSONinputParams.LASTNAME.getValue(), request::getLastname),
+                Map.entry(GuarantorJSONinputParams.ADDRESS_LINE_1.getValue(), request::getAddressLine1),
+                Map.entry(GuarantorJSONinputParams.ADDRESS_LINE_2.getValue(), request::getAddressLine2),
+                Map.entry(GuarantorJSONinputParams.CITY.getValue(), request::getCity),
+                Map.entry(GuarantorJSONinputParams.STATE.getValue(), request::getState),
+                Map.entry(GuarantorJSONinputParams.COUNTRY.getValue(), request::getCountry),
+                Map.entry(GuarantorJSONinputParams.ZIP.getValue(), request::getZip),
+                Map.entry(GuarantorJSONinputParams.PHONE_NUMBER.getValue(), request::getHousePhoneNumber),
+                Map.entry(GuarantorJSONinputParams.MOBILE_NUMBER.getValue(), request::getMobileNumber),
+                Map.entry(GuarantorJSONinputParams.COMMENT.getValue(), request::getComment));
+
+        // Map of entity field setters
+        Map<String, Consumer<String>> entitySetters = Map.ofEntries(
+                Map.entry(GuarantorJSONinputParams.FIRSTNAME.getValue(), val -> this.firstname = val),
+                Map.entry(GuarantorJSONinputParams.LASTNAME.getValue(), val -> this.lastname = val),
+                Map.entry(GuarantorJSONinputParams.ADDRESS_LINE_1.getValue(), val -> this.addressLine1 = val),
+                Map.entry(GuarantorJSONinputParams.ADDRESS_LINE_2.getValue(), val -> this.addressLine2 = val),
+                Map.entry(GuarantorJSONinputParams.CITY.getValue(), val -> this.city = val),
+                Map.entry(GuarantorJSONinputParams.STATE.getValue(), val -> this.state = val),
+                Map.entry(GuarantorJSONinputParams.COUNTRY.getValue(), val -> this.country = val),
+                Map.entry(GuarantorJSONinputParams.ZIP.getValue(), val -> this.zip = val),
+                Map.entry(GuarantorJSONinputParams.PHONE_NUMBER.getValue(), val -> this.housePhoneNumber = val),
+                Map.entry(GuarantorJSONinputParams.MOBILE_NUMBER.getValue(), val -> this.mobilePhoneNumber = val),
+                Map.entry(GuarantorJSONinputParams.COMMENT.getValue(), val -> this.comment = val));
+
+        if (requestValues.containsKey(paramName)) {
+            final String newValue = requestValues.get(paramName).get();
+            final String oldValue = currentValues.get(paramName).get();
+
+            if (newValue != null && (oldValue == null || !oldValue.equalsIgnoreCase(newValue))) {
+                actualChanges.put(paramName, newValue);
+                entitySetters.get(paramName).accept(newValue);
+            }
+        }
+    }
+
+    private void handlePropertyUpdate(final Command<UpdateGuarantorsRequest> command, final Map<String, Object> actualChanges,
+            final String paramName, LocalDate propertyToBeUpdated) {
+
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
+        final LocalDate dateOfBirth = LocalDate.parse(command.getPayload().getDob(), formatter);
+
+        if (command.getPayload().getDob() != null && !dateOfBirth.equals(propertyToBeUpdated) && !this.dateOfBirth.equals(dateOfBirth)) {
+            final LocalDate newValue = dateOfBirth;
+            actualChanges.put(paramName, newValue);
+            if (paramName.equals(GuarantorJSONinputParams.DATE_OF_BIRTH.getValue())) {
+                this.dateOfBirth = newValue;
+            }
+        }
     }
 }
