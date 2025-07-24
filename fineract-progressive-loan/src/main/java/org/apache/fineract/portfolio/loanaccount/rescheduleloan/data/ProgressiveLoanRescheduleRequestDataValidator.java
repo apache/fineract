@@ -24,7 +24,6 @@ import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.Loan
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateAndRetrieveRescheduleFromDate;
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateApprovalDate;
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateForOverdueCharges;
-import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateInterestRate;
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateLoanIsActive;
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateRescheduleReasonComment;
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateRescheduleReasonId;
@@ -78,8 +77,7 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
         validateRescheduleReasonId(fromJsonHelper, jsonElement, dataValidatorBuilder);
         validateRescheduleReasonComment(fromJsonHelper, jsonElement, dataValidatorBuilder);
         LocalDate adjustedDueDate = validateAndRetrieveAdjustedDate(fromJsonHelper, jsonElement, rescheduleFromDate, dataValidatorBuilder);
-        BigDecimal interestRate = validateInterestRate(loan.getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate(), fromJsonHelper,
-                jsonElement, dataValidatorBuilder);
+        BigDecimal interestRate = validateInterestRate(fromJsonHelper, jsonElement, dataValidatorBuilder);
         validateUnsupportedParams(jsonElement, dataValidatorBuilder);
 
         boolean hasInterestRateChange = interestRate != null;
@@ -196,5 +194,14 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
             throw new GeneralPlatformDomainRuleException("loan.reschedule.interest.rate.change.already.exists",
                     "Interest rate change for the provided date is already exists.", rescheduleFromDate);
         }
+    }
+
+    private BigDecimal validateInterestRate(final FromJsonHelper fromJsonHelper, final JsonElement jsonElement,
+            DataValidatorBuilder dataValidatorBuilder) {
+        final BigDecimal interestRate = fromJsonHelper
+                .extractBigDecimalWithLocaleNamed(RescheduleLoansApiConstants.newInterestRateParamName, jsonElement);
+        dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.newInterestRateParamName).value(interestRate).ignoreIfNull()
+                .zeroOrPositiveAmount();
+        return interestRate;
     }
 }

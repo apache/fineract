@@ -150,7 +150,7 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
             return BigDecimal.ZERO;
         }
         BigDecimal baseAmount = switch (method) {
-            case FLAT -> MathUtil.nullToZero(getRepaymentPeriod().calculateTotalDisbursedAmountTillGivenPeriod(this));
+            case FLAT -> MathUtil.nullToZero(getRepaymentPeriod().calculateTotalDisbursedAndCapitalizedIncomeAmountTillGivenPeriod(this));
             case DECLINING_BALANCE -> getOutstandingLoanBalance().getAmount();
             default -> throw new UnsupportedOperationException("Method not implemented: " + method);
         };

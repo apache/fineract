@@ -161,6 +161,10 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     }
 
     private void addCapitalizedIncome(final ProgressiveLoanInterestScheduleModel scheduleModel, final EmiChangeOperation operation) {
+        scheduleModel.repaymentPeriods().stream().filter(rp -> !operation.getSubmittedOnDate().isAfter(rp.getFromDate()))
+                .forEach(rp -> rp.setTotalCapitalizedIncomeAmount(
+                        MathUtil.nullToZero(rp.getTotalCapitalizedIncomeAmount()).add(operation.getAmount().getAmount())));
+
         scheduleModel.changeOutstandingBalanceAndUpdateInterestPeriods(operation.getSubmittedOnDate(), scheduleModel.zero(),
                 scheduleModel.zero(), operation.getAmount()).ifPresent((repaymentPeriod) -> {
                     calculateEMIValueAndRateFactors(
@@ -920,9 +924,11 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
         // already repaid principals should be subtracted from total disbursed amount to calculate correct EMI.
         BigDecimal alreadyRepaidPrincipals = first.getPrevious()
-                .map(rp -> rp.calculateTotalDisbursedAmountTillGivenPeriod(null).subtract(rp.getOutstandingLoanBalance().getAmount()))
+                .map(rp -> rp.calculateTotalDisbursedAndCapitalizedIncomeAmountTillGivenPeriod(null)
+                        .subtract(rp.getOutstandingLoanBalance().getAmount()))
                 .orElse(BigDecimal.ZERO);
-        Money total = Money.of(currency, first.calculateTotalDisbursedAmountTillGivenPeriod(first.getLastInterestPeriod()))
+        Money total = Money
+                .of(currency, first.calculateTotalDisbursedAndCapitalizedIncomeAmountTillGivenPeriod(first.getLastInterestPeriod()))
                 .plus(sumOfInterest).minus(alreadyRepaidPrincipals);
 
         Money periodEmi = total.dividedBy(repaymentPeriods.size(), mc);

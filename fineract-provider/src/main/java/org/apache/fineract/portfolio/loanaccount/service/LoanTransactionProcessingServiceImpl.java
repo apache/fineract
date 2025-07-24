@@ -95,16 +95,18 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
             AdvancedPaymentScheduleTransactionProcessor advancedProcessor, Loan loan, LoanTransaction loanTransaction) {
         Optional<ProgressiveLoanInterestScheduleModel> savedModel = modelRepository.getSavedModel(loan,
                 loanTransaction.getTransactionDate());
+        ProgressiveLoanInterestScheduleModel model = savedModel
+                .orElseGet(() -> advancedProcessor.calculateInterestScheduleModel(loan.getId(), loanTransaction.getTransactionDate()));
 
         ProgressiveTransactionCtx progressiveContext = new ProgressiveTransactionCtx(loan.getCurrency(),
                 loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()),
-                new ChangedTransactionDetail(), savedModel.orElse(null), getTotalRefundInterestAmount(loan));
+                new ChangedTransactionDetail(), model, getTotalRefundInterestAmount(loan));
         progressiveContext.getAlreadyProcessedTransactions().addAll(loanTransactionService.retrieveListOfTransactionsForReprocessing(loan));
         progressiveContext.setChargedOff(loan.isChargedOff());
         progressiveContext.setContractTerminated(loan.isContractTermination());
         ChangedTransactionDetail result = advancedProcessor.processLatestTransaction(loanTransaction, progressiveContext);
-        if (savedModel.isPresent() && !TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
-            modelRepository.writeInterestScheduleModel(loan, savedModel.get());
+        if (!TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
+            modelRepository.writeInterestScheduleModel(loan, model);
         }
         return result;
     }
@@ -124,7 +126,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = getTransactionProcessor(
                 transactionProcessingStrategyCode);
         if (loanRepaymentScheduleTransactionProcessor instanceof AdvancedPaymentScheduleTransactionProcessor advancedProcessor
-                && loanTransaction.getLoan().isInterestBearingAndInterestRecalculationEnabled()) {
+                && loanTransaction.getLoan().isInterestRecalculationEnabled()) {
             return processLatestTransactionProgressiveInterestRecalculation(advancedProcessor, loanTransaction.getLoan(), loanTransaction);
         }
         return loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanTransaction, ctx);
