@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -47,6 +48,7 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 /**
  * Immutable data object representing a savings account.
  */
+@Setter
 @Getter
 @JsonLocalDateArrayFormat
 public final class SavingsAccountData implements Serializable {
@@ -143,6 +145,13 @@ public final class SavingsAccountData implements Serializable {
     private transient Set<Long> existingReversedTransactionIds = new HashSet<>();
     private transient Long glAccountIdForSavingsControl;
     private transient Long glAccountIdForInterestOnSavings;
+
+    private Long glAccountIdForInterestPayable;
+    private Long glAccountIdForOverdraftPorfolio;
+    private Long glAccountIdForInterestReceivable;
+
+    private BigDecimal interestPosting;
+    private BigDecimal overdraftPosting;
 
     public static SavingsAccountData importInstanceIndividual(Long clientId, Long productId, Long fieldOfficerId, LocalDate submittedOnDate,
             BigDecimal nominalAnnualInterestRate, EnumOptionData interestCompoundingPeriodTypeEnum,
@@ -964,4 +973,5 @@ public final class SavingsAccountData implements Serializable {
     public boolean isIsDormancyTrackingActive() {
         return this.isDormancyTrackingActive;
     }
+
 }

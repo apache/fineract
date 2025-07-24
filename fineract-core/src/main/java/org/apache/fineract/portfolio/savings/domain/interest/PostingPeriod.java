@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.TreeSet;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -34,6 +36,8 @@ import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodTyp
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 
+@Setter
+@Getter
 public final class PostingPeriod {
 
     private final LocalDateInterval periodInterval;
@@ -63,6 +67,8 @@ public final class PostingPeriod {
     private Money minOverdraftForInterestCalculation;
 
     private Integer financialYearBeginningMonth;
+
+    private boolean overdraftInterest = false;
 
     public void setOverdraftInterestRateAsFraction(BigDecimal overdraftInterestRateAsFraction) {
         this.overdraftInterestRateAsFraction = overdraftInterestRateAsFraction;
@@ -301,7 +307,7 @@ public final class PostingPeriod {
 
             if (compoundingPeriodEndDate.equals(compoundingPeriod.getPeriodInterval().endDate())) {
                 BigDecimal interestCompounded = compoundInterestValues.getcompoundedInterest().add(unCompoundedInterest);
-                compoundInterestValues.setcompoundedInterest(interestCompounded);
+                compoundInterestValues.setCompoundedInterest(interestCompounded);
                 compoundInterestValues.setZeroForInterestToBeUncompounded();
             }
             interestEarned = interestEarned.add(interestUnrounded);
@@ -314,7 +320,7 @@ public final class PostingPeriod {
     }
 
     public Money getInterestEarned() {
-        return this.interestEarnedRounded;
+        return this.interestEarnedRounded != null ? this.interestEarnedRounded : Money.zero(this.currency);
     }
 
     private static List<CompoundingPeriod> compoundingPeriodsInPostingPeriod(final LocalDateInterval postingPeriodInterval,

@@ -47,8 +47,13 @@ public class CompoundInterestHelper {
         // total interest earned in previous periods but not yet recognised
         BigDecimal compoundedInterest = BigDecimal.ZERO;
         BigDecimal unCompoundedInterest = BigDecimal.ZERO;
+        LocalDate endDay = DateUtils.getBusinessLocalDate();
         final CompoundInterestValues compoundInterestValues = new CompoundInterestValues(compoundedInterest, unCompoundedInterest);
         for (final PostingPeriod postingPeriod : allPeriods) {
+
+            if (postingPeriod.dateOfPostingTransaction().getMonth() != endDay.getMonth()) {
+                compoundInterestValues.setCompoundedInterest(interestEarned.getAmount());
+            }
 
             final BigDecimal interestEarnedThisPeriod = postingPeriod.calculateInterest(compoundInterestValues);
 
@@ -61,8 +66,9 @@ public class CompoundInterestHelper {
             // calculation.
             if (!(postingPeriod.isInterestTransfered() || !interestTransferEnabled
                     || (lockUntil != null && !DateUtils.isAfter(postingPeriod.dateOfPostingTransaction(), lockUntil)))) {
-                compoundInterestValues.setcompoundedInterest(BigDecimal.ZERO);
+                compoundInterestValues.setCompoundedInterest(BigDecimal.ZERO);
             }
+            endDay = postingPeriod.dateOfPostingTransaction();
         }
 
         return interestEarned;

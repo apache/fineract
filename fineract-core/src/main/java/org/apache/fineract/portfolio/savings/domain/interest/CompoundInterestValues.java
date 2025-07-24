@@ -38,7 +38,7 @@ public class CompoundInterestValues {
         return this.uncompoundedInterest;
     }
 
-    public void setcompoundedInterest(BigDecimal interestToBeCompounded) {
+    public void setCompoundedInterest(BigDecimal interestToBeCompounded) {
         this.compoundedInterest = interestToBeCompounded;
     }
 

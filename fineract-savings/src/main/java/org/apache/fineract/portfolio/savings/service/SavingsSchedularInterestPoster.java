@@ -108,33 +108,33 @@ public class SavingsSchedularInterestPoster {
             for (SavingsAccountTransactionData savingsAccountTransactionData : savingsAccountTransactionDataList) {
                 if (savingsAccountTransactionData.getId() == null) {
                     final String key = savingsAccountTransactionData.getRefNo();
-                    if (savingsAccountTransactionDataHashMap.containsKey(key)) {
-                        final SavingsAccountTransactionData dataFromFetch = savingsAccountTransactionDataHashMap.get(key);
-                        savingsAccountTransactionData.setId(dataFromFetch.getId());
-                        if (savingsAccountData.getGlAccountIdForSavingsControl() != 0
-                                && savingsAccountData.getGlAccountIdForInterestOnSavings() != 0) {
-                            OffsetDateTime auditDatetime = DateUtils.getAuditOffsetDateTime();
-                            paramsForGLInsertion.add(new Object[] { savingsAccountData.getGlAccountIdForSavingsControl(),
-                                    savingsAccountData.getOfficeId(), null, currencyCode,
-                                    SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
-                                    savingsAccountTransactionData.getId(), null, false, null, false,
-                                    savingsAccountTransactionData.getTransactionDate(), JournalEntryType.CREDIT.getValue().longValue(),
-                                    savingsAccountTransactionData.getAmount(), null, JournalEntryType.CREDIT.getValue().longValue(),
-                                    savingsAccountData.getId(), auditDatetime, auditDatetime, false, BigDecimal.ZERO, BigDecimal.ZERO, null,
-                                    savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
-                                    DateUtils.getBusinessLocalDate() });
+                    final Boolean isOverdraft = savingsAccountTransactionData.getIsOverdraft();
+                    final SavingsAccountTransactionData dataFromFetch = savingsAccountTransactionDataHashMap.get(key);
+                    savingsAccountTransactionData.setId(dataFromFetch.getId());
+                    if (savingsAccountData.getGlAccountIdForSavingsControl() != 0
+                            && savingsAccountData.getGlAccountIdForInterestOnSavings() != 0) {
+                        OffsetDateTime auditDatetime = DateUtils.getAuditOffsetDateTime();
+                        paramsForGLInsertion.add(
+                                new Object[] { savingsAccountTransactionData.getAccountCredit(), savingsAccountData.getOfficeId(), null,
+                                        currencyCode, SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
+                                        savingsAccountTransactionData.getId(), null, false, null, false,
+                                        savingsAccountTransactionData.getTransactionDate(), JournalEntryType.CREDIT.getValue().longValue(),
+                                        savingsAccountTransactionData.getAmount(), null, JournalEntryType.CREDIT.getValue().longValue(),
+                                        savingsAccountData.getId(), auditDatetime, auditDatetime, false, BigDecimal.ZERO, BigDecimal.ZERO,
+                                        null, savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
+                                        DateUtils.getBusinessLocalDate() });
 
-                            paramsForGLInsertion.add(new Object[] { savingsAccountData.getGlAccountIdForInterestOnSavings(),
-                                    savingsAccountData.getOfficeId(), null, currencyCode,
-                                    SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
-                                    savingsAccountTransactionData.getId(), null, false, null, false,
-                                    savingsAccountTransactionData.getTransactionDate(), JournalEntryType.DEBIT.getValue().longValue(),
-                                    savingsAccountTransactionData.getAmount(), null, JournalEntryType.DEBIT.getValue().longValue(),
-                                    savingsAccountData.getId(), auditDatetime, auditDatetime, false, BigDecimal.ZERO, BigDecimal.ZERO, null,
-                                    savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
-                                    DateUtils.getBusinessLocalDate() });
-                        }
+                        paramsForGLInsertion
+                                .add(new Object[] { savingsAccountTransactionData.getAccountDebit(), savingsAccountData.getOfficeId(), null,
+                                        currencyCode, SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
+                                        savingsAccountTransactionData.getId(), null, false, null, false,
+                                        savingsAccountTransactionData.getTransactionDate(), JournalEntryType.DEBIT.getValue().longValue(),
+                                        savingsAccountTransactionData.getAmount(), null, JournalEntryType.DEBIT.getValue().longValue(),
+                                        savingsAccountData.getId(), auditDatetime, auditDatetime, false, BigDecimal.ZERO, BigDecimal.ZERO,
+                                        null, savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
+                                        DateUtils.getBusinessLocalDate() });
                     }
+
                 }
             }
         }

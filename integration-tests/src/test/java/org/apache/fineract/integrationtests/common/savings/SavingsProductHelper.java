@@ -168,8 +168,8 @@ public class SavingsProductHelper {
             map.put("interestReceivableAccountId", this.interestReceivableAccountId);
         }
         if (this.accountingRule.equals(ACCRUAL_PERIODIC)) {
-            if (this.interestReceivableAccountId != null) {
-                map.put("interestReceivableAccountId", this.interestReceivableAccountId);
+            if (this.savingsControlAccountId != null) {
+                map.put("savingsControlAccountId", this.savingsControlAccountId);
             }
         }
 
@@ -199,6 +199,11 @@ public class SavingsProductHelper {
 
     public SavingsProductHelper withInterestCompoundingPeriodTypeAsMonthly() {
         this.interestCompoundingPeriodType = MONTHLY;
+        return this;
+    }
+
+    public SavingsProductHelper withInterestCompoundingPeriodTypeAsAnnually() {
+        this.interestCompoundingPeriodType = ANNUAL;
         return this;
     }
 
@@ -355,6 +360,10 @@ public class SavingsProductHelper {
 
     public BigDecimal getNominalAnnualInterestRate() {
         return new BigDecimal(nominalAnnualInterestRate);
+    }
+
+    public BigDecimal getNominalAnnualInterestRateOverdraft() {
+        return new BigDecimal(nominalAnnualInterestRateOverdraft);
     }
 
     public BigDecimal getInterestCalculationDaysInYearType() {
