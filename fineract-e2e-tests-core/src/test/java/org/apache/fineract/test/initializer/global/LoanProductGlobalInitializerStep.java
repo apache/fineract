@@ -3422,6 +3422,43 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_MULTIDISBURSAL_EXPECTS_TRANCHES,
                 responseLoanProductMultidisbursalExpectTranches);
 
+        // LP2 with progressive loan schedule + horizontal + interest EMI + 360/30
+        // + interest recalculation, preClosureInterestCalculationStrategy= till preclose
+        // Frequency for recalculate Outstanding Principal: Daily, Frequency Interval for recalculation: 1
+        // allow approved/disbursed amount over applied amount is enabled with percentage
+        // multidisbursal loan that expects tranches
+        // type
+        final String name131 = DefaultLoanProduct.LP2_PROGRESSIVE_ADV_PYMNT_INTEREST_RECALC_360_30_MULTIDISB_OVER_APPLIED_EXPECTED_TRANCHES
+                .getName();
+        final PostLoanProductsRequest loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbApprovedOverAppliedExpectTranches = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2EmiCapitalizedIncome()//
+                .name(name131)//
+                .daysInYearType(DaysInYearType.DAYS360.value)//
+                .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                .isInterestRecalculationEnabled(true)//
+                .preClosureInterestCalculationStrategy(1)//
+                .rescheduleStrategyMethod(4)//
+                .interestRecalculationCompoundingMethod(0)//
+                .recalculationRestFrequencyType(2)//
+                .recalculationRestFrequencyInterval(1)//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT"))) //
+                .allowApprovedDisbursedAmountsOverApplied(true)//
+                .overAppliedCalculationType(OverAppliedCalculationType.PERCENTAGE.value)//
+                .overAppliedNumber(50)//
+                .multiDisburseLoan(true)//
+                .disallowExpectedDisbursements(false)//
+                .maxTrancheCount(10)//
+                .outstandingLoanBalance(10000.0);//
+        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbApprovedOverAppliedExpectTranches = loanProductsApi
+                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbApprovedOverAppliedExpectTranches)
+                .execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_PROGRESSIVE_ADV_PYMNT_INTEREST_RECALC_360_30_MULTIDISB_OVER_APPLIED_EXPECTED_TRANCHES,
+                responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbApprovedOverAppliedExpectTranches);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,

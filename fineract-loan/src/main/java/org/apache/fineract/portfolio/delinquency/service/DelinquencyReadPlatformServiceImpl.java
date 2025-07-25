@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.delinquency.service;
 import static org.apache.fineract.portfolio.loanaccount.domain.Loan.EARLIEST_UNPAID_DATE;
 import static org.apache.fineract.portfolio.loanaccount.domain.Loan.NEXT_UNPAID_DUE_DATE;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
@@ -148,7 +149,10 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
             // Overpaid
             // loans
             collectionData = loanDelinquencyDomainService.getOverdueCollectionData(loan, effectiveDelinquencyList);
-            collectionData.setAvailableDisbursementAmount(loan.getApprovedPrincipal().subtract(loan.getDisbursedAmount()));
+            // Ensure availableDisbursementAmount is never negative
+            final BigDecimal availableAmount = loan.getApprovedPrincipal().subtract(loan.getDisbursedAmount());
+            collectionData
+                    .setAvailableDisbursementAmount(availableAmount.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : availableAmount);
             collectionData.setNextPaymentDueDate(possibleNextRepaymentDate(nextPaymentDueDateConfig, loan));
 
             final LoanTransaction lastPayment = loan.getLastPaymentTransaction();

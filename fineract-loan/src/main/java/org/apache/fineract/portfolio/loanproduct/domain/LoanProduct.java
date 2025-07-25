@@ -414,14 +414,6 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             }
         }
 
-        if (this.allowApprovedDisbursedAmountsOverApplied) {
-            if (this.isMultiDisburseLoan() && !this.disallowExpectedDisbursements) {
-                throw new LoanProductGeneralRuleException(
-                        "disallowExpectedDisbursements.not.set.allowApprovedDisbursedAmountsOverApplied.cant.be.set",
-                        "Disallow Expected Disbursals Not Set - Allow Approved / Disbursed Amounts Over Applied Can't Be Set");
-            }
-        }
-
         if (this.overAppliedCalculationType == null || this.overAppliedCalculationType.isEmpty()) {
             if (this.allowApprovedDisbursedAmountsOverApplied) {
                 throw new LoanProductGeneralRuleException(
