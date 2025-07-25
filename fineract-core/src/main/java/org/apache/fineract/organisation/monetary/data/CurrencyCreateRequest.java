@@ -16,16 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.service;
+package org.apache.fineract.organisation.monetary.data;
 
-import org.apache.fineract.organisation.monetary.data.CurrencyCreateRequest;
-import org.apache.fineract.organisation.monetary.data.CurrencyCreateResponse;
-import org.apache.fineract.organisation.monetary.data.CurrencyUpdateRequest;
-import org.apache.fineract.organisation.monetary.data.CurrencyUpdateResponse;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public interface CurrencyWritePlatformService {
+@Getter
+@Setter
+@NoArgsConstructor
+public class CurrencyCreateRequest implements Serializable {
 
-    CurrencyUpdateResponse updateAllowedCurrencies(CurrencyUpdateRequest request);
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    CurrencyCreateResponse createCurrency(CurrencyCreateRequest payload);
+    private String code;
+    private String name;
+    private Integer decimalPlaces;
+    private Integer inMultiplesOf;
+    private String displaySymbol;
+    private String nameCode;
+
 }
