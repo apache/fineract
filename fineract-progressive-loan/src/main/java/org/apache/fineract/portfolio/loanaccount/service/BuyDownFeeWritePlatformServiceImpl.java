@@ -36,9 +36,8 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
-import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanBuyDownFeeTransactionCreatedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanBuyDownFeeAdjustmentTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanBuyDownFeeTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -125,8 +124,7 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
         loanJournalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
         // Notify business events
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanBuyDownFeeTransactionCreatedBusinessEvent(buyDownFeeTransaction));
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBuyDownFeeTransactionBusinessEvent(buyDownFeeTransaction));
 
         return new CommandProcessingResultBuilder() //
                 .withClientId(loan.getClientId()) //
@@ -205,8 +203,7 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
 
         // Notify business events
         businessEventNotifierService
-                .notifyPostBusinessEvent(new LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent(savedBuyDownFeeAdjustment));
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
+                .notifyPostBusinessEvent(new LoanBuyDownFeeAdjustmentTransactionBusinessEvent(savedBuyDownFeeAdjustment));
 
         return new CommandProcessingResultBuilder().withEntityId(savedBuyDownFeeAdjustment.getId())
                 .withEntityExternalId(savedBuyDownFeeAdjustment.getExternalId()).withOfficeId(loan.getOfficeId())

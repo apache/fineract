@@ -20,11 +20,11 @@ package org.apache.fineract.infrastructure.event.business.domain.loan.transactio
 
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
-public class LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent extends LoanTransactionBusinessEvent {
+public class LoanBuyDownFeeAdjustmentTransactionBusinessEvent extends LoanTransactionBusinessEvent {
 
-    private static final String TYPE = "LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent";
+    private static final String TYPE = "LoanBuyDownFeeAdjustmentTransactionBusinessEvent";
 
-    public LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent(LoanTransaction value) {
+    public LoanBuyDownFeeAdjustmentTransactionBusinessEvent(LoanTransaction value) {
         super(value);
     }
 

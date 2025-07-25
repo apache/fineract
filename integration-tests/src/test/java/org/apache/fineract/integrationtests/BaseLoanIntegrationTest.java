@@ -1343,16 +1343,21 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
 
     protected void logBusinessEvents(List<ExternalEventResponse> allExternalEvents) {
         allExternalEvents.forEach(externalEventDTO -> {
-            Object amount = externalEventDTO.getPayLoad().get("amount");
-            Object outstandingLoanBalance = externalEventDTO.getPayLoad().get("outstandingLoanBalance");
-            Object principalPortion = externalEventDTO.getPayLoad().get("principalPortion");
-            Object interestPortion = externalEventDTO.getPayLoad().get("interestPortion");
-            Object feePortion = externalEventDTO.getPayLoad().get("feeChargesPortion");
-            Object penaltyPortion = externalEventDTO.getPayLoad().get("penaltyChargesPortion");
             log.info("Event Received\n type:'{}'\n businessDate:'{}'", externalEventDTO.getType(), externalEventDTO.getBusinessDate());
-            log.info(
-                    "Values\n amount: {}\n outstandingLoanBalance: {}\n principalPortion: {}\n interestPortion: {}\n feePortion: {}\n penaltyPortion: {}",
-                    amount, outstandingLoanBalance, principalPortion, interestPortion, feePortion, penaltyPortion);
+            if ("org.apache.fineract.avro.loan.v1.LoanTransactionDataV1".equals(externalEventDTO.getSchema())) {
+                Object amount = externalEventDTO.getPayLoad().get("amount");
+                Object outstandingLoanBalance = externalEventDTO.getPayLoad().get("outstandingLoanBalance");
+                Object principalPortion = externalEventDTO.getPayLoad().get("principalPortion");
+                Object interestPortion = externalEventDTO.getPayLoad().get("interestPortion");
+                Object feePortion = externalEventDTO.getPayLoad().get("feeChargesPortion");
+                Object penaltyPortion = externalEventDTO.getPayLoad().get("penaltyChargesPortion");
+                Object reversed = externalEventDTO.getPayLoad().get("reversed");
+                log.info(
+                        "Values\n amount: {}\n outstandingLoanBalance: {}\n principalPortion: {}\n interestPortion: {}\n feePortion: {}\n penaltyPortion: {}\n reversed: {}",
+                        amount, outstandingLoanBalance, principalPortion, interestPortion, feePortion, penaltyPortion, reversed);
+            } else {
+                log.info("Schema: {}", externalEventDTO.getSchema());
+            }
         });
     }
 

@@ -110,7 +110,7 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "LoanCapitalizedIncomeAdjustmentTransactionCreatedBusinessEvent", "LoanTransactionContractTerminationPostBusinessEvent",
                 "LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent",
                 "LoanCapitalizedIncomeTransactionCreatedBusinessEvent", "LoanUndoContractTerminationBusinessEvent",
-                "LoanBuyDownFeeTransactionCreatedBusinessEvent", "LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent",
+                "LoanBuyDownFeeTransactionBusinessEvent", "LoanBuyDownFeeAdjustmentTransactionBusinessEvent",
                 "LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent",
                 "LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent", "LoanApprovedAmountChangedBusinessEvent");
 
@@ -204,7 +204,7 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "LoanCapitalizedIncomeAdjustmentTransactionCreatedBusinessEvent", "LoanTransactionContractTerminationPostBusinessEvent",
                 "LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent",
                 "LoanCapitalizedIncomeTransactionCreatedBusinessEvent", "LoanUndoContractTerminationBusinessEvent",
-                "LoanBuyDownFeeTransactionCreatedBusinessEvent", "LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent",
+                "LoanBuyDownFeeTransactionBusinessEvent", "LoanBuyDownFeeAdjustmentTransactionBusinessEvent",
                 "LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent",
                 "LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent", "LoanApprovedAmountChangedBusinessEvent");
 

@@ -211,4 +211,5 @@
     <include file="parts/0190_buy_down_fee_amortization.xml" relativeToChangelogFile="true" />
     <include file="parts/0191_add_LoanApprovedAmountChangedBusinessEvent.xml" relativeToChangelogFile="true" />
     <include file="parts/0192_create_loan_approved_amount_history.xml" relativeToChangelogFile="true" />
+    <include file="parts/0193_buy_down_fee_events.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

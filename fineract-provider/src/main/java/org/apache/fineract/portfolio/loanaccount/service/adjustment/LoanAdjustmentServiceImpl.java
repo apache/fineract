@@ -37,6 +37,9 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanBuyDownFeeAdjustmentTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanBuyDownFeeTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -321,7 +324,11 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
             if (optAmortizationAdjustmentTransaction.isPresent()) {
                 loan.addLoanTransaction(optAmortizationAdjustmentTransaction.get());
                 loanTransactionRepository.saveAndFlush(optAmortizationAdjustmentTransaction.get());
+                businessEventNotifierService
+                        .notifyPostBusinessEvent(new LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent(
+                                optAmortizationAdjustmentTransaction.get()));
             }
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanBuyDownFeeTransactionBusinessEvent(transactionForAdjustment));
         }
 
         if (loan.isClosedWrittenOff()) {
@@ -355,6 +362,8 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
                         MathUtil.nullToZero(buyDownFeeBalance.getUnrecognizedAmount()).add(transactionForAdjustment.getAmount()));
                 loanBuyDownFeeBalanceRepository.save(buyDownFeeBalance);
             }
+            businessEventNotifierService
+                    .notifyPostBusinessEvent(new LoanBuyDownFeeAdjustmentTransactionBusinessEvent(transactionForAdjustment));
         }
     }
 
