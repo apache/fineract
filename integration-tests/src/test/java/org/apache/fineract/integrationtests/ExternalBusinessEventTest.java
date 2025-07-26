@@ -120,7 +120,7 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
 
             loanTransactionHelper.makeLoanRepayment("15 March 2023", 125.0F, loanIdRef.get().intValue());
 
-            verifyBusinessEvents(new LoanBusinessEvent("LoanBalanceChangedBusinessEvent", "15 March 2023", 300, 400.0, 291.04));
+            verifyBusinessEvents(new LoanBusinessEvent("LoanBalanceChangedBusinessEvent", "15 March 2023", 300, 400.0, 289.13));
         });
         runAt("1 April 2023", () -> {
 
@@ -132,7 +132,7 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
 
             loanTransactionHelper.makeLoanRepayment("15 April 2023", 125.0F, loanIdRef.get().intValue());
 
-            verifyBusinessEvents(new LoanBusinessEvent("LoanBalanceChangedBusinessEvent", "15 April 2023", 300, 1000.0, 770.06));
+            verifyBusinessEvents(new LoanBusinessEvent("LoanBalanceChangedBusinessEvent", "15 April 2023", 300, 1000.0, 758.15));
 
             deleteAllExternalEvents();
 
@@ -146,13 +146,13 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
 
             loanTransactionHelper.reverseRepayment(loanIdRef.get().intValue(), transactionId.intValue(), "15 April 2023");
 
-            verifyBusinessEvents(new LoanBusinessEvent("LoanBalanceChangedBusinessEvent", "15 April 2023", 300, 1000.0, 770.06));
+            verifyBusinessEvents(new LoanBusinessEvent("LoanBalanceChangedBusinessEvent", "15 April 2023", 300, 1000.0, 758.15));
 
             deleteAllExternalEvents();
 
             loanTransactionHelper.makeLoanRepayment("15 April 2023", 830.22F, loanIdRef.get().intValue());
 
-            verifyBusinessEvents(new LoanBusinessEvent("LoanBalanceChangedBusinessEvent", "15 April 2023", 600, 1000.0, 0.0));
+            verifyBusinessEvents(new LoanBusinessEvent("LoanBalanceChangedBusinessEvent", "15 April 2023", 700, 1000.0, 0.0));
 
             disableLoanBalanceChangedBusinessEvent();
         });
@@ -915,7 +915,7 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
 
             PutLoansLoanIdRequest modification = new PutLoansLoanIdRequest().clientId(client.getClientId()).productId(loanProductId)
                     .transactionProcessingStrategyCode(DEFAULT_STRATEGY).interestRatePerPeriod(BigDecimal.valueOf(2)).repaymentEvery(1)
-                    .principal(550L).amortizationType(1).interestType(1).interestCalculationPeriodType(0)
+                    .principal(550L).amortizationType(1).interestType(0).interestCalculationPeriodType(0)
                     .expectedDisbursementDate("1 March 2024").repaymentFrequencyType(2).numberOfRepayments(4).loanTermFrequency(4)
                     .loanTermFrequencyType(2).loanType("individual").dateFormat("dd MMMM yyyy").locale("en_GB");
 
@@ -1097,7 +1097,7 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             String submittedOnDate, String expectedDisburmentDate) {
         final PostLoansRequest loanRequest = new PostLoansRequest() //
                 .loanTermFrequency(4).locale("en_GB").loanTermFrequencyType(2).numberOfRepayments(4).repaymentFrequencyType(2)
-                .interestRatePerPeriod(BigDecimal.valueOf(2)).repaymentEvery(1).principal(principal).amortizationType(1).interestType(1)
+                .interestRatePerPeriod(BigDecimal.valueOf(2)).repaymentEvery(1).principal(principal).amortizationType(1).interestType(0)
                 .interestCalculationPeriodType(0).dateFormat("dd MMMM yyyy").transactionProcessingStrategyCode(DEFAULT_STRATEGY)
                 .loanType("individual").submittedOnDate(submittedOnDate).expectedDisbursementDate(expectedDisburmentDate).clientId(clientId)
                 .productId(loanProductId);
@@ -1110,7 +1110,7 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             String submittedOnDate, String expectedDisburmentDate) {
         final PostLoansRequest loanRequest = new PostLoansRequest() //
                 .loanTermFrequency(4).locale("en_GB").loanTermFrequencyType(2).numberOfRepayments(4).repaymentFrequencyType(2)
-                .interestRatePerPeriod(BigDecimal.valueOf(2)).repaymentEvery(1).principal(principal).amortizationType(1).interestType(1)
+                .interestRatePerPeriod(BigDecimal.valueOf(2)).repaymentEvery(1).principal(principal).amortizationType(1).interestType(0)
                 .interestCalculationPeriodType(0).dateFormat("dd MMMM yyyy").transactionProcessingStrategyCode(DEFAULT_STRATEGY)
                 .loanType("individual").submittedOnDate(submittedOnDate).expectedDisbursementDate(expectedDisburmentDate).clientId(clientId)
                 .productId(loanProductId);

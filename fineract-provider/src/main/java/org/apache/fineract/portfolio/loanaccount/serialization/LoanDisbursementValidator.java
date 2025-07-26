@@ -44,7 +44,7 @@ public final class LoanDisbursementValidator {
             } else {
                 if ((totalDisbursed.compareTo(loan.getApprovedPrincipal()) > 0)
                         || (totalDisbursed.add(capitalizedIncome).compareTo(loan.getApprovedPrincipal()) > 0)) {
-                    final String errorMsg = "Loan can't be disbursed,disburse amount is exceeding approved principal ";
+                    final String errorMsg = "Loan can't be disbursed, disburse amount is exceeding approved principal.";
                     throw new LoanDisbursalException(errorMsg, "disburse.amount.must.be.less.than.approved.principal", totalDisbursed,
                             loan.getApprovedPrincipal());
                 }

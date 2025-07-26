@@ -214,6 +214,8 @@ public final class LoanApplicationValidator {
                     expectedFirstRepaymentOnDate);
         }
 
+        validateCumulativeMultiDisburse(loan);
+
         validateLoanTermAndRepaidEveryValues(loan.getTermFrequency(), loan.getTermPeriodFrequencyType().getValue(),
                 loan.getLoanProductRelatedDetail().getNumberOfRepayments(), loan.getLoanProductRelatedDetail().getRepayEvery(),
                 loan.getLoanProductRelatedDetail().getRepaymentPeriodFrequencyType().getValue(), loan);
@@ -227,6 +229,8 @@ public final class LoanApplicationValidator {
                     "submittedOnDate cannot be after the loans  expectedFirstRepaymentOnDate.", submittedOnDate,
                     expectedFirstRepaymentOnDate);
         }
+
+        validateCumulativeMultiDisburse(loan);
 
         validateLoanTermAndRepaidEveryValues(loan.getTermFrequency(), loan.getTermPeriodFrequencyType().getValue(),
                 loan.getLoanProductRelatedDetail().getNumberOfRepayments(), loan.getLoanProductRelatedDetail().getRepayEvery(),
@@ -2170,12 +2174,33 @@ public final class LoanApplicationValidator {
 
     public BigDecimal getOverAppliedMax(Loan loan) {
         LoanProduct loanProduct = loan.getLoanProduct();
+
+        // Check if overapplied calculation type and number are properly configured
+        if (loanProduct.getOverAppliedCalculationType() == null || loanProduct.getOverAppliedNumber() == null) {
+            // If overapplied calculation is not configured, return proposed principal (original behavior)
+            return loan.getProposedPrincipal();
+        }
+
+        // For loans with approved amount modifications, use proposed principal as base to allow
+        // disbursement up to the originally requested amount regardless of the reduced approved amount
+        boolean hasApprovedAmountModification = loan.getApprovedPrincipal() != null && loan.getProposedPrincipal() != null
+                && loan.getApprovedPrincipal().compareTo(loan.getProposedPrincipal()) != 0;
+
+        BigDecimal basePrincipal;
+        if (hasApprovedAmountModification) {
+            // Use proposed principal for loans with approved amount modifications
+            basePrincipal = loan.getProposedPrincipal();
+        } else {
+            // Use approved principal for normal loans
+            basePrincipal = loan.getApprovedPrincipal() != null ? loan.getApprovedPrincipal() : loan.getProposedPrincipal();
+        }
+
         if ("percentage".equals(loanProduct.getOverAppliedCalculationType())) {
             BigDecimal overAppliedNumber = BigDecimal.valueOf(loanProduct.getOverAppliedNumber());
             BigDecimal totalPercentage = BigDecimal.valueOf(1).add(overAppliedNumber.divide(BigDecimal.valueOf(100)));
-            return loan.getProposedPrincipal().multiply(totalPercentage);
+            return basePrincipal.multiply(totalPercentage);
         } else {
-            return loan.getProposedPrincipal().add(BigDecimal.valueOf(loanProduct.getOverAppliedNumber()));
+            return basePrincipal.add(BigDecimal.valueOf(loanProduct.getOverAppliedNumber()));
         }
     }
 
@@ -2187,6 +2212,19 @@ public final class LoanApplicationValidator {
         if (calendar != null && !calendar.isValidRecurringDate(expectedDisbursementDate, isSkipRepaymentOnFirstMonth, numberOfDays)) {
             final String errorMessage = "Expected disbursement date '" + expectedDisbursementDate + "' do not fall on a meeting date";
             throw new LoanApplicationDateException("disbursement.date.do.not.match.meeting.date", errorMessage, expectedDisbursementDate);
+        }
+    }
+
+    private static void validateCumulativeMultiDisburse(Loan loan) {
+        if (loan.isCumulativeSchedule() && loan.isMultiDisburmentLoan()
+                && loan.getLoanProductRelatedDetail().getInterestMethod().isFlat()) {
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final ApiParameterError error = ApiParameterError.generalError(
+                    "validation.msg.loan.cumulative.multidisburse.does.not.support.flat.interest.mode",
+                    "Cumulative multidisburse loan does NOT support FLAT interest mode.");
+            dataValidationErrors.add(error);
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
         }
     }
 

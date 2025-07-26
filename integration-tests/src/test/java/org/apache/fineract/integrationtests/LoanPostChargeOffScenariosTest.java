@@ -1108,7 +1108,7 @@ public class LoanPostChargeOffScenariosTest extends BaseLoanIntegrationTest {
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("30")
                 .withLoanTermFrequencyAsDays().withNumberOfRepayments("1").withRepaymentEveryAfter("30").withRepaymentFrequencyTypeAsDays()
-                .withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance().withAmortizationTypeAsEqualPrincipalPayments()
+                .withInterestRatePerPeriod("0").withInterestTypeAsDecliningBalance().withAmortizationTypeAsEqualPrincipalPayments()
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("03 September 2022")
                 .withSubmittedOnDate("01 September 2022").withLoanType("individual").withExternalId(externalId)
                 .build(clientID.toString(), loanProductID.toString(), null);

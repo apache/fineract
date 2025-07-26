@@ -50,4 +50,12 @@ public class InterestPauseRequestDto {
             throw new IllegalArgumentException("Error serializing request to JSON", e);
         }
     }
+
+    public static InterestPauseRequestDto fromJson(String json) {
+        try {
+            return new ObjectMapper().readValue(json, InterestPauseRequestDto.class);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Error deserializing request from JSON", e);
+        }
+    }
 }

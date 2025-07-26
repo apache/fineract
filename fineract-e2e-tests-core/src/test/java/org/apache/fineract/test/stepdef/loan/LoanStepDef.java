@@ -24,6 +24,7 @@ import static org.apache.fineract.test.data.loanproduct.DefaultLoanProduct.LP2_A
 import static org.apache.fineract.test.data.loanproduct.DefaultLoanProduct.LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_ZERO_INTEREST_CHARGE_OFF_BEHAVIOUR;
 import static org.apache.fineract.test.data.loanproduct.DefaultLoanProduct.LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_BEHAVIOUR;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.CHARGE_OFF_REASONS;
+import static org.apache.fineract.test.factory.LoanProductsRequestFactory.LOCALE_EN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -98,6 +99,8 @@ import org.apache.fineract.client.models.PostLoansRequestChargeData;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.PutLoansApprovedAmountRequest;
+import org.apache.fineract.client.models.PutLoansApprovedAmountResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.services.BusinessDateManagementApi;
@@ -402,6 +405,173 @@ public class LoanStepDef extends AbstractStepDef {
                 transactionAmount, transferExternalOwnerId);
     }
 
+    @When("Customer makes {string} transaction with {string} payment type on {string} with {double} EUR transaction amount and system-generated Idempotency key and interestRefundCalculation {booleanValue}")
+    public void createTransactionWithAutoIdempotencyKeyAndWithInterestRefundCalculationFlagProvided(final String transactionTypeInput,
+            final String transactionPaymentType, final String transactionDate, final double transactionAmount,
+            final boolean interestRefundCalculation) throws IOException {
+        eventStore.reset();
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanResponse.body() != null;
+        final long loanId = loanResponse.body().getLoanId();
+
+        final TransactionType transactionType = TransactionType.valueOf(transactionTypeInput);
+        final String transactionTypeValue = transactionType.getValue();
+        final DefaultPaymentType paymentType = DefaultPaymentType.valueOf(transactionPaymentType);
+        final Long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
+
+        final PostLoansLoanIdTransactionsRequest paymentTransactionRequest = LoanRequestFactory.defaultPaymentTransactionRequest()
+                .transactionDate(transactionDate).transactionAmount(transactionAmount).paymentTypeId(paymentTypeValue)
+                .interestRefundCalculation(interestRefundCalculation);
+
+        final Response<PostLoansLoanIdTransactionsResponse> paymentTransactionResponse = loanTransactionsApi
+                .executeLoanTransaction(loanId, paymentTransactionRequest, transactionTypeValue).execute();
+        testContext().set(TestContextKey.LOAN_PAYMENT_TRANSACTION_RESPONSE, paymentTransactionResponse);
+        testContext().set(TestContextKey.LOAN_REPAYMENT_RESPONSE, paymentTransactionResponse);
+        ErrorHelper.checkSuccessfulApiCall(paymentTransactionResponse);
+
+        eventCheckHelper.transactionEventCheck(paymentTransactionResponse, transactionType, null);
+        eventCheckHelper.loanBalanceChangedEventCheck(loanId);
+    }
+
+    @When("Admin manually adds Interest Refund for {string} transaction made on {string} with {double} EUR interest refund amount")
+    public void addInterestRefundTransactionManually(final String transactionTypeInput, final String transactionDate, final double amount)
+            throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final TransactionType transactionType = TransactionType.valueOf(transactionTypeInput);
+
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        assert loanDetailsResponse.body() != null;
+        final List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+        assert transactions != null;
+        final GetLoansLoanIdTransactions refundTransaction = transactions.stream()
+                .filter(t -> t.getType() != null
+                        && (transactionType.equals(TransactionType.PAYOUT_REFUND) ? "Payout Refund" : "Merchant Issued Refund")
+                                .equals(t.getType().getValue())
+                        && t.getDate() != null && transactionDate.equals(FORMATTER.format(t.getDate())))
+                .findFirst().orElseThrow(() -> new IllegalStateException("No refund transaction found for loan " + loanId));
+
+        final Response<PostLoansLoanIdTransactionsResponse> adjustmentResponse = addInterestRefundTransaction(amount,
+                refundTransaction.getId());
+        testContext().set(TestContextKey.LOAN_INTEREST_REFUND_RESPONSE, adjustmentResponse);
+        ErrorHelper.checkSuccessfulApiCall(adjustmentResponse);
+        eventCheckHelper.transactionEventCheck(adjustmentResponse, TransactionType.INTEREST_REFUND, null);
+        eventCheckHelper.loanBalanceChangedEventCheck(loanId);
+    }
+
+    @When("Admin manually adds Interest Refund for {string} transaction made on invalid date {string} with {double} EUR interest refund amount")
+    public void addInterestRefundTransactionManuallyWithInvalidDate(final String transactionTypeInput, final String transactionDate,
+            final double amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final TransactionType transactionType = TransactionType.valueOf(transactionTypeInput);
+
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        assert loanDetailsResponse.body() != null;
+        final List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+        assert transactions != null;
+        final GetLoansLoanIdTransactions refundTransaction = transactions.stream()
+                .filter(t -> t.getType() != null
+                        && (transactionType.equals(TransactionType.PAYOUT_REFUND) ? "Payout Refund" : "Merchant Issued Refund")
+                                .equals(t.getType().getValue()))
+                .findFirst().orElseThrow(() -> new IllegalStateException("No refund transaction found for loan " + loanId));
+
+        final Response<PostLoansLoanIdTransactionsResponse> adjustmentResponse = addInterestRefundTransaction(amount,
+                refundTransaction.getId(), transactionDate);
+        testContext().set(TestContextKey.LOAN_INTEREST_REFUND_RESPONSE, adjustmentResponse);
+        ErrorHelper.checkFailedApiCall(adjustmentResponse, 400);
+    }
+
+    @When("Admin fails to add Interest Refund for {string} transaction made on {string} with {double} EUR interest refund amount")
+    public void addInterestRefundTransactionManuallyFailsInNonPayout(final String transactionTypeInput, final String transactionDate,
+            final double amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final TransactionType transactionType = TransactionType.valueOf(transactionTypeInput);
+
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        assert loanDetailsResponse.body() != null;
+        final List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+        assert transactions != null;
+
+        final GetLoansLoanIdTransactions moneyTransaction = transactions.stream()
+                .filter(t -> t.getType() != null && transactionType.equals(TransactionType.REPAYMENT) && t.getDate() != null
+                        && transactionDate.equals(FORMATTER.format(t.getDate())))
+                .findFirst().orElseThrow(() -> new IllegalStateException("No repayment transaction found"));
+
+        final Response<PostLoansLoanIdTransactionsResponse> adjustmentResponse = addInterestRefundTransaction(amount,
+                moneyTransaction.getId());
+        testContext().set(TestContextKey.LOAN_INTEREST_REFUND_RESPONSE, adjustmentResponse);
+        final ErrorResponse errorDetails = ErrorResponse.from(adjustmentResponse);
+        assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.addManualInterestRefundIfReversedFailure()).isEqualTo(403);
+        assertThat(errorDetails.getSingleError().getDeveloperMessage())
+                .isEqualTo(ErrorMessageHelper.addManualInterestRefundIfReversedFailure());
+    }
+
+    @Then("Admin fails to add duplicate Interest Refund for {string} transaction made on {string} with {double} EUR interest refund amount")
+    public void failToAddManualInterestRefundIfAlreadyExists(final String transactionTypeInput, final String transactionDate,
+            final double amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final TransactionType transactionType = TransactionType.valueOf(transactionTypeInput);
+
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        assert loanDetailsResponse.body() != null;
+        final List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+        assert transactions != null;
+        final GetLoansLoanIdTransactions refundTransaction = transactions.stream()
+                .filter(t -> t.getType() != null
+                        && (transactionType.equals(TransactionType.PAYOUT_REFUND) ? "Payout Refund" : "Merchant Issued Refund")
+                                .equals(t.getType().getValue())
+                        && t.getDate() != null && transactionDate.equals(FORMATTER.format(t.getDate())))
+                .findFirst().orElseThrow(() -> new IllegalStateException("No refund transaction found for loan " + loanId));
+
+        final Response<PostLoansLoanIdTransactionsResponse> adjustmentResponse = addInterestRefundTransaction(amount,
+                refundTransaction.getId());
+        testContext().set(TestContextKey.LOAN_INTEREST_REFUND_RESPONSE, adjustmentResponse);
+        final ErrorResponse errorDetails = ErrorResponse.from(adjustmentResponse);
+        assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.addManualInterestRefundIfAlreadyExistsFailure()).isEqualTo(403);
+        assertThat(errorDetails.getSingleError().getDeveloperMessage())
+                .isEqualTo(ErrorMessageHelper.addManualInterestRefundIfAlreadyExistsFailure());
+    }
+
+    @Then("Admin fails to add Interest Refund {string} transaction after reverse made on {string} with {double} EUR interest refund amount")
+    public void failToAddManualInterestRefundIfReversed(final String transactionTypeInput, final String transactionDate,
+            final double amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final TransactionType transactionType = TransactionType.valueOf(transactionTypeInput);
+
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        assert loanDetailsResponse.body() != null;
+        final List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+        assert transactions != null;
+        final GetLoansLoanIdTransactions refundTransaction = transactions.stream()
+                .filter(t -> t.getType() != null
+                        && (transactionType.equals(TransactionType.PAYOUT_REFUND) ? "Payout Refund" : "Merchant Issued Refund")
+                                .equals(t.getType().getValue())
+                        && t.getDate() != null && transactionDate.equals(FORMATTER.format(t.getDate())))
+                .findFirst().orElseThrow(() -> new IllegalStateException("No refund transaction found for loan " + loanId));
+
+        final Response<PostLoansLoanIdTransactionsResponse> adjustmentResponse = addInterestRefundTransaction(amount,
+                refundTransaction.getId());
+        testContext().set(TestContextKey.LOAN_INTEREST_REFUND_RESPONSE, adjustmentResponse);
+        final ErrorResponse errorDetails = ErrorResponse.from(adjustmentResponse);
+        assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.addManualInterestRefundIfAlreadyExistsFailure()).isEqualTo(403);
+        assertThat(errorDetails.getSingleError().getDeveloperMessage())
+                .isEqualTo(ErrorMessageHelper.addManualInterestRefundIfReversedFailure());
+    }
+
     private void createTransactionWithAutoIdempotencyKeyAndWithExternalOwner(String transactionTypeInput, String transactionPaymentType,
             String transactionDate, double transactionAmount, String externalOwnerId) throws IOException {
         eventStore.reset();
@@ -544,6 +714,12 @@ public class LoanStepDef extends AbstractStepDef {
     public void createFullyCustomizedLoanWithDisbursementsDetails(final DataTable table) throws IOException {
         final List<List<String>> data = table.asLists();
         createFullyCustomizedLoanWithExpectedTrancheDisbursementsDetails(data.get(1));
+    }
+
+    @When("Admin creates a fully customized loan with three expected disbursements details and following data:")
+    public void createFullyCustomizedLoanWithThreeDisbursementsDetails(final DataTable table) throws IOException {
+        final List<List<String>> data = table.asLists();
+        createFullyCustomizedLoanWithThreeExpectedTrancheDisbursementsDetails(data.get(1));
     }
 
     @When("Admin creates a fully customized loan with forced disabled downpayment with the following data:")
@@ -3660,6 +3836,27 @@ public class LoanStepDef extends AbstractStepDef {
         createFullyCustomizedLoanExpectsTrancheDisbursementDetails(loanData, disbursementDetail);
     }
 
+    public void createFullyCustomizedLoanWithThreeExpectedTrancheDisbursementsDetails(final List<String> loanData) throws IOException {
+        final String expectedDisbursementDateFirstDisbursal = loanData.get(16);
+        final Double disbursementPrincipalAmountFirstDisbursal = Double.valueOf(loanData.get(17));
+
+        final String expectedDisbursementDateSecondDisbursal = loanData.get(18);
+        final Double disbursementPrincipalAmountSecondDisbursal = Double.valueOf(loanData.get(19));
+
+        final String expectedDisbursementDateThirdDisbursal = loanData.get(20);
+        final Double disbursementPrincipalAmountThirdDisbursal = Double.valueOf(loanData.get(21));
+
+        List<PostLoansDisbursementData> disbursementDetail = new ArrayList<>();
+        disbursementDetail.add(new PostLoansDisbursementData().expectedDisbursementDate(expectedDisbursementDateFirstDisbursal)
+                .principal(BigDecimal.valueOf(disbursementPrincipalAmountFirstDisbursal)));
+        disbursementDetail.add(new PostLoansDisbursementData().expectedDisbursementDate(expectedDisbursementDateSecondDisbursal)
+                .principal(BigDecimal.valueOf(disbursementPrincipalAmountSecondDisbursal)));
+        disbursementDetail.add(new PostLoansDisbursementData().expectedDisbursementDate(expectedDisbursementDateThirdDisbursal)
+                .principal(BigDecimal.valueOf(disbursementPrincipalAmountThirdDisbursal)));
+
+        createFullyCustomizedLoanExpectsTrancheDisbursementDetails(loanData, disbursementDetail);
+    }
+
     public void createFullyCustomizedLoanExpectsTrancheDisbursementDetails(final List<String> loanData,
             List<PostLoansDisbursementData> disbursementDetail) throws IOException {
         final String loanProduct = loanData.get(0);
@@ -4831,4 +5028,135 @@ public class LoanStepDef extends AbstractStepDef {
         log.debug("BuyDown Fee Adjustment created: Transaction ID {}", adjustmentResponse.body().getResourceId());
     }
 
+    @Then("Update loan approved amount with new amount {string} value")
+    public void updateLoanApprovedAmount(final String amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        final PutLoansApprovedAmountRequest modifyLoanApprovedAmountRequest = new PutLoansApprovedAmountRequest().locale(LOCALE_EN)
+                .amount(new BigDecimal(amount));
+
+        final Response<PutLoansApprovedAmountResponse> modifyLoanApprovedAmountResponse = loansApi
+                .modifyLoanApprovedAmount(loanId, modifyLoanApprovedAmountRequest).execute();
+
+        ErrorHelper.checkSuccessfulApiCall(modifyLoanApprovedAmountResponse);
+
+    }
+
+    @Then("Update loan approved amount is forbidden with amount {string} due to exceed applied amount")
+    public void updateLoanApprovedAmountForbiddenExceedAppliedAmount(final String amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        final PutLoansApprovedAmountRequest modifyLoanApprovedAmountRequest = new PutLoansApprovedAmountRequest().locale(LOCALE_EN)
+                .amount(new BigDecimal(amount));
+
+        final Response<PutLoansApprovedAmountResponse> modifyLoanApprovedAmountResponse = loansApi
+                .modifyLoanApprovedAmount(loanId, modifyLoanApprovedAmountRequest).execute();
+
+        ErrorResponse errorDetails = ErrorResponse.from(modifyLoanApprovedAmountResponse);
+        assertThat(errorDetails.getHttpStatusCode()).isEqualTo(403);
+
+        Object errorArgs = errorDetails.getErrors().getFirst().getArgs().getFirst().getValue();
+        String developerMessage;
+        if (errorArgs instanceof Map errorArgsMap) {
+            developerMessage = (String) errorArgsMap.get("developerMessage");
+        } else {
+            developerMessage = errorDetails.getDeveloperMessage();
+        }
+        assertThat(developerMessage).isEqualTo(ErrorMessageHelper.updateApprovedLoanExceedPrincipalFailure());
+    }
+
+    @Then("Update loan approved amount is forbidden with amount {string} due to higher principal amount on loan")
+    public void updateLoanApprovedAmountForbiddenHigherPrincipalAmountOnLoan(final String amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        final PutLoansApprovedAmountRequest modifyLoanApprovedAmountRequest = new PutLoansApprovedAmountRequest().locale(LOCALE_EN)
+                .amount(new BigDecimal(amount));
+
+        final Response<PutLoansApprovedAmountResponse> modifyLoanApprovedAmountResponse = loansApi
+                .modifyLoanApprovedAmount(loanId, modifyLoanApprovedAmountRequest).execute();
+
+        ErrorResponse errorDetails = ErrorResponse.from(modifyLoanApprovedAmountResponse);
+        assertThat(errorDetails.getHttpStatusCode()).isEqualTo(403);
+
+        Object errorArgs = errorDetails.getErrors().getFirst().getArgs().getFirst().getValue();
+        String developerMessage;
+        if (errorArgs instanceof Map errorArgsMap) {
+            developerMessage = (String) errorArgsMap.get("developerMessage");
+        } else {
+            developerMessage = errorDetails.getDeveloperMessage();
+        }
+        assertThat(developerMessage)
+                .isEqualTo(ErrorMessageHelper.updateApprovedLoanLessThanDisbursedPrincipalAndCapitalizedIncomeFailure());
+    }
+
+    @Then("Update loan approved amount is forbidden with amount {string} due to min allowed amount")
+    public void updateLoanApprovedAmountForbiddenMinAllowedAmount(final String amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        final PutLoansApprovedAmountRequest modifyLoanApprovedAmountRequest = new PutLoansApprovedAmountRequest().locale(LOCALE_EN)
+                .amount(new BigDecimal(amount));
+
+        final Response<PutLoansApprovedAmountResponse> modifyLoanApprovedAmountResponse = loansApi
+                .modifyLoanApprovedAmount(loanId, modifyLoanApprovedAmountRequest).execute();
+
+        ErrorResponse errorDetails = ErrorResponse.from(modifyLoanApprovedAmountResponse);
+        assertThat(errorDetails.getHttpStatusCode()).isEqualTo(403);
+
+        Object errorArgs = errorDetails.getErrors().getFirst().getArgs().getFirst().getValue();
+        String developerMessage;
+        if (errorArgs instanceof Map errorArgsMap) {
+            developerMessage = (String) errorArgsMap.get("developerMessage");
+        } else {
+            developerMessage = errorDetails.getDeveloperMessage();
+        }
+        assertThat(developerMessage).isEqualTo(ErrorMessageHelper.updateApprovedLoanLessMinAllowedAmountFailure());
+    }
+
+    private Response<PostLoansLoanIdTransactionsResponse> addInterestRefundTransaction(final double amount, final Long transactionId)
+            throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanResponse.body() != null;
+        final long loanId = loanResponse.body().getLoanId();
+
+        final DefaultPaymentType paymentType = DefaultPaymentType.AUTOPAY;
+        final Long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
+
+        final PostLoansLoanIdTransactionsTransactionIdRequest interestRefundRequest = new PostLoansLoanIdTransactionsTransactionIdRequest()
+                .dateFormat("dd MMMM yyyy").locale("en").transactionAmount(amount).paymentTypeId(paymentTypeValue)
+                .externalId("EXT-INT-REF-" + UUID.randomUUID()).note("");
+
+        return loanTransactionsApi.adjustLoanTransaction(loanId, transactionId, interestRefundRequest, "interest-refund").execute();
+    }
+
+    private Response<PostLoansLoanIdTransactionsResponse> addInterestRefundTransaction(final double amount, final Long transactionId,
+            final String transactionDate) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanResponse.body() != null;
+        final long loanId = loanResponse.body().getLoanId();
+
+        final DefaultPaymentType paymentType = DefaultPaymentType.AUTOPAY;
+        final Long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
+
+        final PostLoansLoanIdTransactionsTransactionIdRequest interestRefundRequest = new PostLoansLoanIdTransactionsTransactionIdRequest()
+                .dateFormat("dd MMMM yyyy").locale("en").transactionAmount(amount).paymentTypeId(paymentTypeValue)
+                .externalId("EXT-INT-REF-" + UUID.randomUUID()).note("");
+
+        if (transactionDate != null) {
+            interestRefundRequest.transactionDate(transactionDate);
+        }
+
+        return loanTransactionsApi.adjustLoanTransaction(loanId, transactionId, interestRefundRequest, "interest-refund").execute();
+    }
 }

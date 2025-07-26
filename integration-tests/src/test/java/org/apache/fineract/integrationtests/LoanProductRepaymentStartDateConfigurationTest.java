@@ -261,7 +261,7 @@ public class LoanProductRepaymentStartDateConfigurationTest {
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(166.67,
+            assertEquals(333.33,
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
 
             // second period [2023-04-03 to 2023-05-03]
@@ -275,7 +275,7 @@ public class LoanProductRepaymentStartDateConfigurationTest {
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 3), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(500.00,
+            assertEquals(333.34,
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
 
         } finally {
@@ -475,7 +475,7 @@ public class LoanProductRepaymentStartDateConfigurationTest {
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("3")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("3").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsDecliningBalance()
                 .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
                 .withExpectedDisbursementDate("07 March 2023").withSubmittedOnDate("03 March 2023").withLoanType("individual")
                 .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);

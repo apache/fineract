@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
  * A JDBC implementation of {@link TenantDetailsService} for loading a tenants details by a
  * <code>tenantIdentifier</code>.
  */
-@Service
+@Service("tenantDetailsService")
 public class JdbcTenantDetailsService implements TenantDetailsService {
 
     private final JdbcTemplate jdbcTemplate;

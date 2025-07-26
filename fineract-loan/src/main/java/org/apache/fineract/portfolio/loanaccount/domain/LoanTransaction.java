@@ -195,6 +195,11 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.INTEREST_REFUND, null, amount, date, externalId);
     }
 
+    public static LoanTransaction interestRefund(final Loan loan, final BigDecimal amount, final LocalDate date,
+            final PaymentDetail paymentDetail, final ExternalId externalId) {
+        return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.INTEREST_REFUND, paymentDetail, amount, date, externalId);
+    }
+
     public static LoanTransaction chargeAdjustment(final Loan loan, final BigDecimal amount, final LocalDate transactionDate,
             final ExternalId externalId, PaymentDetail paymentDetail) {
         return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.CHARGE_ADJUSTMENT, paymentDetail, amount, transactionDate,

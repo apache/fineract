@@ -94,13 +94,22 @@ jobs:
 
       - name: Run Gradle Task
         run: |
+          set -e  # Fail the script if any command fails
           SHARD_INDEX=$(echo "${{ matrix.task }}" | awk -F'-' '{print $3}')
+          FAILED=0
+
           case "${{ matrix.task }}" in
             test-twofactor)
-              ./gradlew --no-daemon :twofactor-tests:test -PdbType=mysql -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer
+              if ! ./gradlew --no-daemon :twofactor-tests:test -PdbType=mysql -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer; then
+                echo "::error::Two-factor tests failed"
+                FAILED=1
+              fi
               ;;
             test-oauth2)
-              ./gradlew --no-daemon :oauth2-tests:test -PdbType=mysql -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer
+              if ! ./gradlew --no-daemon :oauth2-tests:test -PdbType=mysql -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer; then
+                echo "::error::OAuth2 tests failed"
+                FAILED=1
+              fi
               ;;
             test-core-*)
               echo "Grouping test classes by module..."
@@ -111,7 +120,7 @@ jobs:
               done < "shard-tests_${SHARD_INDEX}.txt"
 
               for module in "${!module_tests[@]}"; do
-                echo "Running tests in $module:"
+                echo "::group::Running tests in $module"
                 for class in ${module_tests[$module]}; do
                   echo "  - $class"
                 done
@@ -120,10 +129,20 @@ jobs:
                 test_args=$(for class in ${module_tests[$module]}; do echo --tests "$class"; done | xargs)
 
                 # Run test task for this module
-                ./gradlew "$module:test" $test_args -PdbType=mysql -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer
+                if ! ./gradlew "$module:test" $test_args -PdbType=mysql -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer; then
+                  echo "::error::Tests failed in module $module"
+                  FAILED=1
+                fi
+                echo "::endgroup::"
               done
               ;;
           esac
+
+          # Exit with failure status if any test failed
+          if [ "$FAILED" -eq 1 ]; then
+            echo "::error::Some tests failed in this job"
+            exit 1
+          fi
 
       - name: Archive test results
         if: always()

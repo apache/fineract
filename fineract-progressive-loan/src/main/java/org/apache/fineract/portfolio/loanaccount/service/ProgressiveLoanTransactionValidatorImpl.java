@@ -572,6 +572,11 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
         loanTransactionValidator.validateReversalExternalId(baseDataValidator, element);
     }
 
+    @Override
+    public void validateManualInterestRefundTransaction(final String json) {
+        loanTransactionValidator.validateManualInterestRefundTransaction(json);
+    }
+
     private Set<String> getCapitalizedIncomeParameters() {
         return new HashSet<>(
                 Arrays.asList("transactionDate", "dateFormat", "locale", "transactionAmount", "paymentTypeId", "note", "externalId"));

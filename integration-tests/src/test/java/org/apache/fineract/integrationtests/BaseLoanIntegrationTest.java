@@ -67,6 +67,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
+import org.apache.fineract.client.models.LoanApprovedAmountHistoryData;
 import org.apache.fineract.client.models.LoanPointInTimeData;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostChargesResponse;
@@ -81,6 +82,8 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionI
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.client.models.PutLoansApprovedAmountRequest;
+import org.apache.fineract.client.models.PutLoansApprovedAmountResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.models.RetrieveLoansPointInTimeRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
@@ -775,6 +778,15 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         RetrieveLoansPointInTimeRequest request = new RetrieveLoansPointInTimeRequest().loanIds(loanIds).date(date)
                 .dateFormat(DATETIME_PATTERN).locale("en");
         return Calls.ok(fineractClient().loansPointInTimeApi.retrieveLoansPointInTime(request));
+    }
+
+    protected PutLoansApprovedAmountResponse modifyLoanApprovedAmount(Long loanId, BigDecimal approvedAmount) {
+        PutLoansApprovedAmountRequest request = new PutLoansApprovedAmountRequest().amount(approvedAmount).locale("en");
+        return Calls.ok(fineractClient().loans.modifyLoanApprovedAmount(loanId, request));
+    }
+
+    protected List<LoanApprovedAmountHistoryData> getLoanApprovedAmountHistory(Long loanId) {
+        return Calls.ok(fineractClient().loans.getLoanApprovedAmountHistory(loanId));
     }
 
     protected void verifyOutstanding(LoanPointInTimeData loan, OutstandingAmounts outstanding) {

@@ -209,4 +209,6 @@
     <include file="parts/0188_create_loan_buy_down_fee_balance.xml" relativeToChangelogFile="true" />
     <include file="parts/0189_add_loan_buydown_fee_event.xml" relativeToChangelogFile="true" />
     <include file="parts/0190_buy_down_fee_amortization.xml" relativeToChangelogFile="true" />
+    <include file="parts/0191_add_LoanApprovedAmountChangedBusinessEvent.xml" relativeToChangelogFile="true" />
+    <include file="parts/0192_create_loan_approved_amount_history.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

@@ -65,7 +65,15 @@ public final class ErrorMessageHelper {
     }
 
     public static String addDisbursementExceedApprovedAmountFailure() {
-        return "Loan can't be disbursed,disburse amount is exceeding approved principal ";
+        return "Loan can't be disbursed, disburse amount is exceeding approved principal.";
+    }
+
+    public static String addManualInterestRefundIfAlreadyExistsFailure() {
+        return "Interest Refund already exists for this transaction";
+    }
+
+    public static String addManualInterestRefundIfReversedFailure() {
+        return "Target transaction must be Merchant Issued Refund or Payout Refund";
     }
 
     public static String addDisbursementExceedMaxAppliedAmountFailure(String totalDisbAmount, String maxDisbursalAmount) {
@@ -164,7 +172,7 @@ public final class ErrorMessageHelper {
     }
 
     public static String addCapitalizedIncomeUndoFailureTransactionTypeNonReversal() {
-        return "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income or capitalized income adjustment can be adjusted.";
+        return "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment or buy down fee adjustment can be adjusted.";
     }
 
     public static String addCapitalizedIncomeUndoFailureAdjustmentExists() {
@@ -979,5 +987,17 @@ public final class ErrorMessageHelper {
 
     public static String addInstallmentFeePrincipalPercentageChargeFailure() {
         return "Failed data validation due to: installment.loancharge.with.calculation.type.principal.not.allowed.";
+    }
+
+    public static String updateApprovedLoanExceedPrincipalFailure() {
+        return "Failed data validation due to: can't.be.greater.than.maximum.applied.loan.amount.calculation.";
+    }
+
+    public static String updateApprovedLoanLessThanDisbursedPrincipalAndCapitalizedIncomeFailure() {
+        return "Failed data validation due to: less.than.disbursed.principal.and.capitalized.income.";
+    }
+
+    public static String updateApprovedLoanLessMinAllowedAmountFailure() {
+        return "The parameter `amount` must be greater than 0.";
     }
 }

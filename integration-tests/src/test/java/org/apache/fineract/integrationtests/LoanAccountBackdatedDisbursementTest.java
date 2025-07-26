@@ -1141,7 +1141,7 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("3")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("3").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsDecliningBalance()
                 .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
                 .withExpectedDisbursementDate("07 March 2023").withSubmittedOnDate("03 March 2023").withLoanType("individual")
                 .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);

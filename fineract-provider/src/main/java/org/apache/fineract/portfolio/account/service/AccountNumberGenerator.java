@@ -193,28 +193,42 @@ public class AccountNumberGenerator {
         return accountNumber;
     }
 
-    private Boolean checkAccountNumberConflict(Map<String, String> propertyMap, AccountNumberFormat accountNumberFormat,
+    public Boolean checkAccountNumberConflict(Map<String, String> propertyMap, AccountNumberFormat accountNumberFormat,
             String accountNumber) {
 
         String entityType = propertyMap.get(ENTITY_TYPE);
-        Boolean randomNumberConflict = false;
-        if (entityType.equals("client")) { // avoid duplication it will loop until it finds new random account no.
-
-            Client client = this.clientRepository.getClientByAccountNumber(accountNumber);
-            if (client != null) {
-                randomNumberConflict = true;
-            }
-        } else if (entityType.equals("loan")) {
-            Loan loan = this.loanRepository.findLoanAccountByAccountNumber(accountNumber);
-            if (loan != null) {
-                randomNumberConflict = true;
-            }
-        } else if (entityType.equals("savingsAccount")) {
-            SavingsAccount savingsAccount = this.savingsAccountRepository.findSavingsAccountByAccountNumber(accountNumber);
-            if (savingsAccount != null) {
-                randomNumberConflict = true;
-            }
+        if (entityType == null) { // No entityType in map -> cannot check for conflicts.
+            return false;
         }
+
+        boolean randomNumberConflict = false;
+
+        switch (entityType) {
+            case "client": // avoid duplication it will loop until it finds new random account no.
+                Client client = this.clientRepository.getClientByAccountNumber(accountNumber);
+                if (client != null) {
+                    randomNumberConflict = true;
+                }
+            break;
+
+            case "loan":
+                Loan loan = this.loanRepository.findLoanAccountByAccountNumber(accountNumber);
+                if (loan != null) {
+                    randomNumberConflict = true;
+                }
+            break;
+
+            case "savingsAccount":
+                SavingsAccount savingsAccount = this.savingsAccountRepository.findSavingsAccountByAccountNumber(accountNumber);
+                if (savingsAccount != null) {
+                    randomNumberConflict = true;
+                }
+            break;
+
+            default:
+            break;
+        }
+
         return randomNumberConflict;
     }
 

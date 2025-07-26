@@ -79,7 +79,7 @@ public class LoanRequestFactory {
     public static final Integer DEFAULT_REAGING_FREQUENCY_NUMBER = 1;
     public static final String DEFAULT_REAGING_FREQUENCY_TYPE = "MONTHS";
     public static final BigDecimal DEFAULT_INTEREST_RATE_PER_PERIOD = new BigDecimal(0);
-    public static final Integer DEFAULT_INTEREST_TYPE = InterestType.FLAT.value;
+    public static final Integer DEFAULT_INTEREST_TYPE = InterestType.DECLINING_BALANCE.value;
     public static final Integer DEFAULT_PROGRESSIVE_INTEREST_TYPE = InterestType.DECLINING_BALANCE.value;
     public static final Integer DEFAULT_INTEREST_CALCULATION_PERIOD_TYPE_SAME_AS_REPAYMENT_PERIOD = InterestCalculationPeriodTime.SAME_AS_REPAYMENT_PERIOD.value;
     public static final Integer DEFAULT_PROGRESSIVE_INTEREST_CALCULATION_PERIOD_TYPE_SAME_AS_REPAYMENT_PERIOD = InterestCalculationPeriodTime.DAILY.value;

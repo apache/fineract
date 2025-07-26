@@ -157,7 +157,7 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("45")
                 .withLoanTermFrequencyAsDays().withNumberOfRepayments("3").withRepaymentEveryAfter("15").withRepaymentFrequencyTypeAsDays()
-                .withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance().withAmortizationTypeAsEqualPrincipalPayments()
+                .withInterestRatePerPeriod("0").withInterestTypeAsDecliningBalance().withAmortizationTypeAsEqualPrincipalPayments()
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("01 March 2023")
                 .withSubmittedOnDate("01 March 2023").withLoanType("individual").withExternalId(externalId)
                 .withCreateStandingInstructionAtDisbursement().build(clientID.toString(), loanProductID.toString(), savingsId.toString());

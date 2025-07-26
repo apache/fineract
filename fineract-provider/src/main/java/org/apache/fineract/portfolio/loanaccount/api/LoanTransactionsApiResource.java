@@ -93,6 +93,7 @@ public class LoanTransactionsApiResource {
     public static final String CAPITALIZED_INCOME = "capitalizedIncome";
     public static final String CAPITALIZED_INCOME_ADJUSTMENT = "capitalizedIncomeAdjustment";
     public static final String CONTRACT_TERMINATION = "contractTermination";
+    public static final String INTEREST_REFUND_COMMAND_VALUE = "interest-refund";
     private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "type", "date", "currency", "amount", "externalId",
             LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME, LoanApiConstants.REVERSED_ON_DATE_PARAMNAME));
 
@@ -121,7 +122,8 @@ public class LoanTransactionsApiResource {
             + "loans/1/transactions/template?command=refundbycash" + "\n" + "loans/1/transactions/template?command=refundbytransfer" + "\n"
             + "loans/1/transactions/template?command=foreclosure" + "\n" + "loans/1/transactions/template?command=interestPaymentWaiver"
             + "\n" + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value)"
-            + "\n" + "loans/1/transactions/template?command=charge-off" + "\n" + "loans/1/transactions/template?command=downPayment" + "\n")
+            + "\n" + "loans/1/transactions/template?command=charge-off" + "\n" + "loans/1/transactions/template?command=downPayment" + "\n"
+            + "loans/1/transactions/template?command=interest-refund")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTemplateResponse.class))) })
     public String retrieveTransactionTemplate(@PathParam("loanId") @Parameter(description = "loanId", required = true) final Long loanId,
@@ -151,7 +153,8 @@ public class LoanTransactionsApiResource {
             + "loans/1/transactions/template?command=refundbycash" + "\n" + "loans/1/transactions/template?command=refundbytransfer" + "\n"
             + "loans/1/transactions/template?command=foreclosure" + "\n" + "loans/1/transactions/template?command=interestPaymentWaiver"
             + "\n" + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value)"
-            + "\n" + "loans/1/transactions/template?command=charge-off" + "\n" + "loans/1/transactions/template?command=downPayment" + "\n")
+            + "\n" + "loans/1/transactions/template?command=charge-off" + "\n" + "loans/1/transactions/template?command=downPayment" + "\n"
+            + "loans/1/transactions/template?command=interest-refund")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTemplateResponse.class))) })
     public String retrieveTransactionTemplate(
@@ -694,6 +697,8 @@ public class LoanTransactionsApiResource {
         } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.BUY_DOWN_FEE_ADJUSTMENT_COMMAND)) {
             transactionData = this.loanReadPlatformService.retrieveLoanTransactionTemplate(resolvedLoanId,
                     LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT, transactionId);
+        } else if (CommandParameterUtil.is(commandParam, INTEREST_REFUND_COMMAND_VALUE)) {
+            transactionData = this.loanReadPlatformService.retrieveManualInterestRefundTemplate(resolvedLoanId, transactionId);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
@@ -718,6 +723,8 @@ public class LoanTransactionsApiResource {
             commandRequest = builder.capitalizedIncomeAdjustment(resolvedLoanId, resolvedTransactionId).build();
         } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.BUY_DOWN_FEE_ADJUSTMENT_COMMAND)) {
             commandRequest = builder.buyDownFeeAdjustment(resolvedLoanId, resolvedTransactionId).build();
+        } else if (CommandParameterUtil.is(commandParam, INTEREST_REFUND_COMMAND_VALUE)) {
+            commandRequest = builder.manualInterestRefund(resolvedLoanId, resolvedTransactionId).build();
         } else { // Default to adjust the Loan Transaction
             commandRequest = builder.adjustTransaction(resolvedLoanId, resolvedTransactionId).build();
         }
