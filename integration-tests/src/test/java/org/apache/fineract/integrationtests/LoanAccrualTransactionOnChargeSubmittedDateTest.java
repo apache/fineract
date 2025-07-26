@@ -850,7 +850,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("30")
                 .withLoanTermFrequencyAsDays().withNumberOfRepayments("10").withRepaymentEveryAfter("3").withRepaymentFrequencyTypeAsDays()
-                .withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance().withAmortizationTypeAsEqualPrincipalPayments()
+                .withInterestRatePerPeriod("0").withInterestTypeAsDecliningBalance().withAmortizationTypeAsEqualPrincipalPayments()
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("03 March 2023")
                 .withSubmittedOnDate("03 March 2023").withLoanType("individual").withExternalId(externalId)
                 .build(clientID.toString(), loanProductID.toString(), null);

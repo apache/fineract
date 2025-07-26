@@ -100,7 +100,7 @@ public class LoanCapitalizedIncomeAmortizationEventService {
             if (loan.getLoanProductRelatedDetail().isEnableIncomeCapitalization()) {
                 log.debug("Loan pre charge-off capitalized income amortization for loan {}", loan.getId());
                 loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationTillDate(loan,
-                        DateUtils.getBusinessLocalDate(), false);
+                        DateUtils.getBusinessLocalDate(), true);
             }
         }
     }

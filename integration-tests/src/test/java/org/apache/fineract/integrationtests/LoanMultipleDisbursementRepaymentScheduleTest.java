@@ -221,7 +221,7 @@ public class LoanMultipleDisbursementRepaymentScheduleTest extends BaseLoanInteg
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("30")
                 .withLoanTermFrequencyAsDays().withNumberOfRepayments("1").withRepaymentEveryAfter("30").withRepaymentFrequencyTypeAsDays()
-                .withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance().withAmortizationTypeAsEqualPrincipalPayments()
+                .withInterestRatePerPeriod("0").withInterestTypeAsDecliningBalance().withAmortizationTypeAsEqualPrincipalPayments()
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("07 July 2023")
                 .withSubmittedOnDate("07 July 2023").withLoanType("individual").withExternalId(externalId)
                 .build(clientID.toString(), loanProductID.toString(), null);

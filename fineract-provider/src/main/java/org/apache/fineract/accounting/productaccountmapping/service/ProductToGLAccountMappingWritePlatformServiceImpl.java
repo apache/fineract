@@ -369,7 +369,8 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     @Override
     @Transactional
     public Map<String, Object> updateLoanProductToGLAccountMapping(final Long loanProductId, final JsonCommand command,
-            final boolean accountingRuleChanged, final AccountingRuleType accountingRuleType) {
+            final boolean accountingRuleChanged, final AccountingRuleType accountingRuleType, final boolean enableIncomeCapitalization,
+            final boolean enableBuyDownFee) {
         /***
          * Variable tracks all accounting mapping properties that have been updated
          ***/
@@ -389,7 +390,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
         } /*** else examine and update individual changes ***/
         else {
             this.loanProductToGLAccountMappingHelper.handleChangesToLoanProductToGLAccountMappings(loanProductId, changes, element,
-                    accountingRuleType);
+                    accountingRuleType, enableIncomeCapitalization, enableBuyDownFee);
             this.loanProductToGLAccountMappingHelper.updatePaymentChannelToFundSourceMappings(command, element, loanProductId, changes);
             this.loanProductToGLAccountMappingHelper.updateChargesToIncomeAccountMappings(command, element, loanProductId, changes);
             this.loanProductToGLAccountMappingHelper.updateChargeOffReasonToExpenseAccountMappings(command, element, loanProductId,

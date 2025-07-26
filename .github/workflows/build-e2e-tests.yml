@@ -85,17 +85,20 @@ jobs:
             https://localhost:8443/fineract-provider/actuator/health
 
       - name: Execute tests for shard ${{ matrix.shard_index }}
+        id: tests
         run: |
-          # Read feature files from the shard file
-          FEATURES=$(tr '\n' ',' < "feature_shard_${{ matrix.shard_index }}.txt" | sed 's/,$//')
+          # Initialize failure flag
+          FAILED=0
 
-          if [ -z "$FEATURES" ]; then
+          # Create necessary directories
+          mkdir -p "allure-results-shard-${{ matrix.shard_index }}"
+          mkdir -p "allure-results-merged"
+
+          # Read feature files from the shard file
+          if [ ! -s "feature_shard_${{ matrix.shard_index }}.txt" ]; then
             echo "No features to test in this shard. Skipping..."
             exit 0
           fi
-
-          # Create a directory for individual allure results
-          mkdir -p "allure-results-shard-${{ matrix.shard_index }}"
 
           # Read each feature file path and run tests one by one
           while IFS= read -r feature_file || [ -n "$feature_file" ]; do
@@ -105,14 +108,20 @@ jobs:
             # Create a safe filename for the results
             safe_name=$(echo "$feature_file" | tr '/' '-' | tr ' ' '_')
 
-            echo "Testing feature: $feature_file"
+            echo "::group::Testing feature: $feature_file"
 
             # Run tests with individual allure results directory
-            ./gradlew --no-daemon --console=plain \
+            if ! ./gradlew --no-daemon --console=plain \
               :fineract-e2e-tests-runner:cucumber \
               -Pcucumber.features="$feature_file" \
               -Dallure.results.directory="allure-results-shard-${{ matrix.shard_index }}/$safe_name" \
-              allureReport || echo "Test failed for $feature_file, continuing with next feature..."
+              allureReport; then
+
+              echo "::error::Test failed for $feature_file"
+              FAILED=1
+            fi
+
+            echo "::endgroup::"
 
             # Copy the results to a merged directory
             if [ -d "allure-results-shard-${{ matrix.shard_index }}/$safe_name" ]; then
@@ -121,9 +130,17 @@ jobs:
           done < "feature_shard_${{ matrix.shard_index }}.txt"
 
           # Generate individual report for this shard
-          if [ -d "allure-results-merged" ]; then
+          if [ -d "allure-results-merged" ] && [ "$(ls -A allure-results-merged)" ]; then
+            echo "Generating Allure report..."
             mkdir -p "allure-report-shard-${{ matrix.shard_index }}"
-            allure generate "allure-results-merged" --clean -o "allure-report-shard-${{ matrix.shard_index }}" || echo "Failed to generate Allure report for shard ${{ matrix.shard_index }}"
+            ./fineract-e2e-tests-runner/build/allure/commandline/bin/allure generate "allure-results-merged" --clean -o "allure-report-shard-${{ matrix.shard_index }}" || \
+              echo "::warning::Failed to generate Allure report for shard ${{ matrix.shard_index }}"
+          fi
+
+          # Exit with failure status if any test failed
+          if [ "$FAILED" -eq 1 ]; then
+            echo "::error::Some tests failed in this shard"
+            exit 1
           fi
 
       - name: Upload test results

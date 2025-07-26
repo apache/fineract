@@ -200,7 +200,7 @@ dependencyManagement {
             exclude 'jakarta.activation:jakarta.activation-api'
         }
         dependency 'jakarta.validation:jakarta.validation-api:3.1.1'
-        dependency 'org.hibernate.validator:hibernate-validator:8.0.2.Final'
+        dependency 'org.hibernate.validator:hibernate-validator:9.0.1.Final'
 
         dependency ('org.liquibase:liquibase-core:4.31.1') {
             exclude 'javax.xml.bind:jaxb-api'

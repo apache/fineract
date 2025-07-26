@@ -195,6 +195,11 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.INTEREST_REFUND, null, amount, date, externalId);
     }
 
+    public static LoanTransaction interestRefund(final Loan loan, final BigDecimal amount, final LocalDate date,
+            final PaymentDetail paymentDetail, final ExternalId externalId) {
+        return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.INTEREST_REFUND, paymentDetail, amount, date, externalId);
+    }
+
     public static LoanTransaction chargeAdjustment(final Loan loan, final BigDecimal amount, final LocalDate transactionDate,
             final ExternalId externalId, PaymentDetail paymentDetail) {
         return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.CHARGE_ADJUSTMENT, paymentDetail, amount, transactionDate,
@@ -706,6 +711,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         return LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION.equals(getTypeOf()) && isNotReversed();
     }
 
+    public boolean isCapitalizedIncomeAmortizationAdjustment() {
+        return LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT.equals(getTypeOf()) && isNotReversed();
+    }
+
     public boolean isCapitalizedIncomeAdjustment() {
         return LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT.equals(getTypeOf()) && isNotReversed();
     }
@@ -997,5 +1006,17 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public boolean isBuyDownFee() {
         return LoanTransactionType.BUY_DOWN_FEE.equals(this.typeOf);
+    }
+
+    public boolean isBuyDownFeeAdjustment() {
+        return LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT.equals(this.typeOf);
+    }
+
+    public boolean isBuyDownFeeAmortization() {
+        return LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION.equals(this.typeOf);
+    }
+
+    public boolean isBuyDownFeeAmortizationAdjustment() {
+        return LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT.equals(this.typeOf);
     }
 }

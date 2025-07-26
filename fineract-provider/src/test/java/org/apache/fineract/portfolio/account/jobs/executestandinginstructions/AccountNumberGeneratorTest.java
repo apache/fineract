@@ -22,6 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
@@ -141,5 +143,81 @@ public class AccountNumberGeneratorTest {
 
         String accountNumber = generator.generate(share, format);
         assertThat(accountNumber).isEqualTo("000000321");
+    }
+
+    @Test
+    public void testCheckAccountNumberConflict_nullEntityType_returnsFalse() {
+        Map<String, String> props = new HashMap<>();
+        boolean result = generator.checkAccountNumberConflict(props, null, "12345");
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void testCheckAccountNumberConflict_clientNoConflict() {
+        Map<String, String> props = new HashMap<>();
+        props.put("entityType", "client");
+        when(clientRepo.getClientByAccountNumber("12345")).thenReturn(null);
+
+        boolean result = generator.checkAccountNumberConflict(props, null, "12345");
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void testCheckAccountNumberConflict_clientWithConflict() {
+        Map<String, String> props = new HashMap<>();
+        props.put("entityType", "client");
+        when(clientRepo.getClientByAccountNumber("12345")).thenReturn(mock(Client.class));
+
+        boolean result = generator.checkAccountNumberConflict(props, null, "12345");
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void testCheckAccountNumberConflict_loanNoConflict() {
+        Map<String, String> props = new HashMap<>();
+        props.put("entityType", "loan");
+        when(loanRepo.findLoanAccountByAccountNumber("77777")).thenReturn(null);
+
+        boolean result = generator.checkAccountNumberConflict(props, null, "77777");
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void testCheckAccountNumberConflict_loanWithConflict() {
+        Map<String, String> props = new HashMap<>();
+        props.put("entityType", "loan");
+        when(loanRepo.findLoanAccountByAccountNumber("77777")).thenReturn(mock(Loan.class));
+
+        boolean result = generator.checkAccountNumberConflict(props, null, "77777");
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void testCheckAccountNumberConflict_savingsNoConflict() {
+        Map<String, String> props = new HashMap<>();
+        props.put("entityType", "savingsAccount");
+        when(savingsRepo.findSavingsAccountByAccountNumber("55555")).thenReturn(null);
+
+        boolean result = generator.checkAccountNumberConflict(props, null, "55555");
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void testCheckAccountNumberConflict_savingsWithConflict() {
+        Map<String, String> props = new HashMap<>();
+        props.put("entityType", "savingsAccount");
+        when(savingsRepo.findSavingsAccountByAccountNumber("55555")).thenReturn(mock(SavingsAccount.class));
+
+        boolean result = generator.checkAccountNumberConflict(props, null, "55555");
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void testCheckAccountNumberConflict_unknownEntityType_returnsFalse() {
+        Map<String, String> props = new HashMap<>();
+        props.put("entityType", "foobar");
+
+        boolean result = generator.checkAccountNumberConflict(props, null, "12345");
+        assertThat(result).isFalse();
     }
 }

@@ -125,4 +125,6 @@ public interface LoanWritePlatformService {
     CommandProcessingResult undoChargeOff(JsonCommand command);
 
     CommandProcessingResult makeRefund(Long loanId, LoanTransactionType loanTransactionType, JsonCommand command);
+
+    CommandProcessingResult makeManualInterestRefund(Long loanId, Long transactionId, JsonCommand command);
 }

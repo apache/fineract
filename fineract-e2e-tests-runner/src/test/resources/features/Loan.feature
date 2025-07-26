@@ -908,8 +908,8 @@ Feature: Loan
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | LP1         | 1 January 2023    | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1         | 1 January 2023    | 1000           | 0                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "1 January 2023" with "1000" amount and expected disbursement date on "1 January 2023"
     When Admin successfully disburse the loan on "1 January 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "5 April 2023"
@@ -1100,8 +1100,8 @@ Feature: Loan
     When Admin sets the business date to "8 May 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | LP1         | 8 May 2023        | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1         | 8 May 2023        | 1000           | 0                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "8 May 2023" with "1000" amount and expected disbursement date on "8 May 2023"
     And Admin successfully disburse the loan on "8 May 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "9 May 2023"
@@ -1128,8 +1128,8 @@ Feature: Loan
     When Admin sets the business date to "8 May 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | LP1         | 8 May 2023        | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1         | 8 May 2023        | 1000           | 0                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "8 May 2023" with "1000" amount and expected disbursement date on "8 May 2023"
     And Admin successfully disburse the loan on "8 May 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "9 May 2023"
@@ -1156,8 +1156,8 @@ Feature: Loan
     When Admin sets the business date to "8 May 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | LP1         | 8 May 2023        | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1         | 8 May 2023        | 1000           | 0                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "8 May 2023" with "1000" amount and expected disbursement date on "8 May 2023"
     And Admin successfully disburse the loan on "8 May 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "9 May 2023"
@@ -1185,8 +1185,8 @@ Feature: Loan
     When Admin sets the business date to "14 May 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | LP1         | 14 May 2023       | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
+      | LP1         | 14 May 2023       | 1000           | 0                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "14 May 2023" with "127.95" amount and expected disbursement date on "14 May 2023"
     And Admin successfully disburse the loan on "14 May 2023" with "127.95" EUR transaction amount
     When Admin sets the business date to "11 June 2023"
@@ -1310,8 +1310,8 @@ Feature: Loan
     When Admin sets the business date to "01 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | LP1         | 01 November 2022  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
+      | LP1         | 01 November 2022  | 1000           | 0                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 November 2022" with "1000" amount and expected disbursement date on "01 November 2022"
     When Admin successfully disburse the loan on "01 November 2022" with "1000" EUR transaction amount
     Then Loan has 1000 outstanding amount
@@ -1343,8 +1343,8 @@ Feature: Loan
     When Admin sets the business date to "07 July 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | LP1         | 07 July 2023      | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1         | 07 July 2023      | 1000           | 0                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "07 July 2023" with "1000" amount and expected disbursement date on "07 July 2023"
     And Admin successfully disburse the loan on "07 July 2023" with "370.55" EUR transaction amount
     When Admin sets the business date to "12 July 2023"
@@ -5037,8 +5037,8 @@ Feature: Loan
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | LP1         | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1         | 01 September 2023 | 1000           | 0                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
@@ -5448,8 +5448,8 @@ Feature: Loan
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct          | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | LP2_DOWNPAYMENT_AUTO | 01 February 2024  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LoanProduct          | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
+      | LP2_DOWNPAYMENT_AUTO | 01 February 2024  | 1000           | 0                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 February 2024" with "1000" amount and expected disbursement date on "01 February 2024"
     When Admin successfully disburse the loan on "01 February 2024" with "1000" EUR transaction amount
     When Admin sets the business date to "02 February 2024"
@@ -5489,9 +5489,9 @@ Feature: Loan
       | 2  | 0    | 03 February 2024 | 02 February 2024 | 765.0           | 5.0           | 0.0      | 0.0  | 0.0       | 5.0   | 5.0   | 5.0        | 0.0  | 0.0         |
       |    |      | 04 February 2024 |                  | 30.0            |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 3  | 0    | 04 February 2024 | 02 February 2024 | 787.0           | 8.0           | 0.0      | 0.0  | 0.0       | 8.0   | 8.0   | 8.0        | 0.0  | 0.0         |
-      | 4  | 29   | 01 March 2024    | 02 February 2024 | 525.0           | 262.0         | 0.0      | 0.0  | 0.0       | 262.0 | 262.0 | 262.0      | 0.0  | 0.0         |
-      | 5  | 31   | 01 April 2024    | 02 February 2024 | 263.0           | 262.0         | 0.0      | 0.0  | 0.0       | 262.0 | 262.0 | 262.0      | 0.0  | 0.0         |
-      | 6  | 30   | 01 May 2024      | 02 February 2024 | 0.0             | 263.0         | 0.0      | 0.0  | 0.0       | 263.0 | 263.0 | 263.0      | 0.0  | 0.0         |
+      | 4  | 29   | 01 March 2024    | 02 February 2024 | 524.0           | 263.0         | 0.0      | 0.0  | 0.0       | 263.0 | 263.0 | 263.0      | 0.0  | 0.0         |
+      | 5  | 31   | 01 April 2024    | 02 February 2024 | 261.0           | 263.0         | 0.0      | 0.0  | 0.0       | 263.0 | 263.0 | 263.0      | 0.0  | 0.0         |
+      | 6  | 30   | 01 May 2024      | 02 February 2024 | 0.0             | 261.0         | 0.0      | 0.0  | 0.0       | 261.0 | 261.0 | 261.0      | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       | 1050.0        | 0        | 0.0  | 0         | 1050.0 | 1050.0 | 800.0      | 0    | 0.0         |
@@ -5516,9 +5516,9 @@ Feature: Loan
       | 3  | 0    | 04 February 2024 | 02 February 2024 | 787.0           | 8.0           | 0.0      | 0.0  | 0.0       | 8.0   | 8.0   | 8.0        | 0.0  | 0.0         |
       |    |      | 05 February 2024 |                  | 40.0            |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 4  | 0    | 05 February 2024 | 02 February 2024 | 817.0           | 10.0          | 0.0      | 0.0  | 0.0       | 10.0  | 10.0  | 10.0       | 0.0  | 0.0         |
-      | 5  | 29   | 01 March 2024    | 02 February 2024 | 545.0           | 272.0         | 0.0      | 0.0  | 0.0       | 272.0 | 272.0 | 272.0      | 0.0  | 0.0         |
-      | 6  | 31   | 01 April 2024    | 02 February 2024 | 273.0           | 272.0         | 0.0      | 0.0  | 0.0       | 272.0 | 272.0 | 272.0      | 0.0  | 0.0         |
-      | 7  | 30   | 01 May 2024      |                  | 0.0             | 273.0         | 0.0      | 0.0  | 0.0       | 273.0 | 243.0 | 243.0      | 0.0  | 30.0        |
+      | 5  | 29   | 01 March 2024    | 02 February 2024 | 544.0           | 273.0         | 0.0      | 0.0  | 0.0       | 273.0 | 273.0 | 273.0      | 0.0  | 0.0         |
+      | 6  | 31   | 01 April 2024    | 02 February 2024 | 271.0           | 273.0         | 0.0      | 0.0  | 0.0       | 273.0 | 273.0 | 273.0      | 0.0  | 0.0         |
+      | 7  | 30   | 01 May 2024      |                  | 0.0             | 271.0         | 0.0      | 0.0  | 0.0       | 271.0 | 241.0 | 241.0      | 0.0  | 30.0        |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       | 1090.0        | 0        | 0.0  | 0         | 1090.0 | 1060.0 | 810.0      | 0    | 30.0        |
@@ -7247,3 +7247,164 @@ Feature: Loan
       | 08 August 2025   | Accrual          | 2.8     | 0.0       | 0.0      | 0.0  | 2.8       | 0.0          | false    | false    |
       | 08 August 2025   | Accrual Activity | 6.22    | 0.0       | 3.42     | 0.0  | 2.8       | 0.0          | false    | false    |
       | 15 August 2025   | Repayment        | 2.8     | 0.0       | 0.0      | 0.0  | 2.8       | 0.0          | false    | false    |
+
+  @TestRailId:C3858
+  Scenario: Verify update approved amount for progressive loan - UC1
+    When Admin sets the business date to "01 January 2025"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                    | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE_PMT_ALLOC_1 | 01 January 2025   | 1000            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "1000" amount and expected disbursement date on "01 January 2025"
+   Then Update loan approved amount is forbidden with amount "0" due to min allowed amount
+   When Admin successfully disburse the loan on "01 January 2025" with "1000" EUR transaction amount
+
+  @TestRailId:C3859
+  Scenario: Verify update approved amount after undo disbursement for single disb progressive loan - UC3
+    When Admin sets the business date to "1 January 2025"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                        | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE | 01 January 2025   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2025" with "1000" amount and expected disbursement date on "1 January 2025"
+    And Admin successfully disburse the loan on "1 January 2025" with "100" EUR transaction amount
+    Then Update loan approved amount with new amount "600" value
+    When Admin successfully undo disbursal
+    Then Admin fails to disburse the loan on "1 January 2025" with "700" EUR transaction amount due to exceed approved amount
+
+  @TestRailId:C3860
+  Scenario: Verify update approved amount with approved over applied amount for progressive multidisbursal loan with percentage overAppliedCalculationType - UC4
+    When Admin sets the business date to "1 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_MULTIDISB_APPROVED_OVER_APPLIED_CAPITALIZED_INCOME | 01 January 2025   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2025" with "1000" amount and expected disbursement date on "1 January 2025"
+    And Admin successfully disburse the loan on "1 January 2025" with "1100" EUR transaction amount
+    Then Update loan approved amount is forbidden with amount "1600" due to exceed applied amount
+    Then Update loan approved amount with new amount "1300" value
+    And Admin successfully disburse the loan on "1 January 2025" with "400" EUR transaction amount
+
+  @TestRailId:C3861
+  Scenario: Verify update approved amount with approved over applied amount and capitalized income for progressive loan with percentage overAppliedCalculationType - UC8_1
+    When Admin sets the business date to "1 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                        | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_APPROVED_OVER_APPLIED_PERCENTAGE_CAPITALIZED_INCOME | 01 January 2025   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2025" with "1000" amount and expected disbursement date on "1 January 2025"
+    And Admin successfully disburse the loan on "1 January 2025" with "1100" EUR transaction amount
+    Then Update loan approved amount is forbidden with amount "1600" due to exceed applied amount
+    Then Update loan approved amount with new amount "1400" value
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "1 January 2025" with "400" EUR transaction amount
+
+  @TestRailId:C3862
+  Scenario: Verify update approved amount with capitalized income for progressive loan - UC8_2
+    When Admin sets the business date to "1 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME | 01 January 2025   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2025" with "900" amount and expected disbursement date on "1 January 2025"
+    And Admin successfully disburse the loan on "1 January 2025" with "600" EUR transaction amount
+    Then Update loan approved amount is forbidden with amount "500" due to higher principal amount on loan
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "1 January 2025" with "200" EUR transaction amount
+    Then Update loan approved amount with new amount "1000" value
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "1 January 2025" with "200" EUR transaction amount
+
+  @TestRailId:C3863
+  Scenario: Verify update approved amount with capitalized income for progressive multidisbursal loan - UC8_3
+    When Admin sets the business date to "1 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                  | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_MULTIDISB_CAPITALIZED_INCOME_ADJ_CUSTOM_ALLOC | 01 January 2025   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2025" with "900" amount and expected disbursement date on "1 January 2025"
+    And Admin successfully disburse the loan on "1 January 2025" with "600" EUR transaction amount
+    Then Update loan approved amount is forbidden with amount "500" due to higher principal amount on loan
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "1 January 2025" with "200" EUR transaction amount
+    Then Update loan approved amount with new amount "1000" value
+    And Admin successfully disburse the loan on "1 January 2025" with "200" EUR transaction amount
+
+  @TestRailId:C3864
+  Scenario: Verify update approved amount before disbursement for single disb cumulative loan - UC5_1
+    When Admin sets the business date to "1 January 2025"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1         | 1 January 2025    | 1000           | 0                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "1 January 2025" with "1000" amount and expected disbursement date on "1 January 2025"
+    Then Update loan approved amount with new amount "900" value
+    And Admin successfully disburse the loan on "1 January 2025" with "100" EUR transaction amount
+
+  @TestRailId:C3865
+  Scenario: Verify update approved amount before disbursement for single disb progressive loan - UC5_2
+    When Admin sets the business date to "1 January 2025"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                        | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE | 01 January 2025   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2025" with "1000" amount and expected disbursement date on "1 January 2025"
+    Then Update loan approved amount with new amount "900" value
+    And Admin successfully disburse the loan on "1 January 2025" with "100" EUR transaction amount
+
+  @TestRailId:C3866
+  Scenario: Verify approved amount change for progressive multidisbursal loan that doesn't expect tranches - UC6
+    When Admin sets the business date to "01 January 2025"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE | 01 January 2025   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "1000" amount and expected disbursement date on "01 January 2025"
+    When Admin successfully disburse the loan on "01 January 2025" with "200" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |           | 200.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025 |           | 167.15          | 32.85         | 1.17     | 0.0  | 0.0       | 34.02 | 0.0  | 0.0        | 0.0  | 34.02       |
+      | 2  | 28   | 01 March 2025    |           | 134.11          | 33.04         | 0.98     | 0.0  | 0.0       | 34.02 | 0.0  | 0.0        | 0.0  | 34.02       |
+      | 3  | 31   | 01 April 2025    |           | 100.87          | 33.24         | 0.78     | 0.0  | 0.0       | 34.02 | 0.0  | 0.0        | 0.0  | 34.02       |
+      | 4  | 30   | 01 May 2025      |           |  67.44          | 33.43         | 0.59     | 0.0  | 0.0       | 34.02 | 0.0  | 0.0        | 0.0  | 34.02       |
+      | 5  | 31   | 01 June 2025     |           |  33.81          | 33.63         | 0.39     | 0.0  | 0.0       | 34.02 | 0.0  | 0.0        | 0.0  | 34.02       |
+      | 6  | 30   | 01 July 2025     |           |   0.0           | 33.81         | 0.2      | 0.0  | 0.0       | 34.01 | 0.0  | 0.0        | 0.0  | 34.01       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 200.0         | 4.11     | 0.0  | 0.0       | 204.11 | 0.0  | 0.0        | 0.0  | 204.11      |
+    Then Update loan approved amount with new amount "600" value
+    When Admin successfully disburse the loan on "01 January 2025" with "400" EUR transaction amount
+    Then Update loan approved amount is forbidden with amount "500" due to higher principal amount on loan
+
+  @TestRailId:C3867
+  Scenario: Verify approved amount change with lower vallue for progressive multidisbursal loan that expects two tranches - UC7_1
+    When Admin sets the business date to "01 January 2025"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with three expected disbursements details and following data:
+      | LoanProduct                                                                                | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | 1st_tranche_disb_expected_date | 1st_tranche_disb_principal | 2nd_tranche_disb_expected_date | 2nd_tranche_disb_principal | 3rd_tranche_disb_expected_date | 3rd_tranche_disb_principal |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE_EXPECT_TRANCHE | 01 January 2025   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | 01 January 2025                | 300.0                      | 02 January 2025                | 200.0                      | 03 January 2025                | 500.0                      |
+    And Admin successfully approves the loan on "01 January 2025" with "1000" amount and expected disbursement date on "01 January 2025"
+    Then Loan Tranche Details tab has the following data:
+      | Expected Disbursement On | Disbursed On    | Principal   | Net Disbursal Amount |
+      | 01 January 2025          |                 | 300.0       |                      |
+      | 02 January 2025          |                 | 200.0       |                      |
+      | 03 January 2025          |                 | 500.0       |                      |
+#    --- disbursement - 1 January, 2025  ---
+    When Admin successfully disburse the loan on "01 January 2025" with "300" EUR transaction amount
+    When Admin sets the business date to "03 January 2025"
+    Then Update loan approved amount with new amount "800" value
+
+  @TestRailId:C3868
+  Scenario: Verify approved amount change with greater value for progressive multidisbursal loan that expects two tranches - UC7_2
+    When Admin sets the business date to "01 January 2025"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with three expected disbursements details and following data:
+      | LoanProduct                                                                                | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | 1st_tranche_disb_expected_date | 1st_tranche_disb_principal | 2nd_tranche_disb_expected_date | 2nd_tranche_disb_principal | 3rd_tranche_disb_expected_date | 3rd_tranche_disb_principal |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE_EXPECT_TRANCHE | 01 January 2025   | 1200           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | 01 January 2025                | 300.0                      | 02 January 2025                | 200.0                      | 03 January 2025                | 500.0                      |
+    And Admin successfully approves the loan on "01 January 2025" with "1000" amount and expected disbursement date on "01 January 2025"
+    Then Loan Tranche Details tab has the following data:
+      | Expected Disbursement On | Disbursed On    | Principal   | Net Disbursal Amount |
+      | 01 January 2025          |                 | 300.0       |                      |
+      | 02 January 2025          |                 | 200.0       |                      |
+      | 03 January 2025          |                 | 500.0       |                      |
+#    --- disbursement - 1 January, 2025  ---
+    When Admin successfully disburse the loan on "01 January 2025" with "300" EUR transaction amount
+    When Admin sets the business date to "03 January 2025"
+    Then Update loan approved amount with new amount "1200" value

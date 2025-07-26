@@ -27,6 +27,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepositor
 import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
+import org.apache.fineract.portfolio.loanaccount.service.CapitalizedIncomeBalanceReadService;
+import org.apache.fineract.portfolio.loanaccount.service.CapitalizedIncomeBalanceReadServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.CapitalizedIncomeBalanceService;
 import org.apache.fineract.portfolio.loanaccount.service.CapitalizedIncomeBalanceServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.CapitalizedIncomePlatformService;
@@ -76,5 +78,12 @@ public class ProgressiveLoanAccountConfiguration {
     public CapitalizedIncomeBalanceService capitalizedIncomeBalanceService(
             LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository) {
         return new CapitalizedIncomeBalanceServiceImpl(loanCapitalizedIncomeBalanceRepository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(CapitalizedIncomeBalanceReadService.class)
+    public CapitalizedIncomeBalanceReadService capitalizedIncomeBalanceReadService(LoanRepositoryWrapper loanRepository,
+            LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository) {
+        return new CapitalizedIncomeBalanceReadServiceImpl(loanRepository, loanCapitalizedIncomeBalanceRepository);
     }
 }

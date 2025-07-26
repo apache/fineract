@@ -352,6 +352,8 @@ final class LoanTransactionsApiResourceSwagger {
         @Schema(example = "numberOfInstallments")
         public Integer numberOfInstallments;
         // command=reAge END
+        @Schema(description = "Optional. Controls whether Interest Refund transaction should be created for this refund. If not provided, loan product config is used.", example = "false")
+        public Boolean interestRefundCalculation;
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsResponse")

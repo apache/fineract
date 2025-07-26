@@ -559,6 +559,15 @@ public class ProductToGLAccountMappingHelper {
         return glAccount;
     }
 
+    public void deleteProductToGLAccountMapping(final Long loanProductId, final PortfolioProductType portfolioProductType,
+            final int accountTypeId) {
+        final ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(loanProductId,
+                portfolioProductType.getValue(), accountTypeId);
+        if (accountMapping != null && accountMapping.getGlAccount() != null) {
+            this.accountMappingRepository.delete(accountMapping);
+        }
+    }
+
     public void deleteProductToGLAccountMapping(final Long loanProductId, final PortfolioProductType portfolioProductType) {
         final List<ProductToGLAccountMapping> productToGLAccountMappings = this.accountMappingRepository
                 .findByProductIdAndProductType(loanProductId, portfolioProductType.getValue());

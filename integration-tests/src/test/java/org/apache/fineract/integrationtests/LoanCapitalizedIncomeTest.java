@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -26,8 +27,10 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.fineract.client.models.CapitalizedIncomeDetails;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
+import org.apache.fineract.client.models.LoanDeferredIncomeData;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
@@ -37,6 +40,7 @@ import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.externalevents.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.integrationtests.common.externalevents.LoanBusinessEvent;
 import org.apache.fineract.integrationtests.common.externalevents.LoanTransactionBusinessEvent;
@@ -85,6 +89,12 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     transaction(50.0, "Capitalized Income", "01 January 2024"), //
                     transaction(0.55, "Capitalized Income Amortization", "01 January 2024") //
             );
+            final LoanDeferredIncomeData loanDeferredIncomeData = loanTransactionHelper.fetchDeferredIncomeDetails(loanId);
+            assertTrue(loanDeferredIncomeData.getCapitalizedIncomeData().size() > 0);
+            final CapitalizedIncomeDetails capitalizedIncomeData = loanDeferredIncomeData.getCapitalizedIncomeData().get(0);
+            assertNotNull(capitalizedIncomeData);
+            assertEquals(50.0, Utils.getDoubleValue(capitalizedIncomeData.getAmount()));
+            assertEquals(0.55, Utils.getDoubleValue(capitalizedIncomeData.getAmortizedAmount()));
         });
         runAt("3 January 2024", () -> {
             Long loanId = loanIdRef.get();
@@ -97,6 +107,13 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     transaction(0.03, "Accrual", "02 January 2024"), //
                     transaction(0.55, "Capitalized Income Amortization", "02 January 2024") //
             );
+            final LoanDeferredIncomeData loanDeferredIncomeData = loanTransactionHelper.fetchDeferredIncomeDetails(loanId);
+            assertTrue(loanDeferredIncomeData.getCapitalizedIncomeData().size() > 0);
+            final CapitalizedIncomeDetails capitalizedIncomeData = loanDeferredIncomeData.getCapitalizedIncomeData().get(0);
+            assertNotNull(capitalizedIncomeData);
+            assertEquals(50.0, Utils.getDoubleValue(capitalizedIncomeData.getAmount()));
+            assertEquals(1.1, Utils.getDoubleValue(capitalizedIncomeData.getAmortizedAmount()));
+            assertEquals(48.90, Utils.getDoubleValue(capitalizedIncomeData.getUnrecognizedAmount()));
 
             verifyJournalEntries(loanId, //
                     journalEntry(100, loansReceivableAccount, "DEBIT"), //
@@ -181,6 +198,12 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     transaction(50.0, "Capitalized Income", "01 January 2024"), //
                     transaction(50.0, "Capitalized Income Adjustment", "01 April 2024") //
             );
+            final LoanDeferredIncomeData loanDeferredIncomeData = loanTransactionHelper.fetchDeferredIncomeDetails(loanId);
+            assertTrue(loanDeferredIncomeData.getCapitalizedIncomeData().size() > 0);
+            final CapitalizedIncomeDetails capitalizedIncomeData = loanDeferredIncomeData.getCapitalizedIncomeData().get(0);
+            assertNotNull(capitalizedIncomeData);
+            assertEquals(50.0, Utils.getDoubleValue(capitalizedIncomeData.getAmount()));
+            assertEquals(50.0, Utils.getDoubleValue(capitalizedIncomeData.getAmountAdjustment()));
 
             verifyJournalEntries(loanId, //
                     journalEntry(100, loansReceivableAccount, "DEBIT"), //

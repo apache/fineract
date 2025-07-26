@@ -41,6 +41,7 @@ public enum TransactionType {
     BUY_DOWN_FEE("buyDownFee"), //
     BUY_DOWN_FEE_ADJUSTMENT("buyDownFeeAdjustment"), //
     BUY_DOWN_FEE_AMORTIZATION("buyDownFeeAmortization"), //
+    INTEREST_REFUND("interestRefund"), //
     ;
 
     public final String value;

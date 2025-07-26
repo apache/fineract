@@ -76,6 +76,7 @@ import org.apache.fineract.test.messaging.event.loan.transaction.LoanDisbursalTr
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanRefundPostBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionGoodwillCreditPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionInterestPaymentWaiverPostEvent;
+import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionInterestRefundPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionMakeRepaymentPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionMerchantIssuedRefundPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionPayoutRefundPostEvent;
@@ -308,7 +309,8 @@ public class EventCheckHelper {
             Response<PostLoansLoanIdTransactionsResponse> transactionResponse, TransactionType transactionType, String externalOwnerId)
             throws IOException {
         Long loanId = transactionResponse.body().getLoanId();
-        Long transactionId = transactionResponse.body().getResourceId();
+        Long transactionId = transactionType.equals(TransactionType.INTEREST_REFUND) ? transactionResponse.body().getSubResourceId()
+                : transactionResponse.body().getResourceId();
         Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
         List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
         GetLoansLoanIdTransactions transactionFound = transactions//
@@ -324,6 +326,7 @@ public class EventCheckHelper {
             case MERCHANT_ISSUED_REFUND -> LoanTransactionMerchantIssuedRefundPostEvent.class;
             case REFUND_BY_CASH -> LoanRefundPostBusinessEvent.class;
             case INTEREST_PAYMENT_WAIVER -> LoanTransactionInterestPaymentWaiverPostEvent.class;
+            case INTEREST_REFUND -> LoanTransactionInterestRefundPostEvent.class;
             default -> throw new IllegalStateException(String.format("transaction type %s cannot be found", transactionType.getValue()));
         };
 

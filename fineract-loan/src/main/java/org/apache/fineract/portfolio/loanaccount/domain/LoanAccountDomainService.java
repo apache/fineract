@@ -90,11 +90,14 @@ public interface LoanAccountDomainService {
 
     Pair<LoanTransaction, LoanTransaction> makeRefund(Loan loan, ScheduleGeneratorDTO scheduleGeneratorDTO,
             LoanTransactionType loanTransactionType, LocalDate transactionDate, BigDecimal transactionAmount, PaymentDetail paymentDetail,
-            ExternalId txnExternalId);
+            ExternalId txnExternalId, Boolean interestRefundCalculationOverride);
 
     void updateAndSavePostDatedChecksForIndividualAccount(Loan loan, LoanTransaction transaction);
 
     LoanTransaction applyInterestRefund(Loan loan, LoanRefundRequestData loanRefundRequest);
 
     void updateAndSaveLoanCollateralTransactionsForIndividualAccounts(Loan loan, LoanTransaction transaction);
+
+    LoanTransaction createManualInterestRefundWithAmount(Loan loan, LoanTransaction targetTransaction, BigDecimal amount,
+            PaymentDetail paymentDetail, ExternalId txnExternalId);
 }

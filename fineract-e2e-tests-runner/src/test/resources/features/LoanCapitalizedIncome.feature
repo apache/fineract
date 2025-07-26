@@ -1464,8 +1464,11 @@ Feature: Capitalized Income
       | 26 January 2024  | Accrual                         | 3.69   | 0.0       | 3.69     | 0.0  | 0.0       | 0.0          | false    |
       | 26 January 2024  | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | false    |
       | 26 January 2024  | Capitalized Income Amortization | 16.67  | 0.0       | 16.67    | 0.0  | 0.0       | 0.0          | false    |
-    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "26 January 2024" which has the following Journal entries:
+# --- check CIA journal entries for before and after charge-off trn processed --- #
+    Then Loan Transactions tab has 2 a "CAPITALIZED_INCOME_AMORTIZATION" transactions with date "26 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
+      | INCOME    | 404000       | Interest Income              |        | 83.33  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 83.33  |        |
       | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 16.67  |
       | LIABILITY | 145024       | Deferred Capitalized Income  | 16.67  |        |
     Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "26 January 2024"
@@ -1507,8 +1510,11 @@ Feature: Capitalized Income
       | 26 January 2024  | Accrual                         | 3.69   | 0.0       | 3.69     | 0.0  | 0.0       | 0.0          | false    |
       | 26 January 2024  | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | false    |
       | 26 January 2024  | Capitalized Income Amortization | 16.67  | 0.0       | 16.67    | 0.0  | 0.0       | 0.0          | false    |
-    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "26 January 2024" which has the following Journal entries:
+# --- check CIA journal entries for before and after charge-off trn processed --- #
+    Then Loan Transactions tab has 2 a "CAPITALIZED_INCOME_AMORTIZATION" transactions with date "26 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
+      | INCOME    | 404000       | Interest Income              |        | 83.33  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 83.33  |        |
       | EXPENSE   | 744037       | Credit Loss/Bad Debt-Fraud   |        | 16.67  |
       | LIABILITY | 145024       | Deferred Capitalized Income  | 16.67  |        |
     Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "26 January 2024"
@@ -1550,8 +1556,11 @@ Feature: Capitalized Income
       | 26 January 2024  | Accrual                         | 3.69   | 0.0       | 3.69     | 0.0  | 0.0       | 0.0          | false    |
       | 26 January 2024  | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | false    |
       | 26 January 2024  | Capitalized Income Amortization | 16.67  | 0.0       | 16.67    | 0.0  | 0.0       | 0.0          | false    |
-    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "26 January 2024" which has the following Journal entries:
+# --- check CIA journal entries for before and after charge-off trn processed --- #
+    Then Loan Transactions tab has 2 a "CAPITALIZED_INCOME_AMORTIZATION" transactions with date "26 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
+      | INCOME    | 404000       | Interest Income              |        | 83.33  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 83.33  |        |
       | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 16.67  |
       | LIABILITY | 145024       | Deferred Capitalized Income  | 16.67  |        |
     Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "26 January 2024"
@@ -1593,8 +1602,10 @@ Feature: Capitalized Income
       | 26 January 2024  | Accrual                         | 3.69   | 0.0       | 3.69     | 0.0  | 0.0       | 0.0          | false    |
       | 26 January 2024  | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | false    |
       | 26 January 2024  | Capitalized Income Amortization | 16.67  | 0.0       | 16.67    | 0.0  | 0.0       | 0.0          | false    |
-    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "26 January 2024" which has the following Journal entries:
+    Then Loan Transactions tab has 2 a "CAPITALIZED_INCOME_AMORTIZATION" transactions with date "26 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
+      | INCOME    | 404000       | Interest Income              |        | 83.33  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 83.33  |        |
       | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 16.67  |
       | LIABILITY | 145024       | Deferred Capitalized Income  | 16.67  |        |
     Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "26 January 2024"

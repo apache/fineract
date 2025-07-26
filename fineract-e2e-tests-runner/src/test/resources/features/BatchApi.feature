@@ -48,6 +48,18 @@ Feature: Batch API
     When Batch API call with steps done twice: createClient, createLoan, approveLoan, getLoanDetails runs with enclosingTransaction: "false"
     Then Admin checks that all steps result 200OK
 
+  @TestRailId:C3876
+  Scenario: Create loan, approve, disburse and apply interest pause in a single Batch API call
+    And Run Batch API with steps: createClient, createLoan, approveLoan, disburseLoan, applyInterestPause
+    Then Admin checks that all steps result 200OK
+    And Loan should have an active interest pause period starting on 1st day and ending on 2nd day
+
+  @TestRailId:C3877
+  Scenario: Create loan, approve, disburse and apply interest pause in a single Batch API call by external ids
+    And Run Batch API with steps: createClient, createLoan, approveLoan, disburseLoan, applyInterestPause by external ids
+    Then Admin checks that all steps result 200OK
+    And Loan should have an active interest pause period starting on 1st day and ending on 2nd day
+
   @TestRailId:C2645
   Scenario: Verify Batch API call in case of enclosing transaction is FALSE, there are two reference-trees and one of the steps in second tree fails
     When Batch API call with steps done twice: createClient, createLoan, approveLoan, getLoanDetails runs with enclosingTransaction: "false", with failed approve step in second tree

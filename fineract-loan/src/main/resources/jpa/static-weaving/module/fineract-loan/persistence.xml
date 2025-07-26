@@ -86,6 +86,7 @@
         <class>org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquencyTag</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.Loan</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanApprovedAmountHistory</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanCharge</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement</class>
