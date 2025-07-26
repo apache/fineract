@@ -62,12 +62,33 @@ fi
 FEATURE_LIST_FILE="feature_shard_${SHARD_INDEX}.txt"
 > "$FEATURE_LIST_FILE"
 
-# Distribute features to shards in a round-robin fashion to balance scenario counts
+# First, distribute features to shards in a round-robin fashion to balance scenario counts
 for ((i=0; i<TOTAL_FEATURES; i++)); do
   if (( i % NUM_SHARDS == SHARD_INDEX_ZERO_BASED )); then
-    echo "${SORTED_FEATURES[$i]}" >> "$FEATURE_LIST_FILE"
+    echo "${SORTED_FEATURES[$i]}" >> "$FEATURE_LIST_FILE.tmp"
   fi
 done
+
+# Sort the feature files in this shard by name (with 0_* files first)
+# First, extract just the filenames and prepend a sort key
+while IFS= read -r line; do
+  # Get just the filename part
+  filename=$(basename "$line")
+  # Create a sort key: 0 for files starting with 0_, 1 otherwise
+  if [[ "$filename" == 0_* ]]; then
+    sort_key="0_$filename"
+  else
+    sort_key="1_$filename"
+  fi
+  echo "$sort_key|$line"
+done < "$FEATURE_LIST_FILE.tmp" | \
+  # Sort by the sort key and filename
+  sort -t'|' -k1,1 -k2,2 | \
+  # Remove the sort key
+  cut -d'|' -f2- > "$FEATURE_LIST_FILE"
+
+# Clean up temporary file
+rm -f "$FEATURE_LIST_FILE.tmp"
 
 # Count scenarios in this shard
 SHARD_SCENARIOS=0

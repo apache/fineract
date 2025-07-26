@@ -18,8 +18,17 @@
  */
 package org.apache.fineract.portfolio.collectionsheet.api;
 
+import static org.apache.fineract.infrastructure.core.service.CommandParameterUtil.GENERATE_COLLECTION_SHEET_COMMAND_VALUE;
+import static org.apache.fineract.infrastructure.core.service.CommandParameterUtil.SAVE_COLLECTION_SHEET_COMMAND_VALUE;
+
+import com.google.gson.JsonElement;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -27,28 +36,32 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import java.util.UUID;
-import java.util.function.Supplier;
+import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.command.core.CommandPipeline;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.portfolio.collectionsheet.command.GenerateCollectionSheetCommand;
-import org.apache.fineract.portfolio.collectionsheet.command.SaveCollectionSheetCommand;
-import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetCommandParameter;
+import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.service.CommandWrapperBuilder;
+import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.api.JsonQuery;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants;
 import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetRequest;
-import org.apache.fineract.portfolio.collectionsheet.data.GenerateCollectionSheetRequest;
-import org.apache.fineract.portfolio.collectionsheet.data.IndividualCollectionSheetData;
-import org.apache.fineract.portfolio.collectionsheet.data.SaveCollectionSheetRequest;
+import org.apache.fineract.portfolio.collectionsheet.service.CollectionSheetReadPlatformService;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/collectionsheet")
 @Component
-@Tag(name = "Collection Sheet", description = "Collection Sheet")
+@Tag(name = "Collection Sheet", description = "")
 @RequiredArgsConstructor
 public class CollectionSheetApiResource {
 
-    private final CommandPipeline commandPipeline;
+    private final CollectionSheetReadPlatformService collectionSheetReadPlatformService;
+    private final ToApiJsonSerializer<Object> toApiJsonSerializer;
+    private final FromJsonHelper fromJsonHelper;
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final PlatformSecurityContext context;
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -57,81 +70,23 @@ public class CollectionSheetApiResource {
             + "This Api retrieves repayment details of all individual loans under a office as on a specified meeting date.\n\n"
             + "Save Collection Sheet:\n\n"
             + "This Api allows the loan officer to perform bulk repayments of individual loans and deposit of mandatory savings on a given meeting date.")
-    public Object generateCollectionSheet(@QueryParam("command") @Parameter(description = "command") final String commandParam,
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CollectionSheetRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CollectionSheetApiResourceSwagger.PostCollectionSheetResponse.class))) })
+    public Response generateCollectionSheet(@QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) CollectionSheetRequest collectionSheetRequest) {
+        final String payload = toApiJsonSerializer.serialize(collectionSheetRequest);
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(payload);
 
-        /**
-         * Comment no: 1
-         *
-         * In the comments is the original logic.
-         * Deleted CollectionSheetApiResourcesSwagger.java 
-         **/
-
-        // final String payload = toApiJsonSerializer.serialize(collectionSheetRequest);
-        // final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(payload);
-        //
-        // if (CommandParameterUtil.is(commandParam, GENERATE_COLLECTION_SHEET_COMMAND_VALUE)) {
-        // this.context.authenticatedUser().validateHasReadPermission(CollectionSheetConstants.COLLECTIONSHEET_RESOURCE_NAME);
-        // final JsonElement parsedQuery = this.fromJsonHelper.parse(payload);
-        // final JsonQuery query = JsonQuery.from(payload, parsedQuery, this.fromJsonHelper);
-        // return Response.ok(this.collectionSheetReadPlatformService.generateIndividualCollectionSheet(query)).build();
-        // } else if (CommandParameterUtil.is(commandParam, SAVE_COLLECTION_SHEET_COMMAND_VALUE)) {
-        // final CommandWrapper commandRequest = builder.saveIndividualCollectionSheet().build();
-        // return Response.ok(this.commandsSourceWritePlatformService.logCommandSource(commandRequest)).build();
-        // }
-        // return Response.ok().build();
-
-        /**
-         * Comment No: 2
-         *
-         * This Api accepts request parameters and based on parameter values : a) generateCollectionSheet - Sends a
-         * GenerateCollectionSheetCommand command b) saveCollectionSheet - Sends a SaveCollectionSheetCommand.
-         *
-         *
-         * The request body CollectionSheetRequest collectionSheetRequest is common, but since the handlers are selected
-         * based on the generic parameters, this has to have a wrapper
-         *
-         * Added 2 wrapper classes which wrap the CollectionSheetRequest collectionSheetRequest a)
-         * GenerateCollectionSheetRequest & b) SaveCollectionSheetRequest
-         *
-         *
-         * Also, this API does not have any integration and unit tests associated with it.
-         *
-         *
-         *
-         */
-
-        if (commandParam.equalsIgnoreCase(CollectionSheetCommandParameter.GENERATE_COLLECTION_SHEET.getValue())) {
-            final GenerateCollectionSheetCommand command = new GenerateCollectionSheetCommand();
-            final GenerateCollectionSheetRequest payload = new GenerateCollectionSheetRequest();
-            payload.setRequest(collectionSheetRequest);
-
-            command.setId(UUID.randomUUID());
-            command.setCreatedAt(DateUtils.getAuditOffsetDateTime());
-            command.setPayload(payload);
-            final Supplier<IndividualCollectionSheetData> response = commandPipeline.send(command);
-
-            return response.get();
-        } else if (commandParam.equalsIgnoreCase(CollectionSheetCommandParameter.SAVE_COLLECTION_SHEET.getValue())) {
-            final SaveCollectionSheetCommand command = new SaveCollectionSheetCommand();
-            final SaveCollectionSheetRequest payload = new SaveCollectionSheetRequest();
-            payload.setRequest(collectionSheetRequest);
-
-            command.setId(UUID.randomUUID());
-            command.setCreatedAt(DateUtils.getAuditOffsetDateTime());
-            command.setPayload(payload);
-            final Supplier<CommandProcessingResult> response = commandPipeline.send(command);
-
-            return response.get();
-
-        } else {
-            /**
-             *
-             * TODO Custom Exception Class to be Created
-             *
-             */
-            throw new RuntimeException("Error: Parameter Name not Matching");
+        if (CommandParameterUtil.is(commandParam, GENERATE_COLLECTION_SHEET_COMMAND_VALUE)) {
+            this.context.authenticatedUser().validateHasReadPermission(CollectionSheetConstants.COLLECTIONSHEET_RESOURCE_NAME);
+            final JsonElement parsedQuery = this.fromJsonHelper.parse(payload);
+            final JsonQuery query = JsonQuery.from(payload, parsedQuery, this.fromJsonHelper);
+            return Response.ok(this.collectionSheetReadPlatformService.generateIndividualCollectionSheet(query)).build();
+        } else if (CommandParameterUtil.is(commandParam, SAVE_COLLECTION_SHEET_COMMAND_VALUE)) {
+            final CommandWrapper commandRequest = builder.saveIndividualCollectionSheet().build();
+            return Response.ok(this.commandsSourceWritePlatformService.logCommandSource(commandRequest)).build();
         }
-
+        return Response.ok().build();
     }
 }
