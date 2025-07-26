@@ -52,7 +52,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeBalance;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeBalance;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
@@ -69,10 +68,11 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
 
     private final FromJsonHelper fromApiJsonHelper;
     private final LoanTransactionValidator loanTransactionValidator;
-    private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
     private final LoanBuyDownFeeBalanceRepository loanBuydownFeeBalanceRepository;
     private final LoanTransactionRepository loanTransactionRepository;
+    private final LoanTransactionUtilService loanTransactionUtilService;
+    private final LoanAssembler loanAssembler;
 
     @Override
     public void validateCapitalizedIncome(final JsonCommand command, final Long loanId) {
@@ -86,7 +86,7 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, getCapitalizedIncomeParameters());
 
         Validator.validateOrThrow("loan.capitalized.income", baseDataValidator -> {
-            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+            final Loan loan = loanAssembler.assembleFrom(loanId);
             validateLoanClientIsActive(loan);
             validateLoanGroupIsActive(loan);
 
@@ -168,7 +168,7 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, getCapitalizedIncomeAdjustmentParameters());
 
         Validator.validateOrThrow("loan.capitalizedIncomeAdjustment", baseDataValidator -> {
-            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+            final Loan loan = loanAssembler.assembleFrom(loanId);
             validateLoanClientIsActive(loan);
             validateLoanGroupIsActive(loan);
 
@@ -247,7 +247,7 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, getContractTerminationUndoParameters());
 
         Validator.validateOrThrow("loan.contract.termination.undo", baseDataValidator -> {
-            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+            final Loan loan = loanAssembler.assembleFrom(loanId);
             validateLoanClientIsActive(loan);
             validateLoanGroupIsActive(loan);
 
@@ -264,7 +264,7 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
                 throw new GeneralPlatformDomainRuleException("error.msg.loan.contract.termination.transaction.not.found",
                         "Loan: " + loanId + " contract termination transaction was not found", loanId);
             }
-            if (!contractTerminationTransaction.equals(loan.getLastUserTransaction())) {
+            if (!contractTerminationTransaction.equals(loanTransactionUtilService.getLastUserTransaction(loan))) {
                 throw new GeneralPlatformDomainRuleException("error.msg.loan.contract.termination.is.not.the.last.user.transaction",
                         "Loan: " + loanId
                                 + " contract termination cannot be undone. User transaction was found after contract termination!",
@@ -290,7 +290,7 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
                 .resource("loan.transaction.buyDownFee");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+        final Loan loan = loanAssembler.assembleFrom(loanId);
 
         if (!loan.getLoanProductRelatedDetail().isEnableBuyDownFee()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("buy.down.fee.not.enabled",
@@ -335,7 +335,7 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, getBuyDownFeeAdjustmentParameters());
 
         Validator.validateOrThrow("loan.buyDownFeeAdjustment", baseDataValidator -> {
-            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+            final Loan loan = loanAssembler.assembleFrom(loanId);
             validateLoanClientIsActive(loan);
             validateLoanGroupIsActive(loan);
 

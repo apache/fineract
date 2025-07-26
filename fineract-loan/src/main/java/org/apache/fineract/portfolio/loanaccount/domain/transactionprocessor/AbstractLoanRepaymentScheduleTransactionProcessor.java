@@ -62,6 +62,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.imp
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionUtilService;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -80,6 +81,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     protected final ExternalIdFactory externalIdFactory;
     protected final LoanChargeValidator loanChargeValidator;
     protected final LoanBalanceService loanBalanceService;
+    protected final LoanTransactionUtilService loanTransactionUtilService;
 
     @Override
     public boolean accept(String s) {
@@ -997,13 +999,11 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             return;
         }
 
-        final BigDecimal sumOfAccrualsTillChargeOff = loan.getLoanTransactions().stream()
-                .filter(lt -> lt.isAccrual() && !lt.getTransactionDate().isAfter(chargeOffDate) && lt.isNotReversed())
-                .map(lt -> Optional.ofNullable(lt.getInterestPortion()).orElse(BigDecimal.ZERO)).reduce(BigDecimal.ZERO, BigDecimal::add);
+        final BigDecimal sumOfAccrualsTillChargeOff = loanTransactionUtilService.sumInterestPortionTillChargeOffDate(loan, chargeOffDate,
+                LoanTransactionType.ACCRUAL);
 
-        final BigDecimal sumOfAccrualAdjustmentsTillChargeOff = loan.getLoanTransactions().stream()
-                .filter(lt -> lt.isAccrualAdjustment() && !lt.getTransactionDate().isAfter(chargeOffDate) && lt.isNotReversed())
-                .map(lt -> Optional.ofNullable(lt.getInterestPortion()).orElse(BigDecimal.ZERO)).reduce(BigDecimal.ZERO, BigDecimal::add);
+        final BigDecimal sumOfAccrualAdjustmentsTillChargeOff = loanTransactionUtilService.sumInterestPortionTillChargeOffDate(loan,
+                chargeOffDate, LoanTransactionType.ACCRUAL_ADJUSTMENT);
 
         final BigDecimal missingAccrualAmount = newInterest.subtract(sumOfAccrualsTillChargeOff).add(sumOfAccrualAdjustmentsTillChargeOff);
 

@@ -64,6 +64,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
     private final InterestScheduleModelRepositoryWrapper modelRepository;
     private final LoanBalanceService loanBalanceService;
     private final LoanTransactionService loanTransactionService;
+    private final LoanTransactionUtilService loanTransactionUtilService;
 
     @Override
     public boolean canProcessLatestTransactionOnly(Loan loan, LoanTransaction loanTransaction,
@@ -218,7 +219,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
     public OutstandingAmountsDTO fetchPrepaymentDetail(final ScheduleGeneratorDTO scheduleGeneratorDTO, final LocalDate onDate, Loan loan) {
         OutstandingAmountsDTO outstandingAmounts;
 
-        if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isChargeOffOnDate(onDate)) {
+        if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loanTransactionUtilService.isChargeOffOnDate(loan, onDate)) {
             final MathContext mc = MoneyHelper.getMathContext();
 
             final InterestMethod interestMethod = loan.getLoanRepaymentScheduleDetail().getInterestMethod();

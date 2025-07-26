@@ -43,8 +43,10 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionUtilService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -54,6 +56,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 public class LoanTest {
 
     private final LocalDate actualDate = LocalDate.now(ZoneId.systemDefault());
+
+    @Mock
+    private LoanTransactionUtilService loanTransactionUtilService;
 
     @AfterEach
     public void tearDown() {
@@ -164,7 +169,7 @@ public class LoanTest {
     @Test
     public void testGetLastUserTransactionEmptyList() {
         final Loan loan = new Loan();
-        final LoanTransaction userTransaction = loan.getLastUserTransaction();
+        final LoanTransaction userTransaction = loanTransactionUtilService.getLastUserTransaction(loan);
         assertNull(userTransaction);
     }
 
@@ -192,13 +197,13 @@ public class LoanTest {
         when(loanTransaction4.isAccrual()).thenReturn(Boolean.FALSE);
         when(loanTransaction4.isAccrualAdjustment()).thenReturn(Boolean.TRUE);
         ReflectionTestUtils.setField(loan, "loanTransactions", List.of(loanTransaction, loanTransaction2, loanTransaction3));
-        final LoanTransaction userTransaction = loan.getLastUserTransaction();
+        final LoanTransaction userTransaction = loanTransactionUtilService.getLastUserTransaction(loan);
         assertNotNull(userTransaction);
         assertEquals(loanTransaction2, userTransaction);
     }
 
     /**
-     * Tests {@link Loan#getLastUserTransaction()} where there are user transactions
+     * Tests {@link Loan#testTransactionComparator()} where there are user transactions
      */
     @Test
     public void testTransactionComparator() {

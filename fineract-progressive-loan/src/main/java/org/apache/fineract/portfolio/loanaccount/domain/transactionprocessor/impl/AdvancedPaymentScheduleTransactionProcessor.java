@@ -99,6 +99,7 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidat
 import org.apache.fineract.portfolio.loanaccount.service.InterestRefundService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.schedule.LoanScheduleComponent;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
 import org.apache.fineract.portfolio.loanproduct.calc.data.OutstandingDetails;
@@ -133,8 +134,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             final InterestRefundService interestRefundService, final ExternalIdFactory externalIdFactory,
             final LoanScheduleComponent loanSchedule, final LoanTransactionRepository loanTransactionRepository,
             final LoanChargeValidator loanChargeValidator, final LoanBalanceService loanBalanceService,
-            final LoanChargeService loanChargeService) {
-        super(externalIdFactory, loanChargeValidator, loanBalanceService);
+            final LoanChargeService loanChargeService, final LoanTransactionUtilService loanTransactionUtilService) {
+        super(externalIdFactory, loanChargeValidator, loanBalanceService, loanTransactionUtilService);
         this.emiCalculator = emiCalculator;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.interestRefundService = interestRefundService;

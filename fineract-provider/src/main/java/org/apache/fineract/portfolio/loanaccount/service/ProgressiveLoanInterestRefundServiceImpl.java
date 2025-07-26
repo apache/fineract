@@ -59,6 +59,7 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
     private final LoanScheduleService loanScheduleService;
     private final LoanUtilService loanUtilService;
     private final LoanTransactionProcessingService loanTransactionProcessingService;
+    private final LoanTransactionUtilService loanTransactionUtilService;
 
     private static void simulateRepaymentForDisbursements(LoanTransaction lt, final AtomicReference<BigDecimal> refundFinal,
             List<LoanTransaction> collect) {
@@ -82,8 +83,7 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
         List<LoanRepaymentScheduleInstallment> installmentsToReprocess = new ArrayList<>(
                 loan.getRepaymentScheduleInstallments().stream().filter(i -> !i.isReAged() && !i.isAdditional()).toList());
 
-        if (loan.isProgressiveSchedule() && ((loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy())
-                || loan.hasContractTerminationTransaction())) {
+        if (loanTransactionUtilService.shouldGenerateRepaymentSchedule(loan)) {
             final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
             loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
         }

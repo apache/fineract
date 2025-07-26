@@ -32,6 +32,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Abs
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionUtilService;
 
 /**
  * Old style {@link LoanRepaymentScheduleTransactionProcessor}.
@@ -50,8 +51,9 @@ public class FineractStyleLoanRepaymentScheduleTransactionProcessor extends Abst
     public static final String STRATEGY_NAME = "Penalties, Fees, Interest, Principal order";
 
     public FineractStyleLoanRepaymentScheduleTransactionProcessor(final ExternalIdFactory externalIdFactory,
-            final LoanChargeValidator loanChargeValidator, final LoanBalanceService loanBalanceService) {
-        super(externalIdFactory, loanChargeValidator, loanBalanceService);
+            final LoanChargeValidator loanChargeValidator, final LoanBalanceService loanBalanceService,
+            final LoanTransactionUtilService loanTransactionUtilService) {
+        super(externalIdFactory, loanChargeValidator, loanBalanceService, loanTransactionUtilService);
     }
 
     @Override

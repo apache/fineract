@@ -81,6 +81,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTra
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTopupDetails;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.exception.ExceedingTrancheCountException;
@@ -137,6 +138,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
     private final LoanChargeService loanChargeService;
     private final LoanOfficerService loanOfficerService;
     private final LoanScheduleComponent loanSchedule;
+    private final LoanTransactionRepository loanTransactionRepository;
 
     @Override
     public Loan assembleFrom(final Long accountId) {
@@ -145,7 +147,9 @@ public class LoanAssemblerImpl implements LoanAssembler {
 
     @Override
     public Loan assembleFrom(final Long accountId, final boolean loadLazyCollections) {
-        return loanRepository.findOneWithNotFoundDetection(accountId, loadLazyCollections);
+        Loan loan = loanRepository.findOneWithNotFoundDetection(accountId, loadLazyCollections);
+        loan.setLoanTransactions(loanTransactionRepository.findByLoan(loan));
+        return loan;
     }
 
     @Override
@@ -155,7 +159,9 @@ public class LoanAssemblerImpl implements LoanAssembler {
 
     @Override
     public Loan assembleFrom(final ExternalId externalId, final boolean loadLazyCollections) {
-        return loanRepository.findOneWithNotFoundDetection(externalId, loadLazyCollections);
+        Loan loan = loanRepository.findOneWithNotFoundDetection(externalId, loadLazyCollections);
+        loan.setLoanTransactions(loanTransactionRepository.findByLoan(loan));
+        return loan;
     }
 
     @Override

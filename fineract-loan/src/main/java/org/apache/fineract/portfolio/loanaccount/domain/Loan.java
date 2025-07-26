@@ -35,6 +35,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import jakarta.validation.constraints.NotNull;
@@ -42,6 +43,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -81,6 +83,8 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRef
 import org.apache.fineract.portfolio.rate.domain.Rate;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.lang.NonNull;
 
 @Entity
@@ -308,8 +312,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = new ArrayList<>();
 
-    @OrderBy(value = "dateOf, createdDate, id")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
+    // @OrderBy(value = "dateOf, createdDate, id")
+    // @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
+    @Transient
     private List<LoanTransaction> loanTransactions = new ArrayList<>();
 
     @Setter
@@ -1753,15 +1758,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
                 .map(LoanSupportedInterestRefundTypes::getTransactionType).toList();
     }
 
-    public LoanTransaction getLastUserTransaction() {
-        return getLoanTransactions().stream() //
-                .filter(t -> t.isNotReversed() && !(t.isAccrual() || t.isAccrualAdjustment() || t.isIncomePosting()
-                        || t.isCapitalizedIncomeAmortization() || t.isCapitalizedIncomeAmortizationAdjustment()
-                        || t.isBuyDownFeeAmortization() || t.isBuyDownFeeAmortizationAdjustment())) //
-                .reduce((first, second) -> second) //
-                .orElse(null);
-    }
-
     public void updateEnableInstallmentLevelDelinquency(boolean enableInstallmentLevelDelinquency) {
         this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
     }
@@ -1782,36 +1778,17 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return getLoanProductRelatedDetail().getLoanScheduleType() == CUMULATIVE;
     }
 
-    public boolean isChargeOffOnDate(final LocalDate onDate) {
-        final LoanTransaction chargeOffTransaction = findChargedOffTransaction();
-        return chargeOffTransaction != null && chargeOffTransaction.getDateOf().compareTo(onDate) <= 0;
-    }
-
-    public boolean hasMonetaryActivityAfter(final LocalDate transactionDate) {
-        for (LoanTransaction transaction : this.getLoanTransactions()) {
-            if (transaction.getTransactionDate().isAfter(transactionDate) && transaction.isNotReversed()
-                    && !transaction.isNonMonetaryTransaction()) {
-                return true;
-            }
-        }
-        for (LoanCharge loanCharge : this.getLoanCharges()) {
-            if (!loanCharge.determineIfFullyPaid() && loanCharge.getSubmittedOnDate().isAfter(transactionDate)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean hasChargeOffTransaction() {
-        return getLoanTransactions().stream().anyMatch(LoanTransaction::isChargeOff);
-    }
-
     public boolean hasAccelerateChargeOffStrategy() {
         return LoanChargeOffBehaviour.ACCELERATE_MATURITY.equals(getLoanProductRelatedDetail().getChargeOffBehaviour());
     }
 
-    public boolean hasContractTerminationTransaction() {
-        return getLoanTransactions().stream().anyMatch(t -> t.isContractTermination() && t.isNotReversed());
+    public void setLoanTransactions(List<LoanTransaction> loanTransactions) {
+        this.loanTransactions = loanTransactions;
     }
 
+    @Fetch(FetchMode.SELECT)
+    public List<LoanTransaction> getLoanTransactions() {
+        Collections.sort(this.loanTransactions, new LoanTransactionComparator());
+        return this.loanTransactions;
+    }
 }

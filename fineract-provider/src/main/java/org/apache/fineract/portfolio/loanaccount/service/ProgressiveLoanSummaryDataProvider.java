@@ -56,6 +56,7 @@ public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataPro
     private final LoanRepositoryWrapper loanRepository;
     private final LoanTransactionRepository loanTransactionRepository;
     private final InterestScheduleModelRepositoryWrapper modelRepository;
+    private final LoanTransactionUtilService loanTransactionUtilService;
 
     @Override
     public boolean accept(String loanProcessingStrategyCode) {
@@ -110,7 +111,7 @@ public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataPro
         Optional<LoanRepaymentScheduleInstallment> currentRepaymentPeriod = getRelatedRepaymentScheduleInstallment(loan, businessDate);
 
         if (currentRepaymentPeriod.isPresent()) {
-            if (loan.isChargedOff() || loan.hasContractTerminationTransaction()) {
+            if (loan.isChargedOff() || loanTransactionUtilService.hasContractTerminationTransaction(loan)) {
                 return MathUtil.subtractToZero(currentRepaymentPeriod.get().getInterestOutstanding(loan.getCurrency()).getAmount(),
                         totalUnpaidPayableDueInterest);
             } else {

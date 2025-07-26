@@ -33,6 +33,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Abs
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionUtilService;
 
 /**
  * Heavensfamily style {@link LoanRepaymentScheduleTransactionProcessor}.
@@ -52,8 +53,9 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
     public static final String STRATEGY_NAME = "HeavensFamily Unique";
 
     public HeavensFamilyLoanRepaymentScheduleTransactionProcessor(final ExternalIdFactory externalIdFactory,
-            final LoanChargeValidator loanChargeValidator, final LoanBalanceService loanBalanceService) {
-        super(externalIdFactory, loanChargeValidator, loanBalanceService);
+            final LoanChargeValidator loanChargeValidator, final LoanBalanceService loanBalanceService,
+            final LoanTransactionUtilService loanTransactionUtilService) {
+        super(externalIdFactory, loanChargeValidator, loanBalanceService, loanTransactionUtilService);
     }
 
     @Override
