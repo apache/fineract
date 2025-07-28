@@ -164,7 +164,7 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
                 .setAmountAdjustment(MathUtil.nullToZero(capitalizedIncomeBalance.getAmountAdjustment()).add(transactionAmount));
         capitalizedIncomeBalance.setUnrecognizedAmount(
                 MathUtil.negativeToZero(capitalizedIncomeBalance.getUnrecognizedAmount().subtract(transactionAmount)));
-        capitalizedIncomeBalanceRepository.save(capitalizedIncomeBalance);
+        capitalizedIncomeBalanceRepository.saveAndFlush(capitalizedIncomeBalance);
 
         loanLifecycleStateMachine.determineAndTransition(loan, transactionDate);
 

@@ -100,6 +100,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionProcessingService;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -367,9 +368,14 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
 
         LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
         when(loanProduct.isMultiDisburseLoan()).thenReturn(false);
+
+        LoanProductRelatedDetail loanProductRelatedDetail = Mockito.mock(LoanProductRelatedDetail.class);
+        when(loanProductRelatedDetail.isEnableIncomeCapitalization()).thenReturn(false);
+
         Loan loan = Mockito.spy(Loan.class);
         ReflectionTestUtils.setField(loan, "loanProduct", loanProduct);
         ReflectionTestUtils.setField(loan, "loanStatus", LoanStatus.ACTIVE);
+        when(loan.getLoanRepaymentScheduleDetail()).thenReturn(loanProductRelatedDetail);
         LoanTransaction transaction1 = Mockito.mock(LoanTransaction.class);
         LoanTransaction transaction2 = Mockito.mock(LoanTransaction.class);
         CollectionData collectionData = Mockito.mock(CollectionData.class);
