@@ -170,21 +170,11 @@ tasks.named('binaryDistTar') {
               ':fineract-provider:build', ':fineract-doc:doc',
               ':fineract-client:javadocJar', ':fineract-client:sourcesJar',
               ':fineract-avro-schemas:javadocJar', ':fineract-avro-schemas:sourcesJar')
-              
-    doLast {
-        file("${buildDir}/distributions/apache-fineract-binary-${version}.tar.gz")
-            .renameTo("${buildDir}/distributions/apache-fineract-${version}-binary.tar.gz")
-    }
 }
 
 tasks.named('srcDistTar') {
     description = 'Assembles the source distribution as a tar archive'
     outputs.cacheIf { true }
-    
-    doLast {
-        file("${buildDir}/distributions/apache-fineract-src-${version}.tar.gz")
-            .renameTo("${buildDir}/distributions/apache-fineract-${version}-src.tar.gz")
-    }
 }
 
 // Disable zip distributions as they're not needed
