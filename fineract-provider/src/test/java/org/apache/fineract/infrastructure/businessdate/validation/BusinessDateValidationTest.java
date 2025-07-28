@@ -55,7 +55,7 @@ class BusinessDateValidationTest {
     @Test
     void invalidLocale() {
         var request = BusinessDateUpdateRequest.builder().dateFormat("dd-MM-yyyy").type(BusinessDateType.BUSINESS_DATE).date("12-05-2025")
-                .locale("EN").build();
+                .locale("INVALID").build();
 
         var errors = validator.validateObject(request);
 

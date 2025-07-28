@@ -27,6 +27,8 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.validation.config.ValidationConfig;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -51,24 +53,29 @@ class LocaleValidationTest {
         assertThat(errors.getFieldErrors()).anyMatch(e -> e.getField().equals("locale"));
     }
 
-    @Test
-    void invalidFormat() {
-        var request = LocaleModel.builder().locale("EN").build();
-
+    @ParameterizedTest
+    @ValueSource(strings = { "invalid-locale", // invalid format
+            "xx-YY", // non-existent locale
+            "random text", // random text
+            "123", // numbers
+            "en-US-extra" // extra segment
+    })
+    void invalidFormats(String locale) {
+        var request = LocaleModel.builder().locale(locale).build();
         var errors = validator.validateObject(request);
-
-        assertThat(errors.getFieldErrorCount()).isEqualTo(1);
-
-        assertThat(errors.getFieldErrors()).anyMatch(e -> e.getField().equals("locale"));
+        assertThat(errors.getFieldErrorCount()).as("Expected locale '%s' to be invalid but it was valid", locale).isGreaterThan(0);
     }
 
-    @Test
-    void valid() {
-        var request = LocaleModel.builder().locale("en").build();
-
+    @ParameterizedTest
+    @ValueSource(strings = { "en", // language only
+            "EN", // uppercase language only
+            "en-US", // language with country (hyphen)
+            "en_US", // language with country (underscore)
+    })
+    void validLocales(String locale) {
+        var request = LocaleModel.builder().locale(locale).build();
         var errors = validator.validateObject(request);
-
-        assertThat(errors.getFieldErrorCount()).isEqualTo(0);
+        assertThat(errors.getFieldErrorCount()).as("Expected locale '%s' to be valid but it was invalid", locale).isZero();
     }
 
     @Builder

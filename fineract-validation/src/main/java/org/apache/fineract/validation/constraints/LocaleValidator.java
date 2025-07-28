@@ -27,6 +27,22 @@ class LocaleValidator implements ConstraintValidator<Locale, String> {
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        return StringUtils.isNotBlank(value) && Arrays.asList(java.util.Locale.getISOLanguages()).contains(value);
+        if (StringUtils.isBlank(value)) {
+            return false; // empty string is invalid
+        }
+
+        // Normalize input to use BCP 47 format (e.g., "en-US")
+        String languageTag = value.replace('_', '-');
+
+        java.util.Locale inputLocale = java.util.Locale.forLanguageTag(languageTag);
+
+        // If language is empty, it's not a valid locale
+        if (inputLocale.getLanguage().isEmpty()) {
+            return false;
+        }
+
+        // Check if it matches any available locale
+        return Arrays.stream(java.util.Locale.getAvailableLocales())
+                .anyMatch(available -> available.toLanguageTag().equalsIgnoreCase(inputLocale.toLanguageTag()));
     }
 }
