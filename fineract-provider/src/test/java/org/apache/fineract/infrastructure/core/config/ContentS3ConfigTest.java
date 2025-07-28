@@ -21,10 +21,12 @@ package org.apache.fineract.infrastructure.core.config;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,6 +56,13 @@ class ContentS3ConfigTest {
         when(contentProperties.getS3()).thenReturn(s3Properties);
     }
 
+    @AfterEach
+    void tearDown() {
+        reset(fineractProperties);
+        reset(contentProperties);
+        reset(s3Properties);
+    }
+
     @Test
     void testContentS3Client_WithCredentialsAndNoEndpoint() {
 
@@ -72,7 +81,7 @@ class ContentS3ConfigTest {
 
         verify(s3Properties, times(2)).getAccessKey();
         verify(s3Properties, times(2)).getSecretKey();
-        verify(s3Properties).getRegion();
+        verify(s3Properties, times(2)).getRegion();
         verify(s3Properties).getEndpoint();
     }
 
@@ -91,7 +100,7 @@ class ContentS3ConfigTest {
 
         verify(s3Properties, times(1)).getAccessKey();
         verify(s3Properties, times(0)).getSecretKey();
-        verify(s3Properties).getRegion();
+        verify(s3Properties, times(2)).getRegion();
         verify(s3Properties).getEndpoint();
     }
 
@@ -116,7 +125,7 @@ class ContentS3ConfigTest {
 
         verify(s3Properties, times(2)).getAccessKey();
         verify(s3Properties, times(2)).getSecretKey();
-        verify(s3Properties).getRegion();
+        verify(s3Properties, times(2)).getRegion();
         verify(s3Properties, times(2)).getEndpoint();
         verify(s3Properties).getPathStyleAddressingEnabled();
     }
@@ -137,7 +146,7 @@ class ContentS3ConfigTest {
 
         verify(s3Properties, times(1)).getAccessKey();
         verify(s3Properties, times(0)).getSecretKey();
-        verify(s3Properties).getRegion();
+        verify(s3Properties, times(2)).getRegion();
         verify(s3Properties).getEndpoint();
     }
 
@@ -160,7 +169,7 @@ class ContentS3ConfigTest {
 
         verify(s3Properties, times(2)).getAccessKey();
         verify(s3Properties, times(2)).getSecretKey();
-        verify(s3Properties).getRegion();
+        verify(s3Properties, times(2)).getRegion();
         verify(s3Properties).getEndpoint();
 
         verify(s3Properties, never()).getPathStyleAddressingEnabled();
@@ -182,26 +191,7 @@ class ContentS3ConfigTest {
 
         verify(s3Properties, times(1)).getAccessKey();
         verify(s3Properties, times(1)).getSecretKey();
-        verify(s3Properties).getRegion();
-        verify(s3Properties).getEndpoint();
-    }
-
-    @Test
-    void testContentS3Client_WithOnlySecretKey() {
-
-        String region = "eu-central-1";
-
-        when(s3Properties.getAccessKey()).thenReturn(null);
-        when(s3Properties.getEndpoint()).thenReturn(null);
-        when(s3Properties.getRegion()).thenReturn(region);
-
-        S3Client s3Client = contentS3Config.contentS3Client(fineractProperties);
-
-        assertNotNull(s3Client);
-
-        verify(s3Properties, times(1)).getAccessKey();
-        verify(s3Properties, times(0)).getSecretKey();
-        verify(s3Properties).getRegion();
+        verify(s3Properties, times(2)).getRegion();
         verify(s3Properties).getEndpoint();
     }
 }

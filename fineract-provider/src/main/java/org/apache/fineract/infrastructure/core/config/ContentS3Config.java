@@ -40,9 +40,11 @@ public class ContentS3Config {
     @Bean
     @ConditionalOnProperty("fineract.content.s3.enabled")
     public S3Client contentS3Client(FineractProperties fineractProperties) {
-        S3ClientBuilder builder = S3Client.builder().credentialsProvider(getCredentialProvider(fineractProperties.getContent().getS3()))
-                .region(Region.of(fineractProperties.getContent().getS3().getRegion()));
+        S3ClientBuilder builder = S3Client.builder().credentialsProvider(getCredentialProvider(fineractProperties.getContent().getS3()));
 
+        if (!Strings.isNullOrEmpty(fineractProperties.getContent().getS3().getRegion())) {
+            builder.region(Region.of(fineractProperties.getContent().getS3().getRegion()));
+        }
         if (!Strings.isNullOrEmpty(fineractProperties.getContent().getS3().getEndpoint())) {
             builder.endpointOverride(URI.create(fineractProperties.getContent().getS3().getEndpoint()))
                     .forcePathStyle(fineractProperties.getContent().getS3().getPathStyleAddressingEnabled());
