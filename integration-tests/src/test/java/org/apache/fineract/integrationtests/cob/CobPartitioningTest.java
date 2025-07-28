@@ -124,14 +124,18 @@ public class CobPartitioningTest extends BaseLoanIntegrationTest {
             List<Integer> loanIds = new CopyOnWriteArrayList<>();
 
             // Let's create 1, 2, ..., N-1, N loans
-            final CountDownLatch createLatch = new CountDownLatch(N);
+            final CountDownLatch createLatch = new CountDownLatch(N - 1);
             Integer loanProductID = createLoanProduct();
             List<Future<?>> futures = new ArrayList<>();
-            for (int i = 0; i < N; i++) {
+            // Warm up (EclipseLink sometimes fails if JPQL cache is not warm up but concurrent queries are executed)
+            Integer clientID = createClient();
+            Integer loanID = createLoanForClient(clientID, loanProductID);
+            loanIds.add(loanID);
+            for (int i = 1; i < N; i++) {
                 futures.add(executorService.submit(() -> {
-                    Integer clientID = createClient();
-                    Integer loanID = createLoanForClient(clientID, loanProductID);
-                    loanIds.add(loanID);
+                    Integer internalClientID = createClient();
+                    Integer internalLoanID = createLoanForClient(internalClientID, loanProductID);
+                    loanIds.add(internalLoanID);
                     createLatch.countDown();
                 }));
             }
@@ -140,8 +144,10 @@ public class CobPartitioningTest extends BaseLoanIntegrationTest {
 
             // Force close loans 3, 4, ... , N-3, N-2
             Collections.sort(loanIds);
-            final CountDownLatch closeLatch = new CountDownLatch(N - 4);
-            for (int i = 2; i < N - 2; i++) {
+            final CountDownLatch closeLatch = new CountDownLatch(N - 5);
+            // Warm up (EclipseLink sometimes fails if JPQL cache is not warm up but concurrent queries are executed)
+            LOAN_TRANSACTION_HELPER.forecloseLoan("02 March 2020", loanIds.get(2));
+            for (int i = 3; i < N - 2; i++) {
                 final int idx = i;
                 futures.add(executorService.submit(() -> {
                     LOAN_TRANSACTION_HELPER.forecloseLoan("02 March 2020", loanIds.get(idx));
