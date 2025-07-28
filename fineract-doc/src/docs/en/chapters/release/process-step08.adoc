@@ -4,12 +4,12 @@
 
 Finally create a directory with release name ({revnumber} in this example) in https://dist.apache.org/repos/dist/dev/fineract and add the following files in this new directory:
 
-* apache-fineract-{revnumber}-binary.tar.gz
-* apache-fineract-{revnumber}-binary.tar.gz.sha512
-* apache-fineract-{revnumber}-binary.tar.gz.asc
-* apache-fineract-{revnumber}-src.tar.gz
-* apache-fineract-{revnumber}-src.tar.gz.sha512
-* apache-fineract-{revnumber}-src.tar.gz.asc
+* apache-fineract-bin-{revnumber}.tar.gz
+* apache-fineract-bin-{revnumber}.tar.gz.sha512
+* apache-fineract-bin-{revnumber}.tar.gz.asc
+* apache-fineract-src-{revnumber}.tar.gz
+* apache-fineract-src-{revnumber}.tar.gz.sha512
+* apache-fineract-src-{revnumber}.tar.gz.asc
 
 These files (or "artifacts") make up the release candidate.
 

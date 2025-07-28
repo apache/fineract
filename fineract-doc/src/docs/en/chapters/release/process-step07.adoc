@@ -6,10 +6,10 @@ Release source and binary tarballs must be checksummed and signed. In order to s
 
 [source,bash,subs="attributes+,+macros"]
 ----
-% gpg --armor --output apache-fineract-{revnumber}-src.tar.gz.asc --detach-sig apache-fineract-{revnumber}-src.tar.gz
-% gpg --print-md SHA512 apache-fineract-{revnumber}-src.tar.gz > apache-fineract-{revnumber}-src.tar.gz.sha512
-% gpg --armor --output apache-fineract-{revnumber}-binary.tar.gz.asc --detach-sig apache-fineract-{revnumber}-binary.tar.gz
-% gpg --print-md SHA512 apache-fineract-{revnumber}-binary.tar.gz > apache-fineract-{revnumber}-binary.tar.gz.sha512
+% gpg --armor --output apache-fineract-src-{revnumber}.tar.gz.asc --detach-sig apache-fineract-src-{revnumber}.tar.gz
+% gpg --print-md SHA512 apache-fineract-src-{revnumber}.tar.gz > apache-fineract-src-{revnumber}.tar.gz.sha512
+% gpg --armor --output apache-fineract-bin-{revnumber}.tar.gz.asc --detach-sig apache-fineract-bin-{revnumber}.tar.gz
+% gpg --print-md SHA512 apache-fineract-bin-{revnumber}.tar.gz > apache-fineract-bin-{revnumber}.tar.gz.sha512
 ----
 
 == Gradle Task

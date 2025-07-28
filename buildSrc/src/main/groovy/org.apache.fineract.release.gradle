@@ -176,8 +176,8 @@ fineract {
             description: 'Sign the distribution artifacts',
             gpg: [
                 files: [
-                    "${rootDir}/fineract-war/build/distributions/apache-fineract-${project.version}-src.tar.gz",
-                    "${rootDir}/fineract-war/build/distributions/apache-fineract-${project.version}-binary.tar.gz"
+                    "${rootDir}/fineract-war/build/distributions/apache-fineract-src-${project.version}.tar.gz",
+                    "${rootDir}/fineract-war/build/distributions/apache-fineract-bin-${project.version}.tar.gz"
                 ]
             ]
         ],
