@@ -78,15 +78,15 @@ public enum JdbcJavaType {
     DATE(JavaType.LOCAL_DATE, new DialectType(JDBCType.DATE), new DialectType(JDBCType.DATE)), //
     // precision for TIME, TIMESTAMP (postgres) and INTERVAL specifies the number of fractional digits retained in the
     // seconds field, but by default, there is no explicit bound on precision
-    TIME(JavaType.LOCAL_TIME, new DialectType(JDBCType.TIME), new DialectType(JDBCType.TIME, null, "TIME WITHOUT TIME ZONE")), //
-    TIME_WITH_TIMEZONE(JavaType.OFFSET_TIME, new DialectType(JDBCType.TIME_WITH_TIMEZONE, "TIME"),
+    TIME(JavaType.LOCAL_TIME, new DialectType(JDBCType.TIME, true), new DialectType(JDBCType.TIME, null, "TIME WITHOUT TIME ZONE")), //
+    TIME_WITH_TIMEZONE(JavaType.OFFSET_TIME, new DialectType(JDBCType.TIME_WITH_TIMEZONE, "TIME", true),
             new DialectType(JDBCType.TIME_WITH_TIMEZONE, "TIME WITH TIME ZONE")), //
-    TIMESTAMP(JavaType.LOCAL_DATETIME, new DialectType(JDBCType.TIMESTAMP),
+    TIMESTAMP(JavaType.LOCAL_DATETIME, new DialectType(JDBCType.TIMESTAMP, true),
             new DialectType(JDBCType.TIMESTAMP, null, "TIMESTAMP WITHOUT TIME ZONE")), //
-    DATETIME(JavaType.LOCAL_DATETIME, new DialectType(JDBCType.TIMESTAMP, "DATETIME"), new DialectType(JDBCType.TIMESTAMP)), //
-    TIMESTAMP_WITH_TIMEZONE(JavaType.OFFSET_DATETIME, new DialectType(JDBCType.TIMESTAMP_WITH_TIMEZONE, "DATETIME"),
+    DATETIME(JavaType.LOCAL_DATETIME, new DialectType(JDBCType.TIMESTAMP, "DATETIME", true), new DialectType(JDBCType.TIMESTAMP)), //
+    TIMESTAMP_WITH_TIMEZONE(JavaType.OFFSET_DATETIME, new DialectType(JDBCType.TIMESTAMP_WITH_TIMEZONE, "DATETIME", true),
             new DialectType(JDBCType.TIMESTAMP_WITH_TIMEZONE, "TIMESTAMP WITH TIME ZONE", "TIMESTAMPTZ")), //
-    INTERVAL(JavaType.TIME, new DialectType(JDBCType.TIME), new DialectType(JDBCType.TIME, "INTERVAL")), //
+    INTERVAL(JavaType.TIME, new DialectType(JDBCType.TIME, true), new DialectType(JDBCType.TIME, "INTERVAL")), //
     BINARY(JavaType.BINARY, new DialectType(JDBCType.BINARY, true), new DialectType(JDBCType.BINARY, "BYTEA")), //
     VARBINARY(JavaType.BINARY, new DialectType(JDBCType.VARBINARY, true), new DialectType(JDBCType.VARBINARY, "BYTEA")), //
     LONGVARBINARY(JavaType.BINARY, new DialectType(JDBCType.VARBINARY, true), new DialectType(JDBCType.VARBINARY, "BYTEA")), //

@@ -30,7 +30,9 @@ import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiCon
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_NEWCODE;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_NEWNAME;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE;
+import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE_DATETIME;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE_DROPDOWN;
+import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE_TIMESTAMP;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_UNIQUE;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_PARAM_ADDCOLUMNS;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_PARAM_APPTABLE_NAME;
@@ -1378,6 +1380,8 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
             return jdbcType.formatSql(dialect, 19, 6); // TODO: parameter length is not used
         } else if (apiType.equalsIgnoreCase(API_FIELD_TYPE_DROPDOWN)) {
             return jdbcType.formatSql(dialect, 11); // TODO: parameter length is not used
+        } else if (apiType.equalsIgnoreCase(API_FIELD_TYPE_DATETIME) || apiType.equalsIgnoreCase(API_FIELD_TYPE_TIMESTAMP)) {
+            return jdbcType.formatSql(dialect, 6);
         }
         return jdbcType.formatSql(dialect, length);
     }
