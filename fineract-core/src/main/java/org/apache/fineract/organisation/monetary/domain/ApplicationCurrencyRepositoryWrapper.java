@@ -18,9 +18,10 @@
  */
 package org.apache.fineract.organisation.monetary.domain;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.organisation.monetary.exception.CurrencyNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.apache.fineract.organisation.monetary.exception.InvalidCurrencyException;
+import org.springframework.stereotype.Component;
 
 /**
  * <p>
@@ -33,15 +34,11 @@ import org.springframework.stereotype.Service;
  * {@link ApplicationCurrencyRepository} is required.
  * </p>
  */
-@Service
+@Component
+@RequiredArgsConstructor
 public class ApplicationCurrencyRepositoryWrapper {
 
     private final ApplicationCurrencyRepository repository;
-
-    @Autowired
-    public ApplicationCurrencyRepositoryWrapper(final ApplicationCurrencyRepository repository) {
-        this.repository = repository;
-    }
 
     public ApplicationCurrency findOneWithNotFoundDetection(final MonetaryCurrency currency) {
 
@@ -65,5 +62,18 @@ public class ApplicationCurrencyRepositoryWrapper {
             throw new CurrencyNotFoundException(currencyCode);
         }
         return applicationCurrency;
+    }
+
+    public Boolean existsByCode(String code) {
+        return repository.existsByCode(code);
+    }
+
+    public ApplicationCurrency save(ApplicationCurrency currency) {
+        if (existsByCode(currency.getCode())) {
+            final String errorArgs = String.valueOf(currency.getCode());
+            final String errorMessage = "Duplicate Request. Request cannot be accepted as the currency is already present in the system.";
+            throw new InvalidCurrencyException("existing", "currency.code", errorMessage, errorArgs);
+        }
+        return repository.save(currency);
     }
 }

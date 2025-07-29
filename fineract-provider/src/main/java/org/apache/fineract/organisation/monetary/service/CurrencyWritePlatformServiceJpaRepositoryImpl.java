@@ -23,6 +23,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.organisation.monetary.data.CurrencyCreateRequest;
+import org.apache.fineract.organisation.monetary.data.CurrencyCreateResponse;
 import org.apache.fineract.organisation.monetary.data.CurrencyUpdateRequest;
 import org.apache.fineract.organisation.monetary.data.CurrencyUpdateResponse;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
@@ -30,11 +32,14 @@ import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepos
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrency;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepository;
 import org.apache.fineract.organisation.monetary.exception.CurrencyInUseException;
+import org.apache.fineract.organisation.monetary.mapper.CurrencyMapper;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Service
 @RequiredArgsConstructor
 public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWritePlatformService {
 
@@ -43,6 +48,7 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
     private final LoanProductReadPlatformService loanProductService;
     private final SavingsProductReadPlatformService savingsProductService;
     private final ChargeReadPlatformService chargeService;
+    private final CurrencyMapper currencyMapper;
 
     @Transactional
     @Override
@@ -76,5 +82,14 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
         organisationCurrencyRepository.saveAll(allowedCurrencies);
 
         return CurrencyUpdateResponse.builder().currencies(allowedCurrencyCodes).build();
+    }
+
+    @Transactional
+    @Override
+    public CurrencyCreateResponse createCurrency(CurrencyCreateRequest request) {
+        final ApplicationCurrency currency = currencyMapper.mapToEntity(request);
+        final ApplicationCurrency savedResults = applicationCurrencyRepository.save(currency);
+
+        return currencyMapper.mapToResponse(savedResults);
     }
 }
