@@ -1044,7 +1044,8 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                 }
                 if (!calculateInterest || transaction.getId() == null) {
                     transaction.setOverdraftAmount(overdraftAmount);
-                } else if (!MathUtil.isEqualTo(overdraftAmount, transaction.getOverdraftAmount(this.currency))) {
+                } else if (!MathUtil.isEqualTo(overdraftAmount, transaction.getOverdraftAmount(this.currency))
+                        && !transaction.isAccrual()) {
                     SavingsAccountTransaction accountTransaction = SavingsAccountTransaction.copyTransaction(transaction);
                     if (transaction.isChargeTransaction()) {
                         Set<SavingsAccountChargePaidBy> chargesPaidBy = transaction.getSavingsAccountChargesPaid();
@@ -1171,6 +1172,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         if (backdatedTxnsAllowedTill) {
             addTransactionToExisting(transaction);
         } else {
+            this.accrualsForSavingsReverse(transactionDTO, backdatedTxnsAllowedTill);
             addTransaction(transaction);
         }
 
@@ -1306,6 +1308,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         if (backdatedTxnsAllowedTill) {
             addTransactionToExisting(transaction);
         } else {
+            this.accrualsForSavingsReverse(transactionDTO, backdatedTxnsAllowedTill);
             addTransaction(transaction);
         }
 
@@ -3865,10 +3868,26 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                 .toList();
     }
 
+    public void accrualsForSavingsReverse(SavingsAccountTransactionDTO transactionDTO, final boolean backdatedTxnsAllowedTill) {
+        List<SavingsAccountTransaction> accountTransactionsSorted = null;
+
+        if (backdatedTxnsAllowedTill) {
+            accountTransactionsSorted = retrieveSortedTransactions();
+        } else {
+            accountTransactionsSorted = retrieveListOfTransactions();
+        }
+        for (final SavingsAccountTransaction transaction : accountTransactionsSorted) {
+            boolean typeTransaccionValidation = transaction.getTransactionType() == SavingsAccountTransactionType.ACCRUAL;
+            if (typeTransaccionValidation && (transaction.getDateOf().isAfter(transactionDTO.getTransactionDate())
+                    || transaction.getDateOf().isEqual(transactionDTO.getTransactionDate()))) {
+                transaction.reverse();
+            }
+        }
+    }
+
     public List<SavingsAccountTransactionDetailsForPostingPeriod> toSavingsAccountTransactionDetailsForPostingPeriodList() {
         return retreiveOrderedNonInterestPostingTransactions().stream()
                 .map(transaction -> transaction.toSavingsAccountTransactionDetailsForPostingPeriod(this.currency, this.allowOverdraft))
                 .toList();
     }
-
 }

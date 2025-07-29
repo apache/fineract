@@ -142,4 +142,78 @@ public class SavingsAccrualIntegrationTest {
         Assertions.assertEquals(0, expectedTotalAccrual.compareTo(actualTotalAccrual),
                 "The total accrual (" + actualTotalAccrual + ") does not match the expected (" + expectedTotalAccrual + ")");
     }
+
+    @Test
+    public void testAccrualsAreReversedImmediatelyAfterBackdatedTransaction() {
+        // --- ARRANGE ---
+        final Account assetAccount = this.accountHelper.createAssetAccount();
+        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+        final Account incomeAccount = this.accountHelper.createIncomeAccount();
+        final Account expenseAccount = this.accountHelper.createExpenseAccount();
+        final String interestRate = "10.0";
+        final int daysToTest = 10;
+        final int daysUntilTransaction = 5;
+
+        final SavingsProductHelper productHelper = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily()
+                .withInterestPostingPeriodTypeAsMonthly().withInterestCalculationPeriodTypeAsDailyBalance()
+                .withNominalAnnualInterestRate(new BigDecimal(interestRate))
+                .withAccountingRuleAsAccrualBased(new Account[] { assetAccount, liabilityAccount, incomeAccount, expenseAccount });
+
+        final Integer savingsProductId = SavingsProductHelper.createSavingsProduct(productHelper.build(), this.requestSpec,
+                this.responseSpec);
+        Assertions.assertNotNull(savingsProductId);
+
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2020");
+        Assertions.assertNotNull(clientId);
+
+        final LocalDate startDate = LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(daysToTest);
+        final String startDateString = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US).format(startDate);
+
+        final Integer savingsAccountId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientId, savingsProductId,
+                SavingsAccountHelper.ACCOUNT_TYPE_INDIVIDUAL, startDateString);
+        Assertions.assertNotNull(savingsAccountId);
+
+        this.savingsAccountHelper.approveSavingsOnDate(savingsAccountId, startDateString);
+        this.savingsAccountHelper.activateSavings(savingsAccountId, startDateString);
+
+        this.savingsAccountHelper.depositToSavingsAccount(savingsAccountId, "10000", startDateString, CommonConstants.RESPONSE_RESOURCE_ID);
+
+        schedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions For Savings");
+        LOG.info("Initial accruals for {} days have been generated.", daysToTest);
+
+        // --- ACT ---
+        final LocalDate backdatedTransactionDate = startDate.plusDays(daysUntilTransaction);
+        final String backdatedTransactionDateString = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US)
+                .format(backdatedTransactionDate);
+
+        LOG.info("Performing a single backdated withdrawal on {}. Expecting immediate reversal of subsequent accruals.",
+                backdatedTransactionDateString);
+        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsAccountId, "1000", backdatedTransactionDateString,
+                CommonConstants.RESPONSE_RESOURCE_ID);
+
+        // --- ASSERT ---
+        List<HashMap> allTransactions = savingsAccountHelper.getSavingsTransactions(savingsAccountId);
+
+        boolean verifiedReversedTransaction = false;
+
+        for (HashMap<String, Object> transaction : allTransactions) {
+            Map<String, Object> type = (Map<String, Object>) transaction.get("transactionType");
+            if (type != null && Boolean.TRUE.equals(type.get("accrual"))) {
+                List<Number> dateArray = (List<Number>) transaction.get("date");
+                LocalDate transactionDate = LocalDate.of(dateArray.get(0).intValue(), dateArray.get(1).intValue(),
+                        dateArray.get(2).intValue());
+
+                if (!transactionDate.isBefore(backdatedTransactionDate)) {
+                    Assertions.assertTrue(Boolean.TRUE.equals(transaction.get("reversed")), "Accrual on or after "
+                            + backdatedTransactionDate + " should be REVERSED. Transaction date: " + transactionDate);
+                    verifiedReversedTransaction = true;
+                } else {
+                    Assertions.assertFalse(Boolean.TRUE.equals(transaction.get("reversed")),
+                            "Accrual before " + backdatedTransactionDate + " should NOT be reversed. Transaction date: " + transactionDate);
+                }
+            }
+        }
+
+        Assertions.assertTrue(verifiedReversedTransaction, "Test failed because no reversed accrual transactions were found to verify.");
+    }
 }
