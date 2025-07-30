@@ -63,6 +63,7 @@ import org.apache.fineract.avro.loan.v1.LoanStatusEnumDataV1;
 import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.BusinessDateResponse;
+import org.apache.fineract.client.models.BuyDownFeeAmortizationDetails;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.DisbursementDetail;
 import org.apache.fineract.client.models.GetLoanProductsChargeOffReasonOptions;
@@ -104,6 +105,7 @@ import org.apache.fineract.client.models.PutLoansApprovedAmountResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.services.BusinessDateManagementApi;
+import org.apache.fineract.client.services.LoanBuyDownFeesApi;
 import org.apache.fineract.client.services.LoanCobCatchUpApi;
 import org.apache.fineract.client.services.LoanDisbursementDetailsApi;
 import org.apache.fineract.client.services.LoanInterestPauseApi;
@@ -183,6 +185,9 @@ public class LoanStepDef extends AbstractStepDef {
 
     @Autowired
     private LoansApi loansApi;
+
+    @Autowired
+    private LoanBuyDownFeesApi loanBuyDownFeesApi;
 
     @Autowired
     private LoanCobCatchUpApi loanCobCatchUpApi;
@@ -4140,6 +4145,34 @@ public class LoanStepDef extends AbstractStepDef {
         return actualValues;
     }
 
+    private List<String> fetchValuesOfBuyDownFees(List<String> header, BuyDownFeeAmortizationDetails t) {
+        List<String> actualValues = new ArrayList<>();
+        for (String headerName : header) {
+            switch (headerName) {
+                case "Date" -> actualValues.add(t.getBuyDownFeeDate() == null ? null : FORMATTER.format(t.getBuyDownFeeDate()));
+                case "Fee Amount" -> actualValues
+                        .add(t.getBuyDownFeeAmount() == null ? new Utils.DoubleFormatter(new BigDecimal("0.0").doubleValue()).format()
+                                : new Utils.DoubleFormatter(t.getBuyDownFeeAmount().doubleValue()).format());
+                // actualValues.add(new Utils.DoubleFormatter(t.getBuyDownFeeAmount().doubleValue()).format());
+                // actualValues.add(MathUtil.nullToZero(t.getBuyDownFeeAmount().doubleValue()).format());
+                case "Amortized Amount" -> actualValues
+                        .add(t.getAmortizedAmount() == null ? new Utils.DoubleFormatter(new BigDecimal("0.0").doubleValue()).format()
+                                : new Utils.DoubleFormatter(t.getAmortizedAmount().doubleValue()).format());
+                case "Not Yet Amortized Amount" -> actualValues
+                        .add(t.getNotYetAmortizedAmount() == null ? new Utils.DoubleFormatter(new BigDecimal("0.0").doubleValue()).format()
+                                : new Utils.DoubleFormatter(t.getNotYetAmortizedAmount().doubleValue()).format());
+                case "Adjusted Amount" ->
+                    actualValues.add(t.getAdjustedAmount() == null ? new Utils.DoubleFormatter(new BigDecimal("0.0").doubleValue()).format()
+                            : new Utils.DoubleFormatter(t.getAdjustedAmount().doubleValue()).format());
+                case "Charged Off Amount" -> actualValues
+                        .add(t.getChargedOffAmount() == null ? new Utils.DoubleFormatter(new BigDecimal("0.0").doubleValue()).format()
+                                : new Utils.DoubleFormatter(t.getChargedOffAmount().doubleValue()).format());
+                default -> throw new IllegalStateException(String.format("Header name %s cannot be found", headerName));
+            }
+        }
+        return actualValues;
+    }
+
     private List<String> fetchValuesOfDisbursementDetails(List<String> header, GetLoansLoanIdDisbursementDetails t) {
         List<String> actualValues = new ArrayList<>();
         for (String headerName : header) {
@@ -5026,6 +5059,53 @@ public class LoanStepDef extends AbstractStepDef {
         ErrorHelper.checkSuccessfulApiCall(adjustmentResponse);
 
         log.debug("BuyDown Fee Adjustment created: Transaction ID {}", adjustmentResponse.body().getResourceId());
+    }
+
+    @And("Buy down fee contains the following data:")
+    public void checkBuyDownFeeData(DataTable table) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.body().getLoanId();
+        String resourceId = String.valueOf(loanId);
+
+        final Response<List<BuyDownFeeAmortizationDetails>> buyDownFeesResponse = loanBuyDownFeesApi
+                .retrieveLoanBuyDownFeeAmortizationDetails(loanId).execute();
+        ErrorHelper.checkSuccessfulApiCall(buyDownFeesResponse);
+
+        List<BuyDownFeeAmortizationDetails> buyDownFees = buyDownFeesResponse.body();
+        checkBuyDownFeeTransactionData(resourceId, buyDownFees, table);
+    }
+
+    @And("Buy down fee by external-id contains the following data:")
+    public void checkBuyDownFeeByexternalIdData(DataTable table) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.body().getLoanId();
+        String resourceId = String.valueOf(loanId);
+        String externalId = loanCreateResponse.body().getResourceExternalId();
+
+        final Response<List<BuyDownFeeAmortizationDetails>> buyDownFeesResponse = loanBuyDownFeesApi
+                .retrieveLoanBuyDownFeeAmortizationDetailsByExternalId(externalId).execute();
+        ErrorHelper.checkSuccessfulApiCall(buyDownFeesResponse);
+
+        List<BuyDownFeeAmortizationDetails> buyDownFees = buyDownFeesResponse.body();
+        checkBuyDownFeeTransactionData(resourceId, buyDownFees, table);
+    }
+
+    public void checkBuyDownFeeTransactionData(String resourceId, List<BuyDownFeeAmortizationDetails> buyDownFees, DataTable table) {
+        List<List<String>> data = table.asLists();
+        for (int i = 1; i < data.size(); i++) {
+            List<String> expectedValues = data.get(i);
+            String buyDownFeeDateExpected = expectedValues.get(0);
+            List<List<String>> actualValuesList = buyDownFees.stream()//
+                    .filter(t -> buyDownFeeDateExpected.equals(FORMATTER.format(t.getBuyDownFeeDate())))//
+                    .map(t -> fetchValuesOfBuyDownFees(table.row(0), t))//
+                    .collect(Collectors.toList());//
+            boolean containsExpectedValues = actualValuesList.stream()//
+                    .anyMatch(actualValues -> actualValues.equals(expectedValues));//
+            assertThat(containsExpectedValues)
+                    .as(ErrorMessageHelper.wrongValueInLineInBuyDownFeeTab(resourceId, i, actualValuesList, expectedValues)).isTrue();
+        }
+        assertThat(buyDownFees.size()).as(ErrorMessageHelper.nrOfLinesWrongInBuyDownFeeTab(resourceId, buyDownFees.size(), data.size() - 1))
+                .isEqualTo(data.size() - 1);
     }
 
     @Then("Update loan approved amount with new amount {string} value")
