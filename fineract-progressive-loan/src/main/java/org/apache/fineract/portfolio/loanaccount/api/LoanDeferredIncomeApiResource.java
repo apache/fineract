@@ -20,22 +20,27 @@ package org.apache.fineract.portfolio.loanaccount.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDeferredIncomeData;
 import org.apache.fineract.portfolio.loanaccount.service.CapitalizedIncomeBalanceReadService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.stereotype.Component;
 
-@Path("/v1/loans/{loanId}/deferredincome")
+@Path("/v1/loans")
 @Component
 @Tag(name = "Loan Deferred Income data", description = "Loan deferred income like Capitalized Income to fetch the Deferred Income related informations")
 @RequiredArgsConstructor
@@ -44,16 +49,34 @@ public class LoanDeferredIncomeApiResource {
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "LOAN";
     private final PlatformSecurityContext context;
     private final CapitalizedIncomeBalanceReadService capitalizedIncomeBalanceReadService;
+    private final LoanReadPlatformService loanReadPlatformService;
 
+    @Path("/{loanId}/deferredincome")
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Fetch the Capitalized Income related informations")
-    public LoanDeferredIncomeData fetchDeferredIncomeDetails(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
-            @Context final UriInfo uriInfo) {
+    public LoanDeferredIncomeData fetchDeferredIncomeDetails(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         return capitalizedIncomeBalanceReadService.fetchLoanDeferredIncomeData(loanId);
+    }
+
+    @GET
+    @Path("/external-id/{loanExternalId}/deferredincome")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Get the amortization details of Capitalized Income for a loan by external ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanDeferredIncomeData.class))) })
+    public LoanDeferredIncomeData fetchDeferredIncomeDetailsByExternalId(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId", required = true) final String loanExternalId) {
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
+
+        final ExternalId externalId = ExternalIdFactory.produce(loanExternalId);
+        final Long resolvedLoanId = loanReadPlatformService.getResolvedLoanId(externalId);
+
+        return this.capitalizedIncomeBalanceReadService.fetchLoanDeferredIncomeData(resolvedLoanId);
     }
 
 }
