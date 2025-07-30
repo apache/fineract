@@ -9,6 +9,7 @@ jobs:
   test:
     name: E2E Tests (Shard ${{ matrix.shard_index }} of ${{ matrix.total_shards }})
     runs-on: ubuntu-24.04
+    timeout-minutes: 60
 
     strategy:
       fail-fast: false

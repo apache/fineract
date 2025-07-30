@@ -13,6 +13,7 @@ jobs:
       issues: write  # for actions/stale to close stale issues
       pull-requests: write  # for actions/stale to close stale PRs
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
     - uses: actions/stale@5bef64f19d7facfb25b37b414482c7164d639639 # v9
       with:
