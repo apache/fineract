@@ -3204,8 +3204,6 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 1000.0        | 0        | 0    | 0         | 1000.0 | 0.0  | 0          | 0    | 1000        |
 
-  # TODO fix progressive interest mode FLAT does not respect in multiples of
-  @Skip
   @TestRailId:C3129 @AdvancedPaymentAllocation
   Scenario: Verify installment due date logic for monthly installments - last day of the month
     When Admin sets the business date to "31 January 2024"
@@ -3249,8 +3247,6 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 250.0 | 0.0        | 0.0  | 750.0       |
 
-  # TODO fix progressive interest mode FLAT does not respect in multiples of
-  @Skip
   @TestRailId:C3130 @AdvancedPaymentAllocation
   Scenario: Verify installment due date logic for monthly installments - last day of the month, expected and real disbursement dates are different
     When Admin sets the business date to "30 January 2024"
@@ -3295,8 +3291,6 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 250.0 | 0.0        | 0.0  | 750.0       |
 
-  # TODO fix progressive interest mode FLAT does not respect in multiples of
-  @Skip
   @TestRailId:C3131 @AdvancedPaymentAllocation
   Scenario: Verify installment due date logic for monthly installments - last day of the month, repayment start calculated from Submitted on date - submit, approve, disburse on same date
     When Admin sets the business date to "31 January 2024"
@@ -3340,8 +3334,6 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 250.0 | 0.0        | 0.0  | 750.0       |
 
-  # TODO fix progressive interest mode FLAT does not respect in multiples of
-  @Skip
   @TestRailId:C3132 @AdvancedPaymentAllocation
   Scenario: Verify installment due date logic for monthly installments - last day of the month, repayment start calculated from Submitted on date - submit and approve on same date, disburse on next day
     When Admin sets the business date to "31 January 2024"
@@ -3386,8 +3378,6 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 250.0 | 0.0        | 0.0  | 750.0       |
 
-  # TODO fix progressive interest mode FLAT does not respect in multiples of
-  @Skip
   @TestRailId:C3133 @AdvancedPaymentAllocation
   Scenario: Verify installment due date logic for monthly installments - last day of the month, repayment start calculated from Submitted on date - submit and approve on same date, expected disbursement date on next day
     When Admin sets the business date to "31 January 2024"

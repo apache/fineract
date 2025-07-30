@@ -926,10 +926,11 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 .plus(sumOfInterest).minus(alreadyRepaidPrincipals);
 
         Money periodEmi = total.dividedBy(repaymentPeriods.size(), mc);
-        Money remainder = total.minus(periodEmi.multipliedBy(repaymentPeriods.size(), mc));
+        Money periodEmiInMultiplesOf = applyInstallmentAmountInMultiplesOf(scheduleModel, periodEmi);
+        Money remainder = total.minus(periodEmiInMultiplesOf.multipliedBy(repaymentPeriods.size(), mc));
 
         repaymentPeriods.forEach(rp -> {
-            Money emi = rp.equals(last) ? periodEmi.add(remainder) : periodEmi;
+            Money emi = rp.equals(last) ? periodEmiInMultiplesOf.add(remainder) : periodEmiInMultiplesOf;
             rp.setEmi(emi);
             rp.setOriginalEmi(emi);
             rp.getInterestPeriods().forEach(InterestPeriod::updateOutstandingLoanBalance);

@@ -3168,6 +3168,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .daysInMonthType(DaysInMonthType.DAYS30.value)//
                 .enableDownPayment(false)//
                 .enableAutoRepaymentForDownPayment(null)//
+                .installmentAmountInMultiplesOf(null)//
                 .disbursedAmountPercentageForDownPayment(null)//
                 .multiDisburseLoan(true)//
                 .disallowExpectedDisbursements(true)//
@@ -3197,6 +3198,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT.value)//
                 .enableDownPayment(false)//
                 .enableAutoRepaymentForDownPayment(null)//
+                .installmentAmountInMultiplesOf(null)//
                 .disbursedAmountPercentageForDownPayment(null)//
                 .multiDisburseLoan(true)//
                 .disallowExpectedDisbursements(true)//
@@ -3230,6 +3232,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT.value)//
                 .enableDownPayment(false)//
                 .enableAutoRepaymentForDownPayment(null)//
+                .installmentAmountInMultiplesOf(null)//
                 .disbursedAmountPercentageForDownPayment(null)//
                 .multiDisburseLoan(true)//
                 .disallowExpectedDisbursements(true)//
@@ -3259,6 +3262,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .loanScheduleProcessingType("HORIZONTAL")//
                 .enableDownPayment(false)//
                 .enableAutoRepaymentForDownPayment(null)//
+                .installmentAmountInMultiplesOf(null)//
                 .disbursedAmountPercentageForDownPayment(null)//
                 .multiDisburseLoan(true)//
                 .disallowExpectedDisbursements(true)//
