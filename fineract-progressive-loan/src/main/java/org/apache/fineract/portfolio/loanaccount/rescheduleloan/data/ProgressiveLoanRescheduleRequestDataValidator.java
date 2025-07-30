@@ -46,7 +46,6 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
@@ -91,18 +90,8 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
                     "Only one operation is supported at a time during Loan Rescheduling");
         }
 
-        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-        if (rescheduleFromDate != null) {
-            if (hasInterestRateChange && !rescheduleFromDate.isAfter(businessDate)) {
-                throw new GeneralPlatformDomainRuleException(
-                        "loan.reschedule.interest.rate.change.reschedule.from.date.should.be.in.future",
-                        String.format("Loan Reschedule From date (%s) for Loan: %s should be in the future.", rescheduleFromDate,
-                                loan.getId()),
-                        loan.getId(), rescheduleFromDate);
-            }
-            if (hasInterestRateChange) {
-                validateInterestRateChangeRescheduleFromDate(loan, rescheduleFromDate);
-            }
+        if (rescheduleFromDate != null && hasInterestRateChange) {
+            validateInterestRateChangeRescheduleFromDate(loan, rescheduleFromDate);
         }
 
         LoanRepaymentScheduleInstallment installment;
@@ -161,13 +150,6 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
 
         if (loanRescheduleRequest.getInterestRateFromInstallmentTermVariationIfExists() != null) {
             installment = loan.getRelatedRepaymentScheduleInstallment(rescheduleFromDate);
-            if (!rescheduleFromDate.isAfter(DateUtils.getBusinessLocalDate())) {
-                throw new GeneralPlatformDomainRuleException(
-                        "loan.reschedule.interest.rate.change.reschedule.from.date.should.be.in.future",
-                        String.format("Loan Reschedule From date (%s) for Loan: %s should be in the future.", rescheduleFromDate,
-                                loan.getId()),
-                        loan.getId(), rescheduleFromDate);
-            }
         } else {
             installment = loan.fetchLoanRepaymentScheduleInstallmentByDueDate(rescheduleFromDate);
         }
