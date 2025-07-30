@@ -76,13 +76,13 @@ dependencyManagement {
         dependency 'org.ehcache:ehcache:3.10.8'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.14'
         dependency 'com.jayway.jsonpath:json-path:2.9.0'
-        dependency ('org.apache.tika:tika-core:2.9.3') {
+        dependency ('org.apache.tika:tika-core:3.2.1') {
             exclude 'commons-logging:commons-logging'
         }
-        dependency ('org.apache.tika:tika-core:2.9.3') {
+        dependency ('org.apache.tika:tika-core:3.2.1') {
             exclude 'commons-logging:commons-logging'
         }
-        dependency ('org.apache.tika:tika-parser-miscoffice-module:2.9.3') {
+        dependency ('org.apache.tika:tika-parser-miscoffice-module:3.2.1') {
             exclude 'org.bouncycastle:bcprov-jdk15on'
             exclude 'org.bouncycastle:bcmail-jdk15on'
             exclude 'org.bouncycastle:bcprov-jdk18on'
@@ -99,7 +99,7 @@ dependencyManagement {
             exclude 'org.apache.commons:commons-compress'
             exclude 'xml-apis:xml-apis'
         }
-        dependency ('org.apache.tika:tika-parser-microsoft-module:2.9.3') {
+        dependency ('org.apache.tika:tika-parser-microsoft-module:3.2.1') {
             exclude 'org.bouncycastle:bcprov-jdk15on'
             exclude 'org.bouncycastle:bcmail-jdk15on'
             exclude 'org.bouncycastle:bcprov-jdk18on'
