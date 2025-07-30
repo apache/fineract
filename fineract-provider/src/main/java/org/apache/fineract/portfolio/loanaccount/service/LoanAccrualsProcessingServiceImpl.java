@@ -620,7 +620,15 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         final Money unrecognizedWaived = MathUtil
                 .toMoney(loanTransactionRepository.findChargeUnrecognizedWaivedAmount(loanCharge, tillDate), currency);
         final Money transactionWaived = MathUtil.minusToZero(waived, unrecognizedWaived);
-        final Money transactionAccrued = MathUtil.toMoney(loanTransactionRepository.findChargeAccrualAmount(loanCharge), currency);
+        // For installment fees, use installment-specific accrual amount
+        final Money transactionAccrued;
+        if (installmentFee && installmentChargeId != null) {
+            transactionAccrued = MathUtil.toMoney(
+                    loanTransactionRepository.findChargeAccrualAmountByInstallment(loanCharge, dueInstallment.getInstallmentNumber()),
+                    currency);
+        } else {
+            transactionAccrued = MathUtil.toMoney(loanTransactionRepository.findChargeAccrualAmount(loanCharge), currency);
+        }
         chargeData.setTransactionAccrued(transactionAccrued);
         chargeData.setChargeAccrued(MathUtil.minusToZero(transactionAccrued, transactionWaived));
 

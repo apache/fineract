@@ -1541,7 +1541,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
             int numberOfInstallments = 0;
             for (final LoanRepaymentScheduleInstallment installment : installments) {
-                if (!installment.isRecalculatedInterestComponent()) {
+                if (!installment.isRecalculatedInterestComponent() && !installment.isAdditional() && !installment.isDownPayment()
+                        && !installment.isReAged()) {
                     numberOfInstallments++;
                 }
             }

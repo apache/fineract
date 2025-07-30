@@ -655,7 +655,8 @@ public class LoanChargeService {
     private List<LoanInstallmentCharge> generateInstallmentLoanCharges(final Loan loan, final LoanCharge loanCharge) {
         final List<LoanInstallmentCharge> loanChargePerInstallments = new ArrayList<>();
         if (loanCharge.isInstalmentFee()) {
-            List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
+            final List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments().stream()
+                    .filter(i -> !i.isDownPayment() && !i.isAdditional() && !i.isReAged()).toList();
             for (final LoanRepaymentScheduleInstallment installment : installments) {
                 BigDecimal amount;
                 if (loanCharge.getChargeCalculation().isFlat()) {

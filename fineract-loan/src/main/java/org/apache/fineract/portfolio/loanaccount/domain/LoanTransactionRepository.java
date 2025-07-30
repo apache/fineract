@@ -282,6 +282,19 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
     BigDecimal findChargeAccrualAmount(@Param("loanCharge") LoanCharge loanCharge);
 
     @Query("""
+            SELECT COALESCE(SUM(CASE WHEN lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL THEN lcpb.amount
+                 WHEN lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL_ADJUSTMENT THEN -lcpb.amount
+                 ELSE 0 END), 0)
+            FROM LoanChargePaidBy lcpb
+            JOIN lcpb.loanTransaction lt
+            WHERE lcpb.loanCharge = :loanCharge
+                AND lcpb.installmentNumber = :installmentNumber
+                AND lt.reversed = false
+            """)
+    BigDecimal findChargeAccrualAmountByInstallment(@Param("loanCharge") LoanCharge loanCharge,
+            @Param("installmentNumber") Integer installmentNumber);
+
+    @Query("""
             SELECT COALESCE(SUM(lt.unrecognizedIncomePortion), 0)
             FROM LoanChargePaidBy lcpb
             JOIN lcpb.loanTransaction lt
