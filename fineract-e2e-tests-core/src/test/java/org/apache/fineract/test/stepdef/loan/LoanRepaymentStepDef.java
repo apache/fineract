@@ -538,7 +538,13 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
 
         Response<PostLoansLoanIdTransactionsResponse> transactionUndoResponse = loanTransactionsApi
                 .adjustLoanTransaction(loanId, targetTransaction.getId(), transactionUndoRequest, "").execute();
-        checkMakeTransactionForbidden(transactionUndoResponse, 403, ErrorMessageHelper.addCapitalizedIncomeUndoFailureAdjustmentExists());
+        if (transactionType.equals("Buy Down Fee")) {
+            checkMakeTransactionForbidden(transactionUndoResponse, 403,
+                    ErrorMessageHelper.buyDownFeeUndoFailureAdjustmentExists(targetTransaction.getId()));
+        } else if (transactionType.equals("Capitalized Income")) {
+            checkMakeTransactionForbidden(transactionUndoResponse, 403,
+                    ErrorMessageHelper.addCapitalizedIncomeUndoFailureAdjustmentExists());
+        }
     }
 
     @When("Customer undo {string}th {string} transaction made on {string} with linked {string} transaction")

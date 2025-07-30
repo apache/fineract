@@ -179,6 +179,11 @@ public final class ErrorMessageHelper {
         return "Capitalized income transaction cannot be reversed when non-reversed adjustment exists for it.";
     }
 
+    public static String buyDownFeeUndoFailureAdjustmentExists(Long loanId) {
+        String loanIdStr = String.valueOf(loanId);
+        return String.format("Undo Loan Transaction: %s is not allowed. Loan transaction has not reversed transaction related", loanIdStr);
+    }
+
     public static String wrongAmountInRepaymentSchedule(int line, BigDecimal actual, BigDecimal expected) {
         String lineToStr = String.valueOf(line);
         String actualToStr = actual.toString();
