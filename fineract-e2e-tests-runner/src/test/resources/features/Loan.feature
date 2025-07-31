@@ -125,6 +125,68 @@ Feature: Loan
     When Loan Pay-off is made on "1 January 2024"
     Then Loan's all installments have obligations met
 
+  @TestRailId:C3895
+  Scenario: Verify disbursed amount approved over applied amount for progressive loan that expects tranches with percentage overAppliedCalculationType - UC1
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with disbursement details and following data:
+      | LoanProduct                                                                               | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | 1st_tranche_disb_expected_date |1st_tranche_disb_principal |
+      | LP2_PROGRESSIVE_ADV_PYMNT_INTEREST_RECALC_360_30_MULTIDISB_OVER_APPLIED_EXPECTED_TRANCHES | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | 01 January 2024                | 1000.0                    |
+    And Admin successfully approves the loan on "1 January 2024" with "1200" amount and expected disbursement date on "1 January 2024"
+    Then Loan status will be "APPROVED"
+    Then Loan Tranche Details tab has the following data:
+      | Expected Disbursement On | Disbursed On    | Principal   | Net Disbursal Amount |
+      | 01 January 2024          |                 | 1000.0      |                      |
+    When Admin sets the business date to "2 January 2024"
+    And Admin successfully add disbursement detail to the loan on "5 January 2024" with 200 EUR transaction amount
+    Then Loan Tranche Details tab has the following data:
+      | Expected Disbursement On | Disbursed On    | Principal   | Net Disbursal Amount |
+      | 01 January 2024          |                 | 1000.0      |                      |
+      | 05 January 2024          |                 | 200.0       | 1200.0               |
+    And Admin checks available disbursement amount 0.0 EUR
+    Then Admin fails to disburse the loan on "2 January 2024" with "1600" EUR transaction amount because of wrong amount
+    And Admin successfully disburse the loan on "2 January 2024" with "1500" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    And Admin checks available disbursement amount 0.0 EUR
+    Then Loan Tranche Details tab has the following data:
+      | Expected Disbursement On | Disbursed On    | Principal   | Net Disbursal Amount |
+      | 01 January 2024          | 02 January 2024 | 1500.0      |                      |
+      | 05 January 2024          |                 | 200.0       | 1200.0                |
+
+    When Loan Pay-off is made on "2 January 2024"
+    Then Loan's all installments have obligations met
+
+  @TestRailId:C3896
+  Scenario: Verify disbursed amount approved over applied amount for progressive loan that expects tranches with percentage overAppliedCalculationType - UC2
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with disbursement details and following data:
+      | LoanProduct                                                                               | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | 1st_tranche_disb_expected_date |1st_tranche_disb_principal |
+      | LP2_PROGRESSIVE_ADV_PYMNT_INTEREST_RECALC_360_30_MULTIDISB_OVER_APPLIED_EXPECTED_TRANCHES | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | 01 January 2024                | 1000.0                    |
+    And Admin successfully approves the loan on "1 January 2024" with "1200" amount and expected disbursement date on "1 January 2024"
+    Then Loan status will be "APPROVED"
+    Then Loan Tranche Details tab has the following data:
+      | Expected Disbursement On | Disbursed On    | Principal   | Net Disbursal Amount |
+      | 01 January 2024          |                 | 1000.0      |                      |
+    When Admin sets the business date to "2 January 2024"
+    And Admin successfully add disbursement detail to the loan on "5 January 2024" with 200 EUR transaction amount
+    Then Loan Tranche Details tab has the following data:
+      | Expected Disbursement On | Disbursed On    | Principal   | Net Disbursal Amount |
+      | 01 January 2024          |                 | 1000.0      |                      |
+      | 05 January 2024          |                 | 200.0       | 1200.0               |
+    And Admin checks available disbursement amount 0.0 EUR
+    Then Admin fails to disburse the loan on "2 January 2024" with "1600" EUR transaction amount because of wrong amount
+    And Admin successfully disburse the loan on "2 January 2024" with "1100" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    And Admin checks available disbursement amount 100.0 EUR
+    Then Loan Tranche Details tab has the following data:
+      | Expected Disbursement On | Disbursed On    | Principal   | Net Disbursal Amount |
+      | 01 January 2024          | 02 January 2024 | 1100.0      |                      |
+      | 05 January 2024          |                 | 200.0       | 1200.0                |
+
+    When Loan Pay-off is made on "2 January 2024"
+    Then Loan's all installments have obligations met
+
   @TestRailId:C67
   Scenario: As admin I would like to check that amounts are distributed equally in loan repayment schedule
     When Admin sets the business date to "1 September 2022"

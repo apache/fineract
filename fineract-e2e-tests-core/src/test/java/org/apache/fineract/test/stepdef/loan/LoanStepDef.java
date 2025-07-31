@@ -1695,6 +1695,16 @@ public class LoanStepDef extends AbstractStepDef {
                 .isEqualTo(data.size() - 1);
     }
 
+    @And("Admin checks available disbursement amount {double} EUR")
+    public void checkAvailableDisbursementAmountLoan(Double availableDisbursementAmountExpected) throws IOException {
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+
+        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "all", "", "").execute();
+        BigDecimal availableDisbursementAmountActual = loanDetails.body().getDelinquent().getAvailableDisbursementAmount();
+        assertThat(BigDecimal.valueOf(availableDisbursementAmountExpected).compareTo(availableDisbursementAmountActual)).isEqualTo(0);
+    }
+
     @And("Admin successfully disburse the loan without auto downpayment on {string} with {string} EUR transaction amount")
     public void disburseLoanWithoutAutoDownpayment(String actualDisbursementDate, String transactionAmount) throws IOException {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
