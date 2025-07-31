@@ -25,9 +25,9 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-
 import java.math.BigDecimal;
 import java.text.DateFormat;
+import java.text.DateFormatSymbols;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -40,6 +40,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ThreadLocalRandom;
 import org.apache.fineract.client.models.PostPaymentTypesRequest;
 import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -62,8 +63,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.text.DateFormatSymbols;
-import java.util.concurrent.ThreadLocalRandom;
+
 /**
  * Client Savings Integration Test for checking Savings Application.
  */
@@ -3175,7 +3175,7 @@ public class ClientSavingsIntegrationTest {
         final String dob2 = generateRandomDob(2000);
         final String dobShortMonth1 = getDobShortMonth(dob1);
         final String dobShortMonth2 = getDobShortMonth(dob2);
-        Integer clientId1  = createClientWithDob(dob1);
+        Integer clientId1 = createClientWithDob(dob1);
         Integer clientId2 = createClientWithDob(dob2);
         Integer clientId3 = createClientWithDob(dob2);
 
@@ -3184,15 +3184,8 @@ public class ClientSavingsIntegrationTest {
         final String enforceMinRequiredBalance = "false";
         final boolean allowOverdraft = true;
 
-        final Integer savingsProductID = createSavingsProduct(
-                this.requestSpec,
-                this.responseSpec,
-                MINIMUM_OPENING_BALANCE,
-                minBalanceForInterestCalculation,
-                minRequiredBalance,
-                enforceMinRequiredBalance, 
-                allowOverdraft
-                );
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
 
         applyForSavings(clientId1, savingsProductID);
         applyForSavings(clientId2, savingsProductID);
@@ -3248,12 +3241,12 @@ public class ClientSavingsIntegrationTest {
         return String.format("%d-%02d-%02d", year, month, day);
     }
 
-    private String getDobShortMonth (String dob) {
+    private String getDobShortMonth(String dob) {
         String[] parts = dob.split("-");
         int month = Integer.parseInt(parts[1]);
         int day = Integer.parseInt(parts[2]);
         String[] shortMonths = new DateFormatSymbols().getShortMonths();
-        String monthName = shortMonths[month-1];
+        String monthName = shortMonths[month - 1];
         return monthName + "-" + String.format("%02d", day);
     }
 

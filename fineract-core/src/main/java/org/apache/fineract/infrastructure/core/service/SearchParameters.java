@@ -25,11 +25,9 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +62,7 @@ public final class SearchParameters {
     private final Long categoryId;
     private final boolean isSelfUser;
     private static final Logger log = LoggerFactory.getLogger(SearchParameters.class);
+
     public static SearchParameters from(final String sqlSearch, final Long officeId, final String externalId, final String name,
             final String hierarchy) {
         final Long staffId = null;
@@ -210,19 +209,16 @@ public final class SearchParameters {
             String dateTimeFormat = "MMM-dd";
             try {
                 DateTimeFormatter fmt = new DateTimeFormatterBuilder().appendPattern(dateTimeFormat)
-                .parseDefaulting(ChronoField.YEAR, LocalDate.now().getYear())
-                .toFormatter();
+                        .parseDefaulting(ChronoField.YEAR, LocalDate.now().getYear()).toFormatter();
                 birthDate = LocalDate.parse(birthdate, fmt);
             } catch (final IllegalArgumentException | DateTimeParseException e) {
-                log.error("Exception {}: while parsing the birthdate:{} with error message:{}",
-                        e.getClass().getName(), birthdate, e.getMessage());
-            
+                log.error("Exception {}: while parsing the birthdate:{} with error message:{}", e.getClass().getName(), birthdate,
+                        e.getMessage());
+
                 final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
                 final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.dateFormat.format",
-                                "The parameter `" + birthdate + "` is invalid based on the dateFormat: `" + dateTimeFormat,
-                                birthdate,
-                                birthDate,
-                                dateTimeFormat);
+                        "The parameter `" + birthdate + "` is invalid based on the dateFormat: `" + dateTimeFormat, birthdate, birthDate,
+                        dateTimeFormat);
                 dataValidationErrors.add(error);
 
                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
@@ -396,9 +392,9 @@ public final class SearchParameters {
     }
 
     private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
-                             final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
-                             final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
-                             final Long savingsId, final Boolean orphansOnly, boolean isSelfUser, LocalDate birthDate) {
+            final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
+            final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
+            final Long savingsId, final Boolean orphansOnly, boolean isSelfUser, LocalDate birthDate) {
         this.sqlSearch = sqlSearch;
         this.officeId = officeId;
         this.externalId = externalId;

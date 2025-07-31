@@ -33,7 +33,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -652,7 +651,7 @@ public class SavingsAccountHelper {
     }
 
     public List<HashMap> getBirhdateList(final String dob) {
-        final String URL = SAVINGS_ACCOUNT_URL + "?"  + "birthDate=" + dob + "&" + Utils.TENANT_IDENTIFIER;
+        final String URL = SAVINGS_ACCOUNT_URL + "?" + "birthDate=" + dob + "&" + Utils.TENANT_IDENTIFIER;
         LOG.info(URL);
         HashMap<String, Object> response = Utils.performServerGet(requestSpec, responseSpec, URL, "");
         LOG.info(response.toString());

@@ -30,15 +30,15 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.UUID;
-import java.time.format.DateTimeFormatter;
-import java.time.LocalDate;
 import java.util.Locale;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.ClientTextSearch;
@@ -191,7 +191,7 @@ public class ClientHelper extends IntegrationTest {
     }
 
     public static Integer createClientBirthday(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-                                                final String birthDate) {
+            final String birthDate) {
         log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
         HashMap<String, Object> map = setInitialClientValues("1", LEGALFORM_ID_PERSON, UUID.randomUUID().toString());
         map.put("active", "true");
@@ -203,8 +203,7 @@ public class ClientHelper extends IntegrationTest {
         }
         final String clientJson = GSON.toJson(map);
 
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, clientJson,
-                "clientId");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, clientJson, "clientId");
     }
 
     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
