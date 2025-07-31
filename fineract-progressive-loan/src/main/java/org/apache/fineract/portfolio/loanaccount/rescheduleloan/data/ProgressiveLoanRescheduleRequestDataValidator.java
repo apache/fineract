@@ -78,7 +78,7 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
         validateRescheduleReasonId(fromJsonHelper, jsonElement, dataValidatorBuilder);
         validateRescheduleReasonComment(fromJsonHelper, jsonElement, dataValidatorBuilder);
         LocalDate adjustedDueDate = validateAndRetrieveAdjustedDate(fromJsonHelper, jsonElement, rescheduleFromDate, dataValidatorBuilder);
-        BigDecimal interestRate = validateInterestRate(fromJsonHelper, jsonElement, dataValidatorBuilder);
+        BigDecimal interestRate = validateInterestRate(fromJsonHelper, jsonElement, dataValidatorBuilder, loan);
         validateUnsupportedParams(jsonElement, dataValidatorBuilder);
 
         boolean hasInterestRateChange = interestRate != null;
@@ -199,11 +199,21 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
     }
 
     private BigDecimal validateInterestRate(final FromJsonHelper fromJsonHelper, final JsonElement jsonElement,
-            DataValidatorBuilder dataValidatorBuilder) {
+            DataValidatorBuilder dataValidatorBuilder, Loan loan) {
         final BigDecimal interestRate = fromJsonHelper
                 .extractBigDecimalWithLocaleNamed(RescheduleLoansApiConstants.newInterestRateParamName, jsonElement);
-        dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.newInterestRateParamName).value(interestRate).ignoreIfNull()
-                .zeroOrPositiveAmount();
+        DataValidatorBuilder interestRateDataValidatorBuilder = dataValidatorBuilder.reset()
+                .parameter(RescheduleLoansApiConstants.newInterestRateParamName).value(interestRate).ignoreIfNull().zeroOrPositiveAmount();
+
+        BigDecimal minNominalInterestRatePerPeriod = loan.getLoanProduct().getMinNominalInterestRatePerPeriod();
+        if (minNominalInterestRatePerPeriod != null) {
+            interestRateDataValidatorBuilder.notLessThanMin(minNominalInterestRatePerPeriod);
+        }
+
+        BigDecimal maxNominalInterestRatePerPeriod = loan.getLoanProduct().getMaxNominalInterestRatePerPeriod();
+        if (maxNominalInterestRatePerPeriod != null) {
+            interestRateDataValidatorBuilder.notGreaterThanMax(maxNominalInterestRatePerPeriod);
+        }
         return interestRate;
     }
 }
