@@ -217,8 +217,7 @@ public final class SearchParameters {
 
                 final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
                 final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.dateFormat.format",
-                        "The parameter `" + birthdate + "` is invalid based on the dateFormat: `" + dateTimeFormat, birthdate, birthDate,
-                        dateTimeFormat);
+                        "The parameter `birthdate` is invalid based on the dateFormat: `" + dateTimeFormat, "birthdate", birthdate);
                 dataValidationErrors.add(error);
 
                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",

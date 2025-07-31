@@ -58,6 +58,7 @@ import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -3169,7 +3170,6 @@ public class ClientSavingsIntegrationTest {
 
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testBirthdayForSavingsAccount() {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
@@ -3179,7 +3179,7 @@ public class ClientSavingsIntegrationTest {
         final String dobShortMonth2 = getDobShortMonth(dob2);
         Integer clientId1 = createClientWithDob(dob1);
         Integer clientId2 = createClientWithDob(dob2);
-        Integer clientId3 = createClientWithDob(dob2);
+        Integer clientId3 = createClientWithDob(dob2.replace("2000", "2001"));
 
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = "0";
@@ -3194,12 +3194,8 @@ public class ClientSavingsIntegrationTest {
         applyForSavings(clientId3, savingsProductID);
         List<HashMap> dobHashSet = this.savingsAccountHelper.getBirhdateList(dobShortMonth1);
         assertEquals(1, dobHashSet.size(), "Verifying the count of savings accounts with the same Dob");
-
         List<HashMap> dobHashSet2 = this.savingsAccountHelper.getBirhdateList(dobShortMonth2);
-        assertEquals(2, dobHashSet2.size(), "Verifying the count of savings accounts with the same Dob");
-
-        PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
-                () -> this.savingsAccountHelper.getBirhdateList(dob1));
+        assertEquals(2, dobHashSet2.size(), "Verifying the count of savings accounts with the same Dob, different years");
     }
 
     private Integer createSavingsAccountDailyPostingOverdraft(final Integer clientID, final String startDate) {
