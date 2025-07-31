@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -43,6 +44,7 @@ import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 import org.apache.fineract.client.models.PostPaymentTypesRequest;
 import org.apache.fineract.client.models.PostPaymentTypesResponse;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -3195,6 +3197,9 @@ public class ClientSavingsIntegrationTest {
 
         List<HashMap> dobHashSet2 = this.savingsAccountHelper.getBirhdateList(dobShortMonth2);
         assertEquals(2, dobHashSet2.size(), "Verifying the count of savings accounts with the same Dob");
+
+        PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> this.savingsAccountHelper.getBirhdateList(dob1));
     }
 
     private Integer createSavingsAccountDailyPostingOverdraft(final Integer clientID, final String startDate) {
