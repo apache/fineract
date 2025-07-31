@@ -3,3 +3,4 @@
 This section covers specific features and functionality available in Apache Fineract.
 
 include::capitalized-income.adoc[leveloffset=+1]
+include::buydown-fee.adoc[leveloffset=+1]
