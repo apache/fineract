@@ -1,0 +1,2730 @@
+From e8081a40a41848e6f0756cd9a503314d2899d516 Mon Sep 17 00:00:00 2001
+From: Que Le <le.que1016@gmail.com>
+Date: Wed, 30 Jul 2025 18:08:19 -0500
+Subject: [PATCH 1/9] basic date check
+
+---
+ build.gradle                                  | 14 ++++
+ .../core/service/SearchParameters.java        | 73 +++++++++++++++++--
+ .../api/SavingsAccountsApiResource.java       |  5 +-
+ ...SavingsAccountReadPlatformServiceImpl.java |  5 ++
+ .../ClientSavingsIntegrationTest.java         |  1 +
+ 5 files changed, 91 insertions(+), 7 deletions(-)
+
+diff --git a/build.gradle b/build.gradle
+index 0904122ed..05d87b142 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -17,6 +17,20 @@
+  * under the License.
+  */
+ // TODO: this is work in progress, please follow FINERACT-1171
++
++buildscript {
++    configurations.classpath {
++        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
++            if (details.requested.group == 'com.burgstaller' && details.requested.name == 'okhttp-digest' && details.requested.version == '1.10') {
++                details.useTarget "io.github.rburgst:${details.requested.name}:1.21"
++                details.because 'Dependency has moved'
++            }
++        }
++    }
++}
++
++
++
+ buildscript {
+     ext {
+         jacocoVersion = '0.8.10'
+diff --git a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+index c0b6c80b6..df355ff77 100644
+--- a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
++++ b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+@@ -18,8 +18,23 @@
+  */
+ package org.apache.fineract.infrastructure.core.service;
+ 
++import lombok.extern.slf4j.Slf4j;
+ import org.apache.commons.lang3.StringUtils;
++import org.apache.fineract.infrastructure.core.data.ApiParameterError;
++import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
++import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
++import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
+ 
++import java.time.LocalDate;
++import java.time.format.DateTimeFormatter;
++import java.time.format.DateTimeFormatterBuilder;
++import java.time.format.DateTimeParseException;
++import java.time.temporal.ChronoField;
++import java.util.ArrayList;
++import java.util.List;
++
++
++@Slf4j
+ public final class SearchParameters {
+ 
+     private final String sqlSearch;
+@@ -36,6 +51,7 @@ public final class SearchParameters {
+     private final String sortOrder;
+     private final String accountNo;
+     private final String currencyCode;
++    private final LocalDate birthDate;
+ 
+     private final Long staffId;
+ 
+@@ -182,7 +198,7 @@ public final class SearchParameters {
+     }
+ 
+     public static SearchParameters forSavings(final String sqlSearch, final String externalId, final Integer offset, final Integer limit,
+-            final String orderBy, final String sortOrder) {
++            final String orderBy, final String sortOrder, final String birthdate) {
+ 
+         final Integer maxLimitAllowed = getCheckedLimit(limit);
+         final Long staffId = null;
+@@ -192,8 +208,21 @@ public final class SearchParameters {
+         final Boolean orphansOnly = false;
+         final boolean isSelfUser = false;
+ 
++        LocalDate birthDate = null;
++        if (birthdate != null && !birthdate.isBlank()) {
++            try {
++                DateTimeFormatter fmt = new DateTimeFormatterBuilder().appendPattern("MMM-dd")
++                .parseDefaulting(ChronoField.YEAR, LocalDate.now().getYear())
++                .toFormatter();
++                birthDate = LocalDate.parse(birthdate, fmt);
++            } catch (DateTimeParseException e) {
++                log.error("Exception {}: while parsing the birthdate:{} with error message:{}",
++                        e.getClass().getName(), birthdate, e.getMessage());
++            }
++        }
++
+         return new SearchParameters(sqlSearch, null, externalId, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder,
+-                staffId, accountNo, loanId, savingsId, orphansOnly, isSelfUser);
++                staffId, accountNo, loanId, savingsId, orphansOnly, isSelfUser, birthDate);
+     }
+ 
+     public static SearchParameters forAccountTransfer(final String sqlSearch, final String externalId, final Integer offset,
+@@ -269,7 +298,7 @@ public final class SearchParameters {
+         this.categoryId = null;
+         this.isSelfUser = isSelfUser;
+         this.status = null;
+-
++        this.birthDate = null;
+     }
+ 
+     private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
+@@ -298,7 +327,7 @@ public final class SearchParameters {
+         this.categoryId = null;
+         this.isSelfUser = isSelfUser;
+         this.status = status;
+-
++        this.birthDate = null;
+     }
+ 
+     private SearchParameters(final Long officeId, final String externalId, final String name, final String hierarchy,
+@@ -327,6 +356,7 @@ public final class SearchParameters {
+         this.categoryId = null;
+         this.isSelfUser = isSelfUser;
+         this.status = null;
++        this.birthDate = null;
+     }
+ 
+     private SearchParameters(final Long provisioningEntryId, final Long officeId, final Long productId, final Long categoryId,
+@@ -353,7 +383,36 @@ public final class SearchParameters {
+         this.categoryId = categoryId;
+         this.isSelfUser = false;
+         this.status = null;
++        this.birthDate = null;
++    }
+ 
++    private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
++                             final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
++                             final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
++                             final Long savingsId, final Boolean orphansOnly, boolean isSelfUser, LocalDate birthDate) {
++        this.sqlSearch = sqlSearch;
++        this.officeId = officeId;
++        this.externalId = externalId;
++        this.name = name;
++        this.hierarchy = hierarchy;
++        this.firstname = firstname;
++        this.lastname = lastname;
++        this.offset = offset;
++        this.limit = limit;
++        this.orderBy = orderBy;
++        this.sortOrder = sortOrder;
++        this.staffId = staffId;
++        this.accountNo = accountNo;
++        this.loanId = loanId;
++        this.savingsId = savingsId;
++        this.orphansOnly = orphansOnly;
++        this.currencyCode = null;
++        this.provisioningEntryId = null;
++        this.productId = null;
++        this.categoryId = null;
++        this.isSelfUser = isSelfUser;
++        this.status = null;
++        this.birthDate = birthDate;
+     }
+ 
+     public SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name, final String hierarchy,
+@@ -382,7 +441,7 @@ public final class SearchParameters {
+         this.categoryId = null;
+         this.isSelfUser = false;
+         this.status = null;
+-
++        this.birthDate = null;
+     }
+ 
+     public boolean isOrderByRequested() {
+@@ -481,6 +540,10 @@ public final class SearchParameters {
+         return this.sortOrder;
+     }
+ 
++    public LocalDate getbirthDate() {
++        return this.birthDate;
++    }
++
+     public boolean isStaffIdPassed() {
+         return this.staffId != null && this.staffId != 0;
+     }
+diff --git a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
+index b4ca5f24d..c2248cb5a 100644
+--- a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
++++ b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
+@@ -128,11 +128,12 @@ public class SavingsAccountsApiResource {
+             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
+             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
+-            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
++            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
++            @QueryParam("birthDate") @Parameter(description = "client's birthdate") final String birthDate) {
+ 
+         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+ 
+-        final SearchParameters searchParameters = SearchParameters.forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder);
++        final SearchParameters searchParameters = SearchParameters.forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder, birthDate);
+ 
+         final Page<SavingsAccountData> products = savingsAccountReadPlatformService.retrieveAll(searchParameters);
+ 
+diff --git a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+index 0bce93194..f71cc0bf8 100644
+--- a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
++++ b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+@@ -213,6 +213,11 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
+                 objectArray[arrayPos] = searchParameters.getOfficeId();
+                 arrayPos = arrayPos + 1;
+             }
++            if (searchParameters.getbirthDate() != null) {
++                sqlBuilder.append(" and c.date_of_birth = ?");
++                objectArray[arrayPos] = java.sql.Date.valueOf(searchParameters.getbirthDate());
++                arrayPos = arrayPos + 1;
++            }
+             if (searchParameters.isOrderByRequested()) {
+                 sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
+                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
+diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+index 55a6dcf9b..6d198c22c 100644
+--- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
++++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+@@ -25,6 +25,7 @@ import io.restassured.builder.ResponseSpecBuilder;
+ import io.restassured.http.ContentType;
+ import io.restassured.specification.RequestSpecification;
+ import io.restassured.specification.ResponseSpecification;
++
+ import java.math.BigDecimal;
+ import java.text.DateFormat;
+ import java.text.DecimalFormat;
+-- 
+2.34.1
+
+
+From 851382d36835deb229fe105f8cd1ac61e89e4ef8 Mon Sep 17 00:00:00 2001
+From: Que Le <le.que1016@gmail.com>
+Date: Wed, 30 Jul 2025 20:07:40 -0500
+Subject: [PATCH 2/9] date without year
+
+---
+ .../core/service/SearchParameters.java        |  7 --
+ ...SavingsAccountReadPlatformServiceImpl.java |  6 +-
+ .../ClientSavingsIntegrationTest.java         | 65 ++++++++++++++++++-
+ .../integrationtests/common/ClientHelper.java | 20 ++++++
+ .../common/savings/SavingsAccountHelper.java  | 10 +++
+ 5 files changed, 98 insertions(+), 10 deletions(-)
+
+diff --git a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+index df355ff77..44683287f 100644
+--- a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
++++ b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+@@ -20,18 +20,12 @@ package org.apache.fineract.infrastructure.core.service;
+ 
+ import lombok.extern.slf4j.Slf4j;
+ import org.apache.commons.lang3.StringUtils;
+-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+-import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
+ 
+ import java.time.LocalDate;
+ import java.time.format.DateTimeFormatter;
+ import java.time.format.DateTimeFormatterBuilder;
+ import java.time.format.DateTimeParseException;
+ import java.time.temporal.ChronoField;
+-import java.util.ArrayList;
+-import java.util.List;
+ 
+ 
+ @Slf4j
+@@ -207,7 +201,6 @@ public final class SearchParameters {
+         final Long savingsId = null;
+         final Boolean orphansOnly = false;
+         final boolean isSelfUser = false;
+-
+         LocalDate birthDate = null;
+         if (birthdate != null && !birthdate.isBlank()) {
+             try {
+diff --git a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+index f71cc0bf8..eeb6e9a85 100644
+--- a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
++++ b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+@@ -192,7 +192,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
+         sqlBuilder.append(" join m_office o on o.id = c.office_id");
+         sqlBuilder.append(" where o.hierarchy like ?");
+ 
+-        final Object[] objectArray = new Object[2];
++        final Object[] objectArray = new Object[3];
+         objectArray[0] = hierarchySearchString;
+         int arrayPos = 1;
+         if (searchParameters != null) {
+@@ -214,7 +214,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
+                 arrayPos = arrayPos + 1;
+             }
+             if (searchParameters.getbirthDate() != null) {
+-                sqlBuilder.append(" and c.date_of_birth = ?");
++                sqlBuilder.append(" and c.date_of_birth IS NOT NULL AND DAY(c.date_of_birth)=DAY(?) AND MONTH(c.date_of_birth)=MONTH(?)");
++                objectArray[arrayPos] = java.sql.Date.valueOf(searchParameters.getbirthDate());
++                arrayPos = arrayPos + 1;
+                 objectArray[arrayPos] = java.sql.Date.valueOf(searchParameters.getbirthDate());
+                 arrayPos = arrayPos + 1;
+             }
+diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+index 6d198c22c..eb1e1eeee 100644
+--- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
++++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+@@ -62,7 +62,8 @@ import org.junit.jupiter.api.Order;
+ import org.junit.jupiter.api.Test;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+-
++import java.text.DateFormatSymbols;
++import java.util.concurrent.ThreadLocalRandom;
+ /**
+  * Client Savings Integration Test for checking Savings Application.
+  */
+@@ -3166,6 +3167,43 @@ public class ClientSavingsIntegrationTest {
+ 
+     }
+ 
++    @SuppressWarnings("unchecked")
++    @Test
++    public void testBirthdayForSavingsAccount() {
++        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
++        final String dob1 = generateRandomDob(1990);
++        final String dob2 = generateRandomDob(2000);
++        final String dobShortMonth1 = getDobShortMonth(dob1);
++        final String dobShortMonth2 = getDobShortMonth(dob2);
++        Integer clientId1  = createClientWithDob(dob1);
++        Integer clientId2 = createClientWithDob(dob2);
++        Integer clientId3 = createClientWithDob(dob2);
++
++        final String minBalanceForInterestCalculation = null;
++        final String minRequiredBalance = "0";
++        final String enforceMinRequiredBalance = "false";
++        final boolean allowOverdraft = true;
++
++        final Integer savingsProductID = createSavingsProduct(
++                this.requestSpec,
++                this.responseSpec,
++                MINIMUM_OPENING_BALANCE,
++                minBalanceForInterestCalculation,
++                minRequiredBalance,
++                enforceMinRequiredBalance, 
++                allowOverdraft
++                );
++
++        applyForSavings(clientId1, savingsProductID);
++        applyForSavings(clientId2, savingsProductID);
++        applyForSavings(clientId3, savingsProductID);
++        List<HashMap> dobHashSet = this.savingsAccountHelper.getBirhdateList(dobShortMonth1);
++        assertEquals(1, dobHashSet.size(), "Verifying the count of savings accounts with the same Dob");
++
++        List<HashMap> dobHashSet2 = this.savingsAccountHelper.getBirhdateList(dobShortMonth2);
++        assertEquals(2, dobHashSet2.size(), "Verifying the count of savings accounts with the same Dob");
++    }
++
+     private Integer createSavingsAccountDailyPostingOverdraft(final Integer clientID, final String startDate) {
+         final Integer savingsProductID = createSavingsProductDailyPostingOverdraft();
+         Assertions.assertNotNull(savingsProductID);
+@@ -3194,6 +3232,31 @@ public class ClientSavingsIntegrationTest {
+         GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "39", "5");
+     }
+ 
++    private Integer createClientWithDob(String dob) {
++        Integer clientId = ClientHelper.createClientBirthday(this.requestSpec, this.responseSpec, dob);
++        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
++        return clientId;
++    }
++
++    private void applyForSavings(Integer clientId, Integer savingsProductId) {
++        this.savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductId, ACCOUNT_TYPE_INDIVIDUAL);
++    }
++
++    private String generateRandomDob(int year) {
++        int month = ThreadLocalRandom.current().nextInt(1, 13);
++        int day = ThreadLocalRandom.current().nextInt(1, 29);
++        return String.format("%d-%02d-%02d", year, month, day);
++    }
++
++    private String getDobShortMonth (String dob) {
++        String[] parts = dob.split("-");
++        int month = Integer.parseInt(parts[1]);
++        int day = Integer.parseInt(parts[2]);
++        String[] shortMonths = new DateFormatSymbols().getShortMonths();
++        String monthName = shortMonths[month-1];
++        return monthName + "-" + String.format("%02d", day);
++    }
++
+     @AfterEach
+     public void tearDown() {
+         GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
+index 642783afb..3ed45b161 100644
+--- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
++++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
+@@ -36,6 +36,9 @@ import java.util.HashMap;
+ import java.util.LinkedHashMap;
+ import java.util.List;
+ import java.util.UUID;
++import java.time.format.DateTimeFormatter;
++import java.time.LocalDate;
++import java.util.Locale;
+ import lombok.RequiredArgsConstructor;
+ import lombok.extern.slf4j.Slf4j;
+ import org.apache.fineract.client.models.ClientTextSearch;
+@@ -187,6 +190,23 @@ public class ClientHelper extends IntegrationTest {
+         return createClient(requestSpec, responseSpec, DEFAULT_DATE);
+     }
+ 
++    public static Integer createClientBirthday(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
++                                                final String birthDate) {
++        log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
++        HashMap<String, Object> map = setInitialClientValues("1", LEGALFORM_ID_PERSON, UUID.randomUUID().toString());
++        map.put("active", "true");
++        map.put("activationDate", DEFAULT_DATE);
++        if (birthDate != null) {
++            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
++            String formattedDob = LocalDate.parse(birthDate).format(formatter);
++            map.put("dateOfBirth", formattedDob);
++        }
++        final String clientJson = GSON.toJson(map);
++
++        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, clientJson,
++                "clientId");
++    }
++
+     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+             final String activationDate) {
+         return createClient(requestSpec, responseSpec, activationDate, "1");
+diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
+index 7f6cc2d0f..37bd0fc26 100644
+--- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
++++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
+@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat;
+ import java.util.ArrayList;
+ import java.util.Calendar;
+ import java.util.HashMap;
++import java.util.LinkedHashMap;
+ import java.util.List;
+ import java.util.Locale;
+ import java.util.Map;
+@@ -650,6 +651,15 @@ public class SavingsAccountHelper {
+         return Utils.performServerGet(requestSpec, responseSpec, URL, "");
+     }
+ 
++    public List<HashMap> getBirhdateList(final String dob) {
++        final String URL = SAVINGS_ACCOUNT_URL + "?"  + "birthDate=" + dob + "&" + Utils.TENANT_IDENTIFIER;
++        LOG.info(URL);
++        HashMap<String, Object> response = Utils.performServerGet(requestSpec, responseSpec, URL, "");
++        LOG.info(response.toString());
++        List<HashMap> accounts = (ArrayList<HashMap>) response.get("pageItems");
++        return accounts;
++    }
++
+     public SavingsAccountTransactionsSearchResponse searchTransactions(Integer savingsId,
+             PagedRequestSavingsTransactionSearch searchReqeust) {
+         final String SAVINGS_TRANSACTIONS_SEARCH_URL = SAVINGS_ACCOUNT_URL + "/" + savingsId + "/transactions/search" + "?"
+-- 
+2.34.1
+
+
+From 4dd087dc8941ffa370e6b580e4b875ec694ad906 Mon Sep 17 00:00:00 2001
+From: Que Le <le.que1016@gmail.com>
+Date: Wed, 30 Jul 2025 21:07:51 -0500
+Subject: [PATCH 3/9] add exception for invalid date format
+
+---
+ .../core/service/SearchParameters.java        | 27 +++++++++++++++----
+ 1 file changed, 22 insertions(+), 5 deletions(-)
+
+diff --git a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+index 44683287f..be27797e6 100644
+--- a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
++++ b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+@@ -18,14 +18,19 @@
+  */
+ package org.apache.fineract.infrastructure.core.service;
+ 
+-import lombok.extern.slf4j.Slf4j;
+-import org.apache.commons.lang3.StringUtils;
+-
+ import java.time.LocalDate;
+ import java.time.format.DateTimeFormatter;
+ import java.time.format.DateTimeFormatterBuilder;
+ import java.time.format.DateTimeParseException;
+ import java.time.temporal.ChronoField;
++import java.util.ArrayList;
++import java.util.List;
++
++import org.apache.commons.lang3.StringUtils;
++import org.apache.fineract.infrastructure.core.data.ApiParameterError;
++import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
++
++import lombok.extern.slf4j.Slf4j;
+ 
+ 
+ @Slf4j
+@@ -203,14 +208,26 @@ public final class SearchParameters {
+         final boolean isSelfUser = false;
+         LocalDate birthDate = null;
+         if (birthdate != null && !birthdate.isBlank()) {
++            String dateTimeFormat = "MMM-dd";
+             try {
+-                DateTimeFormatter fmt = new DateTimeFormatterBuilder().appendPattern("MMM-dd")
++                DateTimeFormatter fmt = new DateTimeFormatterBuilder().appendPattern(dateTimeFormat)
+                 .parseDefaulting(ChronoField.YEAR, LocalDate.now().getYear())
+                 .toFormatter();
+                 birthDate = LocalDate.parse(birthdate, fmt);
+-            } catch (DateTimeParseException e) {
++            } catch (final IllegalArgumentException | DateTimeParseException e) {
+                 log.error("Exception {}: while parsing the birthdate:{} with error message:{}",
+                         e.getClass().getName(), birthdate, e.getMessage());
++            
++                final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
++                final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.dateFormat.format",
++                                "The parameter `" + birthdate + "` is invalid based on the dateFormat: `" + dateTimeFormat,
++                                birthdate,
++                                birthDate,
++                                dateTimeFormat);
++                dataValidationErrors.add(error);
++
++                throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
++                        dataValidationErrors, e);
+             }
+         }
+ 
+-- 
+2.34.1
+
+
+From 29e0f72b3c0622b0451b17f2b865e4a8249bf54a Mon Sep 17 00:00:00 2001
+From: Que Le <le.que1016@gmail.com>
+Date: Wed, 30 Jul 2025 21:11:44 -0500
+Subject: [PATCH 4/9] update logging
+
+---
+ .../infrastructure/core/service/SearchParameters.java      | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+index be27797e6..f7f4557b0 100644
+--- a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
++++ b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+@@ -30,10 +30,9 @@ import org.apache.commons.lang3.StringUtils;
+ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+ 
+-import lombok.extern.slf4j.Slf4j;
++import org.slf4j.Logger;
++import org.slf4j.LoggerFactory;
+ 
+-
+-@Slf4j
+ public final class SearchParameters {
+ 
+     private final String sqlSearch;
+@@ -64,7 +63,7 @@ public final class SearchParameters {
+     private final Long productId;
+     private final Long categoryId;
+     private final boolean isSelfUser;
+-
++    private static final Logger log = LoggerFactory.getLogger(SearchParameters.class);
+     public static SearchParameters from(final String sqlSearch, final Long officeId, final String externalId, final String name,
+             final String hierarchy) {
+         final Long staffId = null;
+-- 
+2.34.1
+
+
+From 12dd2ae385445416fc47b51081eaaae2822a5a2b Mon Sep 17 00:00:00 2001
+From: Que Le <le.que1016@gmail.com>
+Date: Wed, 30 Jul 2025 21:15:46 -0500
+Subject: [PATCH 5/9] run checkstyle
+
+---
+ .../core/service/SearchParameters.java        | 24 ++++++++-----------
+ .../api/SavingsAccountsApiResource.java       |  3 ++-
+ .../ClientSavingsIntegrationTest.java         | 23 +++++++-----------
+ .../integrationtests/common/ClientHelper.java | 11 ++++-----
+ .../common/savings/SavingsAccountHelper.java  |  3 +--
+ 5 files changed, 26 insertions(+), 38 deletions(-)
+
+diff --git a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+index f7f4557b0..edd0fc6d3 100644
+--- a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
++++ b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+@@ -25,11 +25,9 @@ import java.time.format.DateTimeParseException;
+ import java.time.temporal.ChronoField;
+ import java.util.ArrayList;
+ import java.util.List;
+-
+ import org.apache.commons.lang3.StringUtils;
+ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+-
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ 
+@@ -64,6 +62,7 @@ public final class SearchParameters {
+     private final Long categoryId;
+     private final boolean isSelfUser;
+     private static final Logger log = LoggerFactory.getLogger(SearchParameters.class);
++
+     public static SearchParameters from(final String sqlSearch, final Long officeId, final String externalId, final String name,
+             final String hierarchy) {
+         final Long staffId = null;
+@@ -210,19 +209,16 @@ public final class SearchParameters {
+             String dateTimeFormat = "MMM-dd";
+             try {
+                 DateTimeFormatter fmt = new DateTimeFormatterBuilder().appendPattern(dateTimeFormat)
+-                .parseDefaulting(ChronoField.YEAR, LocalDate.now().getYear())
+-                .toFormatter();
++                        .parseDefaulting(ChronoField.YEAR, LocalDate.now().getYear()).toFormatter();
+                 birthDate = LocalDate.parse(birthdate, fmt);
+             } catch (final IllegalArgumentException | DateTimeParseException e) {
+-                log.error("Exception {}: while parsing the birthdate:{} with error message:{}",
+-                        e.getClass().getName(), birthdate, e.getMessage());
+-            
++                log.error("Exception {}: while parsing the birthdate:{} with error message:{}", e.getClass().getName(), birthdate,
++                        e.getMessage());
++
+                 final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                 final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.dateFormat.format",
+-                                "The parameter `" + birthdate + "` is invalid based on the dateFormat: `" + dateTimeFormat,
+-                                birthdate,
+-                                birthDate,
+-                                dateTimeFormat);
++                        "The parameter `" + birthdate + "` is invalid based on the dateFormat: `" + dateTimeFormat, birthdate, birthDate,
++                        dateTimeFormat);
+                 dataValidationErrors.add(error);
+ 
+                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+@@ -396,9 +392,9 @@ public final class SearchParameters {
+     }
+ 
+     private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
+-                             final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
+-                             final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
+-                             final Long savingsId, final Boolean orphansOnly, boolean isSelfUser, LocalDate birthDate) {
++            final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
++            final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
++            final Long savingsId, final Boolean orphansOnly, boolean isSelfUser, LocalDate birthDate) {
+         this.sqlSearch = sqlSearch;
+         this.officeId = officeId;
+         this.externalId = externalId;
+diff --git a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
+index c2248cb5a..23e07527d 100644
+--- a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
++++ b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
+@@ -133,7 +133,8 @@ public class SavingsAccountsApiResource {
+ 
+         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+ 
+-        final SearchParameters searchParameters = SearchParameters.forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder, birthDate);
++        final SearchParameters searchParameters = SearchParameters.forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder,
++                birthDate);
+ 
+         final Page<SavingsAccountData> products = savingsAccountReadPlatformService.retrieveAll(searchParameters);
+ 
+diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+index eb1e1eeee..271036772 100644
+--- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
++++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+@@ -25,9 +25,9 @@ import io.restassured.builder.ResponseSpecBuilder;
+ import io.restassured.http.ContentType;
+ import io.restassured.specification.RequestSpecification;
+ import io.restassured.specification.ResponseSpecification;
+-
+ import java.math.BigDecimal;
+ import java.text.DateFormat;
++import java.text.DateFormatSymbols;
+ import java.text.DecimalFormat;
+ import java.text.DecimalFormatSymbols;
+ import java.text.SimpleDateFormat;
+@@ -40,6 +40,7 @@ import java.util.Date;
+ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Locale;
++import java.util.concurrent.ThreadLocalRandom;
+ import org.apache.fineract.client.models.PostPaymentTypesRequest;
+ import org.apache.fineract.client.models.PostPaymentTypesResponse;
+ import org.apache.fineract.integrationtests.common.ClientHelper;
+@@ -62,8 +63,7 @@ import org.junit.jupiter.api.Order;
+ import org.junit.jupiter.api.Test;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+-import java.text.DateFormatSymbols;
+-import java.util.concurrent.ThreadLocalRandom;
++
+ /**
+  * Client Savings Integration Test for checking Savings Application.
+  */
+@@ -3175,7 +3175,7 @@ public class ClientSavingsIntegrationTest {
+         final String dob2 = generateRandomDob(2000);
+         final String dobShortMonth1 = getDobShortMonth(dob1);
+         final String dobShortMonth2 = getDobShortMonth(dob2);
+-        Integer clientId1  = createClientWithDob(dob1);
++        Integer clientId1 = createClientWithDob(dob1);
+         Integer clientId2 = createClientWithDob(dob2);
+         Integer clientId3 = createClientWithDob(dob2);
+ 
+@@ -3184,15 +3184,8 @@ public class ClientSavingsIntegrationTest {
+         final String enforceMinRequiredBalance = "false";
+         final boolean allowOverdraft = true;
+ 
+-        final Integer savingsProductID = createSavingsProduct(
+-                this.requestSpec,
+-                this.responseSpec,
+-                MINIMUM_OPENING_BALANCE,
+-                minBalanceForInterestCalculation,
+-                minRequiredBalance,
+-                enforceMinRequiredBalance, 
+-                allowOverdraft
+-                );
++        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
++                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
+ 
+         applyForSavings(clientId1, savingsProductID);
+         applyForSavings(clientId2, savingsProductID);
+@@ -3248,12 +3241,12 @@ public class ClientSavingsIntegrationTest {
+         return String.format("%d-%02d-%02d", year, month, day);
+     }
+ 
+-    private String getDobShortMonth (String dob) {
++    private String getDobShortMonth(String dob) {
+         String[] parts = dob.split("-");
+         int month = Integer.parseInt(parts[1]);
+         int day = Integer.parseInt(parts[2]);
+         String[] shortMonths = new DateFormatSymbols().getShortMonths();
+-        String monthName = shortMonths[month-1];
++        String monthName = shortMonths[month - 1];
+         return monthName + "-" + String.format("%02d", day);
+     }
+ 
+diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
+index 3ed45b161..27e92c2ab 100644
+--- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
++++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
+@@ -30,15 +30,15 @@ import java.io.ByteArrayInputStream;
+ import java.io.File;
+ import java.io.IOException;
+ import java.io.InputStream;
++import java.time.LocalDate;
++import java.time.format.DateTimeFormatter;
+ import java.util.ArrayList;
+ import java.util.Arrays;
+ import java.util.HashMap;
+ import java.util.LinkedHashMap;
+ import java.util.List;
+-import java.util.UUID;
+-import java.time.format.DateTimeFormatter;
+-import java.time.LocalDate;
+ import java.util.Locale;
++import java.util.UUID;
+ import lombok.RequiredArgsConstructor;
+ import lombok.extern.slf4j.Slf4j;
+ import org.apache.fineract.client.models.ClientTextSearch;
+@@ -191,7 +191,7 @@ public class ClientHelper extends IntegrationTest {
+     }
+ 
+     public static Integer createClientBirthday(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+-                                                final String birthDate) {
++            final String birthDate) {
+         log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
+         HashMap<String, Object> map = setInitialClientValues("1", LEGALFORM_ID_PERSON, UUID.randomUUID().toString());
+         map.put("active", "true");
+@@ -203,8 +203,7 @@ public class ClientHelper extends IntegrationTest {
+         }
+         final String clientJson = GSON.toJson(map);
+ 
+-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, clientJson,
+-                "clientId");
++        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, clientJson, "clientId");
+     }
+ 
+     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
+index 37bd0fc26..e2906810a 100644
+--- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
++++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
+@@ -33,7 +33,6 @@ import java.text.SimpleDateFormat;
+ import java.util.ArrayList;
+ import java.util.Calendar;
+ import java.util.HashMap;
+-import java.util.LinkedHashMap;
+ import java.util.List;
+ import java.util.Locale;
+ import java.util.Map;
+@@ -652,7 +651,7 @@ public class SavingsAccountHelper {
+     }
+ 
+     public List<HashMap> getBirhdateList(final String dob) {
+-        final String URL = SAVINGS_ACCOUNT_URL + "?"  + "birthDate=" + dob + "&" + Utils.TENANT_IDENTIFIER;
++        final String URL = SAVINGS_ACCOUNT_URL + "?" + "birthDate=" + dob + "&" + Utils.TENANT_IDENTIFIER;
+         LOG.info(URL);
+         HashMap<String, Object> response = Utils.performServerGet(requestSpec, responseSpec, URL, "");
+         LOG.info(response.toString());
+-- 
+2.34.1
+
+
+From d4900f600cbbf888917392f88279c07afacffb34 Mon Sep 17 00:00:00 2001
+From: Que Le <le.que1016@gmail.com>
+Date: Wed, 30 Jul 2025 21:56:03 -0500
+Subject: [PATCH 6/9] add exception test cases for date parsing issues
+
+---
+ .../integrationtests/ClientSavingsIntegrationTest.java       | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+index 271036772..cdb682399 100644
+--- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
++++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+@@ -19,6 +19,7 @@
+ package org.apache.fineract.integrationtests;
+ 
+ import static org.junit.jupiter.api.Assertions.assertEquals;
++import static org.junit.jupiter.api.Assertions.assertThrows;
+ 
+ import io.restassured.builder.RequestSpecBuilder;
+ import io.restassured.builder.ResponseSpecBuilder;
+@@ -43,6 +44,7 @@ import java.util.Locale;
+ import java.util.concurrent.ThreadLocalRandom;
+ import org.apache.fineract.client.models.PostPaymentTypesRequest;
+ import org.apache.fineract.client.models.PostPaymentTypesResponse;
++import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+ import org.apache.fineract.integrationtests.common.ClientHelper;
+ import org.apache.fineract.integrationtests.common.CommonConstants;
+ import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+@@ -3195,6 +3197,9 @@ public class ClientSavingsIntegrationTest {
+ 
+         List<HashMap> dobHashSet2 = this.savingsAccountHelper.getBirhdateList(dobShortMonth2);
+         assertEquals(2, dobHashSet2.size(), "Verifying the count of savings accounts with the same Dob");
++
++        PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
++                () -> this.savingsAccountHelper.getBirhdateList(dob1));
+     }
+ 
+     private Integer createSavingsAccountDailyPostingOverdraft(final Integer clientID, final String startDate) {
+-- 
+2.34.1
+
+
+From 5f27402511aac4185ca070bfe8239468c22dfcd2 Mon Sep 17 00:00:00 2001
+From: Que Le <le.que1016@gmail.com>
+Date: Wed, 30 Jul 2025 22:09:57 -0500
+Subject: [PATCH 7/9] increase object array size to accommodate additional
+ parameters
+
+---
+ .../savings/service/SavingsAccountReadPlatformServiceImpl.java  | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+index eeb6e9a85..3c81a75ee 100644
+--- a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
++++ b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+@@ -192,7 +192,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
+         sqlBuilder.append(" join m_office o on o.id = c.office_id");
+         sqlBuilder.append(" where o.hierarchy like ?");
+ 
+-        final Object[] objectArray = new Object[3];
++        final Object[] objectArray = new Object[5];
+         objectArray[0] = hierarchySearchString;
+         int arrayPos = 1;
+         if (searchParameters != null) {
+-- 
+2.34.1
+
+
+From f2fe0ee813f5692580562ecd01380e2752d7a882 Mon Sep 17 00:00:00 2001
+From: Que Le <le.que1016@gmail.com>
+Date: Wed, 30 Jul 2025 22:25:32 -0500
+Subject: [PATCH 8/9] get patch
+
+---
+ que_le.patch | 877 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 877 insertions(+)
+ create mode 100644 que_le.patch
+
+diff --git a/que_le.patch b/que_le.patch
+new file mode 100644
+index 000000000..f5ff09d69
+--- /dev/null
++++ b/que_le.patch
+@@ -0,0 +1,877 @@
++From e8081a40a41848e6f0756cd9a503314d2899d516 Mon Sep 17 00:00:00 2001
++From: Que Le <le.que1016@gmail.com>
++Date: Wed, 30 Jul 2025 18:08:19 -0500
++Subject: [PATCH 1/7] basic date check
++
++---
++ build.gradle                                  | 14 ++++
++ .../core/service/SearchParameters.java        | 73 +++++++++++++++++--
++ .../api/SavingsAccountsApiResource.java       |  5 +-
++ ...SavingsAccountReadPlatformServiceImpl.java |  5 ++
++ .../ClientSavingsIntegrationTest.java         |  1 +
++ 5 files changed, 91 insertions(+), 7 deletions(-)
++
++diff --git a/build.gradle b/build.gradle
++index 0904122ed..05d87b142 100644
++--- a/build.gradle
+++++ b/build.gradle
++@@ -17,6 +17,20 @@
++  * under the License.
++  */
++ // TODO: this is work in progress, please follow FINERACT-1171
+++
+++buildscript {
+++    configurations.classpath {
+++        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+++            if (details.requested.group == 'com.burgstaller' && details.requested.name == 'okhttp-digest' && details.requested.version == '1.10') {
+++                details.useTarget "io.github.rburgst:${details.requested.name}:1.21"
+++                details.because 'Dependency has moved'
+++            }
+++        }
+++    }
+++}
+++
+++
+++
++ buildscript {
++     ext {
++         jacocoVersion = '0.8.10'
++diff --git a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
++index c0b6c80b6..df355ff77 100644
++--- a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+++++ b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
++@@ -18,8 +18,23 @@
++  */
++ package org.apache.fineract.infrastructure.core.service;
++ 
+++import lombok.extern.slf4j.Slf4j;
++ import org.apache.commons.lang3.StringUtils;
+++import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+++import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+++import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+++import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
++ 
+++import java.time.LocalDate;
+++import java.time.format.DateTimeFormatter;
+++import java.time.format.DateTimeFormatterBuilder;
+++import java.time.format.DateTimeParseException;
+++import java.time.temporal.ChronoField;
+++import java.util.ArrayList;
+++import java.util.List;
+++
+++
+++@Slf4j
++ public final class SearchParameters {
++ 
++     private final String sqlSearch;
++@@ -36,6 +51,7 @@ public final class SearchParameters {
++     private final String sortOrder;
++     private final String accountNo;
++     private final String currencyCode;
+++    private final LocalDate birthDate;
++ 
++     private final Long staffId;
++ 
++@@ -182,7 +198,7 @@ public final class SearchParameters {
++     }
++ 
++     public static SearchParameters forSavings(final String sqlSearch, final String externalId, final Integer offset, final Integer limit,
++-            final String orderBy, final String sortOrder) {
+++            final String orderBy, final String sortOrder, final String birthdate) {
++ 
++         final Integer maxLimitAllowed = getCheckedLimit(limit);
++         final Long staffId = null;
++@@ -192,8 +208,21 @@ public final class SearchParameters {
++         final Boolean orphansOnly = false;
++         final boolean isSelfUser = false;
++ 
+++        LocalDate birthDate = null;
+++        if (birthdate != null && !birthdate.isBlank()) {
+++            try {
+++                DateTimeFormatter fmt = new DateTimeFormatterBuilder().appendPattern("MMM-dd")
+++                .parseDefaulting(ChronoField.YEAR, LocalDate.now().getYear())
+++                .toFormatter();
+++                birthDate = LocalDate.parse(birthdate, fmt);
+++            } catch (DateTimeParseException e) {
+++                log.error("Exception {}: while parsing the birthdate:{} with error message:{}",
+++                        e.getClass().getName(), birthdate, e.getMessage());
+++            }
+++        }
+++
++         return new SearchParameters(sqlSearch, null, externalId, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder,
++-                staffId, accountNo, loanId, savingsId, orphansOnly, isSelfUser);
+++                staffId, accountNo, loanId, savingsId, orphansOnly, isSelfUser, birthDate);
++     }
++ 
++     public static SearchParameters forAccountTransfer(final String sqlSearch, final String externalId, final Integer offset,
++@@ -269,7 +298,7 @@ public final class SearchParameters {
++         this.categoryId = null;
++         this.isSelfUser = isSelfUser;
++         this.status = null;
++-
+++        this.birthDate = null;
++     }
++ 
++     private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
++@@ -298,7 +327,7 @@ public final class SearchParameters {
++         this.categoryId = null;
++         this.isSelfUser = isSelfUser;
++         this.status = status;
++-
+++        this.birthDate = null;
++     }
++ 
++     private SearchParameters(final Long officeId, final String externalId, final String name, final String hierarchy,
++@@ -327,6 +356,7 @@ public final class SearchParameters {
++         this.categoryId = null;
++         this.isSelfUser = isSelfUser;
++         this.status = null;
+++        this.birthDate = null;
++     }
++ 
++     private SearchParameters(final Long provisioningEntryId, final Long officeId, final Long productId, final Long categoryId,
++@@ -353,7 +383,36 @@ public final class SearchParameters {
++         this.categoryId = categoryId;
++         this.isSelfUser = false;
++         this.status = null;
+++        this.birthDate = null;
+++    }
++ 
+++    private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
+++                             final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
+++                             final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
+++                             final Long savingsId, final Boolean orphansOnly, boolean isSelfUser, LocalDate birthDate) {
+++        this.sqlSearch = sqlSearch;
+++        this.officeId = officeId;
+++        this.externalId = externalId;
+++        this.name = name;
+++        this.hierarchy = hierarchy;
+++        this.firstname = firstname;
+++        this.lastname = lastname;
+++        this.offset = offset;
+++        this.limit = limit;
+++        this.orderBy = orderBy;
+++        this.sortOrder = sortOrder;
+++        this.staffId = staffId;
+++        this.accountNo = accountNo;
+++        this.loanId = loanId;
+++        this.savingsId = savingsId;
+++        this.orphansOnly = orphansOnly;
+++        this.currencyCode = null;
+++        this.provisioningEntryId = null;
+++        this.productId = null;
+++        this.categoryId = null;
+++        this.isSelfUser = isSelfUser;
+++        this.status = null;
+++        this.birthDate = birthDate;
++     }
++ 
++     public SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name, final String hierarchy,
++@@ -382,7 +441,7 @@ public final class SearchParameters {
++         this.categoryId = null;
++         this.isSelfUser = false;
++         this.status = null;
++-
+++        this.birthDate = null;
++     }
++ 
++     public boolean isOrderByRequested() {
++@@ -481,6 +540,10 @@ public final class SearchParameters {
++         return this.sortOrder;
++     }
++ 
+++    public LocalDate getbirthDate() {
+++        return this.birthDate;
+++    }
+++
++     public boolean isStaffIdPassed() {
++         return this.staffId != null && this.staffId != 0;
++     }
++diff --git a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
++index b4ca5f24d..c2248cb5a 100644
++--- a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
+++++ b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
++@@ -128,11 +128,12 @@ public class SavingsAccountsApiResource {
++             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
++             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
++             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
++-            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
+++            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
+++            @QueryParam("birthDate") @Parameter(description = "client's birthdate") final String birthDate) {
++ 
++         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
++ 
++-        final SearchParameters searchParameters = SearchParameters.forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder);
+++        final SearchParameters searchParameters = SearchParameters.forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder, birthDate);
++ 
++         final Page<SavingsAccountData> products = savingsAccountReadPlatformService.retrieveAll(searchParameters);
++ 
++diff --git a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
++index 0bce93194..f71cc0bf8 100644
++--- a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+++++ b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
++@@ -213,6 +213,11 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
++                 objectArray[arrayPos] = searchParameters.getOfficeId();
++                 arrayPos = arrayPos + 1;
++             }
+++            if (searchParameters.getbirthDate() != null) {
+++                sqlBuilder.append(" and c.date_of_birth = ?");
+++                objectArray[arrayPos] = java.sql.Date.valueOf(searchParameters.getbirthDate());
+++                arrayPos = arrayPos + 1;
+++            }
++             if (searchParameters.isOrderByRequested()) {
++                 sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
++                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
++diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
++index 55a6dcf9b..6d198c22c 100644
++--- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+++++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
++@@ -25,6 +25,7 @@ import io.restassured.builder.ResponseSpecBuilder;
++ import io.restassured.http.ContentType;
++ import io.restassured.specification.RequestSpecification;
++ import io.restassured.specification.ResponseSpecification;
+++
++ import java.math.BigDecimal;
++ import java.text.DateFormat;
++ import java.text.DecimalFormat;
++-- 
++2.34.1
++
++
++From 851382d36835deb229fe105f8cd1ac61e89e4ef8 Mon Sep 17 00:00:00 2001
++From: Que Le <le.que1016@gmail.com>
++Date: Wed, 30 Jul 2025 20:07:40 -0500
++Subject: [PATCH 2/7] date without year
++
++---
++ .../core/service/SearchParameters.java        |  7 --
++ ...SavingsAccountReadPlatformServiceImpl.java |  6 +-
++ .../ClientSavingsIntegrationTest.java         | 65 ++++++++++++++++++-
++ .../integrationtests/common/ClientHelper.java | 20 ++++++
++ .../common/savings/SavingsAccountHelper.java  | 10 +++
++ 5 files changed, 98 insertions(+), 10 deletions(-)
++
++diff --git a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
++index df355ff77..44683287f 100644
++--- a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+++++ b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
++@@ -20,18 +20,12 @@ package org.apache.fineract.infrastructure.core.service;
++ 
++ import lombok.extern.slf4j.Slf4j;
++ import org.apache.commons.lang3.StringUtils;
++-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
++-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
++-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
++-import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
++ 
++ import java.time.LocalDate;
++ import java.time.format.DateTimeFormatter;
++ import java.time.format.DateTimeFormatterBuilder;
++ import java.time.format.DateTimeParseException;
++ import java.time.temporal.ChronoField;
++-import java.util.ArrayList;
++-import java.util.List;
++ 
++ 
++ @Slf4j
++@@ -207,7 +201,6 @@ public final class SearchParameters {
++         final Long savingsId = null;
++         final Boolean orphansOnly = false;
++         final boolean isSelfUser = false;
++-
++         LocalDate birthDate = null;
++         if (birthdate != null && !birthdate.isBlank()) {
++             try {
++diff --git a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
++index f71cc0bf8..eeb6e9a85 100644
++--- a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+++++ b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
++@@ -192,7 +192,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
++         sqlBuilder.append(" join m_office o on o.id = c.office_id");
++         sqlBuilder.append(" where o.hierarchy like ?");
++ 
++-        final Object[] objectArray = new Object[2];
+++        final Object[] objectArray = new Object[3];
++         objectArray[0] = hierarchySearchString;
++         int arrayPos = 1;
++         if (searchParameters != null) {
++@@ -214,7 +214,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
++                 arrayPos = arrayPos + 1;
++             }
++             if (searchParameters.getbirthDate() != null) {
++-                sqlBuilder.append(" and c.date_of_birth = ?");
+++                sqlBuilder.append(" and c.date_of_birth IS NOT NULL AND DAY(c.date_of_birth)=DAY(?) AND MONTH(c.date_of_birth)=MONTH(?)");
+++                objectArray[arrayPos] = java.sql.Date.valueOf(searchParameters.getbirthDate());
+++                arrayPos = arrayPos + 1;
++                 objectArray[arrayPos] = java.sql.Date.valueOf(searchParameters.getbirthDate());
++                 arrayPos = arrayPos + 1;
++             }
++diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
++index 6d198c22c..eb1e1eeee 100644
++--- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+++++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
++@@ -62,7 +62,8 @@ import org.junit.jupiter.api.Order;
++ import org.junit.jupiter.api.Test;
++ import org.slf4j.Logger;
++ import org.slf4j.LoggerFactory;
++-
+++import java.text.DateFormatSymbols;
+++import java.util.concurrent.ThreadLocalRandom;
++ /**
++  * Client Savings Integration Test for checking Savings Application.
++  */
++@@ -3166,6 +3167,43 @@ public class ClientSavingsIntegrationTest {
++ 
++     }
++ 
+++    @SuppressWarnings("unchecked")
+++    @Test
+++    public void testBirthdayForSavingsAccount() {
+++        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+++        final String dob1 = generateRandomDob(1990);
+++        final String dob2 = generateRandomDob(2000);
+++        final String dobShortMonth1 = getDobShortMonth(dob1);
+++        final String dobShortMonth2 = getDobShortMonth(dob2);
+++        Integer clientId1  = createClientWithDob(dob1);
+++        Integer clientId2 = createClientWithDob(dob2);
+++        Integer clientId3 = createClientWithDob(dob2);
+++
+++        final String minBalanceForInterestCalculation = null;
+++        final String minRequiredBalance = "0";
+++        final String enforceMinRequiredBalance = "false";
+++        final boolean allowOverdraft = true;
+++
+++        final Integer savingsProductID = createSavingsProduct(
+++                this.requestSpec,
+++                this.responseSpec,
+++                MINIMUM_OPENING_BALANCE,
+++                minBalanceForInterestCalculation,
+++                minRequiredBalance,
+++                enforceMinRequiredBalance, 
+++                allowOverdraft
+++                );
+++
+++        applyForSavings(clientId1, savingsProductID);
+++        applyForSavings(clientId2, savingsProductID);
+++        applyForSavings(clientId3, savingsProductID);
+++        List<HashMap> dobHashSet = this.savingsAccountHelper.getBirhdateList(dobShortMonth1);
+++        assertEquals(1, dobHashSet.size(), "Verifying the count of savings accounts with the same Dob");
+++
+++        List<HashMap> dobHashSet2 = this.savingsAccountHelper.getBirhdateList(dobShortMonth2);
+++        assertEquals(2, dobHashSet2.size(), "Verifying the count of savings accounts with the same Dob");
+++    }
+++
++     private Integer createSavingsAccountDailyPostingOverdraft(final Integer clientID, final String startDate) {
++         final Integer savingsProductID = createSavingsProductDailyPostingOverdraft();
++         Assertions.assertNotNull(savingsProductID);
++@@ -3194,6 +3232,31 @@ public class ClientSavingsIntegrationTest {
++         GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "39", "5");
++     }
++ 
+++    private Integer createClientWithDob(String dob) {
+++        Integer clientId = ClientHelper.createClientBirthday(this.requestSpec, this.responseSpec, dob);
+++        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+++        return clientId;
+++    }
+++
+++    private void applyForSavings(Integer clientId, Integer savingsProductId) {
+++        this.savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductId, ACCOUNT_TYPE_INDIVIDUAL);
+++    }
+++
+++    private String generateRandomDob(int year) {
+++        int month = ThreadLocalRandom.current().nextInt(1, 13);
+++        int day = ThreadLocalRandom.current().nextInt(1, 29);
+++        return String.format("%d-%02d-%02d", year, month, day);
+++    }
+++
+++    private String getDobShortMonth (String dob) {
+++        String[] parts = dob.split("-");
+++        int month = Integer.parseInt(parts[1]);
+++        int day = Integer.parseInt(parts[2]);
+++        String[] shortMonths = new DateFormatSymbols().getShortMonths();
+++        String monthName = shortMonths[month-1];
+++        return monthName + "-" + String.format("%02d", day);
+++    }
+++
++     @AfterEach
++     public void tearDown() {
++         GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
++diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
++index 642783afb..3ed45b161 100644
++--- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
+++++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
++@@ -36,6 +36,9 @@ import java.util.HashMap;
++ import java.util.LinkedHashMap;
++ import java.util.List;
++ import java.util.UUID;
+++import java.time.format.DateTimeFormatter;
+++import java.time.LocalDate;
+++import java.util.Locale;
++ import lombok.RequiredArgsConstructor;
++ import lombok.extern.slf4j.Slf4j;
++ import org.apache.fineract.client.models.ClientTextSearch;
++@@ -187,6 +190,23 @@ public class ClientHelper extends IntegrationTest {
++         return createClient(requestSpec, responseSpec, DEFAULT_DATE);
++     }
++ 
+++    public static Integer createClientBirthday(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+++                                                final String birthDate) {
+++        log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
+++        HashMap<String, Object> map = setInitialClientValues("1", LEGALFORM_ID_PERSON, UUID.randomUUID().toString());
+++        map.put("active", "true");
+++        map.put("activationDate", DEFAULT_DATE);
+++        if (birthDate != null) {
+++            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
+++            String formattedDob = LocalDate.parse(birthDate).format(formatter);
+++            map.put("dateOfBirth", formattedDob);
+++        }
+++        final String clientJson = GSON.toJson(map);
+++
+++        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, clientJson,
+++                "clientId");
+++    }
+++
++     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
++             final String activationDate) {
++         return createClient(requestSpec, responseSpec, activationDate, "1");
++diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
++index 7f6cc2d0f..37bd0fc26 100644
++--- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
+++++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
++@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat;
++ import java.util.ArrayList;
++ import java.util.Calendar;
++ import java.util.HashMap;
+++import java.util.LinkedHashMap;
++ import java.util.List;
++ import java.util.Locale;
++ import java.util.Map;
++@@ -650,6 +651,15 @@ public class SavingsAccountHelper {
++         return Utils.performServerGet(requestSpec, responseSpec, URL, "");
++     }
++ 
+++    public List<HashMap> getBirhdateList(final String dob) {
+++        final String URL = SAVINGS_ACCOUNT_URL + "?"  + "birthDate=" + dob + "&" + Utils.TENANT_IDENTIFIER;
+++        LOG.info(URL);
+++        HashMap<String, Object> response = Utils.performServerGet(requestSpec, responseSpec, URL, "");
+++        LOG.info(response.toString());
+++        List<HashMap> accounts = (ArrayList<HashMap>) response.get("pageItems");
+++        return accounts;
+++    }
+++
++     public SavingsAccountTransactionsSearchResponse searchTransactions(Integer savingsId,
++             PagedRequestSavingsTransactionSearch searchReqeust) {
++         final String SAVINGS_TRANSACTIONS_SEARCH_URL = SAVINGS_ACCOUNT_URL + "/" + savingsId + "/transactions/search" + "?"
++-- 
++2.34.1
++
++
++From 4dd087dc8941ffa370e6b580e4b875ec694ad906 Mon Sep 17 00:00:00 2001
++From: Que Le <le.que1016@gmail.com>
++Date: Wed, 30 Jul 2025 21:07:51 -0500
++Subject: [PATCH 3/7] add exception for invalid date format
++
++---
++ .../core/service/SearchParameters.java        | 27 +++++++++++++++----
++ 1 file changed, 22 insertions(+), 5 deletions(-)
++
++diff --git a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
++index 44683287f..be27797e6 100644
++--- a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+++++ b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
++@@ -18,14 +18,19 @@
++  */
++ package org.apache.fineract.infrastructure.core.service;
++ 
++-import lombok.extern.slf4j.Slf4j;
++-import org.apache.commons.lang3.StringUtils;
++-
++ import java.time.LocalDate;
++ import java.time.format.DateTimeFormatter;
++ import java.time.format.DateTimeFormatterBuilder;
++ import java.time.format.DateTimeParseException;
++ import java.time.temporal.ChronoField;
+++import java.util.ArrayList;
+++import java.util.List;
+++
+++import org.apache.commons.lang3.StringUtils;
+++import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+++import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+++
+++import lombok.extern.slf4j.Slf4j;
++ 
++ 
++ @Slf4j
++@@ -203,14 +208,26 @@ public final class SearchParameters {
++         final boolean isSelfUser = false;
++         LocalDate birthDate = null;
++         if (birthdate != null && !birthdate.isBlank()) {
+++            String dateTimeFormat = "MMM-dd";
++             try {
++-                DateTimeFormatter fmt = new DateTimeFormatterBuilder().appendPattern("MMM-dd")
+++                DateTimeFormatter fmt = new DateTimeFormatterBuilder().appendPattern(dateTimeFormat)
++                 .parseDefaulting(ChronoField.YEAR, LocalDate.now().getYear())
++                 .toFormatter();
++                 birthDate = LocalDate.parse(birthdate, fmt);
++-            } catch (DateTimeParseException e) {
+++            } catch (final IllegalArgumentException | DateTimeParseException e) {
++                 log.error("Exception {}: while parsing the birthdate:{} with error message:{}",
++                         e.getClass().getName(), birthdate, e.getMessage());
+++            
+++                final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+++                final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.dateFormat.format",
+++                                "The parameter `" + birthdate + "` is invalid based on the dateFormat: `" + dateTimeFormat,
+++                                birthdate,
+++                                birthDate,
+++                                dateTimeFormat);
+++                dataValidationErrors.add(error);
+++
+++                throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+++                        dataValidationErrors, e);
++             }
++         }
++ 
++-- 
++2.34.1
++
++
++From 29e0f72b3c0622b0451b17f2b865e4a8249bf54a Mon Sep 17 00:00:00 2001
++From: Que Le <le.que1016@gmail.com>
++Date: Wed, 30 Jul 2025 21:11:44 -0500
++Subject: [PATCH 4/7] update logging
++
++---
++ .../infrastructure/core/service/SearchParameters.java      | 7 +++----
++ 1 file changed, 3 insertions(+), 4 deletions(-)
++
++diff --git a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
++index be27797e6..f7f4557b0 100644
++--- a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+++++ b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
++@@ -30,10 +30,9 @@ import org.apache.commons.lang3.StringUtils;
++ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
++ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
++ 
++-import lombok.extern.slf4j.Slf4j;
+++import org.slf4j.Logger;
+++import org.slf4j.LoggerFactory;
++ 
++-
++-@Slf4j
++ public final class SearchParameters {
++ 
++     private final String sqlSearch;
++@@ -64,7 +63,7 @@ public final class SearchParameters {
++     private final Long productId;
++     private final Long categoryId;
++     private final boolean isSelfUser;
++-
+++    private static final Logger log = LoggerFactory.getLogger(SearchParameters.class);
++     public static SearchParameters from(final String sqlSearch, final Long officeId, final String externalId, final String name,
++             final String hierarchy) {
++         final Long staffId = null;
++-- 
++2.34.1
++
++
++From 12dd2ae385445416fc47b51081eaaae2822a5a2b Mon Sep 17 00:00:00 2001
++From: Que Le <le.que1016@gmail.com>
++Date: Wed, 30 Jul 2025 21:15:46 -0500
++Subject: [PATCH 5/7] run checkstyle
++
++---
++ .../core/service/SearchParameters.java        | 24 ++++++++-----------
++ .../api/SavingsAccountsApiResource.java       |  3 ++-
++ .../ClientSavingsIntegrationTest.java         | 23 +++++++-----------
++ .../integrationtests/common/ClientHelper.java | 11 ++++-----
++ .../common/savings/SavingsAccountHelper.java  |  3 +--
++ 5 files changed, 26 insertions(+), 38 deletions(-)
++
++diff --git a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
++index f7f4557b0..edd0fc6d3 100644
++--- a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+++++ b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
++@@ -25,11 +25,9 @@ import java.time.format.DateTimeParseException;
++ import java.time.temporal.ChronoField;
++ import java.util.ArrayList;
++ import java.util.List;
++-
++ import org.apache.commons.lang3.StringUtils;
++ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
++ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
++-
++ import org.slf4j.Logger;
++ import org.slf4j.LoggerFactory;
++ 
++@@ -64,6 +62,7 @@ public final class SearchParameters {
++     private final Long categoryId;
++     private final boolean isSelfUser;
++     private static final Logger log = LoggerFactory.getLogger(SearchParameters.class);
+++
++     public static SearchParameters from(final String sqlSearch, final Long officeId, final String externalId, final String name,
++             final String hierarchy) {
++         final Long staffId = null;
++@@ -210,19 +209,16 @@ public final class SearchParameters {
++             String dateTimeFormat = "MMM-dd";
++             try {
++                 DateTimeFormatter fmt = new DateTimeFormatterBuilder().appendPattern(dateTimeFormat)
++-                .parseDefaulting(ChronoField.YEAR, LocalDate.now().getYear())
++-                .toFormatter();
+++                        .parseDefaulting(ChronoField.YEAR, LocalDate.now().getYear()).toFormatter();
++                 birthDate = LocalDate.parse(birthdate, fmt);
++             } catch (final IllegalArgumentException | DateTimeParseException e) {
++-                log.error("Exception {}: while parsing the birthdate:{} with error message:{}",
++-                        e.getClass().getName(), birthdate, e.getMessage());
++-            
+++                log.error("Exception {}: while parsing the birthdate:{} with error message:{}", e.getClass().getName(), birthdate,
+++                        e.getMessage());
+++
++                 final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
++                 final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.dateFormat.format",
++-                                "The parameter `" + birthdate + "` is invalid based on the dateFormat: `" + dateTimeFormat,
++-                                birthdate,
++-                                birthDate,
++-                                dateTimeFormat);
+++                        "The parameter `" + birthdate + "` is invalid based on the dateFormat: `" + dateTimeFormat, birthdate, birthDate,
+++                        dateTimeFormat);
++                 dataValidationErrors.add(error);
++ 
++                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
++@@ -396,9 +392,9 @@ public final class SearchParameters {
++     }
++ 
++     private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
++-                             final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
++-                             final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
++-                             final Long savingsId, final Boolean orphansOnly, boolean isSelfUser, LocalDate birthDate) {
+++            final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
+++            final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
+++            final Long savingsId, final Boolean orphansOnly, boolean isSelfUser, LocalDate birthDate) {
++         this.sqlSearch = sqlSearch;
++         this.officeId = officeId;
++         this.externalId = externalId;
++diff --git a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
++index c2248cb5a..23e07527d 100644
++--- a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
+++++ b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
++@@ -133,7 +133,8 @@ public class SavingsAccountsApiResource {
++ 
++         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
++ 
++-        final SearchParameters searchParameters = SearchParameters.forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder, birthDate);
+++        final SearchParameters searchParameters = SearchParameters.forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder,
+++                birthDate);
++ 
++         final Page<SavingsAccountData> products = savingsAccountReadPlatformService.retrieveAll(searchParameters);
++ 
++diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
++index eb1e1eeee..271036772 100644
++--- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+++++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
++@@ -25,9 +25,9 @@ import io.restassured.builder.ResponseSpecBuilder;
++ import io.restassured.http.ContentType;
++ import io.restassured.specification.RequestSpecification;
++ import io.restassured.specification.ResponseSpecification;
++-
++ import java.math.BigDecimal;
++ import java.text.DateFormat;
+++import java.text.DateFormatSymbols;
++ import java.text.DecimalFormat;
++ import java.text.DecimalFormatSymbols;
++ import java.text.SimpleDateFormat;
++@@ -40,6 +40,7 @@ import java.util.Date;
++ import java.util.HashMap;
++ import java.util.List;
++ import java.util.Locale;
+++import java.util.concurrent.ThreadLocalRandom;
++ import org.apache.fineract.client.models.PostPaymentTypesRequest;
++ import org.apache.fineract.client.models.PostPaymentTypesResponse;
++ import org.apache.fineract.integrationtests.common.ClientHelper;
++@@ -62,8 +63,7 @@ import org.junit.jupiter.api.Order;
++ import org.junit.jupiter.api.Test;
++ import org.slf4j.Logger;
++ import org.slf4j.LoggerFactory;
++-import java.text.DateFormatSymbols;
++-import java.util.concurrent.ThreadLocalRandom;
+++
++ /**
++  * Client Savings Integration Test for checking Savings Application.
++  */
++@@ -3175,7 +3175,7 @@ public class ClientSavingsIntegrationTest {
++         final String dob2 = generateRandomDob(2000);
++         final String dobShortMonth1 = getDobShortMonth(dob1);
++         final String dobShortMonth2 = getDobShortMonth(dob2);
++-        Integer clientId1  = createClientWithDob(dob1);
+++        Integer clientId1 = createClientWithDob(dob1);
++         Integer clientId2 = createClientWithDob(dob2);
++         Integer clientId3 = createClientWithDob(dob2);
++ 
++@@ -3184,15 +3184,8 @@ public class ClientSavingsIntegrationTest {
++         final String enforceMinRequiredBalance = "false";
++         final boolean allowOverdraft = true;
++ 
++-        final Integer savingsProductID = createSavingsProduct(
++-                this.requestSpec,
++-                this.responseSpec,
++-                MINIMUM_OPENING_BALANCE,
++-                minBalanceForInterestCalculation,
++-                minRequiredBalance,
++-                enforceMinRequiredBalance, 
++-                allowOverdraft
++-                );
+++        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+++                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
++ 
++         applyForSavings(clientId1, savingsProductID);
++         applyForSavings(clientId2, savingsProductID);
++@@ -3248,12 +3241,12 @@ public class ClientSavingsIntegrationTest {
++         return String.format("%d-%02d-%02d", year, month, day);
++     }
++ 
++-    private String getDobShortMonth (String dob) {
+++    private String getDobShortMonth(String dob) {
++         String[] parts = dob.split("-");
++         int month = Integer.parseInt(parts[1]);
++         int day = Integer.parseInt(parts[2]);
++         String[] shortMonths = new DateFormatSymbols().getShortMonths();
++-        String monthName = shortMonths[month-1];
+++        String monthName = shortMonths[month - 1];
++         return monthName + "-" + String.format("%02d", day);
++     }
++ 
++diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
++index 3ed45b161..27e92c2ab 100644
++--- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
+++++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
++@@ -30,15 +30,15 @@ import java.io.ByteArrayInputStream;
++ import java.io.File;
++ import java.io.IOException;
++ import java.io.InputStream;
+++import java.time.LocalDate;
+++import java.time.format.DateTimeFormatter;
++ import java.util.ArrayList;
++ import java.util.Arrays;
++ import java.util.HashMap;
++ import java.util.LinkedHashMap;
++ import java.util.List;
++-import java.util.UUID;
++-import java.time.format.DateTimeFormatter;
++-import java.time.LocalDate;
++ import java.util.Locale;
+++import java.util.UUID;
++ import lombok.RequiredArgsConstructor;
++ import lombok.extern.slf4j.Slf4j;
++ import org.apache.fineract.client.models.ClientTextSearch;
++@@ -191,7 +191,7 @@ public class ClientHelper extends IntegrationTest {
++     }
++ 
++     public static Integer createClientBirthday(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
++-                                                final String birthDate) {
+++            final String birthDate) {
++         log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
++         HashMap<String, Object> map = setInitialClientValues("1", LEGALFORM_ID_PERSON, UUID.randomUUID().toString());
++         map.put("active", "true");
++@@ -203,8 +203,7 @@ public class ClientHelper extends IntegrationTest {
++         }
++         final String clientJson = GSON.toJson(map);
++ 
++-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, clientJson,
++-                "clientId");
+++        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, clientJson, "clientId");
++     }
++ 
++     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
++diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
++index 37bd0fc26..e2906810a 100644
++--- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
+++++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
++@@ -33,7 +33,6 @@ import java.text.SimpleDateFormat;
++ import java.util.ArrayList;
++ import java.util.Calendar;
++ import java.util.HashMap;
++-import java.util.LinkedHashMap;
++ import java.util.List;
++ import java.util.Locale;
++ import java.util.Map;
++@@ -652,7 +651,7 @@ public class SavingsAccountHelper {
++     }
++ 
++     public List<HashMap> getBirhdateList(final String dob) {
++-        final String URL = SAVINGS_ACCOUNT_URL + "?"  + "birthDate=" + dob + "&" + Utils.TENANT_IDENTIFIER;
+++        final String URL = SAVINGS_ACCOUNT_URL + "?" + "birthDate=" + dob + "&" + Utils.TENANT_IDENTIFIER;
++         LOG.info(URL);
++         HashMap<String, Object> response = Utils.performServerGet(requestSpec, responseSpec, URL, "");
++         LOG.info(response.toString());
++-- 
++2.34.1
++
++
++From d4900f600cbbf888917392f88279c07afacffb34 Mon Sep 17 00:00:00 2001
++From: Que Le <le.que1016@gmail.com>
++Date: Wed, 30 Jul 2025 21:56:03 -0500
++Subject: [PATCH 6/7] add exception test cases for date parsing issues
++
++---
++ .../integrationtests/ClientSavingsIntegrationTest.java       | 5 +++++
++ 1 file changed, 5 insertions(+)
++
++diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
++index 271036772..cdb682399 100644
++--- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+++++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
++@@ -19,6 +19,7 @@
++ package org.apache.fineract.integrationtests;
++ 
++ import static org.junit.jupiter.api.Assertions.assertEquals;
+++import static org.junit.jupiter.api.Assertions.assertThrows;
++ 
++ import io.restassured.builder.RequestSpecBuilder;
++ import io.restassured.builder.ResponseSpecBuilder;
++@@ -43,6 +44,7 @@ import java.util.Locale;
++ import java.util.concurrent.ThreadLocalRandom;
++ import org.apache.fineract.client.models.PostPaymentTypesRequest;
++ import org.apache.fineract.client.models.PostPaymentTypesResponse;
+++import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
++ import org.apache.fineract.integrationtests.common.ClientHelper;
++ import org.apache.fineract.integrationtests.common.CommonConstants;
++ import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
++@@ -3195,6 +3197,9 @@ public class ClientSavingsIntegrationTest {
++ 
++         List<HashMap> dobHashSet2 = this.savingsAccountHelper.getBirhdateList(dobShortMonth2);
++         assertEquals(2, dobHashSet2.size(), "Verifying the count of savings accounts with the same Dob");
+++
+++        PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+++                () -> this.savingsAccountHelper.getBirhdateList(dob1));
++     }
++ 
++     private Integer createSavingsAccountDailyPostingOverdraft(final Integer clientID, final String startDate) {
++-- 
++2.34.1
++
++
++From 5f27402511aac4185ca070bfe8239468c22dfcd2 Mon Sep 17 00:00:00 2001
++From: Que Le <le.que1016@gmail.com>
++Date: Wed, 30 Jul 2025 22:09:57 -0500
++Subject: [PATCH 7/7] increase object array size to accommodate additional
++ parameters
++
++---
++ .../savings/service/SavingsAccountReadPlatformServiceImpl.java  | 2 +-
++ 1 file changed, 1 insertion(+), 1 deletion(-)
++
++diff --git a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
++index eeb6e9a85..3c81a75ee 100644
++--- a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+++++ b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
++@@ -192,7 +192,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
++         sqlBuilder.append(" join m_office o on o.id = c.office_id");
++         sqlBuilder.append(" where o.hierarchy like ?");
++ 
++-        final Object[] objectArray = new Object[3];
+++        final Object[] objectArray = new Object[5];
++         objectArray[0] = hierarchySearchString;
++         int arrayPos = 1;
++         if (searchParameters != null) {
++-- 
++2.34.1
++
+-- 
+2.34.1
+
+
+From 79911d0612fbf8ff2a6ed4709db9908ea12ab121 Mon Sep 17 00:00:00 2001
+From: Que Le <le.que1016@gmail.com>
+Date: Thu, 31 Jul 2025 00:17:03 -0500
+Subject: [PATCH 9/9] fix error message and test cases
+
+---
+ .../core/service/SearchParameters.java        |   3 +-
+ .../ClientSavingsIntegrationTest.java         |  10 +-
+ que_le.patch                                  | 877 ------------------
+ 3 files changed, 4 insertions(+), 886 deletions(-)
+ delete mode 100644 que_le.patch
+
+diff --git a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+index edd0fc6d3..f36c4776e 100644
+--- a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
++++ b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+@@ -217,8 +217,7 @@ public final class SearchParameters {
+ 
+                 final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                 final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.dateFormat.format",
+-                        "The parameter `" + birthdate + "` is invalid based on the dateFormat: `" + dateTimeFormat, birthdate, birthDate,
+-                        dateTimeFormat);
++                        "The parameter `birthdate` is invalid based on the dateFormat: `" + dateTimeFormat, "birthdate", birthdate);
+                 dataValidationErrors.add(error);
+ 
+                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+index cdb682399..4dd0c55b8 100644
+--- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
++++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+@@ -58,6 +58,7 @@ import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
+ import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
+ import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
+ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
++import org.apache.http.HttpStatus;
+ import org.junit.jupiter.api.AfterEach;
+ import org.junit.jupiter.api.Assertions;
+ import org.junit.jupiter.api.BeforeEach;
+@@ -3169,7 +3170,6 @@ public class ClientSavingsIntegrationTest {
+ 
+     }
+ 
+-    @SuppressWarnings("unchecked")
+     @Test
+     public void testBirthdayForSavingsAccount() {
+         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+@@ -3179,7 +3179,7 @@ public class ClientSavingsIntegrationTest {
+         final String dobShortMonth2 = getDobShortMonth(dob2);
+         Integer clientId1 = createClientWithDob(dob1);
+         Integer clientId2 = createClientWithDob(dob2);
+-        Integer clientId3 = createClientWithDob(dob2);
++        Integer clientId3 = createClientWithDob(dob2.replace("2000", "2001"));
+ 
+         final String minBalanceForInterestCalculation = null;
+         final String minRequiredBalance = "0";
+@@ -3194,12 +3194,8 @@ public class ClientSavingsIntegrationTest {
+         applyForSavings(clientId3, savingsProductID);
+         List<HashMap> dobHashSet = this.savingsAccountHelper.getBirhdateList(dobShortMonth1);
+         assertEquals(1, dobHashSet.size(), "Verifying the count of savings accounts with the same Dob");
+-
+         List<HashMap> dobHashSet2 = this.savingsAccountHelper.getBirhdateList(dobShortMonth2);
+-        assertEquals(2, dobHashSet2.size(), "Verifying the count of savings accounts with the same Dob");
+-
+-        PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+-                () -> this.savingsAccountHelper.getBirhdateList(dob1));
++        assertEquals(2, dobHashSet2.size(), "Verifying the count of savings accounts with the same Dob, different years");
+     }
+ 
+     private Integer createSavingsAccountDailyPostingOverdraft(final Integer clientID, final String startDate) {
+diff --git a/que_le.patch b/que_le.patch
+deleted file mode 100644
+index f5ff09d69..000000000
+--- a/que_le.patch
++++ /dev/null
+@@ -1,877 +0,0 @@
+-From e8081a40a41848e6f0756cd9a503314d2899d516 Mon Sep 17 00:00:00 2001
+-From: Que Le <le.que1016@gmail.com>
+-Date: Wed, 30 Jul 2025 18:08:19 -0500
+-Subject: [PATCH 1/7] basic date check
+-
+----
+- build.gradle                                  | 14 ++++
+- .../core/service/SearchParameters.java        | 73 +++++++++++++++++--
+- .../api/SavingsAccountsApiResource.java       |  5 +-
+- ...SavingsAccountReadPlatformServiceImpl.java |  5 ++
+- .../ClientSavingsIntegrationTest.java         |  1 +
+- 5 files changed, 91 insertions(+), 7 deletions(-)
+-
+-diff --git a/build.gradle b/build.gradle
+-index 0904122ed..05d87b142 100644
+---- a/build.gradle
+-+++ b/build.gradle
+-@@ -17,6 +17,20 @@
+-  * under the License.
+-  */
+- // TODO: this is work in progress, please follow FINERACT-1171
+-+
+-+buildscript {
+-+    configurations.classpath {
+-+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+-+            if (details.requested.group == 'com.burgstaller' && details.requested.name == 'okhttp-digest' && details.requested.version == '1.10') {
+-+                details.useTarget "io.github.rburgst:${details.requested.name}:1.21"
+-+                details.because 'Dependency has moved'
+-+            }
+-+        }
+-+    }
+-+}
+-+
+-+
+-+
+- buildscript {
+-     ext {
+-         jacocoVersion = '0.8.10'
+-diff --git a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+-index c0b6c80b6..df355ff77 100644
+---- a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+-+++ b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+-@@ -18,8 +18,23 @@
+-  */
+- package org.apache.fineract.infrastructure.core.service;
+- 
+-+import lombok.extern.slf4j.Slf4j;
+- import org.apache.commons.lang3.StringUtils;
+-+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+-+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+-+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+-+import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
+- 
+-+import java.time.LocalDate;
+-+import java.time.format.DateTimeFormatter;
+-+import java.time.format.DateTimeFormatterBuilder;
+-+import java.time.format.DateTimeParseException;
+-+import java.time.temporal.ChronoField;
+-+import java.util.ArrayList;
+-+import java.util.List;
+-+
+-+
+-+@Slf4j
+- public final class SearchParameters {
+- 
+-     private final String sqlSearch;
+-@@ -36,6 +51,7 @@ public final class SearchParameters {
+-     private final String sortOrder;
+-     private final String accountNo;
+-     private final String currencyCode;
+-+    private final LocalDate birthDate;
+- 
+-     private final Long staffId;
+- 
+-@@ -182,7 +198,7 @@ public final class SearchParameters {
+-     }
+- 
+-     public static SearchParameters forSavings(final String sqlSearch, final String externalId, final Integer offset, final Integer limit,
+--            final String orderBy, final String sortOrder) {
+-+            final String orderBy, final String sortOrder, final String birthdate) {
+- 
+-         final Integer maxLimitAllowed = getCheckedLimit(limit);
+-         final Long staffId = null;
+-@@ -192,8 +208,21 @@ public final class SearchParameters {
+-         final Boolean orphansOnly = false;
+-         final boolean isSelfUser = false;
+- 
+-+        LocalDate birthDate = null;
+-+        if (birthdate != null && !birthdate.isBlank()) {
+-+            try {
+-+                DateTimeFormatter fmt = new DateTimeFormatterBuilder().appendPattern("MMM-dd")
+-+                .parseDefaulting(ChronoField.YEAR, LocalDate.now().getYear())
+-+                .toFormatter();
+-+                birthDate = LocalDate.parse(birthdate, fmt);
+-+            } catch (DateTimeParseException e) {
+-+                log.error("Exception {}: while parsing the birthdate:{} with error message:{}",
+-+                        e.getClass().getName(), birthdate, e.getMessage());
+-+            }
+-+        }
+-+
+-         return new SearchParameters(sqlSearch, null, externalId, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder,
+--                staffId, accountNo, loanId, savingsId, orphansOnly, isSelfUser);
+-+                staffId, accountNo, loanId, savingsId, orphansOnly, isSelfUser, birthDate);
+-     }
+- 
+-     public static SearchParameters forAccountTransfer(final String sqlSearch, final String externalId, final Integer offset,
+-@@ -269,7 +298,7 @@ public final class SearchParameters {
+-         this.categoryId = null;
+-         this.isSelfUser = isSelfUser;
+-         this.status = null;
+--
+-+        this.birthDate = null;
+-     }
+- 
+-     private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
+-@@ -298,7 +327,7 @@ public final class SearchParameters {
+-         this.categoryId = null;
+-         this.isSelfUser = isSelfUser;
+-         this.status = status;
+--
+-+        this.birthDate = null;
+-     }
+- 
+-     private SearchParameters(final Long officeId, final String externalId, final String name, final String hierarchy,
+-@@ -327,6 +356,7 @@ public final class SearchParameters {
+-         this.categoryId = null;
+-         this.isSelfUser = isSelfUser;
+-         this.status = null;
+-+        this.birthDate = null;
+-     }
+- 
+-     private SearchParameters(final Long provisioningEntryId, final Long officeId, final Long productId, final Long categoryId,
+-@@ -353,7 +383,36 @@ public final class SearchParameters {
+-         this.categoryId = categoryId;
+-         this.isSelfUser = false;
+-         this.status = null;
+-+        this.birthDate = null;
+-+    }
+- 
+-+    private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
+-+                             final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
+-+                             final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
+-+                             final Long savingsId, final Boolean orphansOnly, boolean isSelfUser, LocalDate birthDate) {
+-+        this.sqlSearch = sqlSearch;
+-+        this.officeId = officeId;
+-+        this.externalId = externalId;
+-+        this.name = name;
+-+        this.hierarchy = hierarchy;
+-+        this.firstname = firstname;
+-+        this.lastname = lastname;
+-+        this.offset = offset;
+-+        this.limit = limit;
+-+        this.orderBy = orderBy;
+-+        this.sortOrder = sortOrder;
+-+        this.staffId = staffId;
+-+        this.accountNo = accountNo;
+-+        this.loanId = loanId;
+-+        this.savingsId = savingsId;
+-+        this.orphansOnly = orphansOnly;
+-+        this.currencyCode = null;
+-+        this.provisioningEntryId = null;
+-+        this.productId = null;
+-+        this.categoryId = null;
+-+        this.isSelfUser = isSelfUser;
+-+        this.status = null;
+-+        this.birthDate = birthDate;
+-     }
+- 
+-     public SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name, final String hierarchy,
+-@@ -382,7 +441,7 @@ public final class SearchParameters {
+-         this.categoryId = null;
+-         this.isSelfUser = false;
+-         this.status = null;
+--
+-+        this.birthDate = null;
+-     }
+- 
+-     public boolean isOrderByRequested() {
+-@@ -481,6 +540,10 @@ public final class SearchParameters {
+-         return this.sortOrder;
+-     }
+- 
+-+    public LocalDate getbirthDate() {
+-+        return this.birthDate;
+-+    }
+-+
+-     public boolean isStaffIdPassed() {
+-         return this.staffId != null && this.staffId != 0;
+-     }
+-diff --git a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
+-index b4ca5f24d..c2248cb5a 100644
+---- a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
+-+++ b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
+-@@ -128,11 +128,12 @@ public class SavingsAccountsApiResource {
+-             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+-             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
+-             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
+--            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
+-+            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
+-+            @QueryParam("birthDate") @Parameter(description = "client's birthdate") final String birthDate) {
+- 
+-         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+- 
+--        final SearchParameters searchParameters = SearchParameters.forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder);
+-+        final SearchParameters searchParameters = SearchParameters.forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder, birthDate);
+- 
+-         final Page<SavingsAccountData> products = savingsAccountReadPlatformService.retrieveAll(searchParameters);
+- 
+-diff --git a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+-index 0bce93194..f71cc0bf8 100644
+---- a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+-+++ b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+-@@ -213,6 +213,11 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
+-                 objectArray[arrayPos] = searchParameters.getOfficeId();
+-                 arrayPos = arrayPos + 1;
+-             }
+-+            if (searchParameters.getbirthDate() != null) {
+-+                sqlBuilder.append(" and c.date_of_birth = ?");
+-+                objectArray[arrayPos] = java.sql.Date.valueOf(searchParameters.getbirthDate());
+-+                arrayPos = arrayPos + 1;
+-+            }
+-             if (searchParameters.isOrderByRequested()) {
+-                 sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
+-                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
+-diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+-index 55a6dcf9b..6d198c22c 100644
+---- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+-+++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+-@@ -25,6 +25,7 @@ import io.restassured.builder.ResponseSpecBuilder;
+- import io.restassured.http.ContentType;
+- import io.restassured.specification.RequestSpecification;
+- import io.restassured.specification.ResponseSpecification;
+-+
+- import java.math.BigDecimal;
+- import java.text.DateFormat;
+- import java.text.DecimalFormat;
+--- 
+-2.34.1
+-
+-
+-From 851382d36835deb229fe105f8cd1ac61e89e4ef8 Mon Sep 17 00:00:00 2001
+-From: Que Le <le.que1016@gmail.com>
+-Date: Wed, 30 Jul 2025 20:07:40 -0500
+-Subject: [PATCH 2/7] date without year
+-
+----
+- .../core/service/SearchParameters.java        |  7 --
+- ...SavingsAccountReadPlatformServiceImpl.java |  6 +-
+- .../ClientSavingsIntegrationTest.java         | 65 ++++++++++++++++++-
+- .../integrationtests/common/ClientHelper.java | 20 ++++++
+- .../common/savings/SavingsAccountHelper.java  | 10 +++
+- 5 files changed, 98 insertions(+), 10 deletions(-)
+-
+-diff --git a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+-index df355ff77..44683287f 100644
+---- a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+-+++ b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+-@@ -20,18 +20,12 @@ package org.apache.fineract.infrastructure.core.service;
+- 
+- import lombok.extern.slf4j.Slf4j;
+- import org.apache.commons.lang3.StringUtils;
+--import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+--import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+--import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+--import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
+- 
+- import java.time.LocalDate;
+- import java.time.format.DateTimeFormatter;
+- import java.time.format.DateTimeFormatterBuilder;
+- import java.time.format.DateTimeParseException;
+- import java.time.temporal.ChronoField;
+--import java.util.ArrayList;
+--import java.util.List;
+- 
+- 
+- @Slf4j
+-@@ -207,7 +201,6 @@ public final class SearchParameters {
+-         final Long savingsId = null;
+-         final Boolean orphansOnly = false;
+-         final boolean isSelfUser = false;
+--
+-         LocalDate birthDate = null;
+-         if (birthdate != null && !birthdate.isBlank()) {
+-             try {
+-diff --git a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+-index f71cc0bf8..eeb6e9a85 100644
+---- a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+-+++ b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+-@@ -192,7 +192,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
+-         sqlBuilder.append(" join m_office o on o.id = c.office_id");
+-         sqlBuilder.append(" where o.hierarchy like ?");
+- 
+--        final Object[] objectArray = new Object[2];
+-+        final Object[] objectArray = new Object[3];
+-         objectArray[0] = hierarchySearchString;
+-         int arrayPos = 1;
+-         if (searchParameters != null) {
+-@@ -214,7 +214,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
+-                 arrayPos = arrayPos + 1;
+-             }
+-             if (searchParameters.getbirthDate() != null) {
+--                sqlBuilder.append(" and c.date_of_birth = ?");
+-+                sqlBuilder.append(" and c.date_of_birth IS NOT NULL AND DAY(c.date_of_birth)=DAY(?) AND MONTH(c.date_of_birth)=MONTH(?)");
+-+                objectArray[arrayPos] = java.sql.Date.valueOf(searchParameters.getbirthDate());
+-+                arrayPos = arrayPos + 1;
+-                 objectArray[arrayPos] = java.sql.Date.valueOf(searchParameters.getbirthDate());
+-                 arrayPos = arrayPos + 1;
+-             }
+-diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+-index 6d198c22c..eb1e1eeee 100644
+---- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+-+++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+-@@ -62,7 +62,8 @@ import org.junit.jupiter.api.Order;
+- import org.junit.jupiter.api.Test;
+- import org.slf4j.Logger;
+- import org.slf4j.LoggerFactory;
+--
+-+import java.text.DateFormatSymbols;
+-+import java.util.concurrent.ThreadLocalRandom;
+- /**
+-  * Client Savings Integration Test for checking Savings Application.
+-  */
+-@@ -3166,6 +3167,43 @@ public class ClientSavingsIntegrationTest {
+- 
+-     }
+- 
+-+    @SuppressWarnings("unchecked")
+-+    @Test
+-+    public void testBirthdayForSavingsAccount() {
+-+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+-+        final String dob1 = generateRandomDob(1990);
+-+        final String dob2 = generateRandomDob(2000);
+-+        final String dobShortMonth1 = getDobShortMonth(dob1);
+-+        final String dobShortMonth2 = getDobShortMonth(dob2);
+-+        Integer clientId1  = createClientWithDob(dob1);
+-+        Integer clientId2 = createClientWithDob(dob2);
+-+        Integer clientId3 = createClientWithDob(dob2);
+-+
+-+        final String minBalanceForInterestCalculation = null;
+-+        final String minRequiredBalance = "0";
+-+        final String enforceMinRequiredBalance = "false";
+-+        final boolean allowOverdraft = true;
+-+
+-+        final Integer savingsProductID = createSavingsProduct(
+-+                this.requestSpec,
+-+                this.responseSpec,
+-+                MINIMUM_OPENING_BALANCE,
+-+                minBalanceForInterestCalculation,
+-+                minRequiredBalance,
+-+                enforceMinRequiredBalance, 
+-+                allowOverdraft
+-+                );
+-+
+-+        applyForSavings(clientId1, savingsProductID);
+-+        applyForSavings(clientId2, savingsProductID);
+-+        applyForSavings(clientId3, savingsProductID);
+-+        List<HashMap> dobHashSet = this.savingsAccountHelper.getBirhdateList(dobShortMonth1);
+-+        assertEquals(1, dobHashSet.size(), "Verifying the count of savings accounts with the same Dob");
+-+
+-+        List<HashMap> dobHashSet2 = this.savingsAccountHelper.getBirhdateList(dobShortMonth2);
+-+        assertEquals(2, dobHashSet2.size(), "Verifying the count of savings accounts with the same Dob");
+-+    }
+-+
+-     private Integer createSavingsAccountDailyPostingOverdraft(final Integer clientID, final String startDate) {
+-         final Integer savingsProductID = createSavingsProductDailyPostingOverdraft();
+-         Assertions.assertNotNull(savingsProductID);
+-@@ -3194,6 +3232,31 @@ public class ClientSavingsIntegrationTest {
+-         GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "39", "5");
+-     }
+- 
+-+    private Integer createClientWithDob(String dob) {
+-+        Integer clientId = ClientHelper.createClientBirthday(this.requestSpec, this.responseSpec, dob);
+-+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+-+        return clientId;
+-+    }
+-+
+-+    private void applyForSavings(Integer clientId, Integer savingsProductId) {
+-+        this.savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductId, ACCOUNT_TYPE_INDIVIDUAL);
+-+    }
+-+
+-+    private String generateRandomDob(int year) {
+-+        int month = ThreadLocalRandom.current().nextInt(1, 13);
+-+        int day = ThreadLocalRandom.current().nextInt(1, 29);
+-+        return String.format("%d-%02d-%02d", year, month, day);
+-+    }
+-+
+-+    private String getDobShortMonth (String dob) {
+-+        String[] parts = dob.split("-");
+-+        int month = Integer.parseInt(parts[1]);
+-+        int day = Integer.parseInt(parts[2]);
+-+        String[] shortMonths = new DateFormatSymbols().getShortMonths();
+-+        String monthName = shortMonths[month-1];
+-+        return monthName + "-" + String.format("%02d", day);
+-+    }
+-+
+-     @AfterEach
+-     public void tearDown() {
+-         GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+-diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
+-index 642783afb..3ed45b161 100644
+---- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
+-+++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
+-@@ -36,6 +36,9 @@ import java.util.HashMap;
+- import java.util.LinkedHashMap;
+- import java.util.List;
+- import java.util.UUID;
+-+import java.time.format.DateTimeFormatter;
+-+import java.time.LocalDate;
+-+import java.util.Locale;
+- import lombok.RequiredArgsConstructor;
+- import lombok.extern.slf4j.Slf4j;
+- import org.apache.fineract.client.models.ClientTextSearch;
+-@@ -187,6 +190,23 @@ public class ClientHelper extends IntegrationTest {
+-         return createClient(requestSpec, responseSpec, DEFAULT_DATE);
+-     }
+- 
+-+    public static Integer createClientBirthday(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+-+                                                final String birthDate) {
+-+        log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
+-+        HashMap<String, Object> map = setInitialClientValues("1", LEGALFORM_ID_PERSON, UUID.randomUUID().toString());
+-+        map.put("active", "true");
+-+        map.put("activationDate", DEFAULT_DATE);
+-+        if (birthDate != null) {
+-+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
+-+            String formattedDob = LocalDate.parse(birthDate).format(formatter);
+-+            map.put("dateOfBirth", formattedDob);
+-+        }
+-+        final String clientJson = GSON.toJson(map);
+-+
+-+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, clientJson,
+-+                "clientId");
+-+    }
+-+
+-     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+-             final String activationDate) {
+-         return createClient(requestSpec, responseSpec, activationDate, "1");
+-diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
+-index 7f6cc2d0f..37bd0fc26 100644
+---- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
+-+++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
+-@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat;
+- import java.util.ArrayList;
+- import java.util.Calendar;
+- import java.util.HashMap;
+-+import java.util.LinkedHashMap;
+- import java.util.List;
+- import java.util.Locale;
+- import java.util.Map;
+-@@ -650,6 +651,15 @@ public class SavingsAccountHelper {
+-         return Utils.performServerGet(requestSpec, responseSpec, URL, "");
+-     }
+- 
+-+    public List<HashMap> getBirhdateList(final String dob) {
+-+        final String URL = SAVINGS_ACCOUNT_URL + "?"  + "birthDate=" + dob + "&" + Utils.TENANT_IDENTIFIER;
+-+        LOG.info(URL);
+-+        HashMap<String, Object> response = Utils.performServerGet(requestSpec, responseSpec, URL, "");
+-+        LOG.info(response.toString());
+-+        List<HashMap> accounts = (ArrayList<HashMap>) response.get("pageItems");
+-+        return accounts;
+-+    }
+-+
+-     public SavingsAccountTransactionsSearchResponse searchTransactions(Integer savingsId,
+-             PagedRequestSavingsTransactionSearch searchReqeust) {
+-         final String SAVINGS_TRANSACTIONS_SEARCH_URL = SAVINGS_ACCOUNT_URL + "/" + savingsId + "/transactions/search" + "?"
+--- 
+-2.34.1
+-
+-
+-From 4dd087dc8941ffa370e6b580e4b875ec694ad906 Mon Sep 17 00:00:00 2001
+-From: Que Le <le.que1016@gmail.com>
+-Date: Wed, 30 Jul 2025 21:07:51 -0500
+-Subject: [PATCH 3/7] add exception for invalid date format
+-
+----
+- .../core/service/SearchParameters.java        | 27 +++++++++++++++----
+- 1 file changed, 22 insertions(+), 5 deletions(-)
+-
+-diff --git a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+-index 44683287f..be27797e6 100644
+---- a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+-+++ b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+-@@ -18,14 +18,19 @@
+-  */
+- package org.apache.fineract.infrastructure.core.service;
+- 
+--import lombok.extern.slf4j.Slf4j;
+--import org.apache.commons.lang3.StringUtils;
+--
+- import java.time.LocalDate;
+- import java.time.format.DateTimeFormatter;
+- import java.time.format.DateTimeFormatterBuilder;
+- import java.time.format.DateTimeParseException;
+- import java.time.temporal.ChronoField;
+-+import java.util.ArrayList;
+-+import java.util.List;
+-+
+-+import org.apache.commons.lang3.StringUtils;
+-+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+-+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+-+
+-+import lombok.extern.slf4j.Slf4j;
+- 
+- 
+- @Slf4j
+-@@ -203,14 +208,26 @@ public final class SearchParameters {
+-         final boolean isSelfUser = false;
+-         LocalDate birthDate = null;
+-         if (birthdate != null && !birthdate.isBlank()) {
+-+            String dateTimeFormat = "MMM-dd";
+-             try {
+--                DateTimeFormatter fmt = new DateTimeFormatterBuilder().appendPattern("MMM-dd")
+-+                DateTimeFormatter fmt = new DateTimeFormatterBuilder().appendPattern(dateTimeFormat)
+-                 .parseDefaulting(ChronoField.YEAR, LocalDate.now().getYear())
+-                 .toFormatter();
+-                 birthDate = LocalDate.parse(birthdate, fmt);
+--            } catch (DateTimeParseException e) {
+-+            } catch (final IllegalArgumentException | DateTimeParseException e) {
+-                 log.error("Exception {}: while parsing the birthdate:{} with error message:{}",
+-                         e.getClass().getName(), birthdate, e.getMessage());
+-+            
+-+                final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+-+                final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.dateFormat.format",
+-+                                "The parameter `" + birthdate + "` is invalid based on the dateFormat: `" + dateTimeFormat,
+-+                                birthdate,
+-+                                birthDate,
+-+                                dateTimeFormat);
+-+                dataValidationErrors.add(error);
+-+
+-+                throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+-+                        dataValidationErrors, e);
+-             }
+-         }
+- 
+--- 
+-2.34.1
+-
+-
+-From 29e0f72b3c0622b0451b17f2b865e4a8249bf54a Mon Sep 17 00:00:00 2001
+-From: Que Le <le.que1016@gmail.com>
+-Date: Wed, 30 Jul 2025 21:11:44 -0500
+-Subject: [PATCH 4/7] update logging
+-
+----
+- .../infrastructure/core/service/SearchParameters.java      | 7 +++----
+- 1 file changed, 3 insertions(+), 4 deletions(-)
+-
+-diff --git a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+-index be27797e6..f7f4557b0 100644
+---- a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+-+++ b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+-@@ -30,10 +30,9 @@ import org.apache.commons.lang3.StringUtils;
+- import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+- import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+- 
+--import lombok.extern.slf4j.Slf4j;
+-+import org.slf4j.Logger;
+-+import org.slf4j.LoggerFactory;
+- 
+--
+--@Slf4j
+- public final class SearchParameters {
+- 
+-     private final String sqlSearch;
+-@@ -64,7 +63,7 @@ public final class SearchParameters {
+-     private final Long productId;
+-     private final Long categoryId;
+-     private final boolean isSelfUser;
+--
+-+    private static final Logger log = LoggerFactory.getLogger(SearchParameters.class);
+-     public static SearchParameters from(final String sqlSearch, final Long officeId, final String externalId, final String name,
+-             final String hierarchy) {
+-         final Long staffId = null;
+--- 
+-2.34.1
+-
+-
+-From 12dd2ae385445416fc47b51081eaaae2822a5a2b Mon Sep 17 00:00:00 2001
+-From: Que Le <le.que1016@gmail.com>
+-Date: Wed, 30 Jul 2025 21:15:46 -0500
+-Subject: [PATCH 5/7] run checkstyle
+-
+----
+- .../core/service/SearchParameters.java        | 24 ++++++++-----------
+- .../api/SavingsAccountsApiResource.java       |  3 ++-
+- .../ClientSavingsIntegrationTest.java         | 23 +++++++-----------
+- .../integrationtests/common/ClientHelper.java | 11 ++++-----
+- .../common/savings/SavingsAccountHelper.java  |  3 +--
+- 5 files changed, 26 insertions(+), 38 deletions(-)
+-
+-diff --git a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+-index f7f4557b0..edd0fc6d3 100644
+---- a/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+-+++ b/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/service/SearchParameters.java
+-@@ -25,11 +25,9 @@ import java.time.format.DateTimeParseException;
+- import java.time.temporal.ChronoField;
+- import java.util.ArrayList;
+- import java.util.List;
+--
+- import org.apache.commons.lang3.StringUtils;
+- import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+- import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+--
+- import org.slf4j.Logger;
+- import org.slf4j.LoggerFactory;
+- 
+-@@ -64,6 +62,7 @@ public final class SearchParameters {
+-     private final Long categoryId;
+-     private final boolean isSelfUser;
+-     private static final Logger log = LoggerFactory.getLogger(SearchParameters.class);
+-+
+-     public static SearchParameters from(final String sqlSearch, final Long officeId, final String externalId, final String name,
+-             final String hierarchy) {
+-         final Long staffId = null;
+-@@ -210,19 +209,16 @@ public final class SearchParameters {
+-             String dateTimeFormat = "MMM-dd";
+-             try {
+-                 DateTimeFormatter fmt = new DateTimeFormatterBuilder().appendPattern(dateTimeFormat)
+--                .parseDefaulting(ChronoField.YEAR, LocalDate.now().getYear())
+--                .toFormatter();
+-+                        .parseDefaulting(ChronoField.YEAR, LocalDate.now().getYear()).toFormatter();
+-                 birthDate = LocalDate.parse(birthdate, fmt);
+-             } catch (final IllegalArgumentException | DateTimeParseException e) {
+--                log.error("Exception {}: while parsing the birthdate:{} with error message:{}",
+--                        e.getClass().getName(), birthdate, e.getMessage());
+--            
+-+                log.error("Exception {}: while parsing the birthdate:{} with error message:{}", e.getClass().getName(), birthdate,
+-+                        e.getMessage());
+-+
+-                 final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+-                 final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.dateFormat.format",
+--                                "The parameter `" + birthdate + "` is invalid based on the dateFormat: `" + dateTimeFormat,
+--                                birthdate,
+--                                birthDate,
+--                                dateTimeFormat);
+-+                        "The parameter `" + birthdate + "` is invalid based on the dateFormat: `" + dateTimeFormat, birthdate, birthDate,
+-+                        dateTimeFormat);
+-                 dataValidationErrors.add(error);
+- 
+-                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+-@@ -396,9 +392,9 @@ public final class SearchParameters {
+-     }
+- 
+-     private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
+--                             final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
+--                             final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
+--                             final Long savingsId, final Boolean orphansOnly, boolean isSelfUser, LocalDate birthDate) {
+-+            final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
+-+            final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
+-+            final Long savingsId, final Boolean orphansOnly, boolean isSelfUser, LocalDate birthDate) {
+-         this.sqlSearch = sqlSearch;
+-         this.officeId = officeId;
+-         this.externalId = externalId;
+-diff --git a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
+-index c2248cb5a..23e07527d 100644
+---- a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
+-+++ b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/api/SavingsAccountsApiResource.java
+-@@ -133,7 +133,8 @@ public class SavingsAccountsApiResource {
+- 
+-         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+- 
+--        final SearchParameters searchParameters = SearchParameters.forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder, birthDate);
+-+        final SearchParameters searchParameters = SearchParameters.forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder,
+-+                birthDate);
+- 
+-         final Page<SavingsAccountData> products = savingsAccountReadPlatformService.retrieveAll(searchParameters);
+- 
+-diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+-index eb1e1eeee..271036772 100644
+---- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+-+++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+-@@ -25,9 +25,9 @@ import io.restassured.builder.ResponseSpecBuilder;
+- import io.restassured.http.ContentType;
+- import io.restassured.specification.RequestSpecification;
+- import io.restassured.specification.ResponseSpecification;
+--
+- import java.math.BigDecimal;
+- import java.text.DateFormat;
+-+import java.text.DateFormatSymbols;
+- import java.text.DecimalFormat;
+- import java.text.DecimalFormatSymbols;
+- import java.text.SimpleDateFormat;
+-@@ -40,6 +40,7 @@ import java.util.Date;
+- import java.util.HashMap;
+- import java.util.List;
+- import java.util.Locale;
+-+import java.util.concurrent.ThreadLocalRandom;
+- import org.apache.fineract.client.models.PostPaymentTypesRequest;
+- import org.apache.fineract.client.models.PostPaymentTypesResponse;
+- import org.apache.fineract.integrationtests.common.ClientHelper;
+-@@ -62,8 +63,7 @@ import org.junit.jupiter.api.Order;
+- import org.junit.jupiter.api.Test;
+- import org.slf4j.Logger;
+- import org.slf4j.LoggerFactory;
+--import java.text.DateFormatSymbols;
+--import java.util.concurrent.ThreadLocalRandom;
+-+
+- /**
+-  * Client Savings Integration Test for checking Savings Application.
+-  */
+-@@ -3175,7 +3175,7 @@ public class ClientSavingsIntegrationTest {
+-         final String dob2 = generateRandomDob(2000);
+-         final String dobShortMonth1 = getDobShortMonth(dob1);
+-         final String dobShortMonth2 = getDobShortMonth(dob2);
+--        Integer clientId1  = createClientWithDob(dob1);
+-+        Integer clientId1 = createClientWithDob(dob1);
+-         Integer clientId2 = createClientWithDob(dob2);
+-         Integer clientId3 = createClientWithDob(dob2);
+- 
+-@@ -3184,15 +3184,8 @@ public class ClientSavingsIntegrationTest {
+-         final String enforceMinRequiredBalance = "false";
+-         final boolean allowOverdraft = true;
+- 
+--        final Integer savingsProductID = createSavingsProduct(
+--                this.requestSpec,
+--                this.responseSpec,
+--                MINIMUM_OPENING_BALANCE,
+--                minBalanceForInterestCalculation,
+--                minRequiredBalance,
+--                enforceMinRequiredBalance, 
+--                allowOverdraft
+--                );
+-+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+-+                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
+- 
+-         applyForSavings(clientId1, savingsProductID);
+-         applyForSavings(clientId2, savingsProductID);
+-@@ -3248,12 +3241,12 @@ public class ClientSavingsIntegrationTest {
+-         return String.format("%d-%02d-%02d", year, month, day);
+-     }
+- 
+--    private String getDobShortMonth (String dob) {
+-+    private String getDobShortMonth(String dob) {
+-         String[] parts = dob.split("-");
+-         int month = Integer.parseInt(parts[1]);
+-         int day = Integer.parseInt(parts[2]);
+-         String[] shortMonths = new DateFormatSymbols().getShortMonths();
+--        String monthName = shortMonths[month-1];
+-+        String monthName = shortMonths[month - 1];
+-         return monthName + "-" + String.format("%02d", day);
+-     }
+- 
+-diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
+-index 3ed45b161..27e92c2ab 100644
+---- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
+-+++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/ClientHelper.java
+-@@ -30,15 +30,15 @@ import java.io.ByteArrayInputStream;
+- import java.io.File;
+- import java.io.IOException;
+- import java.io.InputStream;
+-+import java.time.LocalDate;
+-+import java.time.format.DateTimeFormatter;
+- import java.util.ArrayList;
+- import java.util.Arrays;
+- import java.util.HashMap;
+- import java.util.LinkedHashMap;
+- import java.util.List;
+--import java.util.UUID;
+--import java.time.format.DateTimeFormatter;
+--import java.time.LocalDate;
+- import java.util.Locale;
+-+import java.util.UUID;
+- import lombok.RequiredArgsConstructor;
+- import lombok.extern.slf4j.Slf4j;
+- import org.apache.fineract.client.models.ClientTextSearch;
+-@@ -191,7 +191,7 @@ public class ClientHelper extends IntegrationTest {
+-     }
+- 
+-     public static Integer createClientBirthday(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+--                                                final String birthDate) {
+-+            final String birthDate) {
+-         log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
+-         HashMap<String, Object> map = setInitialClientValues("1", LEGALFORM_ID_PERSON, UUID.randomUUID().toString());
+-         map.put("active", "true");
+-@@ -203,8 +203,7 @@ public class ClientHelper extends IntegrationTest {
+-         }
+-         final String clientJson = GSON.toJson(map);
+- 
+--        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, clientJson,
+--                "clientId");
+-+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, clientJson, "clientId");
+-     }
+- 
+-     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+-diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
+-index 37bd0fc26..e2906810a 100644
+---- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
+-+++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/common/savings/SavingsAccountHelper.java
+-@@ -33,7 +33,6 @@ import java.text.SimpleDateFormat;
+- import java.util.ArrayList;
+- import java.util.Calendar;
+- import java.util.HashMap;
+--import java.util.LinkedHashMap;
+- import java.util.List;
+- import java.util.Locale;
+- import java.util.Map;
+-@@ -652,7 +651,7 @@ public class SavingsAccountHelper {
+-     }
+- 
+-     public List<HashMap> getBirhdateList(final String dob) {
+--        final String URL = SAVINGS_ACCOUNT_URL + "?"  + "birthDate=" + dob + "&" + Utils.TENANT_IDENTIFIER;
+-+        final String URL = SAVINGS_ACCOUNT_URL + "?" + "birthDate=" + dob + "&" + Utils.TENANT_IDENTIFIER;
+-         LOG.info(URL);
+-         HashMap<String, Object> response = Utils.performServerGet(requestSpec, responseSpec, URL, "");
+-         LOG.info(response.toString());
+--- 
+-2.34.1
+-
+-
+-From d4900f600cbbf888917392f88279c07afacffb34 Mon Sep 17 00:00:00 2001
+-From: Que Le <le.que1016@gmail.com>
+-Date: Wed, 30 Jul 2025 21:56:03 -0500
+-Subject: [PATCH 6/7] add exception test cases for date parsing issues
+-
+----
+- .../integrationtests/ClientSavingsIntegrationTest.java       | 5 +++++
+- 1 file changed, 5 insertions(+)
+-
+-diff --git a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+-index 271036772..cdb682399 100644
+---- a/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+-+++ b/integration-tests/src/test/java/org/apache/fineract/integrationtests/ClientSavingsIntegrationTest.java
+-@@ -19,6 +19,7 @@
+- package org.apache.fineract.integrationtests;
+- 
+- import static org.junit.jupiter.api.Assertions.assertEquals;
+-+import static org.junit.jupiter.api.Assertions.assertThrows;
+- 
+- import io.restassured.builder.RequestSpecBuilder;
+- import io.restassured.builder.ResponseSpecBuilder;
+-@@ -43,6 +44,7 @@ import java.util.Locale;
+- import java.util.concurrent.ThreadLocalRandom;
+- import org.apache.fineract.client.models.PostPaymentTypesRequest;
+- import org.apache.fineract.client.models.PostPaymentTypesResponse;
+-+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+- import org.apache.fineract.integrationtests.common.ClientHelper;
+- import org.apache.fineract.integrationtests.common.CommonConstants;
+- import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+-@@ -3195,6 +3197,9 @@ public class ClientSavingsIntegrationTest {
+- 
+-         List<HashMap> dobHashSet2 = this.savingsAccountHelper.getBirhdateList(dobShortMonth2);
+-         assertEquals(2, dobHashSet2.size(), "Verifying the count of savings accounts with the same Dob");
+-+
+-+        PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+-+                () -> this.savingsAccountHelper.getBirhdateList(dob1));
+-     }
+- 
+-     private Integer createSavingsAccountDailyPostingOverdraft(final Integer clientID, final String startDate) {
+--- 
+-2.34.1
+-
+-
+-From 5f27402511aac4185ca070bfe8239468c22dfcd2 Mon Sep 17 00:00:00 2001
+-From: Que Le <le.que1016@gmail.com>
+-Date: Wed, 30 Jul 2025 22:09:57 -0500
+-Subject: [PATCH 7/7] increase object array size to accommodate additional
+- parameters
+-
+----
+- .../savings/service/SavingsAccountReadPlatformServiceImpl.java  | 2 +-
+- 1 file changed, 1 insertion(+), 1 deletion(-)
+-
+-diff --git a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+-index eeb6e9a85..3c81a75ee 100644
+---- a/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+-+++ b/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountReadPlatformServiceImpl.java
+-@@ -192,7 +192,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
+-         sqlBuilder.append(" join m_office o on o.id = c.office_id");
+-         sqlBuilder.append(" where o.hierarchy like ?");
+- 
+--        final Object[] objectArray = new Object[3];
+-+        final Object[] objectArray = new Object[5];
+-         objectArray[0] = hierarchySearchString;
+-         int arrayPos = 1;
+-         if (searchParameters != null) {
+--- 
+-2.34.1
+-
+-- 
+2.34.1
+
