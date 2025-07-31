@@ -36,6 +36,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.ClientTextSearch;
@@ -185,6 +188,23 @@ public class ClientHelper extends IntegrationTest {
 
     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return createClient(requestSpec, responseSpec, DEFAULT_DATE);
+    }
+
+    public static Integer createClientBirthday(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+                                                final String birthDate) {
+        log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
+        HashMap<String, Object> map = setInitialClientValues("1", LEGALFORM_ID_PERSON, UUID.randomUUID().toString());
+        map.put("active", "true");
+        map.put("activationDate", DEFAULT_DATE);
+        if (birthDate != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
+            String formattedDob = LocalDate.parse(birthDate).format(formatter);
+            map.put("dateOfBirth", formattedDob);
+        }
+        final String clientJson = GSON.toJson(map);
+
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, clientJson,
+                "clientId");
     }
 
     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

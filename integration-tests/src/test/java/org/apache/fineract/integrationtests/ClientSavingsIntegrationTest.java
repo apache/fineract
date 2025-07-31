@@ -62,7 +62,8 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import java.text.DateFormatSymbols;
+import java.util.concurrent.ThreadLocalRandom;
 /**
  * Client Savings Integration Test for checking Savings Application.
  */
@@ -3166,6 +3167,43 @@ public class ClientSavingsIntegrationTest {
 
     }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testBirthdayForSavingsAccount() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        final String dob1 = generateRandomDob(1990);
+        final String dob2 = generateRandomDob(2000);
+        final String dobShortMonth1 = getDobShortMonth(dob1);
+        final String dobShortMonth2 = getDobShortMonth(dob2);
+        Integer clientId1  = createClientWithDob(dob1);
+        Integer clientId2 = createClientWithDob(dob2);
+        Integer clientId3 = createClientWithDob(dob2);
+
+        final String minBalanceForInterestCalculation = null;
+        final String minRequiredBalance = "0";
+        final String enforceMinRequiredBalance = "false";
+        final boolean allowOverdraft = true;
+
+        final Integer savingsProductID = createSavingsProduct(
+                this.requestSpec,
+                this.responseSpec,
+                MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation,
+                minRequiredBalance,
+                enforceMinRequiredBalance, 
+                allowOverdraft
+                );
+
+        applyForSavings(clientId1, savingsProductID);
+        applyForSavings(clientId2, savingsProductID);
+        applyForSavings(clientId3, savingsProductID);
+        List<HashMap> dobHashSet = this.savingsAccountHelper.getBirhdateList(dobShortMonth1);
+        assertEquals(1, dobHashSet.size(), "Verifying the count of savings accounts with the same Dob");
+
+        List<HashMap> dobHashSet2 = this.savingsAccountHelper.getBirhdateList(dobShortMonth2);
+        assertEquals(2, dobHashSet2.size(), "Verifying the count of savings accounts with the same Dob");
+    }
+
     private Integer createSavingsAccountDailyPostingOverdraft(final Integer clientID, final String startDate) {
         final Integer savingsProductID = createSavingsProductDailyPostingOverdraft();
         Assertions.assertNotNull(savingsProductID);
@@ -3192,6 +3230,31 @@ public class ClientSavingsIntegrationTest {
         GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "38", false);
         GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "39", true);
         GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "39", "5");
+    }
+
+    private Integer createClientWithDob(String dob) {
+        Integer clientId = ClientHelper.createClientBirthday(this.requestSpec, this.responseSpec, dob);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        return clientId;
+    }
+
+    private void applyForSavings(Integer clientId, Integer savingsProductId) {
+        this.savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductId, ACCOUNT_TYPE_INDIVIDUAL);
+    }
+
+    private String generateRandomDob(int year) {
+        int month = ThreadLocalRandom.current().nextInt(1, 13);
+        int day = ThreadLocalRandom.current().nextInt(1, 29);
+        return String.format("%d-%02d-%02d", year, month, day);
+    }
+
+    private String getDobShortMonth (String dob) {
+        String[] parts = dob.split("-");
+        int month = Integer.parseInt(parts[1]);
+        int day = Integer.parseInt(parts[2]);
+        String[] shortMonths = new DateFormatSymbols().getShortMonths();
+        String monthName = shortMonths[month-1];
+        return monthName + "-" + String.format("%02d", day);
     }
 
     @AfterEach

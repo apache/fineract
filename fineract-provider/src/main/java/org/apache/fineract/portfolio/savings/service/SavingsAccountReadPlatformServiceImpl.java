@@ -192,7 +192,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         sqlBuilder.append(" join m_office o on o.id = c.office_id");
         sqlBuilder.append(" where o.hierarchy like ?");
 
-        final Object[] objectArray = new Object[2];
+        final Object[] objectArray = new Object[3];
         objectArray[0] = hierarchySearchString;
         int arrayPos = 1;
         if (searchParameters != null) {
@@ -214,7 +214,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 arrayPos = arrayPos + 1;
             }
             if (searchParameters.getbirthDate() != null) {
-                sqlBuilder.append(" and c.date_of_birth = ?");
+                sqlBuilder.append(" and c.date_of_birth IS NOT NULL AND DAY(c.date_of_birth)=DAY(?) AND MONTH(c.date_of_birth)=MONTH(?)");
+                objectArray[arrayPos] = java.sql.Date.valueOf(searchParameters.getbirthDate());
+                arrayPos = arrayPos + 1;
                 objectArray[arrayPos] = java.sql.Date.valueOf(searchParameters.getbirthDate());
                 arrayPos = arrayPos + 1;
             }

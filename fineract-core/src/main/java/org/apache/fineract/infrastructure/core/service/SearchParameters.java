@@ -20,18 +20,12 @@ package org.apache.fineract.infrastructure.core.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
-import java.util.ArrayList;
-import java.util.List;
 
 
 @Slf4j
@@ -207,7 +201,6 @@ public final class SearchParameters {
         final Long savingsId = null;
         final Boolean orphansOnly = false;
         final boolean isSelfUser = false;
-
         LocalDate birthDate = null;
         if (birthdate != null && !birthdate.isBlank()) {
             try {
