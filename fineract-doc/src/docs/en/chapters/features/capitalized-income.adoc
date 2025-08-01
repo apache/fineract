@@ -1,0 +1,490 @@
+= Capitalized Income
+
+== Overview
+
+Capitalized Income (formerly referred to as Origination Fee) in Apache Fineract is a fee-based or interest-based income item that is added to the principal of a loan and amortized over time. It is designed to be applied at disbursement and is treated as part of the loan's principal for repayment and interest calculations.
+
+== Purpose
+
+This functionality enables financial institutions to:
+
+* Recognize deferred income (fees or interest) systematically over the loan term
+* Align accounting practices with regulatory requirements
+* Improve income recognition accuracy
+
+== Supported Loan Type
+
+[IMPORTANT]
+====
+Capitalized Income is only supported for:
+
+* Progressive Loan Schedules
+* Advanced Payment Allocation Strategy
+
+Other loan schedule types and transaction processing strategies are not supported.
+====
+
+== Configuration at Loan Product Level
+
+Capitalized income must be configured on the loan product.
+
+The configuration options include:
+
+* *Enable Capitalized Income*: Boolean toggle (default: disabled)
+* *Calculation Mode*: Only "Flat" is currently supported
+** Later "Percentage based" can be introduced
+* *Amortization Strategy*: Only "EQUAL_AMORTIZATION" is supported
+*** Daily equal portions are recognized over the life of the loan
+*** Later other strategies can be introduced
+* *Income Type*: Specifies allocation rule. Defines which "balance category" to be used. 
+
+[NOTE]
+====
+In Fineract, balance of a transaction is either: Principal, Fee, Penalty, Interest or overpayment
+====
+
+Options:
+* FEE (default)
+* INTEREST
+
+=== GL Mapping
+
+Required GL Account mappings when Capitalized Income is enabled:
+
+* *Deferred Income (Liability)*: `deferredIncomeLiabilityAccountId` - mandatory when enabled
+* *Income from Capitalization (Income)*: `incomeFromCapitalizationAccountId` - mandatory when enabled
+
+[IMPORTANT]
+====
+Both GL accounts become mandatory when `enableIncomeCapitalization` is set to `true`.
+====
+
+=== Configuration Dependencies
+
+When `enableIncomeCapitalization` is set to `true`, all following parameters become mandatory:
+
+* `capitalizedIncomeCalculationType` - must be "FLAT"
+* `capitalizedIncomeStrategy` - must be "EQUAL_AMORTIZATION"  
+* `capitalizedIncomeType` - must be "FEE" or "INTEREST"
+* `deferredIncomeLiabilityAccountId` - must reference a valid GL account
+* `incomeFromCapitalizationAccountId` - must reference a valid GL account
+
+== Behavior and Calculations
+
+* Capitalized income is added via API on or after the first disbursement date
+* It is treated as a principal portion, recalculating the repayment schedule accordingly
+* Interest and amortization schedules are updated to include the capitalized income amount
+* Validated using formula: `(Total Disbursed + Current Capitalized Income + New Transaction Amount) ≤ Max Amount`, where Max Amount depends on loan product configuration: if `allowApprovedDisbursedAmountsOverApplied = true` uses `getOverAppliedMax(loan)`, otherwise uses `getApprovedPrincipal()`
+
+=== Daily Amortization
+
+* Recognized daily using the configured strategy
+* Recognized portions move from Deferred Income to Income from Capitalization
+
+==== Special Handling
+
+* *Preclosure*: Remaining balance recognized in full on the preclosure date
+* *Charge-off*: Amortization stops and remaining balance is charged off
+
+== Transaction Types Introduced
+
+* Capitalized Income
+* Capitalized Income Amortization
+* Capitalized Income Adjustment
+* Capitalized Income Amortization Adjustment
+
+=== Capitalized Income Transaction
+
+The Capitalized Income transaction in Apache Fineract performs the following actions:
+
+* Adds a specified amount to the loan principal
+** Considered a deferred income item (such as a fee or interest)
+** Booked as part of the loan's principal
+** Added post-disbursement and only if the loan type supports it (currently: Progressive Loans)
+* Creates a distinct loan transaction
+** Separately tracked with its own transaction type ("Capitalized Income")
+** Not merged with disbursements or repayments
+* Updates the loan schedule
+** Recalculates amortization and interest schedule to include the added amount in the outstanding principal
+* Triggers accounting entries
+** Debits "Loan Portfolio" (Asset)
+** Credits "Deferred Income" (Liability)
+** Does not recognize income upfront
+* Initiates daily amortization
+** Source for daily income recognition through "Capitalized Income Amortization" transactions
+** Progressively converts the deferred amount to recognized income
+
+==== Accounting Entries
+
+[cols="2*"]
+|===
+|Scenario |Debit |Credit
+
+|Capitalized Income
+|Loan Portfolio (Asset)
+|Deferred Income (Liability)
+|===
+
+=== Capitalized Income Amortization
+
+A Capitalized Income Amortization transaction in Apache Fineract does the following:
+
+* *Recognizes Deferred Income Over Time*: Transfers a portion of the capitalized income (originally posted as a liability) into recognized income (posted as interest or fee income), based on a configured daily amortization strategy.
+
+* *Daily Posting*: The system automatically creates this transaction each day from the date of capitalized income until the loan maturity or until the full amount is amortized. This is handled by a background job during the COB (Close of Business) process.
+
+* *Uses Equal Amortization*: The default and only supported strategy is Equal Amortization, which divides the total capitalized income evenly over the remaining number of days until the loan matures.
+
+==== Accounting Entries
+
+[cols="2*"]
+|===
+|Scenario |Debit |Credit
+
+|Daily amortization
+|Deferred Income (Liability)
+|Income from Capitalization (Income)
+|===
+
+==== Stops on Events
+
+* *Preclosure*: Triggers final amortization for remaining unrecognized income
+* *Charge-off*: Halts further amortization; the remaining deferred income is charged off
+
+[NOTE]
+====
+Reversal Handling: If the original Capitalized Income transaction is reversed, all associated amortization transactions are also reversed via "Capitalized Income Amortization Adjustment" transactions.
+====
+
+=== Capitalized Income Adjustment
+
+A Capitalized Income Adjustment transaction in Apache Fineract serves to reduce the balance of an existing capitalized income transaction.
+
+==== Purpose
+
+* Correct overcharged or misposted capitalized income amounts
+* Reflect fee waivers or negotiated reductions
+* Support backdated corrections if needed
+
+==== Transaction Behavior
+
+* It is a credit-type transaction, reducing the capitalized income balance
+* Treated similarly to other credit transactions and follows a defined allocation strategy
+* Can be backdated, but not dated before the original capitalized income transaction
+
+==== Validation Rules
+
+* The adjustment amount must not exceed the remaining amount (original capitalized income amount minus total previous adjustments)
+* Adjustment is linked to a specific Capitalized Income transaction (by ID)
+* Multiple adjustments can be made against the same original transaction
+* Adjustments can be reversed if needed
+
+==== Accounting Entries
+
+[cols="3*"]
+|===
+|Scenario |Debit |Credit
+
+|Adjustment ≤ unrecognized balance
+|Deferred Income (Liability)
+|Loan Portfolio (Asset)
+
+|Adjustment > unrecognized balance
+|Deferred Income (Liability)
+|Loan Portfolio (Asset)
+|===
+
+==== Business Event Triggers
+
+* Triggers "Capitalized Income Adjustment" event
+* Updates loan balance and possibly loan status depending on impact
+
+==== Impact
+
+* Reduces amortization basis
+* May modify future amortization amounts
+* Repayment schedule is not affected directly unless recalculated manually
+
+=== Capitalized Income Amortization Adjustment
+
+A Capitalized Income Amortization Adjustment in Apache Fineract is a special transaction type used to reverse previously recognized income from capitalized income amortization.
+
+==== Purpose
+
+* Automatically generated when a Capitalized Income transaction is reversed or when backdated Capitalized Income Adjustment affects amortization balances
+* Reverses all already recognized portions (amortized income) linked to the original Capitalized Income transaction
+
+==== When It Occurs
+
+* Created by daily amortization (COB) or final amortization (triggered on loan closure, charge-off, or by any backdated transaction that affects capitalized income balances)
+* Reverses previously recognized income when amortization needs to be adjusted
+* Restores Deferred Income balances and reverses income recognition
+
+==== Accounting Entries
+
+[cols="3*"]
+|===
+|Transaction Type |Debit |Credit
+
+|Capitalized Income Amortization Adjustment
+|Income from Capitalization (Income)
+|Deferred Income (Liability)
+|===
+
+==== Key Characteristics
+
+* *System-Generated Only*: Cannot be created manually by API or UI
+* *Ensures Accounting Integrity*: Keeps amortized and unrecognized balances aligned after reversals
+* *Non-monetary transaction - does not trigger balance changed or status update events*
+
+==== Business Events
+
+* Triggers a new business event: Capitalized Income Amortization Adjustment
+
+== API Endpoints
+
+=== Configure Capitalized Income on Loan Product
+
+* *Endpoint*: `/loanproducts`
+* *Method*: `POST`
+
+[source,json]
+----
+{
+    ...
+    "enableIncomeCapitalization": true,     // Mandatory
+    "capitalizedIncomeCalculationType": "FLAT",  // Mandatory when enabled
+    "capitalizedIncomeStrategy": "EQUAL_AMORTIZATION",  // Mandatory when enabled
+    "capitalizedIncomeType": "FEE",  // Mandatory when enabled
+    "deferredIncomeLiabilityAccountId": 123,  // Mandatory when enabled
+    "incomeFromCapitalizationAccountId": 456  // Mandatory when enabled
+}
+----
+
+=== Add Capitalized Income
+
+* *Endpoint*: `/loans/{loanId}/transactions?command=capitalizedIncome`
+* *Alternative Endpoint*: `/loans/external-id/{loanExternalId}/transactions?command=capitalizedIncome`
+* *Method*: `POST`
+
+[source,json]
+----
+{
+    "transactionDate": "2025-05-01",    // Mandatory
+    "dateFormat": "yyyy-MM-dd",         // Mandatory
+    "locale": "en",                     // Mandatory
+    "transactionAmount": 100.0,         // Mandatory
+    "paymentTypeId": 1,                 // Optional
+    "note": "Capitalized income fee",   // Optional
+    "externalId": "CINCOME-001"         // Optional
+}
+----
+
+=== Get Capitalized Income Amortization Info
+
+* *Endpoint*: `/loans/{loanId}/deferredincome`
+* *Alternative Endpoint*: `/loans/external-id/{loanExternalId}/deferredincome`
+* *Method*: `GET`
+
+==== Response Body
+
+[source,json]
+----
+{
+    "capitalizedIncomeData": [
+        {
+            "amount": 50.0,                    // Total capitalized income amount
+            "amortizedAmount": 1.1,            // Amount already amortized
+            "unrecognizedAmount": 48.9,        // Amount not yet amortized
+            "amountAdjustment": 0.0,           // Any adjustments made
+            "chargedOffAmount": 0.0            // Amount charged off (if applicable)
+        }
+    ]
+}
+----
+
+=== Add Capitalized Income Adjustment
+
+* *Endpoint*: `/loans/{loanId}/transactions/{capitalizedIncomeTransactionId}?command=capitalizedIncomeAdjustment`
+* *Alternative Endpoint*: `/loans/external-id/{loanExternalId}/transactions/{capitalizedIncomeTransactionId}?command=capitalizedIncomeAdjustment`
+* *Method*: `POST`
+
+[source,json]
+----
+{
+    "transactionDate": "2025-05-01",    // Mandatory
+    "dateFormat": "yyyy-MM-dd",         // Mandatory
+    "locale": "en",                     // Mandatory
+    "transactionAmount": 50.0,          // Mandatory
+    "paymentTypeId": 1,                 // Optional
+    "note": "Capitalized income fee",   // Optional
+    "externalId": "CINCOMEADJ-001"      // Optional
+}
+----
+
+==== Response Body
+
+[source,json]
+----
+{
+    "resourceId": 1,
+    "resourceExternalId": "CINCOMEADJ-001"
+}
+----
+
+=== Capitalized Income Template API (to retrieve limits)
+
+* *Endpoint*: `/loans/{loanId}/transactions/template?command=capitalizedIncome`
+* *Alternative Endpoint*: `/loans/external-id/{loanExternalId}/transactions/template?command=capitalizedIncome`
+* *Method*: `GET`
+
+[source,json]
+----
+{
+    "paymentTypeOptions": [],  // List of available payment types
+    "currency": {...},         // Currency configuration
+    "date": [2025, 5, 29],     // Return the current date
+    "amount": 0                // Return the maximum amount that can be capitalized (approved amount - disbursed amount - capitalized income)
+}
+----
+
+=== Capitalized Income Adjustment Template API (to retrieve limits)
+
+* *Endpoint*: `/loans/{loanId}/transactions/template?command=capitalizedIncomeAdjustment&transactionId={capitalizedIncomeTransactionId}`
+* *Alternative Endpoint*: `/loans/external-id/{loanExternalId}/transactions/template?command=capitalizedIncomeAdjustment&transactionId={capitalizedIncomeTransactionId}`
+* *Method*: `GET`
+
+[source,json]
+----
+{
+    "paymentTypeOptions": [],  // List of available payment types
+    "currency": {...},         // Currency configuration
+    "date": [2025, 5, 29],     // Return the current date
+    "amount": 0                // Return the maximum amount that can be adjusted (capitalized income - adjustment)
+}
+----
+
+== Accounting Entries
+
+[cols="3*"]
+|===
+|Transaction Type |Debit |Credit
+
+|Capitalized Income
+|Loan Portfolio (Asset)
+|Deferred Income (Liability)
+
+|Capitalized Income Amortization
+|Deferred Income (Liability)
+|Income from Capitalization (Income)
+
+|Capitalized Income Adjustment
+|Deferred Income (Liability)
+|Loan Portfolio (Asset)
+
+|Capitalized Income Amortization Adjustment
+|Income from Capitalization (Income)
+|Deferred Income (Liability)
+|===
+
+== Business Events
+
+=== Triggered for Capitalized Income
+
+* `LoanCapitalizedIncomeTransactionCreatedBusinessEvent`
+* `LoanBalanceChangedBusinessEvent`
+
+=== Daily Amortization
+
+* `LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent`
+* `LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent`
+
+=== Capitalized Income Adjustment
+
+* `LoanCapitalizedIncomeAdjustmentTransactionCreatedBusinessEvent`
+* `LoanBalanceChangedBusinessEvent`
+
+=== Reversal
+
+* `LoanAdjustTransactionBusinessEvent`
+
+== Database Structure
+
+=== Configuration
+
+==== Stored on Loan Product (`m_product_loan`)
+
+[cols="3*"]
+|===
+|Field |Data Type |Description
+
+|`enable_income_capitalization` |`BOOLEAN` |Enable capitalized income feature (default: `false`)
+|`capitalized_income_calculation_type` |`VARCHAR` |Calculation method (ENUM: `FLAT`)
+|`capitalized_income_strategy` |`VARCHAR` |Amortization strategy (ENUM: `EQUAL_AMORTIZATION`)
+|`capitalized_income_type` |`VARCHAR` |Income type (ENUM: `FEE`, `INTEREST`)
+|===
+
+==== Stored on Loan (`m_loan`)
+
+[cols="3*"]
+|===
+|Field |Data Type |Description
+
+|`enable_income_capitalization` |`BOOLEAN` |Enable capitalized income feature (default: `false`)
+|`capitalized_income_calculation_type` |`VARCHAR` |Calculation method (ENUM: `FLAT`)
+|`capitalized_income_strategy` |`VARCHAR` |Amortization strategy (ENUM: `EQUAL_AMORTIZATION`)
+|`capitalized_income_type` |`VARCHAR` |Income type (ENUM: `FEE`, `INTEREST`)
+|===
+
+=== Balances
+
+==== On Loan
+
+[cols="3*"]
+|===
+|Field |Data Type |Description
+
+|`capitalized_income_derived` |`DECIMAL(19,6)` |Total capitalized income amount (nullable)
+|`capitalized_income_adjustment_derived` |`DECIMAL(19,6)` |Total adjustment amount (nullable)
+|===
+
+==== Capitalized Income Balance (`m_loan_capitalized_income_balance`)
+
+Each capitalized income has its own balance (1 row for each transaction)
+
+[cols="3*"]
+|===
+|Field |Data Type |Description
+
+|`id` |`BIGINT` |Unique identifier (Primary Key)
+|`version` |`BIGINT` |Version for optimistic locking
+|`loan_id` |`BIGINT` |Associated loan ID (Foreign Key, NOT NULL)
+|`loan_transaction_id` |`BIGINT` |Associated loan transaction ID (Foreign Key, NOT NULL)
+|`amount` |`DECIMAL(19,6)` |Capitalized income transaction amount (NOT NULL)
+|`date` |`DATE` |Capitalized income transaction date (NOT NULL)
+|`unrecognized_amount` |`DECIMAL(19,6)` |Amortization - not yet recognized amount (NOT NULL)
+|`charged_off_amount` |`DECIMAL(19,6)` |Charged-off balance (nullable)
+|`amount_adjustment` |`DECIMAL(19,6)` |Total adjustment amount (nullable)
+|`created_by` |`BIGINT` |Audit field - user who created the record
+|`created_on_utc` |`DATETIME` |Creation timestamp (UTC)
+|`last_modified_by` |`BIGINT` |Last modifier user ID
+|`last_modified_on_utc` |`DATETIME` |Last modification timestamp (UTC)
+|===
+
+=== Constraints
+
+* **Foreign Key Constraints:**
+  - `loan_id` references `m_loan(id)`
+  - `loan_transaction_id` references `m_loan_transaction(id)`
+  - `created_by` references `m_appuser(id)`
+  - `last_modified_by` references `m_appuser(id)`
+
+== Notes
+
+[IMPORTANT]
+====
+* Capitalized income transactions support backdating
+* Adjustment transactions must not predate the original capitalized income
+* No automatic reversal is supported; must be handled manually via dedicated transactions
+* Proper GL accounts must be set for Deferred Income and Income from Capitalization to enable this functionality
+====

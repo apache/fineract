@@ -1,0 +1,5 @@
+= Features
+
+This section covers specific features and functionality available in Apache Fineract.
+
+include::capitalized-income.adoc[leveloffset=+1]
