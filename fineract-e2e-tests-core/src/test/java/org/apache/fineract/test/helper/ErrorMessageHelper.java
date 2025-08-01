@@ -172,16 +172,15 @@ public final class ErrorMessageHelper {
     }
 
     public static String addCapitalizedIncomeUndoFailureTransactionTypeNonReversal() {
-        return "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment or buy down fee adjustment can be adjusted.";
+        return "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment, buy down fee or buy down fee adjustment can be adjusted.";
     }
 
     public static String addCapitalizedIncomeUndoFailureAdjustmentExists() {
         return "Capitalized income transaction cannot be reversed when non-reversed adjustment exists for it.";
     }
 
-    public static String buyDownFeeUndoFailureAdjustmentExists(Long loanId) {
-        String loanIdStr = String.valueOf(loanId);
-        return String.format("Undo Loan Transaction: %s is not allowed. Loan transaction has not reversed transaction related", loanIdStr);
+    public static String buyDownFeeUndoFailureAdjustmentExists() {
+        return "Buy down fee transaction cannot be reversed when non-reversed adjustment exists for it.";
     }
 
     public static String wrongAmountInRepaymentSchedule(int line, BigDecimal actual, BigDecimal expected) {

@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -37,9 +36,6 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanBuyDownFeeAdjustmentTransactionBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanBuyDownFeeTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -177,6 +173,31 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
             capitalizedIncomeBalance
                     .setUnrecognizedAmount(capitalizedIncomeBalance.getUnrecognizedAmount().add(transactionToAdjust.getAmount()));
         }
+        if (transactionToAdjust.isBuyDownFee()) {
+            if (newTransactionDetail.isNotZero()) {
+                throw new InvalidLoanTransactionTypeException("transaction", "buy.down.fee.cannot.be.adjusted",
+                        "Buy down fee transaction cannot be adjusted");
+            }
+
+            LoanBuyDownFeeBalance buyDownFeeBalance = loanBuyDownFeeBalanceRepository.findByLoanIdAndLoanTransactionId(loan.getId(),
+                    transactionToAdjust.getId());
+
+            if (MathUtil.isGreaterThanZero(buyDownFeeBalance.getAmountAdjustment())) {
+                throw new InvalidLoanTransactionTypeException("transaction", "buy.down.fee.cannot.be.reversed.when.adjusted",
+                        "Buy down fee transaction cannot be reversed when non-reversed adjustment exists for it.");
+            }
+            loanBuyDownFeeBalanceRepository.delete(buyDownFeeBalance);
+        }
+        if (transactionToAdjust.isBuyDownFeeAdjustment()) {
+            if (newTransactionDetail.isNotZero()) {
+                throw new InvalidLoanTransactionTypeException("transaction", "buy.down.fee.adjustment.cannot.be.adjusted",
+                        "Buy down fee adjustment transaction cannot be adjusted");
+            }
+            LoanBuyDownFeeBalance buyDownFeeBalance = loanBuyDownFeeBalanceRepository.findBalanceForAdjustment(transactionToAdjust.getId());
+
+            buyDownFeeBalance.setAmountAdjustment(buyDownFeeBalance.getAmountAdjustment().subtract(transactionToAdjust.getAmount()));
+            buyDownFeeBalance.setUnrecognizedAmount(buyDownFeeBalance.getUnrecognizedAmount().add(transactionToAdjust.getAmount()));
+        }
 
         LocalDate recalculateFrom = null;
 
@@ -292,9 +313,9 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
                 && transactionForAdjustment.isNotWaiver() && transactionForAdjustment.isNotCreditBalanceRefund()
                 && !transactionForAdjustment.isDeferredIncome() && !transactionForAdjustment.isCapitalizedIncomeAdjustment()
                 && !transactionForAdjustment.isBuyDownFeeAdjustment()) {
-            final String errorMessage = "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment or buy down fee adjustment can be adjusted.";
+            final String errorMessage = "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income, capitalized income adjustment, buy down fee or buy down fee adjustment can be adjusted.";
             throw new InvalidLoanTransactionTypeException("transaction",
-                    "adjustment.is.only.allowed.to.repayment.or.waiver.or.creditbalancerefund.or.capitalizedIncome.or.capitalizedIncomeAdjustment.or.buyDownFeeAdjustment.transactions",
+                    "adjustment.is.only.allowed.to.repayment.or.waiver.or.creditbalancerefund.or.capitalizedIncome.or.capitalizedIncomeAdjustment.or.buyDownFee.or.buyDownFeeAdjustment.transactions",
                     errorMessage);
         }
 
@@ -318,17 +339,6 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
                         LoanAdjustTransactionBusinessEvent.Data eventData = new LoanAdjustTransactionBusinessEvent.Data(loanTransaction);
                         businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(eventData));
                     });
-        } else if (transactionForAdjustment.isBuyDownFee()) {
-            Optional<LoanTransaction> optAmortizationAdjustmentTransaction = buyDownFeePlatformService
-                    .reverseBuyDownFee(transactionForAdjustment);
-            if (optAmortizationAdjustmentTransaction.isPresent()) {
-                loan.addLoanTransaction(optAmortizationAdjustmentTransaction.get());
-                loanTransactionRepository.saveAndFlush(optAmortizationAdjustmentTransaction.get());
-                businessEventNotifierService
-                        .notifyPostBusinessEvent(new LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent(
-                                optAmortizationAdjustmentTransaction.get()));
-            }
-            businessEventNotifierService.notifyPostBusinessEvent(new LoanBuyDownFeeTransactionBusinessEvent(transactionForAdjustment));
         }
 
         if (loan.isClosedWrittenOff()) {
@@ -346,24 +356,6 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
 
         if (transactionForAdjustment.getTypeOf().equals(LoanTransactionType.CAPITALIZED_INCOME)) {
             reprocessLoanTransactionsService.reprocessTransactions(loan);
-        }
-
-        if (transactionForAdjustment.getTypeOf().equals(LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT)) {
-            // adjust buy down fee balance
-            final LoanTransaction originalBuyDownFeeTransaction = transactionForAdjustment.getLoanTransactionRelations().stream()
-                    .filter(r -> r.getRelationType().equals(LoanTransactionRelationTypeEnum.ADJUSTMENT)).findFirst().get()
-                    .getToTransaction();
-            final LoanBuyDownFeeBalance buyDownFeeBalance = loanBuyDownFeeBalanceRepository.findByLoanIdAndLoanTransactionId(loan.getId(),
-                    originalBuyDownFeeTransaction.getId());
-            if (buyDownFeeBalance != null) {
-                buyDownFeeBalance.setAmountAdjustment(
-                        MathUtil.nullToZero(buyDownFeeBalance.getAmountAdjustment()).subtract(transactionForAdjustment.getAmount()));
-                buyDownFeeBalance.setUnrecognizedAmount(
-                        MathUtil.nullToZero(buyDownFeeBalance.getUnrecognizedAmount()).add(transactionForAdjustment.getAmount()));
-                loanBuyDownFeeBalanceRepository.save(buyDownFeeBalance);
-            }
-            businessEventNotifierService
-                    .notifyPostBusinessEvent(new LoanBuyDownFeeAdjustmentTransactionBusinessEvent(transactionForAdjustment));
         }
     }
 

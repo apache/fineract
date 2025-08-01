@@ -46,9 +46,9 @@ import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.externalevents.BusinessEvent;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventHelper;
+import org.apache.fineract.integrationtests.common.externalevents.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.integrationtests.common.externalevents.LoanTransactionMinimalBusinessEvent;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -64,28 +64,25 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
     private Long clientId;
     private Long loanId;
 
-    // Buy Down Fee accounts for accrual-based accounting
-    private final Account buyDownExpenseAccount = accountHelper.createExpenseAccount();
-    private final Account deferredIncomeLiabilityAccount = accountHelper.createLiabilityAccount();
-
-    // Additional receivable accounts required for accrual-based accounting
-    private final Account interestReceivableAccount = accountHelper.createAssetAccount();
-    private final Account feeReceivableAccount = accountHelper.createAssetAccount();
-    private final Account penaltyReceivableAccount = accountHelper.createAssetAccount();
-
     @AfterAll
     public static void teardown() {
         ExternalEventHelper externalEventHelper = new ExternalEventHelper();
-        externalEventHelper.disableBusinessEvent("LoanBuyDownFeeTransactionBusinessEvent");
-        externalEventHelper.disableBusinessEvent("LoanBuyDownFeeAdjustmentTransactionBusinessEvent");
+        externalEventHelper.disableBusinessEvent("LoanAdjustTransactionBusinessEvent");
+        externalEventHelper.disableBusinessEvent("LoanBuyDownFeeTransactionCreatedBusinessEvent");
+        externalEventHelper.disableBusinessEvent("LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent");
         externalEventHelper.disableBusinessEvent("LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent");
         externalEventHelper.disableBusinessEvent("LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent");
     }
 
     @BeforeEach
     public void beforeEach() {
-        externalEventHelper.enableBusinessEvent("LoanBuyDownFeeTransactionBusinessEvent");
-        externalEventHelper.enableBusinessEvent("LoanBuyDownFeeAdjustmentTransactionBusinessEvent");
+        new BusinessStepHelper().updateSteps("LOAN_CLOSE_OF_BUSINESS", "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION",
+                "CHECK_LOAN_REPAYMENT_DUE", "CHECK_LOAN_REPAYMENT_OVERDUE", "CHECK_DUE_INSTALLMENTS", "UPDATE_LOAN_ARREARS_AGING",
+                "ADD_PERIODIC_ACCRUAL_ENTRIES", "ACCRUAL_ACTIVITY_POSTING", "CAPITALIZED_INCOME_AMORTIZATION", "BUY_DOWN_FEE_AMORTIZATION",
+                "LOAN_INTEREST_RECALCULATION", "EXTERNAL_ASSET_OWNER_TRANSFER");
+        externalEventHelper.enableBusinessEvent("LoanAdjustTransactionBusinessEvent");
+        externalEventHelper.enableBusinessEvent("LoanBuyDownFeeTransactionCreatedBusinessEvent");
+        externalEventHelper.enableBusinessEvent("LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent");
         externalEventHelper.enableBusinessEvent("LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent");
         externalEventHelper.enableBusinessEvent("LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent");
         runAt("01 September 2024", () -> {
@@ -113,7 +110,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
             deleteAllExternalEvents();
             // Create buy down fee transaction
             Long buyDownFeeTransactionId = addBuyDownFeeForLoan(loanId, 500.0, "02 September 2024");
-            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeTransactionBusinessEvent", "02 September 2024"));
+            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeTransactionCreatedBusinessEvent", "02 September 2024"));
 
             assertNotNull(buyDownFeeTransactionId);
 
@@ -149,7 +146,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
                             .transactionAmount(250.0).externalId(externalId).note(noteText));
 
             assertNotNull(response.getResourceId());
-            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeTransactionBusinessEvent", "03 September 2024"));
+            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeTransactionCreatedBusinessEvent", "03 September 2024"));
 
             // Verify transaction details
             final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
@@ -171,12 +168,12 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
             // Add first buy down fee
             Long firstBuyDownFeeId = addBuyDownFeeForLoan(loanId, 200.0, "02 September 2024");
 
-            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeTransactionBusinessEvent", "04 September 2024"));
+            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeTransactionCreatedBusinessEvent", "04 September 2024"));
             deleteAllExternalEvents();
 
             // Add second buy down fee
             Long secondBuyDownFeeId = addBuyDownFeeForLoan(loanId, 150.0, "04 September 2024");
-            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeTransactionBusinessEvent", "04 September 2024"));
+            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeTransactionCreatedBusinessEvent", "04 September 2024"));
 
             assertNotNull(firstBuyDownFeeId);
             assertNotNull(secondBuyDownFeeId);
@@ -288,14 +285,14 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
             Long buyDownFeeTransactionId = addBuyDownFeeForLoan(loanId, 500.0, "06 September 2024");
             assertNotNull(buyDownFeeTransactionId);
 
-            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeTransactionBusinessEvent", "06 September 2024"));
+            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeTransactionCreatedBusinessEvent", "06 September 2024"));
             deleteAllExternalEvents();
 
             // Create buy down fee adjustment (use same date as business date)
             PostLoansLoanIdTransactionsResponse adjustmentResponse = loanTransactionHelper.buyDownFeeAdjustment(loanId,
                     buyDownFeeTransactionId, "06 September 2024", 100.0);
 
-            verifyBusinessEvents(new LoanTransactionMinimalBusinessEvent("LoanBuyDownFeeAdjustmentTransactionBusinessEvent",
+            verifyBusinessEvents(new LoanTransactionMinimalBusinessEvent("LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent",
                     "06 September 2024", 100.0, false));
 
             assertNotNull(adjustmentResponse);
@@ -321,8 +318,8 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
 
             deleteAllExternalEvents();
             loanTransactionHelper.reverseLoanTransaction(loanId, adjustmentResponse.getResourceId(), "06 September 2024");
-            verifyBusinessEvents(new LoanTransactionMinimalBusinessEvent("LoanBuyDownFeeAdjustmentTransactionBusinessEvent",
-                    "06 September 2024", 100.0, true));
+            verifyBusinessEvents(new LoanAdjustTransactionBusinessEvent("LoanAdjustTransactionBusinessEvent", "06 September 2024",
+                    "loanTransactionType.buyDownFeeAdjustment", "2024-09-06"));
 
         });
     }
@@ -395,7 +392,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
             Long buyDownFeeTransactionId = addBuyDownFeeForLoan(loanId, 600.0, "12 September 2024");
             assertNotNull(buyDownFeeTransactionId);
 
-            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeTransactionBusinessEvent", "12 September 2024"));
+            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeTransactionCreatedBusinessEvent", "12 September 2024"));
             deleteAllExternalEvents();
 
             // First adjustment
@@ -403,7 +400,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
                     "12 September 2024", 100.0);
             assertNotNull(adjustment1);
 
-            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeAdjustmentTransactionBusinessEvent", "12 September 2024"));
+            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent", "12 September 2024"));
             deleteAllExternalEvents();
 
             // Second adjustment
@@ -411,7 +408,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
                     "12 September 2024", 150.0);
             assertNotNull(adjustment2);
 
-            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeAdjustmentTransactionBusinessEvent", "12 September 2024"));
+            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent", "12 September 2024"));
 
             // Verify both adjustments are recorded
             final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
@@ -444,7 +441,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
             // Add initial buy down fee
             Long buyDownFeeTransactionId = addBuyDownFeeForLoan(loanId, 350.0, "16 September 2024");
             assertNotNull(buyDownFeeTransactionId);
-            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeTransactionBusinessEvent", "16 September 2024"));
+            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeTransactionCreatedBusinessEvent", "16 September 2024"));
             deleteAllExternalEvents();
             // Create adjustment with external ID
             String adjustmentExternalId = UUID.randomUUID().toString();
@@ -457,7 +454,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
             assertNotNull(adjustmentResponse);
             assertEquals(adjustmentExternalId, adjustmentResponse.getResourceExternalId());
 
-            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeAdjustmentTransactionBusinessEvent", "16 September 2024"));
+            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent", "16 September 2024"));
 
             // Verify adjustment transaction details
             final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
@@ -490,11 +487,6 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
 
     @Test
     public void testBuyDownFeeDailyAmortization() {
-        new BusinessStepHelper().updateSteps("LOAN_CLOSE_OF_BUSINESS", "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION",
-                "CHECK_LOAN_REPAYMENT_DUE", "CHECK_LOAN_REPAYMENT_OVERDUE", "CHECK_DUE_INSTALLMENTS", "UPDATE_LOAN_ARREARS_AGING",
-                "ADD_PERIODIC_ACCRUAL_ENTRIES", "ACCRUAL_ACTIVITY_POSTING", "CAPITALIZED_INCOME_AMORTIZATION", "BUY_DOWN_FEE_AMORTIZATION",
-                "LOAN_INTEREST_RECALCULATION", "EXTERNAL_ASSET_OWNER_TRANSFER");
-
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
         final AtomicReference<Long> buyDownFeeTransactionIdIdRef = new AtomicReference<>();
 
@@ -518,7 +510,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
             PostLoansLoanIdTransactionsResponse transactionsResponse = loanTransactionHelper.makeLoanBuyDownFee(loanId, "1 January 2024",
                     50.0);
             buyDownFeeTransactionIdIdRef.set(transactionsResponse.getResourceId());
-            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeTransactionBusinessEvent", "01 January 2024"));
+            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeTransactionCreatedBusinessEvent", "01 January 2024"));
         });
         runAt("31 January 2024", () -> {
             Long loanId = loanIdRef.get();
@@ -550,7 +542,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
 
             deleteAllExternalEvents();
             loanTransactionHelper.buyDownFeeAdjustment(loanId, buyDownFeeTransactionIdIdRef.get(), "1 February 2024", 10.0);
-            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeAdjustmentTransactionBusinessEvent", "01 February 2024"));
+            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent", "01 February 2024"));
         });
         runAt("2 February 2024", () -> {
             Long loanId = loanIdRef.get();
@@ -572,7 +564,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
 
             deleteAllExternalEvents();
             loanTransactionHelper.buyDownFeeAdjustment(loanId, buyDownFeeTransactionIdIdRef.get(), "10 January 2024", 10.0);
-            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeAdjustmentTransactionBusinessEvent", "02 February 2024"));
+            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent", "02 February 2024"));
         });
         runAt("3 February 2024", () -> {
             Long loanId = loanIdRef.get();
@@ -598,7 +590,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
 
             deleteAllExternalEvents();
             loanTransactionHelper.buyDownFeeAdjustment(loanId, buyDownFeeTransactionIdIdRef.get(), "03 February 2024", 20.0);
-            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeAdjustmentTransactionBusinessEvent", "03 February 2024"));
+            verifyBusinessEvents(new BusinessEvent("LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent", "03 February 2024"));
         });
         runAt("4 February 2024", () -> {
             Long loanId = loanIdRef.get();
@@ -710,8 +702,8 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
             Long buyDownFeeTransactionId = addBuyDownFeeForLoan(loanId, 400.0, "02 September 2024");
             buyDownFeeTransactionIdRef.set(buyDownFeeTransactionId);
             assertNotNull(buyDownFeeTransactionId);
-            verifyBusinessEvents(
-                    new LoanTransactionMinimalBusinessEvent("LoanBuyDownFeeTransactionBusinessEvent", "02 September 2024", 400.0, false));
+            verifyBusinessEvents(new LoanTransactionMinimalBusinessEvent("LoanBuyDownFeeTransactionCreatedBusinessEvent",
+                    "02 September 2024", 400.0, false));
         });
         runAt("10 September 2024", () -> {
             deleteAllExternalEvents();
@@ -730,16 +722,18 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
             Assertions.assertNotNull(transactionsResponse.getResourceId());
             Assertions.assertEquals(transactionsResponse.getResourceId(), buyDownFeeTransactionId);
 
-            verifyBusinessEvents(
-                    new LoanTransactionMinimalBusinessEvent("LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent",
-                            "10 September 2024", 8.79, false),
-                    new LoanTransactionMinimalBusinessEvent("LoanBuyDownFeeTransactionBusinessEvent", "10 September 2024", 400.0, true));
+            verifyBusinessEvents(new LoanAdjustTransactionBusinessEvent("LoanAdjustTransactionBusinessEvent", "10 September 2024",
+                    "loanTransactionType.buyDownFee", "2024-09-02"));
 
+        });
+        runAt("11 September 2024", () -> {
+            executeInlineCOB(loanId);
             verifyTransactions(loanId, //
                     transaction(1000.000000, "Disbursement", "01 September 2024", 1000.000000, 0, 0, 0, 0, 0, 0, false), //
                     transaction(400.000000, "Buy Down Fee", "02 September 2024", 0, 0, 0, 0, 0, 0, 0, true), //
                     transaction(2.220000, "Accrual", "09 September 2024", 0, 0, 2.220000, 0, 0, 0, 0, false), //
                     transaction(8.790000, "Buy Down Fee Amortization", "09 September 2024", 0, 0, 0, 8.790000, 0, 0, 0, false), //
+                    transaction(0.28, "Accrual", "10 September 2024", 0, 0, 0.28, 0, 0, 0, 0, false), //
                     transaction(8.790000, "Buy Down Fee Amortization Adjustment", "10 September 2024", 0, 0, 0, 8.790000, 0, 0, 0, false) //
             );
 
@@ -790,8 +784,8 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
             assertNotNull(buyDownFeeTransactionId);
             buyDownFeeTransactionIdIdRef.set(buyDownFeeTransactionId);
 
-            verifyBusinessEvents(
-                    new LoanTransactionMinimalBusinessEvent("LoanBuyDownFeeTransactionBusinessEvent", "10 September 2024", 400.0, false));
+            verifyBusinessEvents(new LoanTransactionMinimalBusinessEvent("LoanBuyDownFeeTransactionCreatedBusinessEvent",
+                    "10 September 2024", 400.0, false));
 
             // Verify initial buy down fee accounting entries
             verifyTRJournalEntries(buyDownFeeTransactionId, debit(buyDownExpenseAccount, 400.0),
@@ -818,10 +812,8 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
             Assertions.assertNotNull(transactionsResponse.getResourceId());
             Assertions.assertEquals(transactionsResponse.getResourceId(), buyDownFeeTransactionId);
 
-            verifyBusinessEvents(
-                    new LoanTransactionMinimalBusinessEvent("LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent",
-                            "23 September 2024", 14.61, false),
-                    new LoanTransactionMinimalBusinessEvent("LoanBuyDownFeeTransactionBusinessEvent", "23 September 2024", 400.0, true));
+            verifyBusinessEvents(new LoanAdjustTransactionBusinessEvent("LoanAdjustTransactionBusinessEvent", "23 September 2024",
+                    "loanTransactionType.buyDownFee", "2024-09-10"));
 
             // Verify initial buy down fee reversed accounting entries
             verifyTRJournalEntries(buyDownFeeTransactionId, debit(buyDownExpenseAccount, 400.0),
@@ -832,8 +824,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
                     transaction(1000.000000, "Disbursement", "01 September 2024", 1000.000000, 0, 0, 0, 0, 0, 0, false), //
                     transaction(400.000000, "Buy Down Fee", "10 September 2024", 0, 0, 0, 0, 0, 0, 0, true), //
                     transaction(5.830000, "Accrual", "22 September 2024", 0, 0, 5.830000, 0, 0, 0, 0, false), //
-                    transaction(14.610000, "Buy Down Fee Amortization", "22 September 2024", 0, 0, 0, 14.610000, 0, 0, 0, false), //
-                    transaction(14.610000, "Buy Down Fee Amortization Adjustment", "23 September 2024", 0, 0, 0, 14.610000, 0, 0, 0, false) //
+                    transaction(14.610000, "Buy Down Fee Amortization", "22 September 2024", 0, 0, 0, 14.610000, 0, 0, 0, false) //
             );
         });
     }
@@ -870,7 +861,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
                                     .transactionDate("10 September 2024").note("Buy Down Fee reversed").transactionAmount(0.0)
                                     .locale("en")));
             assertEquals(403, exception.getResponse().code());
-            assertTrue(exception.getMessage().contains("loan.transaction.with.not.reversed.transaction.related"));
+            assertTrue(exception.getMessage().contains("buy.down.fee.cannot.be.reversed.when.adjusted"));
         });
     }
 

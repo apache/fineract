@@ -17,7 +17,7 @@ Feature:Feature: Buy Down Fees
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
       | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
-      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2     | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
@@ -38,7 +38,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment        | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
     When Admin sets the business date to "1 March 2024"
     And Customer makes "AUTOPAY" repayment on "01 March 2024" with 33.72 EUR transaction amount
@@ -49,7 +49,7 @@ Feature:Feature: Buy Down Fees
     And Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment                 | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
       | 01 March 2024    | Repayment                 | 33.72  | 33.33     | 0.39     | 0.0  | 0.0       | 33.53        | false    |
       | 31 March 2024    | Accrual                   | 1.16   | 0.0       | 1.16     | 0.0  | 0.0       | 0.0          | false    |
@@ -77,7 +77,7 @@ Feature:Feature: Buy Down Fees
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
       | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
-      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2     | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
@@ -120,7 +120,7 @@ Feature:Feature: Buy Down Fees
     And Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
@@ -318,7 +318,7 @@ Feature:Feature: Buy Down Fees
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
       | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
-      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2     | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
@@ -339,7 +339,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment        | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
     When Admin sets the business date to "1 March 2024"
     When Loan Pay-off is made on "1 March 2024"
@@ -347,7 +347,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment                 | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
       | 01 March 2024    | Repayment                 | 67.25  | 66.86     | 0.39     | 0.0  | 0.0       | 0.0          | false    |
       | 01 March 2024    | Accrual                   | 0.97   | 0.0       | 0.97     | 0.0  | 0.0       | 0.0          | false    |
@@ -376,7 +376,7 @@ Feature:Feature: Buy Down Fees
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
       | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
-      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2     | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
@@ -415,7 +415,7 @@ Feature:Feature: Buy Down Fees
     And Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
@@ -565,7 +565,7 @@ Feature:Feature: Buy Down Fees
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
       | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
-      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2     | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
@@ -586,7 +586,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment        | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
     When Admin sets the business date to "1 March 2024"
     And Admin does charge-off the loan on "1 March 2024"
@@ -601,7 +601,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment                 | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
       | 01 March 2024    | Buy Down Fee Amortization | 33.52  | 0.0       | 33.52    | 0.0  | 0.0       | 0.0          | false    |
       | 01 March 2024    | Accrual                   | 0.97   | 0.0       | 0.97     | 0.0  | 0.0       | 0.0          | false    |
@@ -637,7 +637,7 @@ Feature:Feature: Buy Down Fees
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
       | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
-      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2     | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
@@ -683,7 +683,7 @@ Feature:Feature: Buy Down Fees
     And Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
@@ -840,7 +840,7 @@ Feature:Feature: Buy Down Fees
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
       | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
-      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2     | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
@@ -865,7 +865,7 @@ Feature:Feature: Buy Down Fees
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
       | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
-      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2     | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
@@ -878,7 +878,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Buy Down Fee Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Accrual                   | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Charge-off                | 101.17 | 100.0     | 1.17     | 0.0  | 0.0       | 0.0          | false    |
@@ -898,7 +898,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Buy Down Fee Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Accrual                   | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Charge-off                | 101.17 | 100.0     | 1.17     | 0.0  | 0.0       | 0.0          | true     |
@@ -939,7 +939,7 @@ Feature:Feature: Buy Down Fees
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
       | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
-      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2     | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
@@ -966,7 +966,7 @@ Feature:Feature: Buy Down Fees
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
       | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
-      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2     | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
@@ -979,7 +979,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Buy Down Fee Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Accrual                   | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Charge-off                | 101.17 | 100.0     | 1.17     | 0.0  | 0.0       | 0.0          | false    |
@@ -999,7 +999,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Buy Down Fee Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Accrual                   | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Charge-off                | 101.17 | 100.0     | 1.17     | 0.0  | 0.0       | 0.0          | true     |
@@ -1039,7 +1039,7 @@ Feature:Feature: Buy Down Fees
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
       | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
-      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2     | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
@@ -1067,7 +1067,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 25 January 2024  | Buy Down Fee Amortization | 13.74  | 0.0       | 13.74    | 0.0  | 0.0       | 0.0          | false    |
       | 25 January 2024  | Accrual                   | 0.45   | 0.0       | 0.45     | 0.0  | 0.0       | 0.0          | false    |
       | 25 January 2024  | Charge-off                | 101.17 | 100.0     | 1.17     | 0.0  | 0.0       | 0.0          | false    |
@@ -1102,7 +1102,7 @@ Feature:Feature: Buy Down Fees
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
       | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
-      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2     | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
@@ -1130,7 +1130,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 25 January 2024  | Buy Down Fee Amortization | 13.74  | 0.0       | 13.74    | 0.0  | 0.0       | 0.0          | false    |
       | 25 January 2024  | Accrual                   | 0.45   | 0.0       | 0.45     | 0.0  | 0.0       | 0.0          | false    |
       | 25 January 2024  | Charge-off                | 101.17 | 100.0     | 1.17     | 0.0  | 0.0       | 0.0          | false    |
@@ -1164,7 +1164,7 @@ Feature:Feature: Buy Down Fees
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
       | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
-      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2     | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
@@ -1192,7 +1192,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 25 January 2024  | Buy Down Fee Amortization | 13.74  | 0.0       | 13.74    | 0.0  | 0.0       | 0.0          | false    |
       | 25 January 2024  | Accrual                   | 0.45   | 0.0       | 0.45     | 0.0  | 0.0       | 0.0          | false    |
       | 25 January 2024  | Charge-off                | 101.17 | 100.0     | 1.17     | 0.0  | 0.0       | 0.0          | false    |
@@ -1211,7 +1211,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 25 January 2024  | Buy Down Fee Amortization | 13.74  | 0.0       | 13.74    | 0.0  | 0.0       | 0.0          | false    |
       | 25 January 2024  | Accrual                   | 0.45   | 0.0       | 0.45     | 0.0  | 0.0       | 0.0          | false    |
       | 25 January 2024  | Charge-off                | 101.17 | 100.0     | 1.17     | 0.0  | 0.0       | 0.0          | true     |
@@ -1252,7 +1252,7 @@ Feature:Feature: Buy Down Fees
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
       | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
-      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2     | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
@@ -1297,10 +1297,10 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 31 January 2024  | Accrual                   | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    |
       | 31 January 2024  | Buy Down Fee Amortization | 17.03  | 0.0       | 17.03    | 0.0  | 0.0       | 0.0          | false    |
-      | 01 February 2024 | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 February 2024 | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 March 2024    | Buy Down Fee Amortization | 41.49  | 0.0       | 41.49    | 0.0  | 0.0       | 0.0          | false    |
       | 01 March 2024    | Accrual                   | 0.6    | 0.0       | 0.6      | 0.0  | 0.0       | 0.0          | false    |
       | 01 March 2024    | Charge-off                | 101.36 | 100.0     | 1.36     | 0.0  | 0.0       | 0.0          | false    |
@@ -1367,7 +1367,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment        | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
 # --- BuyDownFee Adjustment trns on March,1 ---#
     When Admin sets the business date to "1 March 2024"
@@ -1384,9 +1384,9 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type        | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement            | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee            | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee            | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment               | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
-      | 01 March 2024    | Buy Down Fee Adjustment | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 66.86        | false    |
+      | 01 March 2024    | Buy Down Fee Adjustment | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
     And Loan Transactions tab has a "BUY_DOWN_FEE_ADJUSTMENT" transaction with date "01 March 2024" which has the following Journal entries:
       | Type      | Account code | Account name                | Debit | Credit |
       | EXPENSE   | 450280       | Buy Down Expense            |       | 10.0   |
@@ -1401,9 +1401,9 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment                 | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
-      | 01 March 2024    | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 66.86        | false    |
+      | 01 March 2024    | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 31 March 2024    | Accrual                   | 1.35   | 0.0       | 1.35     | 0.0  | 0.0       | 0.0          | false    |
       | 31 March 2024    | Buy Down Fee Amortization | 40.0   | 0.0       | 40.0     | 0.0  | 0.0       | 0.0          | false    |
       | 01 April 2024    | Repayment                 | 33.73  | 33.34     | 0.39     | 0.0  | 0.0       | 33.52        | false    |
@@ -1416,9 +1416,9 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment                 | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
-      | 01 March 2024    | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 66.86        | false    |
+      | 01 March 2024    | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 31 March 2024    | Accrual                   | 1.35   | 0.0       | 1.35     | 0.0  | 0.0       | 0.0          | false    |
       | 31 March 2024    | Buy Down Fee Amortization | 40.0   | 0.0       | 40.0     | 0.0  | 0.0       | 0.0          | false    |
       | 01 April 2024    | Repayment                 | 33.73  | 33.34     | 0.39     | 0.0  | 0.0       | 33.52        | false    |
@@ -1441,7 +1441,7 @@ Feature:Feature: Buy Down Fees
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
       | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
-      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2     | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
@@ -1473,7 +1473,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment        | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
 # --- 1st BuyDownFee Adjustment trns on March,1 ---#
     When Admin sets the business date to "1 March 2024"
@@ -1481,9 +1481,9 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type        | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement            | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee            | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee            | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment               | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
-      | 01 March 2024    | Buy Down Fee Adjustment | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 66.86        | false    |
+      | 01 March 2024    | Buy Down Fee Adjustment | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
     And Loan Transactions tab has a "BUY_DOWN_FEE_ADJUSTMENT" transaction with date "01 March 2024" which has the following Journal entries:
       | Type      | Account code | Account name                | Debit | Credit |
       | EXPENSE   | 450280       | Buy Down Expense            |       | 10.0   |
@@ -1497,10 +1497,10 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type        | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement            | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee            | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee            | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment               | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
-      | 01 March 2024    | Buy Down Fee Adjustment | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 66.86        | false    |
-      | 15 March 2024    | Buy Down Fee Adjustment |  5.0   | 0.0       | 0.0      | 0.0  | 0.0       | 66.86        | false    |
+      | 01 March 2024    | Buy Down Fee Adjustment | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 15 March 2024    | Buy Down Fee Adjustment |  5.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
     And Loan Transactions tab has a "BUY_DOWN_FEE_ADJUSTMENT" transaction with date "15 March 2024" which has the following Journal entries:
       | Type      | Account code | Account name                | Debit | Credit |
       | EXPENSE   | 450280       | Buy Down Expense            |       |  5.0   |
@@ -1515,10 +1515,10 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment                 | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
-      | 01 March 2024    | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 66.86        | false    |
-      | 15 March 2024    | Buy Down Fee Adjustment   |  5.0   | 0.0       | 0.0      | 0.0  | 0.0       | 66.86        | false    |
+      | 01 March 2024    | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 15 March 2024    | Buy Down Fee Adjustment   |  5.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 31 March 2024    | Accrual                   | 1.35   | 0.0       | 1.35     | 0.0  | 0.0       | 0.0          | false    |
       | 31 March 2024    | Buy Down Fee Amortization | 35.0   | 0.0       | 35.0     | 0.0  | 0.0       | 0.0          | false    |
       | 01 April 2024    | Repayment                 | 33.73  | 33.34     | 0.39     | 0.0  | 0.0       | 33.52        | false    |
@@ -1531,10 +1531,10 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment                 | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
-      | 01 March 2024    | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 66.86        | false    |
-      | 15 March 2024    | Buy Down Fee Adjustment   |  5.0   | 0.0       | 0.0      | 0.0  | 0.0       | 66.86        | false    |
+      | 01 March 2024    | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 15 March 2024    | Buy Down Fee Adjustment   |  5.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 31 March 2024    | Accrual                   | 1.35   | 0.0       | 1.35     | 0.0  | 0.0       | 0.0          | false    |
       | 31 March 2024    | Buy Down Fee Amortization | 35.0   | 0.0       | 35.0     | 0.0  | 0.0       | 0.0          | false    |
       | 01 April 2024    | Repayment                 | 33.73  | 33.34     | 0.39     | 0.0  | 0.0       | 33.52        | false    |
@@ -1588,7 +1588,7 @@ Feature:Feature: Buy Down Fees
     And Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
-      | 02 January 2024  | Buy Down Fee              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
+      | 02 January 2024  | Buy Down Fee              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Close (as written-off)    | 910.52 | 900.0     | 10.52    | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Buy Down Fee Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
     And Loan Transactions tab has a "BUY_DOWN_FEE_AMORTIZATION" transaction with date "02 January 2024" which has the following Journal entries:
@@ -1648,7 +1648,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
@@ -1731,7 +1731,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
@@ -1871,7 +1871,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
@@ -1995,7 +1995,7 @@ Feature:Feature: Buy Down Fees
       | 29 February 2024 | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
 
       | 01 March 2024    | Repayment                 | 33.72  | 33.33     | 0.39     | 0.0  | 0.0       | 33.53        | false    |
-      | 01 March 2024    | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 33.53        | false    |
+      | 01 March 2024    | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 March 2024    | Accrual                   | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    |
       | 01 March 2024    | Buy Down Fee Amortization | 0.22   | 0.0       | 0.22     | 0.0  | 0.0       | 0.0          | false    |
     And Loan Transactions tab has a "BUY_DOWN_FEE_ADJUSTMENT" transaction with date "01 March 2024" which has the following Journal entries:
@@ -2012,7 +2012,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
@@ -2136,7 +2136,7 @@ Feature:Feature: Buy Down Fees
       | 29 February 2024 | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
 
       | 01 March 2024    | Repayment                 | 33.72  | 33.33     | 0.39     | 0.0  | 0.0       | 33.53        | false    |
-      | 01 March 2024    | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 33.53        | true     |
+      | 01 March 2024    | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | true     |
       | 01 March 2024    | Accrual                   | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    |
       | 01 March 2024    | Buy Down Fee Amortization | 0.22   | 0.0       | 0.22     | 0.0  | 0.0       | 0.0          | false    |
       | 02 March 2024    | Accrual                   | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    |
@@ -2197,7 +2197,7 @@ Feature:Feature: Buy Down Fees
     And Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0         | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment                 | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
 # --- Run COB to amortize Buy Down Fee ---#
@@ -2215,7 +2215,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
@@ -2286,7 +2286,7 @@ Feature:Feature: Buy Down Fees
       | 03 February 2024 | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 04 February 2024 | Accrual                   | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    |
       | 04 February 2024 | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
-      | 05 February 2024 | Accrual                   | 0.01   | 0.0       | 0.01    | 0.0  | 0.0       | 0.0          | false    |
+      | 05 February 2024 | Accrual                   | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    |
       | 05 February 2024 | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 06 February 2024 | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 06 February 2024 | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
@@ -2309,9 +2309,9 @@ Feature:Feature: Buy Down Fees
       | 15 February 2024 | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 15 February 2024 | Buy Down Fee Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    |
 # --- Reverse Buy Down Fee transaction ---#
-    When Admin sets the business date to "15 February 2024"
+#    When Admin sets the business date to "15 February 2024"
     When Customer undo "1"th "Buy Down Fee" transaction made on "01 January 2024"
-    When Admin sets the business date to "16 February 2024"
+    When Admin sets the business date to "17 February 2024"
     And Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
@@ -2325,7 +2325,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                     | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement                         | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee                         | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | true     |
+      | 01 January 2024  | Buy Down Fee                         | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | true     |
       | 01 January 2024  | Buy Down Fee Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Accrual                              | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Buy Down Fee Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
@@ -2418,7 +2418,8 @@ Feature:Feature: Buy Down Fees
       | 14 February 2024 | Buy Down Fee Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 15 February 2024 | Accrual                              | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 15 February 2024 | Buy Down Fee Amortization            | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    |
-      | 15 February 2024 | Buy Down Fee Amortization Adjustment | 25.27  | 0.0       | 25.27    | 0.0  | 0.0       | 0.0          | false    |
+      | 16 February 2024 | Accrual                              | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    |
+      | 16 February 2024 | Buy Down Fee Amortization Adjustment | 25.27  | 0.0       | 25.27    | 0.0  | 0.0       | 0.0          | false    |
     And Loan Transactions tab has a "BUY_DOWN_FEE" transaction with date "01 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name                | Debit | Credit |
       | EXPENSE   | 450280       | Buy Down Expense            | 50.0  |        |
@@ -2527,9 +2528,9 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
-      | 10 January 2024  | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 10 January 2024  | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
     And Loan Transactions tab has a "BUY_DOWN_FEE_ADJUSTMENT" transaction with date "10 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name                | Debit | Credit |
       | EXPENSE   | 450280       | Buy Down Expense            |       | 10.0   |
@@ -2552,7 +2553,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 01 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
@@ -2570,7 +2571,7 @@ Feature:Feature: Buy Down Fees
       | 08 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 09 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 09 January 2024  | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
-      | 10 January 2024  | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | true     |
+      | 10 January 2024  | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | true     |
       | 10 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 10 January 2024  | Buy Down Fee Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    |
     And Loan Transactions tab has a "BUY_DOWN_FEE_ADJUSTMENT" transaction with date "10 January 2024" which has the following Journal entries:
@@ -2595,7 +2596,7 @@ Feature:Feature: Buy Down Fees
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                     | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement                         | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Buy Down Fee                         | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | true     |
+      | 01 January 2024  | Buy Down Fee                         | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | true     |
       | 01 January 2024  | Buy Down Fee Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Accrual                              | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Buy Down Fee Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
@@ -2613,7 +2614,7 @@ Feature:Feature: Buy Down Fees
       | 08 January 2024  | Buy Down Fee Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
       | 09 January 2024  | Accrual                              | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 09 January 2024  | Buy Down Fee Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
-      | 10 January 2024  | Buy Down Fee Adjustment              | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | true     |
+      | 10 January 2024  | Buy Down Fee Adjustment              | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | true     |
       | 10 January 2024  | Accrual                              | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
       | 10 January 2024  | Buy Down Fee Amortization            | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    |
       | 11 January 2024  | Buy Down Fee Amortization Adjustment | 5.49   | 0.0       | 5.49     | 0.0  | 0.0       | 0.0          | false    |

@@ -32,12 +32,10 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
-import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
-import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanBuyDownFeeAdjustmentTransactionBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanBuyDownFeeTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanBuyDownFeeTransactionCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -46,10 +44,8 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeBalance;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeeBalanceRepository;
@@ -70,11 +66,7 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
     private final NoteWritePlatformService noteWritePlatformService;
     private final ExternalIdFactory externalIdFactory;
     private final LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository;
-    private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
-    private final LoanBalanceService loanBalanceService;
-    private final LoanLifecycleStateMachine loanLifecycleStateMachine;
     private final BusinessEventNotifierService businessEventNotifierService;
-    private final LoanTransactionRelationRepository loanTransactionRelationRepository;
 
     @Transactional
     @Override
@@ -111,9 +103,6 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
         // Create Buy Down Fee balance
         createBuyDownFeeBalance(buyDownFeeTransaction);
 
-        // Update loan derived fields
-        loan.updateLoanScheduleDependentDerivedFields();
-
         // Add note if provided
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
@@ -124,7 +113,7 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
         loanJournalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
         // Notify business events
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanBuyDownFeeTransactionBusinessEvent(buyDownFeeTransaction));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBuyDownFeeTransactionCreatedBusinessEvent(buyDownFeeTransaction));
 
         return new CommandProcessingResultBuilder() //
                 .withClientId(loan.getClientId()) //
@@ -171,9 +160,6 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
         // Add transaction to loan
         loan.addLoanTransaction(buyDownFeeAdjustment);
 
-        // Recalculate loan transactions
-        recalculateLoanTransactions(loan, transactionDate, buyDownFeeAdjustment);
-
         // Save transaction
         LoanTransaction savedBuyDownFeeAdjustment = loanTransactionRepository.saveAndFlush(buyDownFeeAdjustment);
 
@@ -187,9 +173,6 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
             loanBuyDownFeeBalanceRepository.save(buydownFeeBalance);
         }
 
-        // Update outstanding loan balances
-        loanBalanceService.updateLoanOutstandingBalances(loan);
-
         // Create a note if provided
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
@@ -198,55 +181,13 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
         // Post journal entries
         loanJournalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
-        // Determine loan lifecycle transition
-        loanLifecycleStateMachine.determineAndTransition(loan, transactionDate);
-
         // Notify business events
         businessEventNotifierService
-                .notifyPostBusinessEvent(new LoanBuyDownFeeAdjustmentTransactionBusinessEvent(savedBuyDownFeeAdjustment));
+                .notifyPostBusinessEvent(new LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent(savedBuyDownFeeAdjustment));
 
         return new CommandProcessingResultBuilder().withEntityId(savedBuyDownFeeAdjustment.getId())
                 .withEntityExternalId(savedBuyDownFeeAdjustment.getExternalId()).withOfficeId(loan.getOfficeId())
                 .withClientId(loan.getClientId()).withLoanId(loan.getId()).build();
-    }
-
-    @Override
-    @Transactional
-    public Optional<LoanTransaction> reverseBuyDownFee(LoanTransaction buyDownFeeTransaction) {
-        LoanTransaction amortizationTransaction = null;
-        Loan loan = buyDownFeeTransaction.getLoan();
-        BigDecimal totalAmortizationAmount = BigDecimal.ZERO;
-
-        if (loanTransactionRelationRepository.hasLoanTransactionRelationsWithType(buyDownFeeTransaction,
-                LoanTransactionRelationTypeEnum.ADJUSTMENT)) {
-            throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.transaction.with.not.reversed.transaction.related", "Undo Loan Transaction: "
-                            + buyDownFeeTransaction.getId() + " is not allowed. Loan transaction has not reversed transaction related",
-                    buyDownFeeTransaction.getId());
-        }
-
-        LoanBuyDownFeeBalance buydownFeeBalance = loanBuyDownFeeBalanceRepository
-                .findByLoanIdAndLoanTransactionId(buyDownFeeTransaction.getLoan().getId(), buyDownFeeTransaction.getId());
-        if (buydownFeeBalance != null) {
-            totalAmortizationAmount = buydownFeeBalance.getAmount().subtract(MathUtil.nullToZero(buydownFeeBalance.getAmountAdjustment())
-                    .add(MathUtil.nullToZero(buydownFeeBalance.getUnrecognizedAmount())));
-            loanBuyDownFeeBalanceRepository.delete(buydownFeeBalance);
-        }
-
-        if (MathUtil.isGreaterThanZero(totalAmortizationAmount)) {
-            amortizationTransaction = LoanTransaction.buyDownFeeAmortizationAdjustment(loan,
-                    Money.of(loan.getCurrency(), totalAmortizationAmount), DateUtils.getBusinessLocalDate(), externalIdFactory.create());
-        }
-
-        return (amortizationTransaction == null) ? Optional.empty() : Optional.of(amortizationTransaction);
-    }
-
-    private void recalculateLoanTransactions(Loan loan, LocalDate transactionDate, LoanTransaction transaction) {
-        if (loan.isInterestBearingAndInterestRecalculationEnabled() || DateUtils.isBeforeBusinessDate(transactionDate)) {
-            reprocessLoanTransactionsService.reprocessTransactions(loan);
-        } else {
-            reprocessLoanTransactionsService.processLatestTransaction(transaction, loan);
-        }
     }
 
     private void checkClientOrGroupActive(final Loan loan) {

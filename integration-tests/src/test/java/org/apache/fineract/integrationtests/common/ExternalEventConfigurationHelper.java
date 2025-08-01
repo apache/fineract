@@ -637,12 +637,12 @@ public class ExternalEventConfigurationHelper {
         defaults.add(loanTransactionUndoContractTerminationBusinessEvent);
 
         Map<String, Object> loanTransactionBuyDownFeePostBusinessEvent = new HashMap<>();
-        loanTransactionBuyDownFeePostBusinessEvent.put("type", "LoanBuyDownFeeTransactionBusinessEvent");
+        loanTransactionBuyDownFeePostBusinessEvent.put("type", "LoanBuyDownFeeTransactionCreatedBusinessEvent");
         loanTransactionBuyDownFeePostBusinessEvent.put("enabled", false);
         defaults.add(loanTransactionBuyDownFeePostBusinessEvent);
 
         Map<String, Object> loanTransactionBuyDownFeeAdjustmentPostBusinessEvent = new HashMap<>();
-        loanTransactionBuyDownFeeAdjustmentPostBusinessEvent.put("type", "LoanBuyDownFeeAdjustmentTransactionBusinessEvent");
+        loanTransactionBuyDownFeeAdjustmentPostBusinessEvent.put("type", "LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent");
         loanTransactionBuyDownFeeAdjustmentPostBusinessEvent.put("enabled", false);
         defaults.add(loanTransactionBuyDownFeeAdjustmentPostBusinessEvent);
 
