@@ -64,6 +64,7 @@ import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.BuyDownFeeAmortizationDetails;
+import org.apache.fineract.client.models.CapitalizedIncomeDetails;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.DisbursementDetail;
 import org.apache.fineract.client.models.GetLoanProductsChargeOffReasonOptions;
@@ -84,6 +85,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.IsCatchUpRunningDTO;
+import org.apache.fineract.client.models.LoanDeferredIncomeData;
 import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.OldestCOBProcessedLoanDTO;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
@@ -107,6 +109,7 @@ import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.services.BusinessDateManagementApi;
 import org.apache.fineract.client.services.LoanBuyDownFeesApi;
 import org.apache.fineract.client.services.LoanCobCatchUpApi;
+import org.apache.fineract.client.services.LoanDeferredIncomeDataApi;
 import org.apache.fineract.client.services.LoanDisbursementDetailsApi;
 import org.apache.fineract.client.services.LoanInterestPauseApi;
 import org.apache.fineract.client.services.LoanProductsApi;
@@ -188,6 +191,9 @@ public class LoanStepDef extends AbstractStepDef {
 
     @Autowired
     private LoanBuyDownFeesApi loanBuyDownFeesApi;
+
+    @Autowired
+    private LoanDeferredIncomeDataApi loanDeferredIncomeDataApi;
 
     @Autowired
     private LoanCobCatchUpApi loanCobCatchUpApi;
@@ -4153,8 +4159,6 @@ public class LoanStepDef extends AbstractStepDef {
                 case "Fee Amount" -> actualValues
                         .add(t.getBuyDownFeeAmount() == null ? new Utils.DoubleFormatter(new BigDecimal("0.0").doubleValue()).format()
                                 : new Utils.DoubleFormatter(t.getBuyDownFeeAmount().doubleValue()).format());
-                // actualValues.add(new Utils.DoubleFormatter(t.getBuyDownFeeAmount().doubleValue()).format());
-                // actualValues.add(MathUtil.nullToZero(t.getBuyDownFeeAmount().doubleValue()).format());
                 case "Amortized Amount" -> actualValues
                         .add(t.getAmortizedAmount() == null ? new Utils.DoubleFormatter(new BigDecimal("0.0").doubleValue()).format()
                                 : new Utils.DoubleFormatter(t.getAmortizedAmount().doubleValue()).format());
@@ -4164,6 +4168,31 @@ public class LoanStepDef extends AbstractStepDef {
                 case "Adjusted Amount" ->
                     actualValues.add(t.getAdjustedAmount() == null ? new Utils.DoubleFormatter(new BigDecimal("0.0").doubleValue()).format()
                             : new Utils.DoubleFormatter(t.getAdjustedAmount().doubleValue()).format());
+                case "Charged Off Amount" -> actualValues
+                        .add(t.getChargedOffAmount() == null ? new Utils.DoubleFormatter(new BigDecimal("0.0").doubleValue()).format()
+                                : new Utils.DoubleFormatter(t.getChargedOffAmount().doubleValue()).format());
+                default -> throw new IllegalStateException(String.format("Header name %s cannot be found", headerName));
+            }
+        }
+        return actualValues;
+    }
+
+    private List<String> fetchValuesOfCapitalizedIncome(List<String> header, CapitalizedIncomeDetails t) {
+        List<String> actualValues = new ArrayList<>();
+        for (String headerName : header) {
+            switch (headerName) {
+                case "Amount" ->
+                    actualValues.add(t.getAmount() == null ? new Utils.DoubleFormatter(new BigDecimal("0.0").doubleValue()).format()
+                            : new Utils.DoubleFormatter(t.getAmount().doubleValue()).format());
+                case "Amortized Amount" -> actualValues
+                        .add(t.getAmortizedAmount() == null ? new Utils.DoubleFormatter(new BigDecimal("0.0").doubleValue()).format()
+                                : new Utils.DoubleFormatter(t.getAmortizedAmount().doubleValue()).format());
+                case "Unrecognized Amount" -> actualValues
+                        .add(t.getUnrecognizedAmount() == null ? new Utils.DoubleFormatter(new BigDecimal("0.0").doubleValue()).format()
+                                : new Utils.DoubleFormatter(t.getUnrecognizedAmount().doubleValue()).format());
+                case "Adjusted Amount" -> actualValues
+                        .add(t.getAmountAdjustment() == null ? new Utils.DoubleFormatter(new BigDecimal("0.0").doubleValue()).format()
+                                : new Utils.DoubleFormatter(t.getAmountAdjustment().doubleValue()).format());
                 case "Charged Off Amount" -> actualValues
                         .add(t.getChargedOffAmount() == null ? new Utils.DoubleFormatter(new BigDecimal("0.0").doubleValue()).format()
                                 : new Utils.DoubleFormatter(t.getChargedOffAmount().doubleValue()).format());
@@ -4904,6 +4933,55 @@ public class LoanStepDef extends AbstractStepDef {
         ErrorHelper.checkFailedApiCall(adjustmentResponse, 400);
     }
 
+    public void checkCapitalizedIncomeTransactionData(String resourceId, List<CapitalizedIncomeDetails> capitalizedIncomeTrn,
+            DataTable table) {
+        List<List<String>> data = table.asLists();
+        for (int i = 1; i < data.size(); i++) {
+            List<String> expectedValues = data.get(i);
+            String capitalizedIncomeAmountExpected = expectedValues.get(0);
+            List<List<String>> actualValuesList = capitalizedIncomeTrn.stream()//
+                    .filter(t -> new BigDecimal(capitalizedIncomeAmountExpected).compareTo(t.getAmount()) == 0)//
+                    .map(t -> fetchValuesOfCapitalizedIncome(table.row(0), t))//
+                    .collect(Collectors.toList());//
+            boolean containsExpectedValues = actualValuesList.stream()//
+                    .anyMatch(actualValues -> actualValues.equals(expectedValues));//
+            assertThat(containsExpectedValues)
+                    .as(ErrorMessageHelper.wrongValueInLineInDeferredIncomeTab(resourceId, i, actualValuesList, expectedValues)).isTrue();
+        }
+        assertThat(capitalizedIncomeTrn.size())
+                .as(ErrorMessageHelper.nrOfLinesWrongInDeferredIncomeTab(resourceId, capitalizedIncomeTrn.size(), data.size() - 1))
+                .isEqualTo(data.size() - 1);
+    }
+
+    @And("Deferred Capitalized Income contains the following data:")
+    public void checkCapitalizedIncomeData(DataTable table) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.body().getLoanId();
+        String resourceId = String.valueOf(loanId);
+
+        final Response<LoanDeferredIncomeData> deferredIncomeResponse = loanDeferredIncomeDataApi.fetchDeferredIncomeDetails(loanId)
+                .execute();
+        ErrorHelper.checkSuccessfulApiCall(deferredIncomeResponse);
+
+        List<CapitalizedIncomeDetails> deferredIncome = deferredIncomeResponse.body().getCapitalizedIncomeData();
+        checkCapitalizedIncomeTransactionData(resourceId, deferredIncome, table);
+    }
+
+    @And("Deferred Capitalized Income by external-id contains the following data:")
+    public void checkCapitalizedIncomeByExternalIdData(DataTable table) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.body().getLoanId();
+        String resourceId = String.valueOf(loanId);
+        String externalId = loanCreateResponse.body().getResourceExternalId();
+
+        final Response<LoanDeferredIncomeData> deferredIncomeResponse = loanDeferredIncomeDataApi
+                .fetchDeferredIncomeDetailsByExternalId(externalId).execute();
+        ErrorHelper.checkSuccessfulApiCall(deferredIncomeResponse);
+
+        List<CapitalizedIncomeDetails> deferredIncome = deferredIncomeResponse.body().getCapitalizedIncomeData();
+        checkCapitalizedIncomeTransactionData(resourceId, deferredIncome, table);
+    }
+
     @And("Admin successfully terminates loan contract")
     public void makeLoanContractTermination() throws IOException {
         final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
@@ -5076,7 +5154,7 @@ public class LoanStepDef extends AbstractStepDef {
     }
 
     @And("Buy down fee by external-id contains the following data:")
-    public void checkBuyDownFeeByexternalIdData(DataTable table) throws IOException {
+    public void checkBuyDownFeeByExternalIdData(DataTable table) throws IOException {
         Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanCreateResponse.body().getLoanId();
         String resourceId = String.valueOf(loanId);

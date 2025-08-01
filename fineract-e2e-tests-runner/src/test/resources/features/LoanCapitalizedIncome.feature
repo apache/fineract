@@ -31,6 +31,9 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                 | Debit  | Credit |
       | ASSET     | 112601       | Loans Receivable             | 100.0  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 100.0  | 0.0              | 100.0               | 0.0             | 0.0                |
 
   @TestRailId:C3637
   Scenario: As a user I want to add capitalized income to a progressive loan after disbursement - UC2
@@ -403,6 +406,9 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                 | Debit  | Credit |
       | ASSET     | 112601       | Loans Receivable             | 150.0  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income  |        | 150.0  |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 150.0  | 0.0              | 150.0               | 0.0             | 0.0                |
     Then Admin fails to disburse the loan on "02 January 2024" with "200" EUR transaction amount due to exceed approved amount
     Then Capitalized income with payment type "AUTOPAY" on "02 January 2024" is forbidden with amount "200" while exceed approved amount
     And Admin sets the business date to "4 January 2024"
@@ -432,6 +438,9 @@ Feature: Capitalized Income
       | 02 January 2024  | Capitalized Income | 150.0  | 150.0     | 0.0      | 0.0  | 0.0       | 650.0        | true     | true     |
       | 04 January 2024  | Disbursement       | 200.0  | 0.0       | 0.0      | 0.0  | 0.0       | 700.0        | false    | false    |
       | 04 January 2024  | Capitalized Income | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 900.0        | false    | false    |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 200.0  | 0.0              | 200.0               | 0.0             | 0.0                |
     Then Admin fails to disburse the loan on "04 January 2024" with "300" EUR transaction amount due to exceed approved amount
     Then Capitalized income with payment type "AUTOPAY" on "04 January 2024" is forbidden with amount "300" while exceed approved amount
 
@@ -912,6 +921,9 @@ Feature: Capitalized Income
       | 01 January 2024  | Disbursement                    | 1500.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       | false    |
       | 02 January 2024  | Capitalized Income              | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 1900.0       | false    |
       | 02 January 2024  | Capitalized Income Adjustment   | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 1700.0       | false    |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 400.0  | 0.0              | 200.0               | 200.0           | 0.0                |
     Then Capitalized income with payment type "AUTOPAY" on "02 January 2024" is forbidden with amount "200" while exceed approved amount
 
     When Loan Pay-off is made on "02 January 2024"
@@ -965,6 +977,9 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                 | Debit  | Credit |
       | INCOME    | 404000       | Interest Income              |        | 100.0  |
       | LIABILITY | 145024       | Deferred Capitalized Income  | 100.0  |        |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 100.0  | 100.0            | 0.0                 | 0.0             | 0.0                |
     And LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "02 January 2024"
 
   @TestRailId:C3647
@@ -1245,6 +1260,9 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                | Debit | Credit |
       | INCOME    | 404000       | Interest Income             |       | 0.55   |
       | LIABILITY | 145024       | Deferred Capitalized Income | 0.55  |        |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 50.0             | 0.0                 | 0.0             | 0.0                |
     And Loan Capitalized Income Amortization Transaction Created Business Event is created on "31 March 2024"
 
   @TestRailId:C3649
@@ -1517,6 +1535,9 @@ Feature: Capitalized Income
       | LIABILITY | 145024       | Deferred Capitalized Income  | 83.33  |        |
       | EXPENSE   | 744037       | Credit Loss/Bad Debt-Fraud   |        | 16.67  |
       | LIABILITY | 145024       | Deferred Capitalized Income  | 16.67  |        |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 100.0  | 83.33            | 0.0                 | 0.0             | 16.67              |
     Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "26 January 2024"
 
   @TestRailId:C3663
@@ -1563,6 +1584,9 @@ Feature: Capitalized Income
       | LIABILITY | 145024       | Deferred Capitalized Income  | 83.33  |        |
       | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 16.67  |
       | LIABILITY | 145024       | Deferred Capitalized Income  | 16.67  |        |
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 100.0  | 83.33            | 0.0                 | 0.0             | 16.67              |
     Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "26 January 2024"
 
   @TestRailId:C3664
@@ -1633,6 +1657,9 @@ Feature: Capitalized Income
       | LIABILITY | 145024       | Deferred Capitalized Income  | 16.67  |        |
       | EXPENSE   | 744007       | Credit Loss/Bad Debt         | 16.67  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income  |        | 16.67  |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 100.0  | 83.33            | 16.67               | 0.0             | 0.0                |
 
   @TestRailId:C3673
   Scenario: Verify capitalized income: repayment schedule - UC1: Simple loan - full payment
@@ -2702,6 +2729,9 @@ Feature: Capitalized Income
       | 01 April 2024    | Repayment                       | 40.54  | 40.3      | 0.24     | 0.0  | 0.0       | 0.0          | false    |
       | 01 April 2024    | Accrual                         | 0.83   | 0.0       | 0.83     | 0.0  | 0.0       | 0.0          | false    |
       | 01 April 2024    | Capitalized Income Amortization | 22.42  | 0.0       | 22.42    | 0.0  | 0.0       | 0.0          | false    |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 40.0             | 0.0                 | 10.0            | 0.0                |
   # Journal entry check for final repayment
     Then Loan Transactions tab has a "REPAYMENT" transaction with date "01 April 2024" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
@@ -2811,6 +2841,9 @@ Feature: Capitalized Income
       | 01 February 2024 | Capitalized Income Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
       | 01 March 2024    | Repayment                       | 50.58  | 49.99     | 0.59     | 0.0  | 0.0       | 50.3         | false    |
       | 01 March 2024    | Capitalized Income Adjustment   | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 40.3         | false    |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 17.58            | 22.42               | 10.0            | 0.0                |
     When Admin sets the business date to "15 March 2024"
     # Journal entry checks for Capitalized Income Adjustment
     And Admin adds capitalized income adjustment with "AUTOPAY" payment type to the loan on "15 March 2024" with "5" EUR transaction amount
@@ -2828,6 +2861,9 @@ Feature: Capitalized Income
       | 01 March 2024    | Repayment                       | 50.58  | 49.99     | 0.59     | 0.0  | 0.0       | 50.3         | false    |
       | 01 March 2024    | Capitalized Income Adjustment   | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 40.3         | false    |
       | 15 March 2024    | Capitalized Income Adjustment   | 5.0    | 5.0       | 0.0      | 0.0  | 0.0       | 35.3         | false    |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 17.58            | 17.42               | 15.0            | 0.0                |
     When Admin sets the business date to "01 April 2024"
     And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 April 2024" with 35.52 EUR transaction amount and system-generated Idempotency key
     Then Loan Transactions tab has the following data:
@@ -2843,6 +2879,9 @@ Feature: Capitalized Income
       | 01 April 2024    | Repayment                       | 35.52  | 35.3      | 0.22     | 0.0  | 0.0       | 0.0          | false    |
       | 01 April 2024    | Accrual                         | 0.81   | 0.0       | 0.81     | 0.0  | 0.0       | 0.0          | false    |
       | 01 April 2024    | Capitalized Income Amortization | 17.42  | 0.0       | 17.42    | 0.0  | 0.0       | 0.0          | false    |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 35.0             | 0.0                 | 15.0            | 0.0                |
   # Journal entry check for final April repayment
     Then Loan Transactions tab has a "REPAYMENT" transaction with date "01 April 2024" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
@@ -3140,7 +3179,7 @@ Feature: Capitalized Income
       | 28 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 01 March 2024    | Capitalized Income Adjustment   | 50.0   | 49.13     | 0.87     | 0.0  | 0.0        | 67.15        | false    | true     |
+      | 01 March 2024    | Capitalized Income Adjustment   | 50.0   | 49.13     | 0.87     | 0.0  | 0.0       | 67.15        | false    | true     |
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_ADJUSTMENT" transaction with date "01 March 2024" which has the following Journal entries:
       | Type      | Account code | Account name                | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable            |       | 49.13  |
@@ -3287,6 +3326,9 @@ Feature: Capitalized Income
       | 29 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 February 2024 | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Capitalized Income Adjustment   | 51.0   | 50.12     | 0.88     | 0.0  | 0.0       | 100.88       | false    | false    |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 51.0   | 0.0              | 0.0                 | 51.0            | 0.0                |
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_ADJUSTMENT" transaction with date "01 March 2024" which has the following Journal entries:
       | Type      | Account code | Account name                | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable            |       | 50.12  |
@@ -3422,6 +3464,9 @@ Feature: Capitalized Income
       | ASSET     | 112601       | Loans Receivable            |       | 50.04  |
       | ASSET     | 112603       | Interest/Fee Receivable     |       | 0.96   |
       | LIABILITY | 145024       | Deferred Capitalized Income | 51.0  |        |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 51.0   | 0.0              | 0.0                 | 51.0            | 0.0                |
 
   @TestRailId:C3712
   Scenario: Verify Capitalized Income Adjustment validation - Total adjustment amount cannot exceed original transaction amount
@@ -3501,6 +3546,9 @@ Feature: Capitalized Income
       | 01 February 2024 | Repayment                       | 50.58  | 49.71     | 0.87     | 0.0  | 0.0       | 100.29       | false    |
       | 01 February 2024 | Accrual                         | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Capitalized Income Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 17.58            | 32.42               | 0.0             | 0.0                |
     When Admin sets the business date to "01 March 2024"
     When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 March 2024" with 50.89 EUR transaction amount and system-generated Idempotency key
     When Admin sets the business date to "02 March 2024"
@@ -3516,16 +3564,19 @@ Feature: Capitalized Income
       | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       | 150.0         | 1.47     | 0.00 | 0.00      | 151.47 | 151.47 | 50.31      | 0.0  | 0.0         |
     And Loan Transactions tab has the following data:
-      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
-      | 01 January 2024  | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-      | 01 January 2024  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
-      | 01 February 2024 | Repayment                       | 50.58  | 49.71     | 0.87     | 0.0  | 0.0       | 100.29       | false    |
-      | 01 February 2024 | Accrual                         | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
-      | 01 February 2024 | Capitalized Income Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
-      | 01 March 2024    | Repayment                       | 50.89  | 50.3      | 0.59     | 0.0  | 0.0       | 49.99        | false    |
-      | 02 March 2024    | Capitalized Income Adjustment   | 50.0   | 49.99     | 0.01     | 0.0  | 0.0       | 0.0          | false    |
-      | 02 March 2024    | Accrual                         | 0.6    | 0.0       | 0.6      | 0.0  | 0.0       | 0.0          | false    |
-      | 02 March 2024    | Capitalized Income Amortization Adjustment   | 17.58   | 0.0      | 17.58    | 0.0  | 0.0       | 0.0          | false     |
+      | Transaction date | Transaction Type                             | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement                                 | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Capitalized Income                           | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
+      | 01 February 2024 | Repayment                                    | 50.58  | 49.71     | 0.87     | 0.0  | 0.0       | 100.29       | false    |
+      | 01 February 2024 | Accrual                                      | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Capitalized Income Amortization              | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
+      | 01 March 2024    | Repayment                                    | 50.89  | 50.3      | 0.59     | 0.0  | 0.0       | 49.99        | false    |
+      | 02 March 2024    | Capitalized Income Adjustment                | 50.0   | 49.99     | 0.01     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 March 2024    | Accrual                                      | 0.6    | 0.0       | 0.6      | 0.0  | 0.0       | 0.0          | false    |
+      | 02 March 2024    | Capitalized Income Amortization Adjustment   | 17.58   | 0.0      | 17.58    | 0.0  | 0.0       | 0.0          | false    |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 0.0              | 0.0                 | 50.0            | 0.0                |
 
   @TestRailId:C3716
   Scenario: Verify Capitalized Income/Adjustment validation - Transaction date can't be in a future
@@ -3615,6 +3666,9 @@ Feature: Capitalized Income
       | 01 January 2024  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    | false    |
       | 01 January 2024  | Capitalized Income Adjustment   | 40.0   | 40.0      | 0.0      | 0.0  | 0.0       | 110.0        | false    | false    |
       | 01 January 2024  | Capitalized Income Amortization | 0.11   | 0.0       | 0.11     | 0.0  | 0.0       | 0.0          | false    | false    |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 0.11             | 9.89                | 40.0            | 0.0                |
 
   @TestRailId:C3704
   Scenario: Verify Capitalized Income adjustment reverse - UC1
@@ -3760,6 +3814,9 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable            |       | 40.0   |
       | LIABILITY | 145024       | Deferred Capitalized Income | 40.0  |        |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 10.0             | 0.0                 | 40.0            | 0.0                |
     When Admin sets the business date to "02 March 2024"
     And Admin runs inline COB job for Loan
     And Customer undo "1"th capitalized income adjustment on "02 March 2024"
@@ -3899,6 +3956,9 @@ Feature: Capitalized Income
       | LIABILITY | 145024       | Deferred Capitalized Income | 40.0  |        |
       | ASSET     | 112601       | Loans Receivable            | 40.0  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income |       | 40.0   |
+    And Deferred Capitalized Income by external-id contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 34.07            | 15.93               | 0.0             | 0.0                |
 
   @TestRailId:C3705
   Scenario: Verify Capitalized Income adjustment reverse - UC2
