@@ -1023,4 +1023,5 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     public boolean isBuyDownFeeAmortizationAdjustment() {
         return LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT.equals(this.typeOf);
     }
+
 }

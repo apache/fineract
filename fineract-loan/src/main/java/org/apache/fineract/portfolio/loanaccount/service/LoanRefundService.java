@@ -24,6 +24,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanRefundValidator;
@@ -34,6 +35,8 @@ public class LoanRefundService {
     private final LoanRefundValidator loanRefundValidator;
     private final LoanTransactionProcessingService loadTransactionProcessingService;
     private final LoanLifecycleStateMachine loanLifecycleStateMachine;
+    private final LoanTransactionRepository loanTransactionRepository;
+    private final LoanTransactionService loanTransactionService;
 
     public void makeRefund(final Loan loan, final LoanTransaction loanTransaction) {
         loanRefundValidator.validateTransferRefund(loan, loanTransaction);
@@ -60,6 +63,7 @@ public class LoanRefundService {
         loanRefundValidator.validateCreditBalanceRefund(loan, newCreditBalanceRefundTransaction);
         loan.getLoanTransactions().add(newCreditBalanceRefundTransaction);
 
+        loanTransactionRepository.saveAndFlush(newCreditBalanceRefundTransaction);
         loanLifecycleStateMachine.determineAndTransition(loan, newCreditBalanceRefundTransaction.getTransactionDate());
     }
 
@@ -67,8 +71,7 @@ public class LoanRefundService {
         loanLifecycleStateMachine.transition(LoanEvent.LOAN_REFUND, loan);
 
         loanTransaction.updateLoan(loan);
-
-        loanRefundValidator.validateRefundEligibility(loan, loanTransaction);
+        loanRefundValidator.validateRefundEligibility(loan, loanTransaction, loanTransactionService.calculateTotalPaidInRepayments(loan));
 
         if (loanTransaction.isNotZero()) {
             loan.addLoanTransaction(loanTransaction);
@@ -85,6 +88,7 @@ public class LoanRefundService {
                 new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                         new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
 
+        loanTransactionRepository.saveAndFlush(loanTransaction);
         loanLifecycleStateMachine.determineAndTransition(loan, loanTransaction.getTransactionDate());
     }
 }

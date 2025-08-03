@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import jakarta.persistence.FlushModeType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.persistence.FlushModeHandler;
@@ -38,6 +37,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentSchedulePro
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionComparator;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType;
 import org.springframework.stereotype.Service;
 
@@ -48,9 +48,10 @@ public class LoanBalanceService {
     private final CapitalizedIncomeBalanceService capitalizedIncomeBalanceService;
     private final FlushModeHandler flushModeHandler;
     private final LoanTransactionRepository loanTransactionRepository;
+    private final LoanTransactionService loanTransactionService;
 
     public Money calculateTotalOverpayment(final Loan loan) {
-        Money totalPaidInRepayments = loan.getTotalPaidInRepayments();
+        Money totalPaidInRepayments = loanTransactionService.calculateTotalPaidInRepayments(loan);
 
         final MonetaryCurrency currency = loan.getCurrency();
         Money cumulativeTotalPaidOnInstallments = Money.zero(currency);
@@ -64,10 +65,12 @@ public class LoanBalanceService {
             cumulativeTotalWaivedOnInstallments = cumulativeTotalWaivedOnInstallments.plus(scheduledRepayment.getInterestWaived(currency));
         }
 
-        for (final LoanTransaction loanTransaction : loan.getLoanTransactions()) {
-            if (loanTransaction.isReversed()) {
-                continue;
-            }
+        final List<LoanTransactionType> loanTransactionTypes = List.of(LoanTransactionType.REFUND, //
+                LoanTransactionType.REFUND_FOR_ACTIVE_LOAN, //
+                LoanTransactionType.CREDIT_BALANCE_REFUND, //
+                LoanTransactionType.CHARGEBACK);
+        for (final LoanTransaction loanTransaction : loanTransactionRepository.fetchNonReversedByLoanAndTransactionTypes(loan,
+                loanTransactionTypes)) {
             if (loanTransaction.isRefund() || loanTransaction.isRefundForActiveLoan()) {
                 totalPaidInRepayments = totalPaidInRepayments.minus(loanTransaction.getAmount(currency));
             } else if (loanTransaction.isCreditBalanceRefund()) {
@@ -131,12 +134,7 @@ public class LoanBalanceService {
 
     public void updateLoanOutstandingBalances(Loan loan) {
         Money outstanding = Money.zero(loan.getCurrency());
-        final List<LoanTransaction> loanTransactions = new ArrayList<>();
-        for (final LoanTransaction transaction : loan.getLoanTransactions()) {
-            if (transaction.isNotReversed() && !transaction.isNonMonetaryTransaction()) {
-                loanTransactions.add(transaction);
-            }
-        }
+        final List<LoanTransaction> loanTransactions = loanTransactionService.fetchNonReversedMonetaryTransactionsByLoan(loan);
         loanTransactions.sort(LoanTransactionComparator.INSTANCE);
 
         for (LoanTransaction loanTransaction : loanTransactions) {

@@ -24,18 +24,33 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionComparator;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LoanTransactionService {
 
     private final LoanTransactionRepository loanTransactionRepository;
+
+    public static final List<LoanTransactionType> PAYMENT_LOAN_TRANSACTION_TYPES = List.of(LoanTransactionType.REPAYMENT, //
+            LoanTransactionType.MERCHANT_ISSUED_REFUND, //
+            LoanTransactionType.PAYOUT_REFUND, //
+            LoanTransactionType.GOODWILL_CREDIT, //
+            LoanTransactionType.CHARGE_REFUND, //
+            LoanTransactionType.CHARGE_ADJUSTMENT, //
+            LoanTransactionType.DOWN_PAYMENT, //
+            LoanTransactionType.INTEREST_PAYMENT_WAIVER, //
+            LoanTransactionType.INTEREST_REFUND, //
+            LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT);
 
     public List<LoanTransaction> retrieveListOfTransactionsForReprocessing(final Loan loan) {
         return loan.getLoanTransactions().stream().filter(loanTransactionForReprocessingPredicate())
@@ -56,4 +71,40 @@ public class LoanTransactionService {
                         || !transaction.isNonMonetaryTransaction() || transaction.isContractTermination());
     }
 
+    private boolean hasChargeOffTransaction(final Loan loan) {
+        return loanTransactionRepository.hasChargeOffTransaction(loan);
+    }
+
+    private boolean hasContractTerminationTransaction(final Loan loan) {
+        return loanTransactionRepository.hasContractTerminationTransaction(loan);
+    }
+
+    public boolean shouldRegenerateRepaymentSchedule(final Loan loan) {
+        final boolean hasChargeOffTransaction = hasChargeOffTransaction(loan);
+        final boolean hasContractTerminationTransaction = hasContractTerminationTransaction(loan);
+        return loan.isProgressiveSchedule()
+                && ((hasChargeOffTransaction && loan.hasAccelerateChargeOffStrategy()) || hasContractTerminationTransaction);
+    }
+
+    public Money calculateTotalPaidInRepayments(final Loan loan) {
+        return Money.of(loan.getCurrency(),
+                loanTransactionRepository.sumTotalAmountByLoanAndTransactionTypes(loan, PAYMENT_LOAN_TRANSACTION_TYPES));
+    }
+
+    public List<LoanTransaction> fetchNonReversedPaymentLoanTransactions(final Loan loan) {
+        return loanTransactionRepository.fetchNonReversedByLoanAndTransactionTypes(loan, PAYMENT_LOAN_TRANSACTION_TYPES);
+    }
+
+    public List<LoanTransaction> fetchNonReversedMonetaryTransactionsByLoan(final Loan loan) {
+        return loanTransactionRepository.findNonReversedMonetaryTransactionsByLoan(loan);
+    }
+
+    public List<LoanTransaction> fetchNonReversedPaymentLoanTransactions(final Loan loan, LoanTransaction loanTransaction) {
+        List<LoanTransaction> loanTransactions = loanTransactionRepository.findNonReversedMonetaryTransactionsByLoan(loan);
+        if (loanTransaction.isNotZero() || loanTransaction.isReversed()) {
+            loanTransactions.add(loanTransaction);
+        }
+        loanTransactions.sort(LoanTransactionComparator.INSTANCE);
+        return loanTransactions;
+    }
 }

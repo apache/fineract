@@ -30,6 +30,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.mapper.CurrencyMapper;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionService;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.springframework.stereotype.Component;
 
@@ -64,8 +65,9 @@ public class CumulativeDecliningBalanceInterestLoanScheduleGenerator extends Abs
 
     public CumulativeDecliningBalanceInterestLoanScheduleGenerator(final ScheduledDateGenerator scheduledDateGenerator,
             final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator,
-            final LoanTransactionRepository loanTransactionRepository, final CurrencyMapper currencyMapper) {
-        super(loanTransactionRepository, currencyMapper);
+            final LoanTransactionRepository loanTransactionRepository, final CurrencyMapper currencyMapper,
+            final LoanTransactionService loanTransactionService) {
+        super(loanTransactionRepository, currencyMapper, loanTransactionService);
         this.scheduledDateGenerator = scheduledDateGenerator;
         this.paymentPeriodsInOneYearCalculator = paymentPeriodsInOneYearCalculator;
     }

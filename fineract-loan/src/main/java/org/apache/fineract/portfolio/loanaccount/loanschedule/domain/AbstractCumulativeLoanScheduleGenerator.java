@@ -64,6 +64,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleP
 import org.apache.fineract.portfolio.loanaccount.loanschedule.exception.MultiDisbursementEmiAmountException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.exception.MultiDisbursementOutstandingAmoutException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.exception.ScheduleDateException;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionService;
 import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 
 @RequiredArgsConstructor
@@ -71,6 +72,7 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
 
     private final LoanTransactionRepository loanTransactionRepository;
     private final CurrencyMapper currencyMapper;
+    private final LoanTransactionService loanTransactionService;
 
     @Override
     public LoanScheduleModel generate(final MathContext mc, final LoanApplicationTerms loanApplicationTerms,

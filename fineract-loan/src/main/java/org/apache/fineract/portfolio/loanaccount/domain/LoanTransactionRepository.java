@@ -532,4 +532,40 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
     List<LoanTransaction> findTransactionsForChargeOffClassification(@Param("loan") Loan loan,
             @Param("chargeOffDate") LocalDate chargeOffDate, @Param("dateComparison") String dateComparison);
 
+    @Query("""
+            SELECT lt FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND lt.reversed = false
+                AND lt.typeOf IN :loanTransactionTypes
+            ORDER BY lt.dateOf, lt.createdDate, lt.id
+            """)
+    List<LoanTransaction> fetchNonReversedByLoanAndTransactionTypes(@Param("loan") Loan loan,
+            @Param("loanTransactionTypes") List<LoanTransactionType> loanTransactionTypes);
+
+    @Query("""
+            SELECT CASE WHEN COUNT(lt) > 0 THEN true ELSE false END FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND lt.reversed = false
+                AND lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CHARGE_OFF
+            """)
+    boolean hasChargeOffTransaction(@Param("loan") Loan loan);
+
+    @Query("""
+            SELECT CASE WHEN COUNT(lt) > 0 THEN true ELSE false END FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND lt.reversed = false
+                AND lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CONTRACT_TERMINATION
+            """)
+    boolean hasContractTerminationTransaction(@Param("loan") Loan loan);
+
+    @Query("""
+            SELECT COALESCE(SUM(lt.amount), 0)
+            FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND lt.reversed = false
+                AND lt.typeOf IN :loanTransactionTypes
+            """)
+    BigDecimal sumTotalAmountByLoanAndTransactionTypes(@Param("loan") Loan loan,
+            @Param("loanTransactionTypes") List<LoanTransactionType> loanTransactionTypes);
+
 }

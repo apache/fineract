@@ -316,7 +316,7 @@ public class LoanAccountConfiguration {
             LoanDownPaymentTransactionValidator loanDownPaymentTransactionValidator, LoanChargeValidator loanChargeValidator,
             LoanScheduleService loanScheduleService, ReprocessLoanTransactionsService reprocessLoanTransactionsService,
             LoanAccountService loanAccountService, LoanAdjustmentService loanAdjustmentService, LoanChargeService loanChargeService,
-            LoanJournalEntryPoster loanJournalEntryPoster) {
+            LoanJournalEntryPoster loanJournalEntryPoster, LoanTransactionService loanTransactionService) {
         return new LoanChargeWritePlatformServiceImpl(loanChargeApiJsonValidator, loanAssembler, chargeRepository,
                 businessEventNotifierService, loanTransactionRepository, accountTransfersWritePlatformService, loanRepositoryWrapper,
                 loanAccountDomainService, loanChargeRepository, loanWritePlatformService, loanUtilService, loanChargeReadPlatformService,
@@ -324,7 +324,7 @@ public class LoanAccountConfiguration {
                 loanRepaymentScheduleTransactionProcessorFactory, externalIdFactory, accountTransferDetailRepository, loanChargeAssembler,
                 paymentDetailWritePlatformService, noteRepository, loanAccrualsProcessingService, loanDownPaymentTransactionValidator,
                 loanChargeValidator, loanScheduleService, reprocessLoanTransactionsService, loanAccountService, loanAdjustmentService,
-                loanChargeService, loanJournalEntryPoster);
+                loanChargeService, loanJournalEntryPoster, loanTransactionService);
     }
 
     @Bean
@@ -523,8 +523,10 @@ public class LoanAccountConfiguration {
     @ConditionalOnMissingBean(LoanRefundService.class)
     public LoanRefundService loanRefundService(final LoanRefundValidator loanRefundValidator,
             final LoanTransactionProcessingService loanTransactionProcessingService,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
-        return new LoanRefundService(loanRefundValidator, loanTransactionProcessingService, loanLifecycleStateMachine);
+            final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransactionRepository loanTransactionRepository,
+            LoanTransactionService loanTransactionService) {
+        return new LoanRefundService(loanRefundValidator, loanTransactionProcessingService, loanLifecycleStateMachine,
+                loanTransactionRepository, loanTransactionService);
     }
 
     @Bean

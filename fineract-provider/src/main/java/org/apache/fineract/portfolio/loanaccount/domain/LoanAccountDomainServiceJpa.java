@@ -629,8 +629,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         loanRefundService.creditBalanceRefund(loan, newCreditBalanceRefundTransaction);
 
-        newCreditBalanceRefundTransaction = this.loanTransactionRepository.saveAndFlush(newCreditBalanceRefundTransaction);
-
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, newCreditBalanceRefundTransaction, noteText);
             this.noteRepository.save(note);
@@ -678,8 +676,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         loanTransactionValidator.validateActivityNotBeforeClientOrGroupTransferDate(loan, LoanEvent.LOAN_REFUND,
                 newRefundTransaction.getTransactionDate());
         loanRefundService.makeRefundForActiveLoan(loan, newRefundTransaction);
-
-        this.loanTransactionRepository.saveAndFlush(newRefundTransaction);
 
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, newRefundTransaction, noteText);
@@ -859,8 +855,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         } else {
             if (loan.isCumulativeSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()) {
                 loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
-            } else if (loan.isProgressiveSchedule() && ((loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy())
-                    || loan.hasContractTerminationTransaction())) {
+            } else if (loanTransactionService.shouldRegenerateRepaymentSchedule(loan)) {
                 loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
             }
             loan.getLoanTransactions().add(refundTransaction);

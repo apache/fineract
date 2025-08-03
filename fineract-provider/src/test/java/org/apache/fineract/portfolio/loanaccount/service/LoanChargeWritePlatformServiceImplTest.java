@@ -165,6 +165,9 @@ class LoanChargeWritePlatformServiceImplTest {
     @Mock
     private LoanJournalEntryPoster journalEntryPoster;
 
+    @Mock
+    private LoanTransactionService loanTransactionService;
+
     @BeforeEach
     void setUp() {
         when(loanAssembler.assembleFrom(LOAN_ID)).thenReturn(loan);

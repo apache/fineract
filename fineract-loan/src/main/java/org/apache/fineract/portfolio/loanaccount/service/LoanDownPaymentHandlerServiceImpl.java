@@ -22,6 +22,7 @@ import static org.apache.fineract.portfolio.loanaccount.domain.Loan.ACTUAL_DISBU
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.configuration.service.TemporaryConfigurationServiceContainer;
@@ -92,13 +93,12 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
         }
 
         loanTransaction.updateLoan(loan);
+        final List<LoanTransaction> loanTransactions = (adjustedTransaction == null)
+                ? loanTransactionService.fetchNonReversedPaymentLoanTransactions(loan, loanTransaction)
+                : loanTransactionService.fetchNonReversedPaymentLoanTransactions(loan, adjustedTransaction);
 
         final boolean isTransactionChronologicallyLatest = loanTransactionService.isChronologicallyLatestRepaymentOrWaiver(loan,
                 loanTransaction);
-
-        if (loanTransaction.isNotZero()) {
-            loan.addLoanTransaction(loanTransaction);
-        }
 
         if (loanTransaction.isNotRepaymentLikeType() && loanTransaction.isNotWaiver() && loanTransaction.isNotRecoveryRepayment()) {
             final String errorMessage = "A transaction of type repayment or recovery repayment or waiver was expected but not received.";
@@ -155,12 +155,18 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
         }
         if (!processLatest || reprocessOnPostConditions) {
             if (loan.isCumulativeSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()) {
+                if (loanTransaction.isNotZero()) {
+                    loan.addLoanTransaction(loanTransaction);
+                }
                 loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
-            } else if (loan.isProgressiveSchedule() && ((loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy())
-                    || loan.hasContractTerminationTransaction())) {
+            } else if (loanTransactionService.shouldRegenerateRepaymentSchedule(loan)) {
                 loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
             }
-            reprocessLoanTransactionsService.reprocessTransactions(loan);
+            reprocessLoanTransactionsService.reprocessParticularTransactions(loan, loanTransactions);
+        }
+        if (loanTransaction.isNotZero()) {
+            loan.addLoanTransaction(loanTransaction);
+            loanTransactionRepository.saveAndFlush(loanTransaction);
         }
 
         /**
