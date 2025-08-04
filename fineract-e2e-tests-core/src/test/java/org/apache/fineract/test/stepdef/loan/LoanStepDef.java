@@ -4894,6 +4894,25 @@ public class LoanStepDef extends AbstractStepDef {
         log.debug("Capitalized Income Adjustment created: Transaction ID {}", adjustmentResponse.body().getResourceId());
     }
 
+    @Then("Loan's available disbursement amount is {string}")
+    public void verifyAvailableDisbursementAmount(String expectedAmount) throws IOException {
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, // loanId
+                false, // staffInSelectedOfficeOnly
+                "collection", // associations
+                null, // exclude
+                null // fields
+        ).execute();
+
+        // Extract availableDisbursementAmount from collection data
+        BigDecimal availableDisbursementAmount = loanDetailsResponse.body().getDelinquent().getAvailableDisbursementAmount();
+
+        assertThat(availableDisbursementAmount).as("Available disbursement amount should be " + expectedAmount)
+                .isEqualByComparingTo(new BigDecimal(expectedAmount));
+    }
+
     @And("Admin adds capitalized income adjustment with {string} payment type to the loan on {string} with {string} EUR trn amount with {string} date for capitalized income")
     public void adminAddsCapitalizedIncomeAdjustmentToTheLoanWithCapitalizedIncomeDate(final String transactionPaymentType,
             final String transactionDate, final String amount, final String capitalizedIncomeTrnsDate) throws IOException {

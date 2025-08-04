@@ -7434,3 +7434,98 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                 | Debit  | Credit |
       | INCOME    | 404000       | Interest Income              | 5.26   |        |
       | LIABILITY | 145024       | Deferred Capitalized Income  |        | 5.26   |
+
+  @TestRailId:C3899
+  Scenario: Verify available disbursement amount should consider calculation with capitalized income
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_MULTIDISB_CAPITALIZED_INCOME_ADJ_CUSTOM_ALLOC  | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "1000" amount and expected disbursement date on "1 January 2024"
+  # Available amount = 1000 - 500 - 0 - 0 = 500
+    And Admin successfully disburse the loan on "1 January 2024" with "500" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    And Loan's available disbursement amount is "500.0"
+    When Admin sets the business date to "2 January 2024"
+  # Available amount = 1000 - 500 - 200 - 0 = 300
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "2 January 2024" with "200" EUR transaction amount
+    Then Loan's available disbursement amount is "300.0"
+  # This should succeed as 300 <= 300
+    When Admin successfully disburse the loan on "2 January 2024" with "300" EUR transaction amount
+  # Available amount = 1000 - 800 - 200 - 0 = 0
+    Then Loan's available disbursement amount is "0.0"
+
+  @TestRailId:C3913
+  Scenario: Verify available disbursement amount calculation with multiple capitalized income transactions
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                     | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSAL_CAPITALIZED_INCOME | 01 January 2024   | 2000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "2000" amount and expected disbursement date on "1 January 2024"
+  # Available amount = 2000 - 1000 - 0 - 0 = 1000
+    And Admin successfully disburse the loan on "1 January 2024" with "1000" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    And Loan's available disbursement amount is "1000.0"
+    When Admin sets the business date to "2 January 2024"
+  # Available amount = 2000 - 1000 - 300 - 0 = 700
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "2 January 2024" with "300" EUR transaction amount
+    Then Loan's available disbursement amount is "700.0"
+    When Admin sets the business date to "3 January 2024"
+  # Available amount = 2000 - 1000 - 300 - 200 - 0 = 500
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "3 January 2024" with "200" EUR transaction amount
+    Then Loan's available disbursement amount is "500.0"
+  # Available amount = 2000 - 1000 - 500 - 0 = 500
+    When Admin successfully disburse the loan on "3 January 2024" with "400" EUR transaction amount
+  # Available amount = 2000 - 1400 - 500 - 0 = 100
+    Then Loan's available disbursement amount is "100.0"
+    When Admin adds capitalized income with "AUTOPAY" payment type to the loan on "3 January 2024" with "100" EUR transaction amount
+  # Available amount = 2000 - 1400 - 600 - 0 = 0
+    Then Loan's available disbursement amount is "0.0"
+
+  @TestRailId:C3914
+  Scenario: Verify available disbursement amount calculation after capitalized income adjustment
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                     | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSAL_CAPITALIZED_INCOME | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "1000" amount and expected disbursement date on "1 January 2024"
+  # Available amount = 1000 - 600 - 0 - 0 = 400
+    And Admin successfully disburse the loan on "1 January 2024" with "600" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    And Loan's available disbursement amount is "400.0"
+    When Admin sets the business date to "2 January 2024"
+  # Available amount = 1000 - 600 - 300 - 0 = 100
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "2 January 2024" with "300" EUR transaction amount
+    Then Loan's available disbursement amount is "100.0"
+  # Add capitalized income adjustment to increase available amount
+    When Admin adds capitalized income adjustment with "AUTOPAY" payment type to the loan on "2 January 2024" with "150" EUR transaction amount
+  # Available amount = 1000 - 600 - (300-150) - 0 = 250
+    Then Loan's available disbursement amount is "250.0"
+    When Admin successfully disburse the loan on "2 January 2024" with "250" EUR transaction amount
+  # Available amount = 1000 - 850 - 150 - 0 = 0
+    Then Loan's available disbursement amount is "0.0"
+
+  @TestRailId:C3915
+  Scenario: Verify available disbursement amount calculation with over applied amount configuration
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type  | charge amount % |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_MULTIDISB_OVER_APPLIED_PERCENTAGE_CAPITALIZED_INCOME | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DISBURSEMENT_CHARGE | 10              |
+    And Admin successfully approves the loan on "1 January 2024" with "1200" amount and expected disbursement date on "1 January 2024"
+  # With 10% over applied: max disbursable = 1000 * 1.10 = 1100
+  # But available amount = 1200 - 700 - 0 - 0 = 500
+    And Admin successfully disburse the loan on "1 January 2024" with "700" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    And Loan's available disbursement amount is "500.0"
+    When Admin sets the business date to "2 January 2024"
+  # Available amount = 1200 - 700 - 200 - 0 = 300
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "2 January 2024" with "200" EUR transaction amount
+    Then Loan's available disbursement amount is "300.0"
+  # This should succeed as total = 700 + 300 + 200 = 1200
+    When Admin successfully disburse the loan on "2 January 2024" with "300" EUR transaction amount
+  # Available amount = 1200 - 900 - 300 - 0 = 0
+    Then Loan's available disbursement amount is "0.0"
