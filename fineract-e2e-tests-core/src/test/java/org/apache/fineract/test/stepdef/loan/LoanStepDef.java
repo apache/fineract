@@ -104,6 +104,8 @@ import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PutLoansApprovedAmountRequest;
 import org.apache.fineract.client.models.PutLoansApprovedAmountResponse;
+import org.apache.fineract.client.models.PutLoansAvailableDisbursementAmountRequest;
+import org.apache.fineract.client.models.PutLoansAvailableDisbursementAmountResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.services.BusinessDateManagementApi;
@@ -5290,6 +5292,92 @@ public class LoanStepDef extends AbstractStepDef {
             developerMessage = errorDetails.getDeveloperMessage();
         }
         assertThat(developerMessage).isEqualTo(ErrorMessageHelper.updateApprovedLoanLessMinAllowedAmountFailure());
+    }
+
+    @Then("Update loan available disbursement amount with new amount {string} value")
+    public void updateLoanAvailableDisbursementAmount(final String amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        final PutLoansAvailableDisbursementAmountRequest modifyLoanAvailableDisbursementAmountRequest = new PutLoansAvailableDisbursementAmountRequest()
+                .locale(LOCALE_EN).amount(new BigDecimal(amount));
+
+        final Response<PutLoansAvailableDisbursementAmountResponse> modifyLoanAvailableDisbursementAmountResponse = loansApi
+                .modifyLoanAvailableDisbursementAmount(loanId, modifyLoanAvailableDisbursementAmountRequest).execute();
+
+        ErrorHelper.checkSuccessfulApiCall(modifyLoanAvailableDisbursementAmountResponse);
+    }
+
+    @Then("Update loan available disbursement amount by external-id with new amount {string} value")
+    public void updateLoanAvailableDisbursementAmountByExternalId(final String amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final String externalId = loanResponse.body().getResourceExternalId();
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        final PutLoansAvailableDisbursementAmountRequest modifyLoanAvailableDisbursementAmountRequest = new PutLoansAvailableDisbursementAmountRequest()
+                .locale(LOCALE_EN).amount(new BigDecimal(amount));
+
+        final Response<PutLoansAvailableDisbursementAmountResponse> modifyLoanAvailableDisbursementAmountResponse = loansApi
+                .modifyLoanAvailableDisbursementAmount1(externalId, modifyLoanAvailableDisbursementAmountRequest).execute();
+
+        ErrorHelper.checkSuccessfulApiCall(modifyLoanAvailableDisbursementAmountResponse);
+    }
+
+    @Then("Update loan available disbursement amount is forbidden with amount {string} due to exceed applied amount")
+    public void updateLoanAvailableDisbursementAmountForbiddenExceedAppliedAmount(final String amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final String externalId = loanResponse.body().getResourceExternalId();
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        final PutLoansAvailableDisbursementAmountRequest modifyLoanAvailableDisbursementAmountRequest = new PutLoansAvailableDisbursementAmountRequest()
+                .locale(LOCALE_EN).amount(new BigDecimal(amount));
+
+        final Response<PutLoansAvailableDisbursementAmountResponse> modifyLoanAvailableDisbursementAmountResponse = loansApi
+                .modifyLoanAvailableDisbursementAmount1(externalId, modifyLoanAvailableDisbursementAmountRequest).execute();
+
+        ErrorResponse errorDetails = ErrorResponse.from(modifyLoanAvailableDisbursementAmountResponse);
+        assertThat(errorDetails.getHttpStatusCode()).isEqualTo(403);
+
+        Object errorArgs = errorDetails.getErrors().getFirst().getArgs().getFirst().getValue();
+        String developerMessage;
+        if (errorArgs instanceof Map errorArgsMap) {
+            developerMessage = (String) errorArgsMap.get("developerMessage");
+        } else {
+            developerMessage = errorDetails.getDeveloperMessage();
+        }
+        assertThat(developerMessage).isEqualTo(ErrorMessageHelper.updateAvailableDisbursementLoanExceedPrincipalFailure());
+    }
+
+    @Then("Update loan available disbursement amount is forbidden with amount {string} due to min allowed amount")
+    public void updateLoanAvailableDisbursementAmountForbiddenMinAllowedAmount(final String amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        final PutLoansAvailableDisbursementAmountRequest modifyLoanAvailableDisbursementAmountRequest = new PutLoansAvailableDisbursementAmountRequest()
+                .locale(LOCALE_EN).amount(new BigDecimal(amount));
+
+        final Response<PutLoansAvailableDisbursementAmountResponse> modifyLoanAvailableDisbursementAmountResponse = loansApi
+                .modifyLoanAvailableDisbursementAmount(loanId, modifyLoanAvailableDisbursementAmountRequest).execute();
+
+        ErrorResponse errorDetails = ErrorResponse.from(modifyLoanAvailableDisbursementAmountResponse);
+        assertThat(errorDetails.getHttpStatusCode()).isEqualTo(403);
+
+        Object errorArgs = errorDetails.getErrors().getFirst().getArgs().getFirst().getValue();
+        String developerMessage;
+        if (errorArgs instanceof Map errorArgsMap) {
+            developerMessage = (String) errorArgsMap.get("developerMessage");
+        } else {
+            developerMessage = errorDetails.getDeveloperMessage();
+        }
+        assertThat(developerMessage).isEqualTo(ErrorMessageHelper.updateAvailableDisbursementLoanLessMinAllowedAmountFailure());
     }
 
     private Response<PostLoansLoanIdTransactionsResponse> addInterestRefundTransaction(final double amount, final Long transactionId)

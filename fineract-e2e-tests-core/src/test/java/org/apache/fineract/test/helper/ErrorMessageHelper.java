@@ -1006,6 +1006,14 @@ public final class ErrorMessageHelper {
         return "The parameter `amount` must be greater than 0.";
     }
 
+    public static String updateAvailableDisbursementLoanExceedPrincipalFailure() {
+        return "Failed data validation due to: can't.be.greater.than.maximum.available.disbursement.amount.calculation.";
+    }
+
+    public static String updateAvailableDisbursementLoanLessMinAllowedAmountFailure() {
+        return "The parameter `amount` must be greater than or equal to 0.";
+    }
+
     public static String wrongValueInLineInBuyDownFeeTab(String resourceId, int line, List<List<String>> actualList,
             List<String> expected) {
         String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
