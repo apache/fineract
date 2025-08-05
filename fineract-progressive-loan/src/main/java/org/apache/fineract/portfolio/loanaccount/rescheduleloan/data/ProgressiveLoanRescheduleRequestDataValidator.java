@@ -25,6 +25,7 @@ import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.Loan
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateApprovalDate;
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateForOverdueCharges;
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateLoanIsActive;
+import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateLoanStatusIsActiveOrClosed;
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateRescheduleReasonComment;
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateRescheduleReasonId;
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateRescheduleRequestStatus;
@@ -47,7 +48,9 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRescheduleRequestToTermVariationMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
@@ -70,7 +73,6 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
 
         final JsonElement jsonElement = jsonCommand.parsedJson();
 
-        validateLoanIsActive(loan, dataValidatorBuilder);
         validateSubmittedOnDate(fromJsonHelper, loan, jsonElement, dataValidatorBuilder);
         final LocalDate rescheduleFromDate = validateAndRetrieveRescheduleFromDate(fromJsonHelper, jsonElement, dataValidatorBuilder);
         validateRescheduleReasonId(fromJsonHelper, jsonElement, dataValidatorBuilder);
@@ -81,6 +83,11 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
 
         boolean hasInterestRateChange = interestRate != null;
         boolean hasAdjustDueDateChange = adjustedDueDate != null;
+        if (hasInterestRateChange) {
+            validateLoanStatusIsActiveOrClosed(loan, dataValidatorBuilder);
+        } else {
+            validateLoanIsActive(loan, dataValidatorBuilder);
+        }
 
         if (hasInterestRateChange && hasAdjustDueDateChange) {
             dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.adjustedDueDateParamName).failWithCode(
@@ -144,7 +151,20 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
         LocalDate rescheduleFromDate = loanRescheduleRequest.getRescheduleFromDate();
         final Loan loan = loanRescheduleRequest.getLoan();
         LoanRepaymentScheduleInstallment installment;
-        validateLoanIsActive(loan, dataValidatorBuilder);
+
+        boolean hasInterestRateChange = false;
+        for (LoanRescheduleRequestToTermVariationMapping mapping : loanRescheduleRequest
+                .getLoanRescheduleRequestToTermVariationMappings()) {
+            LoanTermVariationType termType = mapping.getLoanTermVariations().getTermType();
+            if (termType.isInterestRateVariation() || termType.isInterestRateFromInstallment()) {
+                hasInterestRateChange = true;
+            }
+        }
+        if (hasInterestRateChange) {
+            validateLoanStatusIsActiveOrClosed(loan, dataValidatorBuilder);
+        } else {
+            validateLoanIsActive(loan, dataValidatorBuilder);
+        }
 
         if (loanRescheduleRequest.getInterestRateFromInstallmentTermVariationIfExists() != null) {
             installment = loan.getRelatedRepaymentScheduleInstallment(rescheduleFromDate);

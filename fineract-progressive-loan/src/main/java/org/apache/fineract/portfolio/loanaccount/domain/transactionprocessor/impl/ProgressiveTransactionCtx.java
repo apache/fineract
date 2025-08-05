@@ -37,16 +37,18 @@ import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanIntere
 public class ProgressiveTransactionCtx extends TransactionCtx {
 
     private final ProgressiveLoanInterestScheduleModel model;
-    private List<LoanTransaction> alreadyProcessedTransactions = new ArrayList<>();
+    private final List<LoanTransaction> alreadyProcessedTransactions = new ArrayList<>();
     @Setter
     private Money sumOfInterestRefundAmount;
     @Setter
     private boolean isChargedOff = false;
     @Setter
+    private boolean isWrittenOff = false;
+    @Setter
     private boolean isContractTerminated = false;
     @Setter
     private boolean isPrepayAttempt = false;
-    private List<LoanRepaymentScheduleInstallment> skipRepaymentScheduleInstallments = new ArrayList<>();
+    private final List<LoanRepaymentScheduleInstallment> skipRepaymentScheduleInstallments = new ArrayList<>();
 
     public ProgressiveTransactionCtx(MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
             Set<LoanCharge> charges, MoneyHolder overpaymentHolder, ChangedTransactionDetail changedTransactionDetail,

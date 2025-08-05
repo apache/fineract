@@ -827,6 +827,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             }
         }
 
+        loanTransaction.resetDerivedComponents();
         loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltychargesPortion);
     }
 

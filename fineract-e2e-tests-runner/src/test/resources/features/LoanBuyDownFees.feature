@@ -1250,7 +1250,7 @@ Feature:Feature: Buy Down Fees
     When Loan Pay-off is made on "25 January 2024"
     Then Loan's all installments have obligations met
 
-  @TestRailId:C3887
+  @TestRailId:C3886
   Scenario: Verify loan with with a few Buy Down fees with adjustment and charge-off transaction - amortization in case of loan charge-off event - UC3.8
     When Admin sets the business date to "01 January 2024"
     And Admin creates a client with random data

@@ -62,6 +62,7 @@ public class ProgressivePossibleNextRepaymentCalculationServiceImpl extends Abst
         ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(loan.getCurrency(), repaymentScheduleInstallments, Set.of(),
                 new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail(), scheduleModel);
         ctx.setChargedOff(loan.isChargedOff());
+        ctx.setWrittenOff(loan.isClosedWrittenOff());
         ctx.setContractTerminated(loan.isContractTermination());
         advancedPaymentScheduleTransactionProcessor.recalculateInterestForDate(nextPaymentDueDate, ctx, false);
         RepaymentPeriod repaymentPeriod = scheduleModel.findRepaymentPeriodByDueDate(nextPaymentDueDate)

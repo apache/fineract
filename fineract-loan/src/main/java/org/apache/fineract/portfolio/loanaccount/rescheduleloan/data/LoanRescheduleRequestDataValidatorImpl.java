@@ -35,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -194,6 +195,12 @@ public class LoanRescheduleRequestDataValidatorImpl implements LoanRescheduleReq
         }
     }
 
+    public static void validateLoanStatusIsActiveOrClosed(Loan loan, DataValidatorBuilder dataValidatorBuilder) {
+        if (!loan.getStatus().isActive() && !loan.getStatus().isClosed() && !loan.getStatus().isOverpaid()) {
+            dataValidatorBuilder.reset().failWithCode("loan.is.not.active.or.closed", "Loan is not active or closed");
+        }
+    }
+
     public static void validateSupportedParameters(JsonCommand jsonCommand, Set<String> createRequestDataParameters) {
         final String jsonString = jsonCommand.json();
 
@@ -243,6 +250,11 @@ public class LoanRescheduleRequestDataValidatorImpl implements LoanRescheduleReq
         if (loan.getLoanProductRelatedDetail().getLoanScheduleType() == LoanScheduleType.PROGRESSIVE) {
             progressiveLoanRescheduleRequestDataValidatorDelegate.validateForCreateAction(jsonCommand, loan);
         } else {
+            if (loan.isChargedOff()) {
+                throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
+                        "Loan: " + loan.getId() + " reschedule installment is not allowed. Loan Account is Charged-off", loan.getId());
+            }
+
             validateSupportedParameters(jsonCommand, CREATE_REQUEST_DATA_PARAMETERS);
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder dataValidatorBuilder = new DataValidatorBuilder(dataValidationErrors)

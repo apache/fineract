@@ -103,6 +103,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
                 new ChangedTransactionDetail(), model, getTotalRefundInterestAmount(loan));
         progressiveContext.getAlreadyProcessedTransactions().addAll(loanTransactionService.retrieveListOfTransactionsForReprocessing(loan));
         progressiveContext.setChargedOff(loan.isChargedOff());
+        progressiveContext.setWrittenOff(loan.isClosedWrittenOff());
         progressiveContext.setContractTerminated(loan.isContractTermination());
         ChangedTransactionDetail result = advancedProcessor.processLatestTransaction(loanTransaction, progressiveContext);
         if (!TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
