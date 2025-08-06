@@ -5,3 +5,4 @@ This section covers specific features and functionality available in Apache Fine
 include::capitalized-income.adoc[leveloffset=+1]
 include::buydown-fee.adoc[leveloffset=+1]
 include::approved-amount-modification.adoc[leveloffset=+1]
+include::backdated_interest_modification.adoc[leveloffset=+1]
