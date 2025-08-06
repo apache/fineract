@@ -40,9 +40,9 @@ import org.apache.fineract.client.services.InlineJobApi;
 import org.apache.fineract.client.services.JournalEntriesApi;
 import org.apache.fineract.client.services.LoanAccountLockApi;
 import org.apache.fineract.client.services.LoanBuyDownFeesApi;
+import org.apache.fineract.client.services.LoanCapitalizedIncomeApi;
 import org.apache.fineract.client.services.LoanChargesApi;
 import org.apache.fineract.client.services.LoanCobCatchUpApi;
-import org.apache.fineract.client.services.LoanDeferredIncomeDataApi;
 import org.apache.fineract.client.services.LoanDisbursementDetailsApi;
 import org.apache.fineract.client.services.LoanInterestPauseApi;
 import org.apache.fineract.client.services.LoanProductsApi;
@@ -265,7 +265,7 @@ public class ApiConfiguration {
     }
 
     @Bean
-    public LoanDeferredIncomeDataApi loanDeferredIncomeDataApi() {
-        return fineractClient.createService(LoanDeferredIncomeDataApi.class);
+    public LoanCapitalizedIncomeApi loanCapitalizedIncomeApi() {
+        return fineractClient.createService(LoanCapitalizedIncomeApi.class);
     }
 }

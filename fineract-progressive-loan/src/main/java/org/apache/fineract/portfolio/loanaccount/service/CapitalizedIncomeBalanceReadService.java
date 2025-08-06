@@ -18,10 +18,13 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import org.apache.fineract.portfolio.loanaccount.data.LoanDeferredIncomeData;
+import java.util.List;
+import org.apache.fineract.portfolio.loanaccount.data.CapitalizedIncomeDetails;
+import org.apache.fineract.portfolio.loanaccount.data.LoanCapitalizedIncomeData;
 
 public interface CapitalizedIncomeBalanceReadService {
 
-    LoanDeferredIncomeData fetchLoanDeferredIncomeData(Long loanId);
+    LoanCapitalizedIncomeData fetchLoanCapitalizedIncomeData(Long loanId);
 
+    List<CapitalizedIncomeDetails> fetchLoanCapitalizedIncomeDetails(Long loanId);
 }
