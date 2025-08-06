@@ -30,7 +30,7 @@ import lombok.ToString;
 @ToString
 @Getter
 @Setter
-public class LoanDeferredIncomeData {
+public class LoanCapitalizedIncomeData {
 
     private List<CapitalizedIncomeDetails> capitalizedIncomeData;
 

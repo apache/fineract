@@ -25,12 +25,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.fineract.client.models.CapitalizedIncomeDetails;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
-import org.apache.fineract.client.models.LoanDeferredIncomeData;
+import org.apache.fineract.client.models.LoanCapitalizedIncomeData;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
@@ -89,9 +90,16 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     transaction(50.0, "Capitalized Income", "01 January 2024"), //
                     transaction(0.55, "Capitalized Income Amortization", "01 January 2024") //
             );
-            final LoanDeferredIncomeData loanDeferredIncomeData = loanTransactionHelper.fetchDeferredIncomeDetails(loanId);
-            assertTrue(loanDeferredIncomeData.getCapitalizedIncomeData().size() > 0);
-            final CapitalizedIncomeDetails capitalizedIncomeData = loanDeferredIncomeData.getCapitalizedIncomeData().get(0);
+            final LoanCapitalizedIncomeData loanCapitalizedIncomeData = loanTransactionHelper.fetchLoanCapitalizedIncomeData(loanId);
+            assertTrue(loanCapitalizedIncomeData.getCapitalizedIncomeData().size() > 0);
+            CapitalizedIncomeDetails capitalizedIncomeData = loanCapitalizedIncomeData.getCapitalizedIncomeData().get(0);
+            assertNotNull(capitalizedIncomeData);
+            assertEquals(50.0, Utils.getDoubleValue(capitalizedIncomeData.getAmount()));
+            assertEquals(0.55, Utils.getDoubleValue(capitalizedIncomeData.getAmortizedAmount()));
+            final List<CapitalizedIncomeDetails> capitalizedIncomeDetails = loanTransactionHelper.fetchCapitalizedIncomeDetails(loanId);
+            assertNotNull(capitalizedIncomeDetails);
+            assertTrue(loanCapitalizedIncomeData.getCapitalizedIncomeData().size() == capitalizedIncomeDetails.size());
+            capitalizedIncomeData = capitalizedIncomeDetails.get(0);
             assertNotNull(capitalizedIncomeData);
             assertEquals(50.0, Utils.getDoubleValue(capitalizedIncomeData.getAmount()));
             assertEquals(0.55, Utils.getDoubleValue(capitalizedIncomeData.getAmortizedAmount()));
@@ -107,9 +115,9 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     transaction(0.03, "Accrual", "02 January 2024"), //
                     transaction(0.55, "Capitalized Income Amortization", "02 January 2024") //
             );
-            final LoanDeferredIncomeData loanDeferredIncomeData = loanTransactionHelper.fetchDeferredIncomeDetails(loanId);
-            assertTrue(loanDeferredIncomeData.getCapitalizedIncomeData().size() > 0);
-            final CapitalizedIncomeDetails capitalizedIncomeData = loanDeferredIncomeData.getCapitalizedIncomeData().get(0);
+            final List<CapitalizedIncomeDetails> capitalizedIncomeDetails = loanTransactionHelper.fetchCapitalizedIncomeDetails(loanId);
+            assertTrue(capitalizedIncomeDetails.size() > 0);
+            final CapitalizedIncomeDetails capitalizedIncomeData = capitalizedIncomeDetails.get(0);
             assertNotNull(capitalizedIncomeData);
             assertEquals(50.0, Utils.getDoubleValue(capitalizedIncomeData.getAmount()));
             assertEquals(1.1, Utils.getDoubleValue(capitalizedIncomeData.getAmortizedAmount()));
@@ -198,9 +206,9 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     transaction(50.0, "Capitalized Income", "01 January 2024"), //
                     transaction(50.0, "Capitalized Income Adjustment", "01 April 2024") //
             );
-            final LoanDeferredIncomeData loanDeferredIncomeData = loanTransactionHelper.fetchDeferredIncomeDetails(loanId);
-            assertTrue(loanDeferredIncomeData.getCapitalizedIncomeData().size() > 0);
-            final CapitalizedIncomeDetails capitalizedIncomeData = loanDeferredIncomeData.getCapitalizedIncomeData().get(0);
+            final List<CapitalizedIncomeDetails> capitalizedIncomeDetails = loanTransactionHelper.fetchCapitalizedIncomeDetails(loanId);
+            assertTrue(capitalizedIncomeDetails.size() > 0);
+            final CapitalizedIncomeDetails capitalizedIncomeData = capitalizedIncomeDetails.get(0);
             assertNotNull(capitalizedIncomeData);
             assertEquals(50.0, Utils.getDoubleValue(capitalizedIncomeData.getAmount()));
             assertEquals(50.0, Utils.getDoubleValue(capitalizedIncomeData.getAmountAdjustment()));

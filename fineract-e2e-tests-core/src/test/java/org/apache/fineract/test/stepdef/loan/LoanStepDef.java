@@ -85,7 +85,6 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.IsCatchUpRunningDTO;
-import org.apache.fineract.client.models.LoanDeferredIncomeData;
 import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.OldestCOBProcessedLoanDTO;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
@@ -110,8 +109,8 @@ import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.services.BusinessDateManagementApi;
 import org.apache.fineract.client.services.LoanBuyDownFeesApi;
+import org.apache.fineract.client.services.LoanCapitalizedIncomeApi;
 import org.apache.fineract.client.services.LoanCobCatchUpApi;
-import org.apache.fineract.client.services.LoanDeferredIncomeDataApi;
 import org.apache.fineract.client.services.LoanDisbursementDetailsApi;
 import org.apache.fineract.client.services.LoanInterestPauseApi;
 import org.apache.fineract.client.services.LoanProductsApi;
@@ -199,7 +198,7 @@ public class LoanStepDef extends AbstractStepDef {
     private LoanBuyDownFeesApi loanBuyDownFeesApi;
 
     @Autowired
-    private LoanDeferredIncomeDataApi loanDeferredIncomeDataApi;
+    private LoanCapitalizedIncomeApi loanCapitalizedIncomeApi;
 
     @Autowired
     private LoanCobCatchUpApi loanCobCatchUpApi;
@@ -4994,12 +4993,11 @@ public class LoanStepDef extends AbstractStepDef {
         long loanId = loanCreateResponse.body().getLoanId();
         String resourceId = String.valueOf(loanId);
 
-        final Response<LoanDeferredIncomeData> deferredIncomeResponse = loanDeferredIncomeDataApi.fetchDeferredIncomeDetails(loanId)
-                .execute();
-        ErrorHelper.checkSuccessfulApiCall(deferredIncomeResponse);
+        final Response<List<CapitalizedIncomeDetails>> capitalizeIncomeDetails = loanCapitalizedIncomeApi
+                .fetchCapitalizedIncomeDetails(loanId).execute();
+        ErrorHelper.checkSuccessfulApiCall(capitalizeIncomeDetails);
 
-        List<CapitalizedIncomeDetails> deferredIncome = deferredIncomeResponse.body().getCapitalizedIncomeData();
-        checkCapitalizedIncomeTransactionData(resourceId, deferredIncome, table);
+        checkCapitalizedIncomeTransactionData(resourceId, capitalizeIncomeDetails.body(), table);
     }
 
     @And("Deferred Capitalized Income by external-id contains the following data:")
@@ -5009,12 +5007,11 @@ public class LoanStepDef extends AbstractStepDef {
         String resourceId = String.valueOf(loanId);
         String externalId = loanCreateResponse.body().getResourceExternalId();
 
-        final Response<LoanDeferredIncomeData> deferredIncomeResponse = loanDeferredIncomeDataApi
-                .fetchDeferredIncomeDetailsByExternalId(externalId).execute();
-        ErrorHelper.checkSuccessfulApiCall(deferredIncomeResponse);
+        final Response<List<CapitalizedIncomeDetails>> capitalizeIncomeDetails = loanCapitalizedIncomeApi
+                .fetchCapitalizedIncomeDetailsByExternalId(externalId).execute();
+        ErrorHelper.checkSuccessfulApiCall(capitalizeIncomeDetails);
 
-        List<CapitalizedIncomeDetails> deferredIncome = deferredIncomeResponse.body().getCapitalizedIncomeData();
-        checkCapitalizedIncomeTransactionData(resourceId, deferredIncome, table);
+        checkCapitalizedIncomeTransactionData(resourceId, capitalizeIncomeDetails.body(), table);
     }
 
     @And("Admin successfully terminates loan contract")
