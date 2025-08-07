@@ -97,6 +97,8 @@ public class InvestorBusinessEventSerializer extends AbstractBusinessEventWithCu
         LoanOwnershipTransferDataV1.Builder builder = LoanOwnershipTransferDataV1.newBuilder().setLoanId(transferData.getLoan().getLoanId())
                 .setLoanExternalId(transferData.getLoan().getExternalId()).setTransferExternalId(transferData.getTransferExternalId())
                 .setAssetOwnerExternalId(transferData.getOwner().getExternalId())
+                .setPreviousOwnerExternalId(
+                        transferData.getPreviousOwner() != null ? transferData.getPreviousOwner().getExternalId() : null)
                 .setTransferExternalGroupId(transferData.getTransferExternalGroupId())
                 .setPurchasePriceRatio(transferData.getPurchasePriceRatio()).setCurrency(getCurrencyFromEvent(event))
                 .setSettlementDate(transferData.getSettlementDate().format(DEFAULT_DATE_FORMATTER))

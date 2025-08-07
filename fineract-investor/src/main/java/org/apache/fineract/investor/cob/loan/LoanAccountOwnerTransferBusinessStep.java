@@ -279,6 +279,7 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
         newExternalAssetOwnerTransfer.setPurchasePriceRatio(externalAssetOwnerTransfer.getPurchasePriceRatio());
         newExternalAssetOwnerTransfer.setEffectiveDateFrom(effectiveDateFrom);
         newExternalAssetOwnerTransfer.setEffectiveDateTo(effectiveDateTo);
+        newExternalAssetOwnerTransfer.setPreviousOwner(externalAssetOwnerTransfer.getPreviousOwner());
 
         expireTransfer(settlementDate, externalAssetOwnerTransfer);
 

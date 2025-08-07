@@ -57,6 +57,14 @@
         },
         {
             "default": null,
+            "name": "previousOwnerExternalId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
             "name": "currency",
             "type": [
                 "null",
