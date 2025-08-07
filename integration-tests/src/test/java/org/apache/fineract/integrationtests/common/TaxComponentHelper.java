@@ -22,6 +22,9 @@ import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
+import org.apache.fineract.client.models.PostTaxesComponentsRequest;
+import org.apache.fineract.client.models.PostTaxesComponentsResponse;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +69,7 @@ public final class TaxComponentHelper {
     @Deprecated(forRemoval = true)
     public static HashMap<String, String> getBasicTaxComponentMap(final String percentage) {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("name", randomNameGenerator("Tax_component_Name_", 5));
+        map.put("name", Utils.randomStringGenerator("Tax_component_Name_", 5));
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
         map.put("percentage", percentage);
@@ -74,8 +77,8 @@ public final class TaxComponentHelper {
         return map;
     }
 
-    public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
-        return Utils.randomStringGenerator(prefix, lenOfRandomSuffix);
+    public static PostTaxesComponentsResponse createTaxComponent(PostTaxesComponentsRequest request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().taxComponents.createTaxComponent(request));
     }
 
 }
