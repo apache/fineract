@@ -24,11 +24,13 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 
+@AllArgsConstructor
 @Getter
 public final class TaxComponentData implements Serializable {
 
@@ -84,23 +86,6 @@ public final class TaxComponentData implements Serializable {
                 taxComponentHistories, glAccountOptions, glAccountTypeOptions);
     }
 
-    private TaxComponentData(final Long id, final String name, final BigDecimal percentage, final EnumOptionData debitAccountType,
-            final GLAccountData debitAcount, final EnumOptionData creditAccountType, final GLAccountData creditAcount,
-            final LocalDate startDate, final Collection<TaxComponentHistoryData> taxComponentHistories,
-            final Map<String, List<GLAccountData>> glAccountOptions, final Collection<EnumOptionData> glAccountTypeOptions) {
-        this.id = id;
-        this.percentage = percentage;
-        this.name = name;
-        this.debitAccountType = debitAccountType;
-        this.debitAccount = debitAcount;
-        this.creditAccountType = creditAccountType;
-        this.creditAccount = creditAcount;
-        this.startDate = startDate;
-        this.taxComponentHistories = taxComponentHistories;
-        this.glAccountOptions = glAccountOptions;
-        this.glAccountTypeOptions = glAccountTypeOptions;
-    }
-
     private TaxComponentData(final Long id, final BigDecimal percentage, final GLAccountData debitAcount,
             final GLAccountData creditAcount) {
         this.id = id;
@@ -137,14 +122,7 @@ public final class TaxComponentData implements Serializable {
     }
 
     private boolean occursOnDayFrom(final LocalDate target) {
-        return DateUtils.isAfter(target, startDate());
+        return DateUtils.isAfter(target, getStartDate());
     }
 
-    public LocalDate startDate() {
-        LocalDate startDate = null;
-        if (this.startDate != null) {
-            startDate = this.startDate;
-        }
-        return startDate;
-    }
 }
