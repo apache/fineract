@@ -31,6 +31,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -38,9 +41,12 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants.GuarantorJSONinputParams;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "m_guarantor")
-public class Guarantor extends AbstractPersistableCustom<Long> {
+public final class Guarantor extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)
@@ -97,10 +103,6 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "guarantor", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<GuarantorFundingDetails> guarantorFundDetails = new ArrayList<>();
-
-    protected Guarantor() {
-
-    }
 
     private Guarantor(final Loan loan, final CodeValue clientRelationshipType, final Integer gurantorType, final Long entityId,
             final String firstname, final String lastname, final LocalDate dateOfBirth, final String addressLine1,
@@ -259,10 +261,6 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
         }
     }
 
-    public Long getEntityId() {
-        return this.entityId;
-    }
-
     public Long getLoanId() {
         return this.loan.getId();
     }
@@ -275,24 +273,12 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
         return this.loan.getOfficeId();
     }
 
-    public CodeValue getClientRelationshipType() {
-        return this.clientRelationshipType;
-    }
-
     public void updateClientRelationshipType(final CodeValue clientRelationshipType) {
         this.clientRelationshipType = clientRelationshipType;
     }
 
     private void updateExistingEntityToNull() {
         this.entityId = null;
-    }
-
-    public Integer getGurantorType() {
-        return this.gurantorType;
-    }
-
-    public boolean isActive() {
-        return this.active;
     }
 
     public void updateStatus(final boolean status) {
@@ -328,14 +314,6 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
             }
         }
         this.active = isActive;
-    }
-
-    public Loan getLoan() {
-        return this.loan;
-    }
-
-    public List<GuarantorFundingDetails> getGuarantorFundDetails() {
-        return this.guarantorFundDetails;
     }
 
     public boolean hasGuarantor(Long savingsId) {

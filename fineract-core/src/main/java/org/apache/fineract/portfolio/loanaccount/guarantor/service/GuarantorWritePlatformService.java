@@ -18,15 +18,31 @@
  */
 package org.apache.fineract.portfolio.loanaccount.guarantor.service;
 
+import org.apache.fineract.command.core.Command;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.loanaccount.guarantor.data.CreateGuarantorsRequest;
+import org.apache.fineract.portfolio.loanaccount.guarantor.data.CreateGuarantorsResponse;
+import org.apache.fineract.portfolio.loanaccount.guarantor.data.DeleteGuarantorsRequest;
+import org.apache.fineract.portfolio.loanaccount.guarantor.data.DeleteGuarantorsResponse;
+import org.apache.fineract.portfolio.loanaccount.guarantor.data.UpdateGuarantorsRequest;
+import org.apache.fineract.portfolio.loanaccount.guarantor.data.UpdateGuarantorsResponse;
 
 public interface GuarantorWritePlatformService {
 
+    @Deprecated
     CommandProcessingResult createGuarantor(Long loanId, JsonCommand command);
 
+    @Deprecated
     CommandProcessingResult updateGuarantor(Long loanId, Long guarantorId, JsonCommand command);
 
+    @Deprecated
     CommandProcessingResult removeGuarantor(Long loanId, Long guarantorId, Long guarantorFundingId);
+
+    CreateGuarantorsResponse createGuarantor(Command<CreateGuarantorsRequest> command);
+
+    UpdateGuarantorsResponse updateGuarantor(Command<UpdateGuarantorsRequest> command);
+
+    DeleteGuarantorsResponse removeGuarantor(Command<DeleteGuarantorsRequest> command);
 
 }
