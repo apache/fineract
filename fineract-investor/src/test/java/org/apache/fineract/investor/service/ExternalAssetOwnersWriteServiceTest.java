@@ -864,6 +864,9 @@ public class ExternalAssetOwnersWriteServiceTest {
         @Mock
         private ConfigurationDomainService configurationDomainService;
 
+        @Mock
+        private ExternalAssetOwnersReadService externalAssetOwnersReadService;
+
         @InjectMocks
         private ExternalAssetOwnersWriteServiceImpl externalAssetOwnersWriteServiceImpl;
 
@@ -934,6 +937,7 @@ public class ExternalAssetOwnersWriteServiceTest {
                     .thenReturn(List.of("ACTIVE", "TRANSFER_IN_PROGRESS", "TRANSFER_ON_HOLD"));
             lenient().when(configurationDomainService.getAllowedLoanStatusesOfDelayedSettlementForExternalAssetTransfer())
                     .thenReturn(List.of("ACTIVE", "TRANSFER_IN_PROGRESS", "TRANSFER_ON_HOLD", "OVERPAID", "CLOSED_OBLIGATIONS_MET"));
+            lenient().when(externalAssetOwnersReadService.retrieveActiveTransferData(any(Long.class), any(), any())).thenReturn(null);
 
         }
     }

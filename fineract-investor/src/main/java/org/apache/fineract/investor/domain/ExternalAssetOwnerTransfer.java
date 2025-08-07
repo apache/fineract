@@ -81,4 +81,8 @@ public class ExternalAssetOwnerTransfer extends AbstractAuditableWithUTCDateTime
 
     @Column(name = "external_group_id", length = 100)
     private ExternalId externalGroupId;
+
+    @ManyToOne
+    @JoinColumn(name = "previous_owner_id")
+    private ExternalAssetOwner previousOwner;
 }
