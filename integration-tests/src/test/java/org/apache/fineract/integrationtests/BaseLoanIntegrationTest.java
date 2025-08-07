@@ -82,15 +82,19 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.models.PostRolesRequest;
+import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.PutLoansApprovedAmountRequest;
 import org.apache.fineract.client.models.PutLoansApprovedAmountResponse;
 import org.apache.fineract.client.models.PutLoansAvailableDisbursementAmountRequest;
 import org.apache.fineract.client.models.PutLoansAvailableDisbursementAmountResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
+import org.apache.fineract.client.models.PutRolesRoleIdPermissionsRequest;
 import org.apache.fineract.client.models.RetrieveLoansPointInTimeRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.client.util.FineractClient;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
@@ -126,12 +130,15 @@ import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
+import retrofit2.Call;
+import retrofit2.Response;
 
 @Slf4j
 @ExtendWith({ LoanTestLifecycleExtension.class, ExternalEventsExtension.class })
 public abstract class BaseLoanIntegrationTest extends IntegrationTest {
 
     protected static final String DATETIME_PATTERN = "dd MMMM yyyy";
+    protected static final String LOCALE = "en";
 
     static {
         Utils.initializeRESTAssured();
@@ -303,6 +310,86 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         }
         verifyLoanStatus(loanId, LoanStatus.CLOSED_OBLIGATIONS_MET);
         return repaymentId;
+    }
+
+    /**
+     * Executes a Loan transaction request by a user created with no permissions then verifies it fails with
+     * authentication error. Then alters user permissions to get the given permission then executes the query again. It
+     * verifies that it returns with no error.
+     *
+     * @param loanId
+     *            loan id
+     * @param postLoansLoanIdTransactionsRequest
+     *            transaction request
+     * @param command
+     *            the command for loan transaction
+     * @param permission
+     *            the given permission related to the loan transaction
+     * @return Result body
+     */
+    public PostLoansLoanIdTransactionsResponse makeLoanTransactionWithPermissionVerification(final Long loanId,
+            PostLoansLoanIdTransactionsRequest postLoansLoanIdTransactionsRequest, final String command, final String permission) {
+        return performPermissionTestForRequest(permission, fineractClient -> fineractClient.loanTransactions.executeLoanTransaction(loanId,
+                postLoansLoanIdTransactionsRequest, command));
+    }
+
+    /**
+     * Executes a Loan transaction adjustment request by a user created with no permissions then verifies it fails with
+     * authentication error. Then alters user permissions to get the given permission then executes the query again. It
+     * verifies that it returns with no error.
+     *
+     * @param loanId
+     *            loan ID
+     * @param transactionIdToAdjust
+     *            transaction ID to adjust
+     * @param postLoansLoanIdTransactionsRequest
+     *            transaction request
+     * @param command
+     *            the command for loan transaction
+     * @param permission
+     *            the given permission related to the loan transaction
+     * @return Result body
+     */
+    public PostLoansLoanIdTransactionsResponse adjustLoanTransactionWithPermissionVerification(final Long loanId,
+            final Long transactionIdToAdjust, PostLoansLoanIdTransactionsTransactionIdRequest postLoansLoanIdTransactionsRequest,
+            final String command, final String permission) {
+        return performPermissionTestForRequest(permission, fineractClient -> fineractClient.loanTransactions.adjustLoanTransaction(loanId,
+                transactionIdToAdjust, postLoansLoanIdTransactionsRequest, command));
+    }
+
+    public <T> T performPermissionTestForRequest(final String permission, Function<FineractClient, Call<T>> callback) {
+        // create role
+        String roleName = Utils.uniqueRandomStringGenerator("TEST_ROLE_", 10);
+        Long roleId = Calls
+                .ok(fineractClient().roles.createRole(new PostRolesRequest().name(roleName).description("Test role Description")))
+                .getResourceId();
+
+        Calls.ok(fineractClient().roles.updateRolePermissions(roleId,
+                new PutRolesRoleIdPermissionsRequest().putPermissionsItem(permission, false)));
+        // create user with role
+        String firstname = "Test";
+        String lastname = Utils.uniqueRandomStringGenerator("User", 6);
+        String userName = Utils.uniqueRandomStringGenerator("testUserName", 4);
+        String password = "AKleRbDhK421$";
+        String email = firstname + "." + lastname + "@whatever.mifos.org";
+        Calls.ok(fineractClient().users
+                .create15(new PostUsersRequest().addRolesItem(roleId).email(email).firstname(firstname).lastname(lastname)
+                        .repeatPassword(password).sendPasswordToEmail(false).officeId(1L).username(userName).password(password)));
+
+        // login user
+        FineractClient fineractClientOfUser = newFineractClient(userName, password);
+
+        // try to make transaction - should fail
+        Response<T> responseFail = Calls.executeU(callback.apply(fineractClientOfUser));
+        Assertions.assertEquals(403, responseFail.code());
+
+        // edit role to have permission for transaction
+        Calls.ok(fineractClient().roles.updateRolePermissions(roleId,
+                new PutRolesRoleIdPermissionsRequest().putPermissionsItem(permission, true)));
+        // try to make transaction - should pass
+        Response<T> responseOk = Calls.executeU(callback.apply(fineractClientOfUser));
+        Assertions.assertEquals(200, responseOk.code());
+        return responseOk.body();
     }
 
     private String getNonByPassUserAuthKey(RequestSpecification requestSpec, ResponseSpecification responseSpec) {

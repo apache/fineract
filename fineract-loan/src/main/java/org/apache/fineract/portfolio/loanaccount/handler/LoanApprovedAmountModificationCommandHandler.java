@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@CommandType(entity = "LOAN_APPROVED_AMOUNT", action = "UPDATE")
+@CommandType(entity = "LOAN", action = "UPDATE_APPROVED_AMOUNT")
 public class LoanApprovedAmountModificationCommandHandler implements NewCommandSourceHandler {
 
     private final LoanApprovedAmountWritePlatformService loanApprovedAmountWritePlatformService;
