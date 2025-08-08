@@ -6772,7 +6772,6 @@ Feature: Charge-off
       | 15 January 2024  | Repayment          | 263.69 | 253.91    | 9.78     | 0.0  | 0.0       | 746.09       | false    | false    |
       | 15 January 2024  | Accrual            | 0.53   | 0.0       | 0.53     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 January 2024  | Accrual            | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 17 January 2024  | Accrual Adjustment | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 January 2024  | Charge-off         | 787.64 | 746.09    | 41.55    | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:C3512
@@ -9589,3 +9588,29 @@ Feature: Charge-off
     And Loan has 0.0 outstanding amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     And Global configuration "is-principal-compounding-disabled-for-overdue-loans" is disabled
+
+  @TestRailId:C3988
+  Scenario: Backdated charge-off accrual handling with isInterestRecognitionOnDisbursementDate=true
+    When Admin sets the business date to "20 July 2025"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_RECOGNITION_DISBURSEMENT_DAILY_EMI_360_30_ACCRUAL_ACTIVITY | 14 December 2024  | 1000           | 12.2301                | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 24                | MONTHS                | 1              | MONTHS                 | 24                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "14 December 2024" with "1000" amount and expected disbursement date on "14 December 2024"
+    When Admin successfully disburse the loan on "14 December 2024" with "1000" EUR transaction amount
+    When Admin does charge-off the loan on "20 July 2025"
+    When Admin runs COB job
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount  | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 14 December 2024 | Disbursement     | 1000.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 14 January 2025  | Accrual Activity | 10.19   | 0.0       | 10.19    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 February 2025 | Accrual Activity | 10.19   | 0.0       | 10.19    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 March 2025    | Accrual Activity | 10.19   | 0.0       | 10.19    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 April 2025    | Accrual Activity | 10.19   | 0.0       | 10.19    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 May 2025      | Accrual Activity | 10.19   | 0.0       | 10.19    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 June 2025     | Accrual Activity | 10.19   | 0.0       | 10.19    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 July 2025     | Accrual Activity | 10.19   | 0.0       | 10.19    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 July 2025     | Accrual          | 73.3    | 0.0       | 73.3     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 July 2025     | Charge-off       | 1142.48 | 1000.0    | 142.48   | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Loan Pay-off is made on "20 July 2025"
+    Then Loan's all installments have obligations met
