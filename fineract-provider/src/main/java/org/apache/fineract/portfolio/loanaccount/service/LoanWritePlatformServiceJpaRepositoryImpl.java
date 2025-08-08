@@ -2727,6 +2727,18 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         } else {
             loan.markAsChargedOff(transactionDate, currentUser, null);
         }
+
+        loan.getLoanTransactions().stream().filter(lt -> lt.isAccrual() || lt.isAccrualAdjustment())
+                .filter(transaction -> loan.getLoanProductRelatedDetail().isInterestRecognitionOnDisbursementDate()
+                        ? !DateUtils.isBefore(transaction.getTransactionDate(), transactionDate)
+                        : DateUtils.isAfter(transaction.getTransactionDate(), transactionDate))
+                .forEach(transaction -> {
+                    transaction.reverse();
+                    journalEntryPoster.postJournalEntriesForLoanTransaction(transaction, false, false);
+                    final LoanAdjustTransactionBusinessEvent.Data data = new LoanAdjustTransactionBusinessEvent.Data(transaction);
+                    businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(data));
+                });
+
         final LoanTransaction chargeOffTransaction = LoanTransaction.chargeOff(loan, transactionDate, txnExternalId);
 
         if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
@@ -2753,17 +2765,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final Note note = Note.loanTransactionNote(loan, chargeOffTransaction, noteText);
             this.noteRepository.save(note);
         }
-
-        loan.getLoanTransactions().stream().filter(LoanTransaction::isAccrual)
-                .filter(transaction -> loan.getLoanProductRelatedDetail().isInterestRecognitionOnDisbursementDate()
-                        ? !DateUtils.isBefore(transaction.getTransactionDate(), transactionDate)
-                        : DateUtils.isAfter(transaction.getTransactionDate(), transactionDate))
-                .forEach(transaction -> {
-                    transaction.reverse();
-                    journalEntryPoster.postJournalEntriesForLoanTransaction(transaction, false, false);
-                    final LoanAdjustTransactionBusinessEvent.Data data = new LoanAdjustTransactionBusinessEvent.Data(transaction);
-                    businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(data));
-                });
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanChargeOffPostBusinessEvent(chargeOffTransaction));
         return new CommandProcessingResultBuilder() //
