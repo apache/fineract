@@ -288,6 +288,7 @@ public class LoanAccountData {
     private StringEnumOptionData buyDownFeeCalculationType;
     private StringEnumOptionData buyDownFeeStrategy;
     private StringEnumOptionData buyDownFeeIncomeType;
+    private Boolean merchantBuyDownFee;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -483,7 +484,8 @@ public class LoanAccountData {
             final boolean enableIncomeCapitalization, final StringEnumOptionData capitalizedIncomeCalculationType,
             final StringEnumOptionData capitalizedIncomeStrategy, StringEnumOptionData capitalizedIncomeType,
             final boolean enableBuyDownFee, final StringEnumOptionData buyDownFeeCalculationType,
-            final StringEnumOptionData buyDownFeeStrategy, final StringEnumOptionData buyDownFeeIncomeType) {
+            final StringEnumOptionData buyDownFeeStrategy, final StringEnumOptionData buyDownFeeIncomeType,
+            final boolean merchantBuyDownFee) {
 
         final CollectionData delinquent = CollectionData.template();
 
@@ -533,7 +535,8 @@ public class LoanAccountData {
                 .setCapitalizedIncomeCalculationType(capitalizedIncomeCalculationType)
                 .setCapitalizedIncomeStrategy(capitalizedIncomeStrategy).setCapitalizedIncomeType(capitalizedIncomeType)
                 .setEnableBuyDownFee(enableBuyDownFee).setBuyDownFeeCalculationType(buyDownFeeCalculationType)
-                .setBuyDownFeeStrategy(buyDownFeeStrategy).setBuyDownFeeIncomeType(buyDownFeeIncomeType);
+                .setBuyDownFeeStrategy(buyDownFeeStrategy).setBuyDownFeeIncomeType(buyDownFeeIncomeType)
+                .setMerchantBuyDownFee(merchantBuyDownFee);
     }
 
     /*

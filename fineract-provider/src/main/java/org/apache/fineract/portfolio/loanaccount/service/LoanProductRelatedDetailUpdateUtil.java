@@ -359,6 +359,13 @@ public class LoanProductRelatedDetailUpdateUtil {
             loanRepaymentScheduleDetail.setBuyDownFeeIncomeType(newValue);
         }
 
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.MERCHANT_BUY_DOWN_FEE_PARAM_NAME,
+                loanRepaymentScheduleDetail.isMerchantBuyDownFee())) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.MERCHANT_BUY_DOWN_FEE_PARAM_NAME);
+            actualChanges.put(LoanProductConstants.MERCHANT_BUY_DOWN_FEE_PARAM_NAME, newValue);
+            loanRepaymentScheduleDetail.setMerchantBuyDownFee(newValue);
+        }
+
         return actualChanges;
     }
 

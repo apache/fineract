@@ -554,7 +554,8 @@ public class LoanScheduleAssembler {
                 loanProduct.getLoanProductRelatedDetail().isEnableBuyDownFee(),
                 loanProduct.getLoanProductRelatedDetail().getBuyDownFeeCalculationType(),
                 loanProduct.getLoanProductRelatedDetail().getBuyDownFeeStrategy(),
-                loanProduct.getLoanProductRelatedDetail().getBuyDownFeeIncomeType());
+                loanProduct.getLoanProductRelatedDetail().getBuyDownFeeIncomeType(),
+                loanProduct.getLoanProductRelatedDetail().isMerchantBuyDownFee());
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,

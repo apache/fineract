@@ -213,6 +213,8 @@ public final class LoanProductsApiResourceSwagger {
         public String buyDownFeeStrategy;
         @Schema(example = "FEE", allowableValues = { "FEE", "INTEREST" })
         public String buyDownFeeIncomeType;
+        @Schema(example = "false")
+        public Boolean merchantBuyDownFee;
 
         // Interest Recalculation
         @Schema(example = "false")
@@ -693,6 +695,8 @@ public final class LoanProductsApiResourceSwagger {
         public StringEnumOptionData buyDownFeeStrategy;
         @Schema(example = "FEE")
         public StringEnumOptionData buyDownFeeIncomeType;
+        @Schema(example = "false")
+        public Boolean merchantBuyDownFee;
     }
 
     @Schema(description = "GetLoanProductsTemplateResponse")
@@ -1157,6 +1161,8 @@ public final class LoanProductsApiResourceSwagger {
         public StringEnumOptionData buyDownFeeCalculationType;
         @Schema(example = "EQUAL_AMORTIZATION")
         public StringEnumOptionData buyDownFeeStrategy;
+        @Schema(example = "false")
+        public Boolean merchantBuyDownFee;
         @Schema(example = "FEE")
         public StringEnumOptionData buyDownFeeIncomeType;
         public List<StringEnumOptionData> buyDownFeeCalculationTypeOptions;
@@ -1505,6 +1511,8 @@ public final class LoanProductsApiResourceSwagger {
         public StringEnumOptionData buyDownFeeStrategy;
         @Schema(example = "FEE")
         public StringEnumOptionData buyDownFeeIncomeType;
+        @Schema(example = "false")
+        public Boolean merchantBuyDownFee;
         public List<StringEnumOptionData> buyDownFeeCalculationTypeOptions;
         public List<StringEnumOptionData> buyDownFeeStrategyOptions;
         public List<StringEnumOptionData> buyDownFeeIncomeTypeOptions;
@@ -1787,6 +1795,8 @@ public final class LoanProductsApiResourceSwagger {
         public String buyDownFeeStrategy;
         @Schema(example = "FEE", allowableValues = { "FEE", "INTEREST" })
         public String buyDownFeeIncomeType;
+        @Schema(example = "false")
+        public Boolean merchantBuyDownFee;
     }
 
     public static final class AdvancedPaymentData {

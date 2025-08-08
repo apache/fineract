@@ -206,7 +206,7 @@ public class LoanTransactionTest extends BaseLoanIntegrationTest {
         final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive()
                 .enableBuyDownFee(true).buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)//
                 .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)//
-                .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.INTEREST)//
+                .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.INTEREST).merchantBuyDownFee(true)//
                 .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue()) //
                 .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue()) //
                 .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE) //

@@ -46,5 +46,6 @@ public class AccountingBridgeDataDTO {
     private Long chargeOffReasonCodeValue;
     private boolean isWrittenOff;
     private List<AccountingBridgeLoanTransactionDTO> newLoanTransactions = new ArrayList<>();
+    private boolean merchantBuyDownFee;
 
 }
