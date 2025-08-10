@@ -39,9 +39,9 @@ public final class AuthenticationApiResourceSwagger {
 
         }
 
-        @Schema(required = true, example = "mifos")
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "mifos")
         public String username;
-        @Schema(required = true, example = "password")
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "password")
         public String password;
     }
 

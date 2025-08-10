@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
+import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -262,7 +263,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
     private Response buildResponse(DocumentData documentData) {
         String fileName = "Output" + documentData.getFileName();
         String fileLocation = documentData.getLocation();
-        File file = new File(fileLocation);
+        File file = Path.of(fileLocation).toFile();
         final Response.ResponseBuilder response = Response.ok(file);
         response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
         response.header("Content-Type", "application/vnd.ms-excel");

@@ -57,9 +57,9 @@ final class DatatablesApiResourceSwagger {
 
             private PostColumnHeaderData() {}
 
-            @Schema(required = true, example = "DOB")
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "DOB")
             public String name;
-            @Schema(required = true, example = "String", description = "Any of them: Boolean | Date | DateTime | Decimal | Dropdown | Number | String | Text")
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "String", description = "Any of them: Boolean | Date | DateTime | Decimal | Dropdown | Number | String | Text")
             public String type;
             @Schema(example = "Gender", description = "Used in Code Value fields. Column name becomes: code_cd_name. Mandatory if using type Dropdown, otherwise an error is returned.")
             public String code;
@@ -73,15 +73,15 @@ final class DatatablesApiResourceSwagger {
             public Boolean indexed;
         }
 
-        @Schema(required = true, example = "m_client")
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "m_client")
         public String apptableName;
-        @Schema(required = true, example = "extra_client_details")
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "extra_client_details")
         public String datatableName;
         @Schema(example = "abc")
         public String entitySubType;
-        @Schema(required = false, description = "Allows to create multiple entries in the Data Table. Optional, defaults to false. If this property is not provided Data Table will allow only one entry.", example = "true")
+        @Schema(description = "Allows to create multiple entries in the Data Table. Optional, defaults to false. If this property is not provided Data Table will allow only one entry.", example = "true")
         public boolean multiRow;
-        @Schema(required = true)
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         public List<PostColumnHeaderData> columns;
     }
 

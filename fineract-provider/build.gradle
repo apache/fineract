@@ -28,6 +28,9 @@ apply plugin: 'com.google.cloud.tools.jib'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'se.thinkcode.cucumber-runner'
 
+// Apply dependencies before any configurations are resolved
+apply from: 'dependencies.gradle'
+
 check.dependsOn('cucumber')
 
 // Static weaving is now configured in gradle/static-weaving.gradle
@@ -94,18 +97,6 @@ configurations {
     runtime
 }
 
-dependencies {
-    implementation project(':fineract-core')
-    implementation 'org.springframework.boot:spring-boot-starter-test'
-    implementation 'org.mockito:mockito-core'
-    implementation 'org.mockito:mockito-junit-jupiter'
-    implementation 'org.junit.jupiter:junit-jupiter-api'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.liquibase:liquibase-core'
-}
-
-apply from: 'dependencies.gradle'
-
 // Configuration for the modernizer plugin
 // https://github.com/andygoossens/gradle-modernizer-plugin
 modernizer {
@@ -116,11 +107,7 @@ modernizer {
     ]
 }
 
-// If we are running Gradle within Eclipse to enhance classes with OpenJPA,
-// set the classes directory to point to Eclipse's default build directory
-if (project.hasProperty('env') && project.getProperty('env') == 'eclipse') {
-    sourceSets.main.java.outputDir = new File(rootProject.projectDir, "fineract-provider/bin/main")
-}
+
 
 eclipse {
     project {
@@ -221,11 +208,6 @@ bootRun {
     jvmArgs = [
             "-Dspring.output.ansi.enabled=ALWAYS"
     ]
-
-    dependencies {
-        implementation 'org.mariadb.jdbc:mariadb-java-client'
-        implementation 'org.postgresql:postgresql'
-    }
 }
 
 springBoot {
@@ -276,11 +258,6 @@ jib {
     }
 
     allowInsecureRegistries = true
-
-    dependencies {
-        implementation 'org.mariadb.jdbc:mariadb-java-client'
-        implementation 'org.postgresql:postgresql'
-    }
 }
 
 tasks.register('migrateDatabase') {
@@ -320,7 +297,7 @@ tasks.jibDockerBuild.dependsOn(bootJar)
 // Configuration for git properties gradle plugin
 // https://github.com/n0mer/gradle-git-properties
 gitProperties {
-    gitPropertiesResourceDir = file("$buildDir/classes/java/main")
+    gitPropertiesResourceDir = file("$buildDir/resources/main/META-INF")
     dateFormat = "yyyy-MM-dd'T'HH:mmZ"
     dateFormatTimeZone = "GMT"
     failOnNoGitDirectory = false
@@ -329,12 +306,33 @@ gitProperties {
 // make sure the generateGitProperties task always executes (even when git.properties is not changed)
 generateGitProperties.outputs.upToDateWhen { false }
 
+// Ensure generateGitProperties runs before processResources
+tasks.named('processResources') {
+    dependsOn tasks.named('generateGitProperties')
+}
+
+// Ensure resolve runs before compileTestJava
+tasks.named('compileTestJava') {
+    dependsOn tasks.named('resolve')
+}
+
+// Configure sources jar task
+tasks.named('sourcesJar') {
+    dependsOn(tasks.named('processResources'), tasks.named('generateGitProperties'))
+}
+
+// Ensure licenseMain runs after processResources and generateGitProperties
+tasks.named('licenseMain') {
+    mustRunAfter(tasks.named('processResources'), tasks.named('generateGitProperties'))
+}
+
 // NOTE: Gradle suggested these dependencies
 jar.dependsOn resolve
 test.dependsOn resolve
 checkstyleMain.dependsOn resolve
 checkstyleTest.dependsOn resolve
 rat.dependsOn prepareInputYaml
+spotbugsMain.dependsOn resolve
 spotbugsTest.dependsOn resolve
 compileTestJava.dependsOn ':fineract-client:processResources', ':fineract-avro-schemas:processResources'
 resolveMainClassName.dependsOn resolve

@@ -26,11 +26,11 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -165,19 +165,18 @@ public class SavingsImportHandlerTest {
         firstSavingsRow.createCell(SavingsConstants.OVER_DRAFT_LIMIT_COL)
                 .setCellValue(savingsProductSheet.getRow(1).getCell(15).getNumericCellValue());
 
-        String currentdirectory = new File("").getAbsolutePath();
-        File directory = new File(currentdirectory + File.separator + "src" + File.separator + "integrationTest" + File.separator
-                + "resources" + File.separator + "bulkimport" + File.separator + "importhandler" + File.separator + "savings");
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-        File file = new File(directory + File.separator + "Savings.xls");
-        OutputStream outputStream = new FileOutputStream(file);
-        workbook.write(outputStream);
-        outputStream.close();
+        Path currentDirectory = Path.of("").toAbsolutePath();
+        Path directory = currentDirectory.resolve("src").resolve("integrationTest").resolve("resources").resolve("bulkimport")
+                .resolve("importhandler").resolve("savings");
+        Files.createDirectories(directory);
 
-        String importDocumentId = savingsAccountHelper.importSavingsTemplate(file);
-        file.delete();
+        Path file = directory.resolve("Savings.xls");
+        try (OutputStream outputStream = Files.newOutputStream(file)) {
+            workbook.write(outputStream);
+        }
+
+        String importDocumentId = savingsAccountHelper.importSavingsTemplate(file.toFile());
+        Files.deleteIfExists(file);
         Assertions.assertNotNull(importDocumentId);
 
         // Wait for the creation of output excel
@@ -185,15 +184,15 @@ public class SavingsImportHandlerTest {
 
         // check status column of output excel
         String location = savingsAccountHelper.getOutputTemplateLocation(importDocumentId);
-        FileInputStream fileInputStream = new FileInputStream(location);
-        Workbook Outputworkbook = new HSSFWorkbook(fileInputStream);
-        Sheet OutputSavingsSheet = Outputworkbook.getSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);
-        Row row = OutputSavingsSheet.getRow(1);
+        try (InputStream fileInputStream = Files.newInputStream(Path.of(location));
+                Workbook outputWorkbook = new HSSFWorkbook(fileInputStream)) {
+            Sheet outputSavingsSheet = outputWorkbook.getSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);
+            Row row = outputSavingsSheet.getRow(1);
 
-        LOG.info("Output location: {}", location);
-        LOG.info("Failure reason column: {}", row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
+            LOG.info("Output location: {}", location);
+            LOG.info("Status column: {}", row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
 
-        Assertions.assertEquals("Imported", row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
-        Outputworkbook.close();
+            Assertions.assertEquals("Imported", row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
+        }
     }
 }

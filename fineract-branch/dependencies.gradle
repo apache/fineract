@@ -71,5 +71,5 @@ dependencies {
         exclude group: 'javax.activation'
         exclude group: 'org.skyscreamer'
     }
-    testImplementation ('org.mockito:mockito-inline')
+    testImplementation ('org.mockito:mockito-core')
 }

@@ -170,7 +170,7 @@ public class EmailCampaignApiResource {
 
     }
 
-    @GET()
+    @GET
     @Path("template")
     public String template(@Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);

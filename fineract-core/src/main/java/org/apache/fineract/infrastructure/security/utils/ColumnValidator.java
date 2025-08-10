@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.security.utils;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -47,7 +46,6 @@ public class ColumnValidator {
     private final SqlValidator sqlValidator;
     private final JdbcTemplate jdbcTemplate;
 
-    @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "TODO: fix this!")
     private void validateColumn(Map<String, Set<String>> tableColumnMap) {
         Connection connection = null;
 

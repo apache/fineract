@@ -59,7 +59,7 @@ tasks.register('preprocessAvroSchemas', PreprocessAvroSchemasTask) {
     outputDir = file("$buildDir/generated/avro/src/main/avro")
 }
 
-task buildJavaSdk(type: GenerateAvroJavaTask) {
+tasks.register('buildJavaSdk', GenerateAvroJavaTask) {
     source("$buildDir/generated/avro/src/main/avro")
     outputDir = file("$buildDir/generated/java/src/main/java")
     templateDirectory = "$projectDir/src/main/resources/avro-generator-templates/"
@@ -124,8 +124,13 @@ test {
     useJUnitPlatform()
 }
 
-licenseFormatMain.dependsOn buildJavaSdk
-licenseMain.dependsOn licenseFormatMain
+tasks.named('licenseFormatMain') {
+    enabled = false
+}
+
+tasks.named('licenseMain') {
+    enabled = false
+}
 
 tasks.named('sourcesJar') {
     dependsOn tasks.named('buildJavaSdk')

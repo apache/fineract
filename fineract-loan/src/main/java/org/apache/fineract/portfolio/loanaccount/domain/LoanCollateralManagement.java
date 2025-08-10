@@ -35,7 +35,7 @@ public class LoanCollateralManagement extends AbstractPersistableCustom<Long> {
     @Column(name = "quantity", nullable = false, scale = 5, precision = 20)
     private BigDecimal quantity;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "transaction_id")
     private LoanTransaction loanTransaction = null;
 

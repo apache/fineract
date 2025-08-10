@@ -22,11 +22,11 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -77,19 +77,18 @@ public class OfficeImportHandlerTest {
         Date date = simpleDateFormat.parse("14 May 2001");
         firstOfficeRow.createCell(OfficeConstants.OPENED_ON_COL).setCellValue(date);
 
-        String currentdirectory = new File("").getAbsolutePath();
-        File directory = new File(currentdirectory + File.separator + "src" + File.separator + "integrationTest" + File.separator
-                + "resources" + File.separator + "bulkimport" + File.separator + "importhandler" + File.separator + "office");
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-        File file = new File(directory + File.separator + "Office.xls");
-        OutputStream outputStream = new FileOutputStream(file);
-        workbook.write(outputStream);
-        outputStream.close();
+        Path currentDirectory = Path.of("").toAbsolutePath();
+        Path directory = currentDirectory.resolve("src").resolve("integrationTest").resolve("resources").resolve("bulkimport")
+                .resolve("importhandler").resolve("office");
+        Files.createDirectories(directory);
 
-        String importDocumentId = officeHelper.importOfficeTemplate(file);
-        file.delete();
+        Path file = directory.resolve("Office.xls");
+        try (OutputStream outputStream = Files.newOutputStream(file)) {
+            workbook.write(outputStream);
+        }
+
+        String importDocumentId = officeHelper.importOfficeTemplate(file.toFile());
+        Files.deleteIfExists(file);
         Assertions.assertNotNull(importDocumentId);
 
         // Wait for the creation of output excel
@@ -97,15 +96,15 @@ public class OfficeImportHandlerTest {
 
         // check status column of output excel
         String location = officeHelper.getOutputTemplateLocation(importDocumentId);
-        FileInputStream fileInputStream = new FileInputStream(location);
-        Workbook outputWorkbook = new HSSFWorkbook(fileInputStream);
-        Sheet officeSheet = outputWorkbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
-        Row row = officeSheet.getRow(1);
+        try (InputStream fileInputStream = Files.newInputStream(Path.of(location));
+                Workbook outputWorkbook = new HSSFWorkbook(fileInputStream)) {
+            Sheet officeSheet = outputWorkbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
+            Row row = officeSheet.getRow(1);
 
-        LOG.info("Output location: {}", location);
-        LOG.info("Failure reason column: {}", row.getCell(OfficeConstants.STATUS_COL).getStringCellValue());
+            LOG.info("Output location: {}", location);
+            LOG.info("Status column: {}", row.getCell(OfficeConstants.STATUS_COL).getStringCellValue());
 
-        Assertions.assertEquals("Imported", row.getCell(OfficeConstants.STATUS_COL).getStringCellValue());
-        outputWorkbook.close();
+            Assertions.assertEquals("Imported", row.getCell(OfficeConstants.STATUS_COL).getStringCellValue());
+        }
     }
 }

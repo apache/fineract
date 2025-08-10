@@ -25,11 +25,12 @@ import com.lowagie.text.pdf.PdfWriter;
 import jakarta.ws.rs.core.StreamingOutput;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -194,8 +195,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             final boolean isSelfServiceUserReport) {
 
         final String fileLocation = fineractProperties.getContent().getFilesystem().getRootFolder() + File.separator + "";
-        if (!new File(fileLocation).isDirectory()) {
-            new File(fileLocation).mkdirs();
+        if (!Path.of(fileLocation).toFile().isDirectory()) {
+            Path.of(fileLocation).toFile().mkdirs();
         }
 
         final String genaratePdf = fileLocation + File.separator + reportName + ".pdf";
@@ -213,7 +214,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             final Document document = new Document(PageSize.B0.rotate());
 
             String validatedFileName = ESAPI.encoder().encodeForOS(new UnixCodec(), reportName);
-            PdfWriter.getInstance(document, new FileOutputStream(fileLocation + validatedFileName + ".pdf"));
+            PdfWriter.getInstance(document, Files.newOutputStream(Path.of(fileLocation + validatedFileName + ".pdf")));
             document.open();
 
             final PdfPTable table = new PdfPTable(chSize);

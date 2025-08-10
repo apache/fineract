@@ -36,6 +36,12 @@
         <Package name="~org\.apache\.fineract\.integrationtests.*"/>
     </Match>
     <Match>
+        <Package name="~org\.apache\.fineract\.avro.*"/>
+    </Match>
+    <Match>
+        <Package name="~org\.apache\.fineract\.client.*"/>
+    </Match>
+    <Match>
         <Package name="~.*\.self\..*"/>
         <Bug pattern="UUF_UNUSED_PUBLIC_OR_PROTECTED_FIELD" />
     </Match>

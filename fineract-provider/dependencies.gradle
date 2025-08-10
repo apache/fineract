@@ -40,7 +40,8 @@ dependencies {
     implementation(project(path: ':fineract-report'))
     implementation(project(path: ':fineract-tax'))
 
-    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
+    // Use compileOnly instead of providedRuntime in Gradle 7+
+    compileOnly 'org.springframework.boot:spring-boot-starter-tomcat'
 
     // Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
     // Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.
@@ -107,7 +108,7 @@ dependencies {
 
             'com.github.spotbugs:spotbugs-annotations',
             'io.swagger.core.v3:swagger-annotations-jakarta',
-
+            'org.postgresql:postgresql',
             'com.google.cloud.sql:mysql-socket-factory-connector-j-8',
             'com.squareup.retrofit2:converter-gson',
             'com.sun.activation:jakarta.activation',
@@ -187,7 +188,7 @@ dependencies {
     // runtimeOnly dependencies are things that Fineract code has no direct compile time dependency on, but which must be present at run-time
     runtimeOnly(
             'org.apache.bval:org.apache.bval.bundle',
-
+            'org.mariadb.jdbc:mariadb-java-client',
             // Although fineract (at the time of writing) doesn't have any compile time dep. on httpclient,
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
             'org.apache.httpcomponents:httpclient'
@@ -208,19 +209,37 @@ dependencies {
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
-    testImplementation( 'io.cucumber:cucumber-spring',
-            'io.github.classgraph:classgraph',
-            'io.cucumber:cucumber-core',
-            'io.cucumber:cucumber-java',
-            'io.cucumber:cucumber-java8',
-            'io.cucumber:cucumber-junit-platform-engine',
-            )
-    testImplementation ('org.springframework.boot:spring-boot-starter-test') {
+    testImplementation('io.cucumber:cucumber-spring') {
+        exclude group: 'org.junit.platform', module: 'junit-platform-engine' // Use version from BOM
+    }
+
+    testImplementation 'io.github.classgraph:classgraph'
+
+    testImplementation('io.cucumber:cucumber-core')
+    testImplementation('io.cucumber:cucumber-java')
+    testImplementation('io.cucumber:cucumber-java8')
+    testImplementation('io.cucumber:cucumber-junit-platform-engine')
+
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
         exclude group: 'jakarta.activation'
         exclude group: 'javax.activation'
         exclude group: 'org.skyscreamer'
     }
-    testImplementation ('org.mockito:mockito-inline')
+
+    // Use mockito-inline from the same version as mockito-core (managed by Spring Boot)
+    testImplementation 'org.mockito:mockito-core'
+
+    // Add explicit dependency on JUnit Jupiter (version managed by BOM)
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine'
+
+    // Add explicit dependency on JUnit Platform (version managed by BOM)
+    testImplementation 'org.junit.platform:junit-platform-suite-api'
+    testImplementation 'org.junit.platform:junit-platform-suite-engine'
+
+    // Add MariaDB JDBC driver for tests
+    testImplementation 'org.mariadb.jdbc:mariadb-java-client'
 }

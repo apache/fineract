@@ -125,7 +125,7 @@ dependencies {
     implementation ('org.quartz-scheduler:quartz') {
         exclude group: 'com.zaxxer', module: 'HikariCP-java7'
     }
-    testImplementation ('org.mockito:mockito-inline')
+    testImplementation ('org.mockito:mockito-core')
     implementation('org.apache.avro:avro')
     implementation(
             project(path: ':fineract-avro-schemas')

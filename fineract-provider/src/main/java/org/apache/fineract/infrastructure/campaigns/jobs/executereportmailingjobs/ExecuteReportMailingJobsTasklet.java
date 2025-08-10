@@ -22,8 +22,10 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -137,8 +139,8 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
                     final String fileLocation = fineractProperties.getContent().getFilesystem().getRootFolder() + File.separator + "";
                     final String fileNameWithoutExtension = fileLocation + File.separator + reportName;
 
-                    if (!new File(fileLocation).isDirectory()) {
-                        new File(fileLocation).mkdirs();
+                    if (!Path.of(fileLocation).toFile().isDirectory()) {
+                        Path.of(fileLocation).toFile().mkdirs();
                     }
 
                     if (byteArrayOutputStream.size() == 0) {
@@ -198,13 +200,14 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
         final Set<String> emailRecipients = this.reportMailingJobValidator.validateEmailRecipients(reportMailingJob.getEmailRecipients());
 
         try {
-            final File file = new File(fileName);
-            final FileOutputStream outputStream = new FileOutputStream(file);
+            final Path filePath = Path.of(fileName);
+            final OutputStream outputStream = Files.newOutputStream(filePath);
             byteArrayOutputStream.writeTo(outputStream);
 
             for (String emailRecipient : emailRecipients) {
                 final ReportMailingJobEmailData reportMailingJobEmailData = new ReportMailingJobEmailData().setTo(emailRecipient)
-                        .setText(reportMailingJob.getEmailMessage()).setSubject(reportMailingJob.getEmailSubject()).setAttachment(file);
+                        .setText(reportMailingJob.getEmailMessage()).setSubject(reportMailingJob.getEmailSubject())
+                        .setAttachment(filePath.toFile());
 
                 reportMailingJobEmailService.sendEmailWithAttachment(reportMailingJobEmailData);
             }

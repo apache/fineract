@@ -39,5 +39,6 @@ public interface CommandMapper {
     CommandEntity map(Command source);
 
     @InheritInverseConfiguration
+    @Mapping(ignore = true, target = "idempotencyKey")
     Command map(CommandEntity source);
 }

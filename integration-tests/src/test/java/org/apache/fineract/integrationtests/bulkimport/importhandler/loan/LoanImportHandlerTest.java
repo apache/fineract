@@ -27,11 +27,11 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -227,19 +227,18 @@ public class LoanImportHandlerTest {
         firstLoanRow.createCell(LoanConstants.CHARGE_AMOUNT_1).setCellValue(disbursementChargeJSON.getFloat("amount"));
         firstLoanRow.createCell(LoanConstants.CHARGE_AMOUNT_TYPE_1).setCellValue(disbursementChargeJSON.getString("chargeCalculationType"));
 
-        String currentdirectory = new File("").getAbsolutePath();
-        File directory = new File(currentdirectory + File.separator + "src" + File.separator + "integrationTest" + File.separator
-                + "resources" + File.separator + "bulkimport" + File.separator + "importhandler" + File.separator + "loan");
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-        File file = new File(directory + File.separator + "Loan.xls");
-        OutputStream outputStream = new FileOutputStream(file);
-        workbook.write(outputStream);
-        outputStream.close();
+        Path currentDirectory = Path.of("").toAbsolutePath();
+        Path directory = currentDirectory.resolve("src").resolve("integrationTest").resolve("resources").resolve("bulkimport")
+                .resolve("importhandler").resolve("loan");
+        Files.createDirectories(directory);
 
-        String importDocumentId = loanTransactionHelper.importLoanTemplate(file);
-        file.delete();
+        Path file = directory.resolve("Loan.xls");
+        try (OutputStream outputStream = Files.newOutputStream(file)) {
+            workbook.write(outputStream);
+        }
+
+        String importDocumentId = loanTransactionHelper.importLoanTemplate(file.toFile());
+        Files.deleteIfExists(file);
         Assertions.assertNotNull(importDocumentId);
 
         // Wait for the creation of output excel
@@ -247,15 +246,15 @@ public class LoanImportHandlerTest {
 
         // check status column of output excel
         String location = loanTransactionHelper.getOutputTemplateLocation(importDocumentId);
-        FileInputStream fileInputStream = new FileInputStream(location);
-        Workbook outputworkbook = new HSSFWorkbook(fileInputStream);
-        Sheet outputLoanSheet = outputworkbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);
-        Row row = outputLoanSheet.getRow(1);
+        try (InputStream fileInputStream = Files.newInputStream(Path.of(location));
+                Workbook outputworkbook = new HSSFWorkbook(fileInputStream)) {
+            Sheet outputLoanSheet = outputworkbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);
+            Row row = outputLoanSheet.getRow(1);
 
-        LOG.info("Output location: {}", location);
-        LOG.info("Failure reason column: {}", row.getCell(LoanConstants.FAILURE_REPORT_COL).getStringCellValue());
+            LOG.info("Output location: {}", location);
+            LOG.info("Failure reason column: {}", row.getCell(LoanConstants.FAILURE_REPORT_COL).getStringCellValue());
 
-        Assertions.assertEquals("Imported", row.getCell(LoanConstants.STATUS_COL).getStringCellValue());
-        outputworkbook.close();
+            Assertions.assertEquals("Imported", row.getCell(LoanConstants.STATUS_COL).getStringCellValue());
+        }
     }
 }

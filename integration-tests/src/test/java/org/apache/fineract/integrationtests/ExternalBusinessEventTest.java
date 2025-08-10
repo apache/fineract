@@ -100,7 +100,7 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
                 "EXTERNAL_ASSET_OWNER_TRANSFER");
     }
 
-    @Test()
+    @Test
     public void testExternalBusinessEventLoanBalanceChangedBusinessEventOnMultiDisbursedInterestBearingLoanForRepaymentAndOverpaymentAndReverseRepaymentAndFullRepayment() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 March 2023", () -> {

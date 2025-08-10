@@ -29,13 +29,13 @@ public class InstanceModeApiResourceSwagger {
     @Getter
     public static final class ChangeInstanceModeRequest {
 
-        @Schema(required = true, example = "true")
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "true")
         public boolean readEnabled;
-        @Schema(required = true, example = "true")
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "true")
         public boolean writeEnabled;
-        @Schema(required = true, example = "true")
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "true")
         public boolean batchWorkerEnabled;
-        @Schema(required = true, example = "true")
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "true")
         public boolean batchManagerEnabled;
     }
 }

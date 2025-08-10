@@ -24,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Base64;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -94,7 +95,7 @@ public class FileSystemContentRepository implements ContentRepository {
     private void deleteFileInternal(final String documentPath) {
         String sanitizedPath = pathSanitizer.sanitize(documentPath);
 
-        final File fileToBeDeleted = new File(sanitizedPath);
+        final File fileToBeDeleted = Path.of(sanitizedPath).toFile();
         final boolean fileDeleted = fileToBeDeleted.delete();
         if (!fileDeleted) {
             // no need to throw an Error, what's a caller going to do about it, so simply log a warning
@@ -106,7 +107,7 @@ public class FileSystemContentRepository implements ContentRepository {
     public FileData fetchFile(final DocumentData documentData) {
         String sanitizedPath = pathSanitizer.sanitize(documentData.getLocation());
 
-        final File file = new File(sanitizedPath);
+        final File file = Path.of(sanitizedPath).toFile();
         return new FileData(Files.asByteSource(file), documentData.getFileName(), documentData.getType());
     }
 
@@ -114,7 +115,7 @@ public class FileSystemContentRepository implements ContentRepository {
     public FileData fetchImage(final ImageData imageData) {
         String sanitizedPath = pathSanitizer.sanitize(imageData.location());
 
-        final File file = new File(sanitizedPath);
+        final File file = Path.of(sanitizedPath).toFile();
         return new FileData(Files.asByteSource(file), imageData.getEntityDisplayName(), imageData.contentType().getValue());
     }
 
@@ -147,14 +148,14 @@ public class FileSystemContentRepository implements ContentRepository {
      */
     private void makeDirectories(final String uploadDocumentLocation) throws IOException {
         String sanitizedPath = pathSanitizer.sanitize(uploadDocumentLocation);
-        Files.createParentDirs(new File(sanitizedPath));
+        Files.createParentDirs(Path.of(sanitizedPath).toFile());
     }
 
     private String writeFileToFileSystem(final String fileName, final InputStream uploadedInputStream, final String fileLocation) {
         try (BufferedInputStream bis = new BufferedInputStream(uploadedInputStream)) {
             String sanitizedPath = pathSanitizer.sanitize(fileLocation, bis);
             makeDirectories(sanitizedPath);
-            FileUtils.copyInputStreamToFile(bis, new File(sanitizedPath)); // NOSONAR
+            FileUtils.copyInputStreamToFile(bis, Path.of(sanitizedPath).toFile()); // NOSONAR
             return sanitizedPath;
         } catch (final IOException ioException) {
             log.warn("Failed to write file!", ioException);

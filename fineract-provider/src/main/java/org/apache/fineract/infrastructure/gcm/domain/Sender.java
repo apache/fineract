@@ -63,7 +63,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -703,12 +704,24 @@ public class Sender {
 
     /**
      * Gets an {@link HttpURLConnection} given an URL.
+     *
+     * @param url
+     *            the URL to connect to
+     * @return an HttpURLConnection for the URL
+     * @throws IOException
+     *             if an I/O exception occurs
+     * @throws IllegalArgumentException
+     *             if the URL is malformed
      */
     protected HttpURLConnection getConnection(String url) throws IOException {
-        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-        conn.setConnectTimeout(connectTimeout);
-        conn.setReadTimeout(readTimeout);
-        return conn;
+        try {
+            HttpURLConnection conn = (HttpURLConnection) new URI(url).toURL().openConnection();
+            conn.setConnectTimeout(connectTimeout);
+            conn.setReadTimeout(readTimeout);
+            return conn;
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Invalid URL: " + url, e);
+        }
     }
 
     /**

@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody.Part;
 import okhttp3.ResponseBody;
@@ -40,7 +41,7 @@ import retrofit2.Response;
  */
 public class DocumentTest extends IntegrationTest {
 
-    final File testFile = new File(getClass().getResource("/michael.vorburger-crepes.jpg").getFile());
+    final File testFile = Path.of(getClass().getResource("/michael.vorburger-crepes.jpg").getPath()).toFile();
 
     Long clientId = new ClientTest().getClientId();
     Long documentId;

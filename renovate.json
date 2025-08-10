@@ -92,6 +92,16 @@
     "description": "Postgres JDBC driver 42.7.5 has a performance bug: https://github.com/pgjdbc/pgjdbc/issues/3511#issuecomment-2637277977"
   },
   {
+    "matchPackageNames": ["com.github.spotbugs:spotbugs-annotations"],
+    "allowedVersions": "<=4.8.6",
+    "description": "We need Java 8 compatibility for our code."
+  },
+  {
+    "matchPackageNames": ["com.github.spotbugs"],
+    "allowedVersions": "<=6.0.26",
+    "description": "We need Java 8 compatibility for our code."
+  },
+  {
     "depTypeList": ["dependencies"],
     "updateTypes": ["patch", "minor"],
     "groupName": "non-major"

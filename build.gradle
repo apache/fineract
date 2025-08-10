@@ -117,7 +117,7 @@ plugins {
     id 'org.sonarqube' version '6.2.0.5505'
     id 'com.github.andygoossens.modernizer' version '1.11.0' apply false
     // TODO: upgrade to 6.0.4
-    id 'com.github.spotbugs' version '6.2.3' apply false
+    id 'com.github.spotbugs' version '6.0.26' apply false
     id 'se.thinkcode.cucumber-runner' version '0.0.12' apply false
     id "com.github.davidmc24.gradle.plugin.avro-base" version "1.9.1" apply false
     id 'org.openapi.generator' version '7.14.0' apply false
@@ -161,6 +161,27 @@ subprojects { subproject ->
 
 allprojects  {
     group = 'org.apache.fineract'
+    
+    // Align JUnit Platform versions across all dependencies
+    configurations.configureEach {
+        resolutionStrategy {
+            // Force JUnit Platform components to use the same version
+            eachDependency { DependencyResolveDetails details ->
+                if (details.requested.group.startsWith('org.junit.platform')) {
+                    details.useVersion '1.12.2'  // Aligned with JUnit Jupiter 5.12.2
+                }
+            }
+        }
+    }
+
+    // Exclude problematic Bouncy Castle mail modules globally
+    configurations.configureEach {
+        exclude group: 'org.bouncycastle', module: 'bcmail-jdk15on'
+        exclude group: 'org.bouncycastle', module: 'bcmail-jdk16'
+        exclude group: 'org.bouncycastle', module: 'bcmail-jdk18on'
+        exclude group: 'org.bouncycastle', module: 'bcmail-jdk15to18'
+        exclude group: 'org.bouncycastle', module: 'bcjmail-jdk18on'  // Exclude to prevent META-INF/mailcap conflicts
+    }
 
     repositories {
         mavenCentral()
@@ -248,7 +269,9 @@ allprojects  {
             "**/build.gradle.mustache",
             "**/pom.mustache",
             "**/avro/**/*.java",
-            "**/org/apache/fineract/client/**/*.java"
+            '**/*.yaml',
+            '**/*.json',
+            '**/build/**',
         ])
         strictCheck true
     }
@@ -276,6 +299,7 @@ allprojects  {
             '**/org.springframework.boot.autoconfigure.AutoConfiguration.imports',
             '**/*.json',
             '**/*.json.template',
+            '**/*.yaml',
             '**/*.txt',
             '**/*.log',
             '**/fineractdev-eclipse-preferences.epf',
@@ -384,7 +408,7 @@ configure(project.fineractJavaProjects) {
     }
 
     // Add performance optimizations
-    configurations.all {
+    configurations.configureEach {
         resolutionStrategy {
             cacheChangingModulesFor 0, 'seconds'
             cacheDynamicVersionsFor 0, 'seconds'
@@ -432,40 +456,40 @@ configure(project.fineractJavaProjects) {
     configurations {
         api.setCanBeResolved(true)
     }
-    tasks.withType(Copy) {
+    tasks.withType(Copy).configureEach {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
-    tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile).configureEach {
         options.compilerArgs += [
-            "-Xlint:cast",
-            "-Xlint:auxiliaryclass",
-            "-Xlint:dep-ann",
-            "-Xlint:divzero",
-            "-Xlint:empty",
-            "-Xlint:exports",
-            "-Xlint:fallthrough",
-            "-Xlint:finally",
-            "-Xlint:module",
-            "-Xlint:opens",
-            "-Xlint:options",
-            "-Xlint:overloads",
-            "-Xlint:overrides",
-            "-Xlint:path",
-            "-Xlint:processing",
-            "-Xlint:removal",
-            "-Xlint:requires-automatic",
-            "-Xlint:requires-transitive-automatic",
-            "-Xlint:try",
-            "-Xlint:varargs",
-            "-Xlint:preview",
-            "-Xlint:static",
-            // -Werror needs to be disabled because EclipseLink's static weaving doesn't generate warning-free code
-            // and during an IntelliJ recompilation, it fails
-            //"-Werror",
-            "-Xmaxwarns",
-            "1500",
-            "-Xmaxerrs",
-            "1500"
+                "-Xlint:cast",
+                "-Xlint:auxiliaryclass",
+                "-Xlint:dep-ann",
+                "-Xlint:divzero",
+                "-Xlint:empty",
+                "-Xlint:exports",
+                "-Xlint:fallthrough",
+                "-Xlint:finally",
+                "-Xlint:module",
+                "-Xlint:opens",
+                "-Xlint:options",
+                "-Xlint:overloads",
+                "-Xlint:overrides",
+                "-Xlint:path",
+                "-Xlint:processing",
+                "-Xlint:removal",
+                "-Xlint:requires-automatic",
+                "-Xlint:requires-transitive-automatic",
+                "-Xlint:try",
+                "-Xlint:varargs",
+                "-Xlint:preview",
+                "-Xlint:static",
+                // -Werror needs to be disabled because EclipseLink's static weaving doesn't generate warning-free code
+                // and during an IntelliJ recompilation, it fails
+                //"-Werror",
+                "-Xmaxwarns",
+                "1500",
+                "-Xmaxerrs",
+                "1500"
         ]
         // TODO FINERACT-959 (gradually) enable -Xlint:all (see "javac -help -X")
 
@@ -748,11 +772,13 @@ configure(project.fineractJavaProjects) {
         ]
     }
 
-    tasks.withType(Javadoc) {
-        options.addStringOption('Xdoclint:none', '-quiet')
-        options.encoding = 'UTF-8'
-        // Ignore any errors during javadoc generation
-        failOnError = false
+    tasks.withType(Javadoc).tap {
+        configureEach {
+            options.addStringOption('Xdoclint:none', '-quiet')
+            options.encoding = 'UTF-8'
+            // Ignore any errors during javadoc generation
+            failOnError = false
+        }
     }
 }
 
@@ -787,7 +813,7 @@ configure(project.fineractCustomProjects) {
             exclude group: 'org.skyscreamer'
         }
         testImplementation( 'org.mockito:mockito-core',
-                'org.mockito:mockito-inline',
+                'org.mockito:mockito-core',
                 'org.mockito:mockito-junit-jupiter',
                 'org.junit.jupiter:junit-jupiter-api',
                 'org.junit.jupiter:junit-jupiter-engine',
@@ -798,10 +824,10 @@ configure(project.fineractCustomProjects) {
                 'org.awaitility:awaitility',
                 'io.github.classgraph:classgraph',
                 'io.cucumber:cucumber-core',
-                'io.cucumber:cucumber-java:7.27.0',
-                'io.cucumber:cucumber-java8:7.27.0',
-                'io.cucumber:cucumber-junit-platform-engine:7.27.0',
-                'io.cucumber:cucumber-spring:7.27.0',
+                'io.cucumber:cucumber-java:7.20.1',
+                'io.cucumber:cucumber-java8:7.20.1',
+                'io.cucumber:cucumber-junit-platform-engine:7.20.1',
+                'io.cucumber:cucumber-spring:7.20.1',
                 )
 
         testCompileOnly('org.projectlombok:lombok')
@@ -878,15 +904,15 @@ configure(project.fineractPublishProjects) {
     }
 }
 
-task printSourceSetInformation() {
-    doLast{
+tasks.register('printSourceSetInformation') {
+    doLast {
         sourceSets.each { srcSet ->
-            println "["+srcSet.name+"]"
-            print "-->Source directories: "+srcSet.allJava.srcDirs+"\n"
-            print "-->Output directories: "+srcSet.output.classesDirs.files+"\n"
+            println "[" + srcSet.name + "]"
+            print "-->Source directories: " + srcSet.allJava.srcDirs + "\n"
+            print "-->Output directories: " + srcSet.output.classesDirs.files + "\n"
             print "-->Compile classpath:\n"
             srcSet.compileClasspath.files.each {
-                print "  "+it.path+"\n"
+                print "  " + it.path + "\n"
             }
             println ""
         }

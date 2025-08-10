@@ -21,7 +21,6 @@ dependencies {
     implementation(
             'org.springframework.boot:spring-boot-starter',
             'org.springframework.boot:spring-boot-starter-validation',
-            'org.springframework.boot:spring-boot-starter-data-jpa',
             'io.github.resilience4j:resilience4j-spring-boot3',
 
             'org.liquibase:liquibase-core',
@@ -39,6 +38,9 @@ dependencies {
             'org.mapstruct:mapstruct',
             'com.lmax:disruptor',
             )
+    implementation ('org.springframework.boot:spring-boot-starter-data-jpa') {
+        exclude group: 'org.hibernate'
+    }
     implementation('org.eclipse.persistence:org.eclipse.persistence.jpa') {
         exclude group: 'org.eclipse.persistence', module: 'jakarta.persistence'
     }
@@ -62,7 +64,7 @@ dependencies {
     testImplementation (
             project(':fineract-validation'),
             'org.springframework.boot:spring-boot-starter-web',
-            'org.mockito:mockito-inline',
+            'org.mockito:mockito-core',
             'org.openjdk.jmh:jmh-core',
             'org.testcontainers:junit-jupiter',
             'org.testcontainers:postgresql',

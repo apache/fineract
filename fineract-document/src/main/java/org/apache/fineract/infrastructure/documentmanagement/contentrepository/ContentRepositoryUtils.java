@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.contentrepository;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
@@ -36,6 +36,7 @@ public final class ContentRepositoryUtils {
 
     private ContentRepositoryUtils() {}
 
+    @Getter
     public enum ImageMIMEtype {
 
         GIF("image/gif"), //
@@ -48,26 +49,18 @@ public final class ContentRepositoryUtils {
             this.value = value;
         }
 
-        public String getValue() {
-            return this.value;
-        }
-
         @SuppressWarnings("UnnecessaryDefaultInEnumSwitch")
         public static ImageMIMEtype fromFileExtension(ImageFileExtension fileExtension) {
-            switch (fileExtension) {
-                case GIF:
-                    return ImageMIMEtype.GIF;
-                case JPG:
-                case JPEG:
-                    return ImageMIMEtype.JPEG;
-                case PNG:
-                    return ImageMIMEtype.PNG;
-                default:
-                    throw new IllegalArgumentException();
-            }
+            return switch (fileExtension) {
+                case GIF -> ImageMIMEtype.GIF;
+                case JPG, JPEG -> ImageMIMEtype.JPEG;
+                case PNG -> ImageMIMEtype.PNG;
+                default -> throw new IllegalArgumentException();
+            };
         }
     }
 
+    @Getter
     public enum ImageFileExtension {
 
         GIF(".gif"), //
@@ -81,28 +74,21 @@ public final class ContentRepositoryUtils {
             this.value = value;
         }
 
-        public String getValue() {
-            return this.value;
-        }
-
         public String getValueWithoutDot() {
             return this.value.substring(1);
         }
 
         public ImageFileExtension getFileExtension() {
-            switch (this) {
-                case GIF:
-                    return ImageFileExtension.GIF;
-                case JPEG:
-                    return ImageFileExtension.JPEG;
-                case PNG:
-                    return ImageFileExtension.PNG;
-                default:
-                    throw new IllegalArgumentException();
-            }
+            return switch (this) {
+                case GIF -> ImageFileExtension.GIF;
+                case JPEG -> ImageFileExtension.JPEG;
+                case PNG -> ImageFileExtension.PNG;
+                default -> throw new IllegalArgumentException();
+            };
         }
     }
 
+    @Getter
     public enum ImageDataURIsuffix {
 
         GIF("data:" + ImageMIMEtype.GIF.getValue() + ";base64,"), //
@@ -115,9 +101,6 @@ public final class ContentRepositoryUtils {
             this.value = value;
         }
 
-        public String getValue() {
-            return this.value;
-        }
     }
 
     public static ImageFileExtension imageExtensionFromFileName(String fileName) {
@@ -194,9 +177,6 @@ public final class ContentRepositoryUtils {
     /**
      * Generate a random String.
      */
-
-    @SuppressFBWarnings(value = {
-            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public static String generateRandomString() {
         final String characters = "abcdefghijklmnopqrstuvwxyz123456789";
         // length is a random number between 5 to 16

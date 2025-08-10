@@ -352,7 +352,7 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
         assertNull(result.getJournalEntryData());
     }
 
-    @RequiredArgsConstructor()
+    @RequiredArgsConstructor
     public static class ExpectedExternalTransferData {
 
         private final ExternalTransferData.StatusEnum status;
@@ -394,7 +394,7 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
         }
     }
 
-    @RequiredArgsConstructor()
+    @RequiredArgsConstructor
     public static class ExpectedJournalEntryData {
 
         private final Long glAccountId;

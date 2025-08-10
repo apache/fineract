@@ -44,7 +44,7 @@ public class JournalEntry extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "payment_details_id")
     private PaymentDetail paymentDetail;
 

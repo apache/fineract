@@ -23,7 +23,6 @@ import static org.apache.fineract.infrastructure.security.vote.SelfServiceUserAu
 import static org.springframework.security.authorization.AuthenticatedAuthorizationManager.fullyAuthenticated;
 import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAuthority;
 import static org.springframework.security.authorization.AuthorizationManagers.allOf;
-import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -68,6 +67,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 @Configuration
 @ConditionalOnProperty("fineract.security.oauth.enabled")
@@ -105,23 +105,30 @@ public class OAuth2SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http //
-                .securityMatcher(antMatcher("/api/**")).authorizeHttpRequests((auth) -> {
+                .securityMatcher(PathPatternRequestMatcher.withDefaults().matcher("/api/**")).authorizeHttpRequests((auth) -> {
                     List<AuthorizationManager<RequestAuthorizationContext>> authorizationManagers = new ArrayList<>();
                     authorizationManagers.add(fullyAuthenticated());
                     authorizationManagers.add(hasAuthority("TWOFACTOR_AUTHENTICATED"));
                     if (fineractProperties.getModule().getSelfService().isEnabled()) {
-                        auth.requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/authentication")).permitAll() //
-                                .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/registration")).permitAll() //
-                                .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/registration/user")).permitAll(); //
+                        auth.requestMatchers(
+                                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/*/self/authentication")).permitAll() //
+                                .requestMatchers(
+                                        PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/*/self/registration"))
+                                .permitAll() //
+                                .requestMatchers(
+                                        PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/*/self/registration/user"))
+                                .permitAll(); //
                         authorizationManagers.add(selfServiceUserAuthManager());
                     }
 
-                    auth.requestMatchers(antMatcher(HttpMethod.OPTIONS, "/api/**")).permitAll() //
-                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/echo")).permitAll() //
-                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/authentication")).permitAll() //
-                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated() //
-                            .requestMatchers(antMatcher("/api/*/twofactor")).fullyAuthenticated() //
-                            .requestMatchers(antMatcher("/api/**"))
+                    auth.requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.OPTIONS, "/api/**")).permitAll() //
+                            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/*/echo")).permitAll() //
+                            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/*/authentication"))
+                            .permitAll() //
+                            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/*/twofactor/validate"))
+                            .fullyAuthenticated() //
+                            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/api/*/twofactor")).fullyAuthenticated() //
+                            .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/api/**"))
                             .access(allOf(authorizationManagers.toArray(new AuthorizationManager[0]))); //
                 }).csrf(AbstractHttpConfigurer::disable) // NOSONAR only creating a service that is used by non-browser
                                                          // clients
@@ -138,7 +145,8 @@ public class OAuth2SecurityConfig {
         }
 
         if (serverProperties.getSsl().isEnabled()) {
-            http.requiresChannel(channel -> channel.requestMatchers(antMatcher("/api/**")).requiresSecure());
+            http.requiresChannel(
+                    channel -> channel.requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/api/**")).requiresSecure());
         }
 
         if (fineractProperties.getSecurity().getHsts().isEnabled()) {

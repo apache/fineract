@@ -25,11 +25,11 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -126,18 +126,16 @@ public class ClientEntityImportHandlerTest {
         firstClientRow.createCell(ClientEntityConstants.SUBMITTED_ON_COL).setCellValue(submittedDate);
         firstClientRow.createCell(ClientEntityConstants.ADDRESS_ENABLED).setCellValue("False");
 
-        File directory = new File(System.getProperty("user.home") + File.separator + "Fineract" + File.separator + "bulkimport"
-                + File.separator + "integration_tests" + File.separator + "importhandler" + File.separator + "client");
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-        File file = new File(directory + File.separator + "ClientEntity.xls");
-        OutputStream outputStream = new FileOutputStream(file);
-        workbook.write(outputStream);
-        outputStream.close();
+        Path directory = Path.of(System.getProperty("user.home"), "Fineract", "bulkimport", "integration_tests", "importhandler", "client");
+        Files.createDirectories(directory);
 
-        String importDocumentId = clientHelper.importClientEntityTemplate(file);
-        file.delete();
+        Path file = directory.resolve("ClientEntity.xls");
+        try (OutputStream outputStream = Files.newOutputStream(file)) {
+            workbook.write(outputStream);
+        }
+
+        String importDocumentId = clientHelper.importClientEntityTemplate(file.toFile());
+        Files.deleteIfExists(file);
         Assertions.assertNotNull(importDocumentId);
 
         // Wait for the creation of output excel
@@ -145,15 +143,15 @@ public class ClientEntityImportHandlerTest {
 
         // check status column of output excel
         String location = clientHelper.getOutputTemplateLocation(importDocumentId);
-        FileInputStream fileInputStream = new FileInputStream(location);
-        Workbook outputWorkbook = new HSSFWorkbook(fileInputStream);
-        Sheet outputClientEntitySheet = outputWorkbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
-        Row row = outputClientEntitySheet.getRow(1);
+        try (InputStream fileInputStream = Files.newInputStream(Path.of(location));
+                Workbook outputWorkbook = new HSSFWorkbook(fileInputStream)) {
+            Sheet outputClientEntitySheet = outputWorkbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
+            Row row = outputClientEntitySheet.getRow(1);
 
-        LOG.info("Output location: {}", location);
-        LOG.info("Failure reason column: {}", row.getCell(ClientEntityConstants.STATUS_COL).getStringCellValue());
+            LOG.info("Output location: {}", location);
+            LOG.info("Status column: {}", row.getCell(ClientEntityConstants.STATUS_COL).getStringCellValue());
 
-        Assertions.assertEquals("Imported", row.getCell(ClientEntityConstants.STATUS_COL).getStringCellValue());
-        outputWorkbook.close();
+            Assertions.assertEquals("Imported", row.getCell(ClientEntityConstants.STATUS_COL).getStringCellValue());
+        }
     }
 }

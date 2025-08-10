@@ -42,12 +42,12 @@ asciidoctorj {
     fatalWarnings missingIncludes()
 }
 
-task copyImages(type: Copy) {
+tasks.register('copyImages', Copy) {
     from "${projectDir}/src/docs/en/images"
     into "${buildDir}/generated/images"
 }
 
-task copyDiagrams(type: Copy) {
+tasks.register('copyDiagrams', Copy) {
     from "${projectDir}/src/docs/en/diagrams"
     into "${buildDir}/generated/diagrams"
 }
@@ -94,7 +94,7 @@ asciidoctorPdf {
     dependsOn(':fineract-client:clean', ':fineract-client:buildAsciidoc')
 }
 
-task doc(type: Zip) {
+tasks.register('doc', Zip) {
     dependsOn(asciidoctor, asciidoctorPdf)
 
     into("fineract-${project.version}/html") {
