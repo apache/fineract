@@ -359,36 +359,56 @@ public class AccountingProcessorHelper {
             final Integer accountTypeToBeCredited, final Long loanProductId, final Long loanId, final String transactionId,
             final LocalDate transactionDate, final BigDecimal totalAmount, final List<ChargePaymentDTO> chargePaymentDTOs) {
 
-        GLAccount receivableAccount = getLinkedGLAccountForLoanCharges(loanProductId, accountTypeToBeDebited, null);
         final Map<GLAccount, BigDecimal> creditDetailsMap = new LinkedHashMap<>();
+        final Map<GLAccount, BigDecimal> debitDetailsMap = new LinkedHashMap<>();
+
         for (final ChargePaymentDTO chargePaymentDTO : chargePaymentDTOs) {
             final Long chargeId = chargePaymentDTO.getChargeId();
-            final GLAccount chargeSpecificAccount = getLinkedGLAccountForLoanCharges(loanProductId, accountTypeToBeCredited, chargeId);
-            BigDecimal chargeSpecificAmount = chargePaymentDTO.getAmount();
+            final GLAccount chargeSpecificCreditAccount = getLinkedGLAccountForLoanCharges(loanProductId, accountTypeToBeCredited,
+                    chargeId);
+            final GLAccount chargeSpecificDebitAccount = getLinkedGLAccountForLoanCharges(loanProductId, accountTypeToBeDebited, chargeId);
+            final BigDecimal chargeSpecificAmount = chargePaymentDTO.getAmount();
 
-            // adjust net credit amount if the account is already present in the
-            // map
-            if (creditDetailsMap.containsKey(chargeSpecificAccount)) {
-                final BigDecimal existingAmount = creditDetailsMap.get(chargeSpecificAccount);
-                chargeSpecificAmount = chargeSpecificAmount.add(existingAmount);
-            }
-            creditDetailsMap.put(chargeSpecificAccount, chargeSpecificAmount);
+            // aggregate amounts by account for credit entries
+            creditDetailsMap.merge(chargeSpecificCreditAccount, chargeSpecificAmount, BigDecimal::add);
+
+            // aggregate amounts by account for debit entries
+            debitDetailsMap.merge(chargeSpecificDebitAccount, chargeSpecificAmount, BigDecimal::add);
         }
 
         BigDecimal totalCreditedAmount = BigDecimal.ZERO;
+        BigDecimal totalDebitedAmount = BigDecimal.ZERO;
+
+        // Create credit journal entries
         for (final Map.Entry<GLAccount, BigDecimal> entry : creditDetailsMap.entrySet()) {
             final GLAccount account = entry.getKey();
             final BigDecimal amount = entry.getValue();
             totalCreditedAmount = totalCreditedAmount.add(amount);
-            createDebitJournalEntryForLoan(office, currencyCode, receivableAccount, loanId, transactionId, transactionDate, amount);
             createCreditJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate, amount);
+        }
+
+        // Create debit journal entries using charge-specific debit accounts
+        for (final Map.Entry<GLAccount, BigDecimal> entry : debitDetailsMap.entrySet()) {
+            final GLAccount account = entry.getKey();
+            final BigDecimal amount = entry.getValue();
+            totalDebitedAmount = totalDebitedAmount.add(amount);
+            createDebitJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate, amount);
         }
 
         if (totalAmount.compareTo(totalCreditedAmount) != 0) {
             throw new PlatformDataIntegrityException(
-                    "Meltdown in advanced accounting...sum of all charges is not equal to the fee charge for a transaction",
-                    "Meltdown in advanced accounting...sum of all charges is not equal to the fee charge for a transaction",
+                    "Meltdown in advanced accounting...sum of all charge credits does not equal the total transaction amount",
+                    "Sum of charge credits (" + totalCreditedAmount + ") does not equal transaction total (" + totalAmount + ") for loan "
+                            + loanId + ", transaction " + transactionId,
                     totalCreditedAmount, totalAmount);
+        }
+
+        if (totalAmount.compareTo(totalDebitedAmount) != 0) {
+            throw new PlatformDataIntegrityException(
+                    "Meltdown in advanced accounting...sum of all charge debits does not equal the total transaction amount",
+                    "Sum of charge debits (" + totalDebitedAmount + ") does not equal transaction total (" + totalAmount + ") for loan "
+                            + loanId + ", transaction " + transactionId,
+                    totalDebitedAmount, totalAmount);
         }
     }
 
@@ -1098,14 +1118,14 @@ public class AccountingProcessorHelper {
          * cash and accrual based accounts
          *****/
 
-        // Vishwas TODO: remove this condition as it should always be true
-        if (accountMappingTypeId == CashAccountsForLoan.INCOME_FROM_FEES.getValue()
-                || accountMappingTypeId == CashAccountsForLoan.INCOME_FROM_PENALTIES.getValue()) {
-            final ProductToGLAccountMapping chargeSpecificIncomeAccountMapping = this.accountMappingRepository
+        // Check for charge-specific mappings for all account types (not just income accounts)
+        // This allows charge-specific GL account mappings for debit accounts as well
+        if (chargeId != null) {
+            final ProductToGLAccountMapping chargeSpecificAccountMapping = this.accountMappingRepository
                     .findProductIdAndProductTypeAndFinancialAccountTypeAndChargeId(loanProductId, PortfolioProductType.LOAN.getValue(),
                             accountMappingTypeId, chargeId);
-            if (chargeSpecificIncomeAccountMapping != null) {
-                accountMapping = chargeSpecificIncomeAccountMapping;
+            if (chargeSpecificAccountMapping != null) {
+                accountMapping = chargeSpecificAccountMapping;
             }
         }
         return accountMapping.getGlAccount();
