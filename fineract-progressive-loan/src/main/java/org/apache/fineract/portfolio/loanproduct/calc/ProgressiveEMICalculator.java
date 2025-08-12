@@ -125,8 +125,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     }
 
     private void addDisbursement(final ProgressiveLoanInterestScheduleModel scheduleModel, final EmiChangeOperation operation) {
-        scheduleModel.repaymentPeriods().stream().filter(rp -> !operation.getSubmittedOnDate().isAfter(rp.getFromDate())).forEach(
-                rp -> rp.setTotalDisbursedAmount(MathUtil.nullToZero(rp.getTotalDisbursedAmount()).add(operation.getAmount().getAmount())));
+        scheduleModel.repaymentPeriods().stream().filter(rp -> !operation.getSubmittedOnDate().isAfter(rp.getFromDate()))
+                .forEach(rp -> rp.setTotalDisbursedAmount(rp.getTotalDisbursedAmount().add(operation.getAmount().getAmount())));
 
         scheduleModel
                 .changeOutstandingBalanceAndUpdateInterestPeriods(operation.getSubmittedOnDate(), operation.getAmount(),
@@ -161,9 +161,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     }
 
     private void addCapitalizedIncome(final ProgressiveLoanInterestScheduleModel scheduleModel, final EmiChangeOperation operation) {
-        scheduleModel.repaymentPeriods().stream().filter(rp -> !operation.getSubmittedOnDate().isAfter(rp.getFromDate()))
-                .forEach(rp -> rp.setTotalCapitalizedIncomeAmount(
-                        MathUtil.nullToZero(rp.getTotalCapitalizedIncomeAmount()).add(operation.getAmount().getAmount())));
+        scheduleModel.repaymentPeriods().stream().filter(rp -> !operation.getSubmittedOnDate().isAfter(rp.getFromDate())).forEach(
+                rp -> rp.setTotalCapitalizedIncomeAmount(rp.getTotalCapitalizedIncomeAmount().add(operation.getAmount().getAmount())));
 
         scheduleModel.changeOutstandingBalanceAndUpdateInterestPeriods(operation.getSubmittedOnDate(), scheduleModel.zero(),
                 scheduleModel.zero(), operation.getAmount()).ifPresent((repaymentPeriod) -> {

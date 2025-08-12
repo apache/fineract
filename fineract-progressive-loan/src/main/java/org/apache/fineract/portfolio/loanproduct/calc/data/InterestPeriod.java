@@ -32,6 +32,7 @@ import lombok.ToString;
 import org.apache.fineract.infrastructure.core.serialization.gson.JsonExclude;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 
@@ -90,21 +91,21 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
 
     public static InterestPeriod withEmptyAmounts(@NotNull RepaymentPeriod repaymentPeriod, @NotNull LocalDate fromDate,
             LocalDate dueDate) {
-        final Money zero = repaymentPeriod.getEmi().zero();
+        final Money zero = repaymentPeriod.getZero();
         return new InterestPeriod(repaymentPeriod, fromDate, dueDate, BigDecimal.ZERO, BigDecimal.ZERO, zero, zero, zero, zero, zero, zero,
                 zero.getMc(), false);
     }
 
     public static InterestPeriod withEmptyAmounts(@NotNull RepaymentPeriod repaymentPeriod, @NotNull LocalDate fromDate, LocalDate dueDate,
             boolean isPaused) {
-        final Money zero = repaymentPeriod.getEmi().zero();
+        final Money zero = repaymentPeriod.getZero();
         return new InterestPeriod(repaymentPeriod, fromDate, dueDate, BigDecimal.ZERO, BigDecimal.ZERO, zero, zero, zero, zero, zero, zero,
                 zero.getMc(), isPaused);
     }
 
     public static InterestPeriod withPausedAndEmptyAmounts(@NotNull RepaymentPeriod repaymentPeriod, @NotNull LocalDate fromDate,
             LocalDate dueDate) {
-        final Money zero = repaymentPeriod.getEmi().zero();
+        final Money zero = repaymentPeriod.getZero();
         return new InterestPeriod(repaymentPeriod, fromDate, dueDate, BigDecimal.ZERO, BigDecimal.ZERO, zero, zero, zero, zero, zero, zero,
                 zero.getMc(), true);
     }
@@ -150,7 +151,7 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
             return BigDecimal.ZERO;
         }
         BigDecimal baseAmount = switch (method) {
-            case FLAT -> MathUtil.nullToZero(getRepaymentPeriod().calculateTotalDisbursedAndCapitalizedIncomeAmountTillGivenPeriod(this));
+            case FLAT -> getRepaymentPeriod().calculateTotalDisbursedAndCapitalizedIncomeAmountTillGivenPeriod(this);
             case DECLINING_BALANCE -> getOutstandingLoanBalance().getAmount();
             default -> throw new UnsupportedOperationException("Method not implemented: " + method);
         };
@@ -200,4 +201,41 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
     public boolean isFirstInterestPeriod() {
         return this.equals(getRepaymentPeriod().getFirstInterestPeriod());
     }
+
+    private MonetaryCurrency getCurrency() {
+        return getRepaymentPeriod().getCurrency();
+    }
+
+    public Money getCreditedPrincipal() {
+        return MathUtil.nullToZero(creditedPrincipal, getCurrency(), getMc());
+    }
+
+    public Money getCreditedInterest() {
+        return MathUtil.nullToZero(creditedInterest, getCurrency(), getMc());
+    }
+
+    public Money getDisbursementAmount() {
+        return MathUtil.nullToZero(disbursementAmount, getCurrency(), getMc());
+    }
+
+    public Money getBalanceCorrectionAmount() {
+        return MathUtil.nullToZero(balanceCorrectionAmount, getCurrency(), getMc());
+    }
+
+    public Money getOutstandingLoanBalance() {
+        return MathUtil.nullToZero(outstandingLoanBalance, getCurrency(), getMc());
+    }
+
+    public Money getCapitalizedIncomePrincipal() {
+        return MathUtil.nullToZero(capitalizedIncomePrincipal, getCurrency(), getMc());
+    }
+
+    public BigDecimal getRateFactor() {
+        return MathUtil.nullToZero(rateFactor);
+    }
+
+    public BigDecimal getRateFactorTillPeriodDueDate() {
+        return MathUtil.nullToZero(rateFactorTillPeriodDueDate);
+    }
+
 }
