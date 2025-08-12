@@ -625,7 +625,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 LocalDate recalculateFrom = null;
                 ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
                 loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
-                loanAccrualsProcessingService.reprocessExistingAccruals(loan);
+                loanAccrualsProcessingService.reprocessExistingAccruals(loan, false);
             }
 
             loan.adjustNetDisbursalAmount(loan.getProposedPrincipal());

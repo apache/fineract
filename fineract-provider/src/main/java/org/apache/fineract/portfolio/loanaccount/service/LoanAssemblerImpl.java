@@ -285,7 +285,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
         // TODO: review
         loanChargeService.recalculateAllCharges(loanApplication);
         topUpLoanConfiguration(element, loanApplication);
-        loanAccrualsProcessingService.reprocessExistingAccruals(loanApplication);
+        loanAccrualsProcessingService.reprocessExistingAccruals(loanApplication, false);
         return loanApplication;
     }
 
@@ -851,7 +851,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
 
             final LoanScheduleModel loanScheduleModel = this.calculationPlatformService.calculateLoanSchedule(query, false);
             loanSchedule.updateLoanSchedule(loan, loanScheduleModel);
-            loanAccrualsProcessingService.reprocessExistingAccruals(loan);
+            loanAccrualsProcessingService.reprocessExistingAccruals(loan, false);
             loanChargeService.recalculateAllCharges(loan);
         }
 

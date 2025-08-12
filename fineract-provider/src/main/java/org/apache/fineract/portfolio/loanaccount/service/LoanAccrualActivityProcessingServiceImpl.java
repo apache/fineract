@@ -63,6 +63,7 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
     private final LoanAccountService loanAccountService;
     private final LoanBalanceService loanBalanceService;
     private final LoanTransactionRepository loanTransactionRepository;
+    private final LoanJournalEntryPoster journalEntryPoster;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -245,6 +246,7 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
 
             loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newLoanTransaction);
             loan.addLoanTransaction(newLoanTransaction);
+            journalEntryPoster.postJournalEntriesForLoanTransaction(newLoanTransaction, false, false);
 
             LoanAdjustTransactionBusinessEvent.Data data = new LoanAdjustTransactionBusinessEvent.Data(loanTransaction);
             data.setNewTransactionDetail(newLoanTransaction);
@@ -277,6 +279,7 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
         if (newAccrualActivityTransaction != null) {
             LoanTransaction savedNewTransaction = makeAccrualActivityTransaction(loan, newAccrualActivityTransaction);
             loan.addLoanTransaction(savedNewTransaction);
+            journalEntryPoster.postJournalEntriesForLoanTransaction(savedNewTransaction, false, false);
         }
     }
 

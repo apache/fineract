@@ -117,6 +117,9 @@ public class LoanDownPaymentHandlerServiceImplTest {
     @Mock
     private LoanTransactionService loanTransactionService;
 
+    @Mock
+    private LoanJournalEntryPoster loanJournalEntryPoster;
+
     private LoanDownPaymentHandlerServiceImpl underTest;
 
     @BeforeEach
@@ -124,7 +127,7 @@ public class LoanDownPaymentHandlerServiceImplTest {
         underTest = new LoanDownPaymentHandlerServiceImpl(loanTransactionRepository, businessEventNotifierService,
                 loanDownPaymentTransactionValidator, loanScheduleService, loanRefundService, loanRefundValidator,
                 reprocessLoanTransactionsService, loanTransactionProcessingService, loanLifecycleStateMachine, loanBalanceService,
-                loanTransactionService);
+                loanTransactionService, loanJournalEntryPoster);
         moneyHelper.when(MoneyHelper::getMathContext).thenReturn(new MathContext(12, RoundingMode.UP));
         moneyHelper.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.UP);
         tempConfigServiceMock.when(TemporaryConfigurationServiceContainer::isExternalIdAutoGenerationEnabled).thenReturn(true);

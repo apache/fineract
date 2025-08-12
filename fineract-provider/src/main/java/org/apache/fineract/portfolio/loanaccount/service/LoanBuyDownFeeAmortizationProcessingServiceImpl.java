@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -59,9 +58,6 @@ public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyD
     @Override
     @Transactional
     public void processBuyDownFeeAmortizationTillDate(@NonNull Loan loan, @NonNull LocalDate tillDate, boolean addJournal) {
-        final List<Long> existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
-        final List<Long> existingReversedTransactionIds = loanTransactionRepository.findReversedTransactionIdsByLoan(loan);
-
         List<LoanBuyDownFeeBalance> balances = loanBuyDownFeeBalanceRepository.findAllByLoanId(loan.getId());
 
         LocalDate maturityDate = loan.getMaturityDate() != null ? loan.getMaturityDate()
@@ -99,7 +95,7 @@ public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyD
             loanTransactionRepository.flush();
 
             if (addJournal) {
-                journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+                journalEntryPoster.postJournalEntriesForLoanTransaction(transaction, false, false);
             }
 
             BusinessEvent<?> event = MathUtil.isGreaterThanZero(totalAmortizationAmount)
@@ -112,13 +108,6 @@ public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyD
     @Override
     @Transactional
     public void processBuyDownFeeAmortizationOnLoanClosure(@NonNull final Loan loan, final boolean addJournal) {
-        List<Long> existingTransactionIds = Collections.emptyList();
-        List<Long> existingReversedTransactionIds = Collections.emptyList();
-        if (addJournal) {
-            existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
-            existingReversedTransactionIds = loanTransactionRepository.findReversedTransactionIdsByLoan(loan);
-        }
-
         final LocalDate transactionDate = getFinalBuyDownFeeAmortizationTransactionDate(loan);
         final Optional<LoanTransaction> amortizationTransaction = createBuyDownFeeAmortizationTransaction(loan, transactionDate, false,
                 null);
@@ -130,20 +119,16 @@ public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyD
                 businessEventNotifierService
                         .notifyPostBusinessEvent(new LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent(loanTransaction));
             }
+            if (addJournal) {
+                journalEntryPoster.postJournalEntriesForLoanTransaction(amortizationTransaction.get(), false, false);
+            }
         });
-
-        if (addJournal) {
-            journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
-        }
     }
 
     @Override
     @Transactional
     public void processBuyDownFeeAmortizationOnLoanChargeOff(@NonNull final Loan loan,
             @NonNull final LoanTransaction chargeOffTransaction) {
-        final List<Long> existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
-        final List<Long> existingReversedTransactionIds = loanTransactionRepository.findReversedTransactionIdsByLoan(loan);
-
         LocalDate transactionDate = loan.getChargedOffOnDate();
         if (transactionDate == null) {
             transactionDate = DateUtils.getBusinessLocalDate();
@@ -152,7 +137,7 @@ public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyD
         final Optional<LoanTransaction> amortizationTransaction = createBuyDownFeeAmortizationTransaction(loan, transactionDate, true,
                 chargeOffTransaction);
         if (amortizationTransaction.isPresent()) {
-            journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+            journalEntryPoster.postJournalEntriesForLoanTransaction(amortizationTransaction.get(), false, false);
             if (amortizationTransaction.get().isBuyDownFeeAmortization()) {
                 businessEventNotifierService.notifyPostBusinessEvent(
                         new LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent(amortizationTransaction.get()));
@@ -167,8 +152,6 @@ public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyD
     @Transactional
     public void processBuyDownFeeAmortizationOnLoanUndoChargeOff(@NonNull final LoanTransaction loanTransaction) {
         final Loan loan = loanTransaction.getLoan();
-        final List<Long> existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
-        final List<Long> existingReversedTransactionIds = loanTransactionRepository.findReversedTransactionIdsByLoan(loan);
 
         loan.getLoanTransactions().stream().filter(LoanTransaction::isBuyDownFeeAmortization)
                 .filter(transaction -> transaction.getTransactionDate().equals(loanTransaction.getTransactionDate())
@@ -177,17 +160,15 @@ public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyD
                                         && rel.getToTransaction().equals(loanTransaction)))
                 .forEach(transaction -> {
                     transaction.reverse();
+                    journalEntryPoster.postJournalEntriesForLoanTransaction(transaction, false, false);
                     final LoanAdjustTransactionBusinessEvent.Data data = new LoanAdjustTransactionBusinessEvent.Data(transaction);
                     businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(data));
-
                 });
 
         for (LoanBuyDownFeeBalance balance : loanBuyDownFeeBalanceRepository.findAllByLoanId(loan.getId())) {
             balance.setUnrecognizedAmount(balance.getChargedOffAmount());
             balance.setChargedOffAmount(BigDecimal.ZERO);
         }
-
-        journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
     }
 
     private Optional<LoanTransaction> createBuyDownFeeAmortizationTransaction(final Loan loan, final LocalDate transactionDate,

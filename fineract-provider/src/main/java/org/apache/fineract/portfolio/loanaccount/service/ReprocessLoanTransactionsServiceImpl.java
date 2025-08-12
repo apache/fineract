@@ -24,6 +24,10 @@ import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.interestpauses.service.LoanAccountTransfersService;
@@ -56,6 +60,8 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
     private final LoanBalanceService loanBalanceService;
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanTransactionService loanTransactionService;
+    private final LoanJournalEntryPoster loanJournalEntryPoster;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Override
     public void reprocessTransactions(final Loan loan) {
@@ -191,8 +197,19 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
 
             loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newTransaction);
 
+            // Create journal entries for new transaction
+            loanJournalEntryPoster.postJournalEntriesForLoanTransaction(newTransaction, false, false);
+            if (oldTransaction == null && (newTransaction.isAccrual() || newTransaction.isAccrualAdjustment())) {
+                final LoanTransactionBusinessEvent businessEvent = newTransaction.isAccrual()
+                        ? new LoanAccrualTransactionCreatedBusinessEvent(newTransaction)
+                        : new LoanAccrualAdjustmentTransactionBusinessEvent(newTransaction);
+                businessEventNotifierService.notifyPostBusinessEvent(businessEvent);
+            }
+
             if (oldTransaction != null) {
                 loanAccountTransfersService.updateLoanTransaction(oldTransaction.getId(), newTransaction);
+                // Create reversal journal entries for old transaction if it exists (reverse-replay scenario)
+                loanJournalEntryPoster.postJournalEntriesForLoanTransaction(oldTransaction, false, false);
             }
         }
         replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);

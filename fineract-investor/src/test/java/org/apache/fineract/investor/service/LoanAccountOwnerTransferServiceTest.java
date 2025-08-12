@@ -50,6 +50,7 @@ import org.apache.fineract.investor.domain.LoanOwnershipTransferBusinessEvent;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
+import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -82,6 +83,8 @@ public class LoanAccountOwnerTransferServiceTest {
     private BusinessEventNotifierService businessEventNotifierService;
     @Mock
     private ExternalAssetOwnerTransferOutstandingInterestCalculation externalAssetOwnerTransferOutstandingInterestCalculation;
+    @Mock
+    private LoanJournalEntryPoster loanJournalEntryPoster;
 
     @InjectMocks
     private LoanAccountOwnerTransferServiceImpl underTest;

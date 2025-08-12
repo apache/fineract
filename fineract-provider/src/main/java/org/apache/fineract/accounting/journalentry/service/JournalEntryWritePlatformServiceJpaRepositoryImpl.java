@@ -78,13 +78,24 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.investor.domain.ExternalAssetOwner;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerRepository;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerNotFoundException;
 import org.apache.fineract.investor.service.AccountingService;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeDataDTO;
+import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeLoanTransactionDTO;
+import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByDTO;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
+import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -787,6 +798,160 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     public void createJournalEntriesForClientTransactions(Map<String, Object> accountingBridgeData) {
         final ClientTransactionDTO clientTransactionDTO = this.helper.populateClientTransactionDtoFromMap(accountingBridgeData);
         accountingProcessorForClientTransactions.createJournalEntriesForClientTransaction(clientTransactionDTO);
+    }
+
+    @Transactional
+    @Override
+    public void createJournalEntriesForLoanTransaction(final LoanTransaction loanTransaction, final boolean isAccountTransfer,
+            final boolean isLoanToLoanTransfer) {
+        final Loan loan = loanTransaction.getLoan();
+
+        // Check if accounting is enabled for this loan
+        if (!loan.isCashBasedAccountingEnabledOnLoanProduct() && !loan.isUpfrontAccrualAccountingEnabledOnLoanProduct()
+                && !loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
+            return; // No accounting enabled, skip journal entry creation
+        }
+
+        final AccountingBridgeDataDTO accountingBridgeData = createAccountingBridgeDataForSingleTransaction(loanTransaction,
+                isAccountTransfer);
+
+        if (isLoanToLoanTransfer) {
+            accountingBridgeData.getNewLoanTransactions().forEach(tx -> tx.setLoanToLoanTransfer(true));
+        }
+
+        this.createJournalEntriesForLoan(accountingBridgeData);
+    }
+
+    @Transactional
+    @Override
+    public void createJournalEntriesForExternalOwnerTransfer(final Loan loan, final ExternalAssetOwnerTransfer externalAssetOwnerTransfer,
+            final ExternalAssetOwner previousOwner) {
+        final boolean isBuyback = externalAssetOwnerTransfer.getStatus().name().contains("BUYBACK");
+
+        if (isBuyback) {
+            this.accountingService.createJournalEntriesForBuybackAssetTransfer(loan, externalAssetOwnerTransfer);
+        } else {
+            this.accountingService.createJournalEntriesForSaleAssetTransfer(loan, externalAssetOwnerTransfer, previousOwner);
+        }
+    }
+
+    /**
+     * Create AccountingBridgeDataDTO for a single loan transaction This converts a single LoanTransaction to the format
+     * expected by existing journal entry logic
+     */
+    private AccountingBridgeDataDTO createAccountingBridgeDataForSingleTransaction(final LoanTransaction loanTransaction,
+            final boolean isAccountTransfer) {
+        final Loan loan = loanTransaction.getLoan();
+        final String currencyCode = loan.getCurrencyCode();
+
+        final AccountingBridgeLoanTransactionDTO transactionDTO = convertToAccountingBridgeTransaction(loanTransaction);
+
+        final List<AccountingBridgeLoanTransactionDTO> transactions = new ArrayList<>();
+        transactions.add(transactionDTO);
+
+        boolean wasChargedOffAtTransactionTime = loan.isChargedOff();
+        if (loan.isChargedOff() && loan.getChargedOffOnDate() != null) {
+            // If transaction date is before charge-off date, treat as non-charged-off
+            if (loanTransaction.getTransactionDate().isBefore(loan.getChargedOffOnDate())) {
+                wasChargedOffAtTransactionTime = false;
+            }
+        }
+
+        return new AccountingBridgeDataDTO(loan.getId(), loan.productId(), loan.getOfficeId(), currencyCode,
+                loan.getSummary().getTotalInterestCharged(), loan.isCashBasedAccountingEnabledOnLoanProduct(),
+                loan.isUpfrontAccrualAccountingEnabledOnLoanProduct(), loan.isPeriodicAccrualAccountingEnabledOnLoanProduct(),
+                isAccountTransfer, wasChargedOffAtTransactionTime, loan.isFraud(), loan.fetchChargeOffReasonId(), loan.isClosedWrittenOff(),
+                transactions, loan.getLoanProductRelatedDetail().isMerchantBuyDownFee());
+    }
+
+    /**
+     * Convert LoanTransaction to AccountingBridgeLoanTransactionDTO
+     */
+    private AccountingBridgeLoanTransactionDTO convertToAccountingBridgeTransaction(LoanTransaction loanTransaction) {
+        final MonetaryCurrency currency = loanTransaction.getLoan().getCurrency();
+        final AccountingBridgeLoanTransactionDTO transactionDTO = new AccountingBridgeLoanTransactionDTO();
+
+        transactionDTO.setId(loanTransaction.getId());
+        transactionDTO.setOfficeId(loanTransaction.getOffice().getId());
+        transactionDTO.setType(LoanEnumerations.transactionType(loanTransaction.getTypeOf()));
+        transactionDTO.setReversed(loanTransaction.isReversed());
+        transactionDTO.setDate(loanTransaction.getTransactionDate());
+        transactionDTO.setCurrencyCode(currency.getCode());
+        transactionDTO.setAmount(loanTransaction.getAmount());
+        transactionDTO.setNetDisbursalAmount(loanTransaction.getLoan().getNetDisbursalAmount());
+
+        // Handle principalPortion for chargeback
+        if (transactionDTO.getType().isChargeback() && (loanTransaction.getLoan().getCreditAllocationRules() == null
+                || loanTransaction.getLoan().getCreditAllocationRules().isEmpty())) {
+            transactionDTO.setPrincipalPortion(loanTransaction.getAmount());
+        } else {
+            transactionDTO.setPrincipalPortion(loanTransaction.getPrincipalPortion());
+        }
+
+        transactionDTO.setInterestPortion(loanTransaction.getInterestPortion());
+        transactionDTO.setFeeChargesPortion(loanTransaction.getFeeChargesPortion());
+        transactionDTO.setPenaltyChargesPortion(loanTransaction.getPenaltyChargesPortion());
+        transactionDTO.setOverPaymentPortion(loanTransaction.getOverPaymentPortion());
+
+        // Handle ChargeRefund transactions
+        if (transactionDTO.getType().isChargeRefund()) {
+            transactionDTO.setChargeRefundChargeType(loanTransaction.getChargeRefundChargeType());
+        }
+
+        if (loanTransaction.getPaymentDetail() != null) {
+            transactionDTO.setPaymentTypeId(loanTransaction.getPaymentDetail().getPaymentType().getId());
+        }
+
+        // Populate loanChargesPaid from the transaction
+        if (!loanTransaction.getLoanChargesPaid().isEmpty()) {
+            List<LoanChargePaidByDTO> loanChargesPaidData = new ArrayList<>();
+            for (final LoanChargePaidBy chargePaidBy : loanTransaction.getLoanChargesPaid()) {
+                final LoanChargePaidByDTO loanChargePaidData = new LoanChargePaidByDTO();
+                loanChargePaidData.setChargeId(chargePaidBy.getLoanCharge().getCharge().getId());
+                loanChargePaidData.setIsPenalty(chargePaidBy.getLoanCharge().isPenaltyCharge());
+                loanChargePaidData.setLoanChargeId(chargePaidBy.getLoanCharge().getId());
+                loanChargePaidData.setAmount(chargePaidBy.getAmount());
+                loanChargePaidData.setInstallmentNumber(chargePaidBy.getInstallmentNumber());
+
+                loanChargesPaidData.add(loanChargePaidData);
+            }
+            transactionDTO.setLoanChargesPaid(loanChargesPaidData);
+        }
+
+        // Handle chargeback principalPaid/feePaid/penaltyPaid
+        if (transactionDTO.getType().isChargeback() && loanTransaction.getOverPaymentPortion() != null
+                && loanTransaction.getOverPaymentPortion().compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal principalPaid = loanTransaction.getOverPaymentPortion();
+            BigDecimal feePaid = BigDecimal.ZERO;
+            BigDecimal penaltyPaid = BigDecimal.ZERO;
+            if (!loanTransaction.getLoanTransactionToRepaymentScheduleMappings().isEmpty()) {
+                principalPaid = loanTransaction.getLoanTransactionToRepaymentScheduleMappings().stream()
+                        .map(mapping -> Optional.ofNullable(mapping.getPrincipalPortion()).orElse(BigDecimal.ZERO))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                feePaid = loanTransaction.getLoanTransactionToRepaymentScheduleMappings().stream()
+                        .map(mapping -> Optional.ofNullable(mapping.getFeeChargesPortion()).orElse(BigDecimal.ZERO))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                penaltyPaid = loanTransaction.getLoanTransactionToRepaymentScheduleMappings().stream()
+                        .map(mapping -> Optional.ofNullable(mapping.getPenaltyChargesPortion()).orElse(BigDecimal.ZERO))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+            }
+            transactionDTO.setPrincipalPaid(principalPaid);
+            transactionDTO.setFeePaid(feePaid);
+            transactionDTO.setPenaltyPaid(penaltyPaid);
+        }
+
+        // Populate loanChargeData for CHARGE_ADJUSTMENT transactions
+        LoanTransactionRelation loanTransactionRelation = loanTransaction.getLoanTransactionRelations().stream()
+                .filter(e -> LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT.equals(e.getRelationType())).findAny().orElse(null);
+        if (loanTransactionRelation != null) {
+            LoanCharge loanCharge = loanTransactionRelation.getToCharge();
+            transactionDTO.setLoanChargeData(loanCharge.toData());
+        }
+
+        // Set loanToLoanTransfer
+        transactionDTO.setLoanToLoanTransfer(false);
+
+        return transactionDTO;
     }
 
     private static class OfficeCurrencyKey {
