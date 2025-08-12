@@ -32,30 +32,30 @@ import org.springframework.lang.NonNull;
 @Getter
 public class ChangeOperation implements Comparable<ChangeOperation> {
 
-    private final Optional<LoanTermVariationsData> interestRateChange;
+    private final Optional<LoanTermVariationsData> loanTermVariationsData;
     private final Optional<LoanCharge> loanCharge;
     private final Optional<LoanTransaction> loanTransaction;
 
     public ChangeOperation(LoanCharge loanCharge) {
-        this.interestRateChange = Optional.empty();
+        this.loanTermVariationsData = Optional.empty();
         this.loanCharge = Optional.of(loanCharge);
         this.loanTransaction = Optional.empty();
     }
 
     public ChangeOperation(LoanTransaction loanTransaction) {
-        this.interestRateChange = Optional.empty();
+        this.loanTermVariationsData = Optional.empty();
         this.loanTransaction = Optional.of(loanTransaction);
         this.loanCharge = Optional.empty();
     }
 
-    public ChangeOperation(LoanTermVariationsData interestRateChange) {
-        this.interestRateChange = Optional.of(interestRateChange);
+    public ChangeOperation(LoanTermVariationsData loanTermVariationsData) {
+        this.loanTermVariationsData = Optional.of(loanTermVariationsData);
         this.loanTransaction = Optional.empty();
         this.loanCharge = Optional.empty();
     }
 
-    public boolean isInterestRateChange() {
-        return interestRateChange.isPresent();
+    public boolean isLoanTermVariationsData() {
+        return loanTermVariationsData.isPresent();
     }
 
     public boolean isTransaction() {
@@ -80,7 +80,7 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
     }
 
     private LocalDate getEffectiveDate() {
-        if (interestRateChange.isPresent()) {
+        if (loanTermVariationsData.isPresent()) {
             return getSubmittedOnDate();
         } else if (loanCharge.isPresent()) {
             if (isBackdatedCharge()) {
@@ -98,8 +98,8 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
     }
 
     private LocalDate getSubmittedOnDate() {
-        if (interestRateChange.isPresent()) {
-            return interestRateChange.get().getTermVariationApplicableFrom();
+        if (loanTermVariationsData.isPresent()) {
+            return loanTermVariationsData.get().getTermVariationApplicableFrom();
         } else if (loanCharge.isPresent()) {
             return loanCharge.get().getSubmittedOnDate();
         } else if (loanTransaction.isPresent()) {
@@ -110,7 +110,7 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
     }
 
     private OffsetDateTime getCreatedDateTime() {
-        if (interestRateChange.isPresent()) {
+        if (loanTermVariationsData.isPresent()) {
             return DateUtils.getOffsetDateTimeOfTenantFromLocalDate(getSubmittedOnDate());
         } else if (loanCharge.isPresent() && loanCharge.get().getCreatedDate().isPresent()) {
             return loanCharge.get().getCreatedDate().get();
