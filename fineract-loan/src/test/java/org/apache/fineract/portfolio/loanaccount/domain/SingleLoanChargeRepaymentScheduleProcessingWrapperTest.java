@@ -69,8 +69,7 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapperTest {
     private ArgumentCaptor<Money> penaltyChargesWrittenOff = ArgumentCaptor.forClass(Money.class);
 
     private final LoanChargeService loanChargeService = new LoanChargeService(mock(LoanChargeValidator.class),
-            mock(LoanTransactionProcessingService.class), mock(LoanLifecycleStateMachine.class), mock(LoanBalanceService.class),
-            mock(LoanTransactionRepository.class));
+            mock(LoanTransactionProcessingService.class), mock(LoanLifecycleStateMachine.class), mock(LoanBalanceService.class));
 
     @BeforeAll
     public static void init() {

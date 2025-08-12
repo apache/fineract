@@ -20,9 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -77,8 +75,6 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
 
-        final List<Long> existingTransactionIds = new ArrayList<>(loanTransactionRepository.findTransactionIdsByLoan(loan));
-        final List<Long> existingReversedTransactionIds = new ArrayList<>(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
         final Map<String, Object> changes = new LinkedHashMap<>();
 
         // Create payment details
@@ -109,8 +105,7 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
             noteWritePlatformService.createLoanTransactionNote(buyDownFeeTransaction.getId(), noteText);
         }
 
-        // Post journal entries
-        loanJournalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+        loanJournalEntryPoster.postJournalEntriesForLoanTransaction(buyDownFeeTransaction, false, false);
 
         // Notify business events
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBuyDownFeeTransactionCreatedBusinessEvent(buyDownFeeTransaction));
@@ -131,8 +126,6 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
 
-        final List<Long> existingTransactionIds = new ArrayList<>(loanTransactionRepository.findTransactionIdsByLoan(loan));
-        final List<Long> existingReversedTransactionIds = new ArrayList<>(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
         final Map<String, Object> changes = new LinkedHashMap<>();
 
         // Create payment details
@@ -178,8 +171,8 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
         if (StringUtils.isNotBlank(noteText)) {
             noteWritePlatformService.createLoanTransactionNote(savedBuyDownFeeAdjustment.getId(), noteText);
         }
-        // Post journal entries
-        loanJournalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+
+        loanJournalEntryPoster.postJournalEntriesForLoanTransaction(savedBuyDownFeeAdjustment, false, false);
 
         // Notify business events
         businessEventNotifierService

@@ -32,7 +32,6 @@ import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -47,9 +46,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalance
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanRescheduledDueAdjustScheduleBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
-import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeDataDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -72,14 +69,12 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepayme
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleHistoryWritePlatformService;
-import org.apache.fineract.portfolio.loanaccount.mapper.LoanAccountingBridgeMapper;
 import org.apache.fineract.portfolio.loanaccount.mapper.LoanTermVariationsMapper;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidator;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.exception.LoanRescheduleRequestNotFoundException;
-import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualTransactionBusinessEventService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
@@ -108,20 +103,17 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     private final LoanRescheduleRequestRepository loanRescheduleRequestRepository;
     private final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository;
     private final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService;
-    private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanAssembler loanAssembler;
     private final LoanUtilService loanUtilService;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final LoanScheduleGeneratorFactory loanScheduleFactory;
     private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
-    private final LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
     private final LoanChargeService loanChargeService;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final LoanTermVariationsMapper loanTermVariationsMapper;
-    private final LoanAccountingBridgeMapper loanAccountingBridgeMapper;
     private final LoanScheduleComponent loanSchedule;
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanLifecycleStateMachine loanLifecycleStateMachine;
@@ -355,9 +347,6 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             changes.put("approvedByUserId", appUser.getId());
 
             Loan loan = loanRescheduleRequest.getLoan();
-            final List<Long> existingTransactionIds = new ArrayList<>(loanTransactionRepository.findTransactionIdsByLoan(loan));
-            final List<Long> existingReversedTransactionIds = new ArrayList<>(
-                    loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
 
             ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan,
                     loanRescheduleRequest.getRescheduleFromDate());
@@ -442,7 +431,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             } else {
                 loanSchedule.updateLoanSchedule(loan, loanScheduleDTO.getLoanScheduleModel());
             }
-            loanAccrualsProcessingService.reprocessExistingAccruals(loan);
+            loanAccrualsProcessingService.reprocessExistingAccruals(loan, true);
             loanChargeService.recalculateAllCharges(loan);
             reprocessLoanTransactionsService.reprocessTransactions(loan);
 
@@ -460,11 +449,9 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             }
             loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
-            loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, true, false);
+            loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, true, true);
             businessEventNotifierService.notifyPostBusinessEvent(new LoanRescheduledDueAdjustScheduleBusinessEvent(loan));
 
-            postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
-            loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
             if (hasInterestRateChange) {
                 businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
             }
@@ -505,14 +492,6 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             }
             throw e;
         }
-    }
-
-    private void postJournalEntries(Loan loan, List<Long> existingTransactionIds, List<Long> existingReversedTransactionIds) {
-        final MonetaryCurrency currency = loan.getCurrency();
-        boolean isAccountTransfer = false;
-        final AccountingBridgeDataDTO accountingBridgeData = loanAccountingBridgeMapper.deriveAccountingBridgeData(currency.getCode(),
-                existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, loan);
-        this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
     }
 
     @Override

@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -62,13 +61,6 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
     @Override
     @Transactional
     public void processCapitalizedIncomeAmortizationOnLoanClosure(@NotNull final Loan loan, final boolean addJournal) {
-        List<Long> existingTransactionIds = Collections.emptyList();
-        List<Long> existingReversedTransactionIds = Collections.emptyList();
-        if (addJournal) {
-            existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
-            existingReversedTransactionIds = loanTransactionRepository.findReversedTransactionIdsByLoan(loan);
-        }
-
         final LocalDate transactionDate = getFinalCapitalizedIncomeAmortizationTransactionDate(loan);
         final Optional<LoanTransaction> amortizationTransaction = createCapitalizedIncomeAmortizationTransaction(loan, transactionDate,
                 false, null);
@@ -80,20 +72,16 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
                 businessEventNotifierService.notifyPostBusinessEvent(
                         new LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent(loanTransaction));
             }
+            if (addJournal) {
+                journalEntryPoster.postJournalEntriesForLoanTransaction(amortizationTransaction.get(), false, false);
+            }
         });
-
-        if (addJournal) {
-            journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
-        }
     }
 
     @Override
     @Transactional
     public void processCapitalizedIncomeAmortizationOnLoanChargeOff(@NotNull final Loan loan,
             @NonNull final LoanTransaction chargeOffTransaction) {
-        final List<Long> existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
-        final List<Long> existingReversedTransactionIds = loanTransactionRepository.findReversedTransactionIdsByLoan(loan);
-
         LocalDate transactionDate = loan.getChargedOffOnDate();
         if (transactionDate == null) {
             transactionDate = DateUtils.getBusinessLocalDate();
@@ -102,7 +90,7 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
         final Optional<LoanTransaction> amortizationTransaction = createCapitalizedIncomeAmortizationTransaction(loan, transactionDate,
                 true, chargeOffTransaction);
         if (amortizationTransaction.isPresent()) {
-            journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+            journalEntryPoster.postJournalEntriesForLoanTransaction(amortizationTransaction.get(), false, false);
             if (amortizationTransaction.get().isCapitalizedIncomeAmortization()) {
                 businessEventNotifierService.notifyPostBusinessEvent(
                         new LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent(amortizationTransaction.get()));
@@ -162,8 +150,6 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
     @Transactional
     public void processCapitalizedIncomeAmortizationOnLoanUndoChargeOff(@NotNull final LoanTransaction loanTransaction) {
         final Loan loan = loanTransaction.getLoan();
-        final List<Long> existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
-        final List<Long> existingReversedTransactionIds = loanTransactionRepository.findReversedTransactionIdsByLoan(loan);
 
         loan.getLoanTransactions().stream().filter(LoanTransaction::isCapitalizedIncomeAmortization)
                 .filter(transaction -> transaction.getTransactionDate().equals(loanTransaction.getTransactionDate())
@@ -174,24 +160,19 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
                     transaction.reverse();
                     final LoanAdjustTransactionBusinessEvent.Data data = new LoanAdjustTransactionBusinessEvent.Data(transaction);
                     businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(data));
-
+                    journalEntryPoster.postJournalEntriesForLoanTransaction(transaction, false, false);
                 });
 
         for (LoanCapitalizedIncomeBalance balance : loanCapitalizedIncomeBalanceRepository.findAllByLoanId(loan.getId())) {
             balance.setUnrecognizedAmount(balance.getChargedOffAmount());
             balance.setChargedOffAmount(BigDecimal.ZERO);
         }
-
-        journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
     }
 
     @Override
     @Transactional
     public void processCapitalizedIncomeAmortizationTillDate(@NonNull final Loan loan, @NonNull final LocalDate tillDate,
             final boolean addJournal) {
-        final List<Long> existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
-        final List<Long> existingReversedTransactionIds = loanTransactionRepository.findReversedTransactionIdsByLoan(loan);
-
         List<LoanCapitalizedIncomeBalance> balances = loanCapitalizedIncomeBalanceRepository.findAllByLoanId(loan.getId());
 
         LocalDate maturityDate = loan.getMaturityDate() != null ? loan.getMaturityDate()
@@ -229,7 +210,7 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
             loanTransactionRepository.flush();
 
             if (addJournal) {
-                journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+                journalEntryPoster.postJournalEntriesForLoanTransaction(transaction, false, false);
             }
 
             BusinessEvent<?> event = MathUtil.isGreaterThanZero(totalAmortizationAmount)

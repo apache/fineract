@@ -39,11 +39,11 @@ import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMapping
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMappingRepository;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
 import org.apache.fineract.investor.domain.LoanOwnershipTransferBusinessEvent;
-import org.apache.fineract.investor.service.AccountingService;
 import org.apache.fineract.investor.service.DelayedSettlementAttributeService;
 import org.apache.fineract.investor.service.ExternalAssetOwnerTransferOutstandingInterestCalculation;
 import org.apache.fineract.investor.service.LoanTransferabilityService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -61,7 +61,7 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
             ExternalTransferStatus.BUYBACK);
     private final ExternalAssetOwnerTransferRepository externalAssetOwnerTransferRepository;
     private final ExternalAssetOwnerTransferLoanMappingRepository externalAssetOwnerTransferLoanMappingRepository;
-    private final AccountingService accountingService;
+    private final LoanJournalEntryPoster loanJournalEntryPoster;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanTransferabilityService loanTransferabilityService;
     private final DelayedSettlementAttributeService delayedSettlementAttributeService;
@@ -148,7 +148,7 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
         externalAssetOwnerTransferRepository.save(activeExternalAssetOwnerTransfer);
         buybackExternalAssetOwnerTransfer = externalAssetOwnerTransferRepository.save(buybackExternalAssetOwnerTransfer);
         externalAssetOwnerTransferLoanMappingRepository.deleteByLoanIdAndOwnerTransfer(loan.getId(), activeExternalAssetOwnerTransfer);
-        accountingService.createJournalEntriesForBuybackAssetTransfer(loan, buybackExternalAssetOwnerTransfer);
+        loanJournalEntryPoster.postJournalEntriesForExternalOwnerTransfer(loan, buybackExternalAssetOwnerTransfer, null);
         return buybackExternalAssetOwnerTransfer;
     }
 
@@ -174,7 +174,7 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
         ExternalTransferStatus activeStatus = determineActiveStatus(externalAssetOwnerTransfer);
 
         ExternalAssetOwnerTransfer newTransfer = activatePendingEntry(settlementDate, externalAssetOwnerTransfer, activeStatus);
-        accountingService.createJournalEntriesForSaleAssetTransfer(loan, newTransfer, previousOwner);
+        loanJournalEntryPoster.postJournalEntriesForExternalOwnerTransfer(loan, newTransfer, previousOwner);
         return newTransfer;
     }
 

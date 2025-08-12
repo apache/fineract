@@ -131,8 +131,7 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
     private AvroDateTimeMapper mapper;
 
     private final LoanChargeService loanChargeService = new LoanChargeService(mock(LoanChargeValidator.class),
-            mock(LoanTransactionProcessingService.class), mock(LoanLifecycleStateMachine.class), mock(LoanBalanceService.class),
-            mock(LoanTransactionRepository.class));
+            mock(LoanTransactionProcessingService.class), mock(LoanLifecycleStateMachine.class), mock(LoanBalanceService.class));
 
     private MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
 
