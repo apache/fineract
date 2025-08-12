@@ -3953,6 +3953,225 @@ class ProgressiveEMICalculatorTest {
         }
     }
 
+    @Nested
+    public class RescheduleInstallmentExtendRepaymentPeriod {
+
+        @BeforeEach
+        void beforeEach() {
+            Mockito.when(loanProductRelatedDetail.getInterestMethod()).thenReturn(InterestMethod.DECLINING_BALANCE);
+            Mockito.when(loanProductRelatedDetail.getInterestCalculationPeriodMethod()).thenReturn(InterestCalculationPeriodMethod.DAILY);
+            Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+            Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+            Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(BigDecimal.valueOf(12.0));
+            Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+            Mockito.when(loanProductRelatedDetail.getNumberOfRepayments()).thenReturn(3);
+            Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        }
+
+        @Test
+        public void testExtraTermsDecliningBalance() {
+            final LocalDate disbursementDate = LocalDate.of(2024, 6, 1);
+            final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = generateExpectedRepaymentPeriods(disbursementDate);
+            final Integer installmentAmountInMultiplesOf = null;
+
+            final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator.generatePeriodInterestScheduleModel(
+                    expectedRepaymentPeriods, loanProductRelatedDetail, List.of(), installmentAmountInMultiplesOf, mc);
+
+            emiCalculator.addDisbursement(interestSchedule, disbursementDate, toMoney(1000));
+
+            checkPeriod(interestSchedule, 0, 340.02, 10.00, 330.02, 669.98, false); //
+            checkPeriod(interestSchedule, 1, 340.02, 6.70, 333.32, 336.66, false); //
+            checkPeriod(interestSchedule, 2, 340.03, 3.37, 336.66, 0.00, false); //
+
+            // add extra repayment period 1
+            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 7, 2), 1);
+
+            checkPeriod(interestSchedule, 0, 340.02, 10.00, 330.02, 669.98, false); //
+            checkPeriod(interestSchedule, 1, 227.81, 6.70, 221.11, 448.87, false); //
+            checkPeriod(interestSchedule, 2, 227.81, 4.49, 223.32, 225.55, false); //
+            checkPeriod(interestSchedule, 3, 227.81, 2.26, 225.55, 0.00, false); //
+
+            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 8, 2), 2);
+
+            checkPeriod(interestSchedule, 0, 340.02, 10.00, 330.02, 669.98, false); //
+            checkPeriod(interestSchedule, 1, 227.81, 6.70, 221.11, 448.87, false); //
+            checkPeriod(interestSchedule, 2, 115.04, 4.49, 110.55, 338.32, false); //
+            checkPeriod(interestSchedule, 3, 115.04, 3.38, 111.66, 226.66, false); //
+            checkPeriod(interestSchedule, 4, 115.04, 2.27, 112.77, 113.89, false); //
+            checkPeriod(interestSchedule, 5, 115.03, 1.14, 113.89, 0.00, false); //
+
+        }
+
+        @Test
+        public void testExtraTermsFlat() {
+            final LocalDate disbursementDate = LocalDate.of(2024, 6, 1);
+            final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = generateExpectedRepaymentPeriods(disbursementDate);
+            final Integer installmentAmountInMultiplesOf = null;
+
+            Mockito.when(loanProductRelatedDetail.getInterestMethod()).thenReturn(InterestMethod.FLAT);
+            Mockito.when(loanProductRelatedDetail.getInterestCalculationPeriodMethod())
+                    .thenReturn(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD);
+            Mockito.when(loanProductRelatedDetail.isAllowPartialPeriodInterestCalculation()).thenReturn(true);
+
+            final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator.generatePeriodInterestScheduleModel(
+                    expectedRepaymentPeriods, loanProductRelatedDetail, List.of(), installmentAmountInMultiplesOf, mc);
+
+            emiCalculator.addDisbursement(interestSchedule, disbursementDate, toMoney(1000));
+
+            checkPeriod(interestSchedule, 0, 343.33, 10.00, 333.33, 666.67, false); //
+            checkPeriod(interestSchedule, 1, 343.33, 10.00, 333.33, 333.34, false); //
+            checkPeriod(interestSchedule, 2, 343.34, 10.00, 333.34, 0.00, false); //
+
+            // add extra repayment period 1
+            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 7, 2), 1);
+
+            checkPeriod(interestSchedule, 0, 343.33, 10.00, 333.33, 666.67, false); //
+            checkPeriod(interestSchedule, 1, 232.22, 10.00, 222.22, 444.45, false); //
+            checkPeriod(interestSchedule, 2, 232.22, 10.00, 222.22, 222.23, false); //
+            checkPeriod(interestSchedule, 3, 232.23, 10.00, 222.23, 0.00, false); //
+
+            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 8, 2), 2);
+
+            checkPeriod(interestSchedule, 0, 343.33, 10.00, 333.33, 666.67, false); //
+            checkPeriod(interestSchedule, 1, 232.22, 10.00, 222.22, 444.45, false); //
+            checkPeriod(interestSchedule, 2, 121.11, 10.00, 111.11, 333.34, false); //
+            checkPeriod(interestSchedule, 3, 121.11, 10.00, 111.11, 222.23, false); //
+            checkPeriod(interestSchedule, 4, 121.11, 10.00, 111.11, 111.12, false); //
+            checkPeriod(interestSchedule, 5, 121.12, 10.00, 111.12, 0.00, false); //
+
+        }
+
+        @Test
+        public void testExtraTermsDecliningBalanceWithFullyRepaidPeriods() {
+            final LocalDate disbursementDate = LocalDate.of(2024, 6, 1);
+
+            Mockito.when(loanProductRelatedDetail.getNumberOfRepayments()).thenReturn(4);
+
+            final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = generateExpectedRepaymentPeriods(disbursementDate);
+            final Integer installmentAmountInMultiplesOf = null;
+
+            final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator.generatePeriodInterestScheduleModel(
+                    expectedRepaymentPeriods, loanProductRelatedDetail, List.of(), installmentAmountInMultiplesOf, mc);
+
+            emiCalculator.addDisbursement(interestSchedule, disbursementDate, toMoney(1000));
+
+            checkPeriod(interestSchedule, 0, 256.28, 10.00, 246.28, 753.72, false); //
+            checkPeriod(interestSchedule, 1, 256.28, 7.54, 248.74, 504.98, false); //
+            checkPeriod(interestSchedule, 2, 256.28, 5.05, 251.23, 253.75, false); //
+            checkPeriod(interestSchedule, 3, 256.29, 2.54, 253.75, 0.00, false); //
+
+            // simulate merchant issued refund allocated on last installment ( fully repaid ) on first date
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 10, 1), LocalDate.of(2024, 6, 1),
+                    Money.of(currency, BigDecimal.valueOf(256.29D)));
+
+            // simulate early repayment on day 0
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 6, 1),
+                    Money.of(currency, BigDecimal.valueOf(256.28D)));
+
+            // verify 1st and 4th installments are fully repaid
+            checkPeriod(interestSchedule, 0, 256.28, 0.00, 256.28, 487.43, true); //
+            checkPeriod(interestSchedule, 1, 256.28, 9.74, 246.54, 240.89, false); //
+            checkPeriod(interestSchedule, 2, 243.30, 2.41, 240.89, 0.00, false); //
+            checkPeriod(interestSchedule, 3, 256.29, 0.00, 256.29, 0.00, true); //
+
+            // add extra repayment period 1
+            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 6, 15), 1);
+
+            // verify 1st and 4th installments are not modified, additional principal paid are substract from last
+            // period
+            checkPeriod(interestSchedule, 0, 256.28, 0.00, 256.28, 487.43, true); //
+            checkPeriod(interestSchedule, 1, 206.04, 9.74, 196.30, 291.13, false); //
+            checkPeriod(interestSchedule, 2, 206.04, 2.91, 203.13, 88.00, false); //
+            checkPeriod(interestSchedule, 3, 256.29, 0.00, 256.29, 88.00, true); //
+            checkPeriod(interestSchedule, 4, 89.76, 1.76, 88.00, 0.00, false); //
+
+            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 6, 15), 2);
+
+            // verify 1st and 4th installments are not modified, additional principal paid are substract from last
+            // periods
+            checkPeriod(interestSchedule, 0, 256.28, 0.00, 256.28, 487.43, true); //
+            checkPeriod(interestSchedule, 1, 126.91, 9.74, 117.17, 370.26, false); //
+            checkPeriod(interestSchedule, 2, 126.91, 3.70, 123.21, 247.05, false); //
+            checkPeriod(interestSchedule, 3, 256.29, 0.00, 256.29, 247.05, true); //
+            checkPeriod(interestSchedule, 4, 126.91, 4.94, 121.97, 125.08, false); //
+            checkPeriod(interestSchedule, 5, 126.33, 1.25, 125.08, 0.00, false); //
+            checkPeriod(interestSchedule, 6, 0.00, 0.00, 0.00, 0.00, true); //
+        }
+
+        @Test
+        public void testExtraTermsFlatWithFullyRepaidPeriods() {
+            final LocalDate disbursementDate = LocalDate.of(2024, 6, 1);
+
+            Mockito.when(loanProductRelatedDetail.getNumberOfRepayments()).thenReturn(4);
+            Mockito.when(loanProductRelatedDetail.getInterestMethod()).thenReturn(InterestMethod.FLAT);
+            Mockito.when(loanProductRelatedDetail.getInterestCalculationPeriodMethod())
+                    .thenReturn(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD);
+            Mockito.when(loanProductRelatedDetail.isAllowPartialPeriodInterestCalculation()).thenReturn(true);
+
+            final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = generateExpectedRepaymentPeriods(disbursementDate);
+            final Integer installmentAmountInMultiplesOf = null;
+
+            final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator.generatePeriodInterestScheduleModel(
+                    expectedRepaymentPeriods, loanProductRelatedDetail, List.of(), installmentAmountInMultiplesOf, mc);
+
+            emiCalculator.addDisbursement(interestSchedule, disbursementDate, toMoney(1000));
+
+            checkPeriod(interestSchedule, 0, 260.00, 10.00, 250.00, 750.00, false); //
+            checkPeriod(interestSchedule, 1, 260.00, 10.00, 250.00, 500.00, false); //
+            checkPeriod(interestSchedule, 2, 260.00, 10.00, 250.00, 250.00, false); //
+            checkPeriod(interestSchedule, 3, 260.00, 10.00, 250.00, 0.00, false); //
+
+            // simulate merchant issued refund allocated on last installment ( fully repaid ) on first date
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 10, 1), LocalDate.of(2024, 6, 1),
+                    Money.of(currency, BigDecimal.valueOf(250.0D)));
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 10, 1), LocalDate.of(2024, 6, 1),
+                    Money.of(currency, BigDecimal.valueOf(10.0D)));
+
+            checkPeriod(interestSchedule, 0, 260.00, 10.00, 250.00, 500.00, false); //
+            checkPeriod(interestSchedule, 1, 260.00, 10.00, 250.00, 250.00, false); //
+            checkPeriod(interestSchedule, 2, 260.00, 10.00, 250.00, 0.00, false); //
+            checkPeriod(interestSchedule, 3, 260.00, 10.00, 250.00, 0.00, true); //
+
+            // simulate early repayment on day 0
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 6, 1),
+                    Money.of(currency, BigDecimal.valueOf(250.0D)));
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 6, 1),
+                    Money.of(currency, BigDecimal.valueOf(10.0D)));
+
+            // verify 1st and 4th installments are fully repaid
+            checkPeriod(interestSchedule, 0, 260.00, 10.00, 250.00, 500.00, true); //
+            checkPeriod(interestSchedule, 1, 260.00, 10.00, 250.00, 250.00, false); //
+            checkPeriod(interestSchedule, 2, 260.00, 10.00, 250.00, 0.00, false); //
+            checkPeriod(interestSchedule, 3, 260.00, 10.00, 250.00, 0.00, true); //
+
+            // add extra repayment period 1
+            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 6, 15), 1);
+
+            // verify 1st and 4th installments are not modified, additional principal paid are substract from last
+            // period
+            checkPeriod(interestSchedule, 0, 260.00, 10.00, 250.00, 500.00, true); //
+            checkPeriod(interestSchedule, 1, 210.00, 10.00, 200.00, 300.00, false); //
+            checkPeriod(interestSchedule, 2, 210.00, 10.00, 200.00, 100.00, false); //
+            checkPeriod(interestSchedule, 3, 260.00, 10.00, 250.00, 100.00, true); //
+            checkPeriod(interestSchedule, 4, 110.00, 10.00, 100.00, 0.00, false); //
+
+            // add extra repayment period 2
+            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 6, 15), 2);
+
+            // verify 1st and 4th installments are not modified, additional principal paid are substract from last
+            // periods
+            checkPeriod(interestSchedule, 0, 260.00, 10.00, 250.00, 500.00, true); //
+            checkPeriod(interestSchedule, 1, 152.86, 10.00, 142.86, 357.14, false); //
+            checkPeriod(interestSchedule, 2, 152.86, 10.00, 142.86, 214.28, false); //
+            checkPeriod(interestSchedule, 3, 260.00, 10.00, 250.00, 214.28, true); //
+            checkPeriod(interestSchedule, 4, 152.86, 10.00, 142.86, 71.42, false); //
+            checkPeriod(interestSchedule, 5, 81.42, 10.00, 71.42, 0.00, false); //
+            checkPeriod(interestSchedule, 6, 10.00, 10.00, 0.00, 0.00, false); //
+
+        }
+
+    }
+
     // utilities
     private List<LoanScheduleModelRepaymentPeriod> generateExpectedRepaymentPeriods(LocalDate disbursementDate) {
         return switch (loanProductRelatedDetail.getRepaymentPeriodFrequencyType()) {

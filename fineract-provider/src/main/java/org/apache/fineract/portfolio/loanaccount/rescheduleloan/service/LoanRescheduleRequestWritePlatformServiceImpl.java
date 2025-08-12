@@ -395,7 +395,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     .getLoanRescheduleRequestToTermVariationMappings()) {
                 mapping.getLoanTermVariations().updateIsActive(true);
                 LoanTermVariationType termType = mapping.getLoanTermVariations().getTermType();
-                if (termType.isInterestRateVariation() || termType.isInterestRateFromInstallment()) {
+                if (termType.isInterestRateVariation() || termType.isInterestRateFromInstallment() || termType.isExtendRepaymentPeriod()) {
                     hasInterestRateChange = true;
                 }
             }

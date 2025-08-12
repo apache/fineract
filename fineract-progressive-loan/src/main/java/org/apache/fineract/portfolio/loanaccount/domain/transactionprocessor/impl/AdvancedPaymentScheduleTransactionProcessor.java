@@ -53,6 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -234,9 +235,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         List<LoanTransaction> overpaidTransactions = new ArrayList<>();
         for (final ChangeOperation changeOperation : changeOperations) {
-            if (changeOperation.isInterestRateChange()) {
-                final LoanTermVariationsData interestRateChange = changeOperation.getInterestRateChange().get();
-                processInterestRateChange(installments, interestRateChange, scheduleModel);
+            if (changeOperation.isLoanTermVariationsData()) {
+                final LoanTermVariationsData interestRateChange = changeOperation.getLoanTermVariationsData().get();
+                processLoanTermVariation(installments, interestRateChange, scheduleModel);
             } else if (changeOperation.isTransaction()) {
                 LoanTransaction transaction = changeOperation.getLoanTransaction().get();
                 processSingleTransaction(transaction, ctx);
@@ -301,16 +302,55 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 .map(TransactionChangeData::getNewTransaction).findFirst().orElse(transaction);
     }
 
-    private void processInterestRateChange(final List<LoanRepaymentScheduleInstallment> installments,
-            final LoanTermVariationsData interestRateChange, final ProgressiveLoanInterestScheduleModel scheduleModel) {
-        final LocalDate interestRateChangeSubmittedOnDate = interestRateChange.getTermVariationApplicableFrom();
-        final BigDecimal newInterestRate = interestRateChange.getDecimalValue();
-        if (interestRateChange.getTermVariationType().isInterestPauseVariation()) {
-            final LocalDate pauseEndDate = interestRateChange.getDateValue();
-            emiCalculator.applyInterestPause(scheduleModel, interestRateChangeSubmittedOnDate, pauseEndDate);
-        } else {
-            emiCalculator.changeInterestRate(scheduleModel, interestRateChangeSubmittedOnDate, newInterestRate);
+    private void processLoanTermVariation(final List<LoanRepaymentScheduleInstallment> installments,
+            final LoanTermVariationsData termVariationsData, final ProgressiveLoanInterestScheduleModel scheduleModel) {
+        switch (termVariationsData.getTermVariationType()) {
+            case INTEREST_PAUSE -> handleInterestPause(installments, termVariationsData, scheduleModel);
+            case INTEREST_RATE_FROM_INSTALLMENT -> handleChangeInterestRate(installments, termVariationsData, scheduleModel);
+            case EXTEND_REPAYMENT_PERIOD -> handleExtraRepaymentPeriod(installments, termVariationsData, scheduleModel);
+            default -> throw new IllegalStateException("Unhandled LoanTermVariationType.");
         }
+    }
+
+    private void handleExtraRepaymentPeriod(final List<LoanRepaymentScheduleInstallment> installments,
+            final LoanTermVariationsData termVariationsData, final ProgressiveLoanInterestScheduleModel scheduleModel) {
+        final LocalDate interestRateChangeSubmittedOnDate = termVariationsData.getTermVariationApplicableFrom();
+        final int repaymentPeriodsToAdd = termVariationsData.getDecimalValue().intValue();
+        emiCalculator.addRepaymentPeriods(scheduleModel, interestRateChangeSubmittedOnDate, repaymentPeriodsToAdd);
+        final Loan loan = installments.getFirst().getLoan();
+
+        int nextInstallmentNumber = installments.stream().mapToInt(LoanRepaymentScheduleInstallment::getInstallmentNumber).max().orElse(0)
+                + 1;
+
+        for (int i = 0; i < scheduleModel.repaymentPeriods().size(); i++) {
+            final RepaymentPeriod rp = scheduleModel.repaymentPeriods().get(i);
+            // Check if this period already exists in installments
+            if (installments.stream().noneMatch(installment -> installment.getFromDate().equals(rp.getFromDate())
+                    && installment.getDueDate().equals(rp.getDueDate()))) {
+
+                final LoanRepaymentScheduleInstallment newInstallment = new LoanRepaymentScheduleInstallment(loan, nextInstallmentNumber,
+                        rp.getFromDate(), rp.getDueDate(), rp.getDuePrincipal().getAmount(), rp.getDueInterest().getAmount(), ZERO, ZERO,
+                        false, null, ZERO);
+                installments.add(newInstallment);
+                nextInstallmentNumber++;
+            }
+        }
+        processInterestRateChangeOnInstallments(scheduleModel, interestRateChangeSubmittedOnDate, installments);
+    }
+
+    private void handleChangeInterestRate(final List<LoanRepaymentScheduleInstallment> installments,
+            final LoanTermVariationsData termVariationsData, final ProgressiveLoanInterestScheduleModel scheduleModel) {
+        final LocalDate interestRateChangeSubmittedOnDate = termVariationsData.getTermVariationApplicableFrom();
+        final BigDecimal newInterestRate = termVariationsData.getDecimalValue();
+        emiCalculator.changeInterestRate(scheduleModel, interestRateChangeSubmittedOnDate, newInterestRate);
+        processInterestRateChangeOnInstallments(scheduleModel, interestRateChangeSubmittedOnDate, installments);
+    }
+
+    private void handleInterestPause(final List<LoanRepaymentScheduleInstallment> installments,
+            final LoanTermVariationsData termVariationsData, final ProgressiveLoanInterestScheduleModel scheduleModel) {
+        final LocalDate interestRateChangeSubmittedOnDate = termVariationsData.getTermVariationApplicableFrom();
+        final LocalDate pauseEndDate = termVariationsData.getDateValue();
+        emiCalculator.applyInterestPause(scheduleModel, interestRateChangeSubmittedOnDate, pauseEndDate);
         processInterestRateChangeOnInstallments(scheduleModel, interestRateChangeSubmittedOnDate, installments);
     }
 
@@ -1204,14 +1244,14 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         List<ChangeOperation> changeOperations = new ArrayList<>();
         Map<LoanTermVariationType, List<LoanTermVariationsData>> loanTermVariationsMap = loanTermVariations.stream()
                 .collect(Collectors.groupingBy(ltvd -> LoanTermVariationType.fromInt(ltvd.getTermType().getId().intValue())));
-        if (loanTermVariationsMap.get(LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT) != null) {
-            changeOperations.addAll(loanTermVariationsMap.get(LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT).stream()
-                    .map(ChangeOperation::new).toList());
-        }
-        if (loanTermVariationsMap.get(LoanTermVariationType.INTEREST_PAUSE) != null) {
-            changeOperations
-                    .addAll(loanTermVariationsMap.get(LoanTermVariationType.INTEREST_PAUSE).stream().map(ChangeOperation::new).toList());
-        }
+
+        Stream.of(LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT, LoanTermVariationType.INTEREST_PAUSE,
+                LoanTermVariationType.EXTEND_REPAYMENT_PERIOD).forEach(key -> {
+                    if (loanTermVariationsMap.get(key) != null) {
+                        changeOperations.addAll(loanTermVariationsMap.get(key).stream().map(ChangeOperation::new).toList());
+                    }
+                });
+
         if (charges != null) {
             changeOperations.addAll(charges.stream().map(ChangeOperation::new).toList());
         }

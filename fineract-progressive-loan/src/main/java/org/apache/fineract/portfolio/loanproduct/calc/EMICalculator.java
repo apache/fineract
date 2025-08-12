@@ -78,6 +78,9 @@ public interface EMICalculator {
     void changeInterestRate(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate newInterestSubmittedOnDate,
             BigDecimal newInterestRate);
 
+    void addRepaymentPeriods(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate submittedOnDate,
+            int numberOfRepaymentPeriodsToAdd);
+
     /**
      * This method applies outstanding balance correction on the interest model. Negative amount decreases the
      * outstanding balance while positive amounts are increasing that. Typically used for late repayment or to count

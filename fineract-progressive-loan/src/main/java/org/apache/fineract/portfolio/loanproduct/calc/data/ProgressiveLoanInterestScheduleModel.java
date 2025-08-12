@@ -38,6 +38,7 @@ import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -429,5 +430,14 @@ public class ProgressiveLoanInterestScheduleModel {
 
     public boolean isCopy() {
         return this.modifiers.get(COPY);
+    }
+
+    public Function<Long, LocalDate> resolveRepaymentPEriodLengthGeneratorFunction(LocalDate instance) {
+        return switch (loanProductRelatedDetail.getRepaymentPeriodFrequencyType()) {
+            case MONTHS -> instance::plusMonths;
+            case WEEKS -> instance::plusWeeks;
+            case DAYS -> instance::plusDays;
+            default -> throw new UnsupportedOperationException();
+        };
     }
 }
