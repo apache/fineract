@@ -335,6 +335,10 @@ public final class MathUtil {
         return nullToDefault(value, Money.zero(currency));
     }
 
+    public static Money nullToZero(Money value, @NotNull MonetaryCurrency currency, @NotNull MathContext mc) {
+        return nullToDefault(value, Money.zero(currency, mc));
+    }
+
     public static Money nullToDefault(Money value, Money def) {
         return value == null ? def : value;
     }
