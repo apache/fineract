@@ -20,25 +20,21 @@ package org.apache.fineract.organisation.workingdays.domain;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.organisation.workingdays.exception.WorkingDaysNotFoundException;
 import org.apache.fineract.organisation.workingdays.service.WorkingDaysUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 /**
  * <p>
  * Wrapper for {@link WorkingDaysRepository} that adds NULL checking and Error handling capabilities
  * </p>
  */
-@Service
+@Component
+@RequiredArgsConstructor
 public class WorkingDaysRepositoryWrapper {
 
     private final WorkingDaysRepository repository;
-
-    @Autowired
-    public WorkingDaysRepositoryWrapper(final WorkingDaysRepository repository) {
-        this.repository = repository;
-    }
 
     public WorkingDays findOne() {
         final List<WorkingDays> workingDaysList = this.repository.findAll();

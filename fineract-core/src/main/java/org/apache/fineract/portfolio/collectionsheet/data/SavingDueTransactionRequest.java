@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.portfolio.collectionsheet.data;
 
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -37,9 +41,20 @@ public class SavingDueTransactionRequest implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @PositiveOrZero(message = "{collection.sheet.savings.due.transactions.savings.id.positiveOrZero}")
+    @Digits(integer = 10, fraction = 0, message = "{collection.sheet.saving.due.transactions.savings.id.digits}")
     private Long savingsId;
+
+    @NotNull(message = "{collection.sheet.savings.due.transaction.amount.required}")
+    @DecimalMin(value = "0.01", message = "{collection.sheet.savings.due.transactions.amount.min}")
     private BigDecimal transactionAmount;
+
+    @PositiveOrZero(message = "{collection.sheet.savings.due.transactions.deposit.account.type.positiveOrZero}")
+    @Digits(integer = 10, fraction = 0, message = "{collection.sheet.savings.due.transactions.deposit.account.type.digits}")
     private Long depositAccountType;
+
+    @PositiveOrZero(message = "{collection.sheet.savings.due.transactions.deposit.payment.type.id.positiveOrZero}")
+    @Digits(integer = 10, fraction = 0, message = "{collection.sheet.savings.due.transactions.deposit.payment.type.id.digits}")
     private Long paymentTypeId;
     private String accountNumber;
     private String checkNumber;

@@ -28,19 +28,21 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Documented
-@Constraint(validatedBy = LocalDateValidator.class)
+@Constraint(validatedBy = DateRangeValidator.class)
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-@Repeatable(LocalDate.List.class)
-public @interface LocalDate {
+@Repeatable(DateRange.List.class)
+public @interface DateRange {
 
-    String message() default "{org.apache.fineract.validation.local-date}";
+    String message() default "{org.apache.fineract.validation.date-range}";
 
     String dateField();
 
     String formatField();
 
     String localeField();
+
+    int maxYearsAgo();
 
     Class<?>[] groups() default {};
 
@@ -51,6 +53,6 @@ public @interface LocalDate {
     @Documented
     @interface List {
 
-        LocalDate[] value();
+        DateRange[] value();
     }
 }

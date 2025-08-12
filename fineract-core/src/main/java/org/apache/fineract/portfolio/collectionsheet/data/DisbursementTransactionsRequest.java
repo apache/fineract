@@ -18,9 +18,10 @@
  */
 package org.apache.fineract.portfolio.collectionsheet.data;
 
+import jakarta.validation.Valid;
 import java.io.Serial;
 import java.io.Serializable;
-import java.math.BigDecimal;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,17 +33,14 @@ import lombok.experimental.FieldNameConstants;
 @FieldNameConstants
 @AllArgsConstructor
 @Builder
-public class RepaymentTransactionRequest implements Serializable {
+public class DisbursementTransactionsRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private Long loanId;
-    private BigDecimal transactionAmount;
-    private Long paymentTypeId;
-    private String accountNumber;
-    private String checkNumber;
-    private String routingCode;
-    private String receiptNumber;
-    private String bankNumber;
+    @Valid
+    private List<RepaymentTransactionRequest> bulkRepaymentTransactions;
+
+    @Valid
+    private List<SavingDueTransactionRequest> bulkSavingsDueTransactions;
 }

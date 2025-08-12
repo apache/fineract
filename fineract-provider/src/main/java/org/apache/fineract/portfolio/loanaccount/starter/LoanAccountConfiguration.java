@@ -172,6 +172,7 @@ import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatform
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.apache.fineract.portfolio.rate.service.RateAssembler;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecksRepository;
@@ -443,7 +444,7 @@ public class LoanAccountConfiguration {
             LoanJournalEntryPoster journalEntryPoster, LoanAdjustmentService loanAdjustmentService,
             LoanAccountingBridgeMapper loanAccountingBridgeMapper, LoanMapper loanMapper,
             LoanTransactionProcessingService loanTransactionProcessingService, final LoanBalanceService loanBalanceService,
-            LoanTransactionService loanTransactionService) {
+            LoanTransactionService loanTransactionService, PaymentTypeRepositoryWrapper paymentTyperepositoryWrapper) {
         return new LoanWritePlatformServiceJpaRepositoryImpl(context, loanTransactionValidator, loanUpdateCommandFromApiJsonDeserializer,
                 loanRepositoryWrapper, loanAccountDomainService, noteRepository, loanTransactionRepository,
                 loanTransactionRelationRepository, loanAssembler, journalEntryWritePlatformService, calendarInstanceRepository,
@@ -458,7 +459,7 @@ public class LoanAccountConfiguration {
                 loanTransactionAssembler, loanAccrualsProcessingService, loanOfficerValidator, loanDownPaymentTransactionValidator,
                 loanDisbursementService, loanScheduleService, loanChargeValidator, loanOfficerService, reprocessLoanTransactionsService,
                 loanAccountService, journalEntryPoster, loanAdjustmentService, loanAccountingBridgeMapper, loanMapper,
-                loanTransactionProcessingService, loanBalanceService, loanTransactionService);
+                loanTransactionProcessingService, loanBalanceService, loanTransactionService, paymentTyperepositoryWrapper);
     }
 
     @Bean

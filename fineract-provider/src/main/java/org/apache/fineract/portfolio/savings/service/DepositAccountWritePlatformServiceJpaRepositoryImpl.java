@@ -28,6 +28,9 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.ResolverStyle;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,6 +80,8 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
+import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetRequest;
+import org.apache.fineract.portfolio.collectionsheet.data.SavingDueTransactionRequest;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
@@ -1404,5 +1409,52 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 accountTransactionDTO.getTransactionDate(), accountTransactionDTO.getTransactionAmount(), paymentDetail,
                 isRegularTransaction);
 
+    }
+
+    @Transactional
+    @Override
+    public SavingsAccountTransaction mandatorySavingsAccountDeposit(SavingDueTransactionRequest element, CollectionSheetRequest request) {
+        boolean isRegularTransaction = false;
+        // final PaymentDetail paymentDetail = accountTransactionDTO.getPaymentDetail();
+        final PaymentDetail paymentDetail = paymentDetailWritePlatformService.createAndPersistPaymentDetail(element);
+
+        final LocalDate transactionDate = getDateInLocalDate(request.getTransactionDate(), request.getLocale(), request.getDateFormat());
+
+        final DateTimeFormatter formatter = new DateTimeFormatterBuilder().parseCaseInsensitive()
+                .appendPattern(request.getDateFormat().replace("y", "u")).parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0).parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+                .toFormatter(Locale.forLanguageTag(request.getLocale())).withResolverStyle(ResolverStyle.STRICT);
+
+        if (paymentDetail != null && paymentDetail.getId() == null) {
+            this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
+        }
+        if (element.getDepositAccountType().intValue() == DepositAccountType.RECURRING_DEPOSIT.getValue()) {
+            RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(element.getSavingsId(),
+                    DepositAccountType.RECURRING_DEPOSIT);
+
+            return this.depositAccountDomainService.handleRDDeposit(account, formatter, transactionDate, element.getTransactionAmount(),
+                    paymentDetail, isRegularTransaction);
+        }
+        SavingsAccount account = null;
+        if (element.getDepositAccountType().intValue() == DepositAccountType.SAVINGS_DEPOSIT.getValue()) {
+            account = this.depositAccountAssembler.assembleFrom(element.getSavingsId(), DepositAccountType.SAVINGS_DEPOSIT);
+        } else {
+            account = this.depositAccountAssembler.assembleFrom(element.getSavingsId(), DepositAccountType.CURRENT_DEPOSIT);
+        }
+        return this.depositAccountDomainService.handleSavingDeposit(account, formatter, transactionDate, element.getTransactionAmount(),
+                paymentDetail, isRegularTransaction);
+    }
+
+    private LocalDate getDateInLocalDate(String date, String locale, String dateFormat) {
+        try {
+            final DateTimeFormatter formatter = new DateTimeFormatterBuilder().parseCaseInsensitive()
+                    .appendPattern(dateFormat.replace("y", "u")).parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                    .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0).parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+                    .toFormatter(Locale.forLanguageTag(locale)).withResolverStyle(ResolverStyle.STRICT);
+
+            return LocalDate.parse(date, formatter);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid date format or value in transaction", e);
+        }
     }
 }

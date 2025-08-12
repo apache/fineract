@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.portfolio.collectionsheet.data.RepaymentTransactionRequest;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -63,5 +64,13 @@ public class ExternalIdFactory {
 
     public ExternalId create() {
         return create(null);
+    }
+
+    public ExternalId createFromRequest(RepaymentTransactionRequest element) {
+        String externalIdStr = null;
+        if (element != null) {
+            externalIdStr = element.getExternalId();
+        }
+        return create(externalIdStr);
     }
 }

@@ -59,7 +59,7 @@ class LocalDateValidator implements ConstraintValidator<LocalDate, Object> {
             var locale = (String) localeAttr.get(value);
 
             if (StringUtils.isBlank(date) || StringUtils.isBlank(format) || StringUtils.isBlank(locale)) {
-                return false;
+                return true;
             }
 
             toLocalDate(date, format, locale);

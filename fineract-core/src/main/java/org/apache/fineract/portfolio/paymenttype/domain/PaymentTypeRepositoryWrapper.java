@@ -21,9 +21,9 @@ package org.apache.fineract.portfolio.paymenttype.domain;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.paymenttype.exception.PaymentTypeNotFoundException;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class PaymentTypeRepositoryWrapper {
 
@@ -40,5 +40,4 @@ public class PaymentTypeRepositoryWrapper {
     public PaymentType findOneWithNotFoundDetection(final Long id) {
         return this.repository.findById(id).orElseThrow(() -> new PaymentTypeNotFoundException(id));
     }
-
 }

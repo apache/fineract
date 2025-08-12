@@ -25,9 +25,11 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.Map;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.portfolio.collectionsheet.data.RepaymentTransactionRequest;
 import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
@@ -35,8 +37,9 @@ import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 
 @Entity
 @Getter
+@NoArgsConstructor
 @Table(name = "m_payment_detail")
-public class PaymentDetail extends AbstractPersistableCustom<Long> {
+public final class PaymentDetail extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "payment_type_id", nullable = false)
@@ -57,8 +60,6 @@ public class PaymentDetail extends AbstractPersistableCustom<Long> {
     @Column(name = "bank_number", length = 50)
     private String bankNumber;
 
-    protected PaymentDetail() {}
-
     public static PaymentDetail generatePaymentDetail(final PaymentType paymentType, final JsonCommand command,
             final Map<String, Object> changes) {
         final String accountNumber = command.stringValueOfParameterNamed(PaymentDetailConstants.accountNumberParamName);
@@ -66,6 +67,33 @@ public class PaymentDetail extends AbstractPersistableCustom<Long> {
         final String routingCode = command.stringValueOfParameterNamed(PaymentDetailConstants.routingCodeParamName);
         final String receiptNumber = command.stringValueOfParameterNamed(PaymentDetailConstants.receiptNumberParamName);
         final String bankNumber = command.stringValueOfParameterNamed(PaymentDetailConstants.bankNumberParamName);
+
+        if (StringUtils.isNotBlank(accountNumber)) {
+            changes.put(PaymentDetailConstants.accountNumberParamName, accountNumber);
+        }
+        if (StringUtils.isNotBlank(checkNumber)) {
+            changes.put(PaymentDetailConstants.checkNumberParamName, checkNumber);
+        }
+        if (StringUtils.isNotBlank(routingCode)) {
+            changes.put(PaymentDetailConstants.routingCodeParamName, routingCode);
+        }
+        if (StringUtils.isNotBlank(receiptNumber)) {
+            changes.put(PaymentDetailConstants.receiptNumberParamName, receiptNumber);
+        }
+        if (StringUtils.isNotBlank(bankNumber)) {
+            changes.put(PaymentDetailConstants.bankNumberParamName, bankNumber);
+        }
+        changes.put("paymentTypeId", paymentType.getId());
+        return new PaymentDetail(paymentType, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber);
+    }
+
+    public static PaymentDetail generatePaymentDetail(PaymentType paymentType, RepaymentTransactionRequest element,
+            Map<String, Object> changes) {
+        final String accountNumber = element.getAccountNumber();
+        final String checkNumber = element.getCheckNumber();
+        final String routingCode = element.getRoutingCode();
+        final String receiptNumber = element.getReceiptNumber();
+        final String bankNumber = element.getBankNumber();
 
         if (StringUtils.isNotBlank(accountNumber)) {
             changes.put(PaymentDetailConstants.accountNumberParamName, accountNumber);

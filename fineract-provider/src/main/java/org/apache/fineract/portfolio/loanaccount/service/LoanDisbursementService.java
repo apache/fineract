@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
+import org.apache.fineract.portfolio.collectionsheet.data.RepaymentTransactionRequest;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -55,7 +56,9 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanDisbursementValidator;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.springframework.stereotype.Service;
 
+@Service
 @RequiredArgsConstructor
 public class LoanDisbursementService {
 
@@ -114,6 +117,7 @@ public class LoanDisbursementService {
         }
     }
 
+    @Deprecated
     public Money adjustDisburseAmount(final Loan loan, @NotNull final JsonCommand command,
             @NotNull final LocalDate actualDisbursementDate) {
         Money disburseAmount = loan.getLoanRepaymentScheduleDetail().getPrincipal().zero();
@@ -367,4 +371,56 @@ public class LoanDisbursementService {
         return returnObject;
     }
 
+    public Money adjustDisburseAmount(Loan loan, RepaymentTransactionRequest element, LocalDate actualDisbursementDate) {
+        Money disburseAmount = loan.getLoanRepaymentScheduleDetail().getPrincipal().zero();
+        final BigDecimal principalDisbursed = element.getTransactionAmount();
+        if (loan.getActualDisbursementDate() == null || DateUtils.isBefore(actualDisbursementDate, loan.getActualDisbursementDate())) {
+            loan.setActualDisbursementDate(actualDisbursementDate);
+        }
+        BigDecimal diff = BigDecimal.ZERO;
+        final Collection<LoanDisbursementDetails> details = loan.fetchUndisbursedDetail();
+        if (principalDisbursed == null) {
+            disburseAmount = loan.getLoanRepaymentScheduleDetail().getPrincipal();
+            if (!details.isEmpty()) {
+                disburseAmount = disburseAmount.zero();
+                for (LoanDisbursementDetails disbursementDetails : details) {
+                    disbursementDetails.updateActualDisbursementDate(actualDisbursementDate);
+                    disburseAmount = disburseAmount.plus(disbursementDetails.principal());
+                }
+            }
+        } else {
+            if (loan.getLoanProduct().isMultiDisburseLoan()) {
+                disburseAmount = Money.of(loan.getCurrency(), principalDisbursed);
+            } else {
+                disburseAmount = disburseAmount.plus(principalDisbursed);
+            }
+
+            if (details.isEmpty()) {
+                diff = loan.getLoanRepaymentScheduleDetail().getPrincipal().minus(principalDisbursed).getAmount();
+            } else {
+                for (LoanDisbursementDetails disbursementDetails : details) {
+                    disbursementDetails.updateActualDisbursementDate(actualDisbursementDate);
+                    disbursementDetails.updatePrincipal(principalDisbursed);
+                }
+            }
+            BigDecimal totalAmount = BigDecimal.ZERO;
+            if (loan.loanProduct().isMultiDisburseLoan()) {
+                Collection<LoanDisbursementDetails> loanDisburseDetails = loan.getDisbursementDetails();
+                BigDecimal setPrincipalAmount = BigDecimal.ZERO;
+                for (LoanDisbursementDetails disbursementDetails : loanDisburseDetails) {
+                    if (disbursementDetails.actualDisbursementDate() != null) {
+                        setPrincipalAmount = setPrincipalAmount.add(disbursementDetails.principal());
+                    }
+                    totalAmount = totalAmount.add(disbursementDetails.principal());
+                }
+                loan.getLoanRepaymentScheduleDetail().setPrincipal(setPrincipalAmount);
+            } else {
+                loan.getLoanRepaymentScheduleDetail()
+                        .setPrincipal(loan.getLoanRepaymentScheduleDetail().getPrincipal().minus(diff).getAmount());
+                totalAmount = loan.getLoanRepaymentScheduleDetail().getPrincipal().getAmount();
+            }
+            loanDisbursementValidator.compareDisbursedToApprovedOrProposedPrincipal(loan, disburseAmount.getAmount(), totalAmount);
+        }
+        return disburseAmount;
+    }
 }

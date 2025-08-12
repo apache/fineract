@@ -21,16 +21,21 @@ package org.apache.fineract.portfolio.collectionsheet.service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.command.core.Command;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
+import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetRequest;
+import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetResponse;
 import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetTransactionDataValidator;
+import org.apache.fineract.portfolio.collectionsheet.data.SavingDueTransactionRequest;
 import org.apache.fineract.portfolio.collectionsheet.serialization.CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.collectionsheet.serialization.CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
@@ -41,8 +46,12 @@ import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePla
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.apache.fineract.portfolio.savings.domain.DepositAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
+import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.apache.fineract.portfolio.savings.service.DepositAccountWritePlatformService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
 @RequiredArgsConstructor
 public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements CollectionSheetWritePlatformService {
 
@@ -86,6 +95,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
                 .with(changes).with(changes).build();
     }
 
+    @Deprecated
     @Override
     public CommandProcessingResult saveIndividualCollectionSheet(final JsonCommand command) {
 
@@ -115,6 +125,31 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
                 .with(changes).with(changes).build();
     }
 
+    @Transactional
+    @Override
+    public CollectionSheetResponse saveIndividualCollectionSheet(Command<CollectionSheetRequest> payload) {
+        final CollectionSheetRequest request = payload.getPayload();
+
+        final Map<String, Object> changes = new HashMap<>();
+        changes.put("locale", request.getLocale());
+        changes.put("dateFormat", request.getDateFormat());
+
+        final String noteText = request.getNote();
+        if (StringUtils.isNotBlank(noteText)) {
+            changes.put("note", noteText);
+        }
+
+        changes.putAll(updateBulkRepayments(request));
+
+        changes.putAll(updateBulkDisbursals(request));
+
+        changes.putAll(updateBulkMandatorySavingsDuePayments(request));
+
+        return CollectionSheetResponse.builder().commandId(payload.getId()).groupId(payload.getPayload().getOfficeId())
+                .entityId(payload.getPayload().getOfficeId()).changes(new LinkedHashMap<>(changes)).build();
+    }
+
+    @Deprecated
     private Map<String, Object> updateBulkRepayments(final JsonCommand command, final PaymentDetail paymentDetail) {
         final Map<String, Object> changes = new HashMap<>();
         final CollectionSheetBulkRepaymentCommand bulkRepaymentCommand = this.bulkRepaymentCommandFromApiJsonDeserializer
@@ -123,6 +158,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
         return changes;
     }
 
+    @Deprecated
     private Map<String, Object> updateBulkDisbursals(final JsonCommand command) {
         final Map<String, Object> changes = new HashMap<>();
         final CollectionSheetBulkDisbursalCommand bulkDisbursalCommand = this.bulkDisbursalCommandFromApiJsonDeserializer
@@ -131,6 +167,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
         return changes;
     }
 
+    @Deprecated
     private Map<String, Object> updateBulkMandatorySavingsDuePayments(final JsonCommand command, final PaymentDetail paymentDetail) {
         final Map<String, Object> changes = new HashMap<>();
         final Collection<SavingsAccountTransactionDTO> savingsTransactions = this.accountAssembler
@@ -149,4 +186,30 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
         return changes;
     }
 
+    private Map<String, ?> updateBulkMandatorySavingsDuePayments(CollectionSheetRequest request) {
+        final Map<String, Object> changes = new HashMap<>();
+        final List<SavingDueTransactionRequest> savingsTransactions = request.getBulkDisbursementTransactions()
+                .getBulkSavingsDueTransactions();
+
+        List<Long> depositTransactionIds = new ArrayList<>();
+        for (SavingDueTransactionRequest element : savingsTransactions) {
+            try {
+                SavingsAccountTransaction savingsAccountTransaction = accountWritePlatformService.mandatorySavingsAccountDeposit(element,
+                        request);
+                depositTransactionIds.add(savingsAccountTransaction.getId());
+            } catch (Exception e) {
+                throw new SavingsAccountNotFoundException(element.getSavingsId(), e);
+            }
+        }
+        changes.put("SavingsTransactions", depositTransactionIds);
+        return changes;
+    }
+
+    private Map<String, Object> updateBulkRepayments(final CollectionSheetRequest request) {
+        return new HashMap<>(loanWritePlatformService.makeLoanBulkRepayment(request));
+    }
+
+    private Map<String, Object> updateBulkDisbursals(final CollectionSheetRequest request) {
+        return new HashMap<>(this.loanWritePlatformService.bulkLoanDisbursal(request, false));
+    }
 }

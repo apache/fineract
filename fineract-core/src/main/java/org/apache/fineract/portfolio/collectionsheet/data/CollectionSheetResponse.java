@@ -20,27 +20,24 @@ package org.apache.fineract.portfolio.collectionsheet.data;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Map;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.FieldNameConstants;
 
+@Builder
 @Data
 @NoArgsConstructor
-@Builder
 @AllArgsConstructor
-@FieldNameConstants
-public class CollectionSheetRequest implements Serializable {
+public class CollectionSheetResponse implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private Long officeId;
-    private String dateFormat;
-    private String locale;
-    private String actualDisbursementDate;
-    private String transactionDate;
-    private DisbursementTransactionsRequest bulkDisbursementTransactions;
-
+    private UUID commandId;
+    private Long entityId;
+    private Long groupId;
+    private Map<String, Object> changes;
 }

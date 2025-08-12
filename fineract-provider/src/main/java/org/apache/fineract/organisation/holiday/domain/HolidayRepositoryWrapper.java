@@ -20,25 +20,21 @@ package org.apache.fineract.organisation.holiday.domain;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.organisation.holiday.exception.HolidayNotFoundException;
 import org.apache.fineract.organisation.holiday.service.HolidayUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 /**
  * <p>
  * Wrapper for {@link HolidayRepository} that adds NULL checking and Error handling capabilities
  * </p>
  */
-@Service
+@Component
+@RequiredArgsConstructor
 public class HolidayRepositoryWrapper {
 
     private final HolidayRepository repository;
-
-    @Autowired
-    public HolidayRepositoryWrapper(final HolidayRepository repository) {
-        this.repository = repository;
-    }
 
     public Holiday findOneWithNotFoundDetection(final Long id) {
         return this.repository.findById(id).orElseThrow(() -> new HolidayNotFoundException(id));

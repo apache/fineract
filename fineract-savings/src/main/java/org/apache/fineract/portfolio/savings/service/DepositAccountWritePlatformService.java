@@ -23,6 +23,8 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
+import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetRequest;
+import org.apache.fineract.portfolio.collectionsheet.data.SavingDueTransactionRequest;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
@@ -87,4 +89,6 @@ public interface DepositAccountWritePlatformService {
     void updateMaturityDetails(Long depositAccountId, DepositAccountType depositAccountType);
 
     SavingsAccountTransaction mandatorySavingsAccountDeposit(SavingsAccountTransactionDTO accountTransactionDTO);
+
+    SavingsAccountTransaction mandatorySavingsAccountDeposit(SavingDueTransactionRequest element, CollectionSheetRequest request);
 }

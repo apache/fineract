@@ -18,9 +18,12 @@
  */
 package org.apache.fineract.portfolio.collectionsheet.data;
 
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.List;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,11 +35,26 @@ import lombok.experimental.FieldNameConstants;
 @FieldNameConstants
 @AllArgsConstructor
 @Builder
-public class DisbursementTransactionsRequest implements Serializable {
+public class RepaymentTransactionRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private List<RepaymentTransactionRequest> bulkRepaymentTransactions;
-    private List<SavingDueTransactionRequest> bulkSavingsDueTransactions;
+    @PositiveOrZero(message = "{collection.sheet.repayment.transactions.loanId.positiveOrZero}")
+    @Digits(integer = 10, fraction = 0, message = "{collection.sheet.repayment.transactions.loanId.digits}")
+    private Long loanId;
+
+    @DecimalMin(value = "0.01", message = "{collection.sheet.repayment.transactions.transaction.amount.min}")
+    private BigDecimal transactionAmount;
+
+    @PositiveOrZero(message = "{collection.sheet.repayment.transactions.payment.type.id.positiveOrZero}")
+    @Digits(integer = 10, fraction = 0, message = "{collection.sheet.repayment.transactions.payment.type.id.digits}")
+    private Long paymentTypeId;
+    private String accountNumber;
+    private String checkNumber;
+    private String routingCode;
+    private String receiptNumber;
+    private String bankNumber;
+    private String externalId;
+    private BigDecimal fixedEmiAmount;
 }

@@ -29,6 +29,7 @@ import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
+import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetRequest;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
@@ -127,4 +128,8 @@ public interface LoanWritePlatformService {
     CommandProcessingResult makeRefund(Long loanId, LoanTransactionType loanTransactionType, JsonCommand command);
 
     CommandProcessingResult makeManualInterestRefund(Long loanId, Long transactionId, JsonCommand command);
+
+    Map<String, Object> makeLoanBulkRepayment(CollectionSheetRequest request);
+
+    Map<String, Object> bulkLoanDisbursal(CollectionSheetRequest request, boolean isAccountTransfer);
 }

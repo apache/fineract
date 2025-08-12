@@ -31,7 +31,7 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -39,7 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Wrapper for {@link LoanRepository} that adds NULL checking and Error handling capabilities
  * </p>
  */
-@Service
+@Component
 @RequiredArgsConstructor
 public class LoanRepositoryWrapper {
 

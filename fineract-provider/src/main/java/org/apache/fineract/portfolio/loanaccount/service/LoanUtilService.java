@@ -60,7 +60,9 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.springframework.stereotype.Service;
 
+@Service
 @RequiredArgsConstructor
 public class LoanUtilService {
 
@@ -333,5 +335,4 @@ public class LoanUtilService {
             noteRepository.save(newNote);
         }
     }
-
 }

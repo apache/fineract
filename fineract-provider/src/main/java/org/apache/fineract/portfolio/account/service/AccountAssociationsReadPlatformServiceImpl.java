@@ -34,9 +34,11 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Slf4j
+@Service
 public class AccountAssociationsReadPlatformServiceImpl implements AccountAssociationsReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
