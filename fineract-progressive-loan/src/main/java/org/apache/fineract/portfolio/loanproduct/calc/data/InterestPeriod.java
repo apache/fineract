@@ -39,7 +39,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 @Getter
 @ToString(exclude = { "repaymentPeriod" })
 @EqualsAndHashCode(exclude = { "repaymentPeriod" })
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class InterestPeriod implements Comparable<InterestPeriod> {
 
     @JsonExclude
@@ -116,34 +116,34 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
     }
 
     public void addBalanceCorrectionAmount(final Money balanceCorrectionAmount) {
-        this.balanceCorrectionAmount = MathUtil.plus(this.balanceCorrectionAmount, balanceCorrectionAmount);
+        this.balanceCorrectionAmount = MathUtil.plus(this.getBalanceCorrectionAmount(), balanceCorrectionAmount);
     }
 
     public void addDisbursementAmount(final Money disbursementAmount) {
-        this.disbursementAmount = MathUtil.plus(this.disbursementAmount, disbursementAmount, mc);
+        this.disbursementAmount = MathUtil.plus(this.getDisbursementAmount(), disbursementAmount, mc);
     }
 
     public void addCreditedPrincipalAmount(final Money creditedPrincipal) {
-        this.creditedPrincipal = MathUtil.plus(this.creditedPrincipal, creditedPrincipal, mc);
+        this.creditedPrincipal = MathUtil.plus(this.getCreditedPrincipal(), creditedPrincipal, mc);
     }
 
     public void addCreditedInterestAmount(final Money creditedInterest) {
-        this.creditedInterest = MathUtil.plus(this.creditedInterest, creditedInterest, mc);
+        this.creditedInterest = MathUtil.plus(this.getCreditedInterest(), creditedInterest, mc);
     }
 
     public void addCapitalizedIncomePrincipalAmount(final Money capitalizedIncomePrincipal) {
-        this.capitalizedIncomePrincipal = MathUtil.plus(this.capitalizedIncomePrincipal, capitalizedIncomePrincipal, mc);
+        this.capitalizedIncomePrincipal = MathUtil.plus(this.getCapitalizedIncomePrincipal(), capitalizedIncomePrincipal, mc);
     }
 
     public BigDecimal getCalculatedDueInterest() {
         if (isPaused) {
-            return creditedInterest.getAmount();
+            return getCreditedInterest().getAmount();
         }
 
         long lengthTillPeriodDueDate = getLengthTillPeriodDueDate();
         final BigDecimal interestDueTillRepaymentDueDate = getCalculatedDueInterest(
                 getRepaymentPeriod().getLoanProductRelatedDetail().getInterestMethod(), lengthTillPeriodDueDate); //
-        return MathUtil.negativeToZero(MathUtil.add(mc, creditedInterest.getAmount(), interestDueTillRepaymentDueDate));
+        return MathUtil.negativeToZero(MathUtil.add(mc, getCreditedInterest().getAmount(), interestDueTillRepaymentDueDate));
     }
 
     public BigDecimal getCalculatedDueInterest(InterestMethod method, long lengthTillPeriodDueDate) {

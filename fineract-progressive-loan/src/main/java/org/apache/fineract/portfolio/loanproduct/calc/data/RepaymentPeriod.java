@@ -40,7 +40,7 @@ import org.apache.fineract.portfolio.util.Memo;
 
 @ToString(exclude = { "previous" })
 @EqualsAndHashCode(exclude = { "previous" })
-public final class RepaymentPeriod {
+public class RepaymentPeriod {
 
     @JsonExclude
     private final RepaymentPeriod previous;
@@ -91,7 +91,7 @@ public final class RepaymentPeriod {
     @JsonExclude
     private MonetaryCurrency currency;
 
-    private RepaymentPeriod(RepaymentPeriod previous, LocalDate fromDate, LocalDate dueDate, List<InterestPeriod> interestPeriods,
+    protected RepaymentPeriod(RepaymentPeriod previous, LocalDate fromDate, LocalDate dueDate, List<InterestPeriod> interestPeriods,
             Money emi, Money originalEmi, Money paidPrincipal, Money paidInterest, Money futureUnrecognizedInterest, MathContext mc,
             LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail) {
         this.previous = previous;
