@@ -19,13 +19,12 @@
 package org.apache.fineract.portfolio.loanaccount.mapper;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeDataDTO;
 import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeLoanTransactionDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByDTO;
@@ -36,6 +35,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.springframework.stereotype.Component;
 
@@ -75,15 +75,8 @@ public class LoanAccountingBridgeMapper {
 
     public AccountingBridgeDataDTO deriveAccountingBridgeData(final String currencyCode, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds, final boolean isAccountTransfer, final Loan loan) {
-        List<LoanTransaction> transactions;
-        if (existingTransactionIds == null || existingTransactionIds.isEmpty()) {
-            transactions = loanTransactionRepository.findNonReversedByLoan(loan);
-        } else if (existingReversedTransactionIds == null || existingReversedTransactionIds.isEmpty()) {
-            transactions = loanTransactionRepository.findTransactionsForAccountingBridge(loan, existingTransactionIds);
-        } else {
-            transactions = loanTransactionRepository.findTransactionsForAccountingBridge(loan, existingTransactionIds,
-                    existingReversedTransactionIds);
-        }
+        final List<LoanTransaction> transactions = findTransactionsForAccountingBridge(existingTransactionIds,
+                existingReversedTransactionIds, loan);
 
         final List<AccountingBridgeLoanTransactionDTO> newLoanTransactions = transactions.stream() //
                 .map(transaction -> mapToLoanTransactionData(transaction, currencyCode)) //
@@ -179,47 +172,53 @@ public class LoanAccountingBridgeMapper {
     private void classifyTransactionsBasedOnChargeOffDate(final List<AccountingBridgeLoanTransactionDTO> newLoanTransactionsBeforeChargeOff,
             final List<AccountingBridgeLoanTransactionDTO> newLoanTransactionsAfterChargeOff, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds, final String currencyCode, final Loan loan) {
-        // Before
-        filterTransactionsByChargeOffDate(newLoanTransactionsBeforeChargeOff, currencyCode, existingTransactionIds,
-                existingReversedTransactionIds,
-                transaction -> DateUtils.isBefore(transaction.getTransactionDate(), loan.getChargedOffOnDate()), loan);
-        // On
-        filterTransactionsByChargeOffDate(newLoanTransactionsBeforeChargeOff, newLoanTransactionsAfterChargeOff, currencyCode,
-                existingTransactionIds, existingReversedTransactionIds,
-                transaction -> DateUtils.isEqual(transaction.getTransactionDate(), loan.getChargedOffOnDate()), loan);
-        // After
-        filterTransactionsByChargeOffDate(newLoanTransactionsAfterChargeOff, currencyCode, existingTransactionIds,
-                existingReversedTransactionIds,
-                transaction -> DateUtils.isAfter(transaction.getTransactionDate(), loan.getChargedOffOnDate()), loan);
+
+        final LocalDate chargeOffDate = loan.getChargedOffOnDate();
+        if (chargeOffDate == null) {
+            return;
+        }
+
+        // Before charge-off
+        final List<LoanTransaction> beforeTransactions = findTransactionsForChargeOffClassification(loan, chargeOffDate, "BEFORE",
+                existingTransactionIds, existingReversedTransactionIds);
+        processTransactionsForChargeOff(beforeTransactions, newLoanTransactionsBeforeChargeOff, newLoanTransactionsAfterChargeOff,
+                currencyCode, loan);
+
+        // On charge-off date
+        final List<LoanTransaction> onTransactions = findTransactionsForChargeOffClassification(loan, chargeOffDate, "EQUAL",
+                existingTransactionIds, existingReversedTransactionIds);
+        processTransactionsForChargeOff(onTransactions, newLoanTransactionsBeforeChargeOff, newLoanTransactionsAfterChargeOff, currencyCode,
+                loan);
+
+        // After charge-off
+        final List<LoanTransaction> afterTransactions = findTransactionsForChargeOffClassification(loan, chargeOffDate, "AFTER",
+                existingTransactionIds, existingReversedTransactionIds);
+        processTransactionsForChargeOff(afterTransactions, newLoanTransactionsBeforeChargeOff, newLoanTransactionsAfterChargeOff,
+                currencyCode, loan);
     }
 
-    private void filterTransactionsByChargeOffDate(final List<AccountingBridgeLoanTransactionDTO> filteredTransactions,
-            final String currencyCode, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
-            final Predicate<LoanTransaction> chargeOffDateCriteria, final Loan loan) {
-        filteredTransactions.addAll(loan.getLoanTransactions().stream() //
-                .filter(chargeOffDateCriteria) //
-                .filter(transaction -> {
-                    boolean isExistingTransaction = existingTransactionIds.contains(transaction.getId());
-                    boolean isExistingReversedTransaction = existingReversedTransactionIds.contains(transaction.getId());
+    private List<LoanTransaction> findTransactionsForChargeOffClassification(final Loan loan, final LocalDate chargeOffDate,
+            final String dateComparison, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
 
-                    if (transaction.isReversed() && isExistingTransaction && !isExistingReversedTransaction) {
-                        return true;
-                    } else {
-                        return !isExistingTransaction;
-                    }
-                }) //
-                .map(transaction -> mapToLoanTransactionData(transaction, currencyCode)).toList());
+        final boolean hasExistingIds = existingTransactionIds != null && !existingTransactionIds.isEmpty();
+        final boolean hasExistingReversedIds = existingReversedTransactionIds != null && !existingReversedTransactionIds.isEmpty();
+
+        if (hasExistingIds && hasExistingReversedIds) {
+            return loanTransactionRepository.findTransactionsForChargeOffClassification(loan, chargeOffDate, dateComparison,
+                    existingTransactionIds, existingReversedTransactionIds);
+        } else if (hasExistingIds) {
+            return loanTransactionRepository.findTransactionsForChargeOffClassification(loan, chargeOffDate, dateComparison,
+                    existingTransactionIds);
+        } else {
+            return loanTransactionRepository.findTransactionsForChargeOffClassification(loan, chargeOffDate, dateComparison);
+        }
     }
 
-    private void filterTransactionsByChargeOffDate(final List<AccountingBridgeLoanTransactionDTO> newLoanTransactionsBeforeChargeOff,
-            final List<AccountingBridgeLoanTransactionDTO> newLoanTransactionsAfterChargeOff, final String currencyCode,
-            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
-            final Predicate<LoanTransaction> chargeOffDateCriteria, final Loan loan) {
-        final Optional<LoanTransaction> chargeOffTransactionOptional = loan.getLoanTransactions().stream() //
-                .filter(LoanTransaction::isChargeOff) //
-                .filter(LoanTransaction::isNotReversed) //
-                .findFirst();
+    private void processTransactionsForChargeOff(final List<LoanTransaction> transactions,
+            final List<AccountingBridgeLoanTransactionDTO> newLoanTransactionsBeforeChargeOff,
+            final List<AccountingBridgeLoanTransactionDTO> newLoanTransactionsAfterChargeOff, final String currencyCode, final Loan loan) {
 
+        final Optional<LoanTransaction> chargeOffTransactionOptional = findChargeOffTransaction(loan);
         if (chargeOffTransactionOptional.isEmpty()) {
             return;
         }
@@ -227,35 +226,49 @@ public class LoanAccountingBridgeMapper {
         final LoanTransaction chargeOffTransaction = chargeOffTransactionOptional.get();
         final LoanTransaction originalChargeOffTransaction = getOriginalTransactionIfReverseReplayed(chargeOffTransaction);
 
-        loan.getLoanTransactions().stream().filter(chargeOffDateCriteria).forEach(transaction -> {
-            boolean isExistingTransaction = existingTransactionIds.contains(transaction.getId());
-            boolean isExistingReversedTransaction = existingReversedTransactionIds.contains(transaction.getId());
-            List<AccountingBridgeLoanTransactionDTO> targetList = null;
-            if ((transaction.isReversed() && isExistingTransaction && !isExistingReversedTransaction)) {
-                // reversed transactions
-                LoanTransaction originalTransaction = getOriginalTransactionIfReverseReplayed(transaction);
+        transactions.forEach(transaction -> {
+            List<AccountingBridgeLoanTransactionDTO> targetList;
+
+            if (transaction.isReversed()) {
+                final LoanTransaction originalTransaction = getOriginalTransactionIfReverseReplayed(transaction);
                 targetList = originalTransaction.happenedBefore(originalChargeOffTransaction) ? newLoanTransactionsBeforeChargeOff
                         : newLoanTransactionsAfterChargeOff;
-
-            } else if (!isExistingTransaction) {
-                // new and replayed transactions
+            } else {
                 targetList = transaction.happenedBefore(chargeOffTransaction) ? newLoanTransactionsBeforeChargeOff
                         : newLoanTransactionsAfterChargeOff;
             }
-            if (targetList != null) {
-                targetList.add(mapToLoanTransactionData(transaction, currencyCode));
-            }
+
+            targetList.add(mapToLoanTransactionData(transaction, currencyCode));
         });
     }
 
-    private LoanTransaction getOriginalTransactionIfReverseReplayed(final LoanTransaction loanTransaction) {
-        if (!loanTransaction.getLoanTransactionRelations().isEmpty()) {
-            return loanTransaction.getLoanTransactionRelations().stream()
-                    .filter(tr -> LoanTransactionRelationTypeEnum.REPLAYED.equals(tr.getRelationType()))
-                    .map(LoanTransactionRelation::getToTransaction).toList().stream().min(Comparator.comparingLong(LoanTransaction::getId))
-                    .orElse(loanTransaction);
+    private Optional<LoanTransaction> findChargeOffTransaction(final Loan loan) {
+        return loanTransactionRepository.findNonReversedByLoanAndType(loan, LoanTransactionType.CHARGE_OFF).stream() //
+                .findFirst();
+    }
+
+    private List<LoanTransaction> findTransactionsForAccountingBridge(final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds, final Loan loan) {
+        if (existingTransactionIds == null || existingTransactionIds.isEmpty()) {
+            return loanTransactionRepository.findNonReversedByLoan(loan);
+        } else if (existingReversedTransactionIds == null || existingReversedTransactionIds.isEmpty()) {
+            return loanTransactionRepository.findTransactionsForAccountingBridge(loan, existingTransactionIds);
+        } else {
+            return loanTransactionRepository.findTransactionsForAccountingBridge(loan, existingTransactionIds,
+                    existingReversedTransactionIds);
         }
-        return loanTransaction;
+    }
+
+    private LoanTransaction getOriginalTransactionIfReverseReplayed(final LoanTransaction loanTransaction) {
+        if (loanTransaction.getLoanTransactionRelations().isEmpty()) {
+            return loanTransaction;
+        }
+
+        return loanTransaction.getLoanTransactionRelations().stream() //
+                .filter(tr -> LoanTransactionRelationTypeEnum.REPLAYED.equals(tr.getRelationType())) //
+                .map(LoanTransactionRelation::getToTransaction) //
+                .min(Comparator.comparingLong(LoanTransaction::getId)) //
+                .orElse(loanTransaction);
     }
 
 }

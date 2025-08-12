@@ -481,4 +481,55 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
             """)
     BigDecimal calculateTotalRecoveryPaymentAmount(@Param("loan") Loan loan);
 
+    @Query("""
+            SELECT lt FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND (
+                    (:dateComparison = 'BEFORE' AND lt.dateOf < :chargeOffDate) OR
+                    (:dateComparison = 'EQUAL' AND lt.dateOf = :chargeOffDate) OR
+                    (:dateComparison = 'AFTER' AND lt.dateOf > :chargeOffDate)
+                )
+                AND (
+                    (lt.reversed = true AND lt.id IN :existingTransactionIds AND lt.id NOT IN :existingReversedTransactionIds)
+                    OR (lt.id NOT IN :existingTransactionIds)
+                )
+            ORDER BY lt.dateOf, lt.createdDate, lt.id
+            """)
+    List<LoanTransaction> findTransactionsForChargeOffClassification(@Param("loan") Loan loan,
+            @Param("chargeOffDate") LocalDate chargeOffDate, @Param("dateComparison") String dateComparison,
+            @Param("existingTransactionIds") List<Long> existingTransactionIds,
+            @Param("existingReversedTransactionIds") List<Long> existingReversedTransactionIds);
+
+    @Query("""
+            SELECT lt FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND (
+                    (:dateComparison = 'BEFORE' AND lt.dateOf < :chargeOffDate) OR
+                    (:dateComparison = 'EQUAL' AND lt.dateOf = :chargeOffDate) OR
+                    (:dateComparison = 'AFTER' AND lt.dateOf > :chargeOffDate)
+                )
+                AND (
+                    (lt.reversed = true AND lt.id IN :existingTransactionIds)
+                    OR (lt.id NOT IN :existingTransactionIds)
+                )
+            ORDER BY lt.dateOf, lt.createdDate, lt.id
+            """)
+    List<LoanTransaction> findTransactionsForChargeOffClassification(@Param("loan") Loan loan,
+            @Param("chargeOffDate") LocalDate chargeOffDate, @Param("dateComparison") String dateComparison,
+            @Param("existingTransactionIds") List<Long> existingTransactionIds);
+
+    @Query("""
+            SELECT lt FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND (
+                    (:dateComparison = 'BEFORE' AND lt.dateOf < :chargeOffDate) OR
+                    (:dateComparison = 'EQUAL' AND lt.dateOf = :chargeOffDate) OR
+                    (:dateComparison = 'AFTER' AND lt.dateOf > :chargeOffDate)
+                )
+                AND lt.reversed = false
+            ORDER BY lt.dateOf, lt.createdDate, lt.id
+            """)
+    List<LoanTransaction> findTransactionsForChargeOffClassification(@Param("loan") Loan loan,
+            @Param("chargeOffDate") LocalDate chargeOffDate, @Param("dateComparison") String dateComparison);
+
 }
