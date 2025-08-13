@@ -62,7 +62,7 @@ resolve {
     prettyPrint = false
     classpath = sourceSets.main.runtimeClasspath
     buildClasspath = classpath
-    outputDir = file("${buildDir}/classes/java/main/static")
+    outputDir = file("${buildDir}/resources/main/static")
     openApiFile = file("${buildDir}/tmp/swagger/fineract-input.yaml")
     sortOutput = true
     dependsOn(prepareInputYaml)
