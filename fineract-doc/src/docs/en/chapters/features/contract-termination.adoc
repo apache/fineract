@@ -1,0 +1,270 @@
+= Contract Termination
+
+== Overview
+
+Contract Termination in Apache Fineract is a loan management feature that allows financial institutions to terminate loan contracts. When applied to loans with unpaid installments, this functionality accelerates the maturity date and makes the outstanding loan balance immediately due as of the termination date.
+
+== Purpose
+
+This functionality enables financial institutions to:
+
+* Terminate loan contracts when required by business rules
+* Accelerate payment schedules by making outstanding balances immediately due
+* Maintain proper loan status tracking and accounting
+* Support charge-off and recovery operations on terminated loans
+
+== Supported Loan Type
+
+[IMPORTANT]
+====
+Contract Termination is only supported for:
+
+* Progressive Loan Schedules
+* Active loan accounts
+
+Other loan schedule types and inactive loan states are not supported.
+====
+
+== Business Rules
+
+=== Eligibility Requirements
+
+Contract termination can only be applied when:
+
+* *Loan Status*: The loan must be in `Active` status
+* *Schedule Type*: Only `Progressive` loan schedule type is supported
+* *Not Charged Off*: Loan must not be in charged-off state
+* *Not Already Terminated*: Loan must not already have contract termination applied
+
+=== Termination Date Rules
+
+* Contract termination can only be done as of the current business date
+* Backdated termination is not allowed
+* No future-dated termination permitted
+
+=== Schedule Impact
+
+When contract termination is applied:
+
+* *Maturity Acceleration*: If unpaid installments exist, the loan maturity date is accelerated to the termination date
+* *Interest Calculation*: Interest is calculated only until the contract termination date
+* *Maturity Date Updated*: The loan maturity date is updated to the contract termination date
+* *Principal Outstanding*: The full outstanding principal balance becomes due
+* *Delinquency Bucketing*: Continues as per the new accelerated schedule
+
+=== Post-Termination Operations
+
+After contract termination:
+
+* *Charge-off Allowed*: Terminated loans can be charged off
+* *Charge-backs Allowed*: Terminated loans support charge-back transactions
+* *Future Installments*: All installments scheduled after termination date are removed from the schedule
+* *Accrual Activities*: Accrual and accrual activity transactions stop after termination
+* *Backdated Payments*: Backdated payments and reversals are allowed
+* *Contract Termination Reversal*: The termination can be undone/reversed
+
+=== Special Handling
+
+==== Post-Maturity Termination
+
+If contract termination is done after the original maturity date:
+
+* No schedule acceleration occurs (installments and maturity date remain unchanged)
+* Interest calculation follows normal rules up to the original maturity date
+* The loan remains in its current state without forced acceleration
+
+==== Contract Termination Reversal
+
+* Contract termination can be undone/reversed
+* Schedule will be recalculated and reapplied accordingly
+* All associated transactions are properly reversed and replayed
+
+== Transaction Types
+
+=== Contract Termination Transaction
+
+The Contract Termination transaction in Apache Fineract performs the following actions:
+
+* *Accelerates Payment Schedule*: Makes all outstanding amounts immediately due
+* *Creates Distinct Transaction*: Tracked separately with transaction type "Contract Termination"
+* *Updates Loan Sub-Status*: Changes loan sub-status to `CONTRACT_TERMINATION` (value: 900)
+* *Triggers Schedule Recalculation*: Updates repayment schedule with accelerated terms
+* *No Accounting Entries*: Contract termination itself does not generate accounting entries
+* *Stops Accrual Activity*: Interest accrual and accrual activities cease after termination
+
+==== Transaction Behavior
+
+* Transaction date is set to current business date
+* Amount represents total outstanding balance as calculated by loan summary
+* Triggers loan reprocessing for interest-bearing loans with recalculation enabled
+* Non-monetary transaction (excluded from monetary transaction queries)
+
+==== Accrual Transactions
+
+During contract termination, the system may generate:
+
+* Final accrual transaction up to termination date
+* Accrual adjustment transaction if needed
+* Associated journal entries
+* Relevant business events for accrual processing
+
+=== Contract Termination Undo
+
+The Contract Termination Undo transaction reverses a previous contract termination:
+
+* *Reverses Termination Transaction*: Marks the original termination as reversed
+* *Removes Sub-Status*: Restores loan to previous sub-status state
+* *Recalculates Schedule*: Regenerates original repayment schedule
+* *Reprocesses Transactions*: Re-runs transaction processing logic
+* *Triggers Business Events*: Notifies system of balance and status changes
+
+== API Endpoints
+
+=== Apply Contract Termination
+
+* *Endpoint*: `/loans/{loanId}?command=contractTermination`
+* *Alternative Endpoint*: `/loans/external-id/{loanExternalId}?command=contractTermination`
+* *Method*: `POST`
+
+[source,json]
+----
+{
+    "note": "Contract terminated due to default",            // Optional
+    "externalId": "95174ff9-1a75-4d72-a413-6f9b1cb988b7"     // Optional
+}
+----
+
+==== Response Body
+
+[source,json]
+----
+{
+    "entityId": 1,
+    "entityExternalId": "95174ff9-1a75-4d72-a413-6f9b1cb988b7",
+    "officeId": 1,
+    "clientId": 1,
+    "loanId": 1,
+    "changes": {
+        "subStatus": 900
+    }
+}
+----
+
+=== Undo Contract Termination
+
+* *Endpoint*: `/loans/{loanId}?command=undoContractTermination`
+* *Alternative Endpoint*: `/loans/external-id/{loanExternalId}?command=undoContractTermination`
+* *Method*: `POST`
+
+[source,json]
+----
+{
+    "note": "Reversing contract termination",                       // Optional
+    "reversalExternalId": "95174ff9-1a75-4d72-a413-6f9b1cb988b7"    // Optional
+}
+----
+
+==== Response Body
+
+[source,json]
+----
+{
+    "entityId": 1,
+    "entityExternalId": "95174ff9-1a75-4d72-a413-6f9b1cb988b7",
+    "officeId": 1,
+    "clientId": 1,
+    "groupId": null,
+    "loanId": 1,
+    "changes": {
+        "subStatus": null
+    }
+}
+----
+
+== Business Events
+
+=== Triggered for Contract Termination
+
+* `LoanTransactionContractTerminationPostBusinessEvent` - After termination processing
+* `LoanBalanceChangedBusinessEvent` - After termination processing
+* `LoanAdjustTransactionBusinessEvent` - During termination transaction processing
+
+=== Triggered for Contract Termination Undo
+
+* `LoanUndoContractTerminationBusinessEvent` - Before and after undo operation
+* `LoanBalanceChangedBusinessEvent` - After schedule recalculation
+* `LoanAdjustTransactionBusinessEvent` - During reversal processing
+
+== Database Impact
+
+=== Loan Sub-Status
+
+==== Updated on Loan (`m_loan`)
+
+[cols="3*"]
+|===
+|Field |Data Type |Description
+
+|`sub_status_enum` |`SMALLINT` |Set to 900 (CONTRACT_TERMINATION) when terminated, reset to NULL when undone
+|===
+
+=== Transaction Records
+
+==== Loan Transaction (`m_loan_transaction`)
+
+[cols="3*"]
+|===
+|Field |Data Type |Description
+
+|`transaction_type_enum` |`SMALLINT` |Set to 38 (CONTRACT_TERMINATION)
+|`transaction_date` |`DATE` |Current business date
+|`amount` |`DECIMAL(19,6)` |Total outstanding balance
+|`is_reversed` |`BOOLEAN` |Set to TRUE when undone
+|===
+
+== Validation Rules
+
+=== Contract Termination Validation
+
+* Loan must be in active status (`loan.isOpen()`)
+* Loan product must use Progressive schedule type
+* Loan must not be charged off (`!loan.isChargedOff()`)
+* Loan must not already be terminated (`!loan.isContractTermination()`)
+* Client or group must be active
+
+=== Contract Termination Undo Validation
+
+* Original contract termination transaction must exist
+* Transaction must not be already reversed
+* Proper permissions required for reversal operations
+
+== Integration Points
+
+=== Charge Operations
+
+* Charge-off operations can be performed on terminated loans
+* Charge-back transactions are supported on terminated loans
+* Charge adjustments follow normal business rules
+
+=== Delinquency Management
+
+* Delinquency bucketing continues based on accelerated schedule
+* Delinquency calculations use the new due dates from termination
+
+=== Accounting Integration
+
+* No direct accounting entries for contract termination transaction
+* Potential accrual transactions generated up to termination date
+* Journal entries created for final accrual transactions
+* Interest accrual stops after termination
+* Business events triggered for accrual processing
+
+== Notes
+
+[IMPORTANT]
+====
+* Contract termination is irreversible through normal business processes once additional transactions occur
+* Proper authorization and audit trails are maintained for all termination activities
+* Integration with external systems should account for accelerated payment schedules
+* Only Progressive loan schedule type supports this functionality due to schedule recalculation requirements
+====
