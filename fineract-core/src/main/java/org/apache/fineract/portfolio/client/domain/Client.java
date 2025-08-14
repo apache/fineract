@@ -29,7 +29,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -135,9 +134,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "client_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
     private Set<Group> groups;
 
-    @Transient
-    private boolean accountNumberRequiresAutoGeneration = false;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "closure_reason_cv_id")
     private CodeValue closureReason;
@@ -237,7 +233,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
-            this.accountNumberRequiresAutoGeneration = true;
         } else {
             this.accountNumber = accountNo;
         }
@@ -327,21 +322,12 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     }
 
-    public boolean isAccountNumberRequiresAutoGeneration() {
-        return this.accountNumberRequiresAutoGeneration;
-    }
-
-    public void setAccountNumberRequiresAutoGeneration(final boolean accountNumberRequiresAutoGeneration) {
-        this.accountNumberRequiresAutoGeneration = accountNumberRequiresAutoGeneration;
-    }
-
     public boolean identifiedBy(final Long clientId) {
         return getId().equals(clientId);
     }
 
     public void updateAccountNo(final String accountIdentifier) {
         this.accountNumber = accountIdentifier;
-        this.accountNumberRequiresAutoGeneration = false;
     }
 
     public void activate(final AppUser currentUser, final DateTimeFormatter formatter, final LocalDate activationLocalDate) {

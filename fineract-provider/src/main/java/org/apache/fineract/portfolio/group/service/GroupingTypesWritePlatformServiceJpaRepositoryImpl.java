@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandProcessingService;
@@ -186,16 +187,17 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 rollbackTransaction = this.commandProcessingService.validateRollbackCommand(commandWrapper, currentUser);
             }
 
-            // pre-save to generate id for use in group hierarchy
             this.groupRepository.save(newGroup);
+
+            // Account Number generation
+            if (StringUtils.isBlank(accountNo)) {
+                generateAccountNumber(newGroup);
+            }
 
             /*
              * Generate hierarchy for a new center/group and all the child groups if they exist
              */
             newGroup.generateHierarchy();
-
-            /* Generate account number if required */
-            generateAccountNumberIfRequired(newGroup);
 
             this.groupRepository.saveAndFlush(newGroup);
             newGroup.captureStaffHistoryDuringCenterCreation(staff, activationDate);
@@ -229,20 +231,17 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         }
     }
 
-    private void generateAccountNumberIfRequired(Group newGroup) {
-        if (newGroup.isAccountNumberRequiresAutoGeneration()) {
-            EntityAccountType entityAccountType = null;
-            AccountNumberFormat accountNumberFormat = null;
-            if (newGroup.isCenter()) {
-                entityAccountType = EntityAccountType.CENTER;
-                accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(entityAccountType);
-                newGroup.updateAccountNo(this.accountNumberGenerator.generateCenterAccountNumber(newGroup, accountNumberFormat));
-            } else {
-                entityAccountType = EntityAccountType.GROUP;
-                accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(entityAccountType);
-                newGroup.updateAccountNo(this.accountNumberGenerator.generateGroupAccountNumber(newGroup, accountNumberFormat));
-            }
-
+    private void generateAccountNumber(Group newGroup) {
+        EntityAccountType entityAccountType = null;
+        AccountNumberFormat accountNumberFormat = null;
+        if (newGroup.isCenter()) {
+            entityAccountType = EntityAccountType.CENTER;
+            accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(entityAccountType);
+            newGroup.updateAccountNo(this.accountNumberGenerator.generateCenterAccountNumber(newGroup, accountNumberFormat));
+        } else {
+            entityAccountType = EntityAccountType.GROUP;
+            accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(entityAccountType);
+            newGroup.updateAccountNo(this.accountNumberGenerator.generateGroupAccountNumber(newGroup, accountNumberFormat));
         }
     }
 
