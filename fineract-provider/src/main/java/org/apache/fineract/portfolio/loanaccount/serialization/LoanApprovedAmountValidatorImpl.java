@@ -106,7 +106,7 @@ public final class LoanApprovedAmountValidatorImpl implements LoanApprovedAmount
     }
 
     @Override
-    public void validateLoanAvailableDisbursementAmountModification(JsonCommand command) {
+    public void validateLoanAvailableDisbursementAmountModification(final JsonCommand command) {
         String json = command.json();
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
@@ -133,9 +133,8 @@ public final class LoanApprovedAmountValidatorImpl implements LoanApprovedAmount
             final Long loanId = command.getLoanId();
             Loan loan = this.loanRepository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId));
 
-            if (INVALID_LOAN_STATUSES_FOR_APPROVED_AMOUNT_MODIFICATION.contains(loan.getStatus())) {
-                baseDataValidator.reset()
-                        .failWithCodeNoParameterAddedToErrorCode("loan.status.not.valid.for.available.disbursement.amount.modification");
+            if (!loan.getStatus().isApproved() && !loan.getStatus().isActive()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("loan.must.be.approved.or.active");
             }
 
             BigDecimal maximumThresholdForApprovedAmount;
@@ -153,6 +152,11 @@ public final class LoanApprovedAmountValidatorImpl implements LoanApprovedAmount
             if (MathUtil.isGreaterThan(newAvailableDisbursementAmount, maximumAvailableDisbursementThreshold)) {
                 baseDataValidator.reset().parameter(LoanApiConstants.amountParameterName)
                         .failWithCode("can't.be.greater.than.maximum.available.disbursement.amount.calculation");
+            }
+
+            if (MathUtil.isZero(newAvailableDisbursementAmount) && loan.getStatus().isApproved()) {
+                baseDataValidator.reset().parameter(LoanApiConstants.amountParameterName)
+                        .failWithCode("cannot.be.zero.as.nothing.was.disbursed.yet");
             }
         });
     }

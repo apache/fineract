@@ -566,8 +566,8 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
                     () -> modifyLoanAvailableDisbursementAmount(postLoansResponse.getResourceId(), sixHundred));
 
             assertEquals(403, exception.getResponse().code());
-            assertTrue(exception.getMessage().contains(
-                    "validation.msg.loan.available.disbursement.amount.loan.status.not.valid.for.available.disbursement.amount.modification"));
+            assertTrue(
+                    exception.getMessage().contains("validation.msg.loan.available.disbursement.amount.loan.must.be.approved.or.active"));
         });
     }
 
@@ -649,6 +649,8 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
                     1000.0, 7.0, 6, (request) -> request.disbursementData(List.of(new PostLoansDisbursementData()
                             .expectedDisbursementDate("1 January 2024").principal(BigDecimal.valueOf(800.0)))));
+
+            disburseLoan(loanId, BigDecimal.valueOf(800), "1 January 2024");
 
             PutLoansAvailableDisbursementAmountResponse putLoansAvailableDisbursementAmountResponse = modifyLoanAvailableDisbursementAmount(
                     loanId, BigDecimal.ZERO);

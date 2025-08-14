@@ -1033,6 +1033,10 @@ public final class ErrorMessageHelper {
         return "The parameter `amount` must be greater than or equal to 0.";
     }
 
+    public static String updateAvailableDisbursementLoanCannotBeZeroAsNothingWasDisbursed() {
+        return "Failed data validation due to: cannot.be.zero.as.nothing.was.disbursed.yet.";
+    }
+
     public static String wrongValueInLineInBuyDownFeeTab(String resourceId, int line, List<List<String>> actualList,
             List<String> expected) {
         String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
