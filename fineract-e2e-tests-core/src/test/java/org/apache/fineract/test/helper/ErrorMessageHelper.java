@@ -59,6 +59,26 @@ public final class ErrorMessageHelper {
         return "Loan has a wrong http status";
     }
 
+    public static String setIncorrectBusinessDateFailure() {
+        return "Wrong local date fields.";
+    }
+
+    public static String setIncorrectBusinessDateMandatoryFailure() {
+        return "The parameter 'date' is mandatory: '${validatedValue}'.";
+    }
+
+    public static String setCurrencyEmptyValueFailure() {
+        return "The parameter 'currencies' cannot be empty.";
+    }
+
+    public static String setCurrencyIncorrectValueFailure(String value) {
+        return String.format("Currency with identifier %s does not exist", value);
+    }
+
+    public static String setCurrencyNullValueMandatoryFailure() {
+        return "The parameter 'currencies' is mandatory.";
+    }
+
     public static String disburseDateFailure(Integer loanId) {
         String loanIdStr = parseLoanIdToString(loanId);
         return String.format("The date on which a loan with identifier : %s is disbursed cannot be in the future.", loanIdStr);
