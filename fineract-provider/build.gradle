@@ -260,6 +260,20 @@ jib {
         ]
     }
 
+    // Include the OpenApi into the Image
+    extraDirectories {
+        paths {
+            // Copy fineract.json from project to Static File location in the image 
+            path {
+                from = file("$rootDir/fineract-provider/build/classes/java/main/static/") //Source Static File location
+                into = '/app/resources/static/'  //Target Static File location
+                includes = ['fineract.json']
+            }
+        }
+        // Enable watching for changes 
+        permissions = ['/app/resources/static/fineract.json': '644']
+    }
+
     container {
         creationTime = 'USE_CURRENT_TIMESTAMP'
         mainClass = 'org.apache.fineract.ServerApplication'
