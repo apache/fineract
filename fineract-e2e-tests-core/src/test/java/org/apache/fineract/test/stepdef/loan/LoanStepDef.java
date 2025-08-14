@@ -5400,6 +5400,32 @@ public class LoanStepDef extends AbstractStepDef {
         assertThat(developerMessage).isEqualTo(ErrorMessageHelper.updateAvailableDisbursementLoanLessMinAllowedAmountFailure());
     }
 
+    @Then("Updating the loan's available disbursement amount to {string} is forbidden because cannot be zero as nothing was disbursed")
+    public void updateLoanAvailableDisbursementAmountForbiddenCannotBeZeroAsNothingWasDisbursed(final String amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        final PutLoansAvailableDisbursementAmountRequest modifyLoanAvailableDisbursementAmountRequest = new PutLoansAvailableDisbursementAmountRequest()
+                .locale(LOCALE_EN).amount(new BigDecimal(amount));
+
+        final Response<PutLoansAvailableDisbursementAmountResponse> modifyLoanAvailableDisbursementAmountResponse = loansApi
+                .modifyLoanAvailableDisbursementAmount(loanId, modifyLoanAvailableDisbursementAmountRequest).execute();
+
+        ErrorResponse errorDetails = ErrorResponse.from(modifyLoanAvailableDisbursementAmountResponse);
+        assertThat(errorDetails.getHttpStatusCode()).isEqualTo(403);
+
+        Object errorArgs = errorDetails.getErrors().getFirst().getArgs().getFirst().getValue();
+        String developerMessage;
+        if (errorArgs instanceof Map errorArgsMap) {
+            developerMessage = (String) errorArgsMap.get("developerMessage");
+        } else {
+            developerMessage = errorDetails.getDeveloperMessage();
+        }
+        assertThat(developerMessage).isEqualTo(ErrorMessageHelper.updateAvailableDisbursementLoanCannotBeZeroAsNothingWasDisbursed());
+    }
+
     private Response<PostLoansLoanIdTransactionsResponse> addInterestRefundTransaction(final double amount, final Long transactionId)
             throws IOException {
         final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
