@@ -123,7 +123,6 @@ dependencyManagement {
         dependency 'jakarta.jms:jakarta.jms-api:3.1.0'
         dependency 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
         dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.6' // Swagger needs exactly this version
-        dependency 'org.apache.bval:org.apache.bval.bundle:3.0.2'
         dependency 'joda-time:joda-time:2.13.1'
 
         dependency 'io.github.classgraph:classgraph:4.8.179'

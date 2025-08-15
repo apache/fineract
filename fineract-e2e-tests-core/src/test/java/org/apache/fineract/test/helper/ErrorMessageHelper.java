@@ -64,7 +64,7 @@ public final class ErrorMessageHelper {
     }
 
     public static String setIncorrectBusinessDateMandatoryFailure() {
-        return "The parameter 'date' is mandatory: '${validatedValue}'.";
+        return "The parameter 'date' is mandatory.";
     }
 
     public static String setCurrencyEmptyValueFailure() {
