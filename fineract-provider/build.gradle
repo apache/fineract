@@ -315,7 +315,7 @@ cucumber {
     ]
 }
 
-tasks.jibDockerBuild.dependsOn(bootJar)
+tasks.jibDockerBuild.dependsOn(bootJar, resolve)
 
 // Configuration for git properties gradle plugin
 // https://github.com/n0mer/gradle-git-properties
