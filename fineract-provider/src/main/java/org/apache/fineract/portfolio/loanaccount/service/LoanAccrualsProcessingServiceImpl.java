@@ -445,7 +445,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                     loan.getOfficeId(), loan.getCurrencyCode(), loan.getSummary().getTotalInterestCharged(),
                     loan.isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct(),
                     loan.isUpfrontAccrualAccountingEnabledOnLoanProduct(), loan.isPeriodicAccrualAccountingEnabledOnLoanProduct(), false,
-                    false, false, null, false, newTransactionDTOs);
+                    false, false, null, false, newTransactionDTOs, loan.getLoanProductRelatedDetail().isMerchantBuyDownFee());
             this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
         }
     }

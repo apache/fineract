@@ -3878,8 +3878,8 @@ public class CommandWrapperBuilder {
     }
 
     public CommandWrapperBuilder updateLoanApprovedAmount(final Long loanId) {
-        this.actionName = "UPDATE";
-        this.entityName = "LOAN_APPROVED_AMOUNT";
+        this.actionName = "UPDATE_APPROVED_AMOUNT";
+        this.entityName = "LOAN";
         this.entityId = loanId;
         this.loanId = loanId;
         this.href = "/loans/" + loanId;
@@ -3887,8 +3887,8 @@ public class CommandWrapperBuilder {
     }
 
     public CommandWrapperBuilder manualInterestRefund(final Long loanId, final Long transactionId) {
-        this.actionName = "MANUAL_INTEREST_REFUND";
-        this.entityName = "LOAN_TRANSACTION";
+        this.actionName = "MANUAL_INTEREST_REFUND_TRANSACTION";
+        this.entityName = "LOAN";
         this.loanId = loanId;
         this.entityId = transactionId;
         this.href = "/loans/" + loanId + "/transactions/" + transactionId + "?command=interest-refund";

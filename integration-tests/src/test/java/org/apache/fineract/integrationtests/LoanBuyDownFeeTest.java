@@ -271,7 +271,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
                 .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())
                 .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue())
                 .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue()).loanScheduleType("PROGRESSIVE")
-                .loanScheduleProcessingType("HORIZONTAL").enableBuyDownFee(true)
+                .loanScheduleProcessingType("HORIZONTAL").enableBuyDownFee(true).merchantBuyDownFee(true)
                 .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                 .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
                 .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE).locale("en").dateFormat("dd MMMM yyyy");
@@ -496,7 +496,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
                 .enableBuyDownFee(true).buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                 .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
                 .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE)
-                .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())
+                .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue()).merchantBuyDownFee(true)
                 .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
                 .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue()));
 
@@ -862,6 +862,46 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
                                     .locale("en")));
             assertEquals(403, exception.getResponse().code());
             assertTrue(exception.getMessage().contains("buy.down.fee.cannot.be.reversed.when.adjusted"));
+        });
+    }
+
+    @Test
+    public void testBuyDownFeeForNonMerchant() {
+        runAt("10 September 2024", () -> {
+            deleteAllExternalEvents();
+            // Add initial buy down fee
+
+            final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                    .createLoanProduct(createProgressiveLoanProductWithBuyDownFee().merchantBuyDownFee(false));
+
+            // Apply for the loan with proper progressive loan settings
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(clientId,
+                    loanProductsResponse.getResourceId(), "01 September 2024", 1000.0, 10.0, 12, null));
+            loanId = postLoansResponse.getLoanId();
+            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(1000.0, "01 September 2024"));
+            disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 September 2024");
+
+            final Long buyDownFeeTransactionId = addBuyDownFeeForLoan(loanId, 400.0, "10 September 2024");
+            assertNotNull(buyDownFeeTransactionId);
+
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 September 2024"), //
+                    transaction(400.0, "Buy Down Fee", "10 September 2024"));
+
+            // Verify initial buy down fee (non merchant) accounting entries
+            verifyTRJournalEntries(buyDownFeeTransactionId, debit(fundSource, 400.0), credit(deferredIncomeLiabilityAccount, 400.0));
+
+            // Reverse Buy Down Fee (non merchant)
+            PostLoansLoanIdTransactionsResponse transactionsResponse = loanTransactionHelper.reverseLoanTransaction(loanId,
+                    buyDownFeeTransactionId, new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN)
+                            .transactionDate("10 September 2024").note("Buy Down Fee reversed").transactionAmount(0.0).locale("en"));
+            Assertions.assertNotNull(transactionsResponse);
+            Assertions.assertNotNull(transactionsResponse.getResourceId());
+            Assertions.assertEquals(transactionsResponse.getResourceId(), buyDownFeeTransactionId);
+
+            // Verify initial buy down fee (non merchant) reversed accounting entries
+            verifyTRJournalEntries(buyDownFeeTransactionId, debit(fundSource, 400.0), credit(deferredIncomeLiabilityAccount, 400.0),
+                    credit(fundSource, 400.0), debit(deferredIncomeLiabilityAccount, 400.0));
         });
     }
 

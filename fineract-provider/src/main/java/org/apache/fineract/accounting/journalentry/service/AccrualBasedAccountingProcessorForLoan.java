@@ -435,8 +435,10 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         final BigDecimal amount = loanTransactionDTO.getAmount();
         final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
 
+        final AccrualAccountsForLoan debitAccountType = loanDTO.isMerchantBuyDownFee() ? AccrualAccountsForLoan.BUY_DOWN_EXPENSE
+                : AccrualAccountsForLoan.FUND_SOURCE;
         if (MathUtil.isGreaterThanZero(amount)) {
-            this.helper.createJournalEntriesForLoan(office, currencyCode, AccrualAccountsForLoan.BUY_DOWN_EXPENSE.getValue(),
+            this.helper.createJournalEntriesForLoan(office, currencyCode, debitAccountType.getValue(),
                     AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
                     transactionDate, amount);
         }

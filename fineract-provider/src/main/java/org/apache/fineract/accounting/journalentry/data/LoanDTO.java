@@ -47,4 +47,5 @@ public class LoanDTO {
     private boolean markedAsFraud;
     private Long chargeOffReasonCodeValue;
     private boolean markedAsWrittenOff;
+    private boolean merchantBuyDownFee;
 }

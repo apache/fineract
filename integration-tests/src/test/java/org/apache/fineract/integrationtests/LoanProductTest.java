@@ -259,7 +259,7 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                     .enableBuyDownFee(true).buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                     .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
                     .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE)
-                    .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())
+                    .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue()).merchantBuyDownFee(true)
                     .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue()));
 
             final GetLoanProductsProductIdResponse loanProductsProductIdResponse = loanProductHelper
@@ -339,7 +339,7 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                     .enableBuyDownFee(true).buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                     .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
                     .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE)
-                    .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())
+                    .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue()).merchantBuyDownFee(true)
                     .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue()));
 
             final GetLoanProductsProductIdResponse loanProductsProductIdResponse = loanProductHelper
@@ -404,7 +404,7 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                             .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                             .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
                             .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE)
-                            .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())
+                            .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue()).merchantBuyDownFee(true)
                             .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue())));
         }
 
@@ -414,7 +414,7 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                     () -> loanProductHelper.createLoanProduct(create4IProgressive().enableBuyDownFee(true)
                             .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
                             .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE)
-                            .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())
+                            .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue()).merchantBuyDownFee(true)
                             .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue())));
         }
 
@@ -424,7 +424,7 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                     () -> loanProductHelper.createLoanProduct(create4IProgressive().enableBuyDownFee(true)
                             .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                             .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE)
-                            .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())
+                            .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue()).merchantBuyDownFee(true)
                             .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue())));
         }
 
@@ -434,7 +434,7 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                     () -> loanProductHelper.createLoanProduct(create4IProgressive().enableBuyDownFee(true)
                             .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                             .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
-                            .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())
+                            .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue()).merchantBuyDownFee(true)
                             .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue())));
         }
 
@@ -444,7 +444,7 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                     () -> loanProductHelper.createLoanProduct(create4IProgressive().enableBuyDownFee(true)
                             .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                             .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
-                            .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE)
+                            .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE).merchantBuyDownFee(true)
                             .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue())));
         }
 
@@ -454,7 +454,7 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                     () -> loanProductHelper.createLoanProduct(create4IProgressive().enableBuyDownFee(true)
                             .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                             .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
-                            .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE)
+                            .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE).merchantBuyDownFee(true)
                             .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())));
         }
     }

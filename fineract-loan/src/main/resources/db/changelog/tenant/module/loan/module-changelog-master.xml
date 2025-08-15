@@ -53,4 +53,5 @@
   <include relativeToChangelogFile="true" file="parts/1028_remove_suboptimal_indexes.xml"/>
   <include relativeToChangelogFile="true" file="parts/1029_add_installment_amount_in_multiples_of_to_loan.xml"/>
   <include relativeToChangelogFile="true" file="parts/1030_add_loan_undo_contract_termination_event.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1031_loan_merchant_buy_down_fee.xml"/>
 </databaseChangeLog>

@@ -91,7 +91,7 @@ public class DefaultScheduledDateGeneratorTest {
                 DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL, false, null, null, null, null, null, ZERO, null, NONE, null, ZERO,
                 EMPTY_LIST, true, 0, false, holidayDetailDTO, false, false, false, null, false, false, null, false, DISBURSEMENT_DATE,
                 submittedOnDate, CUMULATIVE, LoanScheduleProcessingType.HORIZONTAL, null, false, null, null, false, null, false, null, null,
-                null, false, null, null, null);
+                null, false, null, null, null, false);
 
         // when
         List<? extends LoanScheduleModelPeriod> result = underTest.generateRepaymentPeriods(mathContext, expectedDisbursementDate,
@@ -172,7 +172,7 @@ public class DefaultScheduledDateGeneratorTest {
                 EMPTY_LIST, BigDecimal.valueOf(36_000L), null, DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL, false, null, null, null, null,
                 null, ZERO, null, NONE, null, ZERO, EMPTY_LIST, true, 0, false, holidayDetailDTO, false, false, false, null, false, false,
                 null, false, DISBURSEMENT_DATE, submittedOnDate, CUMULATIVE, LoanScheduleProcessingType.HORIZONTAL, null, false, null, null,
-                false, null, false, null, null, null, false, null, null, null);
+                false, null, false, null, null, null, false, null, null, null, false);
     }
 
     private HolidayDetailDTO createHolidayDTO() {

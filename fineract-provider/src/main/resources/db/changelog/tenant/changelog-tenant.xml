@@ -212,4 +212,5 @@
     <include file="parts/0191_add_LoanApprovedAmountChangedBusinessEvent.xml" relativeToChangelogFile="true" />
     <include file="parts/0192_create_loan_approved_amount_history.xml" relativeToChangelogFile="true" />
     <include file="parts/0193_add_column_ip.xml" relativeToChangelogFile="true" />
+    <include file="parts/0194_fix_missing_permission.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

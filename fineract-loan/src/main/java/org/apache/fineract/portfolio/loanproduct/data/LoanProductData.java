@@ -256,6 +256,7 @@ public class LoanProductData implements Serializable {
     private StringEnumOptionData buyDownFeeCalculationType;
     private StringEnumOptionData buyDownFeeStrategy;
     private StringEnumOptionData buyDownFeeIncomeType;
+    private boolean merchantBuyDownFee;
     private List<StringEnumOptionData> buyDownFeeCalculationTypeOptions;
     private List<StringEnumOptionData> buyDownFeeStrategyOptions;
     private List<StringEnumOptionData> buyDownFeeIncomeTypeOptions;
@@ -371,6 +372,7 @@ public class LoanProductData implements Serializable {
         final StringEnumOptionData buyDownFeeCalculationType = null;
         final StringEnumOptionData buyDownFeeStrategy = null;
         final StringEnumOptionData buyDownFeeIncomeType = null;
+        final boolean merchantBuyDownFee = false;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -394,7 +396,7 @@ public class LoanProductData implements Serializable {
                 loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour,
                 interestRecognitionOnDisbursementDate, daysInYearTypeCustomStrategy, enableIncomeCapitalization,
                 capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, enableBuyDownFee,
-                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType);
+                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee);
 
     }
 
@@ -507,6 +509,7 @@ public class LoanProductData implements Serializable {
         final StringEnumOptionData buyDownFeeCalculationType = null;
         final StringEnumOptionData buyDownFeeStrategy = null;
         final StringEnumOptionData buyDownFeeIncomeType = null;
+        final boolean merchantBuyDownFee = false;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -530,7 +533,7 @@ public class LoanProductData implements Serializable {
                 loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour,
                 interestRecognitionOnDisbursementDate, daysInYearTypeCustomStrategy, enableIncomeCapitalization,
                 capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, enableBuyDownFee,
-                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType);
+                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee);
 
     }
 
@@ -650,6 +653,7 @@ public class LoanProductData implements Serializable {
         final StringEnumOptionData buyDownFeeCalculationType = null;
         final StringEnumOptionData buyDownFeeStrategy = null;
         final StringEnumOptionData buyDownFeeIncomeType = null;
+        final boolean merchantBuyDownFee = false;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -673,7 +677,7 @@ public class LoanProductData implements Serializable {
                 loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour,
                 interestRecognitionOnDisbursementDate, daysInYearTypeCustomStrategy, enableIncomeCapitalization,
                 capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, enableBuyDownFee,
-                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType);
+                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee);
 
     }
 
@@ -787,6 +791,7 @@ public class LoanProductData implements Serializable {
         final StringEnumOptionData buyDownFeeCalculationType = null;
         final StringEnumOptionData buyDownFeeStrategy = null;
         final StringEnumOptionData buyDownFeeIncomeType = null;
+        final boolean merchantBuyDownFee = false;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -810,7 +815,7 @@ public class LoanProductData implements Serializable {
                 loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour,
                 interestRecognitionOnDisbursementDate, daysInYearTypeCustomStrategy, enableIncomeCapitalization,
                 capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, enableBuyDownFee,
-                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType);
+                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee);
     }
 
     public static LoanProductData withAccountingDetails(final LoanProductData productData, final Map<String, Object> accountingMappings,
@@ -869,7 +874,7 @@ public class LoanProductData implements Serializable {
             final StringEnumOptionData capitalizedIncomeCalculationType, final StringEnumOptionData capitalizedIncomeStrategy,
             final StringEnumOptionData capitalizedIncomeType, final boolean enableBuyDownFee,
             final StringEnumOptionData buyDownFeeCalculationType, final StringEnumOptionData buyDownFeeStrategy,
-            final StringEnumOptionData buyDownFeeIncomeType) {
+            final StringEnumOptionData buyDownFeeIncomeType, final boolean merchantBuyDownFee) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -934,6 +939,7 @@ public class LoanProductData implements Serializable {
         this.buyDownFeeCalculationType = buyDownFeeCalculationType;
         this.buyDownFeeStrategy = buyDownFeeStrategy;
         this.buyDownFeeIncomeType = buyDownFeeIncomeType;
+        this.merchantBuyDownFee = merchantBuyDownFee;
 
         this.chargeOptions = null;
         this.penaltyOptions = null;
@@ -1238,6 +1244,8 @@ public class LoanProductData implements Serializable {
         this.buyDownFeeCalculationTypeOptions = buyDownFeeCalculationTypeOptions;
         this.buyDownFeeStrategyOptions = buyDownFeeStrategyOptions;
         this.buyDownFeeIncomeTypeOptions = buyDownFeeIncomeTypeOptions;
+
+        this.merchantBuyDownFee = productData.isMerchantBuyDownFee();
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {

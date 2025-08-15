@@ -256,7 +256,7 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
      */
     public void handleChangesToLoanProductToGLAccountMappings(final Long loanProductId, final Map<String, Object> changes,
             final JsonElement element, final AccountingRuleType accountingRuleType, final boolean enableIncomeCapitalization,
-            final boolean enableBuyDownFee) {
+            final boolean enableBuyDownFee, final boolean merchantBuyDownFee) {
         switch (accountingRuleType) {
             case NONE:
             break;
@@ -399,9 +399,11 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                     deleteProductToGLAccountMapping(loanProductId, PortfolioProductType.LOAN,
                             AccrualAccountsForLoan.BUY_DOWN_EXPENSE.getValue());
                 } else {
-                    mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.BUY_DOWN_EXPENSE.getValue(), loanProductId,
-                            AccrualAccountsForLoan.BUY_DOWN_EXPENSE.getValue(), AccrualAccountsForLoan.BUY_DOWN_EXPENSE.toString(),
-                            changes);
+                    if (merchantBuyDownFee) {
+                        mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.BUY_DOWN_EXPENSE.getValue(),
+                                loanProductId, AccrualAccountsForLoan.BUY_DOWN_EXPENSE.getValue(),
+                                AccrualAccountsForLoan.BUY_DOWN_EXPENSE.toString(), changes);
+                    }
                 }
 
                 // liabilities

@@ -28,7 +28,6 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -36,6 +35,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -57,6 +58,8 @@ import org.apache.fineract.portfolio.group.exception.InvalidGroupStateTransition
 import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "m_group")
 public final class Group extends AbstractPersistableCustom<Long> {
 
@@ -130,9 +133,6 @@ public final class Group extends AbstractPersistableCustom<Long> {
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
     private String accountNumber;
 
-    @Transient
-    private boolean accountNumberRequiresAutoGeneration = false;
-
     @OneToMany(mappedBy = "group", cascade = CascadeType.REMOVE)
     private Set<GroupRole> groupRole;
 
@@ -166,6 +166,12 @@ public final class Group extends AbstractPersistableCustom<Long> {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
+        if (StringUtils.isBlank(accountNo)) {
+            this.accountNumber = new RandomPasswordGenerator(19).generate();
+        } else {
+            this.accountNumber = accountNo;
+        }
+
         this.office = office;
         this.staff = staff;
         this.groupLevel = groupLevel;
@@ -175,10 +181,7 @@ public final class Group extends AbstractPersistableCustom<Long> {
             this.parent.addChild(this);
         }
 
-        if (StringUtils.isBlank(accountNo)) {
-            this.accountNumber = new RandomPasswordGenerator(19).generate();
-            this.accountNumberRequiresAutoGeneration = true;
-        } else {
+        if (!StringUtils.isBlank(accountNo)) {
             this.accountNumber = accountNo;
         }
 
@@ -339,14 +342,6 @@ public final class Group extends AbstractPersistableCustom<Long> {
         return actualChanges;
     }
 
-    public LocalDate getSubmittedOnDate() {
-        return this.submittedOnDate;
-    }
-
-    public LocalDate getActivationDate() {
-        return this.activationDate;
-    }
-
     public List<String> associateClients(final Set<Client> clientMembersSet) {
         final List<String> differences = new ArrayList<>();
         for (final Client client : clientMembersSet) {
@@ -432,30 +427,6 @@ public final class Group extends AbstractPersistableCustom<Long> {
             removeStaff(dateOfStaffUnassigned);
         }
         this.staff = null;
-    }
-
-    public GroupLevel getGroupLevel() {
-        return this.groupLevel;
-    }
-
-    public Staff getStaff() {
-        return this.staff;
-    }
-
-    public void setStaff(final Staff staff) {
-        this.staff = staff;
-    }
-
-    public Group getParent() {
-        return this.parent;
-    }
-
-    public void setParent(final Group parent) {
-        this.parent = parent;
-    }
-
-    public Office getOffice() {
-        return this.office;
     }
 
     public boolean isCenter() {
@@ -689,10 +660,6 @@ public final class Group extends AbstractPersistableCustom<Long> {
         }
     }
 
-    public Set<Client> getClientMembers() {
-        return this.clientMembers;
-    }
-
     // StaffAssignmentHistory[during center creation]
     public void captureStaffHistoryDuringCenterCreation(final Staff newStaff, final LocalDate assignmentDate) {
         if (this.isCenter() && this.isActive() && staff != null) {
@@ -732,21 +699,8 @@ public final class Group extends AbstractPersistableCustom<Long> {
         return latestRecordWithNoEndDate;
     }
 
-    public boolean isAccountNumberRequiresAutoGeneration() {
-        return this.accountNumberRequiresAutoGeneration;
-    }
-
-    public void setAccountNumberRequiresAutoGeneration(final boolean accountNumberRequiresAutoGeneration) {
-        this.accountNumberRequiresAutoGeneration = accountNumberRequiresAutoGeneration;
-    }
-
     public void updateAccountNo(final String accountIdentifier) {
         this.accountNumber = accountIdentifier;
-        this.accountNumberRequiresAutoGeneration = false;
-    }
-
-    public void setGroupMembers(List<Group> groupMembers) {
-        this.groupMembers = groupMembers;
     }
 
 }

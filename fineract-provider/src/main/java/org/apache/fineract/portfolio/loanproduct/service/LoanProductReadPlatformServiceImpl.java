@@ -299,7 +299,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.enable_income_capitalization as enableIncomeCapitalization, " //
                     + "lp.capitalized_income_calculation_type as capitalizedIncomeCalculationType, " //
                     + "lp.capitalized_income_strategy as capitalizedIncomeStrategy, " //
-                    + "lp.capitalized_income_type as capitalizedIncomeType, " //
+                    + "lp.capitalized_income_type as capitalizedIncomeType, lp.is_merchant_buy_down_fee as merchantBuyDownFee, " //
                     + "lp.enable_buy_down_fee as enableBuyDownFee, " + "lp.buy_down_fee_calculation_type as buyDownFeeCalculationType, "
                     + "lp.buy_down_fee_strategy as buyDownFeeStrategy, " + "lp.buy_down_fee_income_type as buyDownFeeIncomeType "
                     + " from m_product_loan lp " + " left join m_fund f on f.id = lp.fund_id "
@@ -579,6 +579,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     rs.getString("buyDownFeeStrategy"));
             final StringEnumOptionData buyDownFeeIncomeType = ApiFacingEnum.getStringEnumOptionData(LoanBuyDownFeeIncomeType.class,
                     rs.getString("buyDownFeeIncomeType"));
+            final boolean merchantBuyDownFee = rs.getBoolean("merchantBuyDownFee");
 
             return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -604,7 +605,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes,
                     loanChargeOffBehaviour.getValueAsStringEnumOptionData(), interestRecognitionOnDisbursementDate,
                     daysInYearCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy,
-                    capitalizedIncome, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType);
+                    capitalizedIncome, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType,
+                    merchantBuyDownFee);
         }
     }
 
