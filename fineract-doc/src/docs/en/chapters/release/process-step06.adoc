@@ -40,6 +40,8 @@ Ideally you'd build code and docs and run every possible test and check, but htt
 
 Finally, inspect `apache-fineract-bin-{revnumber}.tar.gz`. Make sure the `fineract-provider-{revnumber}.jar` can be run directly, and the `fineract-provider.war` can be run with Tomcat.
 
+NOTE: We don't release any artifacts to Apache's Maven repository.
+
 == Gradle Task
 
 .Command
