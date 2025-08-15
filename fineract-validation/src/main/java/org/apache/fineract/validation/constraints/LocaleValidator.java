@@ -23,7 +23,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 
-class LocaleValidator implements ConstraintValidator<Locale, String> {
+public class LocaleValidator implements ConstraintValidator<Locale, String> {
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {

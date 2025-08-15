@@ -30,8 +30,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -39,8 +37,6 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class JakartaValidationExceptionMapper implements FineractExceptionMapper, ExceptionMapper<ConstraintViolationException> {
-
-    private final MessageSource messageSource;
 
     @Override
     public Response toResponse(final ConstraintViolationException exception) {
@@ -61,9 +57,7 @@ public class JakartaValidationExceptionMapper implements FineractExceptionMapper
             final String messageTemplate = violation.getMessageTemplate();
             final String messageKey = messageTemplate.replace("{", "").replace("}", "");
 
-            final String interpolatedMessage = messageSource.getMessage(messageKey, null, LocaleContextHolder.getLocale());
-
-            return ApiParameterError.parameterError(messageKey, interpolatedMessage, violation.getPropertyPath().toString());
+            return ApiParameterError.parameterError(messageKey, violation.getMessage(), violation.getPropertyPath().toString());
         }).toList();
     }
 
