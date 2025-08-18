@@ -2839,20 +2839,22 @@ public final class LoanProductDataValidator {
                 baseDataValidator.reset().parameter(LoanProductConstants.BUY_DOWN_FEE_INCOME_TYPE_PARAM_NAME).value(buyDownFeeIncomeType)
                         .isOneOfEnumValues(LoanBuyDownFeeIncomeType.class)
                         .cantBeBlankWhenParameterProvidedIs(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME, true);
-                Boolean merchantBuyDownFee = this.fromApiJsonHelper
-                        .extractBooleanNamed(LoanProductConstants.MERCHANT_BUY_DOWN_FEE_PARAM_NAME, element);
-                baseDataValidator.reset().parameter(LoanProductConstants.MERCHANT_BUY_DOWN_FEE_PARAM_NAME).value(merchantBuyDownFee)
-                        .ignoreIfNull().validateForBooleanValue();
 
                 // Accounting
                 if (AccountingValidations.isAccrualBasedAccounting(accountingRuleType)) {
-                    if (merchantBuyDownFee) {
-                        final Long deferredIncomeLiabilityAccountId = this.fromApiJsonHelper
-                                .extractLongNamed(LoanProductAccountingParams.BUY_DOWN_EXPENSE.getValue(), element);
-                        baseDataValidator.reset().parameter(LoanProductAccountingParams.BUY_DOWN_EXPENSE.getValue())
-                                .value(deferredIncomeLiabilityAccountId).notNull()
-                                .cantBeBlankWhenParameterProvidedIs(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME, true)
-                                .integerGreaterThanZero();
+                    if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.MERCHANT_BUY_DOWN_FEE_PARAM_NAME, element)) {
+                        final Boolean merchantBuyDownFee = this.fromApiJsonHelper
+                                .extractBooleanNamed(LoanProductConstants.MERCHANT_BUY_DOWN_FEE_PARAM_NAME, element);
+                        baseDataValidator.reset().parameter(LoanProductConstants.MERCHANT_BUY_DOWN_FEE_PARAM_NAME).value(merchantBuyDownFee)
+                                .ignoreIfNull().validateForBooleanValue();
+                        if (Boolean.TRUE.equals(merchantBuyDownFee)) {
+                            final Long deferredIncomeLiabilityAccountId = this.fromApiJsonHelper
+                                    .extractLongNamed(LoanProductAccountingParams.BUY_DOWN_EXPENSE.getValue(), element);
+                            baseDataValidator.reset().parameter(LoanProductAccountingParams.BUY_DOWN_EXPENSE.getValue())
+                                    .value(deferredIncomeLiabilityAccountId).notNull()
+                                    .cantBeBlankWhenParameterProvidedIs(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME, true)
+                                    .integerGreaterThanZero();
+                        }
                     }
                     final Long incomeFromDeferredIncomeAccountId = this.fromApiJsonHelper
                             .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_BUY_DOWN.getValue(), element);
