@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.infrastructure.businessdate.data.BusinessDateResponse;
+import org.apache.fineract.infrastructure.businessdate.data.service.BusinessDateDTO;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDate;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateRepository;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
@@ -40,17 +40,17 @@ import org.springframework.stereotype.Service;
 public class BusinessDateReadPlatformServiceImpl implements BusinessDateReadPlatformService {
 
     private final BusinessDateRepository repository;
-    private final BusinessDateMapper businessDatemapper;
+    private final BusinessDateMapper businessDateMapper;
     private final ConfigurationDomainService configurationDomainService;
 
     @Override
-    public List<BusinessDateResponse> findAll() {
+    public List<BusinessDateDTO> findAll() {
         List<BusinessDate> businessDateList = repository.findAll();
-        return businessDatemapper.map(businessDateList);
+        return businessDateMapper.mapEntity(businessDateList);
     }
 
     @Override
-    public BusinessDateResponse findByType(String type) {
+    public BusinessDateDTO findByType(String type) {
         BusinessDateType businessDateType;
         try {
             businessDateType = BusinessDateType.valueOf(type);
@@ -63,7 +63,7 @@ public class BusinessDateReadPlatformServiceImpl implements BusinessDateReadPlat
             log.error("Business date with the provided type cannot be found {}", type);
             throw BusinessDateNotFoundException.notFound(type);
         }
-        return businessDatemapper.map(businessDate.get());
+        return businessDateMapper.mapEntity(businessDate.get());
     }
 
     @Override
@@ -73,8 +73,8 @@ public class BusinessDateReadPlatformServiceImpl implements BusinessDateReadPlat
         businessDateMap.put(BusinessDateType.BUSINESS_DATE, tenantDate);
         businessDateMap.put(BusinessDateType.COB_DATE, tenantDate);
         if (configurationDomainService.isBusinessDateEnabled()) {
-            final List<BusinessDateResponse> businessDateResponseList = this.findAll();
-            for (BusinessDateResponse businessDateResponse : businessDateResponseList) {
+            final List<BusinessDateDTO> businessDateResponseList = this.findAll();
+            for (BusinessDateDTO businessDateResponse : businessDateResponseList) {
                 businessDateMap.put(businessDateResponse.getType(), businessDateResponse.getDate());
             }
         }

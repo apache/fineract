@@ -36,7 +36,7 @@ class BusinessDateUpdateRequestMapperTest {
     void testMapping() {
         var now = LocalDate.now(ZoneId.systemDefault());
         var businessDate = BusinessDate.instance(BusinessDateType.BUSINESS_DATE, now);
-        var businessDateResponse = businessDateMapper.map(businessDate);
+        var businessDateResponse = businessDateMapper.mapEntity(businessDate);
         assertEquals(businessDate.getDate(), businessDateResponse.getDate());
         assertEquals(businessDate.getType().getDescription(), businessDateResponse.getDescription());
         assertEquals(businessDate.getType(), businessDateResponse.getType());
@@ -46,7 +46,7 @@ class BusinessDateUpdateRequestMapperTest {
     void testMappingList() {
         var now = LocalDate.now(ZoneId.systemDefault());
         var businessDate = BusinessDate.instance(BusinessDateType.BUSINESS_DATE, now);
-        var businessDateData = businessDateMapper.map(Collections.singletonList(businessDate));
+        var businessDateData = businessDateMapper.mapEntity(Collections.singletonList(businessDate));
         assertEquals(businessDate.getDate(), businessDateData.get(0).getDate());
         assertEquals(businessDate.getType().getDescription(), businessDateData.get(0).getDescription());
         assertEquals(businessDate.getType(), businessDateData.get(0).getType());

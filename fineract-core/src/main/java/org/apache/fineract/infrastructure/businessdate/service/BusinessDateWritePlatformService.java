@@ -18,14 +18,13 @@
  */
 package org.apache.fineract.infrastructure.businessdate.service;
 
-import org.apache.fineract.infrastructure.businessdate.data.BusinessDateResponse;
-import org.apache.fineract.infrastructure.businessdate.data.BusinessDateUpdateRequest;
+import org.apache.fineract.infrastructure.businessdate.data.service.BusinessDateDTO;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 
 public interface BusinessDateWritePlatformService {
 
-    BusinessDateResponse updateBusinessDate(BusinessDateUpdateRequest request);
+    BusinessDateDTO updateBusinessDate(BusinessDateDTO businessDateDTO);
 
     void increaseDateByTypeByOneDay(BusinessDateType businessDateType) throws JobExecutionException;
 }

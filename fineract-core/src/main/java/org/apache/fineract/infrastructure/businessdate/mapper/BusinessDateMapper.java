@@ -19,7 +19,10 @@
 package org.apache.fineract.infrastructure.businessdate.mapper;
 
 import java.util.List;
-import org.apache.fineract.infrastructure.businessdate.data.BusinessDateResponse;
+import org.apache.fineract.infrastructure.businessdate.data.api.BusinessDateResponse;
+import org.apache.fineract.infrastructure.businessdate.data.api.BusinessDateUpdateRequest;
+import org.apache.fineract.infrastructure.businessdate.data.api.BusinessDateUpdateResponse;
+import org.apache.fineract.infrastructure.businessdate.data.service.BusinessDateDTO;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDate;
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.mapstruct.Mapper;
@@ -29,8 +32,20 @@ import org.mapstruct.Mappings;
 @Mapper(config = MapstructMapperConfig.class)
 public interface BusinessDateMapper {
 
-    @Mappings({ @Mapping(target = "description", source = "source.type.description"), @Mapping(target = "changes", ignore = true) })
-    BusinessDateResponse map(BusinessDate source);
+    @Mappings({ @Mapping(target = "description", source = "type.description"), @Mapping(target = "changes", ignore = true) })
+    BusinessDateDTO mapEntity(BusinessDate source);
 
-    List<BusinessDateResponse> map(List<BusinessDate> sources);
+    List<BusinessDateDTO> mapEntity(List<BusinessDate> sources);
+
+    @Mapping(target = "description", expression = "java(org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType.valueOf(source.getType()).getDescription())")
+    @Mapping(target = "type", expression = "java(org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType.valueOf(source.getType()))")
+    @Mapping(target = "date", expression = "java(org.apache.fineract.infrastructure.core.service.DateUtils.toLocalDate(source.getLocale(), source.getDate(), source.getDateFormat()))")
+    @Mapping(target = "changes", ignore = true)
+    BusinessDateDTO mapUpdateRequest(BusinessDateUpdateRequest source);
+
+    List<BusinessDateResponse> mapFetchResponse(List<BusinessDateDTO> sources);
+
+    BusinessDateResponse mapFetchResponse(BusinessDateDTO source);
+
+    BusinessDateUpdateResponse mapUpdateResponse(BusinessDateDTO source);
 }

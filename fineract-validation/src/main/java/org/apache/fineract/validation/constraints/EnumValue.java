@@ -16,19 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.businessdate.service;
+package org.apache.fineract.validation.constraints;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import org.apache.fineract.infrastructure.businessdate.data.service.BusinessDateDTO;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public interface BusinessDateReadPlatformService {
+@Documented
+@Constraint(validatedBy = EnumValueValidator.class)
+@Target({ ElementType.FIELD })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface EnumValue {
 
-    List<BusinessDateDTO> findAll();
+    String message() default "{org.apache.fineract.validation.enum}";
 
-    BusinessDateDTO findByType(String type);
+    Class<?>[] groups() default {};
 
-    HashMap<BusinessDateType, LocalDate> getBusinessDates();
+    Class<? extends Payload>[] payload() default {};
+
+    Class<? extends Enum<?>> enumClass();
 }

@@ -24,13 +24,11 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.infrastructure.businessdate.data.BusinessDateResponse;
-import org.apache.fineract.infrastructure.businessdate.data.BusinessDateUpdateRequest;
+import org.apache.fineract.infrastructure.businessdate.data.service.BusinessDateDTO;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDate;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateRepository;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.businessdate.exception.BusinessDateActionException;
-import org.apache.fineract.infrastructure.businessdate.mapper.BusinessDateUpdateRequestMapper;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
@@ -46,14 +44,10 @@ public class BusinessDateWritePlatformServiceImpl implements BusinessDateWritePl
 
     private final BusinessDateRepository repository;
     private final ConfigurationDomainService configurationDomainService;
-    private final BusinessDateUpdateRequestMapper updateRequestMapper;
 
     @Override
-    public BusinessDateResponse updateBusinessDate(BusinessDateUpdateRequest request) {
-        BusinessDateResponse businessDateDto = updateRequestMapper.map(request);
-
+    public BusinessDateDTO updateBusinessDate(BusinessDateDTO businessDateDto) {
         adjustDate(businessDateDto);
-
         return businessDateDto;
     }
 
@@ -65,8 +59,8 @@ public class BusinessDateWritePlatformServiceImpl implements BusinessDateWritePl
         LocalDate businessDate = businessDateEntity.map(BusinessDate::getDate).orElse(DateUtils.getLocalDateOfTenant());
         businessDate = businessDate.plusDays(1);
         try {
-            BusinessDateResponse response = BusinessDateResponse.builder().type(businessDateType)
-                    .description(businessDateType.getDescription()).date(businessDate).build();
+            BusinessDateDTO response = BusinessDateDTO.builder().type(businessDateType).description(businessDateType.getDescription())
+                    .date(businessDate).build();
             adjustDate(response);
         } catch (final PlatformApiDataValidationException e) {
             final List<ApiParameterError> errors = e.getErrors();
@@ -86,7 +80,7 @@ public class BusinessDateWritePlatformServiceImpl implements BusinessDateWritePl
         }
     }
 
-    private void adjustDate(BusinessDateResponse response) {
+    private void adjustDate(BusinessDateDTO businessDateDto) {
         boolean isCOBDateAdjustmentEnabled = configurationDomainService.isCOBDateAdjustmentEnabled();
         boolean isBusinessDateEnabled = configurationDomainService.isBusinessDateEnabled();
 
@@ -94,16 +88,16 @@ public class BusinessDateWritePlatformServiceImpl implements BusinessDateWritePl
             log.error("Business date functionality is not enabled!");
             throw new BusinessDateActionException("business.date.is.not.enabled", "Business date functionality is not enabled");
         }
-        updateOrCreateBusinessDate(response);
-        if (isCOBDateAdjustmentEnabled && BusinessDateType.BUSINESS_DATE.equals(response.getType())) {
-            BusinessDateResponse res = BusinessDateResponse.builder().type(BusinessDateType.COB_DATE)
-                    .description(BusinessDateType.COB_DATE.getDescription()).date(response.getDate().minusDays(1)).build();
+        updateOrCreateBusinessDate(businessDateDto);
+        if (isCOBDateAdjustmentEnabled && BusinessDateType.BUSINESS_DATE.equals(businessDateDto.getType())) {
+            BusinessDateDTO res = BusinessDateDTO.builder().type(BusinessDateType.COB_DATE)
+                    .description(BusinessDateType.COB_DATE.getDescription()).date(businessDateDto.getDate().minusDays(1)).build();
             updateOrCreateBusinessDate(res);
-            response.addAllChanges(res.getChanges());
+            businessDateDto.addAllChanges(res.getChanges());
         }
     }
 
-    private void updateOrCreateBusinessDate(BusinessDateResponse businessDateDto) {
+    private void updateOrCreateBusinessDate(BusinessDateDTO businessDateDto) {
         BusinessDateType businessDateType = businessDateDto.getType();
         Optional<BusinessDate> businessDate = repository.findByType(businessDateType);
 
@@ -116,7 +110,7 @@ public class BusinessDateWritePlatformServiceImpl implements BusinessDateWritePl
         }
     }
 
-    private void updateBusinessDate(BusinessDate businessDate, BusinessDateResponse businessDateDto) {
+    private void updateBusinessDate(BusinessDate businessDate, BusinessDateDTO businessDateDto) {
         if (DateUtils.isEqual(businessDate.getDate(), businessDateDto.getDate())) {
             return;
         }

@@ -16,37 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.businessdate.data;
+package org.apache.fineract.infrastructure.businessdate.data.api;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
-import org.apache.fineract.validation.constraints.LocalDate;
-import org.apache.fineract.validation.constraints.Locale;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@LocalDate(dateField = "date", formatField = "dateFormat", localeField = "locale")
-public class BusinessDateUpdateRequest implements Serializable {
+@JsonLocalDateArrayFormat
+public class BusinessDateUpdateResponse implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @NotBlank(message = "{org.apache.fineract.businessdate.date-format.not-blank}")
-    private String dateFormat;
-    @NotNull(message = "{org.apache.fineract.businessdate.type.not-null}")
+    private String description;
     private BusinessDateType type;
-    @NotBlank(message = "{org.apache.fineract.businessdate.date.not-blank}")
-    private String date;
-    @NotBlank(message = "{org.apache.fineract.businessdate.locale.not-blank}")
-    @Locale
-    private String locale;
+    private LocalDate date;
+    private Map<BusinessDateType, LocalDate> changes;
 }
