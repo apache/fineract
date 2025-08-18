@@ -457,12 +457,14 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         final BigDecimal amount = loanTransactionDTO.getAmount();
         final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
 
+        final AccrualAccountsForLoan debitAccountType = loanDTO.isMerchantBuyDownFee() ? AccrualAccountsForLoan.BUY_DOWN_EXPENSE
+                : AccrualAccountsForLoan.FUND_SOURCE;
         if (MathUtil.isGreaterThanZero(amount)) {
             // Mirror of Buy Down Fee entries (as per PS-2574 requirements)
-            // Debit: Deferred Income Liability, Credit: Buy Down Expense
+            // Debit: Deferred Income Liability, Credit: Buy Down Expense (merchant)
+            // Debit: Deferred Income Liability, Credit: Fund Source (non merchant)
             this.helper.createJournalEntriesForLoan(office, currencyCode, AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
-                    AccrualAccountsForLoan.BUY_DOWN_EXPENSE.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
-                    transactionDate, amount);
+                    debitAccountType.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate, amount);
         }
     }
 
