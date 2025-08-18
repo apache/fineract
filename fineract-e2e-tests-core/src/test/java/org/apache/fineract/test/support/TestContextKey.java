@@ -233,8 +233,10 @@ public abstract class TestContextKey {
     public static final String ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_FROM_RESPONSE = "assetExternalizationTransferExternalIdFromResponse";
     public static final String ASSET_EXTERNALIZATION_SALES_TRANSFER_EXTERNAL_ID_FROM_RESPONSE = "assetExternalizationSalesTransferExternalIdFromResponse";
     public static final String ASSET_EXTERNALIZATION_BUYBACK_TRANSFER_EXTERNAL_ID_FROM_RESPONSE = "assetExternalizationBuybackTransferExternalIdFromResponse";
+    public static final String ASSET_EXTERNALIZATION_INTERMEDIARY_SALE_TRANSFER_EXTERNAL_ID_FROM_RESPONSE = "assetExternalizationIntermediarySaleTransferExternalIdFromResponse";
     public static final String ASSET_EXTERNALIZATION_BUYBACK_TRANSFER_PREFIX = "assetExternalizationTransferPrefix";
     public static final String ASSET_EXTERNALIZATION_OWNER_EXTERNAL_ID = "assetExternalizationOwnerExternalId";
+    public static final String ASSET_EXTERNALIZATION_PREVIOUS_OWNER_EXTERNAL_ID = "assetExternalizationPreviousOwnerExternalId";
     public static final String TRANSACTION_EVENT = "transactionEvent";
     public static final String LOAN_WRITE_OFF_RESPONSE = "loanWriteOffResponse";
     public static final String LOAN_DELINQUENCY_ACTION_RESPONSE = "loanDelinquencyActionResponse";

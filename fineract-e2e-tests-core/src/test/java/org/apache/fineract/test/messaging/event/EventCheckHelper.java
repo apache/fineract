@@ -413,6 +413,47 @@ public class EventCheckHelper {
                 .isEqualTo(transferStatusReasonExpected);
     }
 
+    public void loanOwnershipTransferBusinessEventWithTypeCheck(Long loanId, ExternalTransferData transferData, String transferType,
+            String previousAssetOwner) throws IOException {
+        Response<PageExternalTransferData> response = externalAssetOwnersApi.getTransfers(null, loanId, null, null, null).execute();
+        List<ExternalTransferData> content = response.body().getContent();
+        Long transferId = transferData.getTransferId();
+        String assetOwner = transferData.getOwner() == null ? null : transferData.getOwner().getExternalId();
+
+        ExternalTransferData filtered = content.stream().filter(t -> transferId.equals(t.getTransferId())).reduce((first, second) -> second)
+                .orElseThrow(() -> new IllegalStateException("No element found"));
+
+        BigDecimal totalOutstandingBalanceAmountExpected = filtered.getDetails() == null ? null
+                : zeroConversion(filtered.getDetails().getTotalOutstanding());
+        BigDecimal outstandingPrincipalPortionExpected = filtered.getDetails() == null ? null
+                : zeroConversion(filtered.getDetails().getTotalPrincipalOutstanding());
+        BigDecimal outstandingFeePortionExpected = filtered.getDetails() == null ? null
+                : zeroConversion(filtered.getDetails().getTotalFeeChargesOutstanding());
+        BigDecimal outstandingPenaltyPortionExpected = filtered.getDetails() == null ? null
+                : zeroConversion(filtered.getDetails().getTotalPenaltyChargesOutstanding());
+        BigDecimal outstandingInterestPortionExpected = filtered.getDetails() == null ? null
+                : zeroConversion(filtered.getDetails().getTotalInterestOutstanding());
+        BigDecimal overPaymentPortionExpected = filtered.getDetails() == null ? null
+                : zeroConversion(filtered.getDetails().getTotalOverpaid());
+
+        eventAssertion.assertEvent(LoanOwnershipTransferEvent.class, loanId).extractingData(LoanOwnershipTransferDataV1::getLoanId)
+                .isEqualTo(loanId).extractingData(LoanOwnershipTransferDataV1::getAssetOwnerExternalId)
+                .isEqualTo(filtered.getOwner().getExternalId()).extractingData(LoanOwnershipTransferDataV1::getTransferExternalId)
+                .isEqualTo(filtered.getTransferExternalId()).extractingData(LoanOwnershipTransferDataV1::getSettlementDate)
+                .isEqualTo(FORMATTER_EVENTS.format(filtered.getSettlementDate()))
+                .extractingBigDecimal(LoanOwnershipTransferDataV1::getTotalOutstandingBalanceAmount)
+                .isEqualTo(totalOutstandingBalanceAmountExpected)
+                .extractingBigDecimal(LoanOwnershipTransferDataV1::getOutstandingPrincipalPortion)
+                .isEqualTo(outstandingPrincipalPortionExpected).extractingBigDecimal(LoanOwnershipTransferDataV1::getOutstandingFeePortion)
+                .isEqualTo(outstandingFeePortionExpected).extractingBigDecimal(LoanOwnershipTransferDataV1::getOutstandingPenaltyPortion)
+                .isEqualTo(outstandingPenaltyPortionExpected)
+                .extractingBigDecimal(LoanOwnershipTransferDataV1::getOutstandingInterestPortion)
+                .isEqualTo(outstandingInterestPortionExpected).extractingBigDecimal(LoanOwnershipTransferDataV1::getOverPaymentPortion)
+                .isEqualTo(overPaymentPortionExpected).extractingData(LoanOwnershipTransferDataV1::getType).isEqualTo(transferType)
+                .extractingData(LoanOwnershipTransferDataV1::getAssetOwnerExternalId).isEqualTo(assetOwner)
+                .extractingData(LoanOwnershipTransferDataV1::getPreviousOwnerExternalId).isEqualTo(previousAssetOwner);
+    }
+
     public void loanAccountSnapshotBusinessEventCheck(Long loanId, Long transferId) throws IOException {
         Response<PageExternalTransferData> response = externalAssetOwnersApi.getTransfers(null, loanId, null, null, null).execute();
         List<ExternalTransferData> content = response.body().getContent();

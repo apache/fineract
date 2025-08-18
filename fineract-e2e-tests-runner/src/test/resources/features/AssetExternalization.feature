@@ -1309,6 +1309,8 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | PENDING   | 2023-05-01    | 2023-05-10  |
       | 2023-05-21     | 1                  | CANCELLED | 2023-05-01    | 2023-05-10  |
 
+   Then LoanOwnershipTransferBusinessEvent is not created on "21 May 2023"
+
   @TestRailId:C2773
   Scenario: Verify that active SALE can not be cancelled
     When Admin sets the business date to "1 May 2023"
@@ -1331,6 +1333,8 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 2023-05-21  | SALE             |
       | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 9999-12-31  | SALE             |
     When Admin send "cancel" command on "SALE" transaction it will throw an error
+
+    Then LoanOwnershipTransferBusinessEvent with transfer type: "SALE" and transfer asset owner is created
 
   @TestRailId:C2774
   Scenario: Verify that Asset cannot be cancelled after SALE and BUYBACK is completed
@@ -1500,6 +1504,7 @@ Feature: Asset Externalization
       | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
       | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 2023-05-21  | SALE             |
       | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 9999-12-31  | SALE             |
+    Then LoanOwnershipTransferBusinessEvent with transfer type: "SALE" and transfer asset owner is created
     When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
       | Transaction type | settlementDate | purchasePriceRatio |
       | buyback          | 2023-05-30     |                    |
@@ -1518,6 +1523,7 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 2023-05-21  | SALE             |
       | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 2023-05-25  | SALE             |
       | 2023-05-30     | 1                  | BUYBACK | 2023-05-22    | 2023-05-25  | BUYBACK          |
+    Then LoanOwnershipTransferBusinessEvent with transfer type: "BUYBACK" and transfer asset owner is created
 
   @TestRailId:C2788
   Scenario: Verify that when a loan with PENDING BUYBACK is overpaid BUYBACK transaction can be done successfully
@@ -1856,3 +1862,160 @@ Feature: Asset Externalization
       | ASSET     | 112601       | Loans Receivable          | 250.05 |        | true         |
       | LIABILITY | 145023       | Suspense/Clearing account |        | 250.05 | true         |
     Given Global configuration "asset-externalization-of-non-active-loans" is enabled
+
+  @TestRailId:C3991
+  Scenario: Verify asset externalization previous owner for intermediarySale transfer with following SALES request - UC1
+    When Admin set external asset owner loan product attribute "SETTLEMENT_MODEL" value "DELAYED_SETTLEMENT" for loan product "LP1_DUE_DATE"
+    When Admin sets the business date to "1 May 2023"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct  | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_DUE_DATE | 01 May 2023       | 1000           | 0                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "1 May 2023" with "1000" amount and expected disbursement date on "1 May 2023"
+    When Admin successfully disburse the loan on "1 May 2023" with "1000" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | intermediarySale | 2023-05-21     | 1                  |
+    Then Asset externalization response has the correct Loan ID, transferExternalId
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 1 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2023-05-21     | 1                  | PENDING_INTERMEDIATE | 2023-05-01    | 9999-12-31  | INTERMEDIARYSALE |
+    When Admin sets the business date to "22 May 2023"
+    When Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 2 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2023-05-21     | 1                  | PENDING_INTERMEDIATE | 2023-05-01    | 2023-05-21  | INTERMEDIARYSALE |
+      | 2023-05-21     | 1                  | ACTIVE_INTERMEDIATE  | 2023-05-22    | 9999-12-31  | INTERMEDIARYSALE |
+    Then LoanOwnershipTransferBusinessEvent with transfer type: "INTERMEDIARYSALE" and transfer asset owner is created
+    When Admin sets the business date to "14 June 2023"
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2023-06-14     | 1                  |
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 3 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2023-05-21     | 1                  | PENDING_INTERMEDIATE | 2023-05-01    | 2023-05-21  | INTERMEDIARYSALE |
+      | 2023-05-21     | 1                  | ACTIVE_INTERMEDIATE  | 2023-05-22    | 9999-12-31  | INTERMEDIARYSALE |
+      | 2023-06-14     | 1                  | PENDING              | 2023-06-14    | 9999-12-31  | SALE             |
+    When Admin sets the business date to "15 June 2023"
+    When Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 4 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2023-05-21     | 1                  | PENDING_INTERMEDIATE | 2023-05-01    | 2023-05-21  | INTERMEDIARYSALE |
+      | 2023-05-21     | 1                  | ACTIVE_INTERMEDIATE  | 2023-05-22    | 2023-06-14  | INTERMEDIARYSALE |
+      | 2023-06-14     | 1                  | PENDING              | 2023-06-14    | 2023-06-14  | SALE             |
+      | 2023-06-14     | 1                  | ACTIVE               | 2023-06-15    | 9999-12-31  | SALE             |
+    Then LoanOwnershipTransferBusinessEvent with transfer type: "SALE" and transfer asset owner based on intermediarySale is created
+    When Admin set external asset owner loan product attribute "SETTLEMENT_MODEL" value "DEFAULT_SETTLEMENT" for loan product "LP1_DUE_DATE"
+
+  @TestRailId:C3992
+  Scenario: Verify asset externalization previous owner for intermediarySale transfer with following SALES and BUYBACK requests - UC2
+    When Admin set external asset owner loan product attribute "SETTLEMENT_MODEL" value "DELAYED_SETTLEMENT" for loan product "LP1_DUE_DATE"
+    When Admin sets the business date to "1 May 2023"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct  | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_DUE_DATE | 01 May 2023       | 1000           | 0                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "1 May 2023" with "1000" amount and expected disbursement date on "1 May 2023"
+    When Admin successfully disburse the loan on "1 May 2023" with "1000" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | intermediarySale | 2023-05-21     | 1                  |
+    Then Asset externalization response has the correct Loan ID, transferExternalId
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 1 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2023-05-21     | 1                  | PENDING_INTERMEDIATE | 2023-05-01    | 9999-12-31  | INTERMEDIARYSALE |
+    When Admin sets the business date to "22 May 2023"
+    When Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 2 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2023-05-21     | 1                  | PENDING_INTERMEDIATE | 2023-05-01    | 2023-05-21  | INTERMEDIARYSALE |
+      | 2023-05-21     | 1                  | ACTIVE_INTERMEDIATE  | 2023-05-22    | 9999-12-31  | INTERMEDIARYSALE |
+    Then LoanOwnershipTransferBusinessEvent with transfer type: "INTERMEDIARYSALE" and transfer asset owner is created
+
+    When Admin sets the business date to "14 June 2023"
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2023-06-14     | 1                  |
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 3 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2023-05-21     | 1                  | PENDING_INTERMEDIATE | 2023-05-01    | 2023-05-21  | INTERMEDIARYSALE |
+      | 2023-05-21     | 1                  | ACTIVE_INTERMEDIATE  | 2023-05-22    | 9999-12-31  | INTERMEDIARYSALE |
+      | 2023-06-14     | 1                  | PENDING              | 2023-06-14    | 9999-12-31  | SALE             |
+    When Admin sets the business date to "15 June 2023"
+    When Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 4 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2023-05-21     | 1                  | PENDING_INTERMEDIATE | 2023-05-01    | 2023-05-21  | INTERMEDIARYSALE |
+      | 2023-05-21     | 1                  | ACTIVE_INTERMEDIATE  | 2023-05-22    | 2023-06-14  | INTERMEDIARYSALE |
+      | 2023-06-14     | 1                  | PENDING              | 2023-06-14    | 2023-06-14  | SALE             |
+      | 2023-06-14     | 1                  | ACTIVE               | 2023-06-15    | 9999-12-31  | SALE             |
+    Then LoanOwnershipTransferBusinessEvent with transfer type: "SALE" and transfer asset owner based on intermediarySale is created
+
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | buyback          | 2023-06-16     |                    |
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 5 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2023-05-21     | 1                  | PENDING_INTERMEDIATE | 2023-05-01    | 2023-05-21  | INTERMEDIARYSALE |
+      | 2023-05-21     | 1                  | ACTIVE_INTERMEDIATE  | 2023-05-22    | 2023-06-14  | INTERMEDIARYSALE |
+      | 2023-06-14     | 1                  | PENDING              | 2023-06-14    | 2023-06-14  | SALE             |
+      | 2023-06-14     | 1                  | ACTIVE               | 2023-06-15    | 9999-12-31  | SALE             |
+      | 2023-06-16     | 1                  | BUYBACK              | 2023-06-15    | 9999-12-31  | BUYBACK          |
+    When Admin sets the business date to "17 June 2023"
+    When Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 5 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2023-05-21     | 1                  | PENDING_INTERMEDIATE | 2023-05-01    | 2023-05-21  | INTERMEDIARYSALE |
+      | 2023-05-21     | 1                  | ACTIVE_INTERMEDIATE  | 2023-05-22    | 2023-06-14  | INTERMEDIARYSALE |
+      | 2023-06-14     | 1                  | PENDING              | 2023-06-14    | 2023-06-14  | SALE             |
+      | 2023-06-14     | 1                  | ACTIVE               | 2023-06-15    | 2023-06-16  | SALE             |
+      | 2023-06-16     | 1                  | BUYBACK              | 2023-06-15    | 2023-06-16  | BUYBACK          |
+    Then LoanOwnershipTransferBusinessEvent with transfer type: "BUYBACK" and transfer asset owner is created
+    When Admin set external asset owner loan product attribute "SETTLEMENT_MODEL" value "DEFAULT_SETTLEMENT" for loan product "LP1_DUE_DATE"
+
+  @TestRailId:C3993
+  Scenario: Verify asset externalization previous owner for intermediarySale transfer with following BUYBACK requests - UC3
+    When Admin set external asset owner loan product attribute "SETTLEMENT_MODEL" value "DELAYED_SETTLEMENT" for loan product "LP1_DUE_DATE"
+    When Admin sets the business date to "1 May 2023"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct  | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_DUE_DATE | 01 May 2023       | 1000           | 0                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "1 May 2023" with "1000" amount and expected disbursement date on "1 May 2023"
+    When Admin successfully disburse the loan on "1 May 2023" with "1000" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | intermediarySale | 2023-05-21     | 1                  |
+    Then Asset externalization response has the correct Loan ID, transferExternalId
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 1 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2023-05-21     | 1                  | PENDING_INTERMEDIATE | 2023-05-01    | 9999-12-31  | INTERMEDIARYSALE |
+    When Admin sets the business date to "22 May 2023"
+    When Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 2 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2023-05-21     | 1                  | PENDING_INTERMEDIATE | 2023-05-01    | 2023-05-21  | INTERMEDIARYSALE |
+      | 2023-05-21     | 1                  | ACTIVE_INTERMEDIATE  | 2023-05-22    | 9999-12-31  | INTERMEDIARYSALE |
+    Then LoanOwnershipTransferBusinessEvent with transfer type: "INTERMEDIARYSALE" and transfer asset owner is created
+    When Admin sets the business date to "14 June 2023"
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | buyback          | 2023-06-14     |                    |
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 3 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2023-05-21     | 1                  | PENDING_INTERMEDIATE | 2023-05-01    | 2023-05-21  | INTERMEDIARYSALE |
+      | 2023-05-21     | 1                  | ACTIVE_INTERMEDIATE  | 2023-05-22    | 9999-12-31  | INTERMEDIARYSALE |
+      | 2023-06-14     | 1                  | BUYBACK_INTERMEDIATE | 2023-06-14    | 9999-12-31  | BUYBACK          |
+    When Admin sets the business date to "15 June 2023"
+    When Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 3 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2023-05-21     | 1                  | PENDING_INTERMEDIATE | 2023-05-01    | 2023-05-21  | INTERMEDIARYSALE |
+      | 2023-05-21     | 1                  | ACTIVE_INTERMEDIATE  | 2023-05-22    | 2023-06-14  | INTERMEDIARYSALE |
+      | 2023-06-14     | 1                  | BUYBACK_INTERMEDIATE | 2023-06-14    | 2023-06-14  | BUYBACK          |
+    Then LoanOwnershipTransferBusinessEvent with transfer type: "BUYBACK" and transfer asset owner based on intermediarySale is created
+    When Admin set external asset owner loan product attribute "SETTLEMENT_MODEL" value "DEFAULT_SETTLEMENT" for loan product "LP1_DUE_DATE"
+
