@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.businessdate.data;
+package org.apache.fineract.infrastructure.businessdate.data.service;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -33,7 +33,7 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BusinessDateResponse implements Serializable {
+public class BusinessDateDTO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;

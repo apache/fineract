@@ -27,6 +27,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
+import org.apache.fineract.client.models.BusinessDateUpdateResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
@@ -53,7 +54,7 @@ public final class BusinessDateHelper {
         return Utils.performServerPost(requestSpec, responseSpec, BUSINESS_DATE_API, buildBusinessDateRequest(type, date), "changes");
     }
 
-    public static BusinessDateResponse updateBusinessDate(final BusinessDateUpdateRequest request) {
+    public static BusinessDateUpdateResponse updateBusinessDate(final BusinessDateUpdateRequest request) {
         log.info("------------------UPDATE BUSINESS DATE----------------------");
         log.info("------------------Type: {}, date: {}----------------------", request.getType(), request.getDate());
         return Calls.ok(FineractClientHelper.getFineractClient().businessDateManagement.updateBusinessDate(null, request));

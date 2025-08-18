@@ -36,8 +36,10 @@ import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandPipeline;
 import org.apache.fineract.infrastructure.businessdate.command.BusinessDateUpdateCommand;
-import org.apache.fineract.infrastructure.businessdate.data.BusinessDateResponse;
-import org.apache.fineract.infrastructure.businessdate.data.BusinessDateUpdateRequest;
+import org.apache.fineract.infrastructure.businessdate.data.api.BusinessDateResponse;
+import org.apache.fineract.infrastructure.businessdate.data.api.BusinessDateUpdateRequest;
+import org.apache.fineract.infrastructure.businessdate.data.api.BusinessDateUpdateResponse;
+import org.apache.fineract.infrastructure.businessdate.mapper.BusinessDateMapper;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.springframework.stereotype.Component;
@@ -50,13 +52,14 @@ public class BusinessDateApiResource {
 
     private final BusinessDateReadPlatformService readPlatformService;
     private final CommandPipeline commandPipeline;
+    private final BusinessDateMapper businessDateMapper;
 
     @GET
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "List all business dates", description = "")
     public List<BusinessDateResponse> getBusinessDates() {
-        return this.readPlatformService.findAll();
+        return businessDateMapper.mapFetchResponse(this.readPlatformService.findAll());
     }
 
     @GET
@@ -65,24 +68,24 @@ public class BusinessDateApiResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Retrieve a specific Business date", description = "")
     public BusinessDateResponse getBusinessDate(@PathParam("type") @Parameter(description = "type") final String type) {
-        return this.readPlatformService.findByType(type);
+        return businessDateMapper.mapFetchResponse(this.readPlatformService.findByType(type));
     }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Business Date", description = "")
-    public BusinessDateResponse updateBusinessDate(@HeaderParam("Idempotency-Key") String idempotencyKey,
+    public BusinessDateUpdateResponse updateBusinessDate(@HeaderParam("Idempotency-Key") String idempotencyKey,
             @Valid BusinessDateUpdateRequest request) {
 
-        final var command = new BusinessDateUpdateCommand();
+        final BusinessDateUpdateCommand command = new BusinessDateUpdateCommand();
 
         command.setId(UUID.randomUUID());
         command.setIdempotencyKey(idempotencyKey);
         command.setCreatedAt(DateUtils.getAuditOffsetDateTime());
         command.setPayload(request);
 
-        final Supplier<BusinessDateResponse> response = commandPipeline.send(command);
+        final Supplier<BusinessDateUpdateResponse> response = commandPipeline.send(command);
 
         return response.get();
     }

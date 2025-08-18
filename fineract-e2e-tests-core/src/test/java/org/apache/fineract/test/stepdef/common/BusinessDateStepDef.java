@@ -30,6 +30,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
+import org.apache.fineract.client.models.BusinessDateUpdateResponse;
 import org.apache.fineract.client.services.BusinessDateManagementApi;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.test.helper.BusinessDateHelper;
@@ -75,8 +76,8 @@ public class BusinessDateStepDef extends AbstractStepDef {
     public void setIncorrectBusinessDateFailure(String businessDate) throws IOException {
         BusinessDateUpdateRequest businessDateRequest = businessDateHelper.defaultBusinessDateRequest().date(businessDate);
 
-        Response<BusinessDateResponse> businessDateRequestResponse = businessDateManagementApi.updateBusinessDate(null, businessDateRequest)
-                .execute();
+        Response<BusinessDateUpdateResponse> businessDateRequestResponse = businessDateManagementApi
+                .updateBusinessDate(null, businessDateRequest).execute();
         final ErrorResponse errorDetails = ErrorResponse.from(businessDateRequestResponse);
         assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.setIncorrectBusinessDateFailure()).isEqualTo(400);
         assertThat(errorDetails.getSingleError().getDeveloperMessage()).isEqualTo(ErrorMessageHelper.setIncorrectBusinessDateFailure());
@@ -90,8 +91,8 @@ public class BusinessDateStepDef extends AbstractStepDef {
         } else {
             businessDateRequest.date(businessDate);
         }
-        Response<BusinessDateResponse> businessDateRequestResponse = businessDateManagementApi.updateBusinessDate(null, businessDateRequest)
-                .execute();
+        Response<BusinessDateUpdateResponse> businessDateRequestResponse = businessDateManagementApi
+                .updateBusinessDate(null, businessDateRequest).execute();
         Integer httpStatusCodeExpected = 400;
 
         String errorBody = businessDateRequestResponse.errorBody().string();

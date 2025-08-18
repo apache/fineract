@@ -16,19 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.businessdate.service;
+package org.apache.fineract.validation.constraints;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import org.apache.fineract.infrastructure.businessdate.data.service.BusinessDateDTO;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-public interface BusinessDateReadPlatformService {
+public class EnumValueValidator implements ConstraintValidator<EnumValue, String> {
 
-    List<BusinessDateDTO> findAll();
+    private Set<String> acceptedValues;
 
-    BusinessDateDTO findByType(String type);
+    @Override
+    public void initialize(EnumValue annotation) {
+        acceptedValues = Arrays.stream(annotation.enumClass().getEnumConstants()).map(e -> e.name().toLowerCase())
+                .collect(Collectors.toSet());
+    }
 
-    HashMap<BusinessDateType, LocalDate> getBusinessDates();
+    @Override
+    public boolean isValid(String value, ConstraintValidatorContext context) {
+        return value != null && acceptedValues.contains(value.toLowerCase());
+    }
 }

@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.businessdate.command;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.fineract.command.core.Command;
-import org.apache.fineract.infrastructure.businessdate.data.BusinessDateUpdateRequest;
+import org.apache.fineract.infrastructure.businessdate.data.api.BusinessDateUpdateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

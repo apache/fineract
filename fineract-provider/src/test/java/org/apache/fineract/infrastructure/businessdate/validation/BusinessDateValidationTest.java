@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.infrastructure.businessdate.data.BusinessDateUpdateRequest;
+import org.apache.fineract.infrastructure.businessdate.data.api.BusinessDateUpdateRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.hibernate.validator.HibernateValidator;
 import org.junit.jupiter.api.Test;
@@ -59,7 +59,7 @@ class BusinessDateValidationTest {
 
         var errors = validator.validate(request);
 
-        assertThat(errors).hasSize(6);
+        assertThat(errors).hasSize(7);
 
         assertThat(errors).anyMatch(e -> e.getPropertyPath().toString().equals("date"));
         assertThat(errors).anyMatch(e -> e.getPropertyPath().toString().equals("dateFormat"));
@@ -69,8 +69,8 @@ class BusinessDateValidationTest {
 
     @Test
     void invalidLocale() {
-        var request = BusinessDateUpdateRequest.builder().dateFormat("dd-MM-yyyy").type(BusinessDateType.BUSINESS_DATE).date("12-05-2025")
-                .locale("INVALID").build();
+        var request = BusinessDateUpdateRequest.builder().dateFormat("dd-MM-yyyy").type(BusinessDateType.BUSINESS_DATE.name())
+                .date("12-05-2025").locale("INVALID").build();
 
         var errors = validator.validate(request);
 
@@ -81,8 +81,8 @@ class BusinessDateValidationTest {
 
     @Test
     void invalidDateFormat() {
-        var request = BusinessDateUpdateRequest.builder().dateFormat("dd/MM/yyyy").type(BusinessDateType.BUSINESS_DATE).date("12-05-2025")
-                .locale("en").build();
+        var request = BusinessDateUpdateRequest.builder().dateFormat("dd/MM/yyyy").type(BusinessDateType.BUSINESS_DATE.name())
+                .date("12-05-2025").locale("en").build();
 
         var errors = validator.validate(request);
 
@@ -93,8 +93,8 @@ class BusinessDateValidationTest {
 
     @Test
     void valid() {
-        var request = BusinessDateUpdateRequest.builder().dateFormat("dd-MM-yyyy").type(BusinessDateType.BUSINESS_DATE).date("12-05-2025")
-                .locale("en").build();
+        var request = BusinessDateUpdateRequest.builder().dateFormat("dd-MM-yyyy").type(BusinessDateType.BUSINESS_DATE.name())
+                .date("12-05-2025").locale("en").build();
 
         var errors = validator.validate(request);
 

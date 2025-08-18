@@ -21,8 +21,8 @@ package org.apache.fineract.test.helper;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
+import org.apache.fineract.client.models.BusinessDateUpdateResponse;
 import org.apache.fineract.client.services.BusinessDateManagementApi;
 import org.apache.fineract.test.support.TestContext;
 import org.apache.fineract.test.support.TestContextKey;
@@ -43,8 +43,8 @@ public class BusinessDateHelper {
     public void setBusinessDate(String businessDate) throws IOException {
         BusinessDateUpdateRequest businessDateRequest = defaultBusinessDateRequest().date(businessDate);
 
-        Response<BusinessDateResponse> businessDateRequestResponse = businessDateManagementApi.updateBusinessDate(null, businessDateRequest)
-                .execute();
+        Response<BusinessDateUpdateResponse> businessDateRequestResponse = businessDateManagementApi
+                .updateBusinessDate(null, businessDateRequest).execute();
         ErrorHelper.checkSuccessfulApiCall(businessDateRequestResponse);
         TestContext.INSTANCE.set(TestContextKey.BUSINESS_DATE_RESPONSE, businessDateRequestResponse);
     }

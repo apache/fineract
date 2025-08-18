@@ -16,19 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.businessdate.service;
+package org.apache.fineract.infrastructure.businessdate.data.api;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import org.apache.fineract.infrastructure.businessdate.data.service.BusinessDateDTO;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 
-public interface BusinessDateReadPlatformService {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonLocalDateArrayFormat
+public class BusinessDateResponse implements Serializable {
 
-    List<BusinessDateDTO> findAll();
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    BusinessDateDTO findByType(String type);
-
-    HashMap<BusinessDateType, LocalDate> getBusinessDates();
+    private String description;
+    private BusinessDateType type;
+    private LocalDate date;
 }
