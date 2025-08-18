@@ -28,11 +28,6 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@ac638b010cf58a27ee6c972d7336334ccaf61c96 # v4.4.1
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-        id: extract_branch
-
       - name: Get Git Hashes
         run: |
           echo "short_hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
@@ -41,8 +36,8 @@ jobs:
 
       - name: Build the Apache Fineract image
         run:  |
-          TAGS=${{ steps.extract_branch.outputs.branch }}
-          if [ "${{ steps.extract_branch.outputs.branch }}" == "develop" ]; then
+          TAGS=${{ github.ref_name }}
+          if [ "${{ github.ref_name }}" == "develop" ]; then
             TAGS="$TAGS,${{ steps.git_hashes.outputs.short_hash }},${{ steps.git_hashes.outputs.long_hash }}"
           fi
           ./gradlew --no-daemon --console=plain :fineract-provider:jib -x test -x cucumber \
