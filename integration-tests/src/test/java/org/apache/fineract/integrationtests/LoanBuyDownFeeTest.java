@@ -881,7 +881,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
             loanTransactionHelper.approveLoan(loanId, approveLoanRequest(1000.0, "01 September 2024"));
             disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 September 2024");
 
-            final Long buyDownFeeTransactionId = addBuyDownFeeForLoan(loanId, 400.0, "10 September 2024");
+            Long buyDownFeeTransactionId = addBuyDownFeeForLoan(loanId, 400.0, "10 September 2024");
             assertNotNull(buyDownFeeTransactionId);
 
             verifyTransactions(loanId, //
@@ -902,6 +902,18 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
             // Verify initial buy down fee (non merchant) reversed accounting entries
             verifyTRJournalEntries(buyDownFeeTransactionId, debit(fundSource, 400.0), credit(deferredIncomeLiabilityAccount, 400.0),
                     credit(fundSource, 400.0), debit(deferredIncomeLiabilityAccount, 400.0));
+
+            buyDownFeeTransactionId = addBuyDownFeeForLoan(loanId, 400.0, "10 September 2024");
+            assertNotNull(buyDownFeeTransactionId);
+
+            // Buy Down Fee Adjustment (non merchant)
+            final PostLoansLoanIdTransactionsResponse buyDownFeeAdjustmentTransaction = loanTransactionHelper.buyDownFeeAdjustment(loanId,
+                    buyDownFeeTransactionId, "10 September 2024", 200.0);
+            assertNotNull(buyDownFeeAdjustmentTransaction);
+
+            // Verify buy down fee adjustment (non merchant)
+            verifyTRJournalEntries(buyDownFeeAdjustmentTransaction.getResourceId(), debit(deferredIncomeLiabilityAccount, 200.0),
+                    credit(fundSource, 200.0));
         });
     }
 
