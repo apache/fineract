@@ -88,4 +88,6 @@ public interface ApplicationCurrencyRepository
     @Override
     @CacheEvict(allEntries = true)
     <S extends ApplicationCurrency> S saveAndFlush(S entity);
+
+    Boolean existsByCode(String code);
 }

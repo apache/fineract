@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -32,8 +33,11 @@ import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandPipeline;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.organisation.monetary.command.CurrencyCreateCommand;
 import org.apache.fineract.organisation.monetary.command.CurrencyUpdateCommand;
 import org.apache.fineract.organisation.monetary.data.CurrencyConfigurationData;
+import org.apache.fineract.organisation.monetary.data.CurrencyCreateRequest;
+import org.apache.fineract.organisation.monetary.data.CurrencyCreateResponse;
 import org.apache.fineract.organisation.monetary.data.CurrencyUpdateRequest;
 import org.apache.fineract.organisation.monetary.data.CurrencyUpdateResponse;
 import org.apache.fineract.organisation.monetary.service.OrganisationCurrencyReadPlatformService;
@@ -41,7 +45,10 @@ import org.springframework.stereotype.Component;
 
 @Path("/v1/currencies")
 @Component
-@Tag(name = "Currency", description = "Application related configuration around viewing/updating the currencies permitted for use within the MFI.")
+@Tag(name = "Currency", description = """
+        Application related configuration around `viewing/updating/creating`
+        the `currencies` permitted for use within Apache Fineract.
+        """)
 @RequiredArgsConstructor
 public class CurrenciesApiResource {
 
@@ -75,6 +82,22 @@ public class CurrenciesApiResource {
         command.setPayload(request);
 
         final Supplier<CurrencyUpdateResponse> response = commandPipeline.send(command);
+
+        return response.get();
+    }
+
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Create a New Currency", description = "Adds a new 'currency' to Apache Fineract with the given code, name, symbol, decimal places and in multiples of.")
+    public CurrencyCreateResponse createCurrencies(@Valid CurrencyCreateRequest request) {
+        final CurrencyCreateCommand command = new CurrencyCreateCommand();
+
+        command.setId(UUID.randomUUID());
+        command.setCreatedAt(DateUtils.getAuditOffsetDateTime());
+        command.setPayload(request);
+
+        final Supplier<CurrencyCreateResponse> response = commandPipeline.send(command);
 
         return response.get();
     }
