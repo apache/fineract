@@ -272,5 +272,6 @@ dependencyManagement {
 
         dependency 'com.ibm.icu:icu4j:76.1'
         dependency 'org.yakworks:spring-icu4j:0.4.2'
+        dependency "org.springframework.security:spring-security-oauth2-authorization-server:1.5.1"
     }
 }

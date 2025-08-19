@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.security.service;
 
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.domain.PlatformUser;
 import org.apache.fineract.infrastructure.security.domain.PlatformUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +38,14 @@ public class TenantAwareJpaPlatformUserDetailsService implements PlatformUserDet
     @Autowired
     private PlatformUserRepository platformUserRepository;
 
+    @Autowired
+    BasicAuthTenantDetailsService basicAuthTenantDetailsService;
     @Override
-    @Cacheable(value = "usersByUsername", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#username+'ubu')")
+    // @Cacheable(value = "usersByUsername", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#username+'ubu')")
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException, DataAccessException {
 
+        // TODO! send tenant instead of fixed value!
+        ThreadLocalContextUtil.setTenant(basicAuthTenantDetailsService.loadTenantById("default", false));
         // Retrieve active users only
         final boolean deleted = false;
         final boolean enabled = true;
