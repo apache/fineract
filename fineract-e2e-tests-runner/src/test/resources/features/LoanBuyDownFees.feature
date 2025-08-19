@@ -2657,3 +2657,550 @@ Feature:Feature: Buy Down Fees
       | 11 January 2024  | Buy Down Fee Amortization Adjustment | 5.49   | 0.0       | 5.49     | 0.0  | 0.0       | 0.0          | false    |
       | 11 January 2024  | Accrual                              | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
     And LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent is created on "11 January 2024"
+
+  @TestRailId:C3981
+  Scenario: Verify loan with Buy Down fees and full payment for non-merchant - UC1
+    When Admin sets the business date to "01 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_NON_MERCHANT | 01 January 2024    | 100            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "100" amount and expected disbursement date on "01 January 2024"
+    And Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "BUY_DOWN_FEE" transaction with date "01 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account   | 50.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
+    And Buy down fee contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 50.0       | 0.0              | 50.0                     | 0.0             | 0.0                |
+    And LoanBuyDownFeeTransactionCreatedBusinessEvent is created on "01 January 2024"
+    When Admin sets the business date to "1 February 2024"
+    And Customer makes "AUTOPAY" repayment on "01 February 2024" with 33.72 EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Repayment        | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
+    When Admin sets the business date to "1 March 2024"
+    And Customer makes "AUTOPAY" repayment on "01 March 2024" with 33.72 EUR transaction amount
+    When Admin sets the business date to "1 April 2024"
+    When Admin runs inline COB job for Loan
+    And Customer makes "AUTOPAY" repayment on "01 April 2024" with 33.73 EUR transaction amount
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Repayment                 | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
+      | 01 March 2024    | Repayment                 | 33.72  | 33.33     | 0.39     | 0.0  | 0.0       | 33.53        | false    |
+      | 31 March 2024    | Accrual                   | 1.16   | 0.0       | 1.16     | 0.0  | 0.0       | 0.0          | false    |
+      | 31 March 2024    | Buy Down Fee Amortization | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 April 2024    | Repayment                 | 33.73  | 33.53     | 0.2      | 0.0  | 0.0       | 0.0          | false    |
+      | 01 April 2024    | Accrual                   | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "BUY_DOWN_FEE_AMORTIZATION" transaction with date "31 March 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 450281       | Income From Buy Down        |       | 50.0   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 50.0  |        |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 50.0       | 50.0             | 0.0                      | 0.0             | 0.0                |
+    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
+
+  @TestRailId:C3982
+  Scenario: Verify Buy Down Fee reversal on same business date for non-merchant - UC2
+    When Admin sets the business date to "01 January 2024"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_NON_MERCHANT | 01 January 2024   | 100            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "100" amount and expected disbursement date on "01 January 2024"
+    And Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+    And LoanBuyDownFeeTransactionCreatedBusinessEvent is created on "01 January 2024"
+# -- undo Buy Down Fee transaction at the same biz date when it was added -- #
+    When Customer undo "1"th "Buy Down Fee" transaction made on "01 January 2024"
+    When Admin sets the business date to "02 January 2024"
+    And Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+    And Loan Transactions tab has a "BUY_DOWN_FEE" transaction with date "01 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account   | 50.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
+      | LIABILITY | 145023       | Suspense/Clearing account   |       | 50.0   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 50.0  |        |
+
+  @TestRailId:C3983
+  Scenario: Verify loan with Buy Down fees and undo the charge-off transaction for non merchant - amortization in case of loan charge-off event is also reversed - UC3.1
+    When Admin sets the business date to "01 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_NON_MERCHANT | 01 January 2024    | 100            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "100" amount and expected disbursement date on "01 January 2024"
+    And Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "BUY_DOWN_FEE" transaction with date "01 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account   | 50.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 50.0       | 0.0              | 50.0                     | 0.0             | 0.0                |
+    And LoanBuyDownFeeTransactionCreatedBusinessEvent is created on "01 January 2024"
+# --- charge-off ---#
+    When Admin sets the business date to "1 February 2024"
+    And Admin does charge-off the loan on "1 February 2024"
+    Then Loan status will be "ACTIVE"
+    And Loan marked as charged-off on "01 February 2024"
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    And Loan Transactions tab has a "CHARGE_OFF" transaction with date "01 February 2024" which has the following Journal entries:
+      | Type      | Account code | Account name               | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable           |        | 100.0  |
+      | ASSET     | 112603       | Interest/Fee Receivable    |        |  1.17  |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt       | 100.0  |        |
+      | INCOME    | 404001       | Interest Income Charge Off |  1.17  |        |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Buy Down Fee Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Accrual                   | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Charge-off                | 101.17 | 100.0     | 1.17     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Buy Down Fee Amortization | 32.42  | 0.0       | 32.42    | 0.0  | 0.0       | 0.0          | false    |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 50.0       | 17.58            | 0.0                      | 0.0             | 32.42              |
+    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "01 February 2024"
+# --- check BDFA journal entries for before and after charge-off trn processed --- #
+    And Loan Transactions tab has 2 a "BUY_DOWN_FEE_AMORTIZATION" transactions with date "01 February 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 450281       | Income From Buy Down        |       | 17.58  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 17.58 |        |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt        |       | 32.42  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 32.42 |        |
+# --- charge-off undo ---#
+    Then Admin does a charge-off undo the loan
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Buy Down Fee Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Accrual                   | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Charge-off                | 101.17 | 100.0     | 1.17     | 0.0  | 0.0       | 0.0          | true     |
+    And Loan Transactions tab has a "CHARGE_OFF" transaction with date "01 February 2024" which has the following Journal entries:
+      | Type      | Account code | Account name               | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable           |        | 100.0  |
+      | ASSET     | 112603       | Interest/Fee Receivable    |        |  1.17  |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt       | 100.0  |        |
+      | INCOME    | 404001       | Interest Income Charge Off |  1.17  |        |
+      | ASSET     | 112601       | Loans Receivable           | 100.0  |        |
+      | ASSET     | 112603       | Interest/Fee Receivable    |  1.17  |        |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt       |        | 100.0  |
+      | INCOME    | 404001       | Interest Income Charge Off |        | 1.17   |
+    And Loan Transactions tab has 1 a "BUY_DOWN_FEE_AMORTIZATION" transactions with date "01 February 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 450281       | Income From Buy Down        |       | 17.58  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 17.58 |        |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 50.0       | 17.58            | 32.42                    | 0.0             | 0.0                |
+    When Loan Pay-off is made on "1 February 2024"
+    Then Loan's all installments have obligations met
+
+  @TestRailId:C3984
+  Scenario: Verify loan with Buy Down fees and undo the charge-off a fraud loan for non-merchant - amortization in case of loan charge-off event is also reversed - UC3.2
+    When Admin sets the business date to "01 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_NON_MERCHANT | 01 January 2024    | 100            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "100" amount and expected disbursement date on "01 January 2024"
+    And Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "BUY_DOWN_FEE" transaction with date "01 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account   | 50.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 50.0       | 0.0              | 50.0                     | 0.0             | 0.0                |
+    And LoanBuyDownFeeTransactionCreatedBusinessEvent is created on "01 January 2024"
+    Then Admin can successfully set Fraud flag to the loan
+# --- charge-off ---#
+    When Admin sets the business date to "1 February 2024"
+    And Admin does charge-off the loan on "1 February 2024"
+    Then Loan status will be "ACTIVE"
+    And Loan marked as charged-off on "01 February 2024"
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    And Loan Transactions tab has a "CHARGE_OFF" transaction with date "01 February 2024" which has the following Journal entries:
+      | Type      | Account code | Account name               | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable           |        | 100.0  |
+      | ASSET     | 112603       | Interest/Fee Receivable    |        |  1.17  |
+      | EXPENSE   | 744037       | Credit Loss/Bad Debt-Fraud | 100.0  |        |
+      | INCOME    | 404001       | Interest Income Charge Off |  1.17  |        |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Buy Down Fee Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Accrual                   | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Charge-off                | 101.17 | 100.0     | 1.17     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Buy Down Fee Amortization | 32.42  | 0.0       | 32.42    | 0.0  | 0.0       | 0.0          | false    |
+# --- check BDFA journal entries for before and after charge-off trn processed --- #
+    And Loan Transactions tab has 2 a "BUY_DOWN_FEE_AMORTIZATION" transactions with date "01 February 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 450281       | Income From Buy Down        |       | 17.58  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 17.58 |        |
+      | EXPENSE   | 744037       | Credit Loss/Bad Debt-Fraud  |       | 32.42  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 32.42 |        |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 50.0       | 17.58            | 0.0                      | 0.0             | 32.42              |
+    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "01 February 2024"
+# --- charge-off undo ---#
+    Then Admin does a charge-off undo the loan
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Buy Down Fee Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Accrual                   | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Charge-off                | 101.17 | 100.0     | 1.17     | 0.0  | 0.0       | 0.0          | true     |
+    And Loan Transactions tab has a "CHARGE_OFF" transaction with date "01 February 2024" which has the following Journal entries:
+      | Type      | Account code | Account name               | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable           |        | 100.0  |
+      | ASSET     | 112603       | Interest/Fee Receivable    |        |  1.17  |
+      | EXPENSE   | 744037       | Credit Loss/Bad Debt-Fraud | 100.0  |        |
+      | INCOME    | 404001       | Interest Income Charge Off |  1.17  |        |
+      | ASSET     | 112601       | Loans Receivable           | 100.0  |        |
+      | ASSET     | 112603       | Interest/Fee Receivable    |  1.17  |        |
+      | EXPENSE   | 744037       | Credit Loss/Bad Debt-Fraud |        | 100.0  |
+      | INCOME    | 404001       | Interest Income Charge Off |        | 1.17   |
+    And Loan Transactions tab has 1 a "BUY_DOWN_FEE_AMORTIZATION" transactions with date "01 February 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 450281       | Income From Buy Down        |       | 17.58  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 17.58 |        |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 50.0       | 17.58            | 32.42                    | 0.0             | 0.0                |
+    When Loan Pay-off is made on "1 February 2024"
+    Then Loan's all installments have obligations met
+
+  @TestRailId:C3985
+  Scenario: Verify loan with Buy Down fees and undo the charge-off transaction with "delinquent" reason for non-merchant - amortization in case of loan charge-off event is also reversed - UC3.3
+    When Admin sets the business date to "01 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                             | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_NON_MERCHANT_CHARGE_OFF_REASON | 01 January 2024    | 100            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "100" amount and expected disbursement date on "01 January 2024"
+    And Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "BUY_DOWN_FEE" transaction with date "01 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account   | 50.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 50.0       | 0.0              | 50.0                     | 0.0             | 0.0                |
+    And LoanBuyDownFeeTransactionCreatedBusinessEvent is created on "01 January 2024"
+    Then Admin can successfully set Fraud flag to the loan
+    When Admin sets the business date to "25 January 2024"
+    And Admin does charge-off the loan with reason "DELINQUENT" on "25 January 2024"
+    And Loan Transactions tab has a "CHARGE_OFF" transaction with date "25 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name               | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable           |        | 100.0  |
+      | ASSET     | 112603       | Interest/Fee Receivable    |        |  1.17  |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt       | 100.0  |        |
+      | INCOME    | 404001       | Interest Income Charge Off |  1.17  |        |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 25 January 2024  | Buy Down Fee Amortization | 13.74  | 0.0       | 13.74    | 0.0  | 0.0       | 0.0          | false    |
+      | 25 January 2024  | Accrual                   | 0.45   | 0.0       | 0.45     | 0.0  | 0.0       | 0.0          | false    |
+      | 25 January 2024  | Charge-off                | 101.17 | 100.0     | 1.17     | 0.0  | 0.0       | 0.0          | false    |
+      | 25 January 2024  | Buy Down Fee Amortization | 36.26  | 0.0       | 36.26    | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has 2 a "BUY_DOWN_FEE_AMORTIZATION" transactions with date "25 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 450281       | Income From Buy Down        |       | 13.74  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 13.74 |        |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt        |       | 36.26  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 36.26 |        |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 50.0       | 13.74            | 0.0                      | 0.0             | 36.26              |
+    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "25 January 2024"
+    Then Admin does a charge-off undo the loan
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 25 January 2024  | Buy Down Fee Amortization | 13.74  | 0.0       | 13.74    | 0.0  | 0.0       | 0.0          | false    |
+      | 25 January 2024  | Accrual                   | 0.45   | 0.0       | 0.45     | 0.0  | 0.0       | 0.0          | false    |
+      | 25 January 2024  | Charge-off                | 101.17 | 100.0     | 1.17     | 0.0  | 0.0       | 0.0          | true     |
+    And Loan Transactions tab has a "CHARGE_OFF" transaction with date "25 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name               | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable           |        | 100.0  |
+      | ASSET     | 112603       | Interest/Fee Receivable    |        |  1.17  |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt       | 100.0  |        |
+      | INCOME    | 404001       | Interest Income Charge Off |  1.17  |        |
+      | ASSET     | 112601       | Loans Receivable           | 100.0  |        |
+      | ASSET     | 112603       | Interest/Fee Receivable    |  1.17  |        |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt       |        | 100.0  |
+      | INCOME    | 404001       | Interest Income Charge Off |        | 1.17   |
+    And Loan Transactions tab has 1 a "BUY_DOWN_FEE_AMORTIZATION" transactions with date "25 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 450281       | Income From Buy Down        |       | 13.74  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 13.74 |        |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 50.0       | 13.74            | 36.26                    | 0.0             | 0.0                |
+    When Loan Pay-off is made on "25 January 2024"
+    Then Loan's all installments have obligations met
+
+  @TestRailId:С3986
+  Scenario: Verify loan with Buy Down Fee adjustment trn and repayment trns for non-merchant - UC4
+    When Admin sets the business date to "01 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_NON_MERCHANT | 01 January 2024    | 100            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "100" amount and expected disbursement date on "01 January 2024"
+    And Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2024 |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 29   | 01 March 2024    |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 31   | 01 April 2024    |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "BUY_DOWN_FEE" transaction with date "01 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account   | 50.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 50.0       | 0.0              | 50.0                     | 0.0             | 0.0                |
+    And LoanBuyDownFeeTransactionCreatedBusinessEvent is created on "01 January 2024"
+# --- 1st repayment on February,1 ---#
+    When Admin sets the business date to "1 February 2024"
+    And Customer makes "AUTOPAY" repayment on "01 February 2024" with 33.72 EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2024 | 01 February 2024 | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 33.72 | 0.0        | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    |                  | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0   | 0.0        | 0.0  | 33.72       |
+      | 3  | 31   | 01 April 2024    |                  | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0   | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 33.72 | 0.0        | 0.0  | 67.45       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Repayment        | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
+# --- BuyDownFee Adjustment trns on March,1 ---#
+    When Admin sets the business date to "1 March 2024"
+    And Admin adds buy down fee adjustment with "AUTOPAY" payment type to the loan on "01 March 2024" with "10" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2024 | 01 February 2024 | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 33.72 | 0.0        | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    |                  | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0   | 0.0        | 0.0  | 33.72       |
+      | 3  | 31   | 01 April 2024    |                  | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0   | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 33.72 | 0.0        | 0.0  | 67.45       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type        | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement            | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee            | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Repayment               | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
+      | 01 March 2024    | Buy Down Fee Adjustment | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "BUY_DOWN_FEE_ADJUSTMENT" transaction with date "01 March 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account   |       | 10.0   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 10.0  |        |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 50.0       | 0.0              | 40.0                     | 10.0            | 0.0                |
+    And LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent is created on "01 March 2024"
+# --- 2nd repayment on April,1 ---#
+    When Admin sets the business date to "1 April 2024"
+    When Admin runs inline COB job for Loan
+    And Customer makes "AUTOPAY" repayment on "01 April 2024" with 33.73 EUR transaction amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Repayment                 | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
+      | 01 March 2024    | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 31 March 2024    | Accrual                   | 1.35   | 0.0       | 1.35     | 0.0  | 0.0       | 0.0          | false    |
+      | 31 March 2024    | Buy Down Fee Amortization | 40.0   | 0.0       | 40.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 April 2024    | Repayment                 | 33.73  | 33.34     | 0.39     | 0.0  | 0.0       | 33.52        | false    |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 50.0       | 40.0             | 0.0                      | 10.0            | 0.0                |
+    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
+    When Loan Pay-off is made on "1 April 2024"
+    Then Loan's all installments have obligations met
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Repayment                 | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
+      | 01 March 2024    | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 31 March 2024    | Accrual                   | 1.35   | 0.0       | 1.35     | 0.0  | 0.0       | 0.0          | false    |
+      | 31 March 2024    | Buy Down Fee Amortization | 40.0   | 0.0       | 40.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 April 2024    | Repayment                 | 33.73  | 33.34     | 0.39     | 0.0  | 0.0       | 33.52        | false    |
+      | 01 April 2024    | Repayment                 | 33.91  | 33.52     | 0.39     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 April 2024    | Accrual                   | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    |
+
+# --- BuyDownFee Adjustment reversal on March,1 ---#
+    When Customer undo "1"th "Buy Down Fee Adjustment" transaction made on "01 March 2024"
+    When Admin sets the business date to "3 April 2024"
+    When Admin runs inline COB job for Loan
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Repayment                 | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
+      | 01 March 2024    | Buy Down Fee Adjustment   | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+      | 31 March 2024    | Accrual                   | 1.35   | 0.0       | 1.35     | 0.0  | 0.0       | 0.0          | false    |
+      | 31 March 2024    | Buy Down Fee Amortization | 40.0   | 0.0       | 40.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 April 2024    | Repayment                 | 33.73  | 33.34     | 0.39     | 0.0  | 0.0       | 33.52        | false    |
+      | 01 April 2024    | Repayment                 | 33.91  | 33.52     | 0.39     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 April 2024    | Accrual                   | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 April 2024    | Buy Down Fee Amortization | 10.0   | 0.0       | 10.0     | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "BUY_DOWN_FEE_ADJUSTMENT" transaction with date "01 March 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account   |       | 10.0   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 10.0  |        |
+      | LIABILITY | 145023       | Suspense/Clearing account   | 10.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 10.0   |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 50.0       | 50.0             | 0.0                      | 0.0             | 0.0                |
+    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "01 April 2024"
