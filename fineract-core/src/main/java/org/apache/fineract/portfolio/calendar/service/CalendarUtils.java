@@ -238,6 +238,7 @@ public final class CalendarUtils {
     public static String getRRuleReadable(final LocalDate startDate, final String recurringRule) {
 
         String humanReadable = "";
+        final String every = "Every ";
 
         RRule rrule;
         Recur recur = null;
@@ -261,13 +262,13 @@ public final class CalendarUtils {
             if (recur.getInterval() == 1) {
                 humanReadable = "Daily";
             } else {
-                humanReadable = "Every " + recur.getInterval() + " days";
+                humanReadable = every + recur.getInterval() + " days";
             }
         } else if (recur.getFrequency().equals(Recur.Frequency.WEEKLY)) {
             if (recur.getInterval() == 1 || recur.getInterval() == -1) {
                 humanReadable = "Weekly";
             } else {
-                humanReadable = "Every " + recur.getInterval() + " weeks";
+                humanReadable = every + recur.getInterval() + " weeks";
             }
 
             humanReadable += " on ";
@@ -285,17 +286,17 @@ public final class CalendarUtils {
             NumberList nthDays = recur.getSetPosList();
             Integer nthDay = null;
             if (!nthDays.isEmpty()) {
-                nthDay = nthDays.get(0);
+                nthDay = nthDays.getFirst();
             }
             NumberList monthDays = recur.getMonthDayList();
             Integer monthDay = null;
             if (!monthDays.isEmpty()) {
-                monthDay = monthDays.get(0);
+                monthDay = monthDays.getFirst();
             }
             WeekDayList weekdays = recur.getDayList();
             WeekDay weekDay = null;
             if (!weekdays.isEmpty()) {
-                weekDay = weekdays.get(0);
+                weekDay = weekdays.getFirst();
             }
             if (nthDay != null && weekDay != null) {
                 NthDayType nthDayType = NthDayType.fromInt(nthDay);
@@ -304,7 +305,7 @@ public final class CalendarUtils {
                 if (recur.getInterval() == 1 || recur.getInterval() == -1) {
                     humanReadable = "Monthly on " + nthDayName.getCode().toLowerCase() + " " + weekdayType.getCode().toLowerCase();
                 } else {
-                    humanReadable = "Every " + recur.getInterval() + " months on " + nthDayName.getCode().toLowerCase() + " "
+                    humanReadable = every + recur.getInterval() + " months on " + nthDayName.getCode().toLowerCase() + " "
                             + weekdayType.getCode().toLowerCase();
                 }
             } else if (monthDay != null) {
@@ -312,27 +313,27 @@ public final class CalendarUtils {
                     if (recur.getInterval() == 1 || recur.getInterval() == -1) {
                         humanReadable = "Monthly on last day";
                     } else {
-                        humanReadable = "Every " + recur.getInterval() + " months on last day";
+                        humanReadable = every + recur.getInterval() + " months on last day";
                     }
                 } else {
                     if (recur.getInterval() == 1 || recur.getInterval() == -1) {
                         humanReadable = "Monthly on day " + monthDay;
                     } else {
-                        humanReadable = "Every " + recur.getInterval() + " months on day " + monthDay;
+                        humanReadable = every + recur.getInterval() + " months on day " + monthDay;
                     }
                 }
             } else {
                 if (recur.getInterval() == 1 || recur.getInterval() == -1) {
                     humanReadable = "Monthly on day " + startDate.getDayOfMonth();
                 } else {
-                    humanReadable = "Every " + recur.getInterval() + " months on day " + startDate.getDayOfMonth();
+                    humanReadable = every + recur.getInterval() + " months on day " + startDate.getDayOfMonth();
                 }
             }
         } else if (recur.getFrequency().equals(Recur.Frequency.YEARLY)) {
             if (recur.getInterval() == 1) {
                 humanReadable = "Annually on " + startDate.format(DateTimeFormatter.ofPattern("MMM")) + " " + startDate.getDayOfMonth();
             } else {
-                humanReadable = "Every " + recur.getInterval() + " years on " + startDate.format(DateTimeFormatter.ofPattern("MMM")) + " "
+                humanReadable = every + recur.getInterval() + " years on " + startDate.format(DateTimeFormatter.ofPattern("MMM")) + " "
                         + startDate.getDayOfMonth();
             }
         }
