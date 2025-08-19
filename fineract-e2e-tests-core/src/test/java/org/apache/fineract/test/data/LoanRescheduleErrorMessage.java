@@ -26,7 +26,8 @@ public enum LoanRescheduleErrorMessage {
     LOAN_RESCHEDULE_NOT_ALLOWED_FROM_ZERO_TO_NEW_INTEREST_RATE("Failed data validation due to: newInterestRate."), //
     LOAN_RESCHEDULE_NOT_ALLOWED_FROM_CURRENT_INTEREST_RATE_TO_ZERO("The parameter `newInterestRate` must be greater than 0."), //
     NEW_INTEREST_RATE_IS_1_BUT_MINIMUM_IS_3("The parameter `newInterestRate` value 1.0 must not be less than the minimum value 3.0"), //
-    NEW_INTEREST_RATE_IS_45_BUT_MAXIMUM_IS_20("The parameter `newInterestRate` value 45.0 must not be more than maximum value 20.0"); //
+    NEW_INTEREST_RATE_IS_45_BUT_MAXIMUM_IS_20("The parameter `newInterestRate` value 45.0 must not be more than maximum value 20.0"), //
+    LOAN_INTEREST_RATE_CANNOT_BE_NEGATIVE("The parameter `newInterestRate` must be greater than or equal to 0."); //
 
     private final String messageTemplate;
 

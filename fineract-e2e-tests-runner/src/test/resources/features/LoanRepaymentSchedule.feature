@@ -1142,7 +1142,7 @@ Feature: Loan repayment schedule handling
     And Customer makes "AUTOPAY" repayment on "18 March 2025" with 441.03 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     And Loan has 0 outstanding amount
-    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+    And Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
       |    |      | 01 January 2025  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
       | 1  | 31   | 01 February 2025 | 15 January 2025 | 669.98          | 330.02        | 10.0     | 0.0  | 0.0       | 340.02 | 340.02 | 340.02     | 0.0    | 0.0         |
@@ -1157,7 +1157,7 @@ Feature: Loan repayment schedule handling
     And Admin runs inline COB job for Loan
     And Customer undo "1"th "Repayment" transaction made on "18 March 2025"
     Then Loan status will be "ACTIVE"
-    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+    And Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
       |    |      | 01 January 2025  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
       | 1  | 31   | 01 February 2025 | 15 January 2025 | 669.98          | 330.02        | 10.0     | 0.0  | 0.0       | 340.02 | 340.02 | 340.02     | 0.0    | 0.0         |
@@ -1171,7 +1171,7 @@ Feature: Loan repayment schedule handling
     When Customer makes "AUTOPAY" repayment on "19 March 2025" with 611.04 EUR transaction amount
     Then Loan status will be "OVERPAID"
     And Loan has 170.01 overpaid amount
-    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+    And Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
       |    |      | 01 January 2025  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
       | 1  | 31   | 01 February 2025 | 15 January 2025 | 669.98          | 330.02        | 10.0     | 0.0  | 0.0       | 340.02 | 340.02 | 340.02     | 0.0    | 0.0         |
@@ -1185,7 +1185,7 @@ Feature: Loan repayment schedule handling
     When Admin makes Credit Balance Refund transaction on "19 March 2025" with 170.01 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     And Loan has 0 outstanding amount
-    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+    And Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
       |    |      | 01 January 2025  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
       | 1  | 31   | 01 February 2025 | 15 January 2025 | 669.98          | 330.02        | 10.0     | 0.0  | 0.0       | 340.02 | 340.02 | 340.02     | 0.0    | 0.0         |
@@ -1211,7 +1211,7 @@ Feature: Loan repayment schedule handling
     When Customer makes "AUTOPAY" repayment on "19 March 2025" with 340.02 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     And Loan has 0 outstanding amount
-    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+    And Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late   | Outstanding |
       |    |      | 01 January 2025  |                 | 1000.0          |               |          | 0.0  |           | 0.0     | 0.0     |            |        |             |
       | 1  | 31   | 01 February 2025 | 15 January 2025 | 669.98          | 330.02        | 10.0     | 0.0  | 0.0       | 340.02  | 340.02  | 340.02     | 0.0    | 0.0         |
@@ -1387,7 +1387,7 @@ Feature: Loan repayment schedule handling
     And Customer makes "AUTOPAY" repayment on "18 March 2025" with 441.52 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     And Loan has 0 outstanding amount
-    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+    And Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
       |    |      | 01 January 2025  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
       | 1  | 31   | 01 February 2025 | 15 January 2025 | 669.98          | 330.02        | 10.0     | 0.0  | 0.0       | 340.02 | 340.02 | 340.02     | 0.0    | 0.0         |
@@ -1402,7 +1402,7 @@ Feature: Loan repayment schedule handling
     And Admin runs inline COB job for Loan
     And Customer undo "1"th "Repayment" transaction made on "18 March 2025"
     Then Loan status will be "ACTIVE"
-    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+    And Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
       |    |      | 01 January 2025  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
       | 1  | 31   | 01 February 2025 | 15 January 2025 | 669.98          | 330.02        | 10.0     | 0.0  | 0.0       | 340.02 | 340.02 | 340.02     | 0.0    | 0.0         |
@@ -1416,7 +1416,7 @@ Feature: Loan repayment schedule handling
     When Customer makes "AUTOPAY" repayment on "19 March 2025" with 611.53 EUR transaction amount
     Then Loan status will be "OVERPAID"
     And Loan has 170.01 overpaid amount
-    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+    And Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
       |    |      | 01 January 2025  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
       | 1  | 31   | 01 February 2025 | 15 January 2025 | 669.98          | 330.02        | 10.0     | 0.0  | 0.0       | 340.02 | 340.02 | 340.02     | 0.0    | 0.0         |
@@ -1430,7 +1430,7 @@ Feature: Loan repayment schedule handling
     When Admin makes Credit Balance Refund transaction on "19 March 2025" with 170.01 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     And Loan has 0 outstanding amount
-    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+    And Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
       |    |      | 01 January 2025  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
       | 1  | 31   | 01 February 2025 | 15 January 2025 | 669.98          | 330.02        | 10.0     | 0.0  | 0.0       | 340.02 | 340.02 | 340.02     | 0.0    | 0.0         |
@@ -1456,7 +1456,7 @@ Feature: Loan repayment schedule handling
     When Customer makes "AUTOPAY" repayment on "19 March 2025" with 340.02 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     And Loan has 0 outstanding amount
-    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+    And Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late   | Outstanding |
       |    |      | 01 January 2025  |                 | 1000.0          |               |          | 0.0  |           | 0.0     | 0.0     |            |        |             |
       | 1  | 31   | 01 February 2025 | 15 January 2025 | 669.98          | 330.02        | 10.0     | 0.0  | 0.0       | 340.02  | 340.02  | 340.02     | 0.0    | 0.0         |
@@ -1466,7 +1466,7 @@ Feature: Loan repayment schedule handling
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late   | Outstanding |
       | 1790.02       | 23.07    | 0.0  | 0.0       | 1813.09 | 1813.09 | 1371.56    | 441.53 | 0.0         |
-    Then Loan Transactions tab has the following data:
+    And Loan Transactions tab has the following data:
       | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2025  | Disbursement           | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
       | 02 January 2025  | Accrual                | 0.32   | 0.0       | 0.32     | 0.0  | 0.0       | 0.0          | false    | false    |
