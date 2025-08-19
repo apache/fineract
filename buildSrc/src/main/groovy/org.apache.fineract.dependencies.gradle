@@ -150,9 +150,6 @@ dependencyManagement {
         dependency "com.squareup.retrofit2:converter-gson:2.11.0"
         dependency "com.squareup.retrofit2:converter-protobuf:2.11.0"
         dependency 'io.reactivex.rxjava2:rxjava:2.2.21'
-        dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.common:1.0.1"
-        dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:1.0.1"
-        dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.httpclient4:1.0.1"
         dependency "io.gsonfire:gson-fire:1.9.0"
         dependency "com.google.code.findbugs:jsr305:3.0.2"
         dependency "commons-codec:commons-codec:1.17.1"

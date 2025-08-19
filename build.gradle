@@ -22,7 +22,6 @@ buildscript {
         jacocoVersion = '0.8.12'
         retrofitVersion = '2.9.0'
         okhttpVersion = '4.9.3'
-        oltuVersion = '1.0.1'
         fineractCustomProjects = []
         fineractJavaProjects = subprojects.findAll{
             [

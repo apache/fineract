@@ -29,22 +29,14 @@ public class SecurityValidationConfig {
     @Value("${fineract.security.basicauth.enabled}")
     private Boolean basicAuthEnabled;
 
-    @Value("${fineract.security.oauth.enabled}")
-    private Boolean oauthEnabled;
-
     @PostConstruct
     public void validate() {
         // NOTE: avoid NPE if these values are not set
-        if (!Boolean.TRUE.equals(basicAuthEnabled) && !Boolean.TRUE.equals(oauthEnabled)) {
+        if (!Boolean.TRUE.equals(basicAuthEnabled)) {
             // NOTE: while we are already doing consistency checks we might as well cover this case; should not happen
             // as defaults are set in application.properties
             throw new IllegalArgumentException(
                     "No authentication scheme selected. Please decide if you want to use basic OR OAuth2 authentication.");
-        }
-
-        if (Boolean.TRUE.equals(basicAuthEnabled) && Boolean.TRUE.equals(oauthEnabled)) {
-            throw new IllegalArgumentException(
-                    "Too many authentication schemes selected. Please decide if you want to use basic OR OAuth2 authentication.");
         }
     }
 }

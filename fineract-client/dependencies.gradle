@@ -35,11 +35,5 @@ dependencies {
             'com.squareup.okhttp3:logging-interceptor',
             )
 
-    // org.apache.oltu.oauth2 is used in org.apache.fineract.client.auth.OAuthOkHttpClient (only; can be excluded by consumers not requiring OAuth)
-    implementation('org.apache.oltu.oauth2:org.apache.oltu.oauth2.client') {
-        exclude group: 'org.apache.oltu.oauth2', module: 'org.apache.oltu.oauth2.common'
-        exclude group: 'org.slf4j'
-    }
-
     testImplementation 'org.assertj:assertj-core'
 }

@@ -26,11 +26,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.constants.TwoFactorConstants;
-import org.apache.fineract.infrastructure.security.data.FineractJwtAuthenticationToken;
 import org.apache.fineract.infrastructure.security.domain.TFAccessToken;
 import org.apache.fineract.infrastructure.security.service.TwoFactorService;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -40,7 +38,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.GenericFilterBean;
 
 /**
@@ -112,12 +109,6 @@ public class TwoFactorAuthenticationFilter extends GenericFilterBean {
         if (currentAuthentication instanceof UsernamePasswordAuthenticationToken) {
             UsernamePasswordAuthenticationToken updatedAuthentication = new UsernamePasswordAuthenticationToken(
                     currentAuthentication.getPrincipal(), currentAuthentication.getCredentials(), updatedAuthorities);
-            return updatedAuthentication;
-        } else if (currentAuthentication instanceof FineractJwtAuthenticationToken) {
-            FineractJwtAuthenticationToken fineractJwtAuthenticationToken = (FineractJwtAuthenticationToken) currentAuthentication;
-            FineractJwtAuthenticationToken updatedAuthentication = new FineractJwtAuthenticationToken(
-                    fineractJwtAuthenticationToken.getToken(), (Collection<GrantedAuthority>) updatedAuthorities,
-                    (UserDetails) currentAuthentication.getPrincipal());
             return updatedAuthentication;
         } else {
             throw new ServletException("Unknown authentication type: " + currentAuthentication.getClass().getName());

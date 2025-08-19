@@ -24,16 +24,13 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import org.apache.fineract.infrastructure.security.data.FineractJwtAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * A dummy {@link TwoFactorAuthenticationFilter} filter used when 'twofactor' environment profile is not active.
@@ -59,18 +56,6 @@ public class InsecureTwoFactorAuthenticationFilter extends TwoFactorAuthenticati
         if (authentication != null && authentication.isAuthenticated()) {
             List<GrantedAuthority> updatedAuthorities = new ArrayList<>(authentication.getAuthorities());
             updatedAuthorities.add(new SimpleGrantedAuthority("TWOFACTOR_AUTHENTICATED"));
-
-            if (authentication instanceof UsernamePasswordAuthenticationToken) {
-                UsernamePasswordAuthenticationToken updatedAuthentication = new UsernamePasswordAuthenticationToken(
-                        authentication.getPrincipal(), authentication.getCredentials(), updatedAuthorities);
-                context.setAuthentication(updatedAuthentication);
-            } else if (authentication instanceof FineractJwtAuthenticationToken) {
-                FineractJwtAuthenticationToken fineractJwtAuthenticationToken = (FineractJwtAuthenticationToken) authentication;
-                FineractJwtAuthenticationToken updatedAuthentication = new FineractJwtAuthenticationToken(
-                        fineractJwtAuthenticationToken.getToken(), (Collection<GrantedAuthority>) updatedAuthorities,
-                        (UserDetails) authentication.getPrincipal());
-                context.setAuthentication(updatedAuthentication);
-            }
         }
 
         chain.doFilter(req, res);
