@@ -3034,10 +3034,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withLoanId(loan.getId()) //
-                .withEntityId(targetTransaction.getId()) //
-                .withEntityExternalId(targetTransaction.getExternalId()) //
-                .withSubEntityId(interestRefundTxn.getId()) //
-                .withSubEntityExternalId(interestRefundTxn.getExternalId()) //
+                .withEntityId(interestRefundTxn.getId()) //
+                .withEntityExternalId(interestRefundTxn.getExternalId()) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //

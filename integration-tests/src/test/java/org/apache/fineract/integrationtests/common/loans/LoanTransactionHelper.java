@@ -1181,6 +1181,12 @@ public class LoanTransactionHelper {
                 FineractClientHelper.getFineractClient().loanTransactions.executeLoanTransaction1(loanExternalId, request, "chargeRefund"));
     }
 
+    public PostLoansLoanIdTransactionsResponse manualInterestRefund(final Long loanId, final Long targetTransactionId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.adjustLoanTransaction(loanId, targetTransactionId,
+                request, "interest-refund"));
+    }
+
     public PostLoansLoanIdTransactionsResponse makeGoodwillCredit(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
         return Calls
                 .ok(FineractClientHelper.getFineractClient().loanTransactions.executeLoanTransaction(loanId, request, "goodwillCredit"));

@@ -309,8 +309,7 @@ public class EventCheckHelper {
             Response<PostLoansLoanIdTransactionsResponse> transactionResponse, TransactionType transactionType, String externalOwnerId)
             throws IOException {
         Long loanId = transactionResponse.body().getLoanId();
-        Long transactionId = transactionType.equals(TransactionType.INTEREST_REFUND) ? transactionResponse.body().getSubResourceId()
-                : transactionResponse.body().getResourceId();
+        Long transactionId = transactionResponse.body().getResourceId();
         Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
         List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
         GetLoansLoanIdTransactions transactionFound = transactions//
