@@ -64,7 +64,9 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountSubStatusEnumDat
 import org.apache.fineract.portfolio.savings.data.SavingsAccountSummaryData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
+import org.apache.fineract.portfolio.savings.data.SavingsAccrualData;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargesPaidByData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
@@ -1385,5 +1387,14 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     @Override
     public Long retrieveAccountIdByExternalId(final ExternalId externalId) {
         return savingsAccountRepositoryWrapper.findIdByExternalId(externalId);
+    }
+
+    @Override
+    public List<SavingsAccrualData> retrievePeriodicAccrualData(LocalDate tillDate, SavingsAccount savings) {
+        Long savingsId = (savings != null) ? savings.getId() : null;
+        Integer status = SavingsAccountStatusType.ACTIVE.getValue();
+        Integer accountingRule = AccountingRuleType.ACCRUAL_PERIODIC.getValue();
+
+        return this.savingsAccountRepositoryWrapper.findAccrualData(tillDate, savingsId, status, accountingRule);
     }
 }

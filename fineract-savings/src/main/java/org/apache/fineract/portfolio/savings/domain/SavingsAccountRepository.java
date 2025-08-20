@@ -19,8 +19,10 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import jakarta.persistence.LockModeType;
+import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.portfolio.savings.data.SavingsAccrualData;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -70,4 +72,26 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
 
     @Query("SELECT sa.id FROM SavingsAccount sa WHERE sa.externalId = :externalId")
     Long findIdByExternalId(@Param("externalId") ExternalId externalId);
+
+    @Query("""
+            SELECT new org.apache.fineract.portfolio.savings.data.SavingsAccrualData(
+                savings.id,
+                savings.accountNumber,
+                savings.accruedTillDate,
+                CASE WHEN apm.financialAccountType = 18 THEN TRUE ELSE FALSE END,
+                msp.allowOverdraft,
+                savings.depositType
+            )
+            FROM SavingsAccount savings
+            LEFT JOIN SavingsProduct msp ON msp = savings.product
+            LEFT JOIN ProductToGLAccountMapping apm ON apm.productId = msp.id and (apm.financialAccountType = 18 or apm.financialAccountType IS NULL)
+            WHERE savings.status = :status
+              AND (savings.nominalAnnualInterestRate IS NOT NULL AND savings.nominalAnnualInterestRate > 0)
+              AND msp.accountingRule = :accountingRule
+              AND ( savings.closedOnDate <= :tillDate OR savings.closedOnDate IS NULL)
+              AND ( savings.accruedTillDate <= :tillDate OR savings.accruedTillDate IS NULL )
+            ORDER BY savings.id
+            """)
+    List<SavingsAccrualData> findAccrualData(@Param("tillDate") LocalDate tillDate, @Param("savingsId") Long savingsId,
+            @Param("status") Integer status, @Param("accountingRule") Integer accountingRule);
 }

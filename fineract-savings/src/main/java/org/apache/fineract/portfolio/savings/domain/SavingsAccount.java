@@ -71,6 +71,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.configuration.service.TemporaryConfigurationServiceContainer;
@@ -336,6 +337,9 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
     @ManyToOne
     @JoinColumn(name = "tax_group_id")
     private TaxGroup taxGroup;
+
+    @Column(name = "accrued_till_date")
+    private LocalDate accruedTillDate;
 
     @Column(name = "total_savings_amount_on_hold", scale = 6, precision = 19, nullable = true)
     private BigDecimal savingsOnHoldAmount;
@@ -926,6 +930,10 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return this.nominalAnnualInterestRateOverdraft.divide(BigDecimal.valueOf(100L), mc);
     }
 
+    public BigDecimal getEffectiveInterestRateAsFractionAccrual(final MathContext mc, final LocalDate upToInterestCalculationDate) {
+        return this.nominalAnnualInterestRate.divide(BigDecimal.valueOf(100L), mc);
+    }
+
     @SuppressWarnings("unused")
     protected BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate upToInterestCalculationDate) {
         return this.nominalAnnualInterestRate.divide(BigDecimal.valueOf(100L), mc);
@@ -937,6 +945,11 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
     private boolean hasOverdraftInterestCalculation() {
         return isAllowOverdraft() && !MathUtil.isEmpty(getOverdraftLimit()) && !MathUtil.isEmpty(nominalAnnualInterestRateOverdraft);
+    }
+
+    public List<SavingsAccountTransaction> retrieveOrderedAccrualTransactions() {
+        return retrieveListOfTransactions().stream().filter(SavingsAccountTransaction::isAccrual)
+                .sorted(new SavingsAccountTransactionComparator()).collect(Collectors.toList());
     }
 
     protected List<SavingsAccountTransaction> retreiveOrderedNonInterestPostingTransactions() {
@@ -3841,10 +3854,21 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return this.withHoldTax;
     }
 
+    public void setAccruedTillDate(LocalDate accruedTillDate) {
+        this.accruedTillDate = accruedTillDate;
+    }
+
     public List<SavingsAccountTransactionDetailsForPostingPeriod> toSavingsAccountTransactionDetailsForPostingPeriodList(
             List<SavingsAccountTransaction> transactions) {
         return transactions.stream()
                 .map(transaction -> transaction.toSavingsAccountTransactionDetailsForPostingPeriod(this.currency, this.allowOverdraft))
                 .toList();
     }
+
+    public List<SavingsAccountTransactionDetailsForPostingPeriod> toSavingsAccountTransactionDetailsForPostingPeriodList() {
+        return retreiveOrderedNonInterestPostingTransactions().stream()
+                .map(transaction -> transaction.toSavingsAccountTransactionDetailsForPostingPeriod(this.currency, this.allowOverdraft))
+                .toList();
+    }
+
 }

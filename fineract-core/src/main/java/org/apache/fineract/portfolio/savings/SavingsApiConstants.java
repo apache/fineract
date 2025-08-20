@@ -104,6 +104,7 @@ public class SavingsApiConstants {
     public static final String activeParamName = "active";
     public static final String nameParamName = "name";
     public static final String shortNameParamName = "shortName";
+    public static final String interestReceivableAccount = "interestReceivableAccountId";
     public static final String descriptionParamName = "description";
     public static final String currencyCodeParamName = "currencyCode";
     public static final String digitsAfterDecimalParamName = "digitsAfterDecimal";

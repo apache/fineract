@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
+import org.apache.fineract.portfolio.savings.data.SavingsAccrualData;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -178,5 +179,11 @@ public class SavingsAccountRepositoryWrapper {
 
     public Long findIdByExternalId(final ExternalId externalId) {
         return this.repository.findIdByExternalId(externalId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SavingsAccrualData> findAccrualData(final LocalDate tillDate, final Long savingsId, final Integer status,
+            final Integer accountingRule) {
+        return this.repository.findAccrualData(tillDate, savingsId, status, accountingRule);
     }
 }

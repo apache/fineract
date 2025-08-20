@@ -50,6 +50,7 @@ import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.jupiter.api.Assertions;
@@ -1473,6 +1474,31 @@ public class SavingsAccountHelper {
         final String url = "/fineract-provider/api/v1/savingsaccounts/" + savingsId + "/transactions/" + transactionId + "?"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
+    }
+
+    public Integer createSavingsProductWithAccrualAccounting(final Account assetAccount, final Account liabilityAccount,
+            final Account incomeAccount, final Account expenseAccount, final String interestRate) {
+
+        SavingsProductHelper productHelper = new SavingsProductHelper();
+        final Account[] accountList = { assetAccount, liabilityAccount, incomeAccount, expenseAccount };
+
+        final String savingsProductJSON = productHelper.withInterestCompoundingPeriodTypeAsDaily().withInterestPostingPeriodTypeAsMonthly()
+                .withInterestCalculationPeriodTypeAsDailyBalance().withAccountingRuleAsAccrualBased(accountList)
+                .withNominalAnnualInterestRate(new BigDecimal(interestRate)).build();
+
+        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    }
+
+    public BigDecimal getTotalAccrualAmount(Integer savingsId) {
+        List<HashMap> transactions = getSavingsTransactions(savingsId);
+        BigDecimal total = BigDecimal.ZERO;
+        for (HashMap tx : transactions) {
+            Map<String, Object> type = (Map<String, Object>) tx.get("transactionType");
+            if (type != null && Boolean.TRUE.equals(type.get("accrual"))) {
+                total = total.add(new BigDecimal(String.valueOf(tx.get("amount"))));
+            }
+        }
+        return total.setScale(2, java.math.RoundingMode.HALF_UP);
     }
 
 }
