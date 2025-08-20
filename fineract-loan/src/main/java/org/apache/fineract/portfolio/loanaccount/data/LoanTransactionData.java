@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -70,6 +71,7 @@ public class LoanTransactionData implements Serializable {
     private final LocalDate submittedOnDate;
     private final boolean manuallyReversed;
     private final LocalDate possibleNextRepaymentDate;
+    private final BigDecimal availableDisbursementAmountWithOverApplied;
 
     private Collection<LoanChargePaidByData> loanChargePaidByList;
 
@@ -78,6 +80,7 @@ public class LoanTransactionData implements Serializable {
 
     private Collection<CodeValueData> writeOffReasonOptions = null;
 
+    @Setter
     private Integer numberOfRepayments = 0;
 
     // import fields
@@ -94,6 +97,7 @@ public class LoanTransactionData implements Serializable {
     private Integer bankNumber;
     private transient Long accountId;
     private transient String transactionType;
+    @Setter
     private List<LoanRepaymentScheduleInstallmentData> loanRepaymentScheduleInstallments;
 
     // Reverse Data
@@ -144,6 +148,7 @@ public class LoanTransactionData implements Serializable {
         this.paymentTypeOptions = null;
         this.writeOffReasonOptions = null;
         this.reversalExternalId = ExternalId.empty();
+        this.availableDisbursementAmountWithOverApplied = null;
     }
 
     public static LoanTransactionData importInstance(BigDecimal repaymentAmount, LocalDate repaymentDate, Long repaymentTypeId,
@@ -196,14 +201,7 @@ public class LoanTransactionData implements Serializable {
         this.paymentTypeOptions = null;
         this.writeOffReasonOptions = null;
         this.reversalExternalId = ExternalId.empty();
-    }
-
-    public void setNumberOfRepayments(Integer numberOfRepayments) {
-        this.numberOfRepayments = numberOfRepayments;
-    }
-
-    public void setLoanRepaymentScheduleInstallments(final List<LoanRepaymentScheduleInstallmentData> loanRepaymentScheduleInstallments) {
-        this.loanRepaymentScheduleInstallments = loanRepaymentScheduleInstallments;
+        this.availableDisbursementAmountWithOverApplied = null;
     }
 
     public static LoanTransactionData templateOnTop(final LoanTransactionData loanTransactionData,
@@ -301,6 +299,7 @@ public class LoanTransactionData implements Serializable {
         this.possibleNextRepaymentDate = null;
         this.reversalExternalId = reversalExternalId;
         this.reversedOnDate = reversedOnDate;
+        this.availableDisbursementAmountWithOverApplied = null;
     }
 
     public LoanTransactionData(Long id, LoanTransactionEnumData transactionType, LocalDate date, BigDecimal totalAmount,
@@ -336,17 +335,20 @@ public class LoanTransactionData implements Serializable {
         final LocalDate submittedOnDate = null;
         final LocalDate possibleNextRepaymentDate = null;
         final boolean manuallyReversed = false;
+        final BigDecimal availableDisbursementAmountWithOverApplied = null;
         return new LoanTransactionData(id, officeId, officeName, transactionType, paymentDetailData, currency, transactionDate,
                 transactionAmount, netDisbursalAmount, principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion,
                 overpaymentPortion, unrecognizedIncomePortion, paymentOptions, transfer, externalId, fixedEmiAmount, outstandingLoanBalance,
-                submittedOnDate, manuallyReversed, possibleNextRepaymentDate, loanId, externalLoanId);
+                submittedOnDate, manuallyReversed, possibleNextRepaymentDate, loanId, externalLoanId,
+                availableDisbursementAmountWithOverApplied);
 
     }
 
     public static LoanTransactionData loanTransactionDataForDisbursalTemplate(final LoanTransactionEnumData transactionType,
             final LocalDate expectedDisbursedOnLocalDateForTemplate, final BigDecimal disburseAmountForTemplate,
             final BigDecimal netDisbursalAmount, final Collection<PaymentTypeData> paymentOptions, final BigDecimal retriveLastEmiAmount,
-            final LocalDate possibleNextRepaymentDate, final CurrencyData currency) {
+            final LocalDate possibleNextRepaymentDate, final CurrencyData currency,
+            final BigDecimal availableDisbursementAmountWithOverApplied) {
         final Long id = null;
         final Long loanId = null;
         final ExternalId externalLoanId = ExternalId.empty();
@@ -368,7 +370,7 @@ public class LoanTransactionData implements Serializable {
                 expectedDisbursedOnLocalDateForTemplate, disburseAmountForTemplate, netDisbursalAmount, principalPortion, interestPortion,
                 feeChargesPortion, penaltyChargesPortion, overpaymentPortion, unrecognizedIncomePortion, paymentOptions, transfer,
                 externalId, retriveLastEmiAmount, outstandingLoanBalance, submittedOnDate, manuallyReversed, possibleNextRepaymentDate,
-                loanId, externalLoanId);
+                loanId, externalLoanId, availableDisbursementAmountWithOverApplied);
 
     }
 
@@ -379,7 +381,7 @@ public class LoanTransactionData implements Serializable {
             BigDecimal unrecognizedIncomePortion, Collection<PaymentTypeData> paymentOptions, final AccountTransferData transfer,
             final ExternalId externalId, final BigDecimal fixedEmiAmount, BigDecimal outstandingLoanBalance,
             final LocalDate submittedOnDate, final boolean manuallyReversed, final LocalDate possibleNextRepaymentDate, Long loanId,
-            ExternalId externalLoanId) {
+            ExternalId externalLoanId, final BigDecimal availableDisbursementAmountWithOverApplied) {
         this.id = id;
         this.loanId = loanId;
         this.externalLoanId = externalLoanId;
@@ -406,6 +408,7 @@ public class LoanTransactionData implements Serializable {
         this.manuallyReversed = manuallyReversed;
         this.possibleNextRepaymentDate = possibleNextRepaymentDate;
         this.reversalExternalId = ExternalId.empty();
+        this.availableDisbursementAmountWithOverApplied = availableDisbursementAmountWithOverApplied;
     }
 
     public boolean isNotDisbursement() {

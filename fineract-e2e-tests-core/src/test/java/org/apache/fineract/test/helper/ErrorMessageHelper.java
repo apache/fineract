@@ -1066,4 +1066,10 @@ public final class ErrorMessageHelper {
         return String.format("%nNumber of lines does not match in Deferred Income tab and expected datatable of resource %s." //
                 + "%nNumber of transaction tab lines: %s %nNumber of expected datatable lines: %s%n", resourceId, actual, expected);
     }
+
+    public static String wrongAvailableDisbursementAmountWithOverApplied(final double actual, final double expected) {
+        return String.format(
+                "Wrong value in LoanDetails/availableDisbursementAmountWithOverApplied. %nActual value is: %s %nExpected Value is: %s",
+                actual, expected);
+    }
 }

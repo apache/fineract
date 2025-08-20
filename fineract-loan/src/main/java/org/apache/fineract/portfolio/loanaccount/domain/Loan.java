@@ -814,7 +814,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             }
             return principal;
         } else {
-            return getNetDisbursalAmount();
+            if (this.actualDisbursementDate == null) {
+                return BigDecimal.ZERO;
+            } else {
+                return getNetDisbursalAmount();
+            }
         }
     }
 

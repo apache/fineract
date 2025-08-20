@@ -7958,3 +7958,66 @@ Feature: Loan
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 June 2024     | Disbursement     | 1200.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1200.0       |
       | 01 July 2024     | Repayment        | 417.03 | 405.03    | 12.0     | 0.0  | 0.0       | 794.97       |
+
+  @TestRailId:C3999
+  Scenario: Verify availableDisbursementAmountWithOverApplied field calculation
+    When Admin sets the business date to "1 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_MULTIDISB_APPROVED_OVER_APPLIED_CAPITALIZED_INCOME | 01 January 2025   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    Then Loan has availableDisbursementAmountWithOverApplied field with value: 1500
+    And Admin successfully approves the loan on "1 January 2025" with "1000" amount and expected disbursement date on "1 January 2025"
+    Then Loan has availableDisbursementAmountWithOverApplied field with value: 1500
+    And Admin successfully disburse the loan on "1 January 2025" with "900" EUR transaction amount
+    Then Loan has availableDisbursementAmountWithOverApplied field with value: 600
+    And Admin successfully disburse the loan on "1 January 2025" with "300" EUR transaction amount
+    Then Loan has availableDisbursementAmountWithOverApplied field with value: 300
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "1 January 2025" with "100" EUR transaction amount
+    Then Loan has availableDisbursementAmountWithOverApplied field with value: 200
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "1 January 2025" with "150" EUR transaction amount
+    Then Loan has availableDisbursementAmountWithOverApplied field with value: 50
+    When Loan Pay-off is made on "01 January 2025"
+    Then Loan's all installments have obligations met
+
+  @TestRailId:C4003
+  Scenario: Verify availableDisbursementAmountWithOverApplied field calculation for progressive multidisbursal loan that expects tranches
+    When Admin sets the business date to "01 January 2025"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with three expected disbursements details and following data:
+      | LoanProduct                                                                                        | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | 1st_tranche_disb_expected_date | 1st_tranche_disb_principal | 2nd_tranche_disb_expected_date | 2nd_tranche_disb_principal | 3rd_tranche_disb_expected_date | 3rd_tranche_disb_principal |
+      | LP2_ADV_PYMNT_INT_DAILY_EMI_360_30_INT_RECALC_DAILY_MULTIDISB_EXPECT_TRANCHE_APPROVED_OVER_APPLIED | 01 January 2025   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | 01 January 2025                | 300.0                      | 02 January 2025                | 200.0                      | 03 January 2025                | 500.0                      |
+    Then Loan Tranche Details tab has the following data:
+      | Expected Disbursement On | Disbursed On    | Principal   | Net Disbursal Amount |
+      | 01 January 2025          |                 | 300.0       |                      |
+      | 02 January 2025          |                 | 200.0       |                      |
+      | 03 January 2025          |                 | 500.0       |                      |
+    Then Loan has availableDisbursementAmountWithOverApplied field with value: 500
+    And Admin successfully approves the loan on "01 January 2025" with "1000" amount and expected disbursement date on "01 January 2025"
+    Then Loan Tranche Details tab has the following data:
+      | Expected Disbursement On | Disbursed On    | Principal   | Net Disbursal Amount |
+      | 01 January 2025          |                 | 300.0       |                      |
+      | 02 January 2025          |                 | 200.0       |                      |
+      | 03 January 2025          |                 | 500.0       |                      |
+    Then Loan has availableDisbursementAmountWithOverApplied field with value: 500
+    When Admin successfully disburse the loan on "01 January 2025" with "300" EUR transaction amount
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount  | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 300.0   | 0.0       | 0.0      | 0.0  | 0.0       | 300.0        | false    | false    |
+    Then Loan has availableDisbursementAmountWithOverApplied field with value: 500
+    When Admin sets the business date to "02 January 2025"
+    When Admin successfully disburse the loan on "02 January 2025" with "200" EUR transaction amount
+    Then Loan has availableDisbursementAmountWithOverApplied field with value: 500
+    When Admin sets the business date to "03 January 2025"
+    When Admin successfully disburse the loan on "03 January 2025" with "1000" EUR transaction amount
+    Then Loan has availableDisbursementAmountWithOverApplied field with value: 0
+    Then Loan Tranche Details tab has the following data:
+      | Expected Disbursement On | Disbursed On    | Principal   | Net Disbursal Amount |
+      | 01 January 2025          | 01 January 2025 | 300.0       |                      |
+      | 02 January 2025          | 02 January 2025 | 200.0       |                      |
+      | 03 January 2025          | 03 January 2025 | 1000.0      |                      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount  | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 300.0   | 0.0       | 0.0      | 0.0  | 0.0       | 300.0        | false    | false    |
+      | 02 January 2025  | Disbursement     | 200.0   | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+      | 03 January 2025  | Disbursement     | 1000.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       | false    | false    |

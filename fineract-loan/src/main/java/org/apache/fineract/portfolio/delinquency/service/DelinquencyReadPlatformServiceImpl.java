@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 import org.apache.fineract.portfolio.delinquency.data.LoanDelinquencyTagHistoryData;
@@ -56,11 +57,14 @@ import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.DelinquencyPausePeriod;
 import org.apache.fineract.portfolio.loanaccount.data.InstallmentLevelDelinquency;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
+import org.apache.fineract.portfolio.loanproduct.exception.LoanProductGeneralRuleException;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -138,7 +142,12 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
 
             // If the Loan is not Active yet or is cancelled (rejected or withdrawn), return template data
             if (loan.isSubmittedAndPendingApproval() || loan.isApproved() || loan.isCancelled()) {
-                return CollectionData.template();
+                if (loan.getLoanProduct() != null && !loan.getLoanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
+                    return collectionData;
+                } else {
+                    collectionData.setAvailableDisbursementAmountWithOverApplied(calculateAvailableDisbursementAmountWithOverApplied(loan));
+                    return collectionData;
+                }
             }
 
             final List<LoanDelinquencyAction> savedDelinquencyList = retrieveLoanDelinquencyActions(loanId);
@@ -152,6 +161,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
             // loans
             collectionData = loanDelinquencyDomainService.getOverdueCollectionData(loan, effectiveDelinquencyList);
             collectionData.setAvailableDisbursementAmount(calculateAvailableDisbursementAmount(loan));
+            collectionData.setAvailableDisbursementAmountWithOverApplied(calculateAvailableDisbursementAmountWithOverApplied(loan));
             collectionData.setNextPaymentDueDate(possibleNextRepaymentDate(nextPaymentDueDateConfig, loan));
             PossibleNextRepaymentCalculationService possibleNextRepaymentCalculationService = possibleNextRepaymentCalculationServiceDiscovery
                     .getService(loan);
@@ -180,6 +190,54 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
         }
 
         return collectionData;
+    }
+
+    @Override
+    public BigDecimal calculateAvailableDisbursementAmountWithOverApplied(@NonNull final Loan loan) {
+        final LoanProduct loanProduct = loan.getLoanProduct();
+
+        // Start with approved principal
+        BigDecimal approvedWithOverApplied = loan.getApprovedPrincipal();
+
+        // If over applied amount is enabled, calculate the maximum allowed amount
+        if (loanProduct.isAllowApprovedDisbursedAmountsOverApplied()) {
+            if (loanProduct.getOverAppliedCalculationType() != null) {
+                if ("percentage".equalsIgnoreCase(loanProduct.getOverAppliedCalculationType())) {
+                    final BigDecimal overAppliedNumber = BigDecimal.valueOf(loanProduct.getOverAppliedNumber());
+                    final BigDecimal totalPercentage = BigDecimal.valueOf(1)
+                            .add(overAppliedNumber.divide(BigDecimal.valueOf(100), MoneyHelper.getMathContext()));
+                    approvedWithOverApplied = loan.getProposedPrincipal().multiply(totalPercentage);
+                } else {
+                    approvedWithOverApplied = loan.getProposedPrincipal().add(BigDecimal.valueOf(loanProduct.getOverAppliedNumber()));
+                }
+            } else {
+                throw new LoanProductGeneralRuleException("overAppliedCalculationType.must.be.percentage.or.flat",
+                        "Over Applied Calculation Type Must Be 'percentage' or 'flat'");
+            }
+        }
+
+        // Calculate available amount: (approved + over applied) - expected tranches - disbursed - capitalized income
+        if (loan.isMultiDisburmentLoan() && loan.getDisbursementDetails() != null) {
+            final BigDecimal expectedDisbursementAmount = loan.getDisbursementDetails().stream()
+                    .filter(detail -> detail.actualDisbursementDate() == null).map(LoanDisbursementDetails::principal)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            approvedWithOverApplied = approvedWithOverApplied.subtract(expectedDisbursementAmount);
+        }
+
+        BigDecimal availableDisbursementAmount = approvedWithOverApplied.subtract(loan.getDisbursedAmount());
+
+        if (loan.getLoanRepaymentScheduleDetail().isEnableIncomeCapitalization()) {
+            final LoanSummary loanSummary = loan.getSummary();
+            if (loanSummary != null) {
+                final BigDecimal totalCapitalizedIncome = MathUtil.nullToZero(loanSummary.getTotalCapitalizedIncome());
+                final BigDecimal totalCapitalizedIncomeAdjustment = MathUtil.nullToZero(loanSummary.getTotalCapitalizedIncomeAdjustment());
+                final BigDecimal netCapitalizedIncome = totalCapitalizedIncome.subtract(totalCapitalizedIncomeAdjustment);
+                availableDisbursementAmount = availableDisbursementAmount.subtract(netCapitalizedIncome);
+            }
+        }
+
+        // Ensure availableDisbursementAmount is never negative
+        return availableDisbursementAmount.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : availableDisbursementAmount;
     }
 
     private BigDecimal calculateAvailableDisbursementAmount(@NonNull final Loan loan) {

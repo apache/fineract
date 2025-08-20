@@ -1020,6 +1020,8 @@ final class LoansApiResourceSwagger {
 
             @Schema(example = "100.000000")
             public BigDecimal availableDisbursementAmount;
+            @Schema(example = "150.000000")
+            public BigDecimal availableDisbursementAmountWithOverApplied;
             @Schema(example = "12")
             public Integer pastDueDays;
             @Schema(example = "[2022, 07, 01]")

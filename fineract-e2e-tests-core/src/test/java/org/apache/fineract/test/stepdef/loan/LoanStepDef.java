@@ -3293,6 +3293,25 @@ public class LoanStepDef extends AbstractStepDef {
         assertThat(fixedLengthactual).as(ErrorMessageHelper.wrongfixedLength(fixedLengthactual, fieldValue)).isEqualTo(fieldValue);
     }
 
+    @Then("Loan has availableDisbursementAmountWithOverApplied field with value: {double}")
+    public void checkLoanDetailsAvailableDisbursementAmountWithOverAppliedField(final double fieldValue) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanResponse.body() != null;
+        final long loanId = loanResponse.body().getLoanId();
+
+        final Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetails);
+
+        assert loanDetails.body() != null;
+        assert loanDetails.body().getDelinquent() != null;
+        assert loanDetails.body().getDelinquent().getAvailableDisbursementAmountWithOverApplied() != null;
+        final Double availableDisbursementAmountWithOverApplied = loanDetails.body().getDelinquent()
+                .getAvailableDisbursementAmountWithOverApplied().doubleValue();
+        assertThat(availableDisbursementAmountWithOverApplied).as(
+                ErrorMessageHelper.wrongAvailableDisbursementAmountWithOverApplied(availableDisbursementAmountWithOverApplied, fieldValue))
+                .isEqualTo(fieldValue);
+    }
+
     @Then("Loan emi amount variations has {int} variation, with the following data:")
     public void loanEmiAmountVariationsCheck(final int linesExpected, final DataTable table) throws IOException {
         final Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);

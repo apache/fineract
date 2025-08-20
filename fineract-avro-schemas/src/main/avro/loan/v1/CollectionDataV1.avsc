@@ -13,6 +13,14 @@
         },
         {
             "default": null,
+            "name": "availableDisbursementAmountWithOverApplied",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
             "name": "pastDueDays",
             "type": [
                 "null",
