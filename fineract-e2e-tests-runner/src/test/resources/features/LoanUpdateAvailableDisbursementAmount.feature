@@ -275,6 +275,20 @@ Feature: LoanUpdateAvailableDisbursementAmount
     When Loan Pay-off is made on "01 January 2025"
     Then Loan's all installments have obligations met
 
+  @TestRailId:C3995
+  Scenario: Verify update available disbursement amount to zero is forbidden for not approved loan
+    When Admin sets the business date to "01 January 2025"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                        | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE | 01 January 2025   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "1000" amount and expected disbursement date on "01 January 2025"
+    Then Updating the loan's available disbursement amount to "0" is forbidden because cannot be zero as nothing was disbursed
+
+    Then Admin can successfully undone the loan approval
+    Then Loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
+
+  @TestRailId:C3996
   Scenario: Verify update available disbursement amount to zero is forbidden for approved loan
     When Admin sets the business date to "01 January 2025"
     And Admin creates a client with random data
@@ -284,7 +298,11 @@ Feature: LoanUpdateAvailableDisbursementAmount
     And Admin successfully approves the loan on "01 January 2025" with "1000" amount and expected disbursement date on "01 January 2025"
     Then Updating the loan's available disbursement amount to "0" is forbidden because cannot be zero as nothing was disbursed
 
-  Scenario: Verify update available disbursement amount to zero is allowed for active loan after partial disbursement
+    Then Admin can successfully undone the loan approval
+    Then Loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
+
+  @TestRailId:C3997
+  Scenario: Verify update available disbursement amount to zero is allowed for active loan after partial disbursement for single disb loan
     When Admin sets the business date to "01 January 2025"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -293,5 +311,37 @@ Feature: LoanUpdateAvailableDisbursementAmount
     And Admin successfully approves the loan on "01 January 2025" with "1000" amount and expected disbursement date on "01 January 2025"
     And Admin successfully disburse the loan on "01 January 2025" with "500" EUR transaction amount
     Then Update loan available disbursement amount with new amount "0" value
+
+    When Admin successfully undo disbursal
+    Then Admin fails to disburse the loan on "1 January 2025" with "501" EUR transaction amount due to exceed approved amount
+
+    Then Admin can successfully undone the loan approval
+    Then Loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
+
+  @TestRailId:C3998
+  Scenario: Verify update available disbursement amount to zero is allowed for active loan after partial disbursement for multidisb loan that doesn't expect tranches
+    When Admin sets the business date to "01 January 2025"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE | 01 January 2025   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "1000" amount and expected disbursement date on "01 January 2025"
+    When Admin successfully disburse the loan on "01 January 2025" with "200" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |           | 200.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025 |           | 167.15          | 32.85         | 1.17     | 0.0  | 0.0       | 34.02 | 0.0  | 0.0        | 0.0  | 34.02       |
+      | 2  | 28   | 01 March 2025    |           | 134.11          | 33.04         | 0.98     | 0.0  | 0.0       | 34.02 | 0.0  | 0.0        | 0.0  | 34.02       |
+      | 3  | 31   | 01 April 2025    |           | 100.87          | 33.24         | 0.78     | 0.0  | 0.0       | 34.02 | 0.0  | 0.0        | 0.0  | 34.02       |
+      | 4  | 30   | 01 May 2025      |           |  67.44          | 33.43         | 0.59     | 0.0  | 0.0       | 34.02 | 0.0  | 0.0        | 0.0  | 34.02       |
+      | 5  | 31   | 01 June 2025     |           |  33.81          | 33.63         | 0.39     | 0.0  | 0.0       | 34.02 | 0.0  | 0.0        | 0.0  | 34.02       |
+      | 6  | 30   | 01 July 2025     |           |   0.0           | 33.81         | 0.2      | 0.0  | 0.0       | 34.01 | 0.0  | 0.0        | 0.0  | 34.01       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 200.0         | 4.11     | 0.0  | 0.0       | 204.11 | 0.0  | 0.0        | 0.0  | 204.11      |
+
+    Then Update loan available disbursement amount with new amount "0" value
+    Then Admin fails to disburse the loan on "1 January 2025" with "1" EUR transaction amount due to exceed approved amount
+
     When Loan Pay-off is made on "01 January 2025"
     Then Loan's all installments have obligations met
