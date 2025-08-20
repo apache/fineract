@@ -100,6 +100,7 @@ public class ProductToGLAccountMappingHelper {
                 optionalProductToGLAccountMappingEntries.add("incomeFromGoodwillCreditInterestAccountId");
                 optionalProductToGLAccountMappingEntries.add("incomeFromGoodwillCreditFeesAccountId");
                 optionalProductToGLAccountMappingEntries.add("incomeFromGoodwillCreditPenaltyAccountId");
+                optionalProductToGLAccountMappingEntries.add("interestReceivableAccountId");
                 optionalProductToGLAccountMappingEntries.add(LoanProductAccountingParams.DEFERRED_INCOME_LIABILITY.getValue());
                 optionalProductToGLAccountMappingEntries.add(LoanProductAccountingParams.INCOME_FROM_CAPITALIZATION.getValue());
                 optionalProductToGLAccountMappingEntries.add(LoanProductAccountingParams.BUY_DOWN_EXPENSE.getValue());

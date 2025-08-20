@@ -104,12 +104,13 @@ public class SavingsProductDataValidator {
             SavingProductAccountingParams.FEES_RECEIVABLE.getValue(), SavingProductAccountingParams.INTEREST_PAYABLE.getValue(),
             SavingProductAccountingParams.OVERDRAFT_PORTFOLIO_CONTROL.getValue(),
             SavingProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), SavingProductAccountingParams.INCOME_FROM_INTEREST.getValue(),
-            SavingProductAccountingParams.ESCHEAT_LIABILITY.getValue(), isDormancyTrackingActiveParamName, daysToDormancyParamName,
-            daysToInactiveParamName, daysToEscheatParamName, allowOverdraftParamName, overdraftLimitParamName,
-            nominalAnnualInterestRateOverdraftParamName, minOverdraftForInterestCalculationParamName,
-            SavingsApiConstants.minRequiredBalanceParamName, SavingsApiConstants.enforceMinRequiredBalanceParamName,
-            SavingsApiConstants.maxAllowedLienLimitParamName, SavingsApiConstants.lienAllowedParamName,
-            minBalanceForInterestCalculationParamName, withHoldTaxParamName, taxGroupIdParamName));
+            SavingProductAccountingParams.ESCHEAT_LIABILITY.getValue(), SavingProductAccountingParams.INTEREST_RECEIVABLE.getValue(),
+            isDormancyTrackingActiveParamName, daysToDormancyParamName, daysToInactiveParamName, daysToEscheatParamName,
+            allowOverdraftParamName, overdraftLimitParamName, nominalAnnualInterestRateOverdraftParamName,
+            minOverdraftForInterestCalculationParamName, SavingsApiConstants.minRequiredBalanceParamName,
+            SavingsApiConstants.enforceMinRequiredBalanceParamName, SavingsApiConstants.maxAllowedLienLimitParamName,
+            SavingsApiConstants.lienAllowedParamName, minBalanceForInterestCalculationParamName, withHoldTaxParamName,
+            taxGroupIdParamName));
 
     public void validateForCreate(final String json) {
 
