@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -37,6 +38,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanCapitalizedIncomeTransactionCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeBalance;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
@@ -66,6 +68,7 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
     private final LoanBalanceService loanBalanceService;
     private final LoanLifecycleStateMachine loanLifecycleStateMachine;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final CodeValueRepository codeValueRepository;
 
     @Transactional
     @Override
@@ -86,6 +89,9 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
                 transactionDate, txnExternalId);
         // Update loan with capitalized income
         loan.addLoanTransaction(capitalizedIncomeTransaction);
+        // Add Loan Transaction classification
+        addClassificationCodeToTransaction(command, LoanTransactionApiConstants.CAPITALIZED_INCOME_CLASSIFICATION_CODE,
+                capitalizedIncomeTransaction);
         // Recalculate loan transactions
         recalculateLoanTransactions(loan, transactionDate, capitalizedIncomeTransaction);
         // Save and flush (PK is set)
@@ -137,6 +143,7 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
                 Money.of(loan.getCurrency(), transactionAmount), paymentDetail, transactionDate, txnExternalId);
         capitalizedIncomeAdjustment.getLoanTransactionRelations().add(LoanTransactionRelation.linkToTransaction(capitalizedIncomeAdjustment,
                 capitalizedIncome.get(), LoanTransactionRelationTypeEnum.ADJUSTMENT));
+        capitalizedIncomeAdjustment.setClassification(capitalizedIncome.get().getClassification());
         loan.addLoanTransaction(capitalizedIncomeAdjustment);
         recalculateLoanTransactions(loan, transactionDate, capitalizedIncomeAdjustment);
         LoanTransaction savedCapitalizedIncomeAdjustment = loanTransactionRepository.saveAndFlush(capitalizedIncomeAdjustment);
@@ -205,4 +212,11 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
         capitalizedIncomeBalanceRepository.saveAndFlush(capitalizedIncomeBalance);
     }
 
+    private void addClassificationCodeToTransaction(final JsonCommand command, final String codeName, LoanTransaction loanTransaction) {
+        final Long transactionClassificationId = command
+                .longValueOfParameterNamed(LoanTransactionApiConstants.TRANSACTION_CLASSIFICATIONID_PARAMNAME);
+        if (transactionClassificationId != null) {
+            loanTransaction.setClassification(codeValueRepository.findByCodeNameAndId(codeName, transactionClassificationId));
+        }
+    }
 }

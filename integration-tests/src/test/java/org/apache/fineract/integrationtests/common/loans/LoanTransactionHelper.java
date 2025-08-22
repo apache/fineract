@@ -930,6 +930,12 @@ public class LoanTransactionHelper {
                 .transactionDate(transactionDate).dateFormat("dd MMMM yyyy").locale("en"));
     }
 
+    public PostLoansLoanIdTransactionsResponse addCapitalizedIncome(final Long loanId, final String transactionDate, final double amount,
+            final Long classificationId) {
+        return addCapitalizedIncome(loanId, new PostLoansLoanIdTransactionsRequest().transactionAmount(amount)
+                .transactionDate(transactionDate).dateFormat("dd MMMM yyyy").locale("en").classificationId(classificationId));
+    }
+
     public Response<CommandProcessingResult> createInterestPause(Long loanId, String startDate, String endDate) {
         log.info("Creating interest pause for Loan {} from {} to {}", loanId, startDate, endDate);
         return Calls.executeU(FineractClientHelper.getFineractClient().loanInterestPauseApi.createInterestPause(loanId,

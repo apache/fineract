@@ -35,6 +35,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -67,6 +69,7 @@ import org.apache.fineract.portfolio.common.service.Validator;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -107,6 +110,7 @@ public final class LoanTransactionValidatorImpl implements LoanTransactionValida
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final LoanDownPaymentTransactionValidator loanDownPaymentTransactionValidator;
     private final LoanDisbursementValidator loanDisbursementValidator;
+    private final CodeValueRepository codeValueRepository;
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
@@ -1119,5 +1123,19 @@ public final class LoanTransactionValidatorImpl implements LoanTransactionValida
 
         validatePaymentDetails(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    @Override
+    public void validateClassificationCodeValue(final String codeName, final Long transactionClassificationId,
+            DataValidatorBuilder baseDataValidator) {
+        baseDataValidator.reset().parameter(LoanTransactionApiConstants.TRANSACTION_CLASSIFICATIONID_PARAMNAME)
+                .value(transactionClassificationId).ignoreIfNull().positiveAmount();
+        if (transactionClassificationId != null) {
+            final CodeValue codeValue = codeValueRepository.findByCodeNameAndId(codeName, transactionClassificationId);
+            if (codeValue == null) {
+                baseDataValidator.reset().parameter(LoanTransactionApiConstants.TRANSACTION_CLASSIFICATIONID_PARAMNAME)
+                        .failWithCode("code.value.classification.not.exists", "Code value does not exists in the code " + codeName);
+            }
+        }
     }
 }

@@ -29,10 +29,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.fineract.client.models.CapitalizedIncomeDetails;
+import org.apache.fineract.client.models.GetCodesResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.LoanCapitalizedIncomeData;
 import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostCodeValueDataResponse;
+import org.apache.fineract.client.models.PostCodeValuesDataRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -45,6 +49,7 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.externalevents.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.integrationtests.common.externalevents.LoanBusinessEvent;
 import org.apache.fineract.integrationtests.common.externalevents.LoanTransactionBusinessEvent;
+import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionApiConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -185,6 +190,11 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                         .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
                         .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
+        final GetCodesResponse code = codeHelper.retrieveCodeByName(LoanTransactionApiConstants.CAPITALIZED_INCOME_CLASSIFICATION_CODE);
+        final PostCodeValueDataResponse classificationCode = codeHelper.createCodeValue(code.getId(),
+                new PostCodeValuesDataRequest().name(Utils.uniqueRandomStringGenerator("CLASS_", 6)).isActive(true).position(10));
+        final Long classificationId = classificationCode.getSubResourceId();
+
         runAt("1 April 2024", () -> {
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
                     500.0, 7.0, 3, null);
@@ -192,8 +202,14 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
             PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = loanTransactionHelper.addCapitalizedIncome(loanId,
-                    "1 January 2024", 50.0);
+                    "1 January 2024", 50.0, classificationId);
             capitalizedIncomeIdRef.set(capitalizedIncomeResponse.getResourceId());
+
+            // Validate Loan Transaction classification set value
+            GetLoansLoanIdTransactionsTransactionIdResponse transactionDetails = loanTransactionHelper.getLoanTransactionDetails(loanId,
+                    capitalizedIncomeIdRef.get());
+            assertNotNull(transactionDetails.getClassification());
+            assertEquals(classificationId, transactionDetails.getClassification().getId());
 
             PostLoansLoanIdTransactionsResponse capitalizedIncomeAdjustmentResponse = loanTransactionHelper
                     .capitalizedIncomeAdjustment(loanId, capitalizedIncomeIdRef.get(), "1 April 2024", 50.0);
@@ -222,6 +238,12 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     journalEntry(49.71, loansReceivableAccount, "CREDIT"), //
                     journalEntry(0.29, interestReceivableAccount, "CREDIT") //
             );
+
+            // Validate Loan Transaction classification Inherit
+            transactionDetails = loanTransactionHelper.getLoanTransactionDetails(loanId,
+                    capitalizedIncomeAdjustmentResponse.getResourceId());
+            assertNotNull(transactionDetails.getClassification());
+            assertEquals(classificationId, transactionDetails.getClassification().getId());
         });
     }
 

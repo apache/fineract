@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.starter;
 
 import org.apache.fineract.cob.service.LoanAccountLockService;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -391,10 +392,11 @@ public class LoanAccountConfiguration {
             LoanAssembler loanAssembler, LoanTransactionRepository loanTransactionRepository,
             PaymentDetailWritePlatformService paymentDetailWritePlatformService, LoanJournalEntryPoster loanJournalEntryPoster,
             NoteWritePlatformService noteWritePlatformService, ExternalIdFactory externalIdFactory,
-            LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository, BusinessEventNotifierService businessEventNotifierService) {
+            LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository, BusinessEventNotifierService businessEventNotifierService,
+            CodeValueRepository codeValueRepository) {
         return new BuyDownFeeWritePlatformServiceImpl(loanTransactionValidator, loanAssembler, loanTransactionRepository,
                 paymentDetailWritePlatformService, loanJournalEntryPoster, noteWritePlatformService, externalIdFactory,
-                loanBuyDownFeeBalanceRepository, businessEventNotifierService);
+                loanBuyDownFeeBalanceRepository, businessEventNotifierService, codeValueRepository);
     }
 
     @Bean

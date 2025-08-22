@@ -60,4 +60,8 @@ public interface LoanTransactionApiConstants {
         buyDownFeeAmortization, //
         buyDownFeeAmortizationAdjustment, //
     }
+
+    String TRANSACTION_CLASSIFICATIONID_PARAMNAME = "classificationId";
+    String CAPITALIZED_INCOME_CLASSIFICATION_CODE = "capitalized_income_transaction_classification";
+    String BUY_DOWN_FEE_CLASSIFICATION_CODE = "buydown_fee_transaction_classification";
 }

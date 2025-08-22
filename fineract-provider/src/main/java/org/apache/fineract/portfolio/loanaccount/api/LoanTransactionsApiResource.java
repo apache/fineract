@@ -93,7 +93,7 @@ public class LoanTransactionsApiResource {
     public static final String CAPITALIZED_INCOME = "capitalizedIncome";
     public static final String INTEREST_REFUND_COMMAND_VALUE = "interest-refund";
     private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "type", "date", "currency", "amount", "externalId",
-            LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME, LoanApiConstants.REVERSED_ON_DATE_PARAMNAME));
+            LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME, LoanApiConstants.REVERSED_ON_DATE_PARAMNAME, "classification"));
 
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "LOAN";
 

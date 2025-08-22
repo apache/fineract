@@ -26,15 +26,20 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.GetCodesResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostCodeValueDataResponse;
+import org.apache.fineract.client.models.PostCodeValuesDataRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.TransactionType;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionApiConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -103,6 +108,9 @@ public class LoanTransactionTest extends BaseLoanIntegrationTest {
     @Test
     public void testGetLoanTransactionTemplateForCapitalizedIncomeWithOverAppliedAmount() {
         final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final GetCodesResponse code = codeHelper.retrieveCodeByName(LoanTransactionApiConstants.CAPITALIZED_INCOME_CLASSIFICATION_CODE);
+        final PostCodeValueDataResponse classificationCode = codeHelper.createCodeValue(code.getId(),
+                new PostCodeValuesDataRequest().name(Utils.uniqueRandomStringGenerator("CLASS_", 6)).isActive(true).position(10));
 
         final PostLoanProductsResponse loanProductsResponse = loanProductHelper
                 .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
@@ -127,6 +135,7 @@ public class LoanTransactionTest extends BaseLoanIntegrationTest {
             assertEquals("loanTransactionType." + capitalizedIncomeCommand, transactionTemplate.getType().getCode());
             assertEquals(transactionTemplate.getAmount(), 415);
             assertThat(transactionTemplate.getPaymentTypeOptions().size() > 0);
+            assertThat(transactionTemplate.getClassificationOptions().size() > 0);
         });
     }
 
@@ -242,6 +251,9 @@ public class LoanTransactionTest extends BaseLoanIntegrationTest {
     @Test
     public void testGetLoanTransactionTemplateForBuyDownFee() {
         final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final GetCodesResponse code = codeHelper.retrieveCodeByName(LoanTransactionApiConstants.BUY_DOWN_FEE_CLASSIFICATION_CODE);
+        final PostCodeValueDataResponse classificationCode = codeHelper.createCodeValue(code.getId(),
+                new PostCodeValuesDataRequest().name(Utils.uniqueRandomStringGenerator("CLASS_", 6)).isActive(true).position(10));
 
         final PostLoanProductsResponse loanProductsResponse = loanProductHelper
                 .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
@@ -266,6 +278,7 @@ public class LoanTransactionTest extends BaseLoanIntegrationTest {
             assertEquals("loanTransactionType." + buyDownFeeCommand, transactionTemplate.getType().getCode());
             assertEquals(transactionTemplate.getAmount(), 0);
             assertThat(transactionTemplate.getPaymentTypeOptions().size() > 0);
+            assertThat(transactionTemplate.getClassificationOptions().size() > 0);
         });
     }
 }

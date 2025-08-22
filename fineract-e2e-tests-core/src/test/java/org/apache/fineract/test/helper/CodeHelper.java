@@ -60,4 +60,8 @@ public class CodeHelper {
         return codesApi.retrieveCodes().execute().body().stream().filter(r -> name.equals(r.getName())).findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Code with name " + name + " has not been found"));
     }
+
+    public Response<PostCodeValueDataResponse> createCodeValue(Long codeId, PostCodeValuesDataRequest request) throws IOException {
+        return codeValuesApi.createCodeValue(codeId, request).execute();
+    }
 }

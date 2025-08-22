@@ -32,6 +32,20 @@ final class LoanTransactionsApiResourceSwagger {
 
     private LoanTransactionsApiResourceSwagger() {}
 
+    static final class GetCodeValuesDataResponse {
+
+        private GetCodeValuesDataResponse() {}
+
+        @Schema(example = "1")
+        public Long id;
+        @Schema(example = "Passport")
+        public String name;
+        @Schema(example = "Passport information")
+        public String description;
+        @Schema(example = "0")
+        public Integer position;
+    }
+
     @Schema(description = "GetLoansLoanIdTransactionsTemplateResponse")
     public static final class GetLoansLoanIdTransactionsTemplateResponse {
 
@@ -110,6 +124,8 @@ final class LoanTransactionsApiResourceSwagger {
         public List<GetPaymentTypeOptions> paymentTypeOptions;
         @Schema(example = "200.000000")
         public Double netDisbursalAmount;
+
+        public List<GetCodeValuesDataResponse> classificationOptions;
     }
 
     public static final class GetLoanCurrency {
@@ -263,6 +279,7 @@ final class LoanTransactionsApiResourceSwagger {
         public Set<GetLoanTransactionRelation> transactionRelations;
         public Set<GetLoansLoanIdLoanChargePaidByData> loanChargePaidByList;
         public PaymentDetailData paymentDetailData;
+        public GetCodeValuesDataResponse classification;
 
         static final class PaymentDetailData {
 
@@ -354,6 +371,8 @@ final class LoanTransactionsApiResourceSwagger {
         // command=reAge END
         @Schema(description = "Optional. Controls whether Interest Refund transaction should be created for this refund. If not provided, loan product config is used.", example = "false")
         public Boolean interestRefundCalculation;
+        @Schema(example = "1")
+        public Long classificationId;
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsResponse")

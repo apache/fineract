@@ -67,6 +67,8 @@ import org.apache.fineract.client.models.BuyDownFeeAmortizationDetails;
 import org.apache.fineract.client.models.CapitalizedIncomeDetails;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.DisbursementDetail;
+import org.apache.fineract.client.models.GetCodeValuesDataResponse;
+import org.apache.fineract.client.models.GetCodesResponse;
 import org.apache.fineract.client.models.GetLoanProductsChargeOffReasonOptions;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoanProductsResponse;
@@ -90,6 +92,8 @@ import org.apache.fineract.client.models.OldestCOBProcessedLoanDTO;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostAddAndDeleteDisbursementDetailRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostCodeValueDataResponse;
+import org.apache.fineract.client.models.PostCodeValuesDataRequest;
 import org.apache.fineract.client.models.PostLoansDisbursementData;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
@@ -108,6 +112,7 @@ import org.apache.fineract.client.models.PutLoansAvailableDisbursementAmountResp
 import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.services.BusinessDateManagementApi;
+import org.apache.fineract.client.services.CodeValuesApi;
 import org.apache.fineract.client.services.LoanBuyDownFeesApi;
 import org.apache.fineract.client.services.LoanCapitalizedIncomeApi;
 import org.apache.fineract.client.services.LoanCobCatchUpApi;
@@ -235,6 +240,9 @@ public class LoanStepDef extends AbstractStepDef {
 
     @Autowired
     private CodeHelper codeHelper;
+
+    @Autowired
+    private CodeValuesApi codeValuesApi;
 
     @Autowired
     private LoanInterestPauseApi loanInterestPauseApi;
@@ -4771,6 +4779,35 @@ public class LoanStepDef extends AbstractStepDef {
         ErrorHelper.checkSuccessfulApiCall(capitalizedIncomeResponse);
     }
 
+    @And("Admin adds capitalized income with {string} payment type to the loan on {string} with {string} EUR transaction amount and {string} classification")
+    public void adminAddsCapitalizedIncomeWithClassification(final String transactionPaymentType, final String transactionDate,
+            final String amount, final String classificationCodeName) throws IOException {
+        final Response<PostLoansLoanIdTransactionsResponse> capitalizedIncomeResponse = addCapitalizedIncomeWithClassification(
+                transactionPaymentType, transactionDate, amount, classificationCodeName);
+        testContext().set(TestContextKey.LOAN_CAPITALIZED_INCOME_RESPONSE, capitalizedIncomeResponse);
+        ErrorHelper.checkSuccessfulApiCall(capitalizedIncomeResponse);
+    }
+
+    public Response<PostLoansLoanIdTransactionsResponse> addCapitalizedIncomeWithClassification(final String transactionPaymentType,
+            final String transactionDate, final String amount, final String classificationCodeName) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+
+        final DefaultPaymentType paymentType = DefaultPaymentType.valueOf(transactionPaymentType);
+        final Long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
+
+        // Get classification code value
+        final Long classificationId = getClassificationCodeValueId(classificationCodeName);
+
+        final PostLoansLoanIdTransactionsRequest capitalizedIncomeRequest = LoanRequestFactory.defaultCapitalizedIncomeRequest()
+                .transactionDate(transactionDate).transactionAmount(Double.valueOf(amount)).paymentTypeId(paymentTypeValue)
+                .externalId("EXT-CAP-INC-" + UUID.randomUUID()).classificationId(classificationId);
+
+        final Response<PostLoansLoanIdTransactionsResponse> capitalizedIncomeResponse = loanTransactionsApi
+                .executeLoanTransaction(loanId, capitalizedIncomeRequest, "capitalizedIncome").execute();
+        return capitalizedIncomeResponse;
+    }
+
     public Response<PostLoansLoanIdTransactionsResponse> adjustCapitalizedIncome(final String transactionPaymentType,
             final String transactionDate, final String amount, final Long transactionId) throws IOException {
 
@@ -5167,6 +5204,35 @@ public class LoanStepDef extends AbstractStepDef {
         ErrorHelper.checkSuccessfulApiCall(buyDownFeesIncomeResponse);
     }
 
+    @When("Admin adds buy down fee with {string} payment type to the loan on {string} with {string} EUR transaction amount and {string} classification")
+    public void adminAddsBuyDownFeeWithClassification(final String transactionPaymentType, final String transactionDate,
+            final String amount, final String classificationCodeName) throws IOException {
+        final Response<PostLoansLoanIdTransactionsResponse> buyDownFeesIncomeResponse = addBuyDownFeeWithClassification(
+                transactionPaymentType, transactionDate, amount, classificationCodeName);
+        testContext().set(TestContextKey.LOAN_BUY_DOWN_FEE_RESPONSE, buyDownFeesIncomeResponse);
+        ErrorHelper.checkSuccessfulApiCall(buyDownFeesIncomeResponse);
+    }
+
+    public Response<PostLoansLoanIdTransactionsResponse> addBuyDownFeeWithClassification(final String transactionPaymentType,
+            final String transactionDate, final String amount, final String classificationCodeName) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+
+        final DefaultPaymentType paymentType = DefaultPaymentType.valueOf(transactionPaymentType);
+        final Long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
+
+        // Get classification code value
+        final Long classificationId = getClassificationCodeValueId(classificationCodeName);
+
+        final PostLoansLoanIdTransactionsRequest buyDownFeeRequest = LoanRequestFactory.defaultBuyDownFeeIncomeRequest()
+                .transactionDate(transactionDate).transactionAmount(Double.valueOf(amount)).paymentTypeId(paymentTypeValue)
+                .externalId("EXT-BUY-DOWN-FEE" + UUID.randomUUID()).classificationId(classificationId);
+
+        final Response<PostLoansLoanIdTransactionsResponse> buyDownFeeResponse = loanTransactionsApi
+                .executeLoanTransaction(loanId, buyDownFeeRequest, "buyDownFee").execute();
+        return buyDownFeeResponse;
+    }
+
     @And("Admin adds buy down fee adjustment with {string} payment type to the loan on {string} with {string} EUR transaction amount")
     public void adminAddsBuyDownFeesAdjustmentToTheLoan(final String transactionPaymentType, final String transactionDate,
             final String amount) throws IOException {
@@ -5552,5 +5618,51 @@ public class LoanStepDef extends AbstractStepDef {
 
         eventAssertion.assertEventRaised(LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent.class,
                 buyDownFeeAmortizationAdjustmentTransactionId);
+    }
+
+    @And("Loan Transactions tab has a {string} transaction with date {string} which has classification code value {string}")
+    public void loanTransactionHasClassification(String transactionType, String expectedDate, String expectedClassification)
+            throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.body().getLoanId();
+
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+        GetLoansLoanIdTransactions transaction = transactions.stream()
+                .filter(t -> transactionType.equals(t.getType().getValue()) && expectedDate.equals(FORMATTER.format(t.getDate())))
+                .findFirst().orElseThrow(
+                        () -> new IllegalStateException(String.format("No %s transaction found on %s", transactionType, expectedDate)));
+
+        // Get detailed transaction information including classification
+        Response<GetLoansLoanIdTransactionsTransactionIdResponse> transactionDetailsResponse = loanTransactionsApi
+                .retrieveTransaction(loanId, transaction.getId(), null).execute();
+        ErrorHelper.checkSuccessfulApiCall(transactionDetailsResponse);
+
+        GetLoansLoanIdTransactionsTransactionIdResponse transactionDetails = transactionDetailsResponse.body();
+        assertThat(transactionDetails.getClassification()).as(String.format("%s transaction should have classification", transactionType))
+                .isNotNull();
+        assertThat(transactionDetails.getClassification().getName()).as("Classification name should match expected value")
+                .isEqualTo(expectedClassification);
+    }
+
+    private Long getClassificationCodeValueId(String classificationName) throws IOException {
+        final GetCodesResponse code = codeHelper.retrieveCodeByName(classificationName);
+
+        // Delete all existing code values for this classification
+        List<GetCodeValuesDataResponse> existingCodeValues = codeValuesApi.retrieveAllCodeValues(code.getId()).execute().body();
+        for (GetCodeValuesDataResponse codeValue : existingCodeValues) {
+            codeValuesApi.deleteCodeValue(code.getId(), codeValue.getId()).execute();
+        }
+
+        // Create a new code value under the classification code
+        PostCodeValuesDataRequest codeValueRequest = new PostCodeValuesDataRequest().name(classificationName + "_value").isActive(true)
+                .position(1);
+
+        Response<PostCodeValueDataResponse> response = codeHelper.createCodeValue(code.getId(), codeValueRequest);
+        ErrorHelper.checkSuccessfulApiCall(response);
+
+        return response.body().getSubResourceId();
     }
 }

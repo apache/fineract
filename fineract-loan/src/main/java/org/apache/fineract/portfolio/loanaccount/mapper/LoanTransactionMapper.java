@@ -33,6 +33,7 @@ public interface LoanTransactionMapper {
     @Mapping(target = "loanRepaymentScheduleInstallments", ignore = true)
     @Mapping(target = "writeOffReasonOptions", ignore = true)
     @Mapping(target = "chargeOffReasonOptions", ignore = true)
+    @Mapping(target = "classificationOptions", ignore = true)
     @Mapping(target = "paymentTypeOptions", ignore = true)
     @Mapping(target = "overpaymentPortion", ignore = true)
     @Mapping(target = "transfer", ignore = true)
@@ -63,5 +64,6 @@ public interface LoanTransactionMapper {
     @Mapping(target = "bankNumber", ignore = true)
     @Mapping(target = "accountId", ignore = true)
     @Mapping(target = "transactionAmount", ignore = true)
+    @Mapping(target = "classification", expression = "java(loanTransaction.getClassification() != null ? loanTransaction.getClassification().toData() : null)")
     LoanTransactionData mapLoanTransaction(LoanTransaction loanTransaction);
 }

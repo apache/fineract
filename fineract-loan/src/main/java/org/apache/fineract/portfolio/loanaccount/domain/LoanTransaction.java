@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -143,6 +144,11 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     @Setter
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "loanTransaction")
     private LoanReAgeParameter loanReAgeParameter;
+
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "classification_cv_id")
+    private CodeValue classification;
 
     protected LoanTransaction() {}
 
@@ -312,6 +318,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         if (LoanTransactionType.REAGE.equals(loanTransaction.getTypeOf())) {
             newTransaction.setLoanReAgeParameter(loanTransaction.getLoanReAgeParameter().getCopy(newTransaction));
         }
+        newTransaction.setClassification(loanTransaction.getClassification());
         return newTransaction;
     }
 

@@ -113,6 +113,8 @@ public class LoanTransactionData implements Serializable {
     private List<LoanTransactionRelationData> transactionRelations;
 
     private Collection<CodeValueData> chargeOffReasonOptions = null;
+    private Collection<CodeValueData> classificationOptions = null;
+    private CodeValueData classification;
 
     public static LoanTransactionData importInstance(BigDecimal repaymentAmount, LocalDate lastRepaymentDate, Long repaymentTypeId,
             Integer rowIndex, String locale, String dateFormat) {
@@ -162,10 +164,10 @@ public class LoanTransactionData implements Serializable {
 
     public static LoanTransactionData loanTransactionDataForCreditTemplate(final LoanTransactionEnumData transactionType,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final Collection<PaymentTypeData> paymentOptions,
-            final CurrencyData currency) {
+            final CurrencyData currency, List<CodeValueData> classificationOptions) {
         return builder().type(transactionType).date(transactionDate).amount(transactionAmount).paymentTypeOptions(paymentOptions)
                 .currency(currency).externalLoanId(ExternalId.empty()).externalId(ExternalId.empty()).reversalExternalId(ExternalId.empty())
-                .manuallyReversed(false).build();
+                .manuallyReversed(false).classificationOptions(classificationOptions).build();
     }
 
     public static LoanTransactionData loanTransactionDataForDisbursalTemplate(final LoanTransactionEnumData transactionType,
