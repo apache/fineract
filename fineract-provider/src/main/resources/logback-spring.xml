@@ -40,6 +40,7 @@
     <logger name="org.apache.fineract.ServerApplication" level="info"/>
     <logger name="org.apache.fineract" level="${FINERACT_LOGGING_LEVEL:-INFO}"/>
     <logger name="liquibase" level="warn"/>
+    <logger name="org.springframework.security" level="DEBUG"/>
 
     <if condition="${jsonLoggingEnabled} == true">
         <then>
