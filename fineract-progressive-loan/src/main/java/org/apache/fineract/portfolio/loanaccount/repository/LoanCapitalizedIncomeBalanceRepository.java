@@ -26,8 +26,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
-public interface LoanCapitalizedIncomeBalanceRepository
-        extends JpaRepository<LoanCapitalizedIncomeBalance, Long>, JpaSpecificationExecutor<LoanCapitalizedIncomeBalance> {
+public interface LoanCapitalizedIncomeBalanceRepository extends JpaRepository<LoanCapitalizedIncomeBalance, Long>,
+        JpaSpecificationExecutor<LoanCapitalizedIncomeBalance>, CustomizedLoanCapitalizedIncomeBalanceRepository {
 
     String FIND_BALANCE_REPAYMENT_SCHEDULE_DATA = "SELECT new org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepaymentPeriodData(lcib.loanTransaction.id, lcib.loan.id, lcib.loanTransaction.dateOf, lcib.loanTransaction.reversed, lcib.amount, lcib.unrecognizedAmount, lcib.loanTransaction.feeChargesPortion) FROM LoanCapitalizedIncomeBalance lcib ";
 

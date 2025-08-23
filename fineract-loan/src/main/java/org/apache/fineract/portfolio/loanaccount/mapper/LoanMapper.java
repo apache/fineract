@@ -92,8 +92,9 @@ public class LoanMapper {
                 actualDisbursementDate = loanDisbursementDetails.actualDisbursementDate();
             }
             BigDecimal waivedChargeAmount = null;
-            disbursementData.add(new DisbursementData(loanDisbursementDetails.getId(), expectedDisbursementDate, actualDisbursementDate,
-                    loanDisbursementDetails.principal(), loan.getNetDisbursalAmount(), null, null, waivedChargeAmount));
+            disbursementData.add(
+                    new DisbursementData(loanDisbursementDetails.getId(), loan.getId(), expectedDisbursementDate, actualDisbursementDate,
+                            loanDisbursementDetails.principal(), loan.getNetDisbursalAmount(), null, null, waivedChargeAmount));
         }
 
         return disbursementData;

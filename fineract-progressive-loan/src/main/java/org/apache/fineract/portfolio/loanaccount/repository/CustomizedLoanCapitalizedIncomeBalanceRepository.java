@@ -16,19 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.service;
+package org.apache.fineract.portfolio.loanaccount.repository;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepaymentPeriodData;
 
-public final class StreamUtil {
+public interface CustomizedLoanCapitalizedIncomeBalanceRepository {
 
-    private StreamUtil() {}
-
-    public static <A, B> Collector<A, ?, B> foldLeft(final B init, final BiFunction<? super B, ? super A, ? extends B> f) {
-        return Collectors.collectingAndThen(Collectors.reducing(Function.<B>identity(), a -> b -> f.apply(b, a), Function::andThen),
-                endo -> endo.apply(init));
-    }
+    Map<Long, List<LoanTransactionRepaymentPeriodData>> findRepaymentPeriodDataByLoanIds(List<Long> loanIds);
 }

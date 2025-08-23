@@ -27,7 +27,6 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
-import org.apache.fineract.infrastructure.core.service.StreamUtil;
 import org.apache.fineract.infrastructure.dataqueries.api.RunreportsApiResource;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportExportType;
 import org.apache.fineract.infrastructure.dataqueries.service.export.DatatableReportExportService;
@@ -35,6 +34,7 @@ import org.apache.fineract.infrastructure.dataqueries.service.export.ResponseHol
 import org.apache.fineract.infrastructure.report.annotation.ReportService;
 import org.apache.fineract.infrastructure.report.service.AbstractReportingProcessService;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
+import org.apache.fineract.util.StreamUtil;
 import org.springframework.stereotype.Service;
 
 @Service

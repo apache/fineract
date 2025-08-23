@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.api;
 
+import static java.util.Collections.emptyList;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestType;
 
 import com.google.gson.JsonElement;
@@ -130,7 +131,9 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovedAmountHistoryData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCollateralManagementData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionBalanceWithLoanId;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
 import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
@@ -505,22 +508,37 @@ public class LoansApiResource {
         final Page<LoanAccountData> loanBasicDetails = this.loanReadPlatformService.retrieveAll(searchParameters);
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (associationParameters.contains(DataTableApiConstant.summaryAssociateParamName)) {
+
+            List<Long> loanIds = loanBasicDetails.getPageItems().stream().map(LoanAccountData::getId).toList();
+            Map<Long, List<DisbursementData>> disbursementDataByLoanIds = loanReadPlatformService.retrieveLoanDisbursementDetails(loanIds);
+            Map<Long, List<LoanTransactionRepaymentPeriodData>> repaymentPeriodDataByLoanIds = loanCapitalizedIncomeBalanceRepository
+                    .findRepaymentPeriodDataByLoanIds(loanIds);
+            Map<Long, List<LoanTransactionBalanceWithLoanId>> loanTransactionBalancesByLoanIds = loanSummaryBalancesRepository
+                    .retrieveLoanSummaryBalancesByTransactionType(loanIds, LoanApiConstants.LOAN_SUMMARY_TRANSACTION_TYPES);
+
             loanBasicDetails.getPageItems().forEach(i -> {
                 if (i.getSummary() != null) {
-                    Collection<DisbursementData> disbursementData = this.loanReadPlatformService.retrieveLoanDisbursementDetails(i.getId());
-                    List<LoanTransactionRepaymentPeriodData> capitalizedIncomeData = this.loanCapitalizedIncomeBalanceRepository
-                            .findRepaymentPeriodDataByLoanId(i.getId());
-                    final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData = new RepaymentScheduleRelatedLoanData(
+                    Long loanId = i.getId();
+                    List<DisbursementData> disbursementData = disbursementDataByLoanIds.getOrDefault(loanId, emptyList());
+                    List<LoanTransactionRepaymentPeriodData> capitalizedIncomeData = repaymentPeriodDataByLoanIds.getOrDefault(loanId,
+                            emptyList());
+                    List<LoanTransactionBalanceWithLoanId> loanTransactionBalances = loanTransactionBalancesByLoanIds.getOrDefault(loanId,
+                            emptyList());
+
+                    RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData = new RepaymentScheduleRelatedLoanData(
                             i.getTimeline().getExpectedDisbursementDate(), i.getTimeline().getActualDisbursementDate(), i.getCurrency(),
                             i.getPrincipal(), i.getInArrearsTolerance(), i.getFeeChargesAtDisbursementCharged());
-                    final LoanScheduleData repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(i.getId(),
+                    LoanScheduleData repaymentSchedule = loanReadPlatformService.retrieveRepaymentSchedule(loanId,
                             repaymentScheduleRelatedData, disbursementData, capitalizedIncomeData, i.isInterestRecalculationEnabled(),
                             LoanScheduleType.fromEnumOptionData(i.getLoanScheduleType()));
+
                     LoanSummaryDataProvider loanSummaryDataProvider = loanSummaryProviderDelegate
                             .resolveLoanSummaryDataProvider(i.getTransactionProcessingStrategyCode());
-                    i.setSummary(loanSummaryDataProvider.withTransactionAmountsSummary(i.getId(), i.getSummary(), repaymentSchedule,
-                            loanSummaryBalancesRepository.retrieveLoanSummaryBalancesByTransactionType(i.getId(),
-                                    LoanApiConstants.LOAN_SUMMARY_TRANSACTION_TYPES)));
+
+                    LoanSummaryData summaryData = loanSummaryDataProvider.withTransactionAmountsSummary(loanId, i.getSummary(),
+                            repaymentSchedule, loanTransactionBalances);
+
+                    i.setSummary(summaryData);
                 }
             });
         }

@@ -33,6 +33,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 public final class DisbursementData implements LoanPrincipalRelatedDataHolder, Comparable<DisbursementData> {
 
     private final Long id;
+    private final Long loanId;
     private final LocalDate expectedDisbursementDate;
     private final LocalDate actualDisbursementDate;
     private final BigDecimal principal;
@@ -61,6 +62,7 @@ public final class DisbursementData implements LoanPrincipalRelatedDataHolder, C
         this.note = "";
         this.linkAccountId = linkAccountId;
         this.id = null;
+        this.loanId = null;
         this.expectedDisbursementDate = null;
         this.principal = null;
         this.loanChargeId = null;
