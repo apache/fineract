@@ -27,6 +27,7 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.dataqueries.api.RunreportsApiResource;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportExportType;
 import org.apache.fineract.infrastructure.dataqueries.service.export.DatatableReportExportService;
@@ -59,7 +60,8 @@ public class DatatableReportingProcessService extends AbstractReportingProcessSe
         final String parameterTypeValue = ApiParameterHelper.parameterType(queryParams) ? "parameter" : "report";
         final Map<String, String> reportParams = getReportParams(queryParams);
         ResponseHolder response = findReportExportService(exportMode) //
-                .orElseThrow(() -> new IllegalArgumentException("Unsupported export target: " + exportMode)) //
+                .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.report.export.mode.unavailable",
+                        "Export mode %s unavailable".formatted(exportMode.name()))) //
                 .export(reportName, queryParams, reportParams, isSelfServiceUserReport, parameterTypeValue);
         Response.ResponseBuilder builder = Response.status(response.status().getStatusCode());
         if (StringUtils.isNotBlank(response.contentType())) {
