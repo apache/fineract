@@ -2824,10 +2824,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     private Predicate<LoanRepaymentScheduleInstallment> getFilterPredicate(PaymentAllocationType paymentAllocationType,
             MonetaryCurrency currency) {
         return switch (paymentAllocationType.getAllocationType()) {
-            case PENALTY -> (p) -> p.getPenaltyChargesOutstanding(currency).isGreaterThanZero();
-            case FEE -> (p) -> p.getFeeChargesOutstanding(currency).isGreaterThanZero();
-            case INTEREST -> (p) -> p.getInterestOutstanding(currency).isGreaterThanZero();
-            case PRINCIPAL -> (p) -> p.getPrincipalOutstanding(currency).isGreaterThanZero();
+            case PENALTY -> p -> p.getPenaltyChargesOutstanding(currency).isGreaterThanZero();
+            case FEE -> p -> p.getFeeChargesOutstanding(currency).isGreaterThanZero();
+            case INTEREST -> p -> p.getInterestOutstanding(currency).isGreaterThanZero();
+            case PRINCIPAL -> p -> p.getPrincipalOutstanding(currency).isGreaterThanZero();
         };
     }
 

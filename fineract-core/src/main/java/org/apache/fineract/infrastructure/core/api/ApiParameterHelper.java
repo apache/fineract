@@ -28,6 +28,8 @@ import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 
 public final class ApiParameterHelper {
 
+    private static final String GENERIC_RESULT_SET = "genericResultSet";
+
     private ApiParameterHelper() {
 
     }
@@ -126,14 +128,14 @@ public final class ApiParameterHelper {
 
     public static boolean genericResultSet(final MultivaluedMap<String, String> queryParams) {
         boolean genericResultSet = false;
-        if (queryParams.getFirst("genericResultSet") != null) {
-            final String genericResultSetValue = queryParams.getFirst("genericResultSet");
+        if (queryParams.getFirst(GENERIC_RESULT_SET) != null) {
+            final String genericResultSetValue = queryParams.getFirst(GENERIC_RESULT_SET);
             genericResultSet = "true".equalsIgnoreCase(genericResultSetValue);
         }
         return genericResultSet;
     }
 
     public static boolean genericResultSetPassed(final MultivaluedMap<String, String> queryParams) {
-        return queryParams.getFirst("genericResultSet") != null;
+        return queryParams.getFirst(GENERIC_RESULT_SET) != null;
     }
 }

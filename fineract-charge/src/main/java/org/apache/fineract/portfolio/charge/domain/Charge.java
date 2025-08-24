@@ -59,6 +59,13 @@ import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 @Table(name = "m_charge", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name") })
 public class Charge extends AbstractPersistableCustom<Long> {
 
+    public static final String CHARGE_TIME_PARAM_NAME = "chargeTimeType";
+    public static final String CHARGE_CALCULATION_TYPE_PARAM_NAME = "chargeCalculationType";
+    public static final String FEE_ON_MONTH_DAY_PARAM_NAME = "feeOnMonthDay";
+    public static final String FEE_INTERVAL_PARAM_NAME = "feeInterval";
+    public static final String LOCALE_PARAM_NAME = "locale";
+    public static final String FEE_FREQUENCY_PARAM_NAME = "feeFrequency";
+
     @Column(name = "name", length = 100)
     private String name;
 
@@ -142,20 +149,20 @@ public class Charge extends AbstractPersistableCustom<Long> {
         final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
 
         final ChargeAppliesTo chargeAppliesTo = ChargeAppliesTo.fromInt(command.integerValueOfParameterNamed("chargeAppliesTo"));
-        final ChargeTimeType chargeTimeType = ChargeTimeType.fromInt(command.integerValueOfParameterNamed("chargeTimeType"));
+        final ChargeTimeType chargeTimeType = ChargeTimeType.fromInt(command.integerValueOfParameterNamed(CHARGE_TIME_PARAM_NAME));
         final ChargeCalculationType chargeCalculationType = ChargeCalculationType
-                .fromInt(command.integerValueOfParameterNamed("chargeCalculationType"));
+                .fromInt(command.integerValueOfParameterNamed(CHARGE_CALCULATION_TYPE_PARAM_NAME));
         final Integer chargePaymentMode = command.integerValueOfParameterNamed("chargePaymentMode");
 
         final ChargePaymentMode paymentMode = chargePaymentMode == null ? null : ChargePaymentMode.fromInt(chargePaymentMode);
 
         final boolean penalty = command.booleanPrimitiveValueOfParameterNamed("penalty");
         final boolean active = command.booleanPrimitiveValueOfParameterNamed("active");
-        final MonthDay feeOnMonthDay = command.extractMonthDayNamed("feeOnMonthDay");
-        final Integer feeInterval = command.integerValueOfParameterNamed("feeInterval");
+        final MonthDay feeOnMonthDay = command.extractMonthDayNamed(FEE_ON_MONTH_DAY_PARAM_NAME);
+        final Integer feeInterval = command.integerValueOfParameterNamed(FEE_INTERVAL_PARAM_NAME);
         final BigDecimal minCap = command.bigDecimalValueOfParameterNamed("minCap");
         final BigDecimal maxCap = command.bigDecimalValueOfParameterNamed("maxCap");
-        final Integer feeFrequency = command.integerValueOfParameterNamed("feeFrequency");
+        final Integer feeFrequency = command.integerValueOfParameterNamed(FEE_FREQUENCY_PARAM_NAME);
 
         boolean enableFreeWithdrawalCharge = false;
         enableFreeWithdrawalCharge = command.booleanPrimitiveValueOfParameterNamed("enableFreeWithdrawalCharge");
@@ -213,20 +220,20 @@ public class Charge extends AbstractPersistableCustom<Long> {
             // TODO vishwas, this validation seems unnecessary as identical
             // validation is performed in the write service
             if (!isAllowedSavingsChargeTime()) {
-                baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTimeType)
+                baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(this.chargeTimeType)
                         .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.savings");
             }
             // TODO vishwas, this validation seems unnecessary as identical
             // validation is performed in the writeservice
             if (!isAllowedSavingsChargeCalculationType()) {
-                baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
+                baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE_PARAM_NAME).value(this.chargeCalculation)
                         .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.calculation.type.for.savings");
             }
 
             if (!(ChargeTimeType.fromInt(getChargeTimeType()).isWithdrawalFee()
                     || ChargeTimeType.fromInt(getChargeTimeType()).isSavingsNoActivityFee())
                     && ChargeCalculationType.fromInt(getChargeCalculation()).isPercentageOfAmount()) {
-                baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
+                baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE_PARAM_NAME).value(this.chargeCalculation)
                         .failWithCodeNoParameterAddedToErrorCode(
                                 "savings.charge.calculation.type.percentage.allowed.only.for.withdrawal.or.NoActivity");
             }
@@ -257,7 +264,7 @@ public class Charge extends AbstractPersistableCustom<Long> {
             // TODO vishwas, this validation seems unnecessary as identical
             // validation is performed in the write service
             if (!isAllowedLoanChargeTime()) {
-                baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTimeType)
+                baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(this.chargeTimeType)
                         .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
             }
         }
@@ -414,39 +421,38 @@ public class Charge extends AbstractPersistableCustom<Long> {
         if (command.isChangeInBigDecimalParameterNamed(amountParamName, this.amount)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountParamName, locale);
             actualChanges.put(amountParamName, newValue);
-            actualChanges.put("locale", locale.getLanguage());
+            actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
             this.amount = newValue;
         }
 
-        final String chargeTimeParamName = "chargeTimeType";
-        if (command.isChangeInIntegerParameterNamed(chargeTimeParamName, this.chargeTimeType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(chargeTimeParamName);
-            actualChanges.put(chargeTimeParamName, newValue);
-            actualChanges.put("locale", locale.getLanguage());
+        if (command.isChangeInIntegerParameterNamed(CHARGE_TIME_PARAM_NAME, this.chargeTimeType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(CHARGE_TIME_PARAM_NAME);
+            actualChanges.put(CHARGE_TIME_PARAM_NAME, newValue);
+            actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
             this.chargeTimeType = ChargeTimeType.fromInt(newValue).getValue();
 
             if (isSavingsCharge()) {
                 if (!isAllowedSavingsChargeTime()) {
-                    baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTimeType)
+                    baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(this.chargeTimeType)
                             .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.savings");
                 }
                 // if charge time is changed to monthly then validate for
                 // feeOnMonthDay and feeInterval
                 if (isMonthlyFee()) {
-                    final MonthDay monthDay = command.extractMonthDayNamed("feeOnMonthDay");
-                    baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay).notNull();
+                    final MonthDay monthDay = command.extractMonthDayNamed(FEE_ON_MONTH_DAY_PARAM_NAME);
+                    baseDataValidator.reset().parameter(FEE_ON_MONTH_DAY_PARAM_NAME).value(monthDay).notNull();
 
-                    final Integer feeInterval = command.integerValueOfParameterNamed("feeInterval");
-                    baseDataValidator.reset().parameter("feeInterval").value(feeInterval).notNull().inMinMaxRange(1, 12);
+                    final Integer feeInterval = command.integerValueOfParameterNamed(FEE_INTERVAL_PARAM_NAME);
+                    baseDataValidator.reset().parameter(FEE_INTERVAL_PARAM_NAME).value(feeInterval).notNull().inMinMaxRange(1, 12);
                 }
             } else if (isLoanCharge()) {
                 if (!isAllowedLoanChargeTime()) {
-                    baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTimeType)
+                    baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(this.chargeTimeType)
                             .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
                 }
             } else if (isClientCharge()) {
                 if (!isAllowedLoanChargeTime()) {
-                    baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTimeType)
+                    baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(this.chargeTimeType)
                             .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.client");
                 }
             }
@@ -507,29 +513,28 @@ public class Charge extends AbstractPersistableCustom<Long> {
             throw new ChargeParameterUpdateNotSupportedException("charge.applies.to", errorMessage);
         }
 
-        final String chargeCalculationParamName = "chargeCalculationType";
-        if (command.isChangeInIntegerParameterNamed(chargeCalculationParamName, this.chargeCalculation)) {
-            final Integer newValue = command.integerValueOfParameterNamed(chargeCalculationParamName);
-            actualChanges.put(chargeCalculationParamName, newValue);
-            actualChanges.put("locale", locale.getLanguage());
+        if (command.isChangeInIntegerParameterNamed(CHARGE_CALCULATION_TYPE_PARAM_NAME, this.chargeCalculation)) {
+            final Integer newValue = command.integerValueOfParameterNamed(CHARGE_CALCULATION_TYPE_PARAM_NAME);
+            actualChanges.put(CHARGE_CALCULATION_TYPE_PARAM_NAME, newValue);
+            actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
             this.chargeCalculation = ChargeCalculationType.fromInt(newValue).getValue();
 
             if (isSavingsCharge()) {
                 if (!isAllowedSavingsChargeCalculationType()) {
-                    baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
+                    baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE_PARAM_NAME).value(this.chargeCalculation)
                             .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.calculation.type.for.savings");
                 }
 
                 if (!(ChargeTimeType.fromInt(getChargeTimeType()).isWithdrawalFee()
                         || ChargeTimeType.fromInt(getChargeTimeType()).isSavingsNoActivityFee())
                         && ChargeCalculationType.fromInt(getChargeCalculation()).isPercentageOfAmount()) {
-                    baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
+                    baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE_PARAM_NAME).value(this.chargeCalculation)
                             .failWithCodeNoParameterAddedToErrorCode(
                                     "charge.calculation.type.percentage.allowed.only.for.withdrawal.or.noactivity");
                 }
             } else if (isClientCharge()) {
                 if (!isAllowedClientChargeCalculationType()) {
-                    baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
+                    baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE_PARAM_NAME).value(this.chargeCalculation)
                             .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.calculation.type.for.client");
                 }
             }
@@ -541,47 +546,45 @@ public class Charge extends AbstractPersistableCustom<Long> {
             if (command.isChangeInIntegerParameterNamed(paymentModeParamName, this.chargePaymentMode)) {
                 final Integer newValue = command.integerValueOfParameterNamed(paymentModeParamName);
                 actualChanges.put(paymentModeParamName, newValue);
-                actualChanges.put("locale", locale.getLanguage());
+                actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
                 this.chargePaymentMode = ChargePaymentMode.fromInt(newValue).getValue();
             }
         }
 
-        if (command.hasParameter("feeOnMonthDay")) {
-            final MonthDay monthDay = command.extractMonthDayNamed("feeOnMonthDay");
-            final String actualValueEntered = command.stringValueOfParameterNamed("feeOnMonthDay");
+        if (command.hasParameter(FEE_ON_MONTH_DAY_PARAM_NAME)) {
+            final MonthDay monthDay = command.extractMonthDayNamed(FEE_ON_MONTH_DAY_PARAM_NAME);
+            final String actualValueEntered = command.stringValueOfParameterNamed(FEE_ON_MONTH_DAY_PARAM_NAME);
             final Integer dayOfMonthValue = monthDay.getDayOfMonth();
             if (!this.feeOnDay.equals(dayOfMonthValue)) {
-                actualChanges.put("feeOnMonthDay", actualValueEntered);
-                actualChanges.put("locale", locale.getLanguage());
+                actualChanges.put(FEE_ON_MONTH_DAY_PARAM_NAME, actualValueEntered);
+                actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
                 this.feeOnDay = dayOfMonthValue;
             }
 
             final Integer monthOfYear = monthDay.getMonthValue();
             if (!this.feeOnMonth.equals(monthOfYear)) {
-                actualChanges.put("feeOnMonthDay", actualValueEntered);
-                actualChanges.put("locale", locale.getLanguage());
+                actualChanges.put(FEE_ON_MONTH_DAY_PARAM_NAME, actualValueEntered);
+                actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
                 this.feeOnMonth = monthOfYear;
             }
         }
 
-        final String feeInterval = "feeInterval";
-        if (command.isChangeInIntegerParameterNamed(feeInterval, this.feeInterval)) {
-            final Integer newValue = command.integerValueOfParameterNamed(feeInterval);
-            actualChanges.put(feeInterval, newValue);
-            actualChanges.put("locale", locale.getLanguage());
+        if (command.isChangeInIntegerParameterNamed(FEE_INTERVAL_PARAM_NAME, this.feeInterval)) {
+            final Integer newValue = command.integerValueOfParameterNamed(FEE_INTERVAL_PARAM_NAME);
+            actualChanges.put(FEE_INTERVAL_PARAM_NAME, newValue);
+            actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
             this.feeInterval = newValue;
         }
 
-        final String feeFrequency = "feeFrequency";
-        if (command.isChangeInIntegerParameterNamed(feeFrequency, this.feeFrequency)) {
-            final Integer newValue = command.integerValueOfParameterNamed(feeFrequency);
-            actualChanges.put(feeFrequency, newValue);
-            actualChanges.put("locale", locale.getLanguage());
+        if (command.isChangeInIntegerParameterNamed(FEE_FREQUENCY_PARAM_NAME, this.feeFrequency)) {
+            final Integer newValue = command.integerValueOfParameterNamed(FEE_FREQUENCY_PARAM_NAME);
+            actualChanges.put(FEE_FREQUENCY_PARAM_NAME, newValue);
+            actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
             this.feeFrequency = newValue;
         }
 
         if (this.feeFrequency != null) {
-            baseDataValidator.reset().parameter("feeInterval").value(this.feeInterval).notNull();
+            baseDataValidator.reset().parameter(FEE_INTERVAL_PARAM_NAME).value(this.feeInterval).notNull();
         }
 
         final String penaltyParamName = "penalty";
@@ -603,14 +606,14 @@ public class Charge extends AbstractPersistableCustom<Long> {
             if (command.isChangeInBigDecimalParameterNamed(minCapParamName, this.minCap)) {
                 final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(minCapParamName);
                 actualChanges.put(minCapParamName, newValue);
-                actualChanges.put("locale", locale.getLanguage());
+                actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
                 this.minCap = newValue;
             }
             final String maxCapParamName = "maxCap";
             if (command.isChangeInBigDecimalParameterNamed(maxCapParamName, this.maxCap)) {
                 final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(maxCapParamName);
                 actualChanges.put(maxCapParamName, newValue);
-                actualChanges.put("locale", locale.getLanguage());
+                actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
                 this.maxCap = newValue;
             }
 
@@ -784,4 +787,5 @@ public class Charge extends AbstractPersistableCustom<Long> {
         return Objects.hash(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculation, chargePaymentMode, feeOnDay,
                 feeInterval, feeOnMonth, penalty, active, deleted, minCap, maxCap, feeFrequency, account, taxGroup);
     }
+
 }
