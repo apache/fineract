@@ -524,6 +524,8 @@ final class LoansApiResourceSwagger {
             @Schema(example = "1000000.000000")
             public BigDecimal totalCapitalizedIncome;
             @Schema(example = "0.000000")
+            public BigDecimal totalCapitalizedIncomeAdjustment;
+            @Schema(example = "0.000000")
             public BigDecimal principalPaid;
             @Schema(example = "0.00")
             public BigDecimal principalAdjustments;

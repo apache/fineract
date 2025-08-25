@@ -372,6 +372,10 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             addRepaymentForLoan(loanId, 67.45, "2 January 2024");
 
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertNotNull(loanDetails.getSummary().getTotalCapitalizedIncomeAdjustment());
+            assertEquals(BigDecimal.valueOf(100.0).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalCapitalizedIncomeAdjustment().stripTrailingZeros());
+
             Optional<GetLoansLoanIdTransactions> replayedCapitalizedIncomeAdjustmentOpt = loanDetails.getTransactions().stream()
                     .filter(t -> t.getType().getCapitalizedIncomeAdjustment()).findFirst();
             Assertions.assertTrue(replayedCapitalizedIncomeAdjustmentOpt.isPresent(), "Capitalized income adjustment not found");
@@ -964,6 +968,9 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
 
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 0.0, 151.75, 0.0, 150.00, 15.0);
+            assertNotNull(loanDetails.getSummary().getTotalCapitalizedIncomeAdjustment());
+            assertEquals(BigDecimal.valueOf(15.0).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalCapitalizedIncomeAdjustment().stripTrailingZeros());
             // Validate Loan goes to Overpaid
             assertTrue(loanDetails.getStatus().getOverpaid());
         });
