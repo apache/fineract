@@ -34,6 +34,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -59,16 +60,19 @@ public class ColumnValidator {
                 ResultSet resultSet = dbMetaData.getColumns(null, null, entry.getKey(), null);
                 Set<String> tableColumns = getTableColumns(resultSet);
                 if (!columns.isEmpty() && tableColumns.isEmpty()) {
-                    throw new SQLInjectionException();
+                    throw new PlatformApiDataValidationException("error.msg.invalid.table.column", "Invalid table or column name detected",
+                            entry.getKey(), columns);
                 }
                 for (String requestedColumn : columns) {
                     if (!tableColumns.contains(requestedColumn)) {
-                        throw new SQLInjectionException();
+                        throw new PlatformApiDataValidationException("error.msg.invalid.table.column", "Invalid table column name detected",
+                                entry.getKey(), requestedColumn);
                     }
                 }
             }
         } catch (SQLException e) {
-            throw new SQLInjectionException(e);
+            throw new PlatformApiDataValidationException("error.msg.database.access.error",
+                    "Database access error during column validation", e.getMessage(), e);
         } finally {
             if (connection != null) {
                 DataSourceUtils.releaseConnection(connection, jdbcTemplate.getDataSource());
@@ -120,7 +124,8 @@ public class ColumnValidator {
                 Set<String> columns = entry.getValue();
                 tableColumnMap.put(schema.substring(startPos, index).trim(), columns);
             } else {
-                throw new SQLInjectionException();
+                throw new PlatformApiDataValidationException("error.msg.invalid.table.alias", "Invalid table alias in SQL query",
+                        entry.getKey());
             }
         }
 
@@ -142,7 +147,8 @@ public class ColumnValidator {
                     tableColumnMap.put(tableColumn[0], columns);
                 }
             } else {
-                throw new SQLInjectionException();
+                throw new PlatformApiDataValidationException("error.msg.invalid.table.column.format",
+                        "Invalid table.column format in operand", operand);
             }
         }
         return tableColumnMap;

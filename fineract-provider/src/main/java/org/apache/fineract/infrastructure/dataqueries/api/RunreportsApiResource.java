@@ -39,6 +39,7 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportExportType;
@@ -73,6 +74,8 @@ public class RunreportsApiResource {
     public Response retrieveAllAvailableExports(@PathParam("reportName") @Parameter(description = "reportName") final String reportName,
             @Context final UriInfo uriInfo,
             @DefaultValue("false") @QueryParam(IS_SELF_SERVICE_USER_REPORT_PARAMETER) @Parameter(description = IS_SELF_SERVICE_USER_REPORT_PARAMETER) final boolean isSelfServiceUserReport) {
+
+        validateReportName(reportName);
         MultivaluedMap<String, String> queryParams = new MultivaluedStringMap();
         queryParams.putAll(uriInfo.getQueryParameters());
 
@@ -114,6 +117,8 @@ public class RunreportsApiResource {
             @Context final UriInfo uriInfo,
             @DefaultValue("false") @QueryParam(IS_SELF_SERVICE_USER_REPORT_PARAMETER) @Parameter(description = IS_SELF_SERVICE_USER_REPORT_PARAMETER) final boolean isSelfServiceUserReport) {
 
+        validateReportName(reportName);
+
         MultivaluedMap<String, String> queryParams = new MultivaluedStringMap();
         queryParams.putAll(uriInfo.getQueryParameters());
 
@@ -141,6 +146,32 @@ public class RunreportsApiResource {
             if (currentUser.hasNotPermissionForReport(reportName)) {
                 throw new NoAuthorizationException("Not authorised to run report: " + reportName);
             }
+        }
+    }
+
+    /**
+     * Validates report name to prevent SQL injection attacks.
+     *
+     * @param reportName
+     *            the report name to validate
+     * @throws IllegalArgumentException
+     *             if the report name is invalid
+     */
+    private void validateReportName(String reportName) {
+        if (StringUtils.isBlank(reportName)) {
+            throw new IllegalArgumentException("Report name cannot be null or empty");
+        }
+
+        // Basic length validation
+        if (reportName.length() > 100) {
+            throw new IllegalArgumentException("Report name exceeds maximum length of 100 characters");
+        }
+
+        // Check for potentially dangerous characters
+        // Allow letters, numbers, spaces, hyphens, underscores, and parentheses which are common in report names
+        if (!reportName.matches("^[a-zA-Z0-9\\s\\-_()%&.]+$")) {
+            throw new IllegalArgumentException(
+                    "Report name contains invalid characters. Only letters, numbers, spaces, hyphens, underscores, parentheses, percent, ampersand, and dots are allowed");
         }
     }
 }

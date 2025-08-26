@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -53,13 +55,12 @@ import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterJoinData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
+import org.apache.fineract.infrastructure.dataqueries.domain.ReportType;
 import org.apache.fineract.infrastructure.dataqueries.exception.ReportNotFoundException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlInjectionPreventerService;
 import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.owasp.esapi.ESAPI;
-import org.owasp.esapi.codecs.UnixCodec;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -154,21 +155,58 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     private String getSql(final String name, final String type) {
-        final String encodedName = sqlInjectionPreventerService.encodeSql(name);
-        final String encodedType = sqlInjectionPreventerService.encodeSql(type);
+        if (name == null || type == null) {
+            throw new IllegalArgumentException("Report name and type cannot be null");
+        }
 
-        final String inputSql = "select " + encodedType + "_sql as the_sql from stretchy_" + encodedType + " where " + encodedType
-                + "_name = ?";
+        // Validate report type against whitelist - this prevents SQL injection in table names
+        if (!ReportType.isValidType(type)) {
+            throw new IllegalArgumentException("Invalid report type provided");
+        }
+
+        final ReportType reportType = ReportType.fromValue(type);
+        final String quotedTableName = getQuotedTableName(reportType);
+        final String quotedColumnSqlName = getQuotedColumnName(reportType, "_sql");
+        final String quotedColumnNameName = getQuotedColumnName(reportType, "_name");
+
+        // Use parameterized query with validated and quoted identifiers to prevent SQL injection
+        final String inputSql = "SELECT " + quotedColumnSqlName + " AS the_sql FROM " + quotedTableName + " WHERE " + quotedColumnNameName
+                + " = ?";
 
         final String inputSqlWrapped = this.genericDataService.wrapSQL(inputSql);
 
-        // the return statement contains the exact sql required
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(inputSqlWrapped, encodedName);
+        // Use parameterized query - name parameter is safely handled by JDBC
+        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(inputSqlWrapped, name);
 
         if (rs.next() && rs.getString("the_sql") != null) {
             return rs.getString("the_sql");
         }
-        throw new ReportNotFoundException(encodedName);
+        throw new ReportNotFoundException(name);
+    }
+
+    /**
+     * Gets the properly quoted table name for the given report type. This method ensures SQL injection prevention by
+     * using only validated enum values.
+     */
+    private String getQuotedTableName(ReportType reportType) {
+        String tableName = "stretchy_" + reportType.getValue();
+        return sqlInjectionPreventerService.quoteIdentifier(tableName);
+    }
+
+    /**
+     * Gets the properly quoted column name by combining the report type prefix with a suffix. This method ensures SQL
+     * injection prevention by using only validated enum values and safely constructing the full column name before
+     * quoting.
+     *
+     * @param reportType
+     *            the validated report type
+     * @param suffix
+     *            the column name suffix (e.g., "_sql", "_name")
+     * @return the properly quoted full column name
+     */
+    private String getQuotedColumnName(ReportType reportType, String suffix) {
+        String fullColumnName = reportType.getValue() + suffix;
+        return sqlInjectionPreventerService.quoteIdentifier(fullColumnName);
     }
 
     @Override
@@ -212,8 +250,15 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
             final Document document = new Document(PageSize.B0.rotate());
 
-            String validatedFileName = ESAPI.encoder().encodeForOS(new UnixCodec(), reportName);
-            PdfWriter.getInstance(document, new FileOutputStream(fileLocation + validatedFileName + ".pdf"));
+            // Validate filename characters and use Path.of() for safe handling
+            if (!reportName.matches("^[a-zA-Z0-9_.-]+$")) {
+                throw new IllegalArgumentException("Invalid report name format");
+            }
+            Path validatedPath = Paths.get(fileLocation, reportName + ".pdf").normalize();
+            if (!validatedPath.startsWith(Paths.get(fileLocation))) {
+                throw new IllegalArgumentException("Path traversal attempt detected");
+            }
+            PdfWriter.getInstance(document, new FileOutputStream(validatedPath.toString()));
             document.open();
 
             final PdfPTable table = new PdfPTable(chSize);
