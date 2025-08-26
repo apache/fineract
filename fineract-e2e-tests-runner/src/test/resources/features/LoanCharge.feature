@@ -7777,3 +7777,50 @@ Feature: LoanCharge
     Then Loan Charges tab has the following data:
       | Name                 | isPenalty | Payment due at  | Due as of | Calculation type | Due  | Paid | Waived | Outstanding |
       | Installment flat fee | false     | Installment Fee |           | Flat             | 30.0 | 0.0  | 0.0    | 30.0        |
+
+  Scenario: Verify Loan Charge together with paid installments with amounts zero
+    When Admin sets the business date to "11 April 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 11 April 2025     | 1001           | 12.25                  | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 24                | MONTHS                | 1              | MONTHS                 | 24                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "11 April 2025" with "209.72" amount and expected disbursement date on "11 April 2025"
+    And Admin successfully disburse the loan on "11 April 2025" with "209.72" EUR transaction amount
+    And Admin sets the business date to "11 May 2025"
+    And Customer makes "AUTOPAY" repayment on "11 May 2025" with 9.9 EUR transaction amount
+    And Admin sets the business date to "11 June 2025"
+    And Customer makes "AUTOPAY" repayment on "11 June 2025" with 9.9 EUR transaction amount
+    And Admin sets the business date to "11 July 2025"
+    And Customer makes "AUTOPAY" repayment on "11 July 2025" with 9.9 EUR transaction amount
+    And Admin sets the business date to "11 August 2025"
+    And Customer makes "AUTOPAY" repayment on "11 August 2025" with 9.9 EUR transaction amount
+    And Admin sets the business date to "13 August 2025"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "13 August 2025" with 188.8 EUR transaction amount and system-generated Idempotency key
+    Then Loan Repayment schedule has 24 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due  | Paid  | In advance | Late | Outstanding |
+      | 1  | 30   | 11 May 2025       | 11 May 2025    | 201.96          | 7.76          | 2.14     | 0.0  | 0.0       | 9.9  | 9.9   | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 11 June 2025      | 11 June 2025   | 194.12          | 7.84          | 2.06     | 0.0  | 0.0       | 9.9  | 9.9  | 0.0        | 0.0  | 0.0         |
+      | 3  | 30   | 11 July 2025      | 11 July 2025   | 186.2           | 7.92          | 1.98     | 0.0  | 0.0       | 9.9  | 9.9  | 0.0        | 0.0  | 0.0         |
+      | 4  | 31   | 11 August 2025    | 11 August 2025 | 178.2           | 8.0           | 1.9      | 0.0  | 0.0       | 9.9  | 9.9  | 0.0        | 0.0  | 0.0         |
+      | 5  | 31   | 11 September 2025 | 13 August 2025 | 178.2           | 0.0           | 0.12     | 0.0  | 0.0       | 0.12 | 0.12 | 0.12       | 0.0  | 0.0         |
+      | 6  | 30   | 11 October 2025   | 13 August 2025 | 178.2           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0  | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 7  | 31   | 11 November 2025  | 13 August 2025 | 168.3           | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+      | 8  | 30   | 11 December 2025  | 13 August 2025 | 158.4           | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+      | 9  | 31   | 11 January 2026   | 13 August 2025 | 148.5           | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+      | 10 | 31   | 11 February 2026  | 13 August 2025 | 138.6           | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+      | 11 | 28   | 11 March 2026     | 13 August 2025 | 128.7           | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+      | 12 | 31   | 11 April 2026     | 13 August 2025 | 118.8           | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+      | 13 | 30   | 11 May 2026       | 13 August 2025 | 108.9           | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+      | 14 | 31   | 11 June 2026      | 13 August 2025 | 99.0            | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+      | 15 | 30   | 11 July 2026      | 13 August 2025 | 89.1            | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+      | 16 | 31   | 11 August 2026    | 13 August 2025 | 79.2            | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+      | 17 | 31   | 11 September 2026 | 13 August 2025 | 69.3            | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+      | 18 | 30   | 11 October 2026   | 13 August 2025 | 59.4            | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+      | 19 | 31   | 11 November 2026  | 13 August 2025 | 49.5            | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+      | 20 | 30   | 11 December 2026  | 13 August 2025 | 39.6            | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+      | 21 | 31   | 11 January 2027   | 13 August 2025 | 29.7            | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+      | 22 | 31   | 11 February 2027  | 13 August 2025 | 19.8            | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+      | 23 | 28   | 11 March 2027     | 13 August 2025 | 9.9             | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+      | 24 | 31   | 11 April 2027     | 13 August 2025 | 0.0             | 9.9           | 0.0      | 0.0  | 0.0       | 9.9  | 9.9  | 9.9        | 0.0  | 0.0         |
+    When Admin sets the business date to "15 August 2025"
+    When Admin adds "LOAN_NSF_FEE" due date charge with "15 August 2025" due date and 35 EUR transaction amount

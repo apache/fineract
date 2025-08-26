@@ -141,4 +141,8 @@ public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistab
         return Money.of(currency, this.penaltyChargesPortion);
     }
 
+    public boolean isZeroAmount() {
+        return this.amount == null || this.amount.compareTo(BigDecimal.ZERO) == 0;
+    }
+
 }
