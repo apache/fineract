@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Sign in</title>
+</head>
+<body>
+<h1>Sign in</h1>
+
+<form th:action="@{/login}" method="post">
+    <div>
+        <label>Tenant ID</label>
+        <input type="text" name="tenantId" required />
+    </div>
+
+    <div>
+        <label>Username</label>
+        <input type="text" name="username" autocomplete="username" required />
+    </div>
+
+    <div>
+        <label>Password</label>
+        <input type="password" name="password" autocomplete="current-password" required />
+    </div>
+
+    <button type="submit">Sign in</button>
+</form>
+</body>
+</html>

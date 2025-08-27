@@ -21,6 +21,9 @@ package org.apache.fineract.infrastructure.security.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -28,11 +31,12 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.exception.ResetPasswordException;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.apache.fineract.useradministration.domain.AppUserRepository;
 import org.apache.fineract.useradministration.exception.UnAuthenticatedUserException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 /**
@@ -40,20 +44,17 @@ import org.springframework.stereotype.Service;
  */
 
 @Service
+@RequiredArgsConstructor
 public class SpringSecurityPlatformSecurityContext implements PlatformSecurityContext {
 
     // private static final Logger LOG =
     // LoggerFactory.getLogger(SpringSecurityPlatformSecurityContext.class);
 
     private final ConfigurationDomainService configurationDomainService;
+    private final AppUserRepository appUserRepository;
 
     protected static final List<CommandWrapper> EXEMPT_FROM_PASSWORD_RESET_CHECK = new ArrayList<CommandWrapper>(
             List.of(new CommandWrapperBuilder().updateUser(null).build()));
-
-    @Autowired
-    SpringSecurityPlatformSecurityContext(final ConfigurationDomainService configurationDomainService) {
-        this.configurationDomainService = configurationDomainService;
-    }
 
     @Override
     public AppUser authenticatedUser() {
@@ -66,6 +67,9 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
                 Object principal = auth.getPrincipal();
                 if (principal instanceof AppUser appUser) {
                     currentUser = appUser;
+                } else if(principal instanceof Jwt jwt){
+                    //TODO: not nice... we should not work with JPA entity!
+                    currentUser = appUserRepository.findAppUserByName(jwt.getSubject());
                 }
             }
         }
@@ -79,6 +83,26 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
         }
 
         return currentUser;
+    }
+
+    @Override
+    public Optional<AppUser> fetchAuthenticatedUser() {
+        AppUser currentUser = null;
+        final SecurityContext context = SecurityContextHolder.getContext();
+        if (context != null) {
+            final Authentication auth = context.getAuthentication();
+            if (auth != null) {
+                Object principal = auth.getPrincipal();
+                if (principal instanceof AppUser appUser) {
+                    currentUser = appUser;
+                } else if(principal instanceof Jwt jwt){
+                    //TODO: not nice... we should not work with JPA entity!
+                    return Optional.of(currentUser = appUserRepository.findAppUserByName(jwt.getSubject()));
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
     @Override
