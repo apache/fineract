@@ -63,7 +63,6 @@ import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeeBalanc
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
-import org.apache.fineract.portfolio.loanaccount.service.BuyDownFeePlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerService;
@@ -100,7 +99,6 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
     private final LoanBalanceService loanBalanceService;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
-    private final BuyDownFeePlatformService buyDownFeePlatformService;
     private final LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository;
 
     @Override

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.integrationtests.BaseLoanIntegrationTest.InterestRateFrequencyType.MONTHS;
 import static org.apache.fineract.integrationtests.BaseLoanIntegrationTest.InterestRateFrequencyType.WHOLE_TERM;
 import static org.apache.fineract.integrationtests.BaseLoanIntegrationTest.InterestRateFrequencyType.YEARS;
 import static org.apache.fineract.integrationtests.BaseLoanIntegrationTest.RepaymentFrequencyType.DAYS;
@@ -41,6 +42,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
 import org.apache.fineract.client.models.CreditAllocationData;
@@ -62,6 +64,7 @@ import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
@@ -78,9 +81,11 @@ import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.accounting.PeriodicAccrualAccountingHelper;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
+import org.apache.fineract.integrationtests.common.loans.CobHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
+import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
 import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
@@ -5997,6 +6002,147 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
             assertTrue(loanDetails.getStatus().getActive());
             assertEquals("1450.000000", loanDetails.getSummary().getPrincipalOutstanding().toString());
+        });
+    }
+
+    // UC156: Loan Transaction reprocess
+    @Test
+    public void uc156() {
+        final String operationDate = "13 June 2025";
+        AtomicLong createdLoanId = new AtomicLong();
+        AtomicLong secondRepayment = new AtomicLong();
+        AtomicLong createdLoanChargeId = new AtomicLong();
+        final BigDecimal interestRatePerPeriod = BigDecimal.valueOf(11.32);
+        final BigDecimal principalAmount = BigDecimal.valueOf(135.94);
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec, List.of(//
+                Pair.of(1, 10), //
+                Pair.of(11, 30), //
+                Pair.of(31, 60), //
+                Pair.of(61, null)//
+        ));
+
+        runAt(operationDate, () -> {
+            final ArrayList<String> interestRefundTypes = new ArrayList<String>();
+            interestRefundTypes.add("PAYOUT_REFUND");
+            interestRefundTypes.add("MERCHANT_ISSUED_REFUND");
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .interestRatePerPeriod(interestRatePerPeriod.doubleValue()).interestRateFrequencyType(YEARS)//
+                    .daysInMonthType(DaysInMonthType.DAYS_30)//
+                    .daysInYearType(DaysInYearType.DAYS_360)//
+                    .numberOfRepayments(6)//
+                    .repaymentEvery(1)//
+                    .repaymentFrequencyType(2L)//
+                    .chargeOffBehaviour("ZERO_INTEREST")//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
+                    .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
+                    .enableDownPayment(false)//
+                    .enableAccrualActivityPosting(true)//
+                    .allowPartialPeriodInterestCalcualtion(null)//
+                    .enableAutoRepaymentForDownPayment(null)//
+                    .isInterestRecalculationEnabled(true)//
+                    .delinquencyBucketId(delinquencyBucketId.longValue())//
+                    .enableInstallmentLevelDelinquency(true)//
+                    .interestRecalculationCompoundingMethod(0)//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY)//
+                    .installmentAmountInMultiplesOf(null)//
+                    .supportedInterestRefundTypes(interestRefundTypes) //
+                    .rescheduleStrategyMethod(LoanRescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD.getValue())//
+                    .recalculationRestFrequencyType(2)//
+                    .recalculationRestFrequencyInterval(1);
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate,
+                    principalAmount.doubleValue(), 6).interestCalculationPeriodType(DAYS)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .interestRatePerPeriod(interestRatePerPeriod)//
+                    .repaymentEvery(1)//
+                    .repaymentFrequencyType(MONTHS)//
+                    .loanTermFrequency(6)//
+                    .loanTermFrequencyType(MONTHS);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            createdLoanId.set(loanResponse.getLoanId());
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().approvedLoanAmount(principalAmount)
+                    .dateFormat(DATETIME_PATTERN).approvedOnDate(operationDate).locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().actualDisbursementDate(operationDate)
+                    .dateFormat(DATETIME_PATTERN).locale("en").transactionAmount(principalAmount));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertTrue(loanDetails.getStatus().getActive());
+        });
+
+        runAt("22 June 2025", () -> {
+            PostLoansLoanIdTransactionsResponse repayment = loanTransactionHelper.makeLoanRepayment(createdLoanId.get(),
+                    new PostLoansLoanIdTransactionsRequest().transactionDate("22 June 2025").dateFormat("dd MMMM yyyy").locale("en")
+                            .transactionAmount(25.0));
+        });
+
+        runAt("13 July 2025", () -> {
+            PostLoansLoanIdTransactionsResponse repayment = loanTransactionHelper.makeLoanRepayment(createdLoanId.get(),
+                    new PostLoansLoanIdTransactionsRequest().transactionDate("13 July 2025").dateFormat("dd MMMM yyyy").locale("en")
+                            .transactionAmount(23.41));
+            secondRepayment.set(repayment.getResourceId());
+        });
+
+        runAt("16 July 2025", () -> {
+            loanTransactionHelper.makeMerchantIssuedRefund(createdLoanId.get(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("16 July 2025").locale("en").transactionAmount(135.94));
+        });
+
+        runAt("18 July 2025", () -> {
+            CobHelper.fastForwardLoansLastCOBDate(createdLoanId.get(), "18 July 2025");
+            verifyLastClosedBusinessDate(createdLoanId.get(), "18 July 2025");
+            loanTransactionHelper.reverseLoanTransaction(createdLoanId.get(), secondRepayment.get(),
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("18 July 2025")
+                            .transactionAmount(0.0).locale("en"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertTrue(loanDetails.getStatus().getOverpaid());
+            verifyTransactions(createdLoanId.get(), //
+                    transaction(135.94, "Disbursement", "13 June 2025", 135.94, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                    transaction(25.0, "Repayment", "22 June 2025", 111.32, 24.62, 0.38, 0.0, 0.0, 0.0, 0.0),
+                    transaction(23.41, "Repayment", "13 July 2025", 88.65, 22.67, 0.74, 0.0, 0.0, 0.0, 0.0, true),
+                    transaction(0.38, "Accrual Activity", "13 July 2025", 0.0, 0.0, 0.38, 0.0, 0.0, 0.0, 0.0),
+                    transaction(1.20, "Accrual", "16 July 2025", 0.0, 0.0, 1.20, 0.0, 0.0, 0.0, 0.0),
+                    transaction(135.94, "Merchant Issued Refund", "16 July 2025", 0.0, 111.32, 0.84, 0.0, 0.0, 0.0, 23.78),
+                    transaction(1.22, "Interest Refund", "16 July 2025", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.22),
+                    transaction(0.84, "Accrual Activity", "16 July 2025", 0.0, 0.0, 0.84, 0.0, 0.0, 0.0, 0.0),
+                    transaction(0.02, "Accrual", "18 July 2025", 0.0, 0.0, 0.02, 0.0, 0.0, 0.0, 0.0));
+
+            createdLoanChargeId.set(addCharge(createdLoanId.get(), false, 2.8, "18 July 2025"));
+            LOG.info("------------------------------ REPROCESSING LOAN ---------------------------------------");
+
+            loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertTrue(loanDetails.getStatus().getOverpaid());
+            verifyTransactions(createdLoanId.get(), //
+                    transaction(135.94, "Disbursement", "13 June 2025", 135.94, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                    transaction(25.0, "Repayment", "22 June 2025", 111.32, 24.62, 0.38, 0.0, 0.0, 0.0, 0.0),
+                    transaction(23.41, "Repayment", "13 July 2025", 88.65, 22.67, 0.74, 0.0, 0.0, 0.0, 0.0, true),
+                    transaction(0.38, "Accrual Activity", "13 July 2025", 0.0, 0.0, 0.38, 0.0, 0.0, 0.0, 0.0),
+                    transaction(1.20, "Accrual", "16 July 2025", 0.0, 0.0, 1.20, 0.0, 0.0, 0.0, 0.0),
+                    transaction(135.94, "Merchant Issued Refund", "16 July 2025", 0.0, 111.32, 0.84, 2.80, 0.0, 0.0, 20.98),
+                    transaction(1.22, "Interest Refund", "16 July 2025", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.22),
+                    transaction(3.64, "Accrual Activity", "16 July 2025", 0.0, 0.0, 0.84, 2.80, 0.0, 0.0, 0.0),
+                    transaction(0.02, "Accrual", "18 July 2025", 0.0, 0.0, 0.02, 0.0, 0.0, 0.0, 0.0),
+                    transaction(2.80, "Accrual", "18 July 2025", 0.0, 0.0, 0.00, 2.80, 0.0, 0.0, 0.0));
+
+            CobHelper.reprocessLoan(createdLoanId.get());
+            loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertTrue(loanDetails.getStatus().getOverpaid());
+
+            verifyTransactions(createdLoanId.get(), //
+                    transaction(135.94, "Disbursement", "13 June 2025", 135.94, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                    transaction(25.0, "Repayment", "22 June 2025", 111.32, 24.62, 0.38, 0.0, 0.0, 0.0, 0.0),
+                    transaction(23.41, "Repayment", "13 July 2025", 88.65, 22.67, 0.74, 0.0, 0.0, 0.0, 0.0, true),
+                    transaction(0.38, "Accrual Activity", "13 July 2025", 0.0, 0.0, 0.38, 0.0, 0.0, 0.0, 0.0),
+                    transaction(1.20, "Accrual", "16 July 2025", 0.0, 0.0, 1.20, 0.0, 0.0, 0.0, 0.0),
+                    transaction(135.94, "Merchant Issued Refund", "16 July 2025", 0.0, 111.32, 0.84, 2.80, 0.0, 0.0, 20.98),
+                    transaction(1.22, "Interest Refund", "16 July 2025", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.22),
+                    transaction(3.64, "Accrual Activity", "16 July 2025", 0.0, 0.0, 0.84, 2.80, 0.0, 0.0, 0.0),
+                    transaction(0.02, "Accrual", "18 July 2025", 0.0, 0.0, 0.02, 0.0, 0.0, 0.0, 0.0),
+                    transaction(2.80, "Accrual", "18 July 2025", 0.0, 0.0, 0.0, 2.80, 0.0, 0.0, 0.0));
         });
     }
 

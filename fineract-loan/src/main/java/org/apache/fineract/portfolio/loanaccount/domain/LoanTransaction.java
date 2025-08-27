@@ -319,6 +319,9 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
             newTransaction.setLoanReAgeParameter(loanTransaction.getLoanReAgeParameter().getCopy(newTransaction));
         }
         newTransaction.setClassification(loanTransaction.getClassification());
+        if (loanTransaction.isAccrualActivity()) {
+            newTransaction.setCreatedBy(loanTransaction.getCreatedBy().get());
+        }
         return newTransaction;
     }
 
