@@ -35,7 +35,7 @@ public class GuarantorNotFoundException extends AbstractPlatformResourceNotFound
     }
 
     public GuarantorNotFoundException(final Long loanId, final Long guarantorId, final Long guarantorFundingId) {
-        super("error.msg.loan.guarantor.not.found", "Guarantor with identifier " + guarantorId + "and with funding detail "
+        super("error.msg.loan.guarantor.not.found", "Guarantor with identifier " + guarantorId + " and with funding detail "
                 + guarantorFundingId + " does not exist for loan with Identifier " + loanId, loanId, guarantorId, guarantorFundingId);
     }
 }
