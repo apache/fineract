@@ -86,26 +86,6 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
     }
 
     @Override
-    public Optional<AppUser> fetchAuthenticatedUser() {
-        AppUser currentUser = null;
-        final SecurityContext context = SecurityContextHolder.getContext();
-        if (context != null) {
-            final Authentication auth = context.getAuthentication();
-            if (auth != null) {
-                Object principal = auth.getPrincipal();
-                if (principal instanceof AppUser appUser) {
-                    currentUser = appUser;
-                } else if(principal instanceof Jwt jwt){
-                    //TODO: not nice... we should not work with JPA entity!
-                    return Optional.of(currentUser = appUserRepository.findAppUserByName(jwt.getSubject()));
-                }
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    @Override
     public void isAuthenticated() {
         authenticatedUser();
     }
