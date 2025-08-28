@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -1550,20 +1551,72 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         private List<LoanSchedulePeriodDataWrapper> collectEligibleDisbursementData(LoanScheduleType loanScheduleType,
                 Collection<DisbursementData> disbursementData, LocalDate fromDate, LocalDate dueDate, Set<Long> disbursementPeriodIds) {
             List<LoanSchedulePeriodDataWrapper> disbursementDataList = new ArrayList<>();
-            // Collect eligible disbursement data
-            for (final DisbursementData data : disbursementData) {
-                boolean isDueForDisbursement = data.isDueForDisbursement(loanScheduleType, fromDate, dueDate);
-                boolean isEligible = ((fromDate.equals(this.disbursement.disbursementDate()) && data.disbursementDate().equals(fromDate))
-                        || (fromDate.equals(dueDate) && data.disbursementDate().equals(fromDate))
-                        || canAddDisbursementData(data, isDueForDisbursement, excludePastUnDisbursed))
-                        && !disbursementPeriodIds.contains(data.getId());
 
-                if (isEligible) {
-                    disbursementDataList.add(new LoanSchedulePeriodDataWrapper(data, data.disbursementDate(), true));
-                    disbursementPeriodIds.add(data.getId());
+            boolean hasMultipleTranchesOnSameDate = hasMultipleTranchesOnSameDate(disbursementData);
+
+            if (hasMultipleTranchesOnSameDate) {
+                Map<LocalDate, List<DisbursementData>> disbursementsByDate = new HashMap<>();
+
+                for (final DisbursementData data : disbursementData) {
+                    boolean isDueForDisbursement = data.isDueForDisbursement(loanScheduleType, fromDate, dueDate);
+                    boolean isEligible = ((fromDate.equals(this.disbursement.disbursementDate())
+                            && data.disbursementDate().equals(fromDate))
+                            || (fromDate.equals(dueDate) && data.disbursementDate().equals(fromDate))
+                            || canAddDisbursementData(data, isDueForDisbursement, excludePastUnDisbursed))
+                            && !disbursementPeriodIds.contains(data.getId());
+
+                    if (isEligible) {
+                        disbursementsByDate.computeIfAbsent(data.disbursementDate(), k -> new ArrayList<>()).add(data);
+                        disbursementPeriodIds.add(data.getId());
+                    }
+                }
+
+                for (Map.Entry<LocalDate, List<DisbursementData>> entry : disbursementsByDate.entrySet()) {
+                    List<DisbursementData> sameDateDisbursements = entry.getValue();
+
+                    if (sameDateDisbursements.size() > 1) {
+                        List<DisbursementData> disbursedTranches = sameDateDisbursements.stream().filter(DisbursementData::isDisbursed)
+                                .collect(Collectors.toList());
+
+                        if (!disbursedTranches.isEmpty()) {
+                            for (DisbursementData data : disbursedTranches) {
+                                disbursementDataList.add(new LoanSchedulePeriodDataWrapper(data, data.disbursementDate(), true));
+                            }
+                        } else {
+                            for (DisbursementData data : sameDateDisbursements) {
+                                disbursementDataList.add(new LoanSchedulePeriodDataWrapper(data, data.disbursementDate(), true));
+                            }
+                        }
+                    } else {
+                        DisbursementData data = sameDateDisbursements.get(0);
+                        disbursementDataList.add(new LoanSchedulePeriodDataWrapper(data, data.disbursementDate(), true));
+                    }
+                }
+            } else {
+                for (final DisbursementData data : disbursementData) {
+                    boolean isDueForDisbursement = data.isDueForDisbursement(loanScheduleType, fromDate, dueDate);
+                    boolean isEligible = ((fromDate.equals(this.disbursement.disbursementDate())
+                            && data.disbursementDate().equals(fromDate))
+                            || (fromDate.equals(dueDate) && data.disbursementDate().equals(fromDate))
+                            || canAddDisbursementData(data, isDueForDisbursement, excludePastUnDisbursed))
+                            && !disbursementPeriodIds.contains(data.getId());
+
+                    if (isEligible) {
+                        disbursementDataList.add(new LoanSchedulePeriodDataWrapper(data, data.disbursementDate(), true));
+                        disbursementPeriodIds.add(data.getId());
+                    }
                 }
             }
+
             return disbursementDataList;
+        }
+
+        private boolean hasMultipleTranchesOnSameDate(Collection<DisbursementData> disbursementData) {
+            if (disbursementData == null || disbursementData.size() <= 1) {
+                return false;
+            }
+            return disbursementData.stream().collect(Collectors.groupingBy(DisbursementData::disbursementDate, Collectors.counting()))
+                    .values().stream().anyMatch(count -> count > 1);
         }
 
         private List<LoanSchedulePeriodDataWrapper> collectEligibleCapitalizedIncomeData(LocalDate fromDate, LocalDate dueDate,

@@ -1696,7 +1696,6 @@ public final class LoanApplicationValidator {
             BigDecimal tatalDisbursement = BigDecimal.ZERO;
             final JsonArray variationArray = this.fromApiJsonHelper.extractJsonArrayNamed(LoanApiConstants.disbursementDataParameterName,
                     element);
-            List<LocalDate> expectedDisbursementDates = new ArrayList<>();
             if (variationArray != null && !variationArray.isEmpty()) {
                 if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.isEqualAmortizationParam, element)) {
                     boolean isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isEqualAmortizationParam,
@@ -1721,12 +1720,6 @@ public final class LoanApplicationValidator {
                         baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
                                 .failWithCode(LoanApiConstants.DISBURSEMENT_DATE_BEFORE_ERROR);
                     }
-
-                    if (expectedDisbursementDate != null && expectedDisbursementDates.contains(expectedDisbursementDate)) {
-                        baseDataValidator.reset().parameter(LoanApiConstants.expectedDisbursementDateParameterName)
-                                .failWithCode(LoanApiConstants.DISBURSEMENT_DATE_UNIQUE_ERROR);
-                    }
-                    expectedDisbursementDates.add(expectedDisbursementDate);
 
                     BigDecimal principal = this.fromApiJsonHelper
                             .extractBigDecimalNamed(LoanApiConstants.disbursementPrincipalParameterName, jsonObject, locale);
