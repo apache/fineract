@@ -67,36 +67,15 @@ public class RunreportsApiResource {
     @Path("/availableExports/{reportName}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(
-            summary = "Return all available export types for the specific report",
-            description = "Returns the list of all available export types for a given report."
-    )
+    @Operation(summary = "Return all available export types for the specific report", description = "Returns the list of all available export types for a given report.")
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "OK",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ReportExportType.class)))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Bad Request - Invalid report name or parameters"
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Internal Server Error"
-            )
-    })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ReportExportType.class)))),
+            @ApiResponse(responseCode = "400", description = "Bad Request - Invalid report name or parameters"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error") })
     public Response retrieveAllAvailableExports(
-            @PathParam("reportName") @Parameter(
-                    description = "Name of the report to get available export types for",
-                    example = "Client Listing",
-                    required = true
-            ) final String reportName,
+            @PathParam("reportName") @Parameter(description = "Name of the report to get available export types for", example = "Client Listing", required = true) final String reportName,
             @Context final UriInfo uriInfo,
-            @DefaultValue("false") @QueryParam(IS_SELF_SERVICE_USER_REPORT_PARAMETER) @Parameter(
-                    description = "Indicates if this is a self-service user report",
-                    example = "false"
-            ) final boolean isSelfServiceUserReport) {
+            @DefaultValue("false") @QueryParam(IS_SELF_SERVICE_USER_REPORT_PARAMETER) @Parameter(description = "Indicates if this is a self-service user report", example = "false") final boolean isSelfServiceUserReport) {
 
         MultivaluedMap<String, String> queryParams = new MultivaluedStringMap();
         queryParams.putAll(uriInfo.getQueryParameters());
@@ -115,101 +94,43 @@ public class RunreportsApiResource {
     @Path("{reportName}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON, "text/csv", "application/vnd.ms-excel", "application/pdf", "text/html" })
-    @Operation(
-            summary = "Run a predefined report",
-            description = ReportParameters.FULL_DESCRIPTION
-    )
+    @Operation(summary = "Run a predefined report", description = ReportParameters.FULL_DESCRIPTION)
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "OK - Report executed successfully",
-                    content = @Content(schema = @Schema(implementation = RunreportsApiResourceSwagger.RunReportsResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Bad Request - Missing or invalid parameters"
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized - Not authorized to run this report"
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Internal Server Error"
-            )
-    })
+            @ApiResponse(responseCode = "200", description = "OK - Report executed successfully", content = @Content(schema = @Schema(implementation = RunreportsApiResourceSwagger.RunReportsResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request - Missing or invalid parameters"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Not authorized to run this report"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error") })
     public Response runReport(
-            @PathParam("reportName") @Parameter(
-                    description = "The name of the report to execute (e.g., 'Client Listing', 'Expected Payments By Date')",
-                    example = "Client Listing",
-                    required = true
-            ) final String reportName,
+            @PathParam("reportName") @Parameter(description = "The name of the report to execute (e.g., 'Client Listing', 'Expected Payments By Date')", example = "Client Listing", required = true) final String reportName,
             @Context final UriInfo uriInfo,
 
+            @DefaultValue("false") @QueryParam(IS_SELF_SERVICE_USER_REPORT_PARAMETER) @Parameter(description = "Whether this is a self-service user report", example = "false") final boolean isSelfServiceUserReport,
 
-            @DefaultValue("false") @QueryParam(IS_SELF_SERVICE_USER_REPORT_PARAMETER) @Parameter(
-                    description = "Whether this is a self-service user report",
-                    example = "false"
-            ) final boolean isSelfServiceUserReport,
+            @DefaultValue("false") @QueryParam("exportCSV") @Parameter(description = "Set to true to export results as CSV", example = "false") final Boolean exportCSV,
 
+            @DefaultValue("false") @QueryParam("parameterType") @Parameter(description = "Indicates if this is a parameter type request", example = "false") final Boolean parameterType,
 
-            @DefaultValue("false") @QueryParam("exportCSV") @Parameter(
-                    description = "Set to true to export results as CSV",
-                    example = "false"
-            ) final Boolean exportCSV,
+            @QueryParam("output-type") @Parameter(description = "Output format type (HTML, XLS, CSV, PDF)", example = "HTML") final String outputType,
 
-            @DefaultValue("false") @QueryParam("parameterType") @Parameter(
-                    description = "Indicates if this is a parameter type request",
-                    example = "false"
-            ) final Boolean parameterType,
+            @QueryParam("R_officeId") @Parameter(description = "Office ID filter", example = "1") final String rOfficeId,
 
-            @QueryParam("output-type") @Parameter(
-                    description = "Output format type (HTML, XLS, CSV, PDF)",
-                    example = "HTML"
-            ) final String outputType,
+            @QueryParam("R_loanOfficerId") @Parameter(description = "Loan officer ID filter", example = "5") final String rLoanOfficerId,
 
-            @QueryParam("R_officeId") @Parameter(
-                    description = "Office ID filter",
-                    example = "1"
-            ) final String rOfficeId,
+            @QueryParam("R_fromDate") @Parameter(description = "Start date filter (yyyy-MM-dd)", example = "2023-01-01") final String rFromDate,
 
-            @QueryParam("R_loanOfficerId") @Parameter(
-                    description = "Loan officer ID filter",
-                    example = "5"
-            ) final String rLoanOfficerId,
+            @QueryParam("R_toDate") @Parameter(description = "End date filter (yyyy-MM-dd)", example = "2023-12-31") final String rToDate,
 
-            @QueryParam("R_fromDate") @Parameter(
-                    description = "Start date filter (yyyy-MM-dd)",
-                    example = "2023-01-01"
-            ) final String rFromDate,
+            @QueryParam("R_currencyId") @Parameter(description = "Currency ID filter", example = "USD") final String rCurrencyId,
 
-            @QueryParam("R_toDate") @Parameter(
-                    description = "End date filter (yyyy-MM-dd)",
-                    example = "2023-12-31"
-            ) final String rToDate,
-
-            @QueryParam("R_currencyId") @Parameter(
-                    description = "Currency ID filter",
-                    example = "USD"
-            ) final String rCurrencyId,
-
-            @QueryParam("R_accountNo") @Parameter(
-                    description = "Account number filter",
-                    example = "00010001"
-            ) final String rAccountNo) {
+            @QueryParam("R_accountNo") @Parameter(description = "Account number filter", example = "00010001") final String rAccountNo) {
 
         return processReportRequest(reportName, uriInfo, isSelfServiceUserReport);
     }
 
-
-    public Response runReport(
-            final String reportName,
-            final UriInfo uriInfo,
-            final boolean isSelfServiceUserReport) {
+    public Response runReport(final String reportName, final UriInfo uriInfo, final boolean isSelfServiceUserReport) {
 
         return processReportRequest(reportName, uriInfo, isSelfServiceUserReport);
     }
-
 
     private Response processReportRequest(final String reportName, final UriInfo uriInfo, final boolean isSelfServiceUserReport) {
         MultivaluedMap<String, String> queryParams = new MultivaluedStringMap();

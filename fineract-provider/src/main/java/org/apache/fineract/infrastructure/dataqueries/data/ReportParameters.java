@@ -1,3 +1,22 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.apache.fineract.infrastructure.dataqueries.api;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,66 +33,48 @@ public class ReportParameters {
     public static final String DECIMAL_CHOICE = "decimalChoice";
     public static final String PORTFOLIO_RISK_BRANCH = "Portfolio at Risk by Branch";
 
-    public static final String FULL_DESCRIPTION =
-            "This resource allows you to run and receive output from pre-defined Apache Fineract reports.\n"
-                    + "\n" + "Reports can also be used to provide data for searching and workflow functionality.\n" + "\n"
-                    + "The default output is a JSON formatted \"Generic Resultset\". The Generic Resultset contains Column Heading as well as Data information. However, you can export to CSV format by simply adding \"&exportCSV=true\" to the end of your URL.\n"
-                    + "\n"
-                    + "If Pentaho reports have been pre-defined, they can also be run through this resource. Pentaho reports can return HTML, PDF or CSV formats.\n"
-                    + "\n"
-                    + "The Apache Fineract reference application uses a JQuery plugin called stretchy reporting which, itself, uses this reports resource to provide a pretty flexible reporting User Interface (UI).\n\n"
-                    + "\n" + "\n" + "Example Requests:\n" + "\n" + "runreports/Client%20Listing?R_officeId=1\n" + "\n" + "\n"
-                    + "runreports/Client%20Listing?R_officeId=1&exportCSV=true\n" + "\n" + "\n"
-                    + "runreports/OfficeIdSelectOne?R_officeId=1&parameterType=true\n" + "\n" + "\n"
-                    + "runreports/OfficeIdSelectOne?R_officeId=1&parameterType=true&exportCSV=true\n" + "\n" + "\n"
-                    + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=HTML&R_officeId=1\n"
-                    + "\n" + "\n"
-                    + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=XLS&R_officeId=1\n"
-                    + "\n" + "\n"
-                    + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=CSV&R_officeId=1\n"
-                    + "\n" + "\n"
-                    + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=PDF&R_officeId=1"
-                    + "\n\n**Available Parameters (All Optional):**\n\n"
-                    + "**Common Control Parameters:**\n"
-                    + "- `isSelfServiceUserReport`: Indicates if this is a self-service user report (default: false)\n"
-                    + "- `exportCSV`: Set to true to export results as CSV (default: false)\n"
-                    + "- `parameterType`: Indicates if this is a parameter type request (default: false)\n"
-                    + "- `output-type`: Output format type (HTML, XLS, CSV, PDF)\n"
-                    + "- `enable-business-date`: Enable business date filtering\n"
-                    + "- `obligDateType`: Obligation date type\n"
-                    + "- `decimalChoice`: Decimal formatting choice\n"
-                    + "- `Portfolio at Risk by Branch`: Portfolio risk parameter\n\n"
+    public static final String FULL_DESCRIPTION = "This resource allows you to run and receive output from pre-defined Apache Fineract reports.\n"
+            + "\n" + "Reports can also be used to provide data for searching and workflow functionality.\n" + "\n"
+            + "The default output is a JSON formatted \"Generic Resultset\". The Generic Resultset contains Column Heading as well as Data information. However, you can export to CSV format by simply adding \"&exportCSV=true\" to the end of your URL.\n"
+            + "\n"
+            + "If Pentaho reports have been pre-defined, they can also be run through this resource. Pentaho reports can return HTML, PDF or CSV formats.\n"
+            + "\n"
+            + "The Apache Fineract reference application uses a JQuery plugin called stretchy reporting which, itself, uses this reports resource to provide a pretty flexible reporting User Interface (UI).\n\n"
+            + "\n" + "\n" + "Example Requests:\n" + "\n" + "runreports/Client%20Listing?R_officeId=1\n" + "\n" + "\n"
+            + "runreports/Client%20Listing?R_officeId=1&exportCSV=true\n" + "\n" + "\n"
+            + "runreports/OfficeIdSelectOne?R_officeId=1&parameterType=true\n" + "\n" + "\n"
+            + "runreports/OfficeIdSelectOne?R_officeId=1&parameterType=true&exportCSV=true\n" + "\n" + "\n"
+            + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=HTML&R_officeId=1\n"
+            + "\n" + "\n"
+            + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=XLS&R_officeId=1\n"
+            + "\n" + "\n"
+            + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=CSV&R_officeId=1\n"
+            + "\n" + "\n"
+            + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=PDF&R_officeId=1"
+            + "\n\n**Available Parameters (All Optional):**\n\n" + "**Common Control Parameters:**\n"
+            + "- `isSelfServiceUserReport`: Indicates if this is a self-service user report (default: false)\n"
+            + "- `exportCSV`: Set to true to export results as CSV (default: false)\n"
+            + "- `parameterType`: Indicates if this is a parameter type request (default: false)\n"
+            + "- `output-type`: Output format type (HTML, XLS, CSV, PDF)\n" + "- `enable-business-date`: Enable business date filtering\n"
+            + "- `obligDateType`: Obligation date type\n" + "- `decimalChoice`: Decimal formatting choice\n"
+            + "- `Portfolio at Risk by Branch`: Portfolio risk parameter\n\n"
 
-                    + "**Common Report Parameters (R_ prefixed):**\n"
-                    + "- `R_officeId`: Office ID filter\n"
-                    + "- `R_loanOfficerId`: Loan officer ID filter\n"
-                    + "- `R_currencyId`: Currency ID filter\n"
-                    + "- `R_fromDate`, `R_toDate`: Date range filters (yyyy-MM-dd)\n"
-                    + "- `R_accountNo`: Account number filter\n"
-                    + "- `R_transactionId`: Transaction ID filter\n"
-                    + "- `R_centerId`: Center ID filter\n"
-                    + "- `R_branch`: Branch filter\n"
-                    + "- `R_ondate`: Specific date filter\n"
-                    + "- `R_cycleX`, `R_cycleY`: Cycle filters\n"
-                    + "- `R_fromX`, `R_toY`: Range filters\n"
-                    + "- `R_overdueX`, `R_overdueY`: Overdue filters\n"
-                    + "- `R_endDate`: End date filter\n\n"
+            + "**Common Report Parameters (R_ prefixed):**\n" + "- `R_officeId`: Office ID filter\n"
+            + "- `R_loanOfficerId`: Loan officer ID filter\n" + "- `R_currencyId`: Currency ID filter\n"
+            + "- `R_fromDate`, `R_toDate`: Date range filters (yyyy-MM-dd)\n" + "- `R_accountNo`: Account number filter\n"
+            + "- `R_transactionId`: Transaction ID filter\n" + "- `R_centerId`: Center ID filter\n" + "- `R_branch`: Branch filter\n"
+            + "- `R_ondate`: Specific date filter\n" + "- `R_cycleX`, `R_cycleY`: Cycle filters\n" + "- `R_fromX`, `R_toY`: Range filters\n"
+            + "- `R_overdueX`, `R_overdueY`: Overdue filters\n" + "- `R_endDate`: End date filter\n\n"
 
-                    + "**Other Common Parameters:**\n"
-                    + "- `OfficeId`: Office ID filter (alternative)\n"
-                    + "- `loanOfficerId`: Loan officer ID filter (alternative)\n"
-                    + "- `currencyId`: Currency ID filter (alternative)\n"
-                    + "- `fundId`: Fund ID filter\n"
-                    + "- `loanProductId`: Loan product ID filter\n"
-                    + "- `loanPurposeId`: Loan purpose ID filter\n"
-                    + "- `parType`: Portfolio at risk type\n"
-                    + "- `SelectGLAccountNO`: GL account number selection\n"
-                    + "- `SavingsAccountSubStatus`: Savings account status\n"
-                    + "- `SelectLoanType`: Loan type selection\n\n"
+            + "**Other Common Parameters:**\n" + "- `OfficeId`: Office ID filter (alternative)\n"
+            + "- `loanOfficerId`: Loan officer ID filter (alternative)\n" + "- `currencyId`: Currency ID filter (alternative)\n"
+            + "- `fundId`: Fund ID filter\n" + "- `loanProductId`: Loan product ID filter\n" + "- `loanPurposeId`: Loan purpose ID filter\n"
+            + "- `parType`: Portfolio at risk type\n" + "- `SelectGLAccountNO`: GL account number selection\n"
+            + "- `SavingsAccountSubStatus`: Savings account status\n" + "- `SelectLoanType`: Loan type selection\n\n"
 
-                    + "**Note:** All parameters are optional and report-specific. \n"
-                    + "The exact parameters required depend on the specific report being executed.\n"
-                    + "Some reports may accept additional parameters not listed here.";
+            + "**Note:** All parameters are optional and report-specific. \n"
+            + "The exact parameters required depend on the specific report being executed.\n"
+            + "Some reports may accept additional parameters not listed here.";
 
     @Parameters({
             @Parameter(name = IS_SELF_SERVICE_USER_REPORT, description = "Optional - Indicates if this is a self-service user report", example = "false"),
@@ -114,8 +115,7 @@ public class ReportParameters {
             @Parameter(name = "SavingsAccountSubStatus", description = "Optional - Savings account sub-status", example = "active"),
             @Parameter(name = "SelectLoanType", description = "Optional - Loan type selection", example = "individual"),
 
-            @Parameter(name = "R_*", description = "Optional - Additional report-specific parameters prefixed with 'R_'")
-    })
+            @Parameter(name = "R_*", description = "Optional - Additional report-specific parameters prefixed with 'R_'") })
     public static void getOpenApiParameters() {
 
     }
@@ -125,8 +125,7 @@ public class ReportParameters {
             @Parameter(name = EXPORT_CSV, description = "Optional - Set to true to export results as CSV", example = "true"),
             @Parameter(name = PARAMETER_TYPE, description = "Optional - Indicates if this is a parameter type request", example = "false"),
             @Parameter(name = OUTPUT_TYPE, description = "Optional - Output format type (HTML, XLS, CSV, PDF)", example = "HTML"),
-            @Parameter(name = "R_*", description = "Optional - Report-specific parameters prefixed with 'R_'")
-    })
+            @Parameter(name = "R_*", description = "Optional - Report-specific parameters prefixed with 'R_'") })
     public static void getMinimalOpenApiParameters() {
 
     }
