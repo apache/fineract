@@ -165,8 +165,8 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
         LoanTransaction savedBuyDownFeeAdjustment = loanTransactionRepository.saveAndFlush(buyDownFeeAdjustment);
 
         // Update buy down fee balance
-        LoanBuyDownFeeBalance buydownFeeBalance = loanBuyDownFeeBalanceRepository.findByLoanIdAndLoanTransactionId(loanId,
-                buyDownFeeTransactionId);
+        LoanBuyDownFeeBalance buydownFeeBalance = loanBuyDownFeeBalanceRepository
+                .findByLoanIdAndLoanTransactionIdAndDeletedFalseAndClosedFalse(loanId, buyDownFeeTransactionId);
         if (buydownFeeBalance != null) {
             buydownFeeBalance.setAmountAdjustment(MathUtil.nullToZero(buydownFeeBalance.getAmountAdjustment()).add(transactionAmount));
             buydownFeeBalance

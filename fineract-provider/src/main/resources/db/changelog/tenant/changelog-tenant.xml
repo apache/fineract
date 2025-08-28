@@ -213,4 +213,7 @@
     <include file="parts/0192_create_loan_approved_amount_history.xml" relativeToChangelogFile="true" />
     <include file="parts/0193_add_column_ip.xml" relativeToChangelogFile="true" />
     <include file="parts/0194_fix_missing_permission.xml" relativeToChangelogFile="true" />
+    <include file="parts/0195_create_loan_amortization_allocation_mapping.xml" relativeToChangelogFile="true" />
+    <include file="parts/0196_add_deleted_and_closed_to_buy_down_fee_balance.xml" relativeToChangelogFile="true" />
+    <include file="parts/0197_add_deleted_and_closed_to_capitalized_income_balance.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

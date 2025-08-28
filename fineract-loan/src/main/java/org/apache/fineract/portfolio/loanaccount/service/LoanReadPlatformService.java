@@ -163,4 +163,6 @@ public interface LoanReadPlatformService {
 
     Long getResolvedLoanId(ExternalId loanExternalId);
 
+    Long getResolvedLoanTransactionId(Long transactionId, ExternalId externalTransactionId);
+
 }

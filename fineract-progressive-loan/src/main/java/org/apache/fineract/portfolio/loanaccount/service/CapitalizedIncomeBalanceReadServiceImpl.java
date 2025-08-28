@@ -43,7 +43,8 @@ public class CapitalizedIncomeBalanceReadServiceImpl implements CapitalizedIncom
         if (loanRepository.isEnabledCapitalizedIncome(loanId)) {
 
             List<CapitalizedIncomeDetails> capitalizedIncomeData = new ArrayList<>();
-            List<LoanCapitalizedIncomeBalance> capitalizedIncomeBalances = capitalizedIncomeBalanceRepository.findAllByLoanId(loanId);
+            List<LoanCapitalizedIncomeBalance> capitalizedIncomeBalances = capitalizedIncomeBalanceRepository
+                    .findAllByLoanIdAndDeletedFalseAndClosedFalse(loanId);
             for (final LoanCapitalizedIncomeBalance capitalizedIncomeBalance : capitalizedIncomeBalances) {
                 final BigDecimal amortizedAmount = capitalizedIncomeBalance.getAmount() //
                         .subtract(MathUtil.nullToZero(capitalizedIncomeBalance.getUnrecognizedAmount())) //
@@ -67,7 +68,8 @@ public class CapitalizedIncomeBalanceReadServiceImpl implements CapitalizedIncom
         if (loanRepository.isEnabledCapitalizedIncome(loanId)) {
 
             List<CapitalizedIncomeDetails> capitalizedIncomeData = new ArrayList<>();
-            List<LoanCapitalizedIncomeBalance> capitalizedIncomeBalances = capitalizedIncomeBalanceRepository.findAllByLoanId(loanId);
+            List<LoanCapitalizedIncomeBalance> capitalizedIncomeBalances = capitalizedIncomeBalanceRepository
+                    .findAllByLoanIdAndDeletedFalseAndClosedFalse(loanId);
             for (final LoanCapitalizedIncomeBalance capitalizedIncomeBalance : capitalizedIncomeBalances) {
                 final BigDecimal amortizedAmount = capitalizedIncomeBalance.getAmount() //
                         .subtract(MathUtil.nullToZero(capitalizedIncomeBalance.getUnrecognizedAmount())) //

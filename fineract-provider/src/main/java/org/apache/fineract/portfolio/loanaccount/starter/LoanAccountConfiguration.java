@@ -70,6 +70,7 @@ import org.apache.fineract.portfolio.interestpauses.service.InterestPauseWritePl
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanAmortizationAllocationMappingRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
@@ -118,6 +119,8 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualEventService
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualTransactionBusinessEventService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualTransactionBusinessEventServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAmortizationAllocationService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAmortizationAllocationServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanApplicationWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanApplicationWritePlatformServiceJpaRepositoryImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanArrearsAgingService;
@@ -566,9 +569,10 @@ public class LoanAccountConfiguration {
             final ConfigurationDomainService configurationDomainService, final LoanTransactionRepository loanTransactionRepository,
             final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository,
             final BusinessEventNotifierService businessEventNotifierService, final LoanJournalEntryPoster journalEntryPoster,
-            final ExternalIdFactory externalIdFactory) {
+            final ExternalIdFactory externalIdFactory, final LoanAmortizationAllocationService loanAmortizationAllocationService) {
         return new LoanCapitalizedIncomeAmortizationProcessingServiceImpl(configurationDomainService, loanTransactionRepository,
-                loanCapitalizedIncomeBalanceRepository, businessEventNotifierService, journalEntryPoster, externalIdFactory);
+                loanCapitalizedIncomeBalanceRepository, businessEventNotifierService, journalEntryPoster, externalIdFactory,
+                loanAmortizationAllocationService);
     }
 
     @Bean
@@ -577,9 +581,9 @@ public class LoanAccountConfiguration {
             final LoanTransactionRepository loanTransactionRepository,
             final LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository,
             final BusinessEventNotifierService businessEventNotifierService, final LoanJournalEntryPoster journalEntryPoster,
-            final ExternalIdFactory externalIdFactory) {
+            final ExternalIdFactory externalIdFactory, final LoanAmortizationAllocationService loanAmortizationAllocationService) {
         return new LoanBuyDownFeeAmortizationProcessingServiceImpl(loanTransactionRepository, loanBuyDownFeeBalanceRepository,
-                businessEventNotifierService, journalEntryPoster, externalIdFactory);
+                businessEventNotifierService, journalEntryPoster, externalIdFactory, loanAmortizationAllocationService);
     }
 
     @Bean
@@ -588,5 +592,16 @@ public class LoanAccountConfiguration {
             BusinessEventNotifierService businessEventNotifierService,
             LoanBuyDownFeeAmortizationProcessingService loanBuyDownFeeAmortizationProcessingService) {
         return new LoanBuyDownFeeAmortizationEventService(businessEventNotifierService, loanBuyDownFeeAmortizationProcessingService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(LoanAmortizationAllocationService.class)
+    public LoanAmortizationAllocationService loanAmortizationAllocationService(
+            final LoanAmortizationAllocationMappingRepository loanAmortizationAllocationMappingRepository,
+            final LoanTransactionRepository loanTransactionRepository,
+            final LoanCapitalizedIncomeBalanceRepository capitalizedIncomeBalanceRepository,
+            final LoanBuyDownFeeBalanceRepository buyDownFeeBalanceRepository) {
+        return new LoanAmortizationAllocationServiceImpl(loanAmortizationAllocationMappingRepository, loanTransactionRepository,
+                capitalizedIncomeBalanceRepository, buyDownFeeBalanceRepository);
     }
 }

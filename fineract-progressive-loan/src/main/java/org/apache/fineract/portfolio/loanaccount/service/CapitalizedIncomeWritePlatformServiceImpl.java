@@ -159,8 +159,8 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
         // Create journal entries immediately for this transaction
         journalEntryPoster.postJournalEntriesForLoanTransaction(savedCapitalizedIncomeAdjustment, false, false);
 
-        LoanCapitalizedIncomeBalance capitalizedIncomeBalance = capitalizedIncomeBalanceRepository.findByLoanIdAndLoanTransactionId(loanId,
-                capitalizedIncomeTransactionId);
+        LoanCapitalizedIncomeBalance capitalizedIncomeBalance = capitalizedIncomeBalanceRepository
+                .findByLoanIdAndLoanTransactionIdAndDeletedFalseAndClosedFalse(loanId, capitalizedIncomeTransactionId);
         capitalizedIncomeBalance
                 .setAmountAdjustment(MathUtil.nullToZero(capitalizedIncomeBalance.getAmountAdjustment()).add(transactionAmount));
         capitalizedIncomeBalance.setUnrecognizedAmount(

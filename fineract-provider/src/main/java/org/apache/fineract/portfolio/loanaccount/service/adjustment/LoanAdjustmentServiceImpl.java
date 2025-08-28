@@ -147,12 +147,13 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
             }
 
             LoanCapitalizedIncomeBalance capitalizedIncomeBalance = loanCapitalizedIncomeBalanceRepository
-                    .findByLoanIdAndLoanTransactionId(loan.getId(), transactionToAdjust.getId());
+                    .findByLoanIdAndLoanTransactionIdAndDeletedFalseAndClosedFalse(loan.getId(), transactionToAdjust.getId());
             if (MathUtil.isGreaterThanZero(capitalizedIncomeBalance.getAmountAdjustment())) {
                 throw new InvalidLoanTransactionTypeException("transaction", "capitalizedIncome.cannot.be.reversed.when.adjusted",
                         "Capitalized income transaction cannot be reversed when non-reversed adjustment exists for it.");
             }
-            loanCapitalizedIncomeBalanceRepository.delete(capitalizedIncomeBalance);
+            capitalizedIncomeBalance.setDeleted(true);
+            loanCapitalizedIncomeBalanceRepository.saveAndFlush(capitalizedIncomeBalance);
         }
         if (transactionToAdjust.isCapitalizedIncomeAdjustment()) {
             if (newTransactionDetail.isNotZero()) {
@@ -174,14 +175,15 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
                         "Buy down fee transaction cannot be adjusted");
             }
 
-            LoanBuyDownFeeBalance buyDownFeeBalance = loanBuyDownFeeBalanceRepository.findByLoanIdAndLoanTransactionId(loan.getId(),
-                    transactionToAdjust.getId());
+            LoanBuyDownFeeBalance buyDownFeeBalance = loanBuyDownFeeBalanceRepository
+                    .findByLoanIdAndLoanTransactionIdAndDeletedFalseAndClosedFalse(loan.getId(), transactionToAdjust.getId());
 
             if (MathUtil.isGreaterThanZero(buyDownFeeBalance.getAmountAdjustment())) {
                 throw new InvalidLoanTransactionTypeException("transaction", "buy.down.fee.cannot.be.reversed.when.adjusted",
                         "Buy down fee transaction cannot be reversed when non-reversed adjustment exists for it.");
             }
-            loanBuyDownFeeBalanceRepository.delete(buyDownFeeBalance);
+            buyDownFeeBalance.setDeleted(true);
+            loanBuyDownFeeBalanceRepository.saveAndFlush(buyDownFeeBalance);
         }
         if (transactionToAdjust.isBuyDownFeeAdjustment()) {
             if (newTransactionDetail.isNotZero()) {

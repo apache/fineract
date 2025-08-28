@@ -224,7 +224,7 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
                 }
                 if (transactionAmount != null) {
                     LoanCapitalizedIncomeBalance capitalizedIncomeBalance = loanCapitalizedIncomeBalanceRepository
-                            .findByLoanIdAndLoanTransactionId(loanId, capitalizedIncomeTransactionId);
+                            .findByLoanIdAndLoanTransactionIdAndDeletedFalseAndClosedFalse(loanId, capitalizedIncomeTransactionId);
                     if (MathUtil.isLessThan(capitalizedIncomeBalance.getAmount()
                             .subtract(MathUtil.nullToZero(capitalizedIncomeBalance.getAmountAdjustment())), transactionAmount)) {
                         baseDataValidator.reset().parameter("transactionAmount").value(transactionAmount).failWithCode(
@@ -401,8 +401,8 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
 
                 }
                 if (transactionAmount != null) {
-                    LoanBuyDownFeeBalance buydownFeeBalance = loanBuydownFeeBalanceRepository.findByLoanIdAndLoanTransactionId(loanId,
-                            buyDownFeeTransactionId);
+                    LoanBuyDownFeeBalance buydownFeeBalance = loanBuydownFeeBalanceRepository
+                            .findByLoanIdAndLoanTransactionIdAndDeletedFalseAndClosedFalse(loanId, buyDownFeeTransactionId);
                     if (buydownFeeBalance == null) {
                         baseDataValidator.reset().parameter("buyDownFeeTransactionId").failWithCode("buydown.fee.balance.not.found",
                                 "Buy down fee balance not found for the specified transaction.");

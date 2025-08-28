@@ -45,7 +45,8 @@ public class BuyDownFeeReadPlatformServiceImpl implements BuyDownFeeReadPlatform
             throw new GeneralPlatformDomainRuleException("error.msg.loan.is.not.enabled.buydown.fee",
                     "Loan: %s is not enabled Buydown fee feature".formatted(loanId), loanId);
         }
-        final List<LoanBuyDownFeeBalance> buyDownFeeBalances = loanBuyDownFeeBalanceRepository.findAllByLoanId(loanId);
+        final List<LoanBuyDownFeeBalance> buyDownFeeBalances = loanBuyDownFeeBalanceRepository
+                .findAllByLoanIdAndDeletedFalseAndClosedFalse(loanId);
 
         return buyDownFeeBalances.stream().map(this::mapToLoanBuyDownFeeAmortizationData).collect(Collectors.toList());
     }
