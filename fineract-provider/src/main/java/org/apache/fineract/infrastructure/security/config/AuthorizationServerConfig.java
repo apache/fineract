@@ -15,6 +15,8 @@ import org.apache.fineract.infrastructure.security.data.TenantAuthenticationDeta
 import org.apache.fineract.infrastructure.security.service.BasicAuthTenantDetailsService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.Role;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -29,8 +31,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -42,16 +42,15 @@ import org.springframework.security.oauth2.server.resource.web.DefaultBearerToke
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 
-import static org.springframework.security.config.Customizer.withDefaults;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Configuration
 @EnableWebSecurity
+@ConditionalOnProperty("fineract.security.oauth.enabled")
+@EnableConfigurationProperties(ClientProperties.class)
 public class AuthorizationServerConfig {
-
-
     @Bean
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -122,16 +121,24 @@ public class AuthorizationServerConfig {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
     @Bean
-    public RegisteredClientRepository registeredClientRepository() {
-        RegisteredClient client = RegisteredClient.withId(UUID.randomUUID().toString())
-                .clientId("frontend-client")
-                .scope("read")
-                .clientAuthenticationMethod(ClientAuthenticationMethod.NONE) // public client
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .redirectUri("http://localhost:3000/callback")
-                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(false).build())
-                .build();
-        return new InMemoryRegisteredClientRepository(client);
+    public RegisteredClientRepository registeredClientRepository(ClientProperties clientProps) {
+        List<RegisteredClient> clients = clientProps.getRegistrations().entrySet().stream()
+                .map(entry -> {
+                    ClientProperties.Registration reg = entry.getValue();
+                    return RegisteredClient.withId(UUID.randomUUID().toString())
+                            .clientId(reg.getClientId())
+                            .scopes(scopes -> scopes.addAll(reg.getScopes()))
+                            .authorizationGrantTypes(grants -> reg.getAuthorizationGrantTypes()
+                                    .forEach(grant -> grants.add(new AuthorizationGrantType(grant))))
+                            .redirectUris(uris -> uris.addAll(reg.getRedirectUris()))
+                            .clientSettings(ClientSettings.builder()
+                                    .requireAuthorizationConsent(reg.isRequireAuthorizationConsent())
+                                    .build())
+                            .build();
+                })
+                .toList();
+
+        return new InMemoryRegisteredClientRepository(clients);
     }
 
     @Bean
