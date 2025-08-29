@@ -137,11 +137,15 @@ public class LoanAdjustTransactionBusinessEventSerializerTest {
         String reversedLocalDate = reversedOnDate.format(DateTimeFormatter.ISO_DATE);
         LoanAdjustTransactionBusinessEvent businessEvent = new LoanAdjustTransactionBusinessEvent(loanAdjustTransactionBusinessEventData);
 
-        LoanTransactionData transactionToAdjustData = new LoanTransactionData(1L, 1L, "", LoanEnumerations.transactionType(2), null, null,
-                LocalDate.now(ZoneId.systemDefault()), BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
-                BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
-                new ExternalId("testExternalId"), null, null, BigDecimal.valueOf(0.0), LocalDate.now(ZoneId.systemDefault()).minusDays(4),
-                true, new ExternalId("testReversalExternalId"), reversedOnDate, 1L, new ExternalId("testExternalLoanId"));
+        LoanTransactionData transactionToAdjustData = LoanTransactionData.builder().id(1L).officeId(1L).officeName("")
+                .type(LoanEnumerations.transactionType(2)).date(LocalDate.now(ZoneId.systemDefault())).amount(BigDecimal.valueOf(0.0))
+                .netDisbursalAmount(BigDecimal.valueOf(0.0)).principalPortion(BigDecimal.valueOf(0.0))
+                .interestPortion(BigDecimal.valueOf(0.0)).feeChargesPortion(BigDecimal.valueOf(0.0))
+                .penaltyChargesPortion(BigDecimal.valueOf(0.0)).overpaymentPortion(BigDecimal.valueOf(0.0))
+                .unrecognizedIncomePortion(BigDecimal.valueOf(0.0)).externalId(new ExternalId("testExternalId"))
+                .outstandingLoanBalance(BigDecimal.valueOf(0.0)).submittedOnDate(LocalDate.now(ZoneId.systemDefault()).minusDays(4))
+                .manuallyReversed(true).reversalExternalId(new ExternalId("testReversalExternalId")).reversedOnDate(reversedOnDate)
+                .loanId(1L).externalLoanId(new ExternalId("testExternalLoanId")).build();
 
         when(service.retrieveLoanTransaction(anyLong(), anyLong())).thenReturn(transactionToAdjustData);
         when(loanChargePaidByReadService.fetchLoanChargesPaidByDataTransactionId(anyLong())).thenReturn(new ArrayList<>());
