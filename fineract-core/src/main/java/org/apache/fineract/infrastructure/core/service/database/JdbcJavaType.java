@@ -19,10 +19,10 @@
 package org.apache.fineract.infrastructure.core.service.database;
 
 import com.google.common.collect.ImmutableList;
-import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.JDBCType;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
+import org.springframework.lang.NonNull;
 
 public enum JdbcJavaType {
 
@@ -30,14 +30,14 @@ public enum JdbcJavaType {
     BIT(JavaType.BOOLEAN, new DialectType(JDBCType.BIT), new DialectType(JDBCType.BIT, true)) { //
 
         @Override
-        public Object toJdbcValueImpl(@NotNull DatabaseType dialect, Object value) {
+        public Object toJdbcValueImpl(@NonNull DatabaseType dialect, Object value) {
             return value == null ? null : (Boolean.TRUE.equals(value) ? 1 : 0);
         }
     },
     BOOLEAN(JavaType.BOOLEAN, new DialectType(JDBCType.BIT), new DialectType(JDBCType.BOOLEAN, null, "BOOL")) { //
 
         @Override
-        public Object toJdbcValueImpl(@NotNull DatabaseType dialect, Object value) {
+        public Object toJdbcValueImpl(@NonNull DatabaseType dialect, Object value) {
             return (value != null && dialect.isMySql()) ? (Boolean.TRUE.equals(value) ? 1 : 0) : super.toJdbcValueImpl(dialect, value);
         }
     },
@@ -45,7 +45,7 @@ public enum JdbcJavaType {
     TINYINT(JavaType.SHORT, new DialectType(JDBCType.TINYINT, true), new DialectType(JDBCType.SMALLINT)) { //
 
         @Override
-        public Object toJdbcValueImpl(@NotNull DatabaseType dialect, Object value) {
+        public Object toJdbcValueImpl(@NonNull DatabaseType dialect, Object value) {
             return dialect.isMySql() && value instanceof Boolean ? (Boolean.TRUE.equals(value) ? 1 : 0)
                     : super.toJdbcValueImpl(dialect, value);
         }
@@ -113,21 +113,21 @@ public enum JdbcJavaType {
 
     private static final String PLACEHOLDER_TYPE = "{type}";
 
-    @NotNull
+    @NonNull
     private final JavaType javaType;
     private final ImmutableList<DialectType> dialectTypes;
 
-    JdbcJavaType(@NotNull JavaType javaType, DialectType... dialectTypes) {
+    JdbcJavaType(@NonNull JavaType javaType, DialectType... dialectTypes) {
         this.javaType = javaType;
         this.dialectTypes = ImmutableList.copyOf(dialectTypes);
     }
 
-    @NotNull
+    @NonNull
     public JavaType getJavaType() {
         return javaType;
     }
 
-    public static JdbcJavaType getByTypeName(@NotNull DatabaseType dialect, String name, boolean check) {
+    public static JdbcJavaType getByTypeName(@NonNull DatabaseType dialect, String name, boolean check) {
         if (name == null) {
             return null;
         }
@@ -161,8 +161,8 @@ public enum JdbcJavaType {
         return null;
     }
 
-    @NotNull
-    private DialectType getDialectType(@NotNull DatabaseType dialect) {
+    @NonNull
+    private DialectType getDialectType(@NonNull DatabaseType dialect) {
         DialectType dialectType = dialectTypes.get(dialect.ordinal());
         if (dialectType == null) {
             throw new PlatformServiceUnavailableException("error.msg.database.dialect.not.allowed",
@@ -175,7 +175,7 @@ public enum JdbcJavaType {
         return getJavaType().isBooleanType();
     }
 
-    public boolean canBooleanType(@NotNull DatabaseType dialect) {
+    public boolean canBooleanType(@NonNull DatabaseType dialect) {
         return isBooleanType() || (dialect.isMySql() && this == TINYINT);
     }
 
@@ -251,33 +251,33 @@ public enum JdbcJavaType {
         return getJavaType().isBinaryType();
     }
 
-    public boolean hasPrecision(@NotNull DatabaseType dialect) {
+    public boolean hasPrecision(@NonNull DatabaseType dialect) {
         return getDialectType(dialect).precision;
     }
 
-    public boolean hasScale(@NotNull DatabaseType dialect) {
+    public boolean hasScale(@NonNull DatabaseType dialect) {
         return getDialectType(dialect).scale;
     }
 
-    public String getJdbcName(@NotNull DatabaseType dialect) {
+    public String getJdbcName(@NonNull DatabaseType dialect) {
         DialectType dialectType = getDialectType(dialect);
         return dialectType.getNameResolved();
     }
 
-    public String formatSql(@NotNull DatabaseType dialect, Integer precision) {
+    public String formatSql(@NonNull DatabaseType dialect, Integer precision) {
         return formatSql(dialect, precision, null);
     }
 
-    public String formatSql(@NotNull DatabaseType dialect) {
+    public String formatSql(@NonNull DatabaseType dialect) {
         return formatSql(dialect, null, null);
     }
 
-    public String formatSql(@NotNull DatabaseType dialect, Integer precision, Integer scale) {
+    public String formatSql(@NonNull DatabaseType dialect, Integer precision, Integer scale) {
         DialectType dialectType = getDialectType(dialect);
         return dialectType.formatSql(precision, scale);
     }
 
-    public Object toJdbcValue(@NotNull DatabaseType dialect, Object value, boolean check) {
+    public Object toJdbcValue(@NonNull DatabaseType dialect, Object value, boolean check) {
         if (value != null && check && !javaType.getObjectType().matchType(value.getClass(), false)) {
             throw new PlatformServiceUnavailableException("error.msg.database.type.not.valid",
                     "Data type of parameter " + value + " does not match " + this);
@@ -285,22 +285,22 @@ public enum JdbcJavaType {
         return toJdbcValueImpl(dialect, value);
     }
 
-    public Object toJdbcValueImpl(@NotNull DatabaseType dialect, Object value) {
+    public Object toJdbcValueImpl(@NonNull DatabaseType dialect, Object value) {
         return value;
     }
 
     @com.google.errorprone.annotations.Immutable
     private static final class DialectType implements Serializable {
 
-        @NotNull
+        @NonNull
         private final JDBCType jdbcType;
-        @NotNull
+        @NonNull
         private final String name;
         private final boolean precision;
         private final boolean scale;
         private final ImmutableList<String> alterNames;
 
-        private DialectType(@NotNull JDBCType jdbcType, String name, boolean precision, boolean scale, String... alterNames) {
+        private DialectType(@NonNull JDBCType jdbcType, String name, boolean precision, boolean scale, String... alterNames) {
             this.jdbcType = jdbcType;
             this.name = name == null ? jdbcType.getName() : name;
             this.precision = precision;
@@ -308,27 +308,27 @@ public enum JdbcJavaType {
             this.alterNames = ImmutableList.copyOf(alterNames);
         }
 
-        private DialectType(@NotNull JDBCType jdbcType, String name, boolean precision, String... alterNames) {
+        private DialectType(@NonNull JDBCType jdbcType, String name, boolean precision, String... alterNames) {
             this(jdbcType, name, precision, false, alterNames);
         }
 
-        private DialectType(@NotNull JDBCType jdbcType, String name, boolean precision) {
+        private DialectType(@NonNull JDBCType jdbcType, String name, boolean precision) {
             this(jdbcType, name, precision, false);
         }
 
-        private DialectType(@NotNull JDBCType jdbcType, String name, String... alterNames) {
+        private DialectType(@NonNull JDBCType jdbcType, String name, String... alterNames) {
             this(jdbcType, name, false, false, alterNames);
         }
 
-        private DialectType(@NotNull JDBCType jdbcType, boolean precision, boolean scale) {
+        private DialectType(@NonNull JDBCType jdbcType, boolean precision, boolean scale) {
             this(jdbcType, null, precision, scale);
         }
 
-        private DialectType(@NotNull JDBCType jdbcType, boolean precision) {
+        private DialectType(@NonNull JDBCType jdbcType, boolean precision) {
             this(jdbcType, null, precision, false);
         }
 
-        private DialectType(@NotNull JDBCType jdbcType) {
+        private DialectType(@NonNull JDBCType jdbcType) {
             this(jdbcType, null, false, false);
         }
 
@@ -346,7 +346,7 @@ public enum JdbcJavaType {
             }
         }
 
-        private String addSqlPrecisionScale(@NotNull String name, Integer precision, Integer scale) {
+        private String addSqlPrecisionScale(@NonNull String name, Integer precision, Integer scale) {
             if (!this.precision || precision == null) {
                 return name;
             }

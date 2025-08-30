@@ -100,11 +100,11 @@ import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.report.ReportHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.hamcrest.Matchers;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.lang.NonNull;
 
 @SuppressWarnings("rawtypes")
 @ExtendWith({ ExternalEventsExtension.class })
@@ -1312,14 +1312,14 @@ public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationT
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, false);
     }
 
-    @NotNull
+    @NonNull
     private Integer createClient() {
         final Integer clientID = ClientHelper.createClient(REQUEST_SPEC, RESPONSE_SPEC);
         Assertions.assertNotNull(clientID);
         return clientID;
     }
 
-    @NotNull
+    @NonNull
     private Integer createLoanForClient(Integer clientID) {
         Integer overdueFeeChargeId = ChargesHelper.createCharges(REQUEST_SPEC, RESPONSE_SPEC,
                 ChargesHelper.getLoanOverdueFeeJSONWithCalculationTypePercentage("1"));

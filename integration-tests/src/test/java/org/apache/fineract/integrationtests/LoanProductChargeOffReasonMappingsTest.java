@@ -36,9 +36,9 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.lang.NonNull;
 
 public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationTest {
 
@@ -225,7 +225,7 @@ public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationT
                 .allowPartialPeriodInterestCalcualtion(false);//
     }
 
-    @NotNull
+    @NonNull
     private static List<PostChargeOffReasonToExpenseAccountMappings> createPostChargeOffReasonToExpenseAccountMappings(
             Long chargeOffReasonId, Long glAccountId) {
         List<PostChargeOffReasonToExpenseAccountMappings> chargeOffReasonToExpenseAccountMappings = new ArrayList<>();

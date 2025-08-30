@@ -59,10 +59,10 @@ import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuil
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.lang.NonNull;
 
 @SuppressWarnings("rawtypes")
 @Slf4j
@@ -214,7 +214,7 @@ public class CobPartitioningTest extends BaseLoanIntegrationTest {
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, false);
     }
 
-    @NotNull
+    @NonNull
     private Integer createClient() {
         final Integer clientID = ClientHelper.createClient(REQUEST_SPEC, RESPONSE_SPEC);
         Assertions.assertNotNull(clientID);
@@ -231,7 +231,7 @@ public class CobPartitioningTest extends BaseLoanIntegrationTest {
         return loanProductID;
     }
 
-    @NotNull
+    @NonNull
     private Integer createLoanForClient(Integer clientID, Integer loanProductID) {
 
         HashMap loanStatusHashMap;

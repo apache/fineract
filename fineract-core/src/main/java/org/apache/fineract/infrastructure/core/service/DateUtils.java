@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.core.service;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -41,6 +40,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
+import org.springframework.lang.NonNull;
 
 public final class DateUtils {
 
@@ -86,8 +86,8 @@ public final class DateUtils {
         return truncate == null ? now : now.truncatedTo(truncate);
     }
 
-    @NotNull
-    public static OffsetDateTime getOffsetDateTimeOfTenantFromLocalDate(@NotNull final LocalDate date) {
+    @NonNull
+    public static OffsetDateTime getOffsetDateTimeOfTenantFromLocalDate(@NonNull final LocalDate date) {
         return OffsetDateTime.of(date.atStartOfDay(), getOffsetDateTimeOfTenant().getOffset());
     }
 
@@ -178,7 +178,7 @@ public final class DateUtils {
         return compare(first, second, null, false);
     }
 
-    public static int compareWithNullsLast(@NotNull Optional<OffsetDateTime> first, @NotNull Optional<OffsetDateTime> second) {
+    public static int compareWithNullsLast(@NonNull Optional<OffsetDateTime> first, @NonNull Optional<OffsetDateTime> second) {
         return compareWithNullsLast(first.orElse(null), second.orElse(null));
     }
 
@@ -302,14 +302,14 @@ public final class DateUtils {
         return isAfter(first, second) || isEqual(first, second);
     }
 
-    public static long getDifference(LocalDate first, LocalDate second, @NotNull ChronoUnit unit) {
+    public static long getDifference(LocalDate first, LocalDate second, @NonNull ChronoUnit unit) {
         if (first == null || second == null) {
             throw new IllegalArgumentException("Dates must not be null to get difference");
         }
         return unit.between(first, second);
     }
 
-    public static int getExactDifference(LocalDate first, LocalDate second, @NotNull ChronoUnit unit) {
+    public static int getExactDifference(LocalDate first, LocalDate second, @NonNull ChronoUnit unit) {
         return Math.toIntExact(getDifference(first, second, unit));
     }
 
@@ -413,7 +413,7 @@ public final class DateUtils {
         return fromDate != null && DateUtils.isAfter(targetDate, fromDate) && !DateUtils.isAfter(targetDate, toDate);
     }
 
-    @NotNull
+    @NonNull
     private static DateTimeFormatter getDateFormatter(String format, Locale locale) {
         DateTimeFormatter formatter = DEFAULT_DATE_FORMATTER;
         if (format != null || locale != null) {
@@ -425,7 +425,7 @@ public final class DateUtils {
         return formatter;
     }
 
-    @NotNull
+    @NonNull
     private static DateTimeFormatter getDateTimeFormatter(String format, Locale locale) {
         DateTimeFormatter formatter = DEFAULT_DATETIME_FORMATTER;
         if (format != null || locale != null) {

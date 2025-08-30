@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.core.service.database;
 
 import static java.lang.String.format;
 
-import jakarta.validation.constraints.NotNull;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -35,6 +34,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -96,7 +96,7 @@ public class DatabaseSpecificSQLGenerator {
         }
     }
 
-    public String countLastExecutedQueryResult(@NotNull String sql) {
+    public String countLastExecutedQueryResult(@NonNull String sql) {
         if (databaseTypeResolver.isMySQL()) {
             return "SELECT FOUND_ROWS()";
         } else {
@@ -104,7 +104,7 @@ public class DatabaseSpecificSQLGenerator {
         }
     }
 
-    public String countQueryResult(@NotNull String sql) {
+    public String countQueryResult(@NonNull String sql) {
         // Needs to remove the limit and offset
         sql = sql.replaceAll("LIMIT \\d+", "").replaceAll("OFFSET \\d+", "").trim();
         return format("SELECT COUNT(*) FROM (%s) AS temp", sql);
@@ -201,7 +201,7 @@ public class DatabaseSpecificSQLGenerator {
         }
     }
 
-    public String alias(@NotNull String field, String alias) {
+    public String alias(@NonNull String field, String alias) {
         return Strings.isEmpty(alias) ? field : (alias + '.') + field;
     }
 
@@ -227,7 +227,7 @@ public class DatabaseSpecificSQLGenerator {
         return from + escape(definition) + (Strings.isEmpty(alias) ? "" : (" " + alias));
     }
 
-    public String buildJoin(@NotNull String definition, String alias, @NotNull String fkCol, String refAlias, @NotNull String refCol,
+    public String buildJoin(@NonNull String definition, String alias, @NonNull String fkCol, String refAlias, @NonNull String refCol,
             String joinType) {
         String join = Strings.isEmpty(joinType) ? "JOIN" : (joinType + " JOIN");
         alias = Strings.isEmpty(alias) ? "" : (" " + alias);
@@ -246,7 +246,7 @@ public class DatabaseSpecificSQLGenerator {
                 .collect(Collectors.joining(", "));
     }
 
-    public String buildInsert(@NotNull String definition, List<String> fields, Map<String, ResultsetColumnHeaderData> headers) {
+    public String buildInsert(@NonNull String definition, List<String> fields, Map<String, ResultsetColumnHeaderData> headers) {
         if (fields == null || fields.isEmpty()) {
             return "";
         }
@@ -254,7 +254,7 @@ public class DatabaseSpecificSQLGenerator {
                 + ") VALUES (" + fields.stream().map(e -> decoratePlaceHolder(headers, e, "?")).collect(Collectors.joining(", ")) + ")";
     }
 
-    public String buildUpdate(@NotNull String definition, List<String> fields, Map<String, ResultsetColumnHeaderData> headers) {
+    public String buildUpdate(@NonNull String definition, List<String> fields, Map<String, ResultsetColumnHeaderData> headers) {
         if (fields == null || fields.isEmpty()) {
             return "";
         }

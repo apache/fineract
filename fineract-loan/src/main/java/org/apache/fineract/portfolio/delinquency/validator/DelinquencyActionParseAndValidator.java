@@ -23,7 +23,6 @@ import static org.apache.fineract.portfolio.delinquency.validator.DelinquencyAct
 import static org.apache.fineract.portfolio.delinquency.validator.DelinquencyActionParameters.START_DATE;
 
 import com.google.gson.JsonElement;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +38,7 @@ import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
@@ -48,7 +48,7 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
     private final FromJsonHelper jsonHelper;
     private final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
 
-    public LoanDelinquencyAction validateAndParseUpdate(@NotNull final JsonCommand command, Loan loan,
+    public LoanDelinquencyAction validateAndParseUpdate(@NonNull final JsonCommand command, Loan loan,
             List<LoanDelinquencyAction> savedDelinquencyActions, LocalDate businessDate) {
         List<LoanDelinquencyActionData> effectiveDelinquencyList = delinquencyEffectivePauseHelper
                 .calculateEffectiveDelinquencyList(savedDelinquencyActions);
@@ -183,8 +183,8 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
                 || (parsed.getStartDate().isEqual(existing.getStartDate()) && parsed.getEndDate().isEqual(existing.getEndDate()));
     }
 
-    @org.jetbrains.annotations.NotNull
-    private LoanDelinquencyAction parseCommand(@org.jetbrains.annotations.NotNull JsonCommand command) {
+    @NonNull
+    private LoanDelinquencyAction parseCommand(@NonNull JsonCommand command) {
         LoanDelinquencyAction parsedDelinquencyAction = new LoanDelinquencyAction();
         parsedDelinquencyAction.setAction(extractAction(command.parsedJson()));
         parsedDelinquencyAction.setStartDate(extractStartDate(command.parsedJson()));

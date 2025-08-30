@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.savings.service;
 
-import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -48,6 +47,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsHelper;
 import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
 import org.apache.fineract.portfolio.tax.data.TaxComponentData;
 import org.apache.fineract.portfolio.tax.service.TaxUtils;
+import org.springframework.lang.NonNull;
 
 @RequiredArgsConstructor
 public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountInterestPostingService {
@@ -346,7 +346,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         return savingsAccountData.getSavingsAccountTransactionData();
     }
 
-    private SavingsAccountTransactionData retrieveLastTransaction(@NotNull SavingsAccountData savingsAccountData) {
+    private SavingsAccountTransactionData retrieveLastTransaction(@NonNull SavingsAccountData savingsAccountData) {
         List<SavingsAccountTransactionData> transactions = savingsAccountData.getSavingsAccountTransactionData();
         if (transactions == null || transactions.isEmpty()) {
             return savingsAccountData.getLastSavingsAccountTransaction(); // what is this?

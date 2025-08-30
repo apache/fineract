@@ -42,7 +42,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationT
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.util.CapitalizedIncomeAmortizationUtil;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +59,7 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
 
     @Override
     @Transactional
-    public void processCapitalizedIncomeAmortizationOnLoanClosure(@NotNull final Loan loan, final boolean addJournal) {
+    public void processCapitalizedIncomeAmortizationOnLoanClosure(@NonNull final Loan loan, final boolean addJournal) {
         final LocalDate transactionDate = getFinalCapitalizedIncomeAmortizationTransactionDate(loan);
         final Optional<LoanTransaction> amortizationTransaction = createCapitalizedIncomeAmortizationTransaction(loan, transactionDate,
                 false, null);
@@ -80,7 +79,7 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
 
     @Override
     @Transactional
-    public void processCapitalizedIncomeAmortizationOnLoanChargeOff(@NotNull final Loan loan,
+    public void processCapitalizedIncomeAmortizationOnLoanChargeOff(@NonNull final Loan loan,
             @NonNull final LoanTransaction chargeOffTransaction) {
         LocalDate transactionDate = loan.getChargedOffOnDate();
         if (transactionDate == null) {
@@ -148,7 +147,7 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
 
     @Override
     @Transactional
-    public void processCapitalizedIncomeAmortizationOnLoanUndoChargeOff(@NotNull final LoanTransaction loanTransaction) {
+    public void processCapitalizedIncomeAmortizationOnLoanUndoChargeOff(@NonNull final LoanTransaction loanTransaction) {
         final Loan loan = loanTransaction.getLoan();
 
         loan.getLoanTransactions().stream().filter(LoanTransaction::isCapitalizedIncomeAmortization)

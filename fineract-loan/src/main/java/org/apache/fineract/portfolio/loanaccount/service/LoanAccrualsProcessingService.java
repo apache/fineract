@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.exception.MultiException;
@@ -28,22 +27,22 @@ import org.springframework.lang.NonNull;
 
 public interface LoanAccrualsProcessingService {
 
-    void addPeriodicAccruals(@NotNull LocalDate tillDate) throws MultiException;
+    void addPeriodicAccruals(@NonNull LocalDate tillDate) throws MultiException;
 
-    void addPeriodicAccruals(@NotNull LocalDate tillDate, @NotNull Loan loan) throws MultiException;
+    void addPeriodicAccruals(@NonNull LocalDate tillDate, @NonNull Loan loan) throws MultiException;
 
-    void addAccruals(@NotNull LocalDate tillDate) throws MultiException;
+    void addAccruals(@NonNull LocalDate tillDate) throws MultiException;
 
-    void reprocessExistingAccruals(@NotNull Loan loan, boolean addEvent);
+    void reprocessExistingAccruals(@NonNull Loan loan, boolean addEvent);
 
-    void processAccrualsOnInterestRecalculation(@NotNull Loan loan, boolean isInterestRecalculationEnabled, boolean addJournal);
+    void processAccrualsOnInterestRecalculation(@NonNull Loan loan, boolean isInterestRecalculationEnabled, boolean addJournal);
 
     void addIncomePostingAndAccruals(Long loanId) throws Exception;
 
-    void processIncomePostingAndAccruals(@NotNull Loan loan, boolean addEvent);
+    void processIncomePostingAndAccruals(@NonNull Loan loan, boolean addEvent);
 
     void processAccrualsOnLoanClosure(@NonNull Loan loan, boolean addJournal);
 
-    void processAccrualsOnLoanForeClosure(@NotNull Loan loan, @NotNull LocalDate foreClosureDate,
-            @NotNull List<LoanTransaction> newAccrualTransactions);
+    void processAccrualsOnLoanForeClosure(@NonNull Loan loan, @NonNull LocalDate foreClosureDate,
+            @NonNull List<LoanTransaction> newAccrualTransactions);
 }

@@ -18,25 +18,25 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
-import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.api.IdTypeResolver;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.jobs.data.JobDetailData;
 import org.apache.fineract.infrastructure.jobs.data.JobDetailHistoryData;
+import org.springframework.lang.NonNull;
 
 public interface SchedulerJobRunnerReadService {
 
     List<JobDetailData> findAllJobDetails();
 
-    JobDetailData retrieveOne(@NotNull IdTypeResolver.IdType idType, String identifier);
+    JobDetailData retrieveOne(@NonNull IdTypeResolver.IdType idType, String identifier);
 
-    Page<JobDetailHistoryData> retrieveJobHistory(@NotNull IdTypeResolver.IdType idType, String identifier,
+    Page<JobDetailHistoryData> retrieveJobHistory(@NonNull IdTypeResolver.IdType idType, String identifier,
             SearchParameters searchParameters);
 
-    @NotNull
-    Long retrieveId(@NotNull IdTypeResolver.IdType idType, String identifier);
+    @NonNull
+    Long retrieveId(@NonNull IdTypeResolver.IdType idType, String identifier);
 
     boolean isUpdatesAllowed();
 }

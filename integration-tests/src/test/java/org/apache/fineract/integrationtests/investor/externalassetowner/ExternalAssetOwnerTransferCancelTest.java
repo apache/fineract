@@ -70,10 +70,10 @@ import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuil
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.lang.NonNull;
 
 @SuppressWarnings("rawtypes")
 public class ExternalAssetOwnerTransferCancelTest extends BaseLoanIntegrationTest {
@@ -288,14 +288,14 @@ public class ExternalAssetOwnerTransferCancelTest extends BaseLoanIntegrationTes
                 new PutGlobalConfigurationsRequest().enabled(false));
     }
 
-    @NotNull
+    @NonNull
     private Integer createClient() {
         final Integer clientID = ClientHelper.createClient(REQUEST_SPEC, RESPONSE_SPEC);
         Assertions.assertNotNull(clientID);
         return clientID;
     }
 
-    @NotNull
+    @NonNull
     private Integer createLoanForClient(Integer clientID) {
         Integer overdueFeeChargeId = ChargesHelper.createCharges(REQUEST_SPEC, RESPONSE_SPEC,
                 ChargesHelper.getLoanOverdueFeeJSONWithCalculationTypePercentage("1"));

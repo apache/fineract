@@ -64,7 +64,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -81,6 +80,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.lang.NonNull;
 
 @ExtendWith(MockitoExtension.class)
 public class LoanAccountOwnerTransferBusinessStepTest {
@@ -574,7 +574,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         assertEquals("Execute external asset owner transfer", actualEnumName);
     }
 
-    @NotNull
+    @NonNull
     private ArgumentCaptor<BusinessEvent<?>> verifyBusinessEvents(int expectedBusinessEvents) {
         @SuppressWarnings("unchecked")
         ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = ArgumentCaptor.forClass(BusinessEvent.class);

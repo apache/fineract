@@ -39,9 +39,9 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.lang.Nullable;
 
 @Slf4j
 public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoanIntegrationTest {

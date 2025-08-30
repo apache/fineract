@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Map;
@@ -36,6 +35,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.springframework.lang.NonNull;
 
 @RequiredArgsConstructor
 public class LoanTransactionAssembler {
@@ -69,8 +69,8 @@ public class LoanTransactionAssembler {
                 txnExternalId, null);
     }
 
-    public LoanTransaction assembleAccrualActivityTransaction(@NotNull Loan loan, @NotNull LoanRepaymentScheduleInstallment installment,
-            @NotNull LocalDate transactionDate) {
+    public LoanTransaction assembleAccrualActivityTransaction(@NonNull Loan loan, @NonNull LoanRepaymentScheduleInstallment installment,
+            @NonNull LocalDate transactionDate) {
         ExternalId externalId = externalIdFactory.create();
 
         BigDecimal interestPortion = installment.getInterestCharged();

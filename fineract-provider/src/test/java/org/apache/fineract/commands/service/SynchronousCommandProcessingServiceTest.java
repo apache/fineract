@@ -57,7 +57,6 @@ import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProces
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,6 +66,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.NonNull;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -454,7 +454,7 @@ public class SynchronousCommandProcessingServiceTest {
         verify(commandSourceService).generateErrorInfo(runtimeException);
     }
 
-    @NotNull
+    @NonNull
     private static CommandWrapper getCommandWrapper() {
         CommandWrapper commandWrapper = Mockito.mock(CommandWrapper.class);
         when(commandWrapper.isDatatableResource()).thenReturn(false);

@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
-import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.springframework.lang.NonNull;
 
 public final class MathUtil {
 
@@ -303,7 +303,7 @@ public final class MathUtil {
     /**
      * @return BigDecimal with scale set to the 'digitsAfterDecimal' of the parameter currency
      */
-    public static BigDecimal normalizeAmount(BigDecimal amount, @NotNull MonetaryCurrency currency) {
+    public static BigDecimal normalizeAmount(BigDecimal amount, @NonNull MonetaryCurrency currency) {
         return amount == null ? null : amount.setScale(currency.getDigitsAfterDecimal(), MoneyHelper.getRoundingMode());
     }
 
@@ -321,7 +321,7 @@ public final class MathUtil {
         return amount == null ? null : amount.toPlainString();
     }
 
-    public static Money toMoney(BigDecimal amount, @NotNull MonetaryCurrency currency) {
+    public static Money toMoney(BigDecimal amount, @NonNull MonetaryCurrency currency) {
         return amount == null ? null : Money.of(currency, amount);
     }
 
@@ -331,11 +331,11 @@ public final class MathUtil {
         return value == null ? null : value.getAmount();
     }
 
-    public static Money nullToZero(Money value, @NotNull MonetaryCurrency currency) {
+    public static Money nullToZero(Money value, @NonNull MonetaryCurrency currency) {
         return nullToDefault(value, Money.zero(currency));
     }
 
-    public static Money nullToZero(Money value, @NotNull MonetaryCurrency currency, @NotNull MathContext mc) {
+    public static Money nullToZero(Money value, @NonNull MonetaryCurrency currency, @NonNull MathContext mc) {
         return nullToDefault(value, Money.zero(currency, mc));
     }
 

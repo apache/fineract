@@ -25,7 +25,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -56,6 +55,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepositor
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanDisbursementValidator;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.springframework.lang.NonNull;
 
 @RequiredArgsConstructor
 public class LoanDisbursementService {
@@ -117,8 +117,8 @@ public class LoanDisbursementService {
         }
     }
 
-    public Money adjustDisburseAmount(final Loan loan, @NotNull final JsonCommand command,
-            @NotNull final LocalDate actualDisbursementDate) {
+    public Money adjustDisburseAmount(final Loan loan, @NonNull final JsonCommand command,
+            @NonNull final LocalDate actualDisbursementDate) {
         Money disburseAmount = loan.getLoanRepaymentScheduleDetail().getPrincipal().zero();
         final BigDecimal principalDisbursed = command.bigDecimalValueOfParameterNamed(LoanApiConstants.principalDisbursedParameterName);
         if (loan.getActualDisbursementDate() == null || DateUtils.isBefore(actualDisbursementDate, loan.getActualDisbursementDate())) {

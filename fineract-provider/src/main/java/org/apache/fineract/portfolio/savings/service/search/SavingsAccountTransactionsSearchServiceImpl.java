@@ -22,7 +22,6 @@ import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsCons
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 
 import com.google.gson.JsonObject;
-import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,13 +49,14 @@ import org.apache.fineract.portfolio.search.data.ColumnFilterData;
 import org.apache.fineract.portfolio.search.data.TableQueryData;
 import org.apache.fineract.portfolio.search.data.TransactionSearchRequest;
 import org.apache.fineract.portfolio.search.service.SearchUtil;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional(readOnly = true)
@@ -72,8 +72,8 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
     private final SearchUtil searchUtil;
 
     @Override
-    public Page<SavingsAccountTransactionData> searchTransactions(@NotNull Long savingsId,
-            @NotNull TransactionSearchRequest searchParameters) {
+    public Page<SavingsAccountTransactionData> searchTransactions(@NonNull Long savingsId,
+            @NonNull TransactionSearchRequest searchParameters) {
         context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         String apptable = EntityTables.SAVINGS_TRANSACTION.getApptableName();
@@ -130,8 +130,8 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
         return PageableExecutionUtils.getPage(results, pageable, () -> totalElements);
     }
 
-    private static void addFromToFilter(@NotNull String column, String fromValue, String toValue,
-            @NotNull List<ColumnFilterData> columnFilters) {
+    private static void addFromToFilter(@NonNull String column, String fromValue, String toValue,
+            @NonNull List<ColumnFilterData> columnFilters) {
         if (fromValue != null) {
             columnFilters.add(toValue == null ? ColumnFilterData.create(column, SqlOperator.GTE, fromValue)
                     : ColumnFilterData.btw(column, fromValue, toValue));
@@ -141,7 +141,7 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
     }
 
     @Nullable
-    private static Boolean addTransactionTypesFilter(@NotNull TransactionSearchRequest searchParameters,
+    private static Boolean addTransactionTypesFilter(@NonNull TransactionSearchRequest searchParameters,
             List<ColumnFilterData> columnFilters) {
         Predicate<SavingsAccountTransactionType> filter = null;
         Boolean credit = searchParameters.getCredit();
@@ -178,7 +178,7 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
     }
 
     @Override
-    public Page<JsonObject> queryAdvanced(@NotNull Long savingsId, @NotNull PagedLocalRequest<AdvancedQueryRequest> pagedRequest) {
+    public Page<JsonObject> queryAdvanced(@NonNull Long savingsId, @NonNull PagedLocalRequest<AdvancedQueryRequest> pagedRequest) {
         context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_RESOURCE_NAME);
         String apptable = EntityTables.SAVINGS_TRANSACTION.getApptableName();
 
