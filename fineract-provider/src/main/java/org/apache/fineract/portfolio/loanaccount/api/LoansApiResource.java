@@ -1037,7 +1037,7 @@ public class LoansApiResource {
         List<LoanTermVariationsData> loanTermVariations = null;
         Collection<LoanCollateralResponseData> loanCollateralManagements;
         Collection<LoanCollateralManagementData> loanCollateralManagementData = new ArrayList<>();
-        CollectionData collectionData = this.delinquencyReadPlatformService.calculateLoanCollectionData(resolvedLoanId);
+        CollectionData collectionData = null;
 
         final Set<String> mandatoryResponseParameters = new HashSet<>();
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -1060,6 +1060,11 @@ public class LoansApiResource {
                 if (CollectionUtils.isEmpty(guarantors)) {
                     guarantors = null;
                 }
+            }
+
+            if (associationParameters.contains(DataTableApiConstant.collectionAssociateParamName)) {
+                mandatoryResponseParameters.add(DataTableApiConstant.collectionAssociateParamName);
+                collectionData = this.delinquencyReadPlatformService.calculateLoanCollectionData(resolvedLoanId);
             }
 
             if (associationParameters.contains(DataTableApiConstant.transactionsAssociateParamName)) {

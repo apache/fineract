@@ -2210,7 +2210,7 @@ public class LoanStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanCreateResponse.body().getLoanId();
 
-        Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "collection", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
         testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
 
@@ -3299,7 +3299,7 @@ public class LoanStepDef extends AbstractStepDef {
         assert loanResponse.body() != null;
         final long loanId = loanResponse.body().getLoanId();
 
-        final Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
+        final Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "collection", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetails);
 
         assert loanDetails.body() != null;

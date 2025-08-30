@@ -499,7 +499,7 @@ public class EventCheckHelper {
     }
 
     public void loanAccountDelinquencyPauseChangedBusinessEventCheck(Long loanId) throws IOException {
-        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
+        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "all", "", "").execute();
         List<GetLoansLoanIdDelinquencyPausePeriod> delinquencyPausePeriodsActual = loanDetails.body().getDelinquent()
                 .getDelinquencyPausePeriods();
 
