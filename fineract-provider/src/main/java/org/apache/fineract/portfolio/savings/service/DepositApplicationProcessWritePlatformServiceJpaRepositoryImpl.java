@@ -157,6 +157,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         try {
             this.depositAccountDataValidator.validateFixedDepositForSubmit(command.json());
             final AppUser submittedBy = this.context.authenticatedUser();
+            final String accountNo = command.stringValueOfParameterNamed("accountNo");
 
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                     .isSavingsInterestPostingAtCurrentPeriodEnd();
@@ -172,7 +173,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     financialYearBeginningMonth);
             this.fixedDepositAccountRepository.saveAndFlush(account);
 
-            if (account.isAccountNumberRequiresAutoGeneration()) {
+            if (StringUtils.isEmpty(accountNo)) {
                 AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.CLIENT);
                 account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
 
@@ -218,6 +219,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         try {
             this.depositAccountDataValidator.validateRecurringDepositForSubmit(command.json());
             final AppUser submittedBy = this.context.authenticatedUser();
+            final String accountNo = command.stringValueOfParameterNamed("accountNo");
 
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                     .isSavingsInterestPostingAtCurrentPeriodEnd();
@@ -228,7 +230,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             this.recurringDepositAccountRepository.save(account);
 
-            if (account.isAccountNumberRequiresAutoGeneration()) {
+            if (StringUtils.isEmpty(accountNo)) {
                 final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository
                         .findByAccountType(EntityAccountType.SAVINGS);
                 account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));

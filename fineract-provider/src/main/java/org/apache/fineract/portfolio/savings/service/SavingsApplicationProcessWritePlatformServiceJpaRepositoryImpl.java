@@ -150,12 +150,13 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             Boolean isLastChildApplication = false;
 
             // gsim
-            if (account.isAccountNumberRequiresAutoGeneration()) {
+            final String accountNo = command.stringValueOfParameterNamed("accountNo");
+            if (StringUtils.isBlank(accountNo)) {
 
                 final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository
                         .findByAccountType(EntityAccountType.SAVINGS);
                 // if application is of GSIM type
-                if (account.getAccountTypes() == 5) {
+                if (account.getAccountType().isGSIMAccount()) {
                     final Long groupId = command.longValueOfParameterNamed("groupId");
                     // GSIM specific parameters
                     if (command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("applicationId") != null) {
@@ -227,7 +228,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     }
                 } else {
                     // for applications other than GSIM
-                    generateAccountNumber(account);
+                    generateAccountNumber(account, accountNo);
                 }
             }
             // end of gsim
@@ -259,8 +260,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         }
     }
 
-    private void generateAccountNumber(final SavingsAccount account) {
-        if (account.isAccountNumberRequiresAutoGeneration()) {
+    private void generateAccountNumber(final SavingsAccount account, final String accountNo) {
+        if (StringUtils.isBlank(accountNo)) {
             final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.SAVINGS);
             account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
 
@@ -661,6 +662,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsAccountDataDTO.getClient(),
                 savingsAccountDataDTO.getGroup(), savingsAccountDataDTO.getSavingsProduct(), savingsAccountDataDTO.getApplicationDate(),
                 savingsAccountDataDTO.getAppliedBy());
+        generateAccountNumber(account, account.getAccountNumber());
         account.approveAndActivateApplication(savingsAccountDataDTO.getApplicationDate(), savingsAccountDataDTO.getAppliedBy());
         Money amountForDeposit = account.activateWithBalance();
 
@@ -674,7 +676,6 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 existingReversedTransactionIds);
         this.savingAccountRepository.saveAndFlush(account);
 
-        generateAccountNumber(account);
         // post journal entries for activation charges
         this.savingsAccountDomainService.postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, false);
 

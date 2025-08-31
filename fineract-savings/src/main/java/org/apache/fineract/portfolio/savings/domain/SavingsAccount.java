@@ -317,8 +317,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
     private Set<SavingsOfficerAssignmentHistory> savingsOfficerHistory = new HashSet<>();
 
     @Transient
-    protected boolean accountNumberRequiresAutoGeneration = false;
-    @Transient
     protected SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
     @Transient
     protected SavingsHelper savingsHelper;
@@ -407,7 +405,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         this.savingsOfficer = savingsOfficer;
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
-            this.accountNumberRequiresAutoGeneration = true;
         } else {
             this.accountNumber = accountNo;
         }
@@ -1977,11 +1974,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
     public void updateAccountNo(final String newAccountNo) {
         this.accountNumber = newAccountNo;
-        this.accountNumberRequiresAutoGeneration = false;
-    }
-
-    public boolean isAccountNumberRequiresAutoGeneration() {
-        return this.accountNumberRequiresAutoGeneration;
     }
 
     public Long productId() {

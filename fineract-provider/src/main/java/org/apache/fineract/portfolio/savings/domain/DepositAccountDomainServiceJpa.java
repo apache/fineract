@@ -436,11 +436,9 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
     }
 
     private void autoGenerateAccountNumber(final SavingsAccount account) {
-        if (account.isAccountNumberRequiresAutoGeneration()) {
-            final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.SAVINGS);
-            account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
-            this.savingsAccountRepository.save(account);
-        }
+        final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.SAVINGS);
+        account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
+        this.savingsAccountRepository.save(account);
     }
 
     @Transactional
