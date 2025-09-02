@@ -122,6 +122,27 @@ public class LoanChargeBackStepDef extends AbstractStepDef {
         makeChargebackCall(loanId, transactionId, repaymentType, transactionAmount);
     }
 
+    @When("Admin makes {string} chargeback with {double} EUR transaction amount for MIR nr. {double}")
+    public void makeLoanChargebackForMIR(String repaymentType, double transactionAmount, double paymentNr) throws IOException {
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+
+        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        List<GetLoansLoanIdTransactions> transactions = loanDetails.body().getTransactions();
+
+        List<Long> transactionIdList = new ArrayList<>();
+        for (GetLoansLoanIdTransactions f : transactions) {
+            String code = f.getType().getCode();
+            if (code.equals("loanTransactionType.merchantIssuedRefund")) {
+                transactionIdList.add(f.getId());
+            }
+        }
+        Collections.sort(transactionIdList);
+        Long transactionId = transactionIdList.get((int) paymentNr - 1);
+
+        makeChargebackCall(loanId, transactionId, repaymentType, transactionAmount);
+    }
+
     private void makeChargebackCall(Long loanId, Long transactionId, String repaymentType, double transactionAmount) throws IOException {
         eventStore.reset();
         DefaultPaymentType paymentType = DefaultPaymentType.valueOf(repaymentType);
