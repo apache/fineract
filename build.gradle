@@ -143,9 +143,12 @@ gitVersioning.apply {
         branch("maintenance\\/\\d+\\.\\d+") {
             version = '${describe.tag.version.major}.${describe.tag.version.minor}.${describe.tag.version.patch}'
         }
+        tag("(\\d+\\.\\d+\\.\\d+)") {
+            version = '${describe.tag.version.major}.${describe.tag.version.minor}.${describe.tag.version.patch}'
+        }
     }
     rev {
-        version = '${describe.tag.version.major}.${describe.tag.version.minor.next}.${describe.tag.version.patch}-SNAPSHOT'
+        version = '${describe.tag.version.major}.${describe.tag.version.minor.next}.0-SNAPSHOT'
     }
 }
 
