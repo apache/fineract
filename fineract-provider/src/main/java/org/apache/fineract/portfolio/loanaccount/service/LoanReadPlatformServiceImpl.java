@@ -1674,7 +1674,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     + " fromtran.description as fromTransferDescription, "
                     + " totran.id as toTransferId, totran.is_reversed as toTransferReversed, "
                     + " totran.transaction_date as toTransferDate, totran.amount as toTransferAmount, "
-                    + " clcv.id as classCodeId, clcv.code_value as classCodeValue, "
+                    + " clcv.id as classificationCodeId, clcv.code_value as classificationCodeValue, "
                     + " totran.description as toTransferDescription from m_loan l join m_loan_transaction tr on tr.loan_id = l.id "
                     + " join m_currency rc on rc." + sqlGenerator.escape("code") + " = l.currency_code "
                     + " left JOIN m_payment_detail pd ON tr.payment_detail_id = pd.id"
@@ -1707,8 +1707,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             final boolean manuallyReversed = rs.getBoolean("manuallyReversed");
 
             PaymentDetailData paymentDetailData = null;
-
-            final CodeValueData classificationData = CodeValueData.instance(rs.getLong("classCodeId"), rs.getString("classCodeValue"));
+            CodeValueData classificationData = null;
+            Long classificationCodeValueId = JdbcSupport.getLong(rs, "classificationCodeId");
+            if (classificationCodeValueId != null) {
+                classificationData = CodeValueData.instance(classificationCodeValueId, rs.getString("classificationCodeValue"));
+            }
 
             final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentType");
             if (paymentTypeId != null) {
