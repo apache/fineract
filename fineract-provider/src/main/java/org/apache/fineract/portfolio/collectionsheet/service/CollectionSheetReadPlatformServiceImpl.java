@@ -30,9 +30,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -43,7 +44,6 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
-import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.apache.fineract.portfolio.calendar.domain.CalendarRepositoryWrapper;
 import org.apache.fineract.portfolio.calendar.exception.NotValidRecurringDateException;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
@@ -56,6 +56,7 @@ import org.apache.fineract.portfolio.collectionsheet.data.JLGCollectionSheetFlat
 import org.apache.fineract.portfolio.collectionsheet.data.JLGGroupData;
 import org.apache.fineract.portfolio.collectionsheet.data.LoanDueData;
 import org.apache.fineract.portfolio.collectionsheet.data.SavingsDueData;
+import org.apache.fineract.portfolio.collectionsheet.repository.CollectionSheetDao;
 import org.apache.fineract.portfolio.collectionsheet.serialization.CollectionSheetGenerateCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.group.data.CenterData;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
@@ -74,7 +75,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.stereotype.Service;
 
+@Service
 public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetReadPlatformService {
 
     private final PlatformSecurityContext context;
@@ -85,12 +88,11 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     private final CalendarRepositoryWrapper calendarRepositoryWrapper;
     private final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService;
     private final MandatorySavingsCollectionsheetExtractor mandatorySavingsExtractor;
-    private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
-    private final CalendarInstanceRepository calendarInstanceRepository;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
+    private final CollectionSheetDao collectionSheetDao;
 
     public CollectionSheetReadPlatformServiceImpl(final PlatformSecurityContext context,
             final NamedParameterJdbcTemplate namedParameterJdbcTemplate, final CenterReadPlatformService centerReadPlatformService,
@@ -98,10 +100,9 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final CollectionSheetGenerateCommandFromApiJsonDeserializer collectionSheetGenerateCommandFromApiJsonDeserializer,
             final CalendarRepositoryWrapper calendarRepositoryWrapper,
             final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService,
             final PaymentTypeReadPlatformService paymentTypeReadPlatformService,
             final CalendarReadPlatformService calendarReadPlatformService, final ConfigurationDomainService configurationDomainService,
-            final CalendarInstanceRepository calendarInstanceRepository, DatabaseSpecificSQLGenerator sqlGenerator) {
+            final DatabaseSpecificSQLGenerator sqlGenerator, final CollectionSheetDao collectionSheetDao) {
         this.context = context;
         this.centerReadPlatformService = centerReadPlatformService;
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
@@ -109,12 +110,11 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         this.groupReadPlatformService = groupReadPlatformService;
         this.calendarRepositoryWrapper = calendarRepositoryWrapper;
         this.attendanceDropdownReadPlatformService = attendanceDropdownReadPlatformService;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
         this.calendarReadPlatformService = calendarReadPlatformService;
         this.configurationDomainService = configurationDomainService;
-        this.calendarInstanceRepository = calendarInstanceRepository;
         this.sqlGenerator = sqlGenerator;
+        this.collectionSheetDao = collectionSheetDao;
         mandatorySavingsExtractor = new MandatorySavingsCollectionsheetExtractor(sqlGenerator);
     }
 
@@ -672,12 +672,12 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     @Override
     public IndividualCollectionSheetData generateIndividualCollectionSheet(final JsonQuery query) {
 
-        this.collectionSheetGenerateCommandFromApiJsonDeserializer.validateForGenerateCollectionSheetOfIndividuals(query.json());
+        collectionSheetGenerateCommandFromApiJsonDeserializer.validateForGenerateCollectionSheetOfIndividuals(query.json());
 
         final LocalDate transactionDate = query.localDateValueOfParameterNamed(transactionDateParamName);
         final String transactionDateStr = DateUtils.DEFAULT_DATE_FORMATTER.format(transactionDate);
 
-        final AppUser currentUser = this.context.authenticatedUser();
+        final AppUser currentUser = context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String officeHierarchy = hierarchy + "%";
 
@@ -685,9 +685,6 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         final Long staffId = query.longValueOfParameterNamed(staffIdParamName);
         final boolean checkForOfficeId = officeId != null;
         final boolean checkForStaffId = staffId != null;
-
-        final IndividualCollectionSheetFaltDataMapper mapper = new IndividualCollectionSheetFaltDataMapper(checkForOfficeId,
-                checkForStaffId, sqlGenerator);
 
         final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("dueDate", transactionDateStr)
                 .addValue("officeHierarchy", officeHierarchy);
@@ -699,205 +696,37 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             ((MapSqlParameterSource) namedParameters).addValue("staffId", staffId);
         }
 
-        final Collection<IndividualCollectionSheetLoanFlatData> collectionSheetFlatDatas = this.namedParameterJdbcTemplate
-                .query(mapper.sqlSchema(), namedParameters, mapper);
+        final List<IndividualCollectionSheetLoanFlatData> collectionSheetFlatData = collectionSheetDao
+                .getIndividualCollectionSheetFlatDataList(transactionDate, officeHierarchy, officeId, staffId);
 
-        IndividualMandatorySavingsCollectionsheetExtractor mandatorySavingsExtractor = new IndividualMandatorySavingsCollectionsheetExtractor(
-                checkForOfficeId, checkForStaffId, sqlGenerator);
-        // mandatory savings data for collection sheet
-        Collection<IndividualClientData> clientData = this.namedParameterJdbcTemplate
-                .query(mandatorySavingsExtractor.collectionSheetSchema(), namedParameters, mandatorySavingsExtractor);
+        final List<IndividualClientData> clientData = collectionSheetDao.getIndividualClientData(transactionDateStr, officeHierarchy,
+                officeId, staffId);
 
         // merge savings data into loan data
-        mergeLoanData(collectionSheetFlatDatas, (List<IndividualClientData>) clientData);
+        final List<IndividualClientData> response = mergeLoanData(collectionSheetFlatData, clientData);
 
-        final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
+        final List<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
 
-        return new IndividualCollectionSheetData(transactionDate, clientData, paymentOptions);
-
-    }
-
-    private static final class IndividualCollectionSheetFaltDataMapper implements RowMapper<IndividualCollectionSheetLoanFlatData> {
-
-        private final String sql;
-
-        IndividualCollectionSheetFaltDataMapper(final boolean checkForOfficeId, final boolean checkforStaffId,
-                DatabaseSpecificSQLGenerator sqlGenerator) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("SELECT loandata.*, sum(lc.amount_outstanding_derived) as chargesDue ");
-            sb.append("from (SELECT cl.display_name As clientName, ");
-            sb.append("cl.id As clientId, ln.id As loanId, ln.account_no As accountId, ln.loan_status_id As accountStatusId,");
-            sb.append(" pl.short_name As productShortName, ln.product_id As productId, ");
-            sb.append("ln.currency_code as currencyCode, ln.currency_digits as currencyDigits, ln.currency_multiplesof as inMultiplesOf, ");
-            sb.append("rc." + sqlGenerator.escape("name")
-                    + " as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, ");
-            sb.append("(CASE WHEN ln.loan_status_id = 200 THEN ln.principal_amount ELSE null END) As disbursementAmount, ");
-            sb.append(
-                    "sum(COALESCE((CASE WHEN ln.loan_status_id = 300 THEN ls.principal_amount ELSE 0.0 END), 0.0) - COALESCE((CASE WHEN ln.loan_status_id = 300 THEN ls.principal_completed_derived ELSE 0.0 END), 0.0)) As principalDue, ");
-            sb.append("ln.principal_repaid_derived As principalPaid, ");
-            sb.append(
-                    "sum(COALESCE((CASE WHEN ln.loan_status_id = 300 THEN ls.interest_amount ELSE 0.0 END), 0.0) - COALESCE((CASE WHEN ln.loan_status_id = 300 THEN ls.interest_completed_derived ELSE 0.0 END), 0.0)) As interestDue, ");
-            sb.append("ln.interest_repaid_derived As interestPaid, ");
-            sb.append(
-                    "sum(COALESCE((CASE WHEN ln.loan_status_id = 300 THEN ls.fee_charges_amount ELSE 0.0 END), 0.0) - COALESCE((CASE WHEN ln.loan_status_id = 300 THEN ls.fee_charges_completed_derived ELSE 0.0 END), 0.0)) As feeDue, ");
-            sb.append("ln.fee_charges_repaid_derived As feePaid ");
-            sb.append("FROM m_loan ln ");
-            sb.append("JOIN m_client cl ON cl.id = ln.client_id  ");
-            sb.append("LEFT JOIN m_office of ON of.id = cl.office_id  AND of.hierarchy like :officeHierarchy ");
-            sb.append("LEFT JOIN m_product_loan pl ON pl.id = ln.product_id ");
-            sb.append("LEFT JOIN m_currency rc on rc." + sqlGenerator.escape("code") + " = ln.currency_code ");
-            sb.append("JOIN m_loan_repayment_schedule ls ON ls.loan_id = ln.id AND ls.completed_derived = 0 AND ls.duedate <= :dueDate ");
-            sb.append("where ");
-            if (checkForOfficeId) {
-                sb.append("of.id = :officeId and ");
-            }
-            if (checkforStaffId) {
-                sb.append("ln.loan_officer_id = :staffId and ");
-            }
-            sb.append("(ln.loan_status_id = 300) ");
-            sb.append("and ln.group_id is null GROUP BY cl.id , ln.id ORDER BY cl.id , ln.id ) loandata ");
-            sb.append(
-                    "LEFT JOIN m_loan_charge lc ON lc.loan_id = loandata.loanId AND lc.is_paid_derived = false AND lc.is_active = true AND ( lc.due_for_collection_as_of_date  <= :dueDate OR lc.charge_time_enum = 1) ");
-            sb.append("GROUP BY loandata.clientId, loandata.loanId ORDER BY loandata.clientId, loandata.loanId ");
-
-            sql = sb.toString();
-        }
-
-        public String sqlSchema() {
-            return sql;
-        }
-
-        @Override
-        public IndividualCollectionSheetLoanFlatData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
-            final String clientName = rs.getString("clientName");
-            final Long clientId = JdbcSupport.getLong(rs, "clientId");
-            final Long loanId = JdbcSupport.getLong(rs, "loanId");
-            final String accountId = rs.getString("accountId");
-            final Integer accountStatusId = JdbcSupport.getInteger(rs, "accountStatusId");
-            final String productShortName = rs.getString("productShortName");
-            final Long productId = JdbcSupport.getLong(rs, "productId");
-
-            final String currencyCode = rs.getString("currencyCode");
-            final String currencyName = rs.getString("currencyName");
-            final String currencyNameCode = rs.getString("currencyNameCode");
-            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
-            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
-            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            CurrencyData currencyData = null;
-            if (currencyCode != null) {
-                currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
-                        currencyNameCode);
-            }
-
-            final BigDecimal disbursementAmount = rs.getBigDecimal("disbursementAmount");
-            final BigDecimal principalDue = rs.getBigDecimal("principalDue");
-            final BigDecimal principalPaid = rs.getBigDecimal("principalPaid");
-            final BigDecimal interestDue = rs.getBigDecimal("interestDue");
-            final BigDecimal interestPaid = rs.getBigDecimal("interestPaid");
-            final BigDecimal chargesDue = rs.getBigDecimal("chargesDue");
-            final BigDecimal feeDue = rs.getBigDecimal("feeDue");
-            final BigDecimal feePaid = rs.getBigDecimal("feePaid");
-
-            return new IndividualCollectionSheetLoanFlatData(clientName, clientId, loanId, accountId, accountStatusId, productShortName,
-                    productId, currencyData, disbursementAmount, principalDue, principalPaid, interestDue, interestPaid, chargesDue, feeDue,
-                    feePaid);
-        }
+        return new IndividualCollectionSheetData(transactionDate, response, paymentOptions);
 
     }
 
-    private static final class IndividualMandatorySavingsCollectionsheetExtractor
-            implements ResultSetExtractor<Collection<IndividualClientData>> {
-
-        private final SavingsDueDataMapper savingsDueDataMapper = new SavingsDueDataMapper();
-
-        private final String sql;
-
-        IndividualMandatorySavingsCollectionsheetExtractor(final boolean checkForOfficeId, final boolean checkforStaffId,
-                DatabaseSpecificSQLGenerator sqlGenerator) {
-
-            final StringBuilder sb = new StringBuilder(400);
-            sb.append(
-                    "SELECT (CASE WHEN sa.deposit_type_enum=100 THEN 'Saving Deposit' ELSE (CASE WHEN sa.deposit_type_enum=300 THEN 'Recurring Deposit' ELSE 'Current Deposit' END) END) as depositAccountType, cl.display_name As clientName, cl.id As clientId, ");
-            sb.append("sa.id As savingsId, sa.account_no As accountId, sa.status_enum As accountStatusId, ");
-            sb.append("sp.short_name As productShortName, sp.id As productId, ");
-            sb.append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf, ");
-            sb.append("rc." + sqlGenerator.escape("name")
-                    + " as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, ");
-            sb.append("SUM(COALESCE(mss.deposit_amount,0) - coalesce(mss.deposit_amount_completed_derived,0)) as dueAmount ");
-            sb.append("FROM m_savings_account sa ");
-            sb.append("JOIN m_client cl ON cl.id = sa.client_id ");
-            sb.append("JOIN m_savings_product sp ON sa.product_id=sp.id ");
-            sb.append(
-                    "LEFT JOIN m_deposit_account_recurring_detail dard ON sa.id = dard.savings_account_id AND dard.is_mandatory = true AND dard.is_calendar_inherited = false ");
-            sb.append(
-                    "LEFT JOIN m_mandatory_savings_schedule mss ON mss.savings_account_id=sa.id AND mss.completed_derived = 0 AND mss.duedate <= :dueDate ");
-            sb.append("LEFT JOIN m_office of ON of.id = cl.office_id AND of.hierarchy like :officeHierarchy ");
-            sb.append("LEFT JOIN m_currency rc on rc." + sqlGenerator.escape("code") + " = sa.currency_code ");
-            sb.append("WHERE sa.status_enum=300 and sa.group_id is null and sa.deposit_type_enum in (100,300,400) ");
-            sb.append("and (cl.status_enum = 300 or (cl.status_enum = 600 and cl.closedon_date >= :dueDate)) ");
-            if (checkForOfficeId) {
-                sb.append("and of.id = :officeId ");
-            }
-            if (checkforStaffId) {
-                sb.append("and sa.field_officer_id = :staffId ");
-            }
-            sb.append("GROUP BY cl.id , sa.id ORDER BY cl.id , sa.id ");
-
-            this.sql = sb.toString();
-        }
-
-        public String collectionSheetSchema() {
-            return this.sql;
-        }
-
-        @SuppressWarnings("null")
-        @Override
-        public Collection<IndividualClientData> extractData(ResultSet rs) throws SQLException, DataAccessException {
-            List<IndividualClientData> clientData = new ArrayList<>();
-            int rowNum = 0;
-
-            IndividualClientData client = null;
-            Long previousClientId = null;
-
-            while (rs.next()) {
-                final Long clientId = JdbcSupport.getLong(rs, "clientId");
-                if (previousClientId == null || clientId.compareTo(previousClientId) != 0) {
-                    final String clientName = rs.getString("clientName");
-                    client = IndividualClientData.instance(clientId, clientName);
-                    client = IndividualClientData.withSavings(client, new ArrayList<SavingsDueData>());
-                    clientData.add(client);
-                    previousClientId = clientId;
-                }
-                SavingsDueData saving = savingsDueDataMapper.mapRow(rs, rowNum);
-                client.addSavings(saving);
-                rowNum++;
-            }
-
-            return clientData;
-        }
-    }
-
-    private void mergeLoanData(final Collection<IndividualCollectionSheetLoanFlatData> loanFlatDatas,
+    private List<IndividualClientData> mergeLoanData(final List<IndividualCollectionSheetLoanFlatData> loanFlatDataList,
             List<IndividualClientData> clientDatas) {
 
-        IndividualClientData clientSavingsData = null;
-        for (IndividualCollectionSheetLoanFlatData loanFlatData : loanFlatDatas) {
-            IndividualClientData clientData = loanFlatData.getClientData();
-            if (clientSavingsData == null || !clientSavingsData.equals(clientData)) {
-                if (clientDatas.contains(clientData)) {
-                    final int index = clientDatas.indexOf(clientData);
-                    if (index < 0) {
-                        return;
-                    }
-                    clientSavingsData = clientDatas.get(index);
-                    clientSavingsData.setLoans(new ArrayList<LoanDueData>());
-                } else {
-                    clientSavingsData = clientData;
-                    clientSavingsData.setLoans(new ArrayList<LoanDueData>());
-                    clientDatas.add(clientSavingsData);
-                }
-            }
-            clientSavingsData.addLoans(loanFlatData.getLoanDueData());
+        Map<Long, IndividualClientData> responseMap = new LinkedHashMap<>();
+
+        for (IndividualClientData element : clientDatas) {
+            responseMap.putIfAbsent(element.getClientId(), element);
         }
+
+        for (IndividualCollectionSheetLoanFlatData loanFlatData : loanFlatDataList) {
+            final IndividualClientData clientData = loanFlatData.getClientData();
+            responseMap
+                    .computeIfAbsent(clientData.getClientId(),
+                            id -> IndividualClientData.instance(clientData.getClientId(), clientData.getClientName()))
+                    .addLoans(loanFlatData.getLoanDueData());
+        }
+        return new ArrayList<>(responseMap.values());
     }
 }

@@ -21,7 +21,7 @@ package org.apache.fineract.portfolio.collectionsheet.data;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
@@ -36,12 +36,7 @@ public final class IndividualCollectionSheetData implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @SuppressWarnings("unused")
     private final LocalDate dueDate;
-    @SuppressWarnings("unused")
-    private final Collection<IndividualClientData> clients;
-
-    @SuppressWarnings("unused")
-    private final Collection<PaymentTypeData> paymentTypeOptions;
-
+    private final List<IndividualClientData> clients;
+    private final List<PaymentTypeData> paymentTypeOptions;
 }

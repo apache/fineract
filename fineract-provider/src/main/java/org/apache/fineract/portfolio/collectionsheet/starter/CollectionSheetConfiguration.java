@@ -26,6 +26,7 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.apache.fineract.portfolio.calendar.domain.CalendarRepositoryWrapper;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
 import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetTransactionDataValidator;
+import org.apache.fineract.portfolio.collectionsheet.repository.CollectionSheetDao;
 import org.apache.fineract.portfolio.collectionsheet.serialization.CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.collectionsheet.serialization.CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.collectionsheet.serialization.CollectionSheetGenerateCommandFromApiJsonDeserializer;
@@ -61,11 +62,12 @@ public class CollectionSheetConfiguration {
             AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService,
             CodeValueReadPlatformService codeValueReadPlatformService, PaymentTypeReadPlatformService paymentTypeReadPlatformService,
             CalendarReadPlatformService calendarReadPlatformService, ConfigurationDomainService configurationDomainService,
-            CalendarInstanceRepository calendarInstanceRepository, DatabaseSpecificSQLGenerator sqlGenerator) {
+            CalendarInstanceRepository calendarInstanceRepository, DatabaseSpecificSQLGenerator sqlGenerator,
+            CollectionSheetDao collectionSheetDao) {
         return new CollectionSheetReadPlatformServiceImpl(context, namedParameterJdbcTemplate, centerReadPlatformService,
                 groupReadPlatformService, collectionSheetGenerateCommandFromApiJsonDeserializer, calendarRepositoryWrapper,
-                attendanceDropdownReadPlatformService, codeValueReadPlatformService, paymentTypeReadPlatformService,
-                calendarReadPlatformService, configurationDomainService, calendarInstanceRepository, sqlGenerator);
+                attendanceDropdownReadPlatformService, paymentTypeReadPlatformService, calendarReadPlatformService,
+                configurationDomainService, sqlGenerator, collectionSheetDao);
     }
 
     @Bean

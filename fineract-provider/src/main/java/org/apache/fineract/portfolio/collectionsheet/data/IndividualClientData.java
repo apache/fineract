@@ -18,75 +18,48 @@
  */
 package org.apache.fineract.portfolio.collectionsheet.data;
 
-import java.util.Collection;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Immutable data object for clients with loans due for disbursement or collection.
  */
-public final class IndividualClientData {
+@Getter
+@Setter
+@AllArgsConstructor
+@Builder
+public final class IndividualClientData implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final Long clientId;
     private final String clientName;
-    private Collection<LoanDueData> loans;
-    private Collection<SavingsDueData> savings;
+    private List<LoanDueData> loans;
+    private List<SavingsDueData> savings;
 
     public static IndividualClientData instance(final Long clientId, final String clientName) {
-        final Collection<LoanDueData> loans = null;
-        final Collection<SavingsDueData> savings = null;
-        return new IndividualClientData(clientId, clientName, loans, savings);
+        return new IndividualClientData(clientId, clientName, new ArrayList<>(), new ArrayList<>());
     }
 
-    public static IndividualClientData withSavings(final IndividualClientData client, final Collection<SavingsDueData> savings) {
-
+    public static IndividualClientData withSavings(final IndividualClientData client, final List<SavingsDueData> savings) {
         return new IndividualClientData(client.clientId, client.clientName, client.loans, savings);
     }
 
-    public static IndividualClientData withLoans(final IndividualClientData client, final Collection<LoanDueData> loans) {
-
+    public static IndividualClientData withLoans(final IndividualClientData client, final List<LoanDueData> loans) {
         return new IndividualClientData(client.clientId, client.clientName, loans, client.savings);
-    }
-
-    /**
-     * @param clientId
-     * @param clientName
-     * @param loans
-     * @param savings
-     */
-    private IndividualClientData(Long clientId, String clientName, Collection<LoanDueData> loans, Collection<SavingsDueData> savings) {
-        this.clientId = clientId;
-        this.clientName = clientName;
-        this.loans = loans;
-        this.savings = savings;
-    }
-
-    public Long getClientId() {
-        return this.clientId;
-    }
-
-    public String getClientName() {
-        return this.clientName;
-    }
-
-    public Collection<LoanDueData> getLoans() {
-        return this.loans;
-    }
-
-    public void setLoans(final Collection<LoanDueData> loans) {
-        this.loans = loans;
     }
 
     public void addLoans(LoanDueData loans) {
         if (this.loans != null) {
             this.loans.add(loans);
         }
-    }
-
-    public Collection<SavingsDueData> getSavings() {
-        return this.savings;
-    }
-
-    public void setSavings(Collection<SavingsDueData> savings) {
-        this.savings = savings;
     }
 
     public void addSavings(SavingsDueData savings) {
