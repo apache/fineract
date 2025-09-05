@@ -528,8 +528,9 @@ public class LoanAccountConfiguration {
     @ConditionalOnMissingBean(LoanRefundService.class)
     public LoanRefundService loanRefundService(final LoanRefundValidator loanRefundValidator,
             final LoanTransactionProcessingService loanTransactionProcessingService,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
-        return new LoanRefundService(loanRefundValidator, loanTransactionProcessingService, loanLifecycleStateMachine);
+            final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransactionService loanTransactionService) {
+        return new LoanRefundService(loanRefundValidator, loanTransactionProcessingService, loanLifecycleStateMachine,
+                loanTransactionService);
     }
 
     @Bean

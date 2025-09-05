@@ -34,6 +34,7 @@ public class LoanRefundService {
     private final LoanRefundValidator loanRefundValidator;
     private final LoanTransactionProcessingService loadTransactionProcessingService;
     private final LoanLifecycleStateMachine loanLifecycleStateMachine;
+    private final LoanTransactionService loanTransactionService;
 
     public void makeRefund(final Loan loan, final LoanTransaction loanTransaction) {
         loanRefundValidator.validateTransferRefund(loan, loanTransaction);
@@ -68,7 +69,7 @@ public class LoanRefundService {
 
         loanTransaction.updateLoan(loan);
 
-        loanRefundValidator.validateRefundEligibility(loan, loanTransaction);
+        loanRefundValidator.validateRefundEligibility(loan, loanTransaction, loanTransactionService.calculateTotalPaidInRepayments(loan));
 
         if (loanTransaction.isNotZero()) {
             loan.addLoanTransaction(loanTransaction);

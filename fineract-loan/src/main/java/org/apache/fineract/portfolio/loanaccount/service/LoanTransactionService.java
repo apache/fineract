@@ -24,18 +24,33 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionComparator;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LoanTransactionService {
 
     private final LoanTransactionRepository loanTransactionRepository;
+
+    public static final List<LoanTransactionType> PAYMENT_LOAN_TRANSACTION_TYPES = List.of(LoanTransactionType.REPAYMENT, //
+            LoanTransactionType.MERCHANT_ISSUED_REFUND, //
+            LoanTransactionType.PAYOUT_REFUND, //
+            LoanTransactionType.GOODWILL_CREDIT, //
+            LoanTransactionType.CHARGE_REFUND, //
+            LoanTransactionType.CHARGE_ADJUSTMENT, //
+            LoanTransactionType.DOWN_PAYMENT, //
+            LoanTransactionType.INTEREST_PAYMENT_WAIVER, //
+            LoanTransactionType.INTEREST_REFUND, //
+            LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT);
 
     public List<LoanTransaction> retrieveListOfTransactionsForReprocessing(final Loan loan) {
         return loan.getLoanTransactions().stream().filter(loanTransactionForReprocessingPredicate())
@@ -56,4 +71,8 @@ public class LoanTransactionService {
                         || !transaction.isNonMonetaryTransaction() || transaction.isContractTermination());
     }
 
+    public Money calculateTotalPaidInRepayments(final Loan loan) {
+        return Money.of(loan.getCurrency(),
+                loanTransactionRepository.sumTotalAmountByLoanAndTransactionTypes(loan, PAYMENT_LOAN_TRANSACTION_TYPES));
+    }
 }

@@ -473,4 +473,14 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
     boolean existsNonReversedByLoanAndTypeAndDate(@Param("loan") Loan loan, @Param("type") LoanTransactionType type,
             @Param("transactionDate") LocalDate transactionDate);
 
+    @Query("""
+            SELECT COALESCE(SUM(lt.amount), 0)
+            FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND lt.reversed = false
+                AND lt.typeOf IN :loanTransactionTypes
+            """)
+    BigDecimal sumTotalAmountByLoanAndTransactionTypes(@Param("loan") Loan loan,
+            @Param("loanTransactionTypes") List<LoanTransactionType> loanTransactionTypes);
+
 }

@@ -25,6 +25,7 @@ import java.util.List;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
@@ -75,12 +76,12 @@ public final class LoanRefundValidator {
         }
     }
 
-    public void validateRefundEligibility(final Loan loan, final LoanTransaction loanTransaction) {
+    public void validateRefundEligibility(final Loan loan, final LoanTransaction loanTransaction, final Money loanTotalPaidInRepayments) {
         if (loan.getStatus().isOverpaid() || loan.getStatus().isClosed()) {
             final String errorMessage = "This refund option is only for active loans ";
             throw new InvalidLoanStateTransitionException("transaction", "is.exceeding.overpaid.amount", errorMessage,
                     loan.getTotalOverpaid(), loanTransaction.getAmount(loan.getCurrency()).getAmount());
-        } else if (loan.getTotalPaidInRepayments().isZero()) {
+        } else if (loanTotalPaidInRepayments.isZero()) {
             final String errorMessage = "Cannot refund when no payment has been made";
             throw new InvalidLoanStateTransitionException("transaction", "no.payment.yet.made.for.loan", errorMessage);
         }
