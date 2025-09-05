@@ -132,7 +132,7 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
 
         // Check each past installment for accrual activity
         for (LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
-            if (!installment.isDownPayment() && !installment.isAdditional() && installment.getDueDate().isBefore(closureDate)) {
+            if (!installment.isDownPayment() && !installment.isAdditional() && DateUtils.isBefore(installment.getDueDate(), closureDate)) {
                 List<LoanTransaction> installmentAccruals = accrualActivities.stream()
                         .filter(t -> t.getDateOf().isEqual(installment.getDueDate())).toList();
 
