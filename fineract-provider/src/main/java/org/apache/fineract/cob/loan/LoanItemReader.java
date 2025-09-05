@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
+import org.apache.fineract.cob.converter.COBParameterConverter;
 import org.apache.fineract.cob.data.COBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LockOwner;
@@ -53,7 +54,7 @@ public class LoanItemReader extends AbstractLoanItemReader {
     @SuppressWarnings({ "unchecked" })
     public void beforeStep(@NonNull StepExecution stepExecution) {
         ExecutionContext executionContext = stepExecution.getExecutionContext();
-        COBParameter loanCOBParameter = (COBParameter) executionContext.get(LoanCOBConstant.LOAN_COB_PARAMETER);
+        COBParameter loanCOBParameter = COBParameterConverter.convert(executionContext.get(LoanCOBConstant.LOAN_COB_PARAMETER));
         List<Long> loanIds;
         if (Objects.isNull(loanCOBParameter)
                 || (Objects.isNull(loanCOBParameter.getMinAccountId()) && Objects.isNull(loanCOBParameter.getMaxAccountId()))
