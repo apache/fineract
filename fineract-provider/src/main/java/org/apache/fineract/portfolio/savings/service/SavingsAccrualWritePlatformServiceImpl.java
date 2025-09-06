@@ -32,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -165,12 +164,14 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
 
         for (PostingPeriod period : allPostingPeriods) {
             LocalDate valueDate = period.getPeriodInterval().endDate();
-            List<LocalDate> matchingAccrualDates = reversedAccrualTransactionDates.stream()
+            List<LocalDate> matchingAccrualDates = accrualTransactionDates.stream().filter(accrualDate -> accrualDate.equals(valueDate))
+                    .toList();
+            List<LocalDate> matchingAccrualReverseDates = reversedAccrualTransactionDates.stream()
                     .filter(accrualDate -> accrualDate.equals(valueDate)).toList();
             period.calculateInterest(compoundInterestValues);
             final LocalDate endDate = period.getPeriodInterval().endDate();
             if (!accrualTransactionDates.contains(period.getPeriodInterval().endDate())
-                    && (!MathUtil.isZero(period.closingBalance().getAmount()) || !matchingAccrualDates.isEmpty())) {
+                    || (!matchingAccrualReverseDates.isEmpty() && matchingAccrualDates.size() == matchingAccrualReverseDates.size())) {
                 String refNo = (refNoProvider != null) ? refNoProvider.apply(endDate) : null;
                 SavingsAccountTransaction savingsAccountTransaction = SavingsAccountTransaction.accrual(savingsAccount,
                         savingsAccount.office(), period.getPeriodInterval().endDate(), period.getInterestEarned().abs(), false, refNo);
