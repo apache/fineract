@@ -69,6 +69,9 @@ public class SavingsInterestPostingTest {
     private SavingsProductHelper productHelper;
     private JournalEntryHelper journalEntryHelper;
 
+    private static final String ACCRUALS_JOB_NAME = "Add Accrual Transactions For Savings";
+    private static final String POST_INTEREST_JOB_NAME = "Post Interest For Savings";
+
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
@@ -86,7 +89,6 @@ public class SavingsInterestPostingTest {
     public void testPostInterestWithOverdraftProduct() {
         try {
             final String amount = "10000";
-            final String jobName = "Post Interest For Savings";
 
             final Account assetAccount = accountHelper.createAssetAccount();
             final Account incomeAccount = accountHelper.createIncomeAccount();
@@ -116,7 +118,7 @@ public class SavingsInterestPostingTest {
             LocalDate marchDate = LocalDate.of(startDate.getYear(), 3, 1);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, marchDate);
 
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            runAccrualsThenPost();
 
             long days = ChronoUnit.DAYS.between(startDate, marchDate);
             BigDecimal expected = calcInterestPosting(productHelper, amount, days);
@@ -130,6 +132,8 @@ public class SavingsInterestPostingTest {
             long overdraftCount = countOverdraftOnDate(accountId, marchDate);
             Assertions.assertEquals(1L, interestCount, "Expected exactly one INTEREST posting on posting date");
             Assertions.assertEquals(0L, overdraftCount, "Expected NO OVERDRAFT posting on posting date");
+
+            assertNoAccrualReversals(accountId);
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));
@@ -140,7 +144,6 @@ public class SavingsInterestPostingTest {
     public void testOverdraftInterestWithOverdraftProduct() {
         try {
             final String amount = "10000";
-            final String jobName = "Post Interest For Savings";
 
             final Account assetAccount = accountHelper.createAssetAccount();
             final Account incomeAccount = accountHelper.createIncomeAccount();
@@ -170,7 +173,7 @@ public class SavingsInterestPostingTest {
             LocalDate marchDate = LocalDate.of(startDate.getYear(), 3, 1);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, marchDate);
 
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            runAccrualsThenPost();
 
             long days = ChronoUnit.DAYS.between(startDate, marchDate);
             BigDecimal expected = calcOverdraftPosting(productHelper, amount, days);
@@ -185,6 +188,8 @@ public class SavingsInterestPostingTest {
             long overdraftCount = countOverdraftOnDate(accountId, marchDate);
             Assertions.assertEquals(0L, interestCount, "Expected NO INTEREST posting on posting date");
             Assertions.assertEquals(1L, overdraftCount, "Expected exactly one OVERDRAFT posting on posting date");
+
+            assertNoAccrualReversals(accountId);
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));
@@ -196,7 +201,6 @@ public class SavingsInterestPostingTest {
         try {
             final String amountDeposit = "10000";
             final String amountWithdrawal = "20000";
-            final String jobName = "Post Interest For Savings";
 
             final Account assetAccount = accountHelper.createAssetAccount();
             final Account incomeAccount = accountHelper.createIncomeAccount();
@@ -230,7 +234,7 @@ public class SavingsInterestPostingTest {
             LocalDate marchDate = LocalDate.of(startDate.getYear(), 3, 1);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, marchDate);
 
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            runAccrualsThenPost();
 
             List<HashMap> txs = getInterestTransactions(accountId);
             for (HashMap tx : txs) {
@@ -254,6 +258,8 @@ public class SavingsInterestPostingTest {
             Assertions.assertEquals(1L, countInterestOnDate(accountId, marchDate), "Expected exactly one INTEREST posting on posting date");
             Assertions.assertEquals(1L, countOverdraftOnDate(accountId, marchDate),
                     "Expected exactly one OVERDRAFT posting on posting date");
+
+            assertNoAccrualReversals(accountId);
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));
@@ -265,7 +271,6 @@ public class SavingsInterestPostingTest {
         try {
             final String amountDeposit = "20000";
             final String amountWithdrawal = "10000";
-            final String jobName = "Post Interest For Savings";
 
             final Account assetAccount = accountHelper.createAssetAccount();
             final Account incomeAccount = accountHelper.createIncomeAccount();
@@ -298,7 +303,7 @@ public class SavingsInterestPostingTest {
             LocalDate marchDate = LocalDate.of(startDate.getYear(), 3, 1);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, marchDate);
 
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            runAccrualsThenPost();
 
             List<HashMap> txs = getInterestTransactions(accountId);
             for (HashMap tx : txs) {
@@ -322,6 +327,8 @@ public class SavingsInterestPostingTest {
             Assertions.assertEquals(1L, countOverdraftOnDate(accountId, marchDate),
                     "Expected exactly one OVERDRAFT posting on posting date");
             Assertions.assertEquals(1L, countInterestOnDate(accountId, marchDate), "Expected exactly one INTEREST posting on posting date");
+
+            assertNoAccrualReversals(accountId);
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));
@@ -374,13 +381,8 @@ public class SavingsInterestPostingTest {
         return principal.multiply(periodRate, MathContext.DECIMAL64).setScale(productHelper.getDecimalCurrency(), RoundingMode.HALF_EVEN);
     }
 
-    // =========================
-    // Helpers robustos de FECHA/TIPO
-    // =========================
-
     @SuppressWarnings("unchecked")
     private LocalDate coerceToLocalDate(HashMap tx) {
-        // Posibles claves de fecha devueltas por Fineract
         String[] candidateKeys = new String[] { "date", "transactionDate", "submittedOnDate", "createdDate" };
 
         for (String key : candidateKeys) {
@@ -389,7 +391,6 @@ public class SavingsInterestPostingTest {
                 continue;
             }
 
-            // Caso 1: arreglo [yyyy, MM, dd]
             if (v instanceof List<?>) {
                 List<?> arr = (List<?>) v;
                 if (arr.size() >= 3 && arr.get(0) instanceof Number && arr.get(1) instanceof Number && arr.get(2) instanceof Number) {
@@ -400,7 +401,6 @@ public class SavingsInterestPostingTest {
                 }
             }
 
-            // Caso 2: string con distintos formatos
             if (v instanceof String) {
                 String s = (String) v;
                 DateTimeFormatter[] fmts = new DateTimeFormatter[] { DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US),
@@ -414,7 +414,6 @@ public class SavingsInterestPostingTest {
                 }
             }
         }
-        // Si ninguna clave/forma se pudo parsear
         return null;
     }
 
@@ -439,5 +438,39 @@ public class SavingsInterestPostingTest {
         List<HashMap> all = savingsAccountHelper.getSavingsTransactions(accountId);
         return all.stream().filter(tx -> isDate(tx, date)).map(this::txType)
                 .filter(SavingsAccountTransactionType::isOverDraftInterestPosting).count();
+    }
+
+    private void runAccrualsThenPost() {
+        try {
+            schedulerJobHelper.executeAndAwaitJob(ACCRUALS_JOB_NAME);
+        } catch (IllegalArgumentException ex) {
+            LOG.warn("Accruals job not found ({}). Continuing without it.", ACCRUALS_JOB_NAME, ex);
+        }
+        schedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+    }
+
+    @SuppressWarnings({ "rawtypes" })
+    private boolean isReversed(HashMap tx) {
+        Object v = tx.get("reversed");
+        if (v instanceof Boolean) {
+            return (Boolean) v;
+        }
+        if (v instanceof Number) {
+            return ((Number) v).intValue() != 0;
+        }
+        if (v instanceof String) {
+            return Boolean.parseBoolean((String) v);
+        }
+        return false;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private void assertNoAccrualReversals(Integer accountId) {
+        List<HashMap> all = savingsAccountHelper.getSavingsTransactions(accountId);
+        long reversedAccruals = all.stream().filter(tx -> {
+            SavingsAccountTransactionType t = txType(tx);
+            return t.isAccrual() && isReversed(tx);
+        }).count();
+        Assertions.assertEquals(0L, reversedAccruals, "Accrual reversals were found in account transactions");
     }
 }
