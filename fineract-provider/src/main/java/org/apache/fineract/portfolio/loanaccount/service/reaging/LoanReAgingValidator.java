@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -34,13 +35,18 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.api.LoanReAgingApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.ChangeOperation;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class LoanReAgingValidator {
+
+    private final LoanTransactionRepository loanTransactionRepository;
 
     public void validateReAge(Loan loan, JsonCommand command) {
         validateReAgeRequest(loan, command);
@@ -107,8 +113,9 @@ public class LoanReAgingValidator {
         }
 
         // validate if there's already a re-aging transaction for today
-        boolean isReAgingTransactionForTodayPresent = loan.getLoanTransactions().stream()
-                .anyMatch(tx -> tx.getTypeOf().isReAge() && tx.getTransactionDate().equals(getBusinessLocalDate()));
+        final boolean isReAgingTransactionForTodayPresent = loanTransactionRepository.existsNonReversedByLoanAndTypeAndDate(loan,
+                LoanTransactionType.REAGE, getBusinessLocalDate());
+
         if (isReAgingTransactionForTodayPresent) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.reage.transaction.already.present.for.today",
                     "Loan reaging can only be done once a day. There has already been a reaging done for today", loan.getId());

@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
@@ -46,6 +45,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.DuePenFeeIntPriInAdvancePriPenFeeIntLoanRepaymentScheduleTransactionProcessor;
@@ -54,17 +54,29 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @SuppressFBWarnings({ "VA_FORMAT_STRING_USES_NEWLINE" })
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class LoanReAgingValidatorTest {
+
+    @Mock
+    private LoanTransactionRepository loanTransactionRepository;
+
+    @InjectMocks
+    private LoanReAgingValidator underTest;
 
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     private final LocalDate actualDate = LocalDate.now(Clock.systemUTC());
     private final LocalDate maturityDate = actualDate.plusDays(30);
     private final LocalDate businessDate = maturityDate.plusDays(1);
     private final LocalDate afterMaturity = maturityDate.plusDays(7);
-
-    private LoanReAgingValidator underTest = new LoanReAgingValidator();
 
     @BeforeEach
     public void setUp() {
@@ -92,7 +104,8 @@ class LoanReAgingValidatorTest {
     public void testValidateReAge_ShouldThrowException_WhenExternalIdIsLongerThan100() {
         // given
         Loan loan = loan();
-        JsonCommand command = jsonCommand(RandomStringUtils.randomAlphabetic(120));
+        String longExternalId = "A".repeat(120);
+        JsonCommand command = jsonCommand(longExternalId);
         // when
         PlatformApiDataValidationException result = assertThrows(PlatformApiDataValidationException.class,
                 () -> underTest.validateReAge(loan, command));
@@ -367,10 +380,9 @@ class LoanReAgingValidatorTest {
     @Test
     public void testValidateReAge_ShouldThrowException_WhenLoanAlreadyHasReAgeForToday() {
         // given
-        List<LoanTransaction> transactions = List.of(loanTransaction(LoanTransactionType.DISBURSEMENT, maturityDate.minusDays(2)),
-                loanTransaction(LoanTransactionType.REAGE, businessDate));
         Loan loan = loan();
-        given(loan.getLoanTransactions()).willReturn(transactions);
+        given(loanTransactionRepository.existsNonReversedByLoanAndTypeAndDate(loan, LoanTransactionType.REAGE, businessDate))
+                .willReturn(true);
         JsonCommand command = jsonCommand();
         // when
         GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
