@@ -3554,3 +3554,221 @@ Feature:Feature: Buy Down Fees
       | 04 January 2024 | AM     | 1.11   |
       | 05 January 2024 | AM_ADJ | 0.25   |
       | 06 January 2024 | AM     | 0.43   |
+
+  @TestRailId:C4040
+  Scenario: Verify Buy Down Fee amortization allocation mapping when already amortized amount is greater than should be after buy down fee adjustment
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES | 01 January 2024   | 100            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 30                | DAYS                  | 1              | DAYS                   | 30                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "100" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "100" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    And Admin runs inline COB job for Loan
+    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "1 January 2024" with "1" EUR transaction amount
+    When Admin sets the business date to "15 January 2024"
+    And Admin runs inline COB job for Loan
+    And Loan Amortization Allocation Mapping for "BUY_DOWN_FEE" transaction created on "01 January 2024" contains the following data:
+      | Date            | Type   | Amount |
+      | 01 January 2024 | AM     | 0.03   |
+      | 02 January 2024 | AM     | 0.04   |
+      | 03 January 2024 | AM     | 0.03   |
+      | 04 January 2024 | AM     | 0.03   |
+      | 05 January 2024 | AM     | 0.04   |
+      | 06 January 2024 | AM     | 0.03   |
+      | 07 January 2024 | AM     | 0.03   |
+      | 08 January 2024 | AM     | 0.04   |
+      | 09 January 2024 | AM     | 0.03   |
+      | 10 January 2024 | AM     | 0.03   |
+      | 11 January 2024 | AM     | 0.04   |
+      | 12 January 2024 | AM     | 0.03   |
+      | 13 January 2024 | AM     | 0.03   |
+      | 14 January 2024 | AM     | 0.04   |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 1.0        | 0.47             | 0.53                     | 0.0             | 0.0                |
+    And Admin adds buy down fee adjustment with "AUTOPAY" payment type to the loan on "15 January 2024" with "0.7" EUR transaction amount
+    When Admin sets the business date to "16 January 2024"
+    And Admin runs inline COB job for Loan
+    And Loan Amortization Allocation Mapping for "BUY_DOWN_FEE" transaction created on "01 January 2024" contains the following data:
+      | Date            | Type   | Amount |
+      | 01 January 2024 | AM     | 0.03   |
+      | 02 January 2024 | AM     | 0.04   |
+      | 03 January 2024 | AM     | 0.03   |
+      | 04 January 2024 | AM     | 0.03   |
+      | 05 January 2024 | AM     | 0.04   |
+      | 06 January 2024 | AM     | 0.03   |
+      | 07 January 2024 | AM     | 0.03   |
+      | 08 January 2024 | AM     | 0.04   |
+      | 09 January 2024 | AM     | 0.03   |
+      | 10 January 2024 | AM     | 0.03   |
+      | 11 January 2024 | AM     | 0.04   |
+      | 12 January 2024 | AM     | 0.03   |
+      | 13 January 2024 | AM     | 0.03   |
+      | 14 January 2024 | AM     | 0.04   |
+      | 15 January 2024 | AM_ADJ | 0.17   |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 1.0        | 0.3              | 0.0                      | 0.7             | 0.0                |
+    When Admin sets the business date to "25 January 2024"
+    And Admin runs inline COB job for Loan
+    And Loan Amortization Allocation Mapping for "BUY_DOWN_FEE" transaction created on "01 January 2024" contains the following data:
+      | Date            | Type   | Amount |
+      | 01 January 2024 | AM     | 0.03   |
+      | 02 January 2024 | AM     | 0.04   |
+      | 03 January 2024 | AM     | 0.03   |
+      | 04 January 2024 | AM     | 0.03   |
+      | 05 January 2024 | AM     | 0.04   |
+      | 06 January 2024 | AM     | 0.03   |
+      | 07 January 2024 | AM     | 0.03   |
+      | 08 January 2024 | AM     | 0.04   |
+      | 09 January 2024 | AM     | 0.03   |
+      | 10 January 2024 | AM     | 0.03   |
+      | 11 January 2024 | AM     | 0.04   |
+      | 12 January 2024 | AM     | 0.03   |
+      | 13 January 2024 | AM     | 0.03   |
+      | 14 January 2024 | AM     | 0.04   |
+      | 15 January 2024 | AM_ADJ | 0.17   |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 1.0        | 0.3              | 0.0                      | 0.7             | 0.0                |
+
+  @TestRailId:C4043
+  Scenario: Verify Buy Down Fee amortization allocation mapping when after buy down fee adjustment and charge-off
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES | 01 January 2024   | 100            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 30                | DAYS                  | 1              | DAYS                   | 30                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "100" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "100" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    And Admin runs inline COB job for Loan
+    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "1 January 2024" with "1" EUR transaction amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 1.0    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+    When Admin sets the business date to "15 January 2024"
+    And Admin runs inline COB job for Loan
+    And Admin adds buy down fee adjustment with "AUTOPAY" payment type to the loan on "15 January 2024" with "0.3" EUR transaction amount
+    When Admin sets the business date to "16 January 2024"
+    And Admin runs inline COB job for Loan
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 1.0    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 01 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 January 2024  | Buy Down Fee Amortization | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    |
+      | 03 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 03 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 04 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 04 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 05 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 05 January 2024  | Buy Down Fee Amortization | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    |
+      | 06 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 06 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 07 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 07 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 08 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 08 January 2024  | Buy Down Fee Amortization | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    |
+      | 09 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 09 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 10 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 10 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 11 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 11 January 2024  | Buy Down Fee Amortization | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    |
+      | 12 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 12 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 13 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 13 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 14 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 14 January 2024  | Buy Down Fee Amortization | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    |
+      | 15 January 2024  | Buy Down Fee Adjustment   | 0.3    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 15 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 15 January 2024  | Buy Down Fee Amortization | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Amortization Allocation Mapping for "BUY_DOWN_FEE" transaction created on "01 January 2024" contains the following data:
+      | Date            | Type | Amount |
+      | 01 January 2024 | AM   | 0.03   |
+      | 02 January 2024 | AM   | 0.04   |
+      | 03 January 2024 | AM   | 0.03   |
+      | 04 January 2024 | AM   | 0.03   |
+      | 05 January 2024 | AM   | 0.04   |
+      | 06 January 2024 | AM   | 0.03   |
+      | 07 January 2024 | AM   | 0.03   |
+      | 08 January 2024 | AM   | 0.04   |
+      | 09 January 2024 | AM   | 0.03   |
+      | 10 January 2024 | AM   | 0.03   |
+      | 11 January 2024 | AM   | 0.04   |
+      | 12 January 2024 | AM   | 0.03   |
+      | 13 January 2024 | AM   | 0.03   |
+      | 14 January 2024 | AM   | 0.04   |
+      | 15 January 2024 | AM   | 0.01   |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 1.0        | 0.48             | 0.22                     | 0.3             | 0.0                |
+    And Admin does charge-off the loan on "16 January 2024"
+    Then Loan status will be "ACTIVE"
+    And Loan marked as charged-off on "16 January 2024"
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 01 January 2024  | Buy Down Fee              | 1.0    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 01 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 January 2024  | Buy Down Fee Amortization | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    |
+      | 03 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 03 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 04 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 04 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 05 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 05 January 2024  | Buy Down Fee Amortization | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    |
+      | 06 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 06 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 07 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 07 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 08 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 08 January 2024  | Buy Down Fee Amortization | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    |
+      | 09 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 09 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 10 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 10 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 11 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 11 January 2024  | Buy Down Fee Amortization | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    |
+      | 12 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 12 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 13 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 13 January 2024  | Buy Down Fee Amortization | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    |
+      | 14 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 14 January 2024  | Buy Down Fee Amortization | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    |
+      | 15 January 2024  | Buy Down Fee Adjustment   | 0.3    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 15 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 15 January 2024  | Buy Down Fee Amortization | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    |
+      | 16 January 2024  | Accrual                   | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 16 January 2024  | Buy Down Fee Amortization | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
+      | 16 January 2024  | Charge-off                | 100.38 | 100.0     | 0.38     | 0.0  | 0.0       | 0.0          | false    |
+      | 16 January 2024  | Buy Down Fee Amortization | 0.2    | 0.0       | 0.2      | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Amortization Allocation Mapping for "BUY_DOWN_FEE" transaction created on "01 January 2024" contains the following data:
+      | Date            | Type | Amount |
+      | 01 January 2024 | AM   | 0.03   |
+      | 02 January 2024 | AM   | 0.04   |
+      | 03 January 2024 | AM   | 0.03   |
+      | 04 January 2024 | AM   | 0.03   |
+      | 05 January 2024 | AM   | 0.04   |
+      | 06 January 2024 | AM   | 0.03   |
+      | 07 January 2024 | AM   | 0.03   |
+      | 08 January 2024 | AM   | 0.04   |
+      | 09 January 2024 | AM   | 0.03   |
+      | 10 January 2024 | AM   | 0.03   |
+      | 11 January 2024 | AM   | 0.04   |
+      | 12 January 2024 | AM   | 0.03   |
+      | 13 January 2024 | AM   | 0.03   |
+      | 14 January 2024 | AM   | 0.04   |
+      | 15 January 2024 | AM   | 0.01   |
+      | 16 January 2024 | AM   | 0.02   |
+      | 16 January 2024 | AM   | 0.2    |
+    And Buy down fee by external-id contains the following data:
+      | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 January 2024 | 1.0        | 0.5              | 0.0                      | 0.3             | 0.2                |

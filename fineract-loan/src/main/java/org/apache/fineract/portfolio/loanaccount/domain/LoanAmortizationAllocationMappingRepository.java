@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import java.math.BigDecimal;
 import java.util.List;
 import org.apache.fineract.portfolio.loanaccount.data.AmortizationAllocationMappingDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,11 +34,31 @@ import org.springframework.stereotype.Repository;
 public interface LoanAmortizationAllocationMappingRepository
         extends JpaRepository<LoanAmortizationAllocationMapping, Long>, JpaSpecificationExecutor<LoanAmortizationAllocationMapping> {
 
-    @Query(value = "SELECT new org.apache.fineract.portfolio.loanaccount.data.AmortizationAllocationMappingDTO("
-            + "laam.amortizationLoanTransactionId, at.externalId, laam.date, laam.amortizationType, laam.amount) "
-            + "FROM LoanAmortizationAllocationMapping laam " + "JOIN LoanTransaction at ON laam.amortizationLoanTransactionId = at.id "
-            + "WHERE laam.baseLoanTransactionId = :baseLoanTransactionId AND laam.loanId = :loanId "
-            + "ORDER BY laam.date, laam.amortizationLoanTransactionId")
+    @Query("""
+                    SELECT new org.apache.fineract.portfolio.loanaccount.data.AmortizationAllocationMappingDTO(
+                        laam.amortizationLoanTransactionId,
+                        at.externalId,
+                        laam.date,
+                        laam.amortizationType,
+                        laam.amount
+                    ) FROM LoanAmortizationAllocationMapping laam
+                        JOIN LoanTransaction at ON laam.amortizationLoanTransactionId = at.id
+                    WHERE laam.baseLoanTransactionId = :baseLoanTransactionId AND laam.loanId = :loanId
+                    ORDER BY laam.date, laam.amortizationLoanTransactionId
+            """)
     List<AmortizationAllocationMappingDTO> findAmortizationMappingsByBaseTransactionAndLoan(
             @Param("baseLoanTransactionId") Long baseLoanTransactionId, @Param("loanId") Long loanId);
+
+    @Query("""
+                    SELECT COALESCE(SUM(
+                        CASE
+                            WHEN laam.amortizationType = org.apache.fineract.portfolio.loanaccount.domain.AmortizationType.AM THEN laam.amount
+                            WHEN laam.amortizationType = org.apache.fineract.portfolio.loanaccount.domain.AmortizationType.AM_ADJ THEN -laam.amount
+                            ELSE 0
+                        END
+                    ), 0)
+                    FROM LoanAmortizationAllocationMapping laam
+                    WHERE laam.baseLoanTransactionId = :baseLoanTransactionId AND laam.loanId = :loanId
+            """)
+    BigDecimal calculateAlreadyAmortizedAmount(@Param("baseLoanTransactionId") Long baseLoanTransactionId, @Param("loanId") Long loanId);
 }

@@ -36,6 +36,8 @@ public interface LoanAmortizationAllocationService {
      */
     LoanAmortizationAllocationData retrieveLoanAmortizationAllocationsForCapitalizedIncomeTransaction(Long loanTransactionId, Long loanId);
 
+    BigDecimal calculateAlreadyAmortizedAmount(Long loanTransactionId, Long loanId);
+
     LoanAmortizationAllocationMapping createAmortizationAllocationMappingWithBaseLoanTransaction(LoanTransaction loanTransaction,
             BigDecimal amount, AmortizationType amortizationType);
 
