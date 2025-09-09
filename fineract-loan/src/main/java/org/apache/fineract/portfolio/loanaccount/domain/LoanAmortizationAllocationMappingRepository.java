@@ -61,4 +61,13 @@ public interface LoanAmortizationAllocationMappingRepository
                     WHERE laam.baseLoanTransactionId = :baseLoanTransactionId AND laam.loanId = :loanId
             """)
     BigDecimal calculateAlreadyAmortizedAmount(@Param("baseLoanTransactionId") Long baseLoanTransactionId, @Param("loanId") Long loanId);
+
+    @Query("""
+                    SELECT laam FROM LoanAmortizationAllocationMapping laam
+                        JOIN LoanTransaction at ON at.id = laam.baseLoanTransactionId
+                    WHERE laam.amortizationLoanTransactionId = :amortizationLoanTransactionId
+                    AND laam.loanId = :loanId
+            """)
+    List<LoanAmortizationAllocationMapping> fetchLoanTransactionAllocationByAmortizationLoanTransactionId(
+            @Param("amortizationLoanTransactionId") Long amortizationLoanTransactionId, @Param("loanId") Long loanId);
 }

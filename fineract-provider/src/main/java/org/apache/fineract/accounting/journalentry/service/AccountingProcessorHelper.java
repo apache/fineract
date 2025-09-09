@@ -35,6 +35,7 @@ import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsFor
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForSavings;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForShares;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
+import org.apache.fineract.accounting.common.AccountingConstants.LoanProductAccountingParams;
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccount;
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
@@ -171,12 +172,24 @@ public class AccountingProcessorHelper {
 
         return new LoanDTO(loanId, loanProductId, officeId, currencyCode, cashBasedAccountingEnabled, upfrontAccrualBasedAccountingEnabled,
                 periodicAccrualBasedAccountingEnabled, newLoanTransactions, isLoanMarkedAsChargeOff, isLoanMarkedAsFraud,
-                chargeOffReasonCodeValue, isLoanMarkedAsWrittenOff, merchantBuyDownFee);
+                chargeOffReasonCodeValue, isLoanMarkedAsWrittenOff, merchantBuyDownFee,
+                accountingBridgeData.getBuydownFeeClassificationCodeValue(),
+                accountingBridgeData.getCapitalizedIncomeClassificationCodeValue());
     }
 
     public ProductToGLAccountMapping getChargeOffMappingByCodeValue(Long loanProductId, PortfolioProductType productType,
             Long chargeOffReasonId) {
         return accountMappingRepository.findChargeOffReasonMapping(loanProductId, productType.getValue(), chargeOffReasonId);
+    }
+
+    public ProductToGLAccountMapping getClassificationMappingByCodeValue(Long loanProductId, PortfolioProductType productType,
+            final Long classificationId, final String classificationType) {
+        if (LoanProductAccountingParams.BUYDOWN_FEE_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS.getValue().equals(classificationType)) {
+            return accountMappingRepository.findBuydownFeeClassificationMapping(loanProductId, productType.getValue(), classificationId);
+        } else {
+            return accountMappingRepository.findCapitalizedIncomeClassificationMapping(loanProductId, productType.getValue(),
+                    classificationId);
+        }
     }
 
     public SavingsDTO populateSavingsDtoFromMap(final Map<String, Object> accountingBridgeData, final boolean cashBasedAccountingEnabled,
@@ -472,6 +485,14 @@ public class AccountingProcessorHelper {
                 transactionId, transactionDate, amount);
     }
 
+    public void createJournalEntriesForLoan(final Office office, final String currencyCode, final Integer accountTypeToBeDebited,
+            final GLAccount accountToBeCredited, final Long loanProductId, final Long paymentTypeId, final Long loanId,
+            final String transactionId, final LocalDate transactionDate, final BigDecimal amount) {
+        int accountTypeToDebitId = accountTypeToBeDebited;
+        createJournalEntriesForLoan(office, currencyCode, accountTypeToDebitId, accountToBeCredited, loanProductId, paymentTypeId, loanId,
+                transactionId, transactionDate, amount);
+    }
+
     public void createSplitJournalEntriesForLoan(Office office, String currencyCode, List<JournalAmountHolder> splitAccountsHolder,
             JournalAmountHolder totalAccountHolder, Long loanProductId, Long paymentTypeId, Long loanId, String transactionId,
             LocalDate transactionDate) {
@@ -530,6 +551,14 @@ public class AccountingProcessorHelper {
             final String transactionId, final LocalDate transactionDate, final BigDecimal amount) {
         final GLAccount debitAccount = getLinkedGLAccountForLoanProduct(loanProductId, accountTypeToDebitId, paymentTypeId);
         final GLAccount creditAccount = getLinkedGLAccountForLoanProduct(loanProductId, accountTypeToCreditId, paymentTypeId);
+        createDebitJournalEntryForLoan(office, currencyCode, debitAccount, loanId, transactionId, transactionDate, amount);
+        createCreditJournalEntryForLoan(office, currencyCode, creditAccount, loanId, transactionId, transactionDate, amount);
+    }
+
+    private void createJournalEntriesForLoan(final Office office, final String currencyCode, final int accountTypeToDebitId,
+            final GLAccount creditAccount, final Long loanProductId, final Long paymentTypeId, final Long loanId,
+            final String transactionId, final LocalDate transactionDate, final BigDecimal amount) {
+        final GLAccount debitAccount = getLinkedGLAccountForLoanProduct(loanProductId, accountTypeToDebitId, paymentTypeId);
         createDebitJournalEntryForLoan(office, currencyCode, debitAccount, loanId, transactionId, transactionDate, amount);
         createCreditJournalEntryForLoan(office, currencyCode, creditAccount, loanId, transactionId, transactionDate, amount);
     }

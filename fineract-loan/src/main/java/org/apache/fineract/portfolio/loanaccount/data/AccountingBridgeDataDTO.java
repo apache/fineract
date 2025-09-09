@@ -25,6 +25,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.fineract.accounting.journalentry.data.AdvancedMappingtDTO;
 
 @Getter
 @Setter
@@ -47,5 +48,7 @@ public class AccountingBridgeDataDTO {
     private boolean isWrittenOff;
     private List<AccountingBridgeLoanTransactionDTO> newLoanTransactions = new ArrayList<>();
     private boolean merchantBuyDownFee;
+    private List<AdvancedMappingtDTO> buydownFeeClassificationCodeValue;
+    private List<AdvancedMappingtDTO> capitalizedIncomeClassificationCodeValue;
 
 }

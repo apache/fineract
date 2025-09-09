@@ -48,4 +48,6 @@ public class LoanDTO {
     private Long chargeOffReasonCodeValue;
     private boolean markedAsWrittenOff;
     private boolean merchantBuyDownFee;
+    private List<AdvancedMappingtDTO> buydownFeeAdvancedMappingData;
+    private List<AdvancedMappingtDTO> capitalizedIncomeAdvancedMappingData;
 }

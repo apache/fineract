@@ -35,7 +35,7 @@ public interface ProductToGLAccountMappingRepository
             @Param("productType") int productType, @Param("financialAccountType") int financialAccountType,
             @Param("chargeId") Long ChargeId);
 
-    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId and mapping.productType =:productType and mapping.financialAccountType=:financialAccountType and mapping.paymentType is NULL and mapping.charge is NULL and mapping.chargeOffReason is NULL")
+    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId and mapping.productType =:productType and mapping.financialAccountType=:financialAccountType and mapping.paymentType is NULL and mapping.charge is NULL and mapping.chargeOffReason is NULL and mapping.capitalizedIncomeClassification is NULL and mapping.buydownFeeClassification is NULL")
     ProductToGLAccountMapping findCoreProductToFinAccountMapping(@Param("productId") Long productId, @Param("productType") int productType,
             @Param("financialAccountType") int financialAccountType);
 
@@ -70,7 +70,7 @@ public interface ProductToGLAccountMappingRepository
     ProductToGLAccountMapping findChargeOffReasonMapping(@Param("productId") Long productId, @Param("productType") Integer productType,
             @Param("chargeOffReasonId") Long chargeOffReasonId);
 
-    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId AND mapping.productType =:productType AND mapping.charge IS NULL AND mapping.paymentType IS NULL AND mapping.chargeOffReason IS NULL")
+    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId AND mapping.productType =:productType AND mapping.charge IS NULL AND mapping.paymentType IS NULL AND mapping.chargeOffReason IS NULL AND mapping.capitalizedIncomeClassification is NULL AND mapping.buydownFeeClassification is NULL")
     List<ProductToGLAccountMapping> findAllRegularMappings(@Param("productId") Long productId, @Param("productType") Integer productType);
 
     @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId and mapping.productType =:productType and mapping.paymentType is not NULL")
@@ -82,4 +82,21 @@ public interface ProductToGLAccountMappingRepository
 
     @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId AND mapping.productType =:productType AND mapping.charge.penalty = FALSE")
     List<ProductToGLAccountMapping> findAllFeeMappings(@Param("productId") Long productId, @Param("productType") Integer productType);
+
+    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId and mapping.productType =:productType and mapping.capitalizedIncomeClassification is not NULL")
+    List<ProductToGLAccountMapping> findAllCapitalizedIncomeClassificationsMappings(@Param("productId") Long productId,
+            @Param("productType") int productType);
+
+    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId and mapping.productType =:productType and mapping.buydownFeeClassification is not NULL")
+    List<ProductToGLAccountMapping> findAllBuyDownFeeClassificationsMappings(@Param("productId") Long productId,
+            @Param("productType") int productType);
+
+    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.buydownFeeClassification.id = :classificationId AND mapping.productId = :productId AND mapping.productType = :productType")
+    ProductToGLAccountMapping findBuydownFeeClassificationMapping(@Param("productId") Long productId,
+            @Param("productType") Integer productType, @Param("classificationId") Long classificationId);
+
+    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.capitalizedIncomeClassification.id = :classificationId AND mapping.productId = :productId AND mapping.productType = :productType")
+    ProductToGLAccountMapping findCapitalizedIncomeClassificationMapping(@Param("productId") Long productId,
+            @Param("productType") Integer productType, @Param("classificationId") Long classificationId);
+
 }

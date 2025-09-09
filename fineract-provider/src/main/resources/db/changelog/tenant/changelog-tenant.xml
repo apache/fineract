@@ -216,4 +216,5 @@
     <include file="parts/0195_create_loan_amortization_allocation_mapping.xml" relativeToChangelogFile="true" />
     <include file="parts/0196_add_deleted_and_closed_to_buy_down_fee_balance.xml" relativeToChangelogFile="true" />
     <include file="parts/0197_add_deleted_and_closed_to_capitalized_income_balance.xml" relativeToChangelogFile="true" />
+    <include file="parts/0198_add_classification_id_to_acc_product_mapping.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

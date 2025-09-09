@@ -227,6 +227,30 @@ public class ProductToGLAccountMappingHelper {
         }
     }
 
+    public void saveClassificationToGLAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
+            final Map<String, Object> changes, final PortfolioProductType portfolioProductType,
+            final LoanProductAccountingParams classificationParameter) {
+
+        final String arrayName = classificationParameter.getValue();
+        final JsonArray classificationToIncomeAccountMappingArray = this.fromApiJsonHelper.extractJsonArrayNamed(arrayName, element);
+
+        if (classificationToIncomeAccountMappingArray != null) {
+            if (changes != null) {
+                changes.put(arrayName, command.jsonFragment(arrayName));
+            }
+
+            for (int i = 0; i < classificationToIncomeAccountMappingArray.size(); i++) {
+                final JsonObject jsonObject = classificationToIncomeAccountMappingArray.get(i).getAsJsonObject();
+                final Long classificationId = jsonObject.get(LoanProductAccountingParams.CLASSIFICATION_CODE_VALUE_ID.getValue())
+                        .getAsLong();
+                final Long incomeAccountId = jsonObject.get(LoanProductAccountingParams.INCOME_ACCOUNT_ID.getValue()).getAsLong();
+
+                saveClassificationToIncomeMapping(productId, classificationId, incomeAccountId, portfolioProductType,
+                        classificationParameter);
+            }
+        }
+    }
+
     /**
      * @param command
      * @param element
@@ -448,6 +472,75 @@ public class ProductToGLAccountMappingHelper {
         }
     }
 
+    public void updateClassificationToGLAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
+            final Map<String, Object> changes, final PortfolioProductType portfolioProductType,
+            final LoanProductAccountingParams classificationParameter) {
+
+        final List<ProductToGLAccountMapping> existingClassificationToGLAccountMappings = classificationParameter
+                .equals(LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS)
+                        ? this.accountMappingRepository.findAllCapitalizedIncomeClassificationsMappings(productId,
+                                portfolioProductType.getValue())
+                        : this.accountMappingRepository.findAllBuyDownFeeClassificationsMappings(productId,
+                                portfolioProductType.getValue());
+
+        final JsonArray classificationToGLAccountMappingArray = this.fromApiJsonHelper
+                .extractJsonArrayNamed(classificationParameter.getValue(), element);
+
+        final Map<Long, Long> inputClassificationToGLAccountMap = new HashMap<>();
+
+        final Set<Long> existingClassifications = new HashSet<>();
+        if (classificationToGLAccountMappingArray != null) {
+            if (changes != null) {
+                changes.put(classificationParameter.getValue(), command.jsonFragment(classificationParameter.getValue()));
+            }
+
+            for (int i = 0; i < classificationToGLAccountMappingArray.size(); i++) {
+                final JsonObject jsonObject = classificationToGLAccountMappingArray.get(i).getAsJsonObject();
+                final Long incomeGlAccountId = jsonObject.get(LoanProductAccountingParams.INCOME_ACCOUNT_ID.getValue()).getAsLong();
+                final Long classificationCodeValueId = jsonObject.get(LoanProductAccountingParams.CLASSIFICATION_CODE_VALUE_ID.getValue())
+                        .getAsLong();
+                inputClassificationToGLAccountMap.put(classificationCodeValueId, incomeGlAccountId);
+            }
+
+            // If input map is empty, delete all existing mappings
+            if (inputClassificationToGLAccountMap.isEmpty()) {
+                this.accountMappingRepository.deleteAllInBatch(existingClassificationToGLAccountMappings);
+            } else {
+                for (final ProductToGLAccountMapping existingClassificationToGLAccountMapping : existingClassificationToGLAccountMappings) {
+                    final Long currentClassificationId = classificationParameter
+                            .equals(LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS)
+                                    ? existingClassificationToGLAccountMapping.getCapitalizedIncomeClassification().getId()
+                                    : existingClassificationToGLAccountMapping.getBuydownFeeClassification().getId();
+
+                    if (currentClassificationId != null) {
+                        existingClassifications.add(currentClassificationId);
+                        // update existing mappings (if required)
+                        if (inputClassificationToGLAccountMap.containsKey(currentClassificationId)) {
+                            final Long newGLAccountId = inputClassificationToGLAccountMap.get(currentClassificationId);
+                            if (!newGLAccountId.equals(existingClassificationToGLAccountMapping.getGlAccount().getId())) {
+                                final Optional<GLAccount> glAccount = accountRepository.findById(newGLAccountId);
+                                if (glAccount.isPresent()) {
+                                    existingClassificationToGLAccountMapping.setGlAccount(glAccount.get());
+                                    this.accountMappingRepository.saveAndFlush(existingClassificationToGLAccountMapping);
+                                }
+                            }
+                        } // deleted previous record
+                        else {
+                            this.accountMappingRepository.delete(existingClassificationToGLAccountMapping);
+                        }
+                    }
+                }
+
+                // only the newly added
+                for (Map.Entry<Long, Long> entry : inputClassificationToGLAccountMap.entrySet().stream()
+                        .filter(e -> !existingClassifications.contains(e.getKey())).toList()) {
+                    saveClassificationToIncomeMapping(productId, entry.getKey(), entry.getValue(), portfolioProductType,
+                            classificationParameter);
+                }
+            }
+        }
+    }
+
     /**
      * @param productId
      *
@@ -509,6 +602,39 @@ public class ProductToGLAccountMappingHelper {
             final ProductToGLAccountMapping accountMapping = new ProductToGLAccountMapping().setGlAccount(glAccount.get())
                     .setProductId(productId).setProductType(portfolioProductType.getValue())
                     .setFinancialAccountType(CashAccountsForLoan.CHARGE_OFF_EXPENSE.getValue()).setChargeOffReason(codeValueOptional.get());
+
+            this.accountMappingRepository.saveAndFlush(accountMapping);
+        }
+    }
+
+    private void saveClassificationToIncomeMapping(final Long productId, final Long classificationId, final Long incomeAccountId,
+            final PortfolioProductType portfolioProductType, final LoanProductAccountingParams classificationParameter) {
+
+        final Optional<GLAccount> glAccount = accountRepository.findById(incomeAccountId);
+
+        boolean classificationMappingExists = false;
+        if (classificationParameter.equals(LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS)) {
+            classificationMappingExists = this.accountMappingRepository
+                    .findAllCapitalizedIncomeClassificationsMappings(productId, portfolioProductType.getValue()).stream()
+                    .anyMatch(mapping -> mapping.getCapitalizedIncomeClassification().getId().equals(classificationId));
+        } else {
+            classificationMappingExists = this.accountMappingRepository
+                    .findAllBuyDownFeeClassificationsMappings(productId, portfolioProductType.getValue()).stream()
+                    .anyMatch(mapping -> mapping.getBuydownFeeClassification().getId().equals(classificationId));
+        }
+
+        final Optional<CodeValue> codeValueOptional = codeValueRepository.findById(classificationId);
+
+        if (glAccount.isPresent() && !classificationMappingExists && codeValueOptional.isPresent()) {
+            final ProductToGLAccountMapping accountMapping = new ProductToGLAccountMapping().setGlAccount(glAccount.get())
+                    .setProductId(productId).setProductType(portfolioProductType.getValue())
+                    .setFinancialAccountType(CashAccountsForLoan.CLASSIFICATION_INCOME.getValue());
+
+            if (classificationParameter.equals(LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS)) {
+                accountMapping.setCapitalizedIncomeClassification(codeValueOptional.get());
+            } else {
+                accountMapping.setBuydownFeeClassification(codeValueOptional.get());
+            }
 
             this.accountMappingRepository.saveAndFlush(accountMapping);
         }
@@ -610,4 +736,38 @@ public class ProductToGLAccountMappingHelper {
             throw new PlatformApiDataValidationException(validationErrors);
         }
     }
+
+    public void validateClassificationMappingsInDatabase(final List<JsonObject> mappings, final String dataCodeName) {
+        final List<ApiParameterError> validationErrors = new ArrayList<>();
+
+        for (JsonObject jsonObject : mappings) {
+            final Long incomeGlAccountId = this.fromApiJsonHelper.extractLongNamed(LoanProductAccountingParams.INCOME_ACCOUNT_ID.getValue(),
+                    jsonObject);
+            final Long classificationCodeValueId = this.fromApiJsonHelper
+                    .extractLongNamed(LoanProductAccountingParams.CLASSIFICATION_CODE_VALUE_ID.getValue(), jsonObject);
+
+            // Validation: classificationCodeValueId must exist in the database
+            final CodeValue codeValue = this.codeValueRepository.findByCodeNameAndId(dataCodeName, classificationCodeValueId);
+            if (codeValue == null) {
+                validationErrors.add(ApiParameterError.parameterError("validation.msg.classification.invalid",
+                        "Classification with ID " + classificationCodeValueId + " does not exist", dataCodeName));
+            }
+
+            // Validation: expenseGLAccountId must exist as a valid Expense GL account
+            final Optional<GLAccount> glAccount = accountRepository.findById(incomeGlAccountId);
+
+            if (glAccount.isEmpty() || !GLAccountType.fromInt(glAccount.get().getType()).isIncomeType()) {
+                validationErrors.add(ApiParameterError.parameterError("validation.msg.glaccount.not.found",
+                        "GL Account with ID " + incomeGlAccountId + " does not exist or is not an Income GL account",
+                        LoanProductAccountingParams.INCOME_ACCOUNT_ID.getValue()));
+
+            }
+        }
+
+        // Throw all collected validation errors, if any
+        if (!validationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(validationErrors);
+        }
+    }
+
 }

@@ -30,6 +30,7 @@ import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsFor
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForSavings;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForShares;
 import org.apache.fineract.accounting.common.AccountingConstants.LoanProductAccountingDataParams;
+import org.apache.fineract.accounting.common.AccountingConstants.LoanProductAccountingParams;
 import org.apache.fineract.accounting.common.AccountingConstants.SavingProductAccountingDataParams;
 import org.apache.fineract.accounting.common.AccountingConstants.SharesProductAccountingParams;
 import org.apache.fineract.accounting.common.AccountingRuleType;
@@ -37,14 +38,15 @@ import org.apache.fineract.accounting.common.AccountingValidations;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeOffReasonToGLAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
+import org.apache.fineract.accounting.producttoaccountmapping.data.ClassificationToGLAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMapping;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.infrastructure.codes.mapper.CodeValueMapper;
 import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -52,9 +54,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ProductToGLAccountMappingReadPlatformServiceImpl implements ProductToGLAccountMappingReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
-
     private final ProductToGLAccountMappingRepository productToGLAccountMappingRepository;
+    private final CodeValueMapper codeValueMapper;
 
     @Override
     public Map<String, Object> fetchAccountMappingDetailsForLoanProduct(final Long loanProductId, final Integer accountingType) {
@@ -283,20 +284,42 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
             final String glAccountName = mapping.getGlAccount().getName();
             final String glCode = mapping.getGlAccount().getGlCode();
             final GLAccountData chargeOffExpenseAccount = new GLAccountData().setId(glAccountId).setName(glAccountName).setGlCode(glCode);
-            final Long chargeOffReasonId = mapping.getChargeOffReason().getId();
-            final String codeValue = mapping.getChargeOffReason().getLabel();
-            final String codeDescription = mapping.getChargeOffReason().getDescription();
-            final Integer orderPosition = mapping.getChargeOffReason().getPosition();
-            final boolean isActive = mapping.getChargeOffReason().isActive();
-            final boolean isMandatory = mapping.getChargeOffReason().isMandatory();
-            final CodeValueData chargeOffReasonsCodeValue = CodeValueData.builder().id(chargeOffReasonId).name(codeValue)
-                    .description(codeDescription).position(orderPosition).active(isActive).mandatory(isMandatory).build();
+            final CodeValueData chargeOffReasonsCodeValue = codeValueMapper.map(mapping.getChargeOffReason());
 
             final ChargeOffReasonToGLAccountMapper chargeOffReasonToGLAccountMapper = new ChargeOffReasonToGLAccountMapper()
                     .setChargeOffReasonCodeValue(chargeOffReasonsCodeValue).setExpenseAccount(chargeOffExpenseAccount);
             chargeOffReasonToGLAccountMappers.add(chargeOffReasonToGLAccountMapper);
         }
         return chargeOffReasonToGLAccountMappers;
+    }
+
+    private List<ClassificationToGLAccountData> fetchClassificationMappings(final PortfolioProductType portfolioProductType,
+            final Long loanProductId, LoanProductAccountingParams classificationParameter) {
+        final List<ProductToGLAccountMapping> mappings = classificationParameter
+                .equals(LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS)
+                        ? productToGLAccountMappingRepository.findAllCapitalizedIncomeClassificationsMappings(loanProductId,
+                                portfolioProductType.getValue())
+                        : productToGLAccountMappingRepository.findAllBuyDownFeeClassificationsMappings(loanProductId,
+                                portfolioProductType.getValue());
+
+        productToGLAccountMappingRepository.findAllChargeOffReasonsMappings(loanProductId, portfolioProductType.getValue());
+        List<ClassificationToGLAccountData> classificationToGLAccountMappers = mappings.isEmpty() ? null : new ArrayList<>();
+        for (final ProductToGLAccountMapping mapping : mappings) {
+            final Long glAccountId = mapping.getGlAccount().getId();
+            final String glAccountName = mapping.getGlAccount().getName();
+            final String glCode = mapping.getGlAccount().getGlCode();
+            final GLAccountData glAccountData = new GLAccountData().setId(glAccountId).setName(glAccountName).setGlCode(glCode);
+
+            final CodeValueData classificationCodeValue = classificationParameter
+                    .equals(LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS)
+                            ? codeValueMapper.map(mapping.getCapitalizedIncomeClassification())
+                            : codeValueMapper.map(mapping.getBuydownFeeClassification());
+
+            final ClassificationToGLAccountData classificationToGLAccountMapper = new ClassificationToGLAccountData()
+                    .setClassificationCodeValue(classificationCodeValue).setIncomeAccount(glAccountData);
+            classificationToGLAccountMappers.add(classificationToGLAccountMapper);
+        }
+        return classificationToGLAccountMappers;
     }
 
     @Override
@@ -342,6 +365,12 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
     @Override
     public List<ChargeOffReasonToGLAccountMapper> fetchChargeOffReasonMappingsForLoanProduct(Long loanProductId) {
         return fetchChargeOffReasonMappings(PortfolioProductType.LOAN, loanProductId);
+    }
+
+    @Override
+    public List<ClassificationToGLAccountData> fetchClassificationMappingsForLoanProduct(Long loanProductId,
+            LoanProductAccountingParams classificationParameter) {
+        return fetchClassificationMappings(PortfolioProductType.LOAN, loanProductId, classificationParameter);
     }
 
     private Map<String, Object> setAccrualPeriodicSavingsProductToGLAccountMaps(final List<ProductToGLAccountMapping> mappings) {

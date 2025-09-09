@@ -149,6 +149,30 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
         updateChargeOffReasonToGLAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN);
     }
 
+    public void saveCapitalizedIncomeClassificationToIncomeAccountMappings(final JsonCommand command, final JsonElement element,
+            final Long productId, final Map<String, Object> changes) {
+        saveClassificationToGLAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN,
+                LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS);
+    }
+
+    public void updateCapitalizedIncomeClassificationToIncomeAccountMappings(final JsonCommand command, final JsonElement element,
+            final Long productId, final Map<String, Object> changes) {
+        updateClassificationToGLAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN,
+                LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS);
+    }
+
+    public void saveBuyDownFeeClassificationToIncomeAccountMappings(final JsonCommand command, final JsonElement element,
+            final Long productId, final Map<String, Object> changes) {
+        saveClassificationToGLAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN,
+                LoanProductAccountingParams.BUYDOWN_FEE_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS);
+    }
+
+    public void updateBuyDownFeeClassificationToIncomeAccountMappings(final JsonCommand command, final JsonElement element,
+            final Long productId, final Map<String, Object> changes) {
+        updateClassificationToGLAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN,
+                LoanProductAccountingParams.BUYDOWN_FEE_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS);
+    }
+
     public void updateChargesToIncomeAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
             final Map<String, Object> changes) {
         // update both fee and penalty charges

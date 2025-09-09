@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.loanaccount.data.CumulativeIncomeFromIncomePosting;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
@@ -472,5 +473,12 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
             """)
     boolean existsNonReversedByLoanAndTypeAndDate(@Param("loan") Loan loan, @Param("type") LoanTransactionType type,
             @Param("transactionDate") LocalDate transactionDate);
+
+    @Query("""
+            SELECT lt.classification
+            FROM LoanTransaction lt
+            WHERE lt.id = :transactionId
+            """)
+    CodeValue fetchClassificationCodeValueByTransactionId(@Param("transactionId") Long transactionId);
 
 }

@@ -73,7 +73,7 @@ class CreateJournalEntriesForChargeOffLoanTest {
                 Collections.emptyList(), false, "", null, null, null, null);
 
         loanDTO = new LoanDTO(1L, 1L, 1L, "USD", false, true, true, List.of(loanTransactionDTO), false, false, chargeOffReasonId, false,
-                false);
+                false, null, null);
     }
 
     @Test

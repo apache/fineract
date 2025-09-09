@@ -53,7 +53,9 @@ public final class AccountingConstants {
         INCOME_FROM_CHARGE_OFF_PENALTY(18), //
         INCOME_FROM_GOODWILL_CREDIT_INTEREST(19), //
         INCOME_FROM_GOODWILL_CREDIT_FEES(20), //
-        INCOME_FROM_GOODWILL_CREDIT_PENALTY(21); //
+        INCOME_FROM_GOODWILL_CREDIT_PENALTY(21), //
+        CLASSIFICATION_INCOME(22), //
+        ;
 
         private final Integer value;
 
@@ -185,6 +187,9 @@ public final class AccountingConstants {
         INCOME_FROM_CAPITALIZATION("incomeFromCapitalizationAccountId"), //
         BUY_DOWN_EXPENSE("buyDownExpenseAccountId"), //
         INCOME_FROM_BUY_DOWN("incomeFromBuyDownAccountId"), //
+        CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS("capitalizedIncomeClassificationToIncomeAccountMappings"), //
+        BUYDOWN_FEE_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS("buydownfeeClassificationToIncomeAccountMappings"), //
+        CLASSIFICATION_CODE_VALUE_ID("classificationCodeValueId"), //
         ;
 
         private final String value;

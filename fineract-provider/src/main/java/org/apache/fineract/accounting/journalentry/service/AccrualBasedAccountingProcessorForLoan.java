@@ -29,7 +29,9 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
+import org.apache.fineract.accounting.common.AccountingConstants.LoanProductAccountingParams;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
+import org.apache.fineract.accounting.journalentry.data.AdvancedMappingtDTO;
 import org.apache.fineract.accounting.journalentry.data.ChargePaymentDTO;
 import org.apache.fineract.accounting.journalentry.data.GLAccountBalanceHolder;
 import org.apache.fineract.accounting.journalentry.data.LoanDTO;
@@ -296,17 +298,57 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
         final GLAccountBalanceHolder glAccountBalanceHolder = new GLAccountBalanceHolder();
 
+        final List<AdvancedMappingtDTO> classificationCodeValues = loanDTO.getCapitalizedIncomeAdvancedMappingData();
+
         // interest payment
         final AccrualAccountsForLoan creditAccountType = isLoanWrittenOff ? AccrualAccountsForLoan.LOSSES_WRITTEN_OFF
                 : AccrualAccountsForLoan.INCOME_FROM_CAPITALIZATION;
         if (MathUtil.isGreaterThanZero(interestAmount)) {
-            populateCreditDebitMaps(loanProductId, interestAmount, paymentTypeId, creditAccountType.getValue(),
-                    AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), glAccountBalanceHolder);
+            if (classificationCodeValues.isEmpty()) {
+                populateCreditDebitMaps(loanProductId, interestAmount, paymentTypeId, creditAccountType.getValue(),
+                        AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), glAccountBalanceHolder);
+            } else {
+                classificationCodeValues.stream().forEach(classificationCodeValue -> {
+                    ProductToGLAccountMapping mapping = null;
+                    if (classificationCodeValue.getReferenceValueId() != null) {
+                        mapping = fetchAdvanceAccountingMappingForCodeValue(loanProductId, classificationCodeValue.getReferenceValueId(),
+                                LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS.getValue());
+                    }
+
+                    if (mapping == null) {
+                        populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId,
+                                creditAccountType.getValue(), AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
+                                glAccountBalanceHolder);
+                    } else {
+                        populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId, mapping.getGlAccount(),
+                                AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), glAccountBalanceHolder);
+                    }
+                });
+            }
         }
         // handle fees payment
         if (MathUtil.isGreaterThanZero(feesAmount)) {
-            populateCreditDebitMaps(loanProductId, feesAmount, paymentTypeId, creditAccountType.getValue(),
-                    AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), glAccountBalanceHolder);
+            if (classificationCodeValues.isEmpty()) {
+                populateCreditDebitMaps(loanProductId, feesAmount, paymentTypeId, creditAccountType.getValue(),
+                        AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), glAccountBalanceHolder);
+            } else {
+                classificationCodeValues.stream().forEach(classificationCodeValue -> {
+                    ProductToGLAccountMapping mapping = null;
+                    if (classificationCodeValue.getReferenceValueId() != null) {
+                        mapping = fetchAdvanceAccountingMappingForCodeValue(loanProductId, classificationCodeValue.getReferenceValueId(),
+                                LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS.getValue());
+                    }
+
+                    if (mapping == null) {
+                        populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId,
+                                creditAccountType.getValue(), AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
+                                glAccountBalanceHolder);
+                    } else {
+                        populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId, mapping.getGlAccount(),
+                                AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), glAccountBalanceHolder);
+                    }
+                });
+            }
         }
 
         // create credit entries
@@ -325,6 +367,11 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                         debitEntry.getValue(), glAccount);
             }
         }
+    }
+
+    private ProductToGLAccountMapping fetchAdvanceAccountingMappingForCodeValue(final Long loanProductId, final Long codeValueId,
+            final String codeName) {
+        return helper.getClassificationMappingByCodeValue(loanProductId, PortfolioProductType.LOAN, codeValueId, codeName);
     }
 
     private void createJournalEntriesForChargeOffLoanCapitalizedIncomeAmortization(final LoanDTO loanDTO,
@@ -493,17 +540,57 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
         final GLAccountBalanceHolder glAccountBalanceHolder = new GLAccountBalanceHolder();
 
+        final List<AdvancedMappingtDTO> classificationCodeValues = loanDTO.getBuydownFeeAdvancedMappingData();
+
         // interest payment
         final AccrualAccountsForLoan creditAccountType = isLoanWrittenOff ? AccrualAccountsForLoan.LOSSES_WRITTEN_OFF
                 : AccrualAccountsForLoan.INCOME_FROM_BUY_DOWN;
         if (MathUtil.isGreaterThanZero(interestAmount)) {
-            populateCreditDebitMaps(loanProductId, interestAmount, paymentTypeId, creditAccountType.getValue(),
-                    AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), glAccountBalanceHolder);
+            if (classificationCodeValues.isEmpty()) {
+                populateCreditDebitMaps(loanProductId, interestAmount, paymentTypeId, creditAccountType.getValue(),
+                        AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), glAccountBalanceHolder);
+            } else {
+                classificationCodeValues.stream().forEach(classificationCodeValue -> {
+                    ProductToGLAccountMapping mapping = null;
+                    if (classificationCodeValue.getReferenceValueId() != null) {
+                        mapping = fetchAdvanceAccountingMappingForCodeValue(loanProductId, classificationCodeValue.getReferenceValueId(),
+                                LoanProductAccountingParams.BUYDOWN_FEE_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS.getValue());
+                    }
+
+                    if (mapping == null) {
+                        populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId,
+                                creditAccountType.getValue(), AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
+                                glAccountBalanceHolder);
+                    } else {
+                        populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId, mapping.getGlAccount(),
+                                AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), glAccountBalanceHolder);
+                    }
+                });
+            }
         }
         // handle fees payment
         if (MathUtil.isGreaterThanZero(feesAmount)) {
-            populateCreditDebitMaps(loanProductId, feesAmount, paymentTypeId, creditAccountType.getValue(),
-                    AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), glAccountBalanceHolder);
+            if (classificationCodeValues.isEmpty()) {
+                populateCreditDebitMaps(loanProductId, feesAmount, paymentTypeId, creditAccountType.getValue(),
+                        AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), glAccountBalanceHolder);
+            } else {
+                classificationCodeValues.stream().forEach(classificationCodeValue -> {
+                    ProductToGLAccountMapping mapping = null;
+                    if (classificationCodeValue.getReferenceValueId() != null) {
+                        mapping = fetchAdvanceAccountingMappingForCodeValue(loanProductId, classificationCodeValue.getReferenceValueId(),
+                                LoanProductAccountingParams.BUYDOWN_FEE_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS.getValue());
+                    }
+
+                    if (mapping == null) {
+                        populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId,
+                                creditAccountType.getValue(), AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
+                                glAccountBalanceHolder);
+                    } else {
+                        populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId, mapping.getGlAccount(),
+                                AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), glAccountBalanceHolder);
+                    }
+                });
+            }
         }
 
         // create credit entries
@@ -793,6 +880,17 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         if (MathUtil.isGreaterThanZero(transactionPartAmount)) {
             // Resolve Credit
             GLAccount accountCredit = this.helper.getLinkedGLAccountForLoanProduct(loanProductId, creditAccountType, paymentTypeId);
+            glAccountBalanceHolder.addToCredit(accountCredit, transactionPartAmount);
+            // Resolve Debit
+            GLAccount accountDebit = this.helper.getLinkedGLAccountForLoanProduct(loanProductId, debitAccountType, paymentTypeId);
+            glAccountBalanceHolder.addToDebit(accountDebit, transactionPartAmount);
+        }
+    }
+
+    private void populateCreditDebitMaps(Long loanProductId, BigDecimal transactionPartAmount, Long paymentTypeId, GLAccount accountCredit,
+            Integer debitAccountType, GLAccountBalanceHolder glAccountBalanceHolder) {
+        if (MathUtil.isGreaterThanZero(transactionPartAmount)) {
+            // Resolve Credit
             glAccountBalanceHolder.addToCredit(accountCredit, transactionPartAmount);
             // Resolve Debit
             GLAccount accountDebit = this.helper.getLinkedGLAccountForLoanProduct(loanProductId, debitAccountType, paymentTypeId);

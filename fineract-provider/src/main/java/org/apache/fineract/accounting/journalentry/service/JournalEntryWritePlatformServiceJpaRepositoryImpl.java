@@ -44,6 +44,7 @@ import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformSer
 import org.apache.fineract.accounting.journalentry.api.JournalEntryJsonInputParams;
 import org.apache.fineract.accounting.journalentry.command.JournalEntryCommand;
 import org.apache.fineract.accounting.journalentry.command.SingleDebitOrCreditEntryCommand;
+import org.apache.fineract.accounting.journalentry.data.AdvancedMappingtDTO;
 import org.apache.fineract.accounting.journalentry.data.ClientTransactionDTO;
 import org.apache.fineract.accounting.journalentry.data.LoanDTO;
 import org.apache.fineract.accounting.journalentry.data.SavingsDTO;
@@ -61,6 +62,7 @@ import org.apache.fineract.accounting.provisioning.domain.ProvisioningEntry;
 import org.apache.fineract.accounting.rule.domain.AccountingRule;
 import org.apache.fineract.accounting.rule.domain.AccountingRuleRepository;
 import org.apache.fineract.accounting.rule.exception.AccountingRuleNotFoundException;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -90,11 +92,14 @@ import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeDataDTO;
 import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeLoanTransactionDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanAmortizationAllocationMapping;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanAmortizationAllocationMappingRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
@@ -128,6 +133,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private final ConfigurationReadPlatformService configurationReadPlatformService;
     private final AccountingService accountingService;
     private final ExternalAssetOwnerRepository externalAssetOwnerRepository;
+    private final LoanAmortizationAllocationMappingRepository loanAmortizationAllocationMappingRepository;
+    private final LoanTransactionRepository loanTransactionRepository;
 
     @Transactional
     @Override
@@ -857,11 +864,39 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             }
         }
 
+        List<AdvancedMappingtDTO> buydownFeeAdvancedMappingData = null;
+        List<AdvancedMappingtDTO> capitalizedIncomeAdvancedMappingData = null;
+        if (loanTransaction.isBuyDownFeeAmortization()) {
+            buydownFeeAdvancedMappingData = getLoanTransactionClassificationId(loanTransaction);
+        } else if (loanTransaction.isCapitalizedIncomeAmortization()) {
+            capitalizedIncomeAdvancedMappingData = getLoanTransactionClassificationId(loanTransaction);
+        }
+
         return new AccountingBridgeDataDTO(loan.getId(), loan.productId(), loan.getOfficeId(), currencyCode,
                 loan.getSummary().getTotalInterestCharged(), loan.isCashBasedAccountingEnabledOnLoanProduct(),
                 loan.isUpfrontAccrualAccountingEnabledOnLoanProduct(), loan.isPeriodicAccrualAccountingEnabledOnLoanProduct(),
                 isAccountTransfer, wasChargedOffAtTransactionTime, loan.isFraud(), loan.fetchChargeOffReasonId(), loan.isClosedWrittenOff(),
-                transactions, loan.getLoanProductRelatedDetail().isMerchantBuyDownFee());
+                transactions, loan.getLoanProductRelatedDetail().isMerchantBuyDownFee(), buydownFeeAdvancedMappingData,
+                capitalizedIncomeAdvancedMappingData);
+    }
+
+    private List<AdvancedMappingtDTO> getLoanTransactionClassificationId(final LoanTransaction loanTransaction) {
+        List<AdvancedMappingtDTO> advancedMappingData = new ArrayList<AdvancedMappingtDTO>();
+        if (loanTransaction.isCapitalizedIncomeAmortization() || loanTransaction.isBuyDownFeeAmortization()) {
+            final List<LoanAmortizationAllocationMapping> loanTransactionAllocations = loanAmortizationAllocationMappingRepository
+                    .fetchLoanTransactionAllocationByAmortizationLoanTransactionId(loanTransaction.getId(),
+                            loanTransaction.getLoan().getId());
+            loanTransactionAllocations.stream().forEach(loanTransactionAllocation -> {
+                final CodeValue classification = loanTransactionRepository
+                        .fetchClassificationCodeValueByTransactionId(loanTransactionAllocation.getBaseLoanTransactionId());
+                if (classification != null) {
+                    advancedMappingData.add(new AdvancedMappingtDTO(classification.getId(), loanTransactionAllocation.getAmount()));
+                } else {
+                    advancedMappingData.add(new AdvancedMappingtDTO(null, loanTransactionAllocation.getAmount()));
+                }
+            });
+        }
+        return advancedMappingData;
     }
 
     /**

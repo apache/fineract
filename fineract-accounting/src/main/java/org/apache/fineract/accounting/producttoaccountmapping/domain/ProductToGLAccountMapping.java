@@ -68,10 +68,20 @@ public class ProductToGLAccountMapping extends AbstractPersistableCustom<Long> {
     @JoinColumn(name = "charge_off_reason_id", nullable = true)
     private CodeValue chargeOffReason;
 
+    @ManyToOne
+    @JoinColumn(name = "capitalized_income_classification_id", nullable = true)
+    private CodeValue capitalizedIncomeClassification;
+
+    @ManyToOne
+    @JoinColumn(name = "buydown_fee_classification_id", nullable = true)
+    private CodeValue buydownFeeClassification;
+
     public static ProductToGLAccountMapping createNew(final GLAccount glAccount, final Long productId, final int productType,
-            final int financialAccountType, final CodeValue chargeOffReason) {
+            final int financialAccountType, final CodeValue chargeOffReason, final CodeValue capitalizedIncomeClassification,
+            final CodeValue buydownFeeClassification) {
 
         return new ProductToGLAccountMapping().setGlAccount(glAccount).setProductId(productId).setProductType(productType)
-                .setFinancialAccountType(financialAccountType).setChargeOffReason(chargeOffReason);
+                .setFinancialAccountType(financialAccountType).setChargeOffReason(chargeOffReason)
+                .setCapitalizedIncomeClassification(capitalizedIncomeClassification).setBuydownFeeClassification(buydownFeeClassification);
     }
 }

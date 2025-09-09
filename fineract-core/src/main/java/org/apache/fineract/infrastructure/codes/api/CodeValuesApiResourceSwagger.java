@@ -23,7 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Created by sanyam on 30/7/17.
  */
-final class CodeValuesApiResourceSwagger {
+public final class CodeValuesApiResourceSwagger {
 
     private CodeValuesApiResourceSwagger() {
 
@@ -44,6 +44,10 @@ final class CodeValuesApiResourceSwagger {
         public String description;
         @Schema(example = "0")
         public Integer position;
+        @Schema(example = "true")
+        public Boolean active;
+        @Schema(example = "false")
+        public Boolean mandatory;
     }
 
     @Schema(description = "PostCodeValuesDataRequest")
