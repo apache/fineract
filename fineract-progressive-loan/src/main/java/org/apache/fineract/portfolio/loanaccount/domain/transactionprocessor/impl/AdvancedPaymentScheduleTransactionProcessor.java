@@ -2856,8 +2856,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             adjustCalculatedPrincipal = outstandingPrincipalBalance.get()
                     .minus(calculatedPrincipal.multipliedBy(loanTransaction.getLoanReAgeParameter().getNumberOfInstallments()));
         }
-        LoanRepaymentScheduleInstallment lastNormalInstallment = installments.stream().filter(i -> !i.isDownPayment())
-                .reduce((first, second) -> second).orElseThrow();
+        final LoanRepaymentScheduleInstallment lastNormalInstallment = installments.stream() //
+                .filter(i -> i.getDueDate().isBefore(loanTransaction.getTransactionDate())) //
+                .reduce((first, second) -> second) //
+                .orElseThrow();
         LoanRepaymentScheduleInstallment reAgedInstallment = LoanRepaymentScheduleInstallment.newReAgedInstallment(
                 lastNormalInstallment.getLoan(), lastNormalInstallment.getInstallmentNumber() + 1, lastNormalInstallment.getDueDate(),
                 loanTransaction.getLoanReAgeParameter().getStartDate(), calculatedPrincipal.getAmount());
@@ -2874,17 +2876,25 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             reAgedInstallment.updateObligationsMet(currency, loanTransaction.getTransactionDate());
         }
         reAgedInstallment.addToPrincipal(loanTransaction.getTransactionDate(), adjustCalculatedPrincipal);
-        reprocessInstallmentsOrder(installments);
+        reprocessInstallments(installments);
     }
 
     protected void calculateAccrualActivity(LoanTransaction transaction, TransactionCtx ctx) {
         super.calculateAccrualActivity(transaction, ctx.getCurrency(), ctx.getInstallments());
     }
 
-    private void reprocessInstallmentsOrder(List<LoanRepaymentScheduleInstallment> installments) {
-        AtomicInteger counter = new AtomicInteger(1);
-        installments.stream().sorted(LoanRepaymentScheduleInstallment::compareToByDueDate)
-                .forEachOrdered(i -> i.updateInstallmentNumber(counter.getAndIncrement()));
+    private void reprocessInstallments(final List<LoanRepaymentScheduleInstallment> installments) {
+        final AtomicInteger counter = new AtomicInteger(1);
+        final AtomicReference<LocalDate> previousDueDate = new AtomicReference<>(null);
+        installments.stream().sorted(LoanRepaymentScheduleInstallment::compareToByDueDate).forEachOrdered(i -> {
+            i.updateInstallmentNumber(counter.getAndIncrement());
+            final LocalDate prev = previousDueDate.get();
+
+            if (prev != null && i.isAdditional()) {
+                i.updateFromDate(prev);
+            }
+            previousDueDate.set(i.getDueDate());
+        });
     }
 
     private LocalDate calculateReAgedInstallmentDueDate(LoanReAgeParameter reAgeParameter, LocalDate dueDate) {
