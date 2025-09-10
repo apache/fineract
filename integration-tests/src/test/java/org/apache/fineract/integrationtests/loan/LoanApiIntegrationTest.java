@@ -215,6 +215,92 @@ public class LoanApiIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     @Test
+    public void test_retrieveLoansWithSummaryForMultipleLoans_Works() {
+        AtomicLong createdClientId = new AtomicLong();
+        AtomicLong createdLoanId = new AtomicLong();
+        AtomicLong createdLoanId2 = new AtomicLong();
+
+        runAt("01 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            createdClientId.getAndSet(clientId);
+            int numberOfRepayments = 3;
+            int repaymentEvery = 1;
+
+            // Create Loan Product
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() //
+                    .numberOfRepayments(numberOfRepayments) //
+                    .repaymentEvery(repaymentEvery) //
+                    .installmentAmountInMultiplesOf(null) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()) //
+                    .interestType(InterestType.DECLINING_BALANCE)//
+                    .interestRatePerPeriod(10.0)//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY)//
+                    .interestRecalculationCompoundingMethod(InterestRecalculationCompoundingMethod.NONE)//
+                    .rescheduleStrategyMethod(RescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD)//
+                    .isInterestRecalculationEnabled(true)//
+                    .recalculationRestFrequencyInterval(1)//
+                    .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
+                    .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
+                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .disallowExpectedDisbursements(false)//
+                    .allowApprovedDisbursedAmountsOverApplied(false)//
+                    .overAppliedNumber(null)//
+                    .overAppliedCalculationType(null)//
+                    .multiDisburseLoan(null);//
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            // Apply and Approve Loan
+            double amount = 5000.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
+                    .repaymentEvery(repaymentEvery)//
+                    .interestRatePerPeriod(BigDecimal.valueOf(10.0))//
+                    .loanTermFrequency(numberOfRepayments)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .interestType(InterestType.DECLINING_BALANCE)//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY);//
+
+            PostLoansRequest applicationRequest2 = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
+                    .repaymentEvery(repaymentEvery)//
+                    .interestRatePerPeriod(BigDecimal.valueOf(10.0))//
+                    .loanTermFrequency(numberOfRepayments)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .interestType(InterestType.DECLINING_BALANCE)//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY);//
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse2 = loanTransactionHelper.applyLoan(applicationRequest2);
+
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "01 January 2023"));
+
+            PostLoansLoanIdResponse approvedLoanResult2 = loanTransactionHelper.approveLoan(postLoansResponse2.getResourceId(),
+                    approveLoanRequest(amount, "01 January 2023"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+            createdLoanId.getAndSet(loanId);
+            Long loanId2 = approvedLoanResult2.getLoanId();
+            createdLoanId2.getAndSet(loanId2);
+
+            // disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(amount), "01 January 2023");
+            disburseLoan(loanId2, BigDecimal.valueOf(amount), "01 January 2023");
+        });
+        runAt("01 February 2023", () -> {
+            GetLoansResponse loansLoanIdResponse = loanTransactionHelper.retrieveAllLoans(null, "summary", createdClientId.get());
+            loansLoanIdResponse.getPageItems().stream().forEach(r -> {
+                BigDecimal totalUnpaidPayableDueInterest = r.getSummary().getTotalUnpaidPayableDueInterest();
+                assertThat(totalUnpaidPayableDueInterest).isEqualByComparingTo(BigDecimal.valueOf(509.59));
+            });
+        });
+    }
+
+    @Test
     public void test_retrieveLoansWithSummaryWithoutDisbursement_Works() {
         AtomicLong createdLoanId = new AtomicLong();
 
