@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.reaging.Loa
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.reaging.LoanReAgeTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.reaging.LoanUndoReAgeTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.infrastructure.event.business.service.TransactionHelper;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.api.LoanReAgingApiConstants;
@@ -77,6 +78,7 @@ public class LoanReAgingServiceImpl {
     private final LoanUtilService loanUtilService;
     private final LoanScheduleService loanScheduleService;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
+    private final TransactionHelper transactionHelper;
 
     public CommandProcessingResult reAge(Long loanId, JsonCommand command) {
         Loan loan = loanAssembler.assembleFrom(loanId);
@@ -89,14 +91,18 @@ public class LoanReAgingServiceImpl {
         LoanTransaction reAgeTransaction = createReAgeTransaction(loan, command);
         LoanReAgeParameter reAgeParameter = createReAgeParameter(reAgeTransaction, command);
         reAgeTransaction.setLoanReAgeParameter(reAgeParameter);
-
         loanTransactionRepository.saveAndFlush(reAgeTransaction);
 
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
-                .determineProcessor(loan.transactionProcessingStrategy());
-        loanRepaymentScheduleTransactionProcessor.processLatestTransaction(reAgeTransaction, new TransactionCtx(loan.getCurrency(),
-                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+        if (reAgeTransaction.getTransactionDate().isBefore(reAgeTransaction.getSubmittedOnDate())) {
+            reprocessLoanTransactionsService.reprocessTransactionsWithPostTransactionChecks(loan, reAgeTransaction.getTransactionDate());
+        } else {
+            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
+                    .determineProcessor(loan.transactionProcessingStrategy());
+            loanRepaymentScheduleTransactionProcessor.processLatestTransaction(reAgeTransaction,
+                    new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
+                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
 
+        }
         loan.updateLoanScheduleDependentDerivedFields();
         persistNote(loan, command, changes);
 
@@ -172,7 +178,10 @@ public class LoanReAgingServiceImpl {
 
         // reaging transaction date is always the current business date
         LocalDate transactionDate = DateUtils.getBusinessLocalDate();
-
+        LocalDate startDate = command.dateValueOfParameterNamed(LoanReAgingApiConstants.startDate);
+        if (transactionDate.isAfter(startDate)) {
+            transactionDate = startDate;
+        }
         // in case of a reaging transaction, only the outstanding principal amount until the business date is considered
         Money txPrincipal = loan.getTotalPrincipalOutstandingUntil(transactionDate);
         BigDecimal txPrincipalAmount = txPrincipal.getAmount();
@@ -182,7 +191,6 @@ public class LoanReAgingServiceImpl {
     }
 
     private LoanReAgeParameter createReAgeParameter(LoanTransaction reAgeTransaction, JsonCommand command) {
-        // TODO: these parameters should be checked when the validations are implemented
         PeriodFrequencyType periodFrequencyType = command.enumValueOfParameterNamed(LoanReAgingApiConstants.frequencyType,
                 PeriodFrequencyType.class);
         LocalDate startDate = command.dateValueOfParameterNamed(LoanReAgingApiConstants.startDate);

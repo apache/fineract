@@ -2842,23 +2842,58 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         private Money aggregatedPenaltyChargesPortion;
     }
 
+    private void mergeReAgedInstallment(final LoanRepaymentScheduleInstallment target,
+            final LoanRepaymentScheduleInstallment reAgedInstallment, MonetaryCurrency currency, LocalDate transactionDate) {
+        target.setAdditional(false);
+        target.setReAged(true);
+        target.setFromDate(reAgedInstallment.getFromDate());
+        target.setDueDate(reAgedInstallment.getDueDate());
+        target.setPrincipal(reAgedInstallment.getPrincipal().add(MathUtil.nullToZero(target.getPrincipalCompleted())));
+        target.setInterestCharged(MathUtil.add(reAgedInstallment.getInterestCharged(), target.getInterestPaid()));
+        target.updateObligationsMet(currency, transactionDate);
+    }
+
+    private void insertOrReplaceRelatedInstallment(List<LoanRepaymentScheduleInstallment> installments,
+            final LoanRepaymentScheduleInstallment reAgedInstallment, final MonetaryCurrency currency, final LocalDate transactionDate) {
+        Optional<LoanRepaymentScheduleInstallment> first = installments.stream()
+                .filter(installment -> Objects.equals(installment.getInstallmentNumber(), reAgedInstallment.getInstallmentNumber()))
+                .findFirst();
+
+        if (first.isPresent()) {
+            int indexOfReplaceInstallment = installments.indexOf(first.get());
+            LoanRepaymentScheduleInstallment target = installments.get(indexOfReplaceInstallment);
+
+            if (target.isAdditional()) {
+                // additional ( N+1 ) installment due date cannot be earlier than its original due date
+                if (!target.getDueDate().isAfter(reAgedInstallment.getDueDate())) {
+                    mergeReAgedInstallment(target, reAgedInstallment, currency, transactionDate);
+                } else {
+                    installments.add(reAgedInstallment);
+                    reAgedInstallment.updateObligationsMet(currency, transactionDate);
+                    installments.stream()
+                            .filter(i -> i.getInstallmentNumber() != null && i.getInstallmentNumber() >= target.getInstallmentNumber())
+                            .forEach(i -> i.setInstallmentNumber(i.getInstallmentNumber() + 1));
+                }
+            } else {
+                mergeReAgedInstallment(target, reAgedInstallment, currency, transactionDate);
+            }
+        } else {
+            installments.add(reAgedInstallment);
+            reAgedInstallment.updateObligationsMet(currency, transactionDate);
+        }
+    }
+
     private void handleReAge(LoanTransaction loanTransaction, TransactionCtx ctx) {
         loanTransaction.resetDerivedComponents();
         MonetaryCurrency currency = ctx.getCurrency();
         List<LoanRepaymentScheduleInstallment> installments = ctx.getInstallments();
 
-        final LocalDate startDate = loanTransaction.getLoanReAgeParameter().getStartDate();
-        final LocalDate endDate = calculateReAgedInstallmentEndDate(loanTransaction.getLoanReAgeParameter());
-        final AtomicReference<Money> outstandingPrincipalBalance = new AtomicReference<>(Money.zero(currency));
+        AtomicReference<Money> outstandingPrincipalBalance = new AtomicReference<>(Money.zero(currency));
         installments.forEach(i -> {
-            final boolean shouldInclude = !i.isAdditional() || i.getDueDate().isBefore(startDate)
-                    || (!i.getDueDate().isBefore(startDate) && i.getDueDate().isBefore(endDate));
-            if (shouldInclude) {
-                Money principalOutstanding = i.getPrincipalOutstanding(currency);
-                if (principalOutstanding.isGreaterThanZero()) {
-                    outstandingPrincipalBalance.set(outstandingPrincipalBalance.get().add(principalOutstanding));
-                    i.addToPrincipal(loanTransaction.getTransactionDate(), principalOutstanding.negated());
-                }
+            Money principalOutstanding = i.getPrincipalOutstanding(currency);
+            if (principalOutstanding.isGreaterThanZero()) {
+                outstandingPrincipalBalance.set(outstandingPrincipalBalance.get().add(principalOutstanding));
+                i.addToPrincipal(loanTransaction.getTransactionDate(), principalOutstanding.negated());
             }
         });
 
@@ -2878,27 +2913,45 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             adjustCalculatedPrincipal = outstandingPrincipalBalance.get()
                     .minus(calculatedPrincipal.multipliedBy(loanTransaction.getLoanReAgeParameter().getNumberOfInstallments()));
         }
-        final LoanRepaymentScheduleInstallment lastNormalInstallment = installments.stream() //
-                .filter(i -> !i.isDownPayment() && i.getDueDate().isBefore(loanTransaction.getTransactionDate())) //
-                .reduce((first, second) -> second) //
-                .orElseThrow();
 
-        LoanRepaymentScheduleInstallment reAgedInstallment = createOrConvertReAgedInstallment(installments, startDate,
-                loanTransaction.getLoanReAgeParameter(), lastNormalInstallment.getLoan(), lastNormalInstallment.getInstallmentNumber() + 1,
-                lastNormalInstallment.getDueDate(), calculatedPrincipal.getAmount());
-        reAgedInstallment.updateObligationsMet(currency, loanTransaction.getTransactionDate());
+        Optional<LoanRepaymentScheduleInstallment> lastNormalInstallmentOptional = installments.stream().filter(i -> !i.isDownPayment())
+                .filter(i -> i.getDueDate().isBefore(loanTransaction.getTransactionDate())).reduce((first, second) -> second);
+
+        int reAgedInstallmentNumber;
+        LocalDate fromDate;
+        Loan loan;
+        if (lastNormalInstallmentOptional.isEmpty()) {
+            LoanRepaymentScheduleInstallment firstNormalInstallment = installments.stream().filter(i -> !i.isDownPayment())
+                    .min(Comparator.comparing(LoanRepaymentScheduleInstallment::getDueDate)).orElseThrow();
+            reAgedInstallmentNumber = firstNormalInstallment.getInstallmentNumber();
+            fromDate = firstNormalInstallment.getFromDate();
+            loan = firstNormalInstallment.getLoan();
+        } else {
+            LoanRepaymentScheduleInstallment lastNormalInstallment = lastNormalInstallmentOptional.get();
+            reAgedInstallmentNumber = lastNormalInstallment.getInstallmentNumber() + 1;
+            fromDate = lastNormalInstallment.getDueDate();
+            loan = lastNormalInstallment.getLoan();
+        }
+
+        LoanRepaymentScheduleInstallment reAgedInstallment = LoanRepaymentScheduleInstallment.newReAgedInstallment(loan,
+                reAgedInstallmentNumber, fromDate, loanTransaction.getLoanReAgeParameter().getStartDate(), calculatedPrincipal.getAmount());
+        insertOrReplaceRelatedInstallment(installments, reAgedInstallment, currency, loanTransaction.getTransactionDate());
 
         for (int i = 1; i < loanTransaction.getLoanReAgeParameter().getNumberOfInstallments(); i++) {
-            final LocalDate calculatedDueDate = calculateReAgedInstallmentDueDate(loanTransaction.getLoanReAgeParameter(),
+            LocalDate calculatedDueDate = calculateReAgedInstallmentDueDate(loanTransaction.getLoanReAgeParameter(),
                     reAgedInstallment.getDueDate());
-
-            reAgedInstallment = createOrConvertReAgedInstallment(installments, calculatedDueDate, loanTransaction.getLoanReAgeParameter(),
-                    reAgedInstallment.getLoan(), reAgedInstallment.getInstallmentNumber() + 1, reAgedInstallment.getDueDate(),
-                    calculatedPrincipal.getAmount());
-            reAgedInstallment.updateObligationsMet(currency, loanTransaction.getTransactionDate());
+            int nextReAgedInstallmentNumber = reAgedInstallment.getInstallmentNumber() + 1;
+            reAgedInstallment = LoanRepaymentScheduleInstallment.newReAgedInstallment(reAgedInstallment.getLoan(),
+                    nextReAgedInstallmentNumber, reAgedInstallment.getDueDate(), calculatedDueDate, calculatedPrincipal.getAmount());
+            if (i + 1 == loanTransaction.getLoanReAgeParameter().getNumberOfInstallments()) {
+                reAgedInstallment.addToPrincipal(loanTransaction.getTransactionDate(), adjustCalculatedPrincipal);
+            }
+            insertOrReplaceRelatedInstallment(installments, reAgedInstallment, currency, loanTransaction.getTransactionDate());
         }
-        reAgedInstallment.addToPrincipal(loanTransaction.getTransactionDate(), adjustCalculatedPrincipal);
-
+        int lastReAgedInstallmentNumber = reAgedInstallment.getInstallmentNumber();
+        List<LoanRepaymentScheduleInstallment> toRemove = installments.stream().filter(i -> i != null && !i.isAdditional()
+                && i.getInstallmentNumber() != null && i.getInstallmentNumber() > lastReAgedInstallmentNumber).toList();
+        toRemove.forEach(installments::remove);
         reprocessInstallments(installments);
     }
 
@@ -2915,57 +2968,17 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         });
     }
 
-    private LoanRepaymentScheduleInstallment convertAdditionalToReAged(final LoanRepaymentScheduleInstallment installment,
-            final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principalAmount) {
-        installment.setAdditional(false);
-        installment.setReAged(true);
-        installment.updateFromDate(fromDate);
-        installment.updateDueDate(dueDate);
-        installment.updatePrincipal(principalAmount);
-        return installment;
-    }
-
-    private Optional<LoanRepaymentScheduleInstallment> findAdditionalForFrequency(final List<LoanRepaymentScheduleInstallment> installments,
-            final LocalDate targetDueDate, final LoanReAgeParameter reAgeParameter) {
-        final LocalDate nextReAgedDate = calculateReAgedInstallmentDueDate(reAgeParameter, targetDueDate);
-
-        return installments.stream() //
-                .filter(LoanRepaymentScheduleInstallment::isAdditional) //
-                .filter(ai -> !ai.getDueDate().isBefore(targetDueDate) && ai.getDueDate().isBefore(nextReAgedDate)).findAny();
-    }
-
-    private LoanRepaymentScheduleInstallment createOrConvertReAgedInstallment(final List<LoanRepaymentScheduleInstallment> installments,
-            final LocalDate targetDueDate, final LoanReAgeParameter reAgeParameter, final Loan loan, final int installmentNumber,
-            final LocalDate fromDate, final BigDecimal principalAmount) {
-        final Optional<LoanRepaymentScheduleInstallment> additionalInstallment = findAdditionalForFrequency(installments, targetDueDate,
-                reAgeParameter);
-
-        if (additionalInstallment.isPresent()) {
-            return convertAdditionalToReAged(additionalInstallment.get(), fromDate, targetDueDate, principalAmount);
-        } else {
-            final LoanRepaymentScheduleInstallment reAgedInstallment = LoanRepaymentScheduleInstallment.newReAgedInstallment(loan,
-                    installmentNumber, fromDate, targetDueDate, principalAmount);
-            installments.add(reAgedInstallment);
-            return reAgedInstallment;
-        }
-    }
-
-    private LocalDate calculateReAgedInstallmentEndDate(final LoanReAgeParameter reAgeParameter) {
-        return calculateReAgedNextDate(reAgeParameter.getFrequencyType(), reAgeParameter.getStartDate(),
-                reAgeParameter.getFrequencyNumber(), reAgeParameter.getNumberOfInstallments());
-    }
-
     private LocalDate calculateReAgedInstallmentDueDate(final LoanReAgeParameter reAgeParameter, final LocalDate dueDate) {
-        return calculateReAgedNextDate(reAgeParameter.getFrequencyType(), dueDate, reAgeParameter.getFrequencyNumber(), 1);
+        return calculateReAgedNextDate(reAgeParameter.getFrequencyType(), dueDate, reAgeParameter.getFrequencyNumber());
     }
 
     private LocalDate calculateReAgedNextDate(final PeriodFrequencyType frequencyType, final LocalDate dueDate,
-            final Integer frequencyNumber, final Integer numberOfInstallments) {
+            final Integer frequencyNumber) {
         return switch (frequencyType) {
-            case DAYS -> dueDate.plusDays((long) frequencyNumber * numberOfInstallments);
-            case WEEKS -> dueDate.plusWeeks((long) frequencyNumber * numberOfInstallments);
-            case MONTHS -> dueDate.plusMonths((long) frequencyNumber * numberOfInstallments);
-            case YEARS -> dueDate.plusYears((long) frequencyNumber * numberOfInstallments);
+            case DAYS -> dueDate.plusDays((long) frequencyNumber);
+            case WEEKS -> dueDate.plusWeeks((long) frequencyNumber);
+            case MONTHS -> dueDate.plusMonths((long) frequencyNumber);
+            case YEARS -> dueDate.plusYears((long) frequencyNumber);
             default -> throw new UnsupportedOperationException();
         };
     }

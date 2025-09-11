@@ -1010,6 +1010,25 @@ public class DataValidatorBuilder {
         return this;
     }
 
+    public DataValidatorBuilder validateDateAfterOrEqual(final LocalDate date) {
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
+
+        if (this.value != null && date != null) {
+            final LocalDate dateVal = (LocalDate) this.value;
+            if (DateUtils.isBefore(dateVal, date)) {
+                String validationErrorCode = "validation.msg." + this.resource + "." + this.parameter + ".is.before.than.date";
+                String defaultEnglishMessage = "The parameter `" + this.parameter + "` must be greater than or equal to the provided date: "
+                        + date;
+                final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode, defaultEnglishMessage, this.parameter,
+                        dateVal, date);
+                this.dataValidationErrors.add(error);
+            }
+        }
+        return this;
+    }
+
     public DataValidatorBuilder validateDateBeforeOrEqual(final LocalDate date) {
         if (this.value == null && this.ignoreNullValue) {
             return this;

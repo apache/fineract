@@ -62,9 +62,13 @@ public class LoanReAgingValidator {
                 .notExceedingLengthOf(100);
 
         LocalDate startDate = command.localDateValueOfParameterNamed(LoanReAgingApiConstants.startDate);
-        baseDataValidator.reset().parameter(LoanReAgingApiConstants.startDate).value(startDate).notNull()
-                .validateDateAfter(loan.getMaturityDate());
-
+        if (loan.isProgressiveSchedule() && !loan.isInterestBearing()) {
+            baseDataValidator.reset().parameter(LoanReAgingApiConstants.startDate).value(startDate).notNull()
+                    .validateDateAfterOrEqual(loan.getDisbursementDate());
+        } else {
+            baseDataValidator.reset().parameter(LoanReAgingApiConstants.startDate).value(startDate).notNull()
+                    .validateDateAfter(loan.getMaturityDate());
+        }
         String frequencyType = command.stringValueOfParameterNamedAllowingNull(LoanReAgingApiConstants.frequencyType);
         baseDataValidator.reset().parameter(LoanReAgingApiConstants.frequencyType).value(frequencyType).notNull();
 
@@ -81,7 +85,9 @@ public class LoanReAgingValidator {
 
     private void validateReAgeBusinessRules(Loan loan) {
         // validate reaging shouldn't happen before maturity
-        if (DateUtils.isBefore(getBusinessLocalDate(), loan.getMaturityDate())) {
+        // on progressive loans it can
+        if (!(loan.isProgressiveSchedule() && !loan.isInterestBearing())
+                && DateUtils.isBefore(getBusinessLocalDate(), loan.getMaturityDate())) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.cannot.be.submitted.before.maturity",
                     "Loan cannot be re-aged before maturity", loan.getId());
         }
