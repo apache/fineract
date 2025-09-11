@@ -53,7 +53,7 @@ import org.springframework.stereotype.Component;
  */
 @Path("/v1/userdetails")
 @Component
-@ConditionalOnProperty("fineract.security.oauth.enabled")
+@ConditionalOnProperty("fineract.security.oauth2.enabled")
 @Tag(name = "Fetch authenticated user details", description = "")
 @RequiredArgsConstructor
 public class UserDetailsApiResource {
@@ -87,8 +87,7 @@ public class UserDetailsApiResource {
         }
 
         final Collection<String> permissions = new ArrayList<>();
-        AuthenticatedOauthUserData authenticatedUserData = new AuthenticatedOauthUserData().setUsername(principal.getUsername())
-                .setPermissions(permissions);
+        AuthenticatedOauthUserData authenticatedUserData;
 
         final Collection<GrantedAuthority> authorities = new ArrayList<>(authentication.getAuthorities());
         for (final GrantedAuthority grantedAuthority : authorities) {

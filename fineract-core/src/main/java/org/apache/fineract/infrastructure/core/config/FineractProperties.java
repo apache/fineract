@@ -19,7 +19,10 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -504,40 +507,63 @@ public class FineractProperties {
 
         private FineractSecurityBasicAuth basicauth;
         private FineractSecurityTwoFactorAuth twoFactor;
-        private FineractSecurityOAuth oauth;
         private FineractSecurityHsts hsts;
+        private FineractSecurityOAuth2Properties oauth2;
 
         public void set2fa(FineractSecurityTwoFactorAuth twoFactor) {
             this.twoFactor = twoFactor;
         }
-    }
 
-    @Getter
-    @Setter
-    public static class FineractSecurityBasicAuth {
+        @Getter
+        @Setter
+        public static class FineractSecurityOAuth2Properties {
 
-        private boolean enabled;
-    }
+            private boolean enabled;
+            private ClientProperties client;
 
-    @Getter
-    @Setter
-    public static class FineractSecurityTwoFactorAuth {
+            @Getter
+            @Setter
+            public static class ClientProperties implements Serializable {
 
-        private boolean enabled;
-    }
+                @Serial
+                private static final long serialVersionUID = 1L;
+                private Map<String, Registration> registrations = new HashMap<>();
 
-    @Getter
-    @Setter
-    public static class FineractSecurityOAuth {
+                @Getter
+                @Setter
+                public static final class Registration implements Serializable {
 
-        private boolean enabled;
-    }
+                    @Serial
+                    private static final long serialVersionUID = 1L;
+                    private String clientId;
+                    private List<String> scopes = new ArrayList<>();
+                    private List<String> authorizationGrantTypes = new ArrayList<>();
+                    private List<String> redirectUris = new ArrayList<>();
+                    private boolean requireAuthorizationConsent = true;
+                }
+            }
+        }
 
-    @Getter
-    @Setter
-    public static class FineractSecurityHsts {
+        @Getter
+        @Setter
+        public static class FineractSecurityBasicAuth {
 
-        private boolean enabled;
+            private boolean enabled;
+        }
+
+        @Getter
+        @Setter
+        public static class FineractSecurityTwoFactorAuth {
+
+            private boolean enabled;
+        }
+
+        @Getter
+        @Setter
+        public static class FineractSecurityHsts {
+
+            private boolean enabled;
+        }
     }
 
     @Getter

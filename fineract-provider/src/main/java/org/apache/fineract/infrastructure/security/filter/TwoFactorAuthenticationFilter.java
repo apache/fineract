@@ -26,7 +26,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.constants.TwoFactorConstants;
@@ -45,7 +44,7 @@ import org.springframework.web.filter.GenericFilterBean;
 
 /**
  * This filter is responsible for handling two-factor authentication. The filter is enabled when 'twofactor' environment
- * profile is active, otherwise {@link InsecureTwoFactorAuthenticationFilter} is used.
+ * profile is active.
  *
  * This filter validates an access-token provided as a header 'Fineract-Platform-TFA-Token'. If a valid token is
  * provided, a 'TWOFACTOR_AUTHENTICATED' authority is added to the current authentication. If an invalid(non-existent or
@@ -116,8 +115,7 @@ public class TwoFactorAuthenticationFilter extends GenericFilterBean {
         } else if (currentAuthentication instanceof FineractJwtAuthenticationToken) {
             FineractJwtAuthenticationToken fineractJwtAuthenticationToken = (FineractJwtAuthenticationToken) currentAuthentication;
             FineractJwtAuthenticationToken updatedAuthentication = new FineractJwtAuthenticationToken(
-                    fineractJwtAuthenticationToken.getToken(), (Collection<GrantedAuthority>) updatedAuthorities,
-                    (UserDetails) currentAuthentication.getPrincipal());
+                    fineractJwtAuthenticationToken.getToken(), updatedAuthorities, (UserDetails) currentAuthentication.getPrincipal());
             return updatedAuthentication;
         } else {
             throw new ServletException("Unknown authentication type: " + currentAuthentication.getClass().getName());

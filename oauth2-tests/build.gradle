@@ -35,6 +35,9 @@ configurations {
 }
 dependencies {
     driver 'com.mysql:mysql-connector-j'
+    testImplementation 'org.seleniumhq.selenium:selenium-java:4.21.0'
+    testImplementation 'io.github.bonigarcia:webdrivermanager:5.5.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
 }
 
 cargo {
@@ -57,7 +60,7 @@ cargo {
         startStopTimeout = 240000
         sharedClasspath = configurations.driver
         containerProperties {
-            def jvmArgs = '--add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.security=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.management/javax.management=ALL-UNNAMED --add-opens=java.naming/javax.naming=ALL-UNNAMED -Dfineract.security.basicauth.enabled=false -Dfineract.security.oauth.enabled=true -Dfineract.security.2fa.enabled=false '
+            def jvmArgs = '--add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.security=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.management/javax.management=ALL-UNNAMED --add-opens=java.naming/javax.naming=ALL-UNNAMED -Dfineract.security.basicauth.enabled=false -Dfineract.security.oauth2.enabled=true -Dfineract.security.2fa.enabled=false '
             if (project.hasProperty('dbType')) {
                 if ('postgresql'.equalsIgnoreCase(dbType)) {
                     jvmArgs += '-Dspring.datasource.hikari.driverClassName=org.postgresql.Driver -Dspring.datasource.hikari.jdbcUrl=jdbc:postgresql://localhost:5432/fineract_tenants -Dspring.datasource.hikari.username=root -Dspring.datasource.hikari.password=postgres -Dfineract.tenant.host=localhost -Dfineract.tenant.port=5432 -Dfineract.tenant.username=root -Dfineract.tenant.password=postgres'

@@ -30,16 +30,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 /**
- * A JDBC implementation of {@link BasicAuthTenantDetailsService} for loading a tenants details by a
+ * A JDBC implementation of {@link AuthTenantDetailsService} for loading a tenants details by a
  * <code>tenantIdentifier</code>.
  */
 @Service
-public class BasicAuthTenantDetailsServiceJdbc implements BasicAuthTenantDetailsService {
+public class AuthTenantDetailsServiceJdbc implements AuthTenantDetailsService {
 
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public BasicAuthTenantDetailsServiceJdbc(@Qualifier("hikariTenantDataSource") final DataSource dataSource) {
+    public AuthTenantDetailsServiceJdbc(@Qualifier("hikariTenantDataSource") final DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 

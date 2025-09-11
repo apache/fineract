@@ -17,7 +17,7 @@ FINERACT_SERVER_OAUTH_RESOURCE_URL=http://localhost:9000/realms/fineract
 +
 [source,bash]
 ----
-java -Dfineract.security.basicauth.enabled=false -Dfineract.security.oauth.enabled=true -jar fineract-provider.jar
+java -Dfineract.security.basicauth.enabled=false -Dfineract.security.oauth2.enabled=true -jar fineract-provider.jar
 ----
 
 Here's how to test OAuth with https://www.keycloak.org[Keycloak].
