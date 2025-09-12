@@ -7979,7 +7979,7 @@ Feature: LoanCharge
       | 11 August 2025   | Accrual Activity       | 1.9     | 0.0       | 1.9      | 0.0  | 0.0       | 0.0           | false    | false    |
       | 12 August 2025   | Accrual                | 0.06    | 0.0       | 0.06     | 0.0  | 0.0       | 0.0           | false    | false    |
       | 13 August 2025   | Accrual                | 0.06    | 0.0       | 0.06     | 0.0  | 0.0       | 0.0           | false    | false    |
-      | 13 August 2025   | Merchant Issued Refund | 188.8   | 186.2     | 2.02     | 0.0  | 0.58      | 0.0           | false    | true     |
-      | 13 August 2025   | Interest Refund        | 7.87    | 0.0       | 0.0      | 0.0  | 7.87      | 0.0           | false    | true     |
+      | 13 August 2025   | Merchant Issued Refund | 188.8   | 186.2     | 1.9      | 0.0  | 0.7       | 0.0           | false    | true     |
+      | 13 August 2025   | Interest Refund        | 7.87    | 0.0       | 0.12     | 0.0  | 7.75      | 0.0           | false    | true     |
       | 15 August 2025   | Accrual                | 10.0    | 0.0       | 0.0      | 0.0  | 10.0      | 0.0           | false    | false    |
 

@@ -264,6 +264,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 LoanCharge loanCharge = changeOperation.getLoanCharge().get();
                 if (!loanChargeIdProcessed.contains(loanCharge.getId())) {
                     processSingleCharge(loanCharge, currency, installments, disbursementDate);
+                    loanChargeIdProcessed.add(loanCharge.getId());
                 }
                 if (!loanCharge.isFullyPaid() && !overpaidTransactions.isEmpty()) {
                     overpaidTransactions = processOverpaidTransactions(overpaidTransactions, ctx);
