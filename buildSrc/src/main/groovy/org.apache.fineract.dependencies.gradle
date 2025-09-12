@@ -25,8 +25,8 @@ dependencyManagement {
         mavenBom 'com.squareup.okhttp3:okhttp-bom:4.12.0'
         mavenBom 'org.slf4j:slf4j-bom:2.0.17'
         mavenBom 'io.micrometer:micrometer-bom:1.13.6'
-        mavenBom 'org.springframework:spring-framework-bom:6.2.5'
-        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.4.4'
+        mavenBom 'org.springframework:spring-framework-bom:6.2.10'
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.5.5'
         mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:3.2.1'
         mavenBom 'io.opentelemetry:opentelemetry-bom:1.44.1'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:2.0.21'
@@ -150,9 +150,6 @@ dependencyManagement {
         dependency "com.squareup.retrofit2:converter-gson:2.11.0"
         dependency "com.squareup.retrofit2:converter-protobuf:2.11.0"
         dependency 'io.reactivex.rxjava2:rxjava:2.2.21'
-        dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.common:1.0.1"
-        dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:1.0.1"
-        dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.httpclient4:1.0.1"
         dependency "io.gsonfire:gson-fire:1.9.0"
         dependency "com.google.code.findbugs:jsr305:3.0.2"
         dependency "commons-codec:commons-codec:1.17.1"
@@ -213,7 +210,7 @@ dependencyManagement {
             exclude 'pull-parser:pull-parser'
         }
 
-        dependency 'org.owasp.esapi:esapi:2.6.0.0'
+        dependency 'org.owasp.esapi:esapi:2.7.0.0'
         dependency 'org.awaitility:awaitility:4.2.2'
 
         dependencySet(group: 'org.apache.poi', version: '5.4.1') {
@@ -275,5 +272,6 @@ dependencyManagement {
 
         dependency 'com.ibm.icu:icu4j:76.1'
         dependency 'org.yakworks:spring-icu4j:0.4.2'
+        dependency 'org.apache.commons:commons-lang3:3.18.0'
     }
 }

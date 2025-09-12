@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Sign In</title>
+    <style>
+        /* Reset basic styling */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fa; /* light neutral background */
+        }
+
+        /* Centering container */
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 20px;
+        }
+
+        /* Form card styling */
+        .login-card {
+            background-color: #ffffff; /* white form background */
+            padding: 40px 30px;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 24px;
+            font-size: 1.8rem;
+            color: #333333; /* dark grey text */
+        }
+
+        /* Label styling */
+        .login-card label {
+            display: block;
+            text-align: left;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #555555;
+        }
+
+        /* Input styling */
+        .login-card input[type="text"],
+        .login-card input[type="password"] {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 16px;
+            font-size: 1rem;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease-in-out;
+        }
+
+        .login-card input:focus {
+            outline: none;
+            border-color: #0085ff; /* brighter blue accent */
+            box-shadow: 0 0 4px rgba(0,133,255,0.3);
+        }
+
+        /* Button styling */
+        .login-card button[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #0066cc; /* primary blue accent */
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .login-card button[type="submit"]:hover {
+            background-color: #005bb5;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="login-card">
+        <h1>Sign In</h1>
+        <form th:action="@{/login}" method="post">
+            <div>
+                <label for="tenantId">Tenant ID</label>
+                <input type="text" id="tenantId" name="tenantId" required />
+            </div>
+            <div>
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" autocomplete="username" required />
+            </div>
+            <div>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" autocomplete="current-password" required />
+            </div>
+            <button type="submit">Sign In</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

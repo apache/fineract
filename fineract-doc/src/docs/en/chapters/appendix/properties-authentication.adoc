@@ -9,7 +9,7 @@
 |true
 |When set to true, the supported authentication method will be basic authentication.
 
-|fineract.security.oauth.enabled
+|fineract.security.oauth2.enabled
 |FINERACT_SECURITY_OAUTH_ENABLED
 |false
 |When set to true, the supported authentication method will be OAuth.

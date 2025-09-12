@@ -204,6 +204,8 @@ public class ClasspathDuplicatesStepDefinitions implements En {
                 // Pentaho reports harmless duplicates
                 || resourcePath.endsWith("overview.html") //
                 || resourcePath.endsWith("classic-engine.properties") //
-                || resourcePath.endsWith("loader.properties"); //
+                || resourcePath.endsWith("loader.properties") //
+                // ProGuard configuration files are safe to have multiple versions of
+                || resourcePath.equals("META-INF/proguard/gson.pro"); //
     }
 }

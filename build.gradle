@@ -22,7 +22,6 @@ buildscript {
         jacocoVersion = '0.8.12'
         retrofitVersion = '2.9.0'
         okhttpVersion = '4.9.3'
-        oltuVersion = '1.0.1'
         fineractCustomProjects = []
         fineractJavaProjects = subprojects.findAll{
             [
@@ -86,7 +85,7 @@ buildscript {
         classpath 'org.eclipse.persistence:eclipselink:4.0.6'
         classpath 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
         classpath 'com.google.cloud.tools:jib-layer-filter-extension-gradle:0.3.0'
-        classpath 'org.apache.commons:commons-lang3:3.17.0'
+        classpath 'org.apache.commons:commons-lang3:3.18.0'
         classpath 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.22'
         classpath 'jakarta.servlet:jakarta.servlet-api:6.1.0'
     }
@@ -101,7 +100,7 @@ plugins {
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.9' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.2.0' apply false
-    id 'org.springframework.boot' version '3.4.4' apply false
+    id 'org.springframework.boot' version '3.5.5' apply false
     id 'net.ltgt.errorprone' version '4.1.0' apply false
     id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.23' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.2' apply false

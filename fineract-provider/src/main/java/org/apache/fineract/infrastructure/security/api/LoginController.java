@@ -16,11 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.security.service;
+package org.apache.fineract.infrastructure.security.api;
 
-import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 
-public interface BasicAuthTenantDetailsService {
+@Controller
+public class LoginController {
 
-    FineractPlatformTenant loadTenantById(String tenantId, boolean isReport);
+    @GetMapping("/login")
+    public String login() {
+        return "login"; // resolves to src/main/resources/templates/login.html
+    }
 }
