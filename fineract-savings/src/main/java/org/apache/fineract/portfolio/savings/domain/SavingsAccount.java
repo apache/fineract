@@ -2883,10 +2883,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return this.closedOnDate;
     }
 
-    public void setClosedOnDate(final LocalDate closedOnDate) {
-        this.closedOnDate = closedOnDate;
-    }
-
     public AppUser getClosedBy() {
         return this.closedBy;
     }

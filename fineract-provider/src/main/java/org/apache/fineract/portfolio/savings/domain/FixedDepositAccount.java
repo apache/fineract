@@ -882,4 +882,8 @@ public class FixedDepositAccount extends SavingsAccount {
         return SavingsAccountStatusType.MATURED.getValue().equals(this.status);
     }
 
+    public void setClosedOnDate(final LocalDate closedOnDate) {
+        this.closedOnDate = closedOnDate;
+    }
+
 }
