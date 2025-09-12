@@ -1652,3 +1652,123 @@ Feature: LoanReAging
       | Name    | isPenalty | Payment due at       | Due as of   | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date   | 01 May 2025 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
+  Scenario: Verify merging re-aging transaction with N+1 installment in the same bucket(YEARS)
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2024   | 100            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "100" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    When Admin sets the business date to "05 April 2024"
+    And Admin adds "LOAN_SNOOZE_FEE" due date charge with "03 May 2024" due date and 100 EUR transaction amount
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate     | numberOfInstallments |
+      | 1               | YEARS         | 01 April 2024 | 3                    |
+    Then Loan Repayment schedule has 7 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees  | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                 | 100.0           |               |          | 0.0   |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 0    | 01 January 2024  | 01 January 2024 | 75.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 25.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 01 February 2024 | 05 April 2024   | 75.0            | 0.0           | 0.0      | 0.0   | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 3  | 29   | 01 March 2024    | 05 April 2024   | 75.0            | 0.0           | 0.0      | 0.0   | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 4  | 31   | 01 April 2024    | 05 April 2024   | 75.0            | 0.0           | 0.0      | 0.0   | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 5  | 0    | 01 April 2024    |                 | 50.0            | 25.0          | 0.0      | 100.0 | 0.0       | 125.0 | 0.0  | 0.0        | 0.0  | 125.0       |
+      | 6  | 365  | 01 April 2025    |                 | 25.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
+      | 7  | 365  | 01 April 2026    |                 | 0.0             | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
+
+  Scenario: Verify merging re-aging transaction with N+1 installment in the same bucket(MONTHS)
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2024   | 100            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "100" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    When Admin sets the business date to "05 April 2024"
+    And Admin adds "LOAN_SNOOZE_FEE" due date charge with "03 May 2024" due date and 100 EUR transaction amount
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate     | numberOfInstallments |
+      | 1               | MONTHS        | 01 April 2024 | 3                    |
+    Then Loan Repayment schedule has 7 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees  | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                 | 100.0           |               |          | 0.0   |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 0    | 01 January 2024  | 01 January 2024 | 75.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 25.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 01 February 2024 | 05 April 2024   | 75.0            | 0.0           | 0.0      | 0.0   | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 3  | 29   | 01 March 2024    | 05 April 2024   | 75.0            | 0.0           | 0.0      | 0.0   | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 4  | 31   | 01 April 2024    | 05 April 2024   | 75.0            | 0.0           | 0.0      | 0.0   | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 5  | 0    | 01 April 2024    |                 | 50.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
+      | 6  | 30   | 01 May 2024      |                 | 25.0            | 25.0          | 0.0      | 100.0 | 0.0       | 125.0 | 0.0  | 0.0        | 0.0  | 125.0       |
+      | 7  | 31   | 01 June 2024     |                 | 0.0             | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
+
+  Scenario: Verify merging re-aging transaction with N+1 installment in the same bucket(WEEKS)
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2024   | 100            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "100" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    When Admin sets the business date to "05 April 2024"
+    And Admin adds "LOAN_SNOOZE_FEE" due date charge with "09 April 2024" due date and 100 EUR transaction amount
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate     | numberOfInstallments |
+      | 1               | WEEKS         | 01 April 2024 | 3                    |
+    Then Loan Repayment schedule has 7 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees  | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                 | 100.0           |               |          | 0.0   |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 0    | 01 January 2024  | 01 January 2024 | 75.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 25.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 01 February 2024 | 05 April 2024   | 75.0            | 0.0           | 0.0      | 0.0   | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 3  | 29   | 01 March 2024    | 05 April 2024   | 75.0            | 0.0           | 0.0      | 0.0   | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 4  | 31   | 01 April 2024    | 05 April 2024   | 75.0            | 0.0           | 0.0      | 0.0   | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 5  | 0    | 01 April 2024    |                 | 50.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
+      | 6  | 7    | 08 April 2024    |                 | 25.0            | 25.0          | 0.0      | 100.0 | 0.0       | 125.0 | 0.0  | 0.0        | 0.0  | 125.0       |
+      | 7  | 7    | 15 April 2024    |                 | 0.0             | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
+
+  Scenario: Verify merging re-aging transaction with N+1 installment in the same bucket(DAYS)
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2024   | 100            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "100" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    When Admin sets the business date to "05 April 2024"
+    And Admin adds "LOAN_SNOOZE_FEE" due date charge with "03 April 2024" due date and 100 EUR transaction amount
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate     | numberOfInstallments |
+      | 1               | DAYS          | 01 April 2024 | 3                    |
+    Then Loan Repayment schedule has 7 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees  | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                 | 100.0           |               |          | 0.0   |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 0    | 01 January 2024  | 01 January 2024 | 75.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 25.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 01 February 2024 | 05 April 2024   | 75.0            | 0.0           | 0.0      | 0.0   | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 3  | 29   | 01 March 2024    | 05 April 2024   | 75.0            | 0.0           | 0.0      | 0.0   | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 4  | 31   | 01 April 2024    | 05 April 2024   | 75.0            | 0.0           | 0.0      | 0.0   | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 5  | 0    | 01 April 2024    |                 | 50.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
+      | 6  | 1    | 02 April 2024    |                 | 25.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
+      | 7  | 1    | 03 April 2024    |                 | 0.0             | 25.0          | 0.0      | 100.0 | 0.0       | 125.0 | 0.0  | 0.0        | 0.0  | 125.0       |
+
+  Scenario: Verify re-aging transaction with N+1 installment outside bucket
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2024   | 100            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "100" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    When Admin sets the business date to "05 April 2024"
+    And Admin adds "LOAN_SNOOZE_FEE" due date charge with "03 July 2024" due date and 100 EUR transaction amount
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate     | numberOfInstallments |
+      | 1               | MONTHS        | 01 April 2024 | 3                    |
+    Then Loan Repayment schedule has 8 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees  | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                 | 100.0           |               |          | 0.0   |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 0    | 01 January 2024  | 01 January 2024 | 75.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 25.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 01 February 2024 | 05 April 2024   | 75.0            | 0.0           | 0.0      | 0.0   | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 3  | 29   | 01 March 2024    | 05 April 2024   | 75.0            | 0.0           | 0.0      | 0.0   | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 4  | 31   | 01 April 2024    | 05 April 2024   | 75.0            | 0.0           | 0.0      | 0.0   | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 5  | 0    | 01 April 2024    |                 | 50.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
+      | 6  | 30   | 01 May 2024      |                 | 25.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
+      | 7  | 31   | 01 June 2024     |                 | 0.0             | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
+      | 8  | 32   | 03 July 2024     |                 | 0.0             | 0.0           | 0.0      | 100.0 | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
