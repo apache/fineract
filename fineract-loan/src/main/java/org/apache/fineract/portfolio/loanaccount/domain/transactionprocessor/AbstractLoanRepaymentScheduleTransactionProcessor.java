@@ -236,11 +236,16 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
         final int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper.fetchFirstNormalInstallmentNumber(installments);
 
-        final LoanRepaymentScheduleInstallment currentInstallment = installments.stream()
+        final Optional<LoanRepaymentScheduleInstallment> currentInstallmentOpt = installments.stream()
                 .filter(installment -> LoanRepaymentScheduleProcessingWrapper.isInPeriod(loanTransaction.getTransactionDate(), installment,
                         installment.getInstallmentNumber().equals(firstNormalInstallmentNumber)))
-                .findFirst().orElseThrow();
+                .findFirst();
 
+        if (currentInstallmentOpt.isEmpty()) {
+            return;
+        }
+
+        final LoanRepaymentScheduleInstallment currentInstallment = currentInstallmentOpt.get();
         if (currentInstallment.isNotFullyPaidOff() && (currentInstallment.getDueDate().isAfter(loanTransaction.getTransactionDate())
                 || (currentInstallment.getDueDate().isEqual(loanTransaction.getTransactionDate())
                         && loanTransaction.getTransactionDate().equals(DateUtils.getBusinessLocalDate())))) {

@@ -62,7 +62,7 @@ public class LoanStatusChangePlatformServiceImpl implements LoanStatusChangePlat
             if (loan.getLoanProductRelatedDetail().isEnableAccrualActivityPosting()) {
                 LoanStatus oldStatus = event.getOldStatus();
                 LoanStatus newStatus = loan.getStatus();
-                if ((oldStatus.isClosed() || oldStatus.isOverpaid()) && newStatus.isActive()) {
+                if ((oldStatus.isClosedObligationsMet() || oldStatus.isClosed() || oldStatus.isOverpaid()) && newStatus.isActive()) {
                     loanAccrualActivityProcessingService.processAccrualActivityForLoanReopen(loan);
                 }
             }
