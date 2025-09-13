@@ -536,11 +536,11 @@ public class RecurringDepositAccount extends SavingsAccount {
         return Money.of(this.currency, this.minRequiredOpeningBalance);
     }
 
-    protected void processAccountUponActivation(final DateTimeFormatter fmt, final boolean postReversals) {
+    protected void processAccountUponActivation(final DateTimeFormatter fmt, final boolean postReversals,
+            final Long relaxingDaysConfigForPivotDate) {
         final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
         final boolean backdatedTxnsAllowedTill = false;
         String refNo = null;
-        final Long relaxingDaysConfigForPivotDate = this.configurationDomainService.retrieveRelaxingDaysConfigForPivotDate();
         if (minRequiredOpeningBalance.isGreaterThanZero()) {
             final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, getActivationDate(),
                     minRequiredOpeningBalance.getAmount(), null, null, accountType);

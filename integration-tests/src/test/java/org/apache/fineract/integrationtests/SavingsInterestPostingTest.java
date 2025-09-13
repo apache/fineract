@@ -340,6 +340,92 @@ public class SavingsInterestPostingTest {
         }
     }
 
+    @Test
+    public void testPostInterestNotZero() {
+        try {
+            final String amountDeposit = "1000";
+            final String amountWithdrawal = "1000";
+
+            final Account assetAccount = accountHelper.createAssetAccount();
+            final Account incomeAccount = accountHelper.createIncomeAccount();
+            final Account expenseAccount = accountHelper.createExpenseAccount();
+            final Account liabilityAccount = accountHelper.createLiabilityAccount();
+            final Account interestReceivableAccount = accountHelper.createAssetAccount("interestReceivableAccount");
+            final Account savingsControlAccount = accountHelper.createLiabilityAccount("Savings Control");
+            final Account interestPayableAccount = accountHelper.createLiabilityAccount("Interest Payable");
+
+            final Integer productId = createSavingsProductWithAccrualAccountingWithOutOverdraftAllowed(
+                    interestPayableAccount.getAccountID().toString(), savingsControlAccount.getAccountID().toString(),
+                    interestReceivableAccount.getAccountID().toString(), assetAccount, incomeAccount, expenseAccount, liabilityAccount);
+
+            final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2025");
+            final LocalDate startDate = LocalDate.of(LocalDate.now(Utils.getZoneIdOfTenant()).getYear(), 1, 1);
+            final String startStr = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US).format(startDate);
+
+            final Integer accountId = savingsAccountHelper.applyForSavingsApplicationOnDate(clientId, productId,
+                    SavingsAccountHelper.ACCOUNT_TYPE_INDIVIDUAL, startStr);
+            savingsAccountHelper.approveSavingsOnDate(accountId, startStr);
+            savingsAccountHelper.activateSavings(accountId, startStr);
+            savingsAccountHelper.depositToSavingsAccount(accountId, amountDeposit, startStr, CommonConstants.RESPONSE_RESOURCE_ID);
+
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            LocalDate februaryDate = LocalDate.of(startDate.getYear(), 2, 1);
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, februaryDate);
+
+            schedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+
+            List<HashMap> txsFebruary = getInterestTransactions(accountId); // OBTENER EL POSTEO DEL INTEREST
+
+            long daysFebruary = ChronoUnit.DAYS.between(startDate, februaryDate);
+            BigDecimal expectedFebruary = calcInterestPosting(productHelper, amountDeposit, daysFebruary);
+            Assertions.assertEquals(expectedFebruary, BigDecimal.valueOf(((Double) txsFebruary.get(0).get("amount"))));
+
+            final LocalDate withdrawalDate = LocalDate.of(startDate.getYear(), 2, 1);
+            final String withdrawal = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US).format(withdrawalDate);
+
+            BigDecimal runningBalance = new BigDecimal(txsFebruary.get(0).get("runningBalance").toString());
+            String withdrawalRunning = runningBalance.setScale(2, RoundingMode.HALF_UP).toString();
+
+            savingsAccountHelper.withdrawalFromSavingsAccount(accountId, withdrawalRunning, withdrawal,
+                    CommonConstants.RESPONSE_RESOURCE_ID);
+            savingsAccountHelper.withdrawalFromSavingsAccount(accountId, amountWithdrawal, withdrawal,
+                    CommonConstants.RESPONSE_RESOURCE_ID);
+
+            LocalDate marchDate = LocalDate.of(startDate.getYear(), 3, 1);
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, marchDate);
+
+            schedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+
+            List<HashMap> txs = getInterestTransactions(accountId); // CON ESTE DEBEMOS DE VALIDAR QUE EL DIA DE MARZO
+                                                                    // NO SE TENGA POSTEO EN CERO
+            for (HashMap tx : txs) {
+                BigDecimal amt = BigDecimal.valueOf(((Double) tx.get("amount")));
+                @SuppressWarnings("unchecked")
+                Map<String, Object> typeMap = (Map<String, Object>) tx.get("transactionType");
+                SavingsAccountTransactionType type = SavingsAccountTransactionType.fromInt(((Double) typeMap.get("id")).intValue());
+                if (type.isOverDraftInterestPosting()) {
+                    long days = ChronoUnit.DAYS.between(withdrawalDate, marchDate);
+                    BigDecimal decimalsss = new BigDecimal(txsFebruary.get(0).get("runningBalance").toString())
+                            .subtract(runningBalance.setScale(2, RoundingMode.HALF_UP));
+                    BigDecimal withdraw = new BigDecimal(amountWithdrawal);
+                    BigDecimal res = withdraw.subtract(decimalsss);
+                    BigDecimal expected = calcOverdraftPosting(productHelper, res.toString(), days);
+                    Assertions.assertEquals(expected, amt);
+                }
+            }
+
+            Assertions.assertEquals(0L, countInterestOnDate(accountId, marchDate), "Expected exactly one INTEREST posting on posting date");
+            Assertions.assertEquals(1L, countOverdraftOnDate(accountId, marchDate),
+                    "Expected exactly one OVERDRAFT posting on posting date");
+
+            assertNoAccrualReversals(accountId);
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
+    }
+
     private List<HashMap> getInterestTransactions(Integer savingsAccountId) {
         List<HashMap> all = savingsAccountHelper.getSavingsTransactions(savingsAccountId);
         List<HashMap> filtered = new ArrayList<>();

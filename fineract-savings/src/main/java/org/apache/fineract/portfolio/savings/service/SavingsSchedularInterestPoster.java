@@ -36,6 +36,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
@@ -106,7 +107,7 @@ public class SavingsSchedularInterestPoster {
 
             List<SavingsAccountTransactionData> savingsAccountTransactionDataList = savingsAccountData.getSavingsAccountTransactionData();
             for (SavingsAccountTransactionData savingsAccountTransactionData : savingsAccountTransactionDataList) {
-                if (savingsAccountTransactionData.getId() == null) {
+                if (savingsAccountTransactionData.getId() == null && !MathUtil.isZero(savingsAccountTransactionData.getAmount())) {
                     final String key = savingsAccountTransactionData.getRefNo();
                     final Boolean isOverdraft = savingsAccountTransactionData.getIsOverdraft();
                     final SavingsAccountTransactionData dataFromFetch = savingsAccountTransactionDataHashMap.get(key);
@@ -183,7 +184,7 @@ public class SavingsSchedularInterestPoster {
                     auditTime, userId, savingsAccountData.getId() });
             List<SavingsAccountTransactionData> savingsAccountTransactionDataList = savingsAccountData.getSavingsAccountTransactionData();
             for (SavingsAccountTransactionData savingsAccountTransactionData : savingsAccountTransactionDataList) {
-                if (savingsAccountTransactionData.getId() == null) {
+                if (savingsAccountTransactionData.getId() == null && !MathUtil.isZero(savingsAccountTransactionData.getAmount())) {
                     UUID uuid = UUID.randomUUID();
                     savingsAccountTransactionData.setRefNo(uuid.toString());
                     transRefNo.add(uuid.toString());

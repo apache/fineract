@@ -1042,7 +1042,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                 if (MathUtil.isEmpty(overdraftAmount) && runningBalance.isLessThanZero() && !transaction.isAmountOnHold()) {
                     overdraftAmount = runningBalance.negated();
                 }
-                if (!calculateInterest || transaction.getId() == null) {
+                if (!calculateInterest || transaction.getId() == null || transaction.getOverdraftAmount(this.currency).isZero()) {
                     transaction.setOverdraftAmount(overdraftAmount);
                 } else if (!MathUtil.isEqualTo(overdraftAmount, transaction.getOverdraftAmount(this.currency))
                         && !transaction.isAccrual()) {
