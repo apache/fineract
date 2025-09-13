@@ -109,7 +109,7 @@ plugins {
     // https://github.com/jruby/jruby/issues/5573
     // https://github.com/asciidoctor/asciidoctorj-pdf/issues/16
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
-    id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
+    id 'org.asciidoctor.jvm.pdf' version '4.0.5' apply false
     id 'com.google.cloud.tools.jib' version '3.4.5' apply false
     id 'org.sonarqube' version '6.0.1.5171'
     id 'com.github.andygoossens.modernizer' version '1.10.0' apply false
