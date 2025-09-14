@@ -20,29 +20,21 @@ package org.apache.fineract.portfolio.collectionsheet.data;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.FieldNameConstants;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
-@FieldNameConstants
 @AllArgsConstructor
 @Builder
-public class RepaymentTransactionRequest implements Serializable {
+public class RepaymentTransactionRequest extends BaseBulkTransactionsDTO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     private Long loanId;
-    private BigDecimal transactionAmount;
-    private Long paymentTypeId;
-    private String accountNumber;
-    private String checkNumber;
-    private String routingCode;
-    private String receiptNumber;
-    private String bankNumber;
 }

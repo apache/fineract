@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
 import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetTransactionDataValidator;
@@ -108,11 +109,8 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
 
         changes.putAll(updateBulkMandatorySavingsDuePayments(command, paymentDetail));
 
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(command.entityId()) //
-                .withGroupId(command.entityId()) //
-                .with(changes).with(changes).build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(command.entityId())
+                .withGroupId(command.entityId()).with(changes).with(changes).build();
     }
 
     private Map<String, Object> updateBulkRepayments(final JsonCommand command, final PaymentDetail paymentDetail) {
@@ -142,7 +140,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
                         .mandatorySavingsAccountDeposit(savingsAccountTransactionDTO);
                 depositTransactionIds.add(savingsAccountTransaction.getId());
             } catch (Exception e) {
-                // TODO: handle exception
+                throw new PlatformApiDataValidationException(e.getMessage(), e.getMessage(), e.getMessage(), e);
             }
         }
         changes.put("SavingsTransactions", depositTransactionIds);
