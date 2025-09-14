@@ -33,7 +33,7 @@ dependencyManagement {
         mavenBom 'org.junit:junit-bom:5.11.3'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.18.3'
         mavenBom 'io.cucumber:cucumber-bom:7.20.1'
-        mavenBom 'io.netty:netty-bom:4.1.119.Final'
+        mavenBom 'io.netty:netty-bom:4.1.125.Final'
         mavenBom 'org.mockito:mockito-bom:5.14.2'
         mavenBom 'software.amazon.awssdk:bom:2.29.9'
         mavenBom 'io.github.resilience4j:resilience4j-bom:2.2.0'
@@ -238,7 +238,8 @@ dependencyManagement {
         }
 
         //v42.7.5: performance issue: https://github.com/pgjdbc/pgjdbc/issues/3511#issuecomment-2637277977
-        dependency 'org.postgresql:postgresql:42.7.4'
+        //v42.7.4: CVE-2025-49146: https://nvd.nist.gov/vuln/detail/CVE-2025-49146
+        dependency 'org.postgresql:postgresql:42.7.3'
 
         dependency 'com.mysql:mysql-connector-j:9.2.0'
 
@@ -273,5 +274,6 @@ dependencyManagement {
         dependency 'com.ibm.icu:icu4j:76.1'
         dependency 'org.yakworks:spring-icu4j:0.4.2'
         dependency 'org.apache.commons:commons-lang3:3.18.0'
+        dependency 'com.nimbusds:nimbus-jose-jwt:10.0.2'
     }
 }
