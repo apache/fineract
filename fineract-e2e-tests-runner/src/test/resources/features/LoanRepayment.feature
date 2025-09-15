@@ -5615,6 +5615,8 @@ Feature: LoanRepayment
       | 16 August 2025   | Repayment        | 192.27 | 186.99    | 5.28     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 August 2025   | Accrual          | 5.28   | 0.0       | 5.28     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 August 2025   | Accrual Activity | 1.76   | 0.0       | 1.76     | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan has 0 outstanding amount
     When Admin sets the business date to "21 August 2025"
     And Customer makes a repayment undo on "16 August 2025"
     And Admin adds "LOAN_NSF_FEE" due date charge with "21 August 2025" due date and 2.8 EUR transaction amount
@@ -5684,3 +5686,5 @@ Feature: LoanRepayment
       | 16 August 2025   | Accrual Activity | 1.76   | 0.0       | 1.76     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 21 August 2025   | Accrual          | 2.8    | 0.0       | 0.0      | 0.0  | 2.8       | 0.0          | false    | false    |
       | 22 August 2025   | Repayment        | 195.07 | 186.99    | 5.28     | 0.0  | 2.8       | 0.0          | true     | false    |
+    Then Loan status will be "ACTIVE"
+    Then Loan has 195.07 outstanding amount
