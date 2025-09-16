@@ -16,28 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.commands.api;
+package org.apache.fineract.commands.data;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-/**
- * Created by sanyam on 27/7/17.
- */
-final class MakercheckersApiResourceSwagger {
+@Getter
+@Setter
+@SuperBuilder
+public class DeleteMakerCheckerResponse extends MakerCheckerResponseDTO implements Serializable {
 
-    private MakercheckersApiResourceSwagger() {
-        // only to initialize swagger documentation
-    }
-
-    @Schema(description = "PostMakerCheckersResponse")
-    public static final class PostMakerCheckersResponse {
-
-        private PostMakerCheckersResponse() {
-
-        }
-
-        @Schema(example = "1")
-        public Long auditId;
-
-    }
+    @Serial
+    private static final long serialVersionUID = 1L;
 }
