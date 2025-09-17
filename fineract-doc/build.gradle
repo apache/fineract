@@ -16,8 +16,48 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+buildscript {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    
+    dependencies {
+        classpath 'org.asciidoctor:asciidoctor-gradle-jvm:4.0.5'
+        classpath 'org.asciidoctor:asciidoctor-gradle-jvm-pdf:4.0.5'
+        classpath 'org.yaml:snakeyaml:1.33'
+    }
+}
+
+plugins {
+    id 'org.asciidoctor.jvm.convert' version '4.0.5' apply false
+    id 'org.asciidoctor.jvm.pdf' version '4.0.5' apply false
+}
+
 apply plugin: 'org.asciidoctor.jvm.convert'
 apply plugin: 'org.asciidoctor.jvm.pdf'
+
+// Configure resolution strategy for all configurations
+configurations.all {
+    resolutionStrategy {
+        // Force specific versions of dependencies to avoid conflicts
+        force 'org.yaml:snakeyaml:1.33',
+              'org.jruby:jruby-complete:9.4.5.0'
+    }
+}
+
+// Configure Asciidoctor PDF
+asciidoctorPdf {
+    asciidoctorj {
+        version = '2.5.11' // Explicitly set AsciidoctorJ version
+        
+        modules {
+            // Use a specific version of asciidoctorj-pdf that's known to work with AsciidoctorJ 2.5.11
+            pdf.version '2.3.10'
+        }
+    }
+}
 
 // see also: https://asciidoctor.github.io/asciidoctor-gradle-plugin/master/user-guide/
 

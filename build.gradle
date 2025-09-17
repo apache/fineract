@@ -104,16 +104,11 @@ plugins {
     id 'net.ltgt.errorprone' version '4.1.0' apply false
     id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.23' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.2' apply false
-    // can't upgrade to 4.x because of one of these:
-    // https://github.com/asciidoctor/asciidoctorj-pdf/issues/25
-    // https://github.com/jruby/jruby/issues/5573
-    // https://github.com/asciidoctor/asciidoctorj-pdf/issues/16
-    id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
-    id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
+    id 'org.asciidoctor.jvm.convert' version '4.0.5' apply false
+    id 'org.asciidoctor.jvm.pdf' version '4.0.5' apply false
     id 'com.google.cloud.tools.jib' version '3.4.5' apply false
     id 'org.sonarqube' version '6.0.1.5171'
     id 'com.github.andygoossens.modernizer' version '1.10.0' apply false
-    // TODO: upgrade to 6.0.4
     id 'com.github.spotbugs' version '6.0.26' apply false
     id 'se.thinkcode.cucumber-runner' version '0.0.11' apply false
     id "com.github.davidmc24.gradle.plugin.avro-base" version "1.9.1" apply false

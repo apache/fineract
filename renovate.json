@@ -36,10 +36,6 @@
     "allowedVersions": "<=7.8.0"
   },
   {
-    "matchPackageNames": ["org.asciidoctor.jvm.convert", "org.asciidoctor.jvm.pdf"],
-    "allowedVersions": "<=3.3.2"
-  },
-  {
     "matchPackageNames": ["org.eclipse.persistence:eclipselink"],
     "allowedVersions": "<=4.0.2",
     "description": "EclipseLink 4.0.1 has a bug which has been fixed but haven't been released. Try 4.0.2. https://github.com/eclipse-ee4j/eclipselink/issues/1832"
@@ -76,7 +72,7 @@
   },
   {
     "matchPackageNames": ["org.postgresql:postgresql"],
-    "allowedVersions": "<=42.7.4",
+    "allowedVersions": "<=42.7.3",
     "description": "Postgres JDBC driver 42.7.5 has a performance bug: https://github.com/pgjdbc/pgjdbc/issues/3511#issuecomment-2637277977"
   },
   {

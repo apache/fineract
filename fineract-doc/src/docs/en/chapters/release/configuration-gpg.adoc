@@ -182,7 +182,7 @@ You should protect your revocation certificate. Anyone in possession of your rev
 +
 IMPORTANT: Please contact a PMC member to add your GPG public key in Fineract's Subversion repository. This is necessary to be able to validate published releases.
 
-1. Upload your GPG key to a keyserver:
+6. Upload your GPG key to a keyserver:
 +
 [source,bash]
 ----
