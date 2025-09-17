@@ -36,12 +36,10 @@ jobs:
 
       - name: Build the Apache Fineract image
         run:  |
+          TAGS=${{ github.ref_name }}
           if [ "${{ github.ref_name }}" == "develop" ]; then
-            TAGS="latest"
-          else
-            TAGS="${{ github.ref_name }}"
+            TAGS="$TAGS,${{ steps.git_hashes.outputs.short_hash }},${{ steps.git_hashes.outputs.long_hash }}"
           fi
-          
           ./gradlew --no-daemon --console=plain :fineract-provider:jib -x test -x cucumber \
             -Djib.to.auth.username=${{secrets.DOCKERHUB_USER}} \
             -Djib.to.auth.password=${{secrets.DOCKERHUB_TOKEN}} \
