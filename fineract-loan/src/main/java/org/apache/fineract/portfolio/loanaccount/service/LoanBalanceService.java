@@ -50,6 +50,15 @@ public class LoanBalanceService {
     private final LoanTransactionRepository loanTransactionRepository;
 
     public Money calculateTotalOverpayment(final Loan loan) {
+        return calculateTotalOverpaymentInternal(loan, loan.getLoanTransactions());
+    }
+
+    public Money calculateTotalOverpaymentViaPersistence(final Loan loan) {
+        final List<LoanTransaction> loanTransactions = loanTransactionRepository.findNonReversedByLoan(loan);
+        return calculateTotalOverpaymentInternal(loan, loanTransactions);
+    }
+
+    private Money calculateTotalOverpaymentInternal(final Loan loan, final List<LoanTransaction> loanTransactions) {
         Money totalPaidInRepayments = loan.getTotalPaidInRepayments();
 
         final MonetaryCurrency currency = loan.getCurrency();
@@ -64,7 +73,7 @@ public class LoanBalanceService {
             cumulativeTotalWaivedOnInstallments = cumulativeTotalWaivedOnInstallments.plus(scheduledRepayment.getInterestWaived(currency));
         }
 
-        for (final LoanTransaction loanTransaction : loan.getLoanTransactions()) {
+        for (final LoanTransaction loanTransaction : loanTransactions) {
             if (loanTransaction.isReversed()) {
                 continue;
             }
@@ -93,6 +102,14 @@ public class LoanBalanceService {
     }
 
     public void updateLoanSummaryDerivedFields(final Loan loan) {
+        updateLoanSummaryDerivedFieldsInternal(loan, false);
+    }
+
+    public void updateLoanSummaryDerivedFieldsViaPersistence(final Loan loan) {
+        updateLoanSummaryDerivedFieldsInternal(loan, true);
+    }
+
+    private void updateLoanSummaryDerivedFieldsInternal(final Loan loan, final boolean viaPersistence) {
         flushModeHandler.withFlushMode(FlushModeType.COMMIT, () -> {
             if (loan.isNotDisbursed()) {
                 if (loan.getSummary() != null) {
@@ -100,13 +117,17 @@ public class LoanBalanceService {
                 }
                 loan.setTotalOverpaid(null);
             } else {
-                refreshSummaryAndBalancesForDisbursedLoan(loan);
+                refreshSummaryAndBalancesForDisbursedLoanInternal(loan, viaPersistence);
             }
         });
     }
 
     public void refreshSummaryAndBalancesForDisbursedLoan(final Loan loan) {
-        final Money overpaidBy = calculateTotalOverpayment(loan);
+        refreshSummaryAndBalancesForDisbursedLoanInternal(loan, false);
+    }
+
+    private void refreshSummaryAndBalancesForDisbursedLoanInternal(final Loan loan, final boolean viaPersistence) {
+        final Money overpaidBy = viaPersistence ? calculateTotalOverpaymentViaPersistence(loan) : calculateTotalOverpayment(loan);
         loan.setTotalOverpaid(null);
         if (!overpaidBy.isLessThanZero()) {
             loan.setTotalOverpaid(overpaidBy.getAmountDefaultedToNullIfZero());
@@ -120,7 +141,12 @@ public class LoanBalanceService {
         final Money capitalizedIncomeAdjustment = capitalizedIncomeBalanceService.calculateCapitalizedIncomeAdjustment(loan);
         loan.getSummary().updateSummary(loan.getCurrency(), principal, loan.getRepaymentScheduleInstallments(), loan.getLoanCharges(),
                 capitalizedIncome, capitalizedIncomeAdjustment);
-        updateLoanOutstandingBalances(loan);
+
+        if (viaPersistence) {
+            updateLoanOutstandingBalancesViaPersistence(loan);
+        } else {
+            updateLoanOutstandingBalances(loan);
+        }
     }
 
     private Money calculateTotalRecoveredPayments(Loan loan) {
@@ -130,7 +156,6 @@ public class LoanBalanceService {
     }
 
     public void updateLoanOutstandingBalances(Loan loan) {
-        Money outstanding = Money.zero(loan.getCurrency());
         final List<LoanTransaction> loanTransactions = new ArrayList<>();
         for (final LoanTransaction transaction : loan.getLoanTransactions()) {
             if (transaction.isNotReversed() && !transaction.isNonMonetaryTransaction()) {
@@ -138,6 +163,16 @@ public class LoanBalanceService {
             }
         }
         loanTransactions.sort(LoanTransactionComparator.INSTANCE);
+        updateLoanOutstandingBalancesInternal(loan, loanTransactions);
+    }
+
+    private void updateLoanOutstandingBalancesViaPersistence(final Loan loan) {
+        final List<LoanTransaction> loanTransactions = loanTransactionRepository.findNonReversedMonetaryTransactionsByLoan(loan);
+        updateLoanOutstandingBalancesInternal(loan, loanTransactions);
+    }
+
+    private void updateLoanOutstandingBalancesInternal(final Loan loan, final List<LoanTransaction> loanTransactions) {
+        Money outstanding = Money.zero(loan.getCurrency());
 
         for (LoanTransaction loanTransaction : loanTransactions) {
             if (loanTransaction.isDisbursement() || loanTransaction.isIncomePosting() || loanTransaction.isCapitalizedIncome()) {

@@ -89,7 +89,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     @Override
     public ChangedTransactionDetail reprocessLoanTransactions(final LocalDate disbursementDate,
             final List<LoanTransaction> transactionsPostDisbursement, final MonetaryCurrency currency,
-            final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
+            final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges,
+            final List<LoanTransaction> loanTransactions) {
 
         if (charges != null) {
             for (final LoanCharge loanCharge : charges) {
@@ -181,7 +182,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             if (loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
                 // pass through for new transactions
                 if (loanTransaction.getId() == null) {
-                    processLatestTransaction(loanTransaction, new TransactionCtx(currency, installments, charges, overpaymentHolder, null));
+                    processLatestTransaction(loanTransaction, TransactionCtx.builder().currency(currency).installments(installments)
+                            .charges(charges).overpaymentHolder(overpaymentHolder).loanTransactions(loanTransactions).build());
                     loanTransaction.adjustInterestComponent();
                 } else {
                     /**
@@ -192,8 +194,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
                     // Reset derived component of new loan transaction and
                     // re-process transaction
-                    processLatestTransaction(newLoanTransaction,
-                            new TransactionCtx(currency, installments, charges, overpaymentHolder, null));
+                    processLatestTransaction(newLoanTransaction, TransactionCtx.builder().currency(currency).installments(installments)
+                            .charges(charges).overpaymentHolder(overpaymentHolder).loanTransactions(loanTransactions).build());
                     newLoanTransaction.adjustInterestComponent();
                     /**
                      * Check if the transaction amounts have changed. If so, reverse the original transaction and update
@@ -222,7 +224,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 recalculateCreditTransaction(changedTransactionDetail, loanTransaction, currency, installments, overpaymentHolder);
                 reprocessChargebackTransactionRelation(changedTransactionDetail, transactionsToBeProcessed);
             } else if (loanTransaction.isChargeOff()) {
-                recalculateChargeOffTransaction(changedTransactionDetail, loanTransaction, currency, installments);
+                recalculateChargeOffTransaction(changedTransactionDetail, loanTransaction, currency, installments, loanTransactions);
             } else if (loanTransaction.isAccrualActivity()) {
                 recalculateAccrualActivityTransaction(changedTransactionDetail, loanTransaction, currency, installments);
             }
@@ -414,13 +416,13 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     }
 
     private void recalculateChargeOffTransaction(ChangedTransactionDetail changedTransactionDetail, LoanTransaction loanTransaction,
-            MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments) {
+            MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments, final List<LoanTransaction> loanTransactions) {
         final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
 
         final BigDecimal newInterest = getInterestTillChargeOffForPeriod(newLoanTransaction.getLoan(),
                 newLoanTransaction.getTransactionDate());
         createMissingAccrualTransactionDuringChargeOffIfNeeded(newInterest, newLoanTransaction, newLoanTransaction.getTransactionDate(),
-                changedTransactionDetail);
+                changedTransactionDetail, loanTransactions);
 
         newLoanTransaction.resetDerivedComponents();
         // determine how much is outstanding total and breakdown for principal, interest and charges
@@ -842,7 +844,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     private void handleChargeOff(LoanTransaction loanTransaction, TransactionCtx transactionCtx) {
         recalculateChargeOffTransaction(transactionCtx.getChangedTransactionDetail(), loanTransaction, transactionCtx.getCurrency(),
-                transactionCtx.getInstallments());
+                transactionCtx.getInstallments(), transactionCtx.getLoanTransactions());
     }
 
     protected void handleCreditBalanceRefund(LoanTransaction loanTransaction, MonetaryCurrency currency,
@@ -1005,7 +1007,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     private void createMissingAccrualTransactionDuringChargeOffIfNeeded(final BigDecimal newInterest,
             final LoanTransaction chargeOffTransaction, final LocalDate chargeOffDate,
-            final ChangedTransactionDetail changedTransactionDetail) {
+            final ChangedTransactionDetail changedTransactionDetail, final List<LoanTransaction> loanTransactions) {
         final Loan loan = chargeOffTransaction.getLoan();
         final List<LoanRepaymentScheduleInstallment> relevantInstallments = loan.getRepaymentScheduleInstallments().stream()
                 .filter(i -> !i.getFromDate().isAfter(chargeOffDate)).toList();
@@ -1014,13 +1016,15 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             return;
         }
 
-        final BigDecimal sumOfAccrualsTillChargeOff = loan.getLoanTransactions().stream()
+        final BigDecimal sumOfAccrualsTillChargeOff = loanTransactions != null ? loanTransactions.stream()
                 .filter(lt -> lt.isAccrual() && !lt.getTransactionDate().isAfter(chargeOffDate) && lt.isNotReversed())
-                .map(lt -> Optional.ofNullable(lt.getInterestPortion()).orElse(BigDecimal.ZERO)).reduce(BigDecimal.ZERO, BigDecimal::add);
+                .map(lt -> Optional.ofNullable(lt.getInterestPortion()).orElse(BigDecimal.ZERO)).reduce(BigDecimal.ZERO, BigDecimal::add)
+                : BigDecimal.ZERO;
 
-        final BigDecimal sumOfAccrualAdjustmentsTillChargeOff = loan.getLoanTransactions().stream()
+        final BigDecimal sumOfAccrualAdjustmentsTillChargeOff = loanTransactions != null ? loanTransactions.stream()
                 .filter(lt -> lt.isAccrualAdjustment() && !lt.getTransactionDate().isAfter(chargeOffDate) && lt.isNotReversed())
-                .map(lt -> Optional.ofNullable(lt.getInterestPortion()).orElse(BigDecimal.ZERO)).reduce(BigDecimal.ZERO, BigDecimal::add);
+                .map(lt -> Optional.ofNullable(lt.getInterestPortion()).orElse(BigDecimal.ZERO)).reduce(BigDecimal.ZERO, BigDecimal::add)
+                : BigDecimal.ZERO;
 
         final BigDecimal missingAccrualAmount = newInterest.subtract(sumOfAccrualsTillChargeOff).add(sumOfAccrualAdjustmentsTillChargeOff);
 

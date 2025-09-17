@@ -473,4 +473,23 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
     boolean existsNonReversedByLoanAndTypeAndDate(@Param("loan") Loan loan, @Param("type") LoanTransactionType type,
             @Param("transactionDate") LocalDate transactionDate);
 
+    @Query("""
+            SELECT lt FROM LoanTransaction lt
+            JOIN lt.loanChargesPaid lcp
+            WHERE lt.loan = :loan
+                AND lt.typeOf = :transactionType
+                AND lcp.loanCharge = :loanCharge
+            ORDER BY lt.dateOf, lt.createdDate, lt.id
+            """)
+    List<LoanTransaction> findRepaymentAtDisbursementTransactionsWithCharge(@Param("loan") Loan loan,
+            @Param("transactionType") LoanTransactionType transactionType, @Param("loanCharge") LoanCharge loanCharge);
+
+    @Query("""
+            SELECT lt
+            FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND lt.reversed = false
+            ORDER BY lt.dateOf, lt.createdDate, lt.id
+            """)
+    List<LoanTransaction> findNonReversedByLoan(@Param("loan") Loan loan);
 }

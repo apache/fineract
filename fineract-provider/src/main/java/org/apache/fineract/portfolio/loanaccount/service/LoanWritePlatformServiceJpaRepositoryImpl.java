@@ -968,8 +968,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (isTransactionChronologicallyLatest && (!reprocess || !loan.isInterestBearingAndInterestRecalculationEnabled())
                 && !loan.isForeclosure()) {
             loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(),
-                    newInterestPaymentWaiverTransaction, new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                            loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+                    newInterestPaymentWaiverTransaction,
+                    TransactionCtx.builder().currency(loan.getCurrency()).installments(loan.getRepaymentScheduleInstallments())
+                            .charges(loan.getActiveCharges()).overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney())).build());
             reprocess = false;
             if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
                 if (currentInstallment == null || currentInstallment.isNotFullyPaidOff()) {
@@ -2992,9 +2993,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 && !loan.hasChargesAffectedByBackdatedRepaymentLikeTransaction(interestRefundTxn) //
                 && loanTransactionProcessingService.canProcessLatestTransactionOnly(loan, interestRefundTxn, currentInstallment); //
         if (processLatest) {
+            final List<LoanTransaction> transactions = loanTransactionRepository.findNonReversedTransactionsForReprocessingByLoan(loan);
             loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), interestRefundTxn,
-                    new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+                    TransactionCtx.builder().currency(loan.getCurrency()).installments(loan.getRepaymentScheduleInstallments())
+                            .charges(loan.getActiveCharges()).overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney()))
+                            .loanTransactions(transactions).build());
             loan.addLoanTransaction(interestRefundTxn);
         } else {
             if (loan.isCumulativeSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()) {
@@ -3048,15 +3051,16 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loanTransactionValidator.validateIfTransactionIsChargeback(chargebackTransaction);
 
         loan.addLoanTransaction(chargebackTransaction);
+        final List<LoanTransaction> transactions = loanTransactionService.retrieveListOfTransactionsForReprocessing(loan);
         if (loan.isInterestBearing() && loan.isInterestRecalculationEnabled()) {
-            final List<LoanTransaction> transactions = loanTransactionService.retrieveListOfTransactionsForReprocessing(loan);
             loanTransactionProcessingService.reprocessLoanTransactions(loan.getTransactionProcessingStrategyCode(),
                     loan.getDisbursementDate(), transactions, loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                    loan.getActiveCharges());
+                    loan.getActiveCharges(), transactions);
         } else {
             loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), chargebackTransaction,
-                    new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+                    TransactionCtx.builder().currency(loan.getCurrency()).installments(loan.getRepaymentScheduleInstallments())
+                            .charges(loan.getActiveCharges()).overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney()))
+                            .loanTransactions(transactions).build());
         }
         loanLifecycleStateMachine.determineAndTransition(loan, chargebackTransaction.getTransactionDate());
     }
@@ -3247,8 +3251,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         loan.addLoanTransaction(loanTransaction);
         loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), loanTransaction,
-                new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                        new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+                TransactionCtx.builder().currency(loan.getCurrency()).installments(loan.getRepaymentScheduleInstallments())
+                        .charges(loan.getActiveCharges()).overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney())).build());
 
         loanBalanceService.updateLoanSummaryDerivedFields(loan);
         loanLifecycleStateMachine.transition(LoanEvent.WRITE_OFF_OUTSTANDING, loan);
@@ -3322,8 +3326,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
                 loan.addLoanTransaction(loanTransaction);
                 loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), loanTransaction,
-                        new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                                new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+                        TransactionCtx.builder().currency(loan.getCurrency()).installments(loan.getRepaymentScheduleInstallments())
+                                .charges(loan.getActiveCharges()).overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney()))
+                                .build());
 
                 loanBalanceService.updateLoanSummaryDerivedFields(loan);
             } else if (totalOutstanding.isGreaterThanZero()) {

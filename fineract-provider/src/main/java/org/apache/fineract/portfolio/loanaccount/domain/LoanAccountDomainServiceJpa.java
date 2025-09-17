@@ -847,13 +847,15 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 && loanTransactionProcessingService.canProcessLatestTransactionOnly(loan, refundTransaction, currentInstallment); //
         if (processLatest) {
             loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), refundTransaction,
-                    new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+                    TransactionCtx.builder().currency(loan.getCurrency()).installments(loan.getRepaymentScheduleInstallments())
+                            .charges(loan.getActiveCharges()).overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney())).build());
             loan.getLoanTransactions().add(refundTransaction);
             if (interestRefundTransaction != null) {
                 loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(),
-                        interestRefundTransaction, new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                                loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+                        interestRefundTransaction,
+                        TransactionCtx.builder().currency(loan.getCurrency()).installments(loan.getRepaymentScheduleInstallments())
+                                .charges(loan.getActiveCharges()).overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney()))
+                                .build());
                 loan.addLoanTransaction(interestRefundTransaction);
             }
         } else {

@@ -98,10 +98,11 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
         ProgressiveLoanInterestScheduleModel model = savedModel
                 .orElseGet(() -> advancedProcessor.calculateInterestScheduleModel(loan.getId(), loanTransaction.getTransactionDate()));
 
+        final List<LoanTransaction> transactions = loanTransactionService.retrieveListOfTransactionsForReprocessing(loan);
         ProgressiveTransactionCtx progressiveContext = new ProgressiveTransactionCtx(loan.getCurrency(),
                 loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()),
-                new ChangedTransactionDetail(), model, getTotalRefundInterestAmount(loan));
-        progressiveContext.getAlreadyProcessedTransactions().addAll(loanTransactionService.retrieveListOfTransactionsForReprocessing(loan));
+                new ChangedTransactionDetail(), model, getTotalRefundInterestAmount(loan), transactions);
+        progressiveContext.getAlreadyProcessedTransactions().addAll(transactions);
         progressiveContext.setChargedOff(loan.isChargedOff());
         progressiveContext.setWrittenOff(loan.isClosedWrittenOff());
         progressiveContext.setContractTerminated(loan.isContractTermination());
@@ -148,21 +149,22 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
 
     @Override
     public ChangedTransactionDetail reprocessLoanTransactions(String transactionProcessingStrategyCode, LocalDate disbursementDate,
-            List<LoanTransaction> loanTransactions, MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
-            Set<LoanCharge> charges) {
+            List<LoanTransaction> loanTransactionsToReprocess, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges, List<LoanTransaction> loanTransactions) {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = getTransactionProcessor(
                 transactionProcessingStrategyCode);
         if (loanRepaymentScheduleTransactionProcessor instanceof AdvancedPaymentScheduleTransactionProcessor advancedProcessor) {
             LocalDate currentDate = DateUtils.getBusinessLocalDate();
             Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> result = advancedProcessor
-                    .reprocessProgressiveLoanTransactions(disbursementDate, currentDate, loanTransactions, currency, installments, charges);
+                    .reprocessProgressiveLoanTransactions(disbursementDate, currentDate, loanTransactionsToReprocess, currency,
+                            installments, charges, loanTransactions);
             if (!TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
-                modelRepository.writeInterestScheduleModel(getLoan(loanTransactions, installments, charges), result.getRight());
+                modelRepository.writeInterestScheduleModel(getLoan(loanTransactionsToReprocess, installments, charges), result.getRight());
             }
             return result.getLeft();
         } else {
-            return loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(disbursementDate, loanTransactions, currency,
-                    installments, charges);
+            return loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(disbursementDate, loanTransactionsToReprocess,
+                    currency, installments, charges, loanTransactions);
         }
     }
 
@@ -190,7 +192,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
         }
         final ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(
                 loan.getDisbursementDate(), copyTransactions, loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                loan.getActiveCharges());
+                loan.getActiveCharges(), copyTransactions);
 
         loanBalanceService.updateLoanSummaryDerivedFields(loan);
 

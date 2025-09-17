@@ -2802,7 +2802,7 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
         final List<LoanTransaction> loanTransactions = loanTransactionRepository.findNonReversedTransactionsForReprocessingByLoan(loan);
 
         loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(loanApplicationTerms.getExpectedDisbursementDate(),
-                loanTransactions, currency, loanScheduleDTO.getInstallments(), loan.getActiveCharges());
+                loanTransactions, currency, loanScheduleDTO.getInstallments(), loan.getActiveCharges(), loanTransactions);
         Money totalPrincipal = Money.zero(currency);
         Money totalInterest = Money.zero(currency);
         Money feeCharges = Money.zero(currency);

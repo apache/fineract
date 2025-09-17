@@ -86,7 +86,7 @@ public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataPro
                 .findNonReversedTransactionsForReprocessingByLoan(loan).stream().filter(t -> !t.isAccrualActivity()).toList();
         Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> changedTransactionDetailProgressiveLoanInterestScheduleModelPair = advancedPaymentScheduleTransactionProcessor
                 .reprocessProgressiveLoanTransactions(loan.getDisbursementDate(), businessDate, transactionsToReprocess, loan.getCurrency(),
-                        loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
+                        loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), transactionsToReprocess);
         ProgressiveLoanInterestScheduleModel model = changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getRight();
         final List<Long> replayedTransactions = changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getLeft()
                 .getTransactionChanges().stream().filter(change -> change.getOldTransaction() != null && change.getNewTransaction() != null)

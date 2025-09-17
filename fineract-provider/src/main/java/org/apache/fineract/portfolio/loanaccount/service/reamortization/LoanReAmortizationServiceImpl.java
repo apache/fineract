@@ -79,8 +79,9 @@ public class LoanReAmortizationServiceImpl {
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
                 .determineProcessor(loan.transactionProcessingStrategy());
-        loanRepaymentScheduleTransactionProcessor.processLatestTransaction(reAmortizeTransaction, new TransactionCtx(loan.getCurrency(),
-                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+        loanRepaymentScheduleTransactionProcessor.processLatestTransaction(reAmortizeTransaction,
+                TransactionCtx.builder().currency(loan.getCurrency()).installments(loan.getRepaymentScheduleInstallments())
+                        .charges(loan.getActiveCharges()).overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney())).build());
 
         loanTransactionRepository.saveAndFlush(reAmortizeTransaction);
 

@@ -595,8 +595,8 @@ public class LoanChargeService {
         final Set<LoanCharge> loanCharges = new HashSet<>(1);
         loanCharges.add(charge);
         loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), chargesPayment,
-                new TransactionCtx(loan.getCurrency(), chargePaymentInstallments, loanCharges,
-                        new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+                TransactionCtx.builder().currency(loan.getCurrency()).installments(chargePaymentInstallments).charges(loanCharges)
+                        .overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney())).build());
 
         loanLifecycleStateMachine.determineAndTransition(loan, chargesPayment.getTransactionDate());
     }

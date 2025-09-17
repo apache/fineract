@@ -44,7 +44,8 @@ public interface LoanTransactionProcessingService {
 
     ChangedTransactionDetail reprocessLoanTransactions(String transactionProcessingStrategyCode, LocalDate disbursementDate,
             List<LoanTransaction> repaymentsOrWaivers, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Set<LoanCharge> charges);
+            List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Set<LoanCharge> charges,
+            List<LoanTransaction> loanTransactions);
 
     LoanRepaymentScheduleTransactionProcessor getTransactionProcessor(String transactionProcessingStrategyCode);
 

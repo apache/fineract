@@ -895,8 +895,8 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             reprocessLoanTransactionsService.reprocessTransactions(loan);
         } else {
             loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanChargeAdjustmentTransaction,
-                    new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+                    TransactionCtx.builder().currency(loan.getCurrency()).installments(loan.getRepaymentScheduleInstallments())
+                            .charges(loan.getActiveCharges()).overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney())).build());
         }
         loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(loanChargeAdjustmentTransaction);
         loanLifecycleStateMachine.determineAndTransition(loan, loan.getLastUserTransactionDate());

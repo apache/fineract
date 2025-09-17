@@ -19,9 +19,9 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
@@ -36,10 +36,10 @@ import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
@@ -122,22 +122,20 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
     private void removeOrModifyTransactionAssociatedWithLoanChargeIfDueAtDisbursement(final Loan loan, final LoanCharge loanCharge) {
         if (loanCharge.isDueAtDisbursement()) {
             LoanTransaction transactionToRemove = null;
-            List<LoanTransaction> transactions = loan.getLoanTransactions();
+            final List<LoanTransaction> transactions = loanTransactionRepository.findRepaymentAtDisbursementTransactionsWithCharge(loan,
+                    LoanTransactionType.REPAYMENT_AT_DISBURSEMENT, loanCharge);
+
             for (final LoanTransaction transaction : transactions) {
-                if (transaction.isRepaymentAtDisbursement()
-                        && doesLoanChargePaidByContainLoanCharge(transaction.getLoanChargesPaid(), loanCharge)) {
-                    final MonetaryCurrency currency = loan.getCurrency();
-                    final Money chargeAmount = Money.of(currency, loanCharge.amount());
-                    if (transaction.isGreaterThan(chargeAmount)) {
-                        final Money principalPortion = Money.zero(currency);
-                        final Money interestPortion = Money.zero(currency);
-                        final Money penaltyChargesPortion = Money.zero(currency);
+                final MonetaryCurrency currency = loan.getCurrency();
+                final Money chargeAmount = Money.of(currency, loanCharge.amount());
+                if (transaction.isGreaterThan(chargeAmount)) {
+                    final Money principalPortion = Money.zero(currency);
+                    final Money interestPortion = Money.zero(currency);
+                    final Money penaltyChargesPortion = Money.zero(currency);
 
-                        transaction.updateComponentsAndTotal(principalPortion, interestPortion, chargeAmount, penaltyChargesPortion);
-
-                    } else {
-                        transactionToRemove = transaction;
-                    }
+                    transaction.updateComponentsAndTotal(principalPortion, interestPortion, chargeAmount, penaltyChargesPortion);
+                } else {
+                    transactionToRemove = transaction;
                 }
             }
 
@@ -147,28 +145,29 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
         }
     }
 
-    private boolean doesLoanChargePaidByContainLoanCharge(Set<LoanChargePaidBy> loanChargePaidBys, LoanCharge loanCharge) {
-        return loanChargePaidBys.stream() //
-                .anyMatch(loanChargePaidBy -> loanChargePaidBy.getLoanCharge().equals(loanCharge));
-    }
-
     @Override
     public void processLatestTransaction(final LoanTransaction loanTransaction, final Loan loan) {
         LoanRepaymentScheduleTransactionProcessor transactionProcessor = loanTransactionProcessingService
                 .getTransactionProcessor(loan.getTransactionProcessingStrategyCode());
+        List<LoanTransaction> transactions = Collections.emptyList();
+        if (loanTransaction.isInterestRefund() || loanTransaction.isContractTermination() || loanTransaction.isChargeback()
+                || loanTransaction.isChargeOff()) {
+            transactions = loan.getLoanTransactions();
+        }
 
         TransactionCtx transactionCtx;
         if (transactionProcessor instanceof AdvancedPaymentScheduleTransactionProcessor advancedProcessor) {
-            Optional<ProgressiveLoanInterestScheduleModel> savedModel = interestScheduleModelRepositoryWrapper.getSavedModel(loan,
+            final Optional<ProgressiveLoanInterestScheduleModel> savedModel = interestScheduleModelRepositoryWrapper.getSavedModel(loan,
                     loanTransaction.getTransactionDate());
-            ProgressiveLoanInterestScheduleModel model = savedModel
+            final ProgressiveLoanInterestScheduleModel model = savedModel
                     .orElseGet(() -> advancedProcessor.calculateInterestScheduleModel(loan.getId(), loanTransaction.getTransactionDate()));
-
             transactionCtx = new ProgressiveTransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                    loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail(), model);
+                    loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail(), model,
+                    transactions);
         } else {
-            transactionCtx = new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                    new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail());
+            transactionCtx = TransactionCtx.builder().currency(loan.getCurrency()).installments(loan.getRepaymentScheduleInstallments())
+                    .charges(loan.getActiveCharges()).overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney()))
+                    .changedTransactionDetail(new ChangedTransactionDetail()).loanTransactions(transactions).build();
         }
 
         final ChangedTransactionDetail changedTransactionDetail = loanTransactionProcessingService
@@ -219,7 +218,7 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
             final List<LoanTransaction> loanTransactions) {
         final ChangedTransactionDetail changedTransactionDetail = loanTransactionProcessingService.reprocessLoanTransactions(
                 loan.getTransactionProcessingStrategyCode(), loan.getDisbursementDate(), loanTransactions, loan.getCurrency(),
-                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
+                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), loan.getLoanTransactions());
         for (TransactionChangeData change : changedTransactionDetail.getTransactionChanges()) {
             change.getNewTransaction().updateLoan(loan);
         }

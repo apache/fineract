@@ -43,6 +43,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -166,8 +167,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(charge.updatePaidAmountBy(refEq(chargeAmountMoney), eq(1), refEq(zero))).thenReturn(chargeAmountMoney);
         when(loanTransaction.isPenaltyPayment()).thenReturn(false);
 
-        underTest.processLatestTransaction(loanTransaction,
-                new TransactionCtx(currency, List.of(installment), Set.of(charge), new MoneyHolder(overpaidAmount), null));
+        underTest.processLatestTransaction(loanTransaction, TransactionCtx.builder().currency(currency).installments(List.of(installment))
+                .charges(Set.of(charge)).overpaymentHolder(new MoneyHolder(overpaidAmount)).build());
 
         Mockito.verify(installment, times(1)).payFeeChargesComponent(eq(transactionDate), eq(chargeAmountMoney));
         Mockito.verify(loanTransaction, times(1)).updateComponents(refEq(zero), refEq(zero), refEq(chargeAmountMoney), refEq(zero));
@@ -210,8 +211,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(charge.updatePaidAmountBy(refEq(transactionAmountMoney), eq(1), refEq(zero))).thenReturn(transactionAmountMoney);
         when(loanTransaction.isPenaltyPayment()).thenReturn(false);
 
-        underTest.processLatestTransaction(loanTransaction,
-                new TransactionCtx(currency, List.of(installment), Set.of(charge), new MoneyHolder(overpaidAmount), null));
+        underTest.processLatestTransaction(loanTransaction, TransactionCtx.builder().currency(currency).installments(List.of(installment))
+                .charges(Set.of(charge)).overpaymentHolder(new MoneyHolder(overpaidAmount)).build());
 
         Mockito.verify(installment, times(1)).payFeeChargesComponent(eq(transactionDate), eq(transactionAmountMoney));
         Mockito.verify(loanTransaction, times(1)).updateComponents(refEq(zero), refEq(zero), refEq(transactionAmountMoney), refEq(zero));
@@ -262,8 +263,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(loanPaymentAllocationRule.getAllocationTypes()).thenReturn(List.of(PaymentAllocationType.DUE_PRINCIPAL));
         when(loanTransaction.isOn(eq(transactionDate))).thenReturn(true);
 
-        underTest.processLatestTransaction(loanTransaction,
-                new TransactionCtx(currency, List.of(installment), Set.of(charge), new MoneyHolder(overpaidAmount), null));
+        underTest.processLatestTransaction(loanTransaction, TransactionCtx.builder().currency(currency).installments(List.of(installment))
+                .charges(Set.of(charge)).overpaymentHolder(new MoneyHolder(overpaidAmount)).build());
 
         Mockito.verify(installment, times(1)).payFeeChargesComponent(eq(transactionDate), eq(chargeAmountMoney));
         Mockito.verify(loanTransaction, times(1)).updateComponents(refEq(zero), refEq(zero), refEq(chargeAmountMoney), refEq(zero));
@@ -283,7 +284,6 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         LoanCreditAllocationRule mockCreditAllocationRule = createMockCreditAllocationRule(PRINCIPAL, PENALTY, FEE, INTEREST);
         when(loan.getCreditAllocationRules()).thenReturn(List.of(mockCreditAllocationRule));
         LoanTransaction repayment = createRepayment(loan, chargebackTransaction, 10, 0, 20, 5);
-        lenient().when(loan.getLoanTransactions()).thenReturn(List.of(repayment));
 
         MoneyHolder overpaymentHolder = new MoneyHolder(Money.zero(MONETARY_CURRENCY));
         List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>();
@@ -291,7 +291,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         installments.add(installment);
 
         // when
-        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null);
+        final TransactionCtx ctx = TransactionCtx.builder().currency(MONETARY_CURRENCY).installments(installments)
+                .overpaymentHolder(overpaymentHolder).loanTransactions(List.of(repayment)).build();
         underTest.processCreditTransaction(chargebackTransaction, ctx);
 
         // verify principal
@@ -340,7 +341,6 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         LoanCreditAllocationRule mockCreditAllocationRule = createMockCreditAllocationRule(PENALTY, FEE, PRINCIPAL, INTEREST);
         when(loan.getCreditAllocationRules()).thenReturn(List.of(mockCreditAllocationRule));
         LoanTransaction repayment = createRepayment(loan, chargebackTransaction, 10, 0, 20, 5);
-        lenient().when(loan.getLoanTransactions()).thenReturn(List.of(repayment));
 
         MoneyHolder overpaymentHolder = new MoneyHolder(Money.zero(MONETARY_CURRENCY));
         List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>();
@@ -348,7 +348,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         installments.add(installment);
 
         // when
-        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null);
+        final TransactionCtx ctx = TransactionCtx.builder().currency(MONETARY_CURRENCY).installments(installments)
+                .overpaymentHolder(overpaymentHolder).loanTransactions(List.of(repayment)).build();
         underTest.processCreditTransaction(chargebackTransaction, ctx);
 
         // verify charges on installment
@@ -389,7 +390,6 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         LoanCreditAllocationRule mockCreditAllocationRule = createMockCreditAllocationRule(PRINCIPAL, PENALTY, FEE, INTEREST);
         when(loan.getCreditAllocationRules()).thenReturn(List.of(mockCreditAllocationRule));
         LoanTransaction repayment = createRepayment(loan, chargebackTransaction, 10, 0, 20, 5);
-        lenient().when(loan.getLoanTransactions()).thenReturn(List.of(repayment));
 
         MoneyHolder overpaymentHolder = new MoneyHolder(Money.zero(MONETARY_CURRENCY));
         List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>();
@@ -400,7 +400,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         installments.add(installment2);
 
         // when
-        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null);
+        final TransactionCtx ctx = TransactionCtx.builder().currency(MONETARY_CURRENCY).installments(installments)
+                .overpaymentHolder(overpaymentHolder).loanTransactions(List.of(repayment)).build();
         underTest.processCreditTransaction(chargebackTransaction, ctx);
 
         // verify principal
@@ -493,7 +494,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
 
         // Set up TransactionCtx with installments and charges
         TransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, Set.of(), overpaymentHolder, changedTransactionDetail,
-                model);
+                model, Collections.emptyList());
 
         // Mock additional necessary methods
         LoanCharge loanCharge = mock(LoanCharge.class);
@@ -569,7 +570,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         ProgressiveLoanInterestScheduleModel model = mock(ProgressiveLoanInterestScheduleModel.class);
 
         TransactionCtx ctx = new ProgressiveTransactionCtx(currency, spyInstallments, Set.of(), new MoneyHolder(Money.zero(currency)),
-                mock(ChangedTransactionDetail.class), model, Money.zero(currency));
+                mock(ChangedTransactionDetail.class), model, Money.zero(currency), Collections.emptyList());
 
         underTest.processLatestTransaction(disbursementTransaction, ctx);
 
@@ -681,17 +682,15 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         // given
         LoanTransaction chargebackTransaction = mock(LoanTransaction.class);
         when(chargebackTransaction.getId()).thenReturn(123L);
-        Loan loan = mock(Loan.class);
-        when(chargebackTransaction.getLoan()).thenReturn(loan);
         LoanTransaction repayment1 = mock(LoanTransaction.class);
         LoanTransaction repayment2 = mock(LoanTransaction.class);
-        when(loan.getLoanTransactions()).thenReturn(List.of(chargebackTransaction, repayment1, repayment2));
 
         LoanTransactionRelation relation = mock(LoanTransactionRelation.class);
         when(relation.getToTransaction()).thenReturn(chargebackTransaction);
         when(relation.getRelationType()).thenReturn(LoanTransactionRelationTypeEnum.CHARGEBACK);
         when(repayment2.getLoanTransactionRelations()).thenReturn(Set.of(relation));
         TransactionCtx ctx = mock(TransactionCtx.class);
+        when(ctx.getLoanTransactions()).thenReturn(List.of(chargebackTransaction, repayment1, repayment2));
 
         // when
         LoanTransaction originalTransaction = underTest.findChargebackOriginalTransaction(chargebackTransaction, ctx);
@@ -705,15 +704,13 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         // given
         LoanTransaction chargebackTransaction = mock(LoanTransaction.class);
         when(chargebackTransaction.getId()).thenReturn(123L);
-        Loan loan = mock(Loan.class);
-        when(chargebackTransaction.getLoan()).thenReturn(loan);
         LoanTransaction repayment1 = mock(LoanTransaction.class);
         LoanTransaction repayment2 = mock(LoanTransaction.class);
-        when(loan.getLoanTransactions()).thenReturn(List.of(chargebackTransaction, repayment1, repayment2));
 
         when(repayment2.getLoanTransactionRelations()).thenReturn(Set.of());
 
         TransactionCtx ctx = mock(TransactionCtx.class);
+        when(ctx.getLoanTransactions()).thenReturn(List.of(chargebackTransaction, repayment1, repayment2));
 
         // when + then
         RuntimeException runtimeException = Assertions.assertThrows(RuntimeException.class,
@@ -736,13 +733,11 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(relation.getRelationType()).thenReturn(LoanTransactionRelationTypeEnum.CHARGEBACK);
         when(repayment2.getLoanTransactionRelations()).thenReturn(Set.of(relation));
 
-        Loan loan = mock(Loan.class);
-        when(chargebackReplayed.getLoan()).thenReturn(loan);
-        when(loan.getLoanTransactions()).thenReturn(List.of(repayment1, repayment2));
         TransactionChangeData transactionChange = new TransactionChangeData(originalChargeback, chargebackReplayed);
         ChangedTransactionDetail changedTransactionDetail = mock(ChangedTransactionDetail.class);
         when(changedTransactionDetail.getTransactionChanges()).thenReturn(List.of(transactionChange));
         TransactionCtx ctx = mock(TransactionCtx.class);
+        when(ctx.getLoanTransactions()).thenReturn(List.of(repayment1, repayment2));
         when(ctx.getChangedTransactionDetail()).thenReturn(changedTransactionDetail);
 
         // when
@@ -759,9 +754,6 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(chargebackReplayed.getId()).thenReturn(null);
         LoanTransaction repayment1 = mock(LoanTransaction.class);
         LoanTransaction repayment2 = mock(LoanTransaction.class);
-        Loan loan = mock(Loan.class);
-        when(chargebackReplayed.getLoan()).thenReturn(loan);
-        when(loan.getLoanTransactions()).thenReturn(List.of(repayment1, repayment2));
 
         LoanTransaction originalChargeback = mock(LoanTransaction.class);
         when(originalChargeback.getId()).thenReturn(123L);
@@ -773,6 +765,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         TransactionCtx ctx = mock(TransactionCtx.class);
         ChangedTransactionDetail changedTransactionDetail = mock(ChangedTransactionDetail.class);
         when(ctx.getChangedTransactionDetail()).thenReturn(changedTransactionDetail);
+        when(ctx.getLoanTransactions()).thenReturn(List.of(repayment1, repayment2));
         when(changedTransactionDetail.getTransactionChanges())
                 .thenReturn(List.of(new TransactionChangeData(originalChargeback, chargebackReplayed)));
 

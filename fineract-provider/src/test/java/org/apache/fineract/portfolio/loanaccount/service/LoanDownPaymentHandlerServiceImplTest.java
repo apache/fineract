@@ -173,7 +173,7 @@ public class LoanDownPaymentHandlerServiceImplTest {
         when(loanForProcessing.loanCurrency()).thenReturn(loanCurrency);
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
         when(loanForProcessing.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
-        when(loanTransactionProcessingService.reprocessLoanTransactions(any(), any(), any(), any(), any(), any()))
+        when(loanTransactionProcessingService.reprocessLoanTransactions(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(changedTransactionDetail);
         when(loanProductRelatedDetail.getLoanScheduleType()).thenReturn(LoanScheduleType.PROGRESSIVE);
 

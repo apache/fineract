@@ -82,8 +82,8 @@ public class LoanRefundService {
         loanRefundValidator.validateTransactionAmountThreshold(loan, null);
 
         loadTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), loanTransaction,
-                new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                        new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+                TransactionCtx.builder().currency(loan.getCurrency()).installments(loan.getRepaymentScheduleInstallments())
+                        .charges(loan.getActiveCharges()).overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney())).build());
 
         loanLifecycleStateMachine.determineAndTransition(loan, loanTransaction.getTransactionDate());
     }
