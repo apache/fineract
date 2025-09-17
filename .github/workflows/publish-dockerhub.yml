@@ -41,7 +41,7 @@ jobs:
           else
             TAGS="${{ github.ref_name }}"
           fi
-
+          
           ./gradlew --no-daemon --console=plain :fineract-provider:jib -x test -x cucumber \
             -Djib.to.auth.username=${{secrets.DOCKERHUB_USER}} \
             -Djib.to.auth.password=${{secrets.DOCKERHUB_TOKEN}} \
