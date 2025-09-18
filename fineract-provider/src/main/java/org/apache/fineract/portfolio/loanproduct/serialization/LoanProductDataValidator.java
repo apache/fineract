@@ -756,6 +756,7 @@ public final class LoanProductDataValidator {
                     LoanProductAccountingParams.BUYDOWN_FEE_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS);
             validateClassificationToIncomeMappings(baseDataValidator, element,
                     LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS);
+            validateWriteOffToExpenseMappings(baseDataValidator, element);
         }
 
         if (AccountingValidations.isAccrualBasedAccounting(accountingRuleType)) {

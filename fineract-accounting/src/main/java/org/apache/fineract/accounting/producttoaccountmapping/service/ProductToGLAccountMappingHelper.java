@@ -457,7 +457,6 @@ public class ProductToGLAccountMappingHelper {
             // If input map is empty, delete all existing mappings
             if (inputReasonToGLAccountMap.isEmpty()) {
                 this.accountMappingRepository.deleteAll(existingReasonToGLAccountMappings);
-
             } else {
                 for (final ProductToGLAccountMapping existingReasonToGLAccountMapping : existingReasonToGLAccountMappings) {
                     final Long currentReasonId = getReasonIdByCashAccountForLoan(existingReasonToGLAccountMapping, cashAccountsForLoan);

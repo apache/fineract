@@ -53,7 +53,6 @@ import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeOffReas
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ClassificationToGLAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
-import org.apache.fineract.accounting.producttoaccountmapping.data.WriteOffReasonsToExpenseAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingReadPlatformService;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -263,11 +262,11 @@ public class LoanProductsApiResource {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanProductsApiResourceSwagger.GetLoanProductsProductIdResponse.class))) })
     public String retrieveLoanProductDetails(@PathParam("productId") @Parameter(description = "productId") final Long productId,
-            @Context final UriInfo uriInfo) {
+            @QueryParam("template") @Parameter(description = "template") Boolean template, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
-        return getLoanProductDetails(productId, uriInfo);
+        return getLoanProductDetails(productId, uriInfo, template);
     }
 
     @PUT
@@ -296,7 +295,7 @@ public class LoanProductsApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanProductsApiResourceSwagger.GetLoanProductsProductIdResponse.class))) })
     public String retrieveLoanProductDetails(
             @PathParam("externalProductId") @Parameter(description = "externalProductId") final String externalProductId,
-            @Context final UriInfo uriInfo) {
+            @QueryParam("template") @Parameter(description = "template") Boolean template, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
@@ -307,7 +306,7 @@ public class LoanProductsApiResource {
             throw new LoanProductNotFoundException(externalId);
         }
 
-        return getLoanProductDetails(productId, uriInfo);
+        return getLoanProductDetails(productId, uriInfo, template);
     }
 
     @PUT
@@ -346,7 +345,7 @@ public class LoanProductsApiResource {
         return loanProductReadPlatformService.retrieveLoanProductByExternalId(externalProductId).getId();
     }
 
-    private String getLoanProductDetails(Long productId, UriInfo uriInfo) {
+    private String getLoanProductDetails(Long productId, UriInfo uriInfo, Boolean isTemplate) {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
@@ -356,9 +355,9 @@ public class LoanProductsApiResource {
         Collection<ChargeToGLAccountMapper> feeToGLAccountMappings;
         Collection<ChargeToGLAccountMapper> penaltyToGLAccountMappings;
         List<ChargeOffReasonToGLAccountMapper> chargeOffReasonToGLAccountMappings;
-        List<WriteOffReasonsToExpenseAccountMapper> writeOffReasonsToExpenseAccountMappings;
         List<ClassificationToGLAccountData> capitalizedIncomeClassificationToGLAccountMappings;
         List<ClassificationToGLAccountData> buydowFeeClassificationToGLAccountMappings;
+        List<ChargeOffReasonToGLAccountMapper> writeOffReasonsToExpenseAccountMappings;
         if (loanProduct.hasAccountingEnabled()) {
             accountingMappings = this.accountMappingReadPlatformService.fetchAccountMappingDetailsForLoanProduct(productId,
                     loanProduct.getAccountingRule().getId().intValue());
@@ -376,13 +375,15 @@ public class LoanProductsApiResource {
                             LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS);
             buydowFeeClassificationToGLAccountMappings = accountMappingReadPlatformService.fetchClassificationMappingsForLoanProduct(
                     productId, LoanProductAccountingParams.BUYDOWN_FEE_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS);
+            writeOffReasonsToExpenseAccountMappings = this.accountMappingReadPlatformService
+                    .fetchWriteOffReasonMappingsForLoanProduct(productId);
             loanProduct = LoanProductData.withAccountingDetails(loanProduct, accountingMappings, paymentChannelToFundSourceMappings,
                     feeToGLAccountMappings, penaltyToGLAccountMappings, chargeOffReasonToGLAccountMappings,
-                    writeOffReasonsToExpenseAccountMappings, capitalizedIncomeClassificationToGLAccountMappings,
-                    buydowFeeClassificationToGLAccountMappings);
+                    capitalizedIncomeClassificationToGLAccountMappings, buydowFeeClassificationToGLAccountMappings,
+                    writeOffReasonsToExpenseAccountMappings);
         }
 
-        if (settings.isTemplate()) {
+        if (isTemplate != null && isTemplate) {
             loanProduct = handleTemplate(loanProduct);
         }
         return this.toApiJsonSerializer.serialize(settings, loanProduct, LOAN_PRODUCT_DATA_PARAMETERS);
@@ -480,12 +481,12 @@ public class LoanProductsApiResource {
                 .getValuesAsStringEnumOptionDataList(LoanBuyDownFeeStrategy.class);
         final List<StringEnumOptionData> buyDownFeeIncomeTypeOptions = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(LoanBuyDownFeeIncomeType.class);
-        final List<CodeValueData> writeOffReasonOptions = codeValueReadPlatformService
-                .retrieveCodeValuesByCode(LoanApiConstants.WRITEOFFREASONS);
         final List<CodeValueData> capitalizedIncomeClassificationOptions = codeValueReadPlatformService
                 .retrieveCodeValuesByCode(LoanTransactionApiConstants.CAPITALIZED_INCOME_CLASSIFICATION_CODE);
         final List<CodeValueData> buydownFeeClassificationOptions = codeValueReadPlatformService
                 .retrieveCodeValuesByCode(LoanTransactionApiConstants.BUY_DOWN_FEE_CLASSIFICATION_CODE);
+        final List<CodeValueData> writeOffReasonOptions = codeValueReadPlatformService
+                .retrieveCodeValuesByCode(LoanApiConstants.WRITEOFFREASONS);
 
         return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions, amortizationTypeOptions,
                 interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions, interestRateFrequencyTypeOptions,
@@ -500,7 +501,7 @@ public class LoanProductsApiResource {
                 creditAllocationAllocationTypes, supportedInterestRefundTypesOptions, chargeOffBehaviourOptions, chargeOffReasonOptions,
                 daysInYearCustomStrategyOptions, capitalizedIncomeCalculationTypeOptions, capitalizedIncomeStrategyOptions,
                 capitalizedIncomeTypeOptions, buyDownFeeCalculationTypeOptions, buyDownFeeStrategyOptions, buyDownFeeIncomeTypeOptions,
-                writeOffReasonOptions, capitalizedIncomeClassificationOptions, buydownFeeClassificationOptions);
+                capitalizedIncomeClassificationOptions, buydownFeeClassificationOptions, writeOffReasonOptions);
     }
 
 }

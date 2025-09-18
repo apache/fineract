@@ -3174,7 +3174,8 @@ public class LoanStepDef extends AbstractStepDef {
         Long loanProductId = loanProductResolver.resolve(product);
         log.debug("loanProductId: {}", loanProductId);
 
-        Response<GetLoanProductsProductIdResponse> loanProductDetails = loanProductsApi.retrieveLoanProductDetails(loanProductId).execute();
+        Response<GetLoanProductsProductIdResponse> loanProductDetails = loanProductsApi.retrieveLoanProductDetails(loanProductId, false)
+                .execute();
         ErrorHelper.checkSuccessfulApiCall(loanProductDetails);
         List<AdvancedPaymentData> paymentAllocation = loanProductDetails.body().getPaymentAllocation();
 
@@ -3555,8 +3556,8 @@ public class LoanStepDef extends AbstractStepDef {
 
         final DefaultLoanProduct product = DefaultLoanProduct.valueOf(loanProduct);
         final Long loanProductId = loanProductResolver.resolve(product);
-        final Response<GetLoanProductsProductIdResponse> loanProductDetails = loanProductsApi.retrieveLoanProductDetails(loanProductId)
-                .execute();
+        final Response<GetLoanProductsProductIdResponse> loanProductDetails = loanProductsApi
+                .retrieveLoanProductDetails(loanProductId, false).execute();
 
         final List<PostLoansRequestChargeData> loanCharges = new ArrayList<>();
 

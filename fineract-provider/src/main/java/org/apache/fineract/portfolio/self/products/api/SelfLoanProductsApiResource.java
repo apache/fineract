@@ -19,6 +19,7 @@
 
 package org.apache.fineract.portfolio.self.products.api;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -138,10 +139,11 @@ public class SelfLoanProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveLoanProductDetails(@QueryParam(LoanApiConstants.clientIdParameterName) final Long clientId,
+            @QueryParam("template") @Parameter(description = "template") Boolean template,
             @PathParam(LoanApiConstants.productIdParameterName) final Long productId, @Context final UriInfo uriInfo) {
 
         this.appUserClientMapperReadService.validateAppuserClientsMapping(clientId);
-        return this.loanProductsApiResource.retrieveLoanProductDetails(productId, uriInfo);
+        return this.loanProductsApiResource.retrieveLoanProductDetails(productId, template, uriInfo);
     }
 
 }

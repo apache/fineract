@@ -36,11 +36,15 @@ public class LoanProductHelper {
     }
 
     public GetLoanProductsProductIdResponse retrieveLoanProductByExternalId(String externalId) {
-        return Calls.ok(FineractClientHelper.getFineractClient().loanProducts.retrieveLoanProductDetails1(externalId));
+        return Calls.ok(FineractClientHelper.getFineractClient().loanProducts.retrieveLoanProductDetails1(externalId, false));
     }
 
     public GetLoanProductsProductIdResponse retrieveLoanProductById(Long loanProductId) {
-        return Calls.ok(FineractClientHelper.getFineractClient().loanProducts.retrieveLoanProductDetails(loanProductId));
+        return Calls.ok(FineractClientHelper.getFineractClient().loanProducts.retrieveLoanProductDetails(loanProductId, false));
+    }
+
+    public GetLoanProductsProductIdResponse retrieveLoanProductByIdWithTemplate(Long loanProductId) {
+        return Calls.ok(FineractClientHelper.getFineractClient().loanProducts.retrieveLoanProductDetails(loanProductId, true));
     }
 
     public PutLoanProductsProductIdResponse updateLoanProductByExternalId(String externalId, PutLoanProductsProductIdRequest request) {

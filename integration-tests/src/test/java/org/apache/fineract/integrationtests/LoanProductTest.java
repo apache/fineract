@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.GetChargeOffReasonToExpenseAccountMappings;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoanProductsTemplateResponse;
 import org.apache.fineract.client.models.GetLoanProductsWriteOffReasonOptions;
@@ -546,14 +547,14 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
 
             // Verify that get loan product API has the corresponding fields
             GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper.retrieveLoanProductById(loanProductId);
-            List<PostWriteOffReasonToExpenseAccountMappings> writeOffReasonToExpenseAccountMappings = getLoanProductsProductIdResponse
+            List<GetChargeOffReasonToExpenseAccountMappings> writeOffReasonToExpenseAccountMappings = getLoanProductsProductIdResponse
                     .getWriteOffReasonsToExpenseMappings();
             Assertions.assertNotNull(writeOffReasonToExpenseAccountMappings);
             Assertions.assertEquals(1, writeOffReasonToExpenseAccountMappings.size());
-            PostWriteOffReasonToExpenseAccountMappings writeOffMapping = writeOffReasonToExpenseAccountMappings.getFirst();
+            GetChargeOffReasonToExpenseAccountMappings writeOffMapping = writeOffReasonToExpenseAccountMappings.getFirst();
             Assertions.assertNotNull(writeOffMapping);
-            Assertions.assertEquals(expenseAccountId, writeOffMapping.getExpenseAccountId());
-            Assertions.assertEquals(reasonCodeId, writeOffMapping.getWriteOffReasonCodeValueId());
+            Assertions.assertEquals(Long.valueOf(expenseAccountId), writeOffMapping.getExpenseAccount().getId());
+            Assertions.assertEquals(Long.valueOf(reasonCodeId), writeOffMapping.getChargeOffReasonCodeValue().getId());
 
             List<GetLoanProductsWriteOffReasonOptions> writeOffReasonOptionsResultNonTemplate = getLoanProductsProductIdResponse
                     .getWriteOffReasonOptions();
@@ -561,13 +562,22 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                 Assertions.fail("Write-off reason options with no template setting should be empty");
             }
 
+            // Verify that get loan product API has the corresponding fields in template mode
+            GetLoanProductsProductIdResponse getLoanProductsProductIdResponseTemplate = loanProductHelper
+                    .retrieveLoanProductByIdWithTemplate(loanProductId);
+            List<GetLoanProductsWriteOffReasonOptions> writeOffReasonOptionsResultTemplate = getLoanProductsProductIdResponseTemplate
+                    .getWriteOffReasonOptions();
+            if (writeOffReasonOptionsResultTemplate == null || writeOffReasonOptionsResultTemplate.isEmpty()) {
+                Assertions.fail("Write-off reason options in template mode should be not empty.");
+            }
+
             // test Update loan product API - delete writeOffReasonsToExpenseMappings
 
-            GetLoanProductsProductIdResponse getLoanProductsProductId = loanProductHelper.retrieveLoanProductById(loanProductId);
-
             loanProductHelper.updateLoanProductById(loanProductId,
-                    update4IProgressive(getLoanProductsProductId.getName(), getLoanProductsProductId.getShortName(),
-                            getLoanProductsProductId.getDelinquencyBucket().getId()).writeOffReasonsToExpenseMappings(List.of()));
+                    update4IProgressive(getLoanProductsProductIdResponseTemplate.getName(),
+                            getLoanProductsProductIdResponseTemplate.getShortName(),
+                            getLoanProductsProductIdResponseTemplate.getDelinquencyBucket().getId())
+                            .writeOffReasonsToExpenseMappings(List.of()));
 
             // Verify that get loan product API has the corresponding fields
             Assertions.assertNull(loanProductHelper.retrieveLoanProductById(loanProductId).getWriteOffReasonsToExpenseMappings());

@@ -25,7 +25,6 @@ import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeOffReas
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ClassificationToGLAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
-import org.apache.fineract.accounting.producttoaccountmapping.data.WriteOffReasonsToExpenseAccountMapper;
 
 public interface ProductToGLAccountMappingReadPlatformService {
 
@@ -53,8 +52,9 @@ public interface ProductToGLAccountMappingReadPlatformService {
 
     List<ChargeOffReasonToGLAccountMapper> fetchChargeOffReasonMappingsForLoanProduct(Long loanProductId);
 
-    List<WriteOffReasonsToExpenseAccountMapper> fetchWriteOffReasonMappingsForLoanProduct(Long loanProductId);
-
     List<ClassificationToGLAccountData> fetchClassificationMappingsForLoanProduct(Long loanProductId,
             LoanProductAccountingParams classificationParameter);
+
+    List<ChargeOffReasonToGLAccountMapper> fetchWriteOffReasonMappingsForLoanProduct(Long loanProductId);
+
 }

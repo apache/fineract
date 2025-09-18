@@ -301,9 +301,9 @@ public final class LoanProductsApiResourceSwagger {
         public List<GetLoanProductsProductIdResponse.GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
         public List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings;
         public List<PostChargeOffReasonToExpenseAccountMappings> chargeOffReasonToExpenseAccountMappings;
-        public List<PostWriteOffReasonToExpenseAccountMappings> writeOffReasonsToExpenseMappings;
         public List<PostLoanProductsRequest.PostClassificationToIncomeAccountMappings> buydownfeeClassificationToIncomeAccountMappings;
         public List<PostLoanProductsRequest.PostClassificationToIncomeAccountMappings> capitalizedIncomeClassificationToIncomeAccountMappings;
+        public List<PostWriteOffReasonToExpenseAccountMappings> writeOffReasonsToExpenseMappings;
         public List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
 
         // Multi Disburse
@@ -383,6 +383,17 @@ public final class LoanProductsApiResourceSwagger {
             public Long expenseAccountId;
         }
 
+        @Schema(description = "PostClassificationToIncomeAccountMappings")
+        static final class PostClassificationToIncomeAccountMappings {
+
+            private PostClassificationToIncomeAccountMappings() {}
+
+            @Schema(example = "1")
+            public Long classificationCodeValueId;
+            @Schema(example = "1")
+            public Long incomeAccountId;
+        }
+
         @Schema(description = "PostWriteOffReasonToExpenseAccountMappings")
         public static final class PostWriteOffReasonToExpenseAccountMappings {
 
@@ -392,16 +403,6 @@ public final class LoanProductsApiResourceSwagger {
             public String writeOffReasonCodeValueId;
             @Schema(example = "1")
             public String expenseAccountId;
-        }
-
-        static final class PostClassificationToIncomeAccountMappings {
-
-            private PostClassificationToIncomeAccountMappings() {}
-
-            @Schema(example = "1")
-            public Long classificationCodeValueId;
-            @Schema(example = "1")
-            public Long incomeAccountId;
         }
     }
 
@@ -1492,7 +1493,7 @@ public final class LoanProductsApiResourceSwagger {
         public Set<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
         public Set<GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings;
         public List<GetChargeOffReasonToExpenseAccountMappings> chargeOffReasonToExpenseAccountMappings;
-        public List<PostLoanProductsRequest.PostWriteOffReasonToExpenseAccountMappings> writeOffReasonsToExpenseMappings;
+        public List<GetChargeOffReasonToExpenseAccountMappings> writeOffReasonsToExpenseMappings;
         @Schema(example = "false")
         public Boolean isRatesEnabled;
         @Schema(example = "true")

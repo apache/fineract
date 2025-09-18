@@ -145,6 +145,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                         loanProductId, null);
                 this.loanProductToGLAccountMappingHelper.saveCapitalizedIncomeClassificationToIncomeAccountMappings(command, element,
                         loanProductId, null);
+                this.loanProductToGLAccountMappingHelper.saveWriteOffReasonToExpenseAccountMappings(command, element, loanProductId, null);
             break;
             case ACCRUAL_UPFRONT:
                 // Fall Through
@@ -243,6 +244,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                         loanProductId, null);
                 this.loanProductToGLAccountMappingHelper.saveCapitalizedIncomeClassificationToIncomeAccountMappings(command, element,
                         loanProductId, null);
+                this.loanProductToGLAccountMappingHelper.saveWriteOffReasonToExpenseAccountMappings(command, element, loanProductId, null);
             break;
         }
     }
@@ -427,6 +429,8 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                     changes);
             this.loanProductToGLAccountMappingHelper.updateCapitalizedIncomeClassificationToIncomeAccountMappings(command, element,
                     loanProductId, changes);
+
+            this.loanProductToGLAccountMappingHelper.updateWriteOffReasonToExpenseAccountMappings(command, element, loanProductId, changes);
         }
         return changes;
     }
