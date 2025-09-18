@@ -181,8 +181,10 @@ public final class AccountingConstants {
         INCOME_FROM_GOODWILL_CREDIT_FEES("incomeFromGoodwillCreditFeesAccountId"), //
         INCOME_FROM_GOODWILL_CREDIT_PENALTY("incomeFromGoodwillCreditPenaltyAccountId"), //
         CHARGE_OFF_REASON_TO_EXPENSE_ACCOUNT_MAPPINGS("chargeOffReasonToExpenseAccountMappings"), //
+        WRITE_OFF_REASON_TO_EXPENSE_ACCOUNT_MAPPINGS("writeOffReasonsToExpenseMappings"), //
         EXPENSE_GL_ACCOUNT_ID("expenseAccountId"), //
         CHARGE_OFF_REASON_CODE_VALUE_ID("chargeOffReasonCodeValueId"), //
+        WRITE_OFF_REASON_CODE_VALUE_ID("writeOffReasonCodeValueId"), //
         DEFERRED_INCOME_LIABILITY("deferredIncomeLiabilityAccountId"), //
         INCOME_FROM_CAPITALIZATION("incomeFromCapitalizationAccountId"), //
         BUY_DOWN_EXPENSE("buyDownExpenseAccountId"), //

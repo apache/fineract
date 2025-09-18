@@ -53,6 +53,7 @@ import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeOffReas
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ClassificationToGLAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
+import org.apache.fineract.accounting.producttoaccountmapping.data.WriteOffReasonsToExpenseAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingReadPlatformService;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -355,6 +356,7 @@ public class LoanProductsApiResource {
         Collection<ChargeToGLAccountMapper> feeToGLAccountMappings;
         Collection<ChargeToGLAccountMapper> penaltyToGLAccountMappings;
         List<ChargeOffReasonToGLAccountMapper> chargeOffReasonToGLAccountMappings;
+        List<WriteOffReasonsToExpenseAccountMapper> writeOffReasonsToExpenseAccountMappings;
         List<ClassificationToGLAccountData> capitalizedIncomeClassificationToGLAccountMappings;
         List<ClassificationToGLAccountData> buydowFeeClassificationToGLAccountMappings;
         if (loanProduct.hasAccountingEnabled()) {
@@ -367,6 +369,8 @@ public class LoanProductsApiResource {
                     .fetchPenaltyToIncomeAccountMappingsForLoanProduct(productId);
             chargeOffReasonToGLAccountMappings = this.accountMappingReadPlatformService
                     .fetchChargeOffReasonMappingsForLoanProduct(productId);
+            writeOffReasonsToExpenseAccountMappings = this.accountMappingReadPlatformService
+                    .fetchWriteOffReasonMappingsForLoanProduct(productId);
             capitalizedIncomeClassificationToGLAccountMappings = accountMappingReadPlatformService
                     .fetchClassificationMappingsForLoanProduct(productId,
                             LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS);
@@ -374,7 +378,8 @@ public class LoanProductsApiResource {
                     productId, LoanProductAccountingParams.BUYDOWN_FEE_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS);
             loanProduct = LoanProductData.withAccountingDetails(loanProduct, accountingMappings, paymentChannelToFundSourceMappings,
                     feeToGLAccountMappings, penaltyToGLAccountMappings, chargeOffReasonToGLAccountMappings,
-                    capitalizedIncomeClassificationToGLAccountMappings, buydowFeeClassificationToGLAccountMappings);
+                    writeOffReasonsToExpenseAccountMappings, capitalizedIncomeClassificationToGLAccountMappings,
+                    buydowFeeClassificationToGLAccountMappings);
         }
 
         if (settings.isTemplate()) {
@@ -475,6 +480,8 @@ public class LoanProductsApiResource {
                 .getValuesAsStringEnumOptionDataList(LoanBuyDownFeeStrategy.class);
         final List<StringEnumOptionData> buyDownFeeIncomeTypeOptions = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(LoanBuyDownFeeIncomeType.class);
+        final List<CodeValueData> writeOffReasonOptions = codeValueReadPlatformService
+                .retrieveCodeValuesByCode(LoanApiConstants.WRITEOFFREASONS);
         final List<CodeValueData> capitalizedIncomeClassificationOptions = codeValueReadPlatformService
                 .retrieveCodeValuesByCode(LoanTransactionApiConstants.CAPITALIZED_INCOME_CLASSIFICATION_CODE);
         final List<CodeValueData> buydownFeeClassificationOptions = codeValueReadPlatformService
@@ -493,7 +500,7 @@ public class LoanProductsApiResource {
                 creditAllocationAllocationTypes, supportedInterestRefundTypesOptions, chargeOffBehaviourOptions, chargeOffReasonOptions,
                 daysInYearCustomStrategyOptions, capitalizedIncomeCalculationTypeOptions, capitalizedIncomeStrategyOptions,
                 capitalizedIncomeTypeOptions, buyDownFeeCalculationTypeOptions, buyDownFeeStrategyOptions, buyDownFeeIncomeTypeOptions,
-                capitalizedIncomeClassificationOptions, buydownFeeClassificationOptions);
+                writeOffReasonOptions, capitalizedIncomeClassificationOptions, buydownFeeClassificationOptions);
     }
 
 }

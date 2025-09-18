@@ -69,6 +69,10 @@ public class ProductToGLAccountMapping extends AbstractPersistableCustom<Long> {
     private CodeValue chargeOffReason;
 
     @ManyToOne
+    @JoinColumn(name = "write_off_reason_id", nullable = true)
+    private CodeValue writeOffReason;
+
+    @ManyToOne
     @JoinColumn(name = "capitalized_income_classification_id", nullable = true)
     private CodeValue capitalizedIncomeClassification;
 

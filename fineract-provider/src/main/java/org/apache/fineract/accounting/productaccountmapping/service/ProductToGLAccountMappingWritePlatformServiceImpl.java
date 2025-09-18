@@ -140,6 +140,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, null);
                 this.loanProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, loanProductId, null);
                 this.loanProductToGLAccountMappingHelper.saveChargeOffReasonToExpenseAccountMappings(command, element, loanProductId, null);
+                this.loanProductToGLAccountMappingHelper.saveWriteOffReasonToExpenseAccountMappings(command, element, loanProductId, null);
                 this.loanProductToGLAccountMappingHelper.saveBuyDownFeeClassificationToIncomeAccountMappings(command, element,
                         loanProductId, null);
                 this.loanProductToGLAccountMappingHelper.saveCapitalizedIncomeClassificationToIncomeAccountMappings(command, element,
@@ -237,6 +238,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, null);
                 this.loanProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, loanProductId, null);
                 this.loanProductToGLAccountMappingHelper.saveChargeOffReasonToExpenseAccountMappings(command, element, loanProductId, null);
+                this.loanProductToGLAccountMappingHelper.saveWriteOffReasonToExpenseAccountMappings(command, element, loanProductId, null);
                 this.loanProductToGLAccountMappingHelper.saveBuyDownFeeClassificationToIncomeAccountMappings(command, element,
                         loanProductId, null);
                 this.loanProductToGLAccountMappingHelper.saveCapitalizedIncomeClassificationToIncomeAccountMappings(command, element,
@@ -419,6 +421,8 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
             this.loanProductToGLAccountMappingHelper.updateChargesToIncomeAccountMappings(command, element, loanProductId, changes);
             this.loanProductToGLAccountMappingHelper.updateChargeOffReasonToExpenseAccountMappings(command, element, loanProductId,
                     changes);
+
+            this.loanProductToGLAccountMappingHelper.updateWriteOffReasonToExpenseAccountMappings(command, element, loanProductId, changes);
             this.loanProductToGLAccountMappingHelper.updateBuyDownFeeClassificationToIncomeAccountMappings(command, element, loanProductId,
                     changes);
             this.loanProductToGLAccountMappingHelper.updateCapitalizedIncomeClassificationToIncomeAccountMappings(command, element,

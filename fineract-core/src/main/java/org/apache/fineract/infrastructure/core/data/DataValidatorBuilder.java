@@ -531,13 +531,20 @@ public class DataValidatorBuilder {
         }
 
         if (this.value != null) {
-            final long number = Long.parseLong(this.value.toString());
-            if (number < 1) {
-                String validationErrorCode = "validation.msg." + this.resource + "." + this.parameter + ".not.greater.than.zero";
-                String defaultEnglishMessage = "The parameter `" + this.parameter + "` must be greater than 0.";
-                final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode, defaultEnglishMessage, this.parameter,
-                        number, 0);
-                this.dataValidationErrors.add(error);
+            try {
+                final long number = Long.parseLong(this.value.toString());
+                if (number < 1) {
+                    String validationErrorCode = "validation.msg." + this.resource + "." + this.parameter + ".not.greater.than.zero";
+                    String defaultEnglishMessage = "The parameter `" + this.parameter + "` must be greater than 0.";
+                    final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode, defaultEnglishMessage,
+                            this.parameter, number, 0);
+                    this.dataValidationErrors.add(error);
+                }
+            } catch (NumberFormatException e) {
+                String validationErrorCode = "validation.msg." + this.resource + "." + this.parameter + ".not.a.number";
+                String defaultEnglishMessage = "The parameter `" + this.parameter + "` must be a number.";
+                this.dataValidationErrors.add(ApiParameterError.parameterError(validationErrorCode, defaultEnglishMessage, this.parameter));
+                throwValidationErrors();
             }
         }
         return this;

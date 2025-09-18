@@ -30,6 +30,7 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
+import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMapping;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
 import org.apache.fineract.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingInvalidException;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingHelper;
@@ -141,12 +142,39 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
 
     public void saveChargeOffReasonToExpenseAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
             final Map<String, Object> changes) {
-        saveChargeOffReasonToGLAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN);
+        saveReasonToGLAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN,
+                LoanProductAccountingParams.CHARGE_OFF_REASON_TO_EXPENSE_ACCOUNT_MAPPINGS,
+                LoanProductAccountingParams.CHARGE_OFF_REASON_CODE_VALUE_ID, CashAccountsForLoan.CHARGE_OFF_EXPENSE);
+    }
+
+    public void saveWriteOffReasonToExpenseAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
+            final Map<String, Object> changes) {
+        saveReasonToGLAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN,
+                LoanProductAccountingParams.WRITE_OFF_REASON_TO_EXPENSE_ACCOUNT_MAPPINGS,
+                LoanProductAccountingParams.WRITE_OFF_REASON_CODE_VALUE_ID, CashAccountsForLoan.LOSSES_WRITTEN_OFF);
+    }
+
+    public void updateWriteOffReasonToExpenseAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
+            final Map<String, Object> changes) {
+        final List<ProductToGLAccountMapping> existingWriteOffReasonToGLAccountMappings = this.accountMappingRepository
+                .findAllWriteOffReasonsMappings(productId, PortfolioProductType.LOAN.getValue());
+        LoanProductAccountingParams reasonToExpenseAccountMappingsParam = LoanProductAccountingParams.WRITE_OFF_REASON_TO_EXPENSE_ACCOUNT_MAPPINGS;
+        LoanProductAccountingParams reasonCodeValueIdParam = LoanProductAccountingParams.WRITE_OFF_REASON_CODE_VALUE_ID;
+        CashAccountsForLoan cashAccountsForLoan = CashAccountsForLoan.LOSSES_WRITTEN_OFF;
+        updateReasonToGLAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN,
+                existingWriteOffReasonToGLAccountMappings, reasonToExpenseAccountMappingsParam, reasonCodeValueIdParam,
+                cashAccountsForLoan);
     }
 
     public void updateChargeOffReasonToExpenseAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
             final Map<String, Object> changes) {
-        updateChargeOffReasonToGLAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN);
+        final List<ProductToGLAccountMapping> chargeOffReasonsMappings = this.accountMappingRepository
+                .findAllChargeOffReasonsMappings(productId, PortfolioProductType.LOAN.getValue());
+        LoanProductAccountingParams reasonToExpenseAccountMappingsParam = LoanProductAccountingParams.CHARGE_OFF_REASON_TO_EXPENSE_ACCOUNT_MAPPINGS;
+        LoanProductAccountingParams reasonCodeValueIdParam = LoanProductAccountingParams.CHARGE_OFF_REASON_CODE_VALUE_ID;
+        CashAccountsForLoan cashAccountsForLoan = CashAccountsForLoan.CHARGE_OFF_EXPENSE;
+        updateReasonToGLAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN, chargeOffReasonsMappings,
+                reasonToExpenseAccountMappingsParam, reasonCodeValueIdParam, cashAccountsForLoan);
     }
 
     public void saveCapitalizedIncomeClassificationToIncomeAccountMappings(final JsonCommand command, final JsonElement element,

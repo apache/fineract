@@ -834,7 +834,7 @@ public class LoanProductTestBuilder {
         }
         Map<String, Long> newMap = new HashMap<>();
         newMap.put("chargeOffReasonCodeValueId", reasonId);
-        newMap.put("expenseGLAccountId", accountId);
+        newMap.put("expenseAccountId", accountId);
         this.chargeOffReasonToExpenseAccountMappings.add(newMap);
         return this;
     }
