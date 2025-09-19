@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import jakarta.persistence.FlushModeType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -93,16 +92,14 @@ public class LoanBalanceService {
     }
 
     public void updateLoanSummaryDerivedFields(final Loan loan) {
-        flushModeHandler.withFlushMode(FlushModeType.COMMIT, () -> {
-            if (loan.isNotDisbursed()) {
-                if (loan.getSummary() != null) {
-                    loan.getSummary().zeroFields();
-                }
-                loan.setTotalOverpaid(null);
-            } else {
-                refreshSummaryAndBalancesForDisbursedLoan(loan);
+        if (loan.isNotDisbursed()) {
+            if (loan.getSummary() != null) {
+                loan.getSummary().zeroFields();
             }
-        });
+            loan.setTotalOverpaid(null);
+        } else {
+            refreshSummaryAndBalancesForDisbursedLoan(loan);
+        }
     }
 
     public void refreshSummaryAndBalancesForDisbursedLoan(final Loan loan) {

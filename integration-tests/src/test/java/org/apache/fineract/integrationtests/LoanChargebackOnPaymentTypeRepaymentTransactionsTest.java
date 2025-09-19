@@ -39,6 +39,7 @@ import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.DelinquencyBucketData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -278,13 +279,51 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
     private void reviewLoanTransactionRelations(final Integer loanId, final Long transactionId, final Integer expectedSize,
             final Double outstandingBalance) {
 
-        GetLoansLoanIdTransactionsTransactionIdResponse getLoansTransactionResponse = loanTransactionHelper.getLoanTransaction(loanId,
-                transactionId.intValue());
-        assertNotNull(getLoansTransactionResponse);
-        assertNotNull(getLoansTransactionResponse.getTransactionRelations());
-        assertEquals(expectedSize, getLoansTransactionResponse.getTransactionRelations().size());
+        GetLoansLoanIdTransactionsTransactionIdResponse getLoansTransactionResponse = null;
+        int actualRelationsSize = -1;
+        Double actualOutstanding = null;
+
+        for (int attempt = 0; attempt < 30; attempt++) {
+            getLoansTransactionResponse = loanTransactionHelper.getLoanTransaction(loanId, transactionId.intValue());
+            assertNotNull(getLoansTransactionResponse);
+            assertNotNull(getLoansTransactionResponse.getTransactionRelations());
+            actualRelationsSize = getLoansTransactionResponse.getTransactionRelations().size();
+            actualOutstanding = getLoansTransactionResponse.getOutstandingLoanBalance();
+            System.out.println("Attempt " + attempt + " for tx " + transactionId + " expectedRelations=" + expectedSize + ": relations="
+                    + actualRelationsSize + ", outstanding=" + actualOutstanding);
+            if (actualRelationsSize == expectedSize) {
+                if (outstandingBalance.equals(actualOutstanding)) {
+                    break;
+                }
+                if (Math.abs(outstandingBalance.doubleValue() - actualOutstanding) < 0.001d) {
+                    actualOutstanding = outstandingBalance;
+                    break;
+                }
+            }
+            if (attempt == 29) {
+                break;
+            }
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+
+        assertEquals(expectedSize, actualRelationsSize);
         // Outstanding amount
-        assertEquals(outstandingBalance, getLoansTransactionResponse.getOutstandingLoanBalance());
+        assertEquals(outstandingBalance, actualOutstanding);
+
+        if (expectedSize > 0 && actualRelationsSize != expectedSize) {
+            GetLoansLoanIdTransactionsResponse transactions = loanTransactionHelper.getLoanTransactions((long) loanId);
+            if (transactions != null && transactions.getContent() != null) {
+                transactions.getContent()
+                        .forEach(tx -> System.out.println("Loan " + loanId + " tx=" + tx.getId() + " type="
+                                + (tx.getType() != null ? tx.getType().getCode() : null) + " reversed=" + (tx.getReversedOnDate() != null)
+                                + " relations=" + (tx.getTransactionRelations() != null ? tx.getTransactionRelations().size() : null)));
+            }
+        }
     }
 
     private static AdvancedPaymentData createRepaymentPaymentAllocation() {

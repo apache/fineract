@@ -34,8 +34,25 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 
 public interface LoanTransactionRepository extends JpaRepository<LoanTransaction, Long>, JpaSpecificationExecutor<LoanTransaction> {
+
+    // Predefined transaction type sets for optimized queries
+    Set<LoanTransactionType> REPAYMENT_LIKE_TYPES = Set.of(LoanTransactionType.REPAYMENT, LoanTransactionType.RECOVERY_REPAYMENT,
+            LoanTransactionType.MERCHANT_ISSUED_REFUND, LoanTransactionType.PAYOUT_REFUND, LoanTransactionType.GOODWILL_CREDIT,
+            LoanTransactionType.CHARGE_REFUND, LoanTransactionType.DOWN_PAYMENT, LoanTransactionType.REFUND,
+            LoanTransactionType.REFUND_FOR_ACTIVE_LOAN, LoanTransactionType.CREDIT_BALANCE_REFUND, LoanTransactionType.CHARGEBACK,
+            LoanTransactionType.INTEREST_PAYMENT_WAIVER, LoanTransactionType.INTEREST_REFUND,
+            LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT, LoanTransactionType.CHARGE_ADJUSTMENT,
+            LoanTransactionType.REPAYMENT_AT_DISBURSEMENT);
+
+    Set<LoanTransactionType> EXCLUDED_FROM_COB_TYPES = Set.of(LoanTransactionType.CONTRA, LoanTransactionType.MARKED_FOR_RESCHEDULING,
+            LoanTransactionType.APPROVE_TRANSFER, LoanTransactionType.INITIATE_TRANSFER, LoanTransactionType.REJECT_TRANSFER,
+            LoanTransactionType.WITHDRAW_TRANSFER);
+
+    Set<LoanTransactionType> EXCLUDED_FROM_RECEIVABLE_INTEREST = Set.of(LoanTransactionType.REPAYMENT_AT_DISBURSEMENT,
+            LoanTransactionType.DISBURSEMENT);
 
     Optional<LoanTransaction> findByIdAndLoanId(Long transactionId, Long loanId);
 
@@ -402,20 +419,14 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
             WHERE lt.loan = :loan
                 AND lt.reversed = false
                 AND lt.amount > 0
-                AND lt.typeOf IN (
-                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.REPAYMENT,
-                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.MERCHANT_ISSUED_REFUND,
-                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.PAYOUT_REFUND,
-                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.GOODWILL_CREDIT,
-                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CHARGE_REFUND,
-                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CHARGE_ADJUSTMENT,
-                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.DOWN_PAYMENT,
-                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.INTEREST_PAYMENT_WAIVER,
-                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.INTEREST_REFUND,
-                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT
-                )
+                AND lt.typeOf IN :repaymentLikeTypes
             """)
-    Optional<LocalDate> findLastRepaymentLikeTransactionDate(@Param("loan") Loan loan);
+    Optional<LocalDate> findLastRepaymentLikeTransactionDate(@Param("loan") Loan loan,
+            @Param("repaymentLikeTypes") Set<LoanTransactionType> repaymentLikeTypes);
+
+    default Optional<LocalDate> findLastRepaymentLikeTransactionDate(Loan loan) {
+        return findLastRepaymentLikeTransactionDate(loan, REPAYMENT_LIKE_TYPES);
+    }
 
     @Query("""
             SELECT CASE WHEN COUNT(lt) > 0 THEN true ELSE false END
@@ -482,5 +493,133 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
             """)
     BigDecimal sumTotalAmountByLoanAndTransactionTypes(@Param("loan") Loan loan,
             @Param("loanTransactionTypes") List<LoanTransactionType> loanTransactionTypes);
+
+    // COB Transaction Query for optimization
+    @Query("""
+            SELECT lt FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+              AND lt.loan IS NOT NULL
+              AND lt.reversed = false
+              AND lt.dateOf <= :cobDate
+              AND lt.typeOf NOT IN :excludedTypes
+            ORDER BY lt.dateOf, lt.createdDate, lt.id
+            """)
+    @NonNull
+    List<LoanTransaction> findTransactionsForCOB(@NonNull @Param("loan") Loan loan, @NonNull @Param("cobDate") LocalDate cobDate,
+            @Param("excludedTypes") Set<LoanTransactionType> excludedTypes);
+
+    @NonNull
+    default List<LoanTransaction> findTransactionsForCOB(@NonNull Loan loan, @NonNull LocalDate cobDate) {
+        return findTransactionsForCOB(loan, cobDate, EXCLUDED_FROM_COB_TYPES);
+    }
+
+    // Payment Transactions Query for optimization
+    @Query("""
+            SELECT lt
+            FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND lt.reversed = false
+                AND lt.typeOf IN :repaymentLikeTypes
+            ORDER BY lt.dateOf ASC, lt.createdDate ASC, lt.id ASC
+            """)
+    List<LoanTransaction> findPaymentTransactionsByLoan(@Param("loan") Loan loan,
+            @Param("repaymentLikeTypes") Set<LoanTransactionType> repaymentLikeTypes);
+
+    default List<LoanTransaction> findPaymentTransactionsByLoan(Loan loan) {
+        return findPaymentTransactionsByLoan(loan, REPAYMENT_LIKE_TYPES);
+    }
+
+    // Disbursement Transactions Query for optimization
+    @Query("""
+            SELECT lt
+            FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.DISBURSEMENT
+            ORDER BY lt.dateOf DESC, lt.createdDate DESC, lt.id DESC
+            """)
+    List<LoanTransaction> findDisbursementTransactionsByLoanOrderByDateOfDesc(@Param("loan") Loan loan, Pageable pageable);
+
+    default Optional<LoanTransaction> findLastDisbursementTransactionByLoan(Loan loan) {
+        List<LoanTransaction> results = findDisbursementTransactionsByLoanOrderByDateOfDesc(loan, Pageable.ofSize(1));
+        return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+    }
+
+    // Overpayment Calculation Query for optimization
+    @Query("""
+            SELECT lt FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+              AND lt.loan IS NOT NULL
+              AND lt.reversed = false
+              AND lt.typeOf IN :repaymentLikeTypes
+            ORDER BY lt.dateOf, lt.createdDate, lt.id
+            """)
+    @NonNull
+    List<LoanTransaction> findTransactionsForOverpaymentCalculation(@NonNull @Param("loan") Loan loan,
+            @Param("repaymentLikeTypes") Set<LoanTransactionType> repaymentLikeTypes);
+
+    @NonNull
+    default List<LoanTransaction> findTransactionsForOverpaymentCalculation(@NonNull Loan loan) {
+        return findTransactionsForOverpaymentCalculation(loan, REPAYMENT_LIKE_TYPES);
+    }
+
+    // Has Disbursement Transaction Query for optimization
+    @Query("""
+            SELECT CASE WHEN COUNT(lt) > 0 THEN true ELSE false END
+            FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+              AND lt.loan IS NOT NULL
+              AND lt.reversed = false
+              AND lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.DISBURSEMENT
+            """)
+    boolean hasDisbursementTransaction(@NonNull @Param("loan") Loan loan);
+
+    // Receivable Interest Query for optimization
+    @Query("""
+            SELECT lt FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+              AND lt.loan IS NOT NULL
+              AND lt.reversed = false
+              AND lt.typeOf NOT IN :excludedTypes
+              AND lt.dateOf <= :tillDate
+            ORDER BY lt.dateOf, lt.createdDate, lt.id
+            """)
+    @NonNull
+    List<LoanTransaction> findTransactionsForReceivableInterest(@NonNull @Param("loan") Loan loan,
+            @NonNull @Param("tillDate") LocalDate tillDate, @Param("excludedTypes") Set<LoanTransactionType> excludedTypes);
+
+    @NonNull
+    default List<LoanTransaction> findTransactionsForReceivableInterest(@NonNull Loan loan, @NonNull LocalDate tillDate) {
+        return findTransactionsForReceivableInterest(loan, tillDate, EXCLUDED_FROM_RECEIVABLE_INTEREST);
+    }
+
+    // Outstanding Balance Calculation Query for optimization
+    @Query("""
+            SELECT lt FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+              AND lt.loan IS NOT NULL
+              AND lt.reversed = false
+              AND lt.typeOf NOT IN (
+                  org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CONTRA,
+                  org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.MARKED_FOR_RESCHEDULING,
+                  org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.APPROVE_TRANSFER,
+                  org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.INITIATE_TRANSFER,
+                  org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.REJECT_TRANSFER,
+                  org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.WITHDRAW_TRANSFER,
+                  org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL,
+                  org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL_ADJUSTMENT,
+                  org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL_ACTIVITY
+              )
+            ORDER BY lt.dateOf, lt.createdDate, lt.id
+            """)
+    @NonNull
+    List<LoanTransaction> findNonMonetaryTransactionsForOutstandingBalance(@NonNull @Param("loan") Loan loan);
+
+    @Query("""
+            SELECT CASE WHEN COUNT(lt) > 0 THEN true ELSE false END
+            FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND lt.externalId = :externalId
+            """)
+    boolean existsByLoanAndExternalId(@Param("loan") Loan loan, @Param("externalId") ExternalId externalId);
 
 }

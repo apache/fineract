@@ -41,7 +41,7 @@ public class LoanAccountServiceImpl implements LoanAccountService {
     @Override
     public LoanTransaction saveLoanTransactionWithDataIntegrityViolationChecks(LoanTransaction newRepaymentTransaction) {
         try {
-            return this.loanTransactionRepository.saveAndFlush(newRepaymentTransaction);
+            return this.loanTransactionRepository.save(newRepaymentTransaction);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             raiseValidationExceptionForUniqueConstraintViolation(e);
             throw e;

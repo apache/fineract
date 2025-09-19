@@ -138,11 +138,31 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         // transaction properties
         final String transactionId = loanTransactionDTO.getTransactionId();
         final LocalDate transactionDate = loanTransactionDTO.getTransactionDate();
-        final BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
-        final BigDecimal interestAmount = loanTransactionDTO.getInterest();
-        final BigDecimal feesAmount = loanTransactionDTO.getFees();
-        final BigDecimal penaltiesAmount = loanTransactionDTO.getPenalties();
         final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
+
+        // For reverse-replay scenarios, calculate net amounts from all related transactions
+        BigDecimal principalAmount;
+        BigDecimal interestAmount;
+        BigDecimal feesAmount;
+        BigDecimal penaltiesAmount;
+
+        if (shouldUseNetAmountsFromRelatedTransactions(loanDTO, loanTransactionDTO)) {
+            // Calculate net amounts from all related transactions in the bridge data
+            AmountComponents netAmounts = calculateNetAmountsFromRelatedTransactions(loanDTO, loanTransactionDTO);
+            principalAmount = netAmounts.principalAmount;
+            interestAmount = netAmounts.interestAmount;
+            feesAmount = netAmounts.feesAmount;
+            penaltiesAmount = netAmounts.penaltiesAmount;
+            System.err.println("DEBUGGING: Using net amounts for charge-off - Principal: " + principalAmount + ", Original Principal: "
+                    + loanTransactionDTO.getPrincipal() + ", Total transactions: " + loanDTO.getNewLoanTransactions().size());
+        } else {
+            // Use amounts from the charge-off transaction only
+            principalAmount = loanTransactionDTO.getPrincipal();
+            interestAmount = loanTransactionDTO.getInterest();
+            feesAmount = loanTransactionDTO.getFees();
+            penaltiesAmount = loanTransactionDTO.getPenalties();
+            System.err.println("DEBUGGING: Using original amounts for charge-off - Principal: " + principalAmount);
+        }
 
         GLAccountBalanceHolder glAccountBalanceHolder = new GLAccountBalanceHolder();
 
@@ -1001,5 +1021,81 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         /*** create a single debit entry (or reversal) for the entire amount **/
         this.helper.createCreditJournalEntryForLoan(office, currencyCode, CashAccountsForLoan.FUND_SOURCE.getValue(), loanProductId,
                 paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount);
+    }
+
+    /**
+     * Determines if we should use net amounts from all related transactions for charge-off journal entries. This is
+     * needed when charge-off transactions are being regenerated after reverse-replay operations.
+     */
+    private boolean shouldUseNetAmountsFromRelatedTransactions(LoanDTO loanDTO, LoanTransactionDTO chargeOffTransaction) {
+        // Check if we have multiple transactions in the bridge data (indicating related transactions were included)
+        List<LoanTransactionDTO> allTransactions = loanDTO.getNewLoanTransactions();
+
+        // If we have more than just the charge-off transaction, calculate net amounts
+        if (allTransactions.size() > 1) {
+            // Verify that we have disbursement and other monetary transactions
+            boolean hasDisbursement = allTransactions.stream().anyMatch(
+                    t -> !t.getTransactionId().equals(chargeOffTransaction.getTransactionId()) && t.getTransactionType().isDisbursement());
+            return hasDisbursement;
+        }
+
+        return false;
+    }
+
+    /**
+     * Calculates net amounts from all related transactions for charge-off journal entries. This includes disbursements
+     * (+), repayments (-), and the charge-off transaction itself.
+     */
+    private AmountComponents calculateNetAmountsFromRelatedTransactions(LoanDTO loanDTO, LoanTransactionDTO chargeOffTransaction) {
+        BigDecimal netPrincipal = BigDecimal.ZERO;
+        BigDecimal netInterest = BigDecimal.ZERO;
+        BigDecimal netFees = BigDecimal.ZERO;
+        BigDecimal netPenalties = BigDecimal.ZERO;
+
+        for (LoanTransactionDTO transaction : loanDTO.getNewLoanTransactions()) {
+            // Include disbursements as positive amounts
+            if (transaction.getTransactionType().isDisbursement() && !transaction.isReversed()) {
+                netPrincipal = netPrincipal.add(transaction.getPrincipal() != null ? transaction.getPrincipal() : BigDecimal.ZERO);
+            }
+            // Include non-reversed repayments as negative amounts (they reduce the outstanding balance)
+            // Reversed repayments should not reduce the balance
+            else if (transaction.getTransactionType().isRepayment() && !transaction.isReversed()) {
+                netPrincipal = netPrincipal.subtract(transaction.getPrincipal() != null ? transaction.getPrincipal() : BigDecimal.ZERO);
+                netInterest = netInterest.subtract(transaction.getInterest() != null ? transaction.getInterest() : BigDecimal.ZERO);
+                netFees = netFees.subtract(transaction.getFees() != null ? transaction.getFees() : BigDecimal.ZERO);
+                netPenalties = netPenalties.subtract(transaction.getPenalties() != null ? transaction.getPenalties() : BigDecimal.ZERO);
+            }
+            // For the charge-off transaction itself, use its amounts as the base
+            else if (transaction.getTransactionId().equals(chargeOffTransaction.getTransactionId())) {
+                // The charge-off transaction represents the final amounts to be charged off
+                // We'll use the net calculation instead of these amounts
+            }
+        }
+
+        // Ensure amounts are non-negative (charge-off amounts should be positive)
+        netPrincipal = netPrincipal.abs();
+        netInterest = netInterest.abs();
+        netFees = netFees.abs();
+        netPenalties = netPenalties.abs();
+
+        return new AmountComponents(netPrincipal, netInterest, netFees, netPenalties);
+    }
+
+    /**
+     * Helper class to hold calculated amount components
+     */
+    private static class AmountComponents {
+
+        final BigDecimal principalAmount;
+        final BigDecimal interestAmount;
+        final BigDecimal feesAmount;
+        final BigDecimal penaltiesAmount;
+
+        AmountComponents(BigDecimal principalAmount, BigDecimal interestAmount, BigDecimal feesAmount, BigDecimal penaltiesAmount) {
+            this.principalAmount = principalAmount;
+            this.interestAmount = interestAmount;
+            this.feesAmount = feesAmount;
+            this.penaltiesAmount = penaltiesAmount;
+        }
     }
 }

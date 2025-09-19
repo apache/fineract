@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -54,6 +55,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachin
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
@@ -317,11 +319,13 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
         if (transactionForAdjustment.getTypeOf().equals(LoanTransactionType.MERCHANT_ISSUED_REFUND)
                 || transactionForAdjustment.getTypeOf().equals(LoanTransactionType.PAYOUT_REFUND)) {
             loan.getLoanTransactions().stream() //
-                    .filter(LoanTransaction::isNotReversed)
-                    .filter(loanTransaction -> loanTransaction.getLoanTransactionRelations().stream()
-                            .anyMatch(relation -> relation.getRelationType().equals(LoanTransactionRelationTypeEnum.RELATED)
-                                    && relation.getToTransaction().getId().equals(transactionForAdjustment.getId())))
-                    .forEach(loanTransaction -> {
+                    .filter(LoanTransaction::isNotReversed).filter(loanTransaction -> {
+                        // Create a stable collection reference to avoid EclipseLink change tracking issues
+                        Set<LoanTransactionRelation> transactionRelations = loanTransaction.getLoanTransactionRelations();
+                        return transactionRelations.stream()
+                                .anyMatch(relation -> relation.getRelationType().equals(LoanTransactionRelationTypeEnum.RELATED)
+                                        && relation.getToTransaction().getId().equals(transactionForAdjustment.getId()));
+                    }).forEach(loanTransaction -> {
                         loanChargeValidator.validateRepaymentTypeTransactionNotBeforeAChargeRefund(loanTransaction.getLoan(),
                                 loanTransaction, "reversed");
                         loanTransaction.reverse();

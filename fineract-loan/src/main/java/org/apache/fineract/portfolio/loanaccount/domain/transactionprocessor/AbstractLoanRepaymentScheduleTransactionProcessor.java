@@ -457,19 +457,24 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     }
                     LoanTransactionRelation newLoanTransactionRelation = null;
                     LoanTransactionRelation oldLoanTransactionRelation = null;
-                    for (LoanTransactionRelation transactionRelation : loanTransaction.getLoanTransactionRelations()) {
+
+                    Set<LoanTransactionRelation> transactionRelations = loanTransaction.getLoanTransactionRelations();
+                    transactionRelations.size();
+
+                    for (LoanTransactionRelation transactionRelation : transactionRelations) {
                         if (LoanTransactionRelationTypeEnum.CHARGEBACK.equals(transactionRelation.getRelationType())
                                 && oldTransaction != null && oldTransaction.getId() != null
                                 && oldTransaction.getId().equals(transactionRelation.getToTransaction().getId())) {
-                            newLoanTransactionRelation = LoanTransactionRelation.linkToTransaction(loanTransaction, newTransaction,
+                            // Create the relation but don't let it auto-add to avoid collection tracking issues
+                            newLoanTransactionRelation = LoanTransactionRelation.createTransactionRelation(loanTransaction, newTransaction,
                                     LoanTransactionRelationTypeEnum.CHARGEBACK);
                             oldLoanTransactionRelation = transactionRelation;
                             break;
                         }
                     }
-                    if (newLoanTransactionRelation != null) {
-                        loanTransaction.getLoanTransactionRelations().add(newLoanTransactionRelation);
-                        loanTransaction.getLoanTransactionRelations().remove(oldLoanTransactionRelation);
+                    if (newLoanTransactionRelation != null && oldLoanTransactionRelation != null) {
+                        transactionRelations.remove(oldLoanTransactionRelation);
+                        transactionRelations.add(newLoanTransactionRelation);
                     }
                 }
             }
@@ -548,10 +553,15 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         loanChargeValidator.validateRepaymentTypeTransactionNotBeforeAChargeRefund(loanTransaction.getLoan(), loanTransaction, "reversed");
         loanTransaction.reverse();
         loanTransaction.updateExternalId(null);
-        newLoanTransaction.copyLoanTransactionRelations(loanTransaction.getLoanTransactionRelations());
-        // Adding Replayed relation from newly created transaction to reversed transaction
-        newLoanTransaction.getLoanTransactionRelations().add(
-                LoanTransactionRelation.linkToTransaction(newLoanTransaction, loanTransaction, LoanTransactionRelationTypeEnum.REPLAYED));
+        Set<LoanTransactionRelation> originalTransactionRelations = loanTransaction.getLoanTransactionRelations();
+        originalTransactionRelations.size();
+        newLoanTransaction.copyLoanTransactionRelations(originalTransactionRelations);
+
+        Set<LoanTransactionRelation> newTransactionRelations = newLoanTransaction.getLoanTransactionRelations();
+        newTransactionRelations.size();
+        LoanTransactionRelation replayedRelation = LoanTransactionRelation.createTransactionRelation(newLoanTransaction, loanTransaction,
+                LoanTransactionRelationTypeEnum.REPLAYED);
+        newTransactionRelations.add(replayedRelation);
         changedTransactionDetail.addTransactionChange(new TransactionChangeData(loanTransaction, newLoanTransaction));
     }
 

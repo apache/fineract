@@ -138,7 +138,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "loanTransaction")
     private Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "fromTransaction")
+    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "fromTransaction")
     private Set<LoanTransactionRelation> loanTransactionRelations = new HashSet<>();
 
     @Setter
@@ -853,6 +853,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public void updateOutstandingLoanBalance(BigDecimal outstandingLoanBalance) {
         this.outstandingLoanBalance = outstandingLoanBalance;
+    }
+
+    public BigDecimal getOutstandingLoanBalance() {
+        return this.outstandingLoanBalance;
     }
 
     public boolean isNotRefundForActiveLoan() {

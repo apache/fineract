@@ -199,6 +199,7 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
 
             // Create journal entries for new transaction
             loanJournalEntryPoster.postJournalEntriesForLoanTransaction(newTransaction, false, false);
+
             if (oldTransaction == null && (newTransaction.isAccrual() || newTransaction.isAccrualAdjustment())) {
                 final LoanTransactionBusinessEvent businessEvent = newTransaction.isAccrual()
                         ? new LoanAccrualTransactionCreatedBusinessEvent(newTransaction)
@@ -208,8 +209,12 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
 
             if (oldTransaction != null) {
                 loanAccountTransfersService.updateLoanTransaction(oldTransaction.getId(), newTransaction);
-                // Create reversal journal entries for old transaction if it exists (reverse-replay scenario)
-                loanJournalEntryPoster.postJournalEntriesForLoanTransaction(oldTransaction, false, false);
+                // Only create reversal journal entries for old transaction if the old transaction is not already
+                // reversed
+                // and we need to reverse its journal entries. However, since the old transaction represents the
+                // transaction being replaced during reprocessing, and journal entries were already created for it
+                // during its initial posting, we should not create additional journal entries here.
+                // The new transaction above will have the correct journal entries posted.
             }
         }
         replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);

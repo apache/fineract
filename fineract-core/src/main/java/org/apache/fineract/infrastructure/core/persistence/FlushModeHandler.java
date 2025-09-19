@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core.persistence;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.FlushModeType;
 import jakarta.persistence.PersistenceContext;
+import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -34,6 +35,16 @@ public class FlushModeHandler {
         try {
             entityManager.setFlushMode(flushMode);
             runnable.run();
+        } finally {
+            entityManager.setFlushMode(original);
+        }
+    }
+
+    public <T> T withFlushMode(FlushModeType flushMode, Supplier<T> supplier) {
+        FlushModeType original = entityManager.getFlushMode();
+        try {
+            entityManager.setFlushMode(flushMode);
+            return supplier.get();
         } finally {
             entityManager.setFlushMode(original);
         }

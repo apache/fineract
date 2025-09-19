@@ -188,13 +188,13 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             return null;
         }
 
+        List<Long> existingTransactionIds = loan.getLoanTransactions().stream()
+                .filter(transaction -> !transaction.getTypeOf().isInterestRefund()).map(AbstractPersistableCustom::getId).toList();
         Money totalInterest = interestRefundService.totalInterestByTransactions(null, loan.getId(), refundTransaction.getTransactionDate(),
-                List.of(), loan.getLoanTransactions().stream().map(AbstractPersistableCustom::getId).toList());
+                List.of(), existingTransactionIds);
         Money newTotalInterest = interestRefundService.totalInterestByTransactions(null, loan.getId(),
-                refundTransaction.getTransactionDate(), List.of(refundTransaction),
-                loan.getLoanTransactions().stream().map(AbstractPersistableCustom::getId).toList());
+                refundTransaction.getTransactionDate(), List.of(refundTransaction), existingTransactionIds);
         BigDecimal interestRefundAmount = totalInterest.minus(newTotalInterest).getAmount();
-
         if (MathUtil.isZero(interestRefundAmount)) {
             return null;
         }
@@ -265,7 +265,68 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         loanDownPaymentTransactionValidator.validateRepaymentTypeAccountStatus(loan, newRepaymentTransaction, event);
         loanTransactionValidator.validateActivityNotBeforeClientOrGroupTransferDate(loan, event,
                 newRepaymentTransaction.getTransactionDate());
+        final LoanTransactionType originalTransactionType = newRepaymentTransaction.getTypeOf();
+        final LocalDate originalTransactionDate = newRepaymentTransaction.getTransactionDate();
+        final MonetaryCurrency loanCurrency = loan.getCurrency();
+        final Money originalTransactionAmount = newRepaymentTransaction.getAmount(loanCurrency);
+
         makeRepayment(loan, newRepaymentTransaction, scheduleGeneratorDTO);
+
+        // Track if transaction was reprocessed to avoid duplicate journal entries
+        final boolean wasReprocessed = newRepaymentTransaction.isReversed();
+
+        // After reprocessing, if our transaction is reversed, find the replacement
+        if (newRepaymentTransaction.isReversed()) {
+            // Find the replacement transaction from repository (to ensure we get the latest data)
+            final Long reversedTransactionId = newRepaymentTransaction.getId();
+            final ExternalId transactionExternalId = newRepaymentTransaction.getExternalId();
+
+            // Search using repository to get the most up-to-date transaction list
+            final List<LoanTransaction> candidateTransactions = loanTransactionRepository
+                    .findNonReversedTransactionsForReprocessingByLoan(loan);
+
+            // Find matching transaction by type, date, and amount
+            // Since REPLAYED relations are no longer persisted, we match by transaction attributes
+            LoanTransaction finalTransaction = candidateTransactions.stream()
+                    .filter(t -> transactionExternalId != null && !transactionExternalId.isEmpty()
+                            && transactionExternalId.equals(t.getExternalId()) && !t.getId().equals(reversedTransactionId))
+                    .findFirst().orElse(null);
+
+            if (finalTransaction == null) {
+                finalTransaction = candidateTransactions.stream()
+                        .filter(t -> !t.isReversed() && t.getTypeOf().equals(originalTransactionType)
+                                && t.getTransactionDate().equals(originalTransactionDate)
+                                && t.getAmount(loanCurrency).getAmount().compareTo(originalTransactionAmount.getAmount()) == 0
+                                && !t.getId().equals(reversedTransactionId))
+                        .sorted((t1, t2) -> {
+                            // Sort by ID for deterministic ordering (IDs are sequential)
+                            return t1.getId().compareTo(t2.getId());
+                        }).findFirst().orElse(null);
+            }
+
+            if (finalTransaction == null) {
+                finalTransaction = loan.getLoanTransactions().stream().filter(t -> transactionExternalId != null
+                        && !transactionExternalId.isEmpty() && transactionExternalId.equals(t.getExternalId()) && t.isNotReversed())
+                        .findFirst().orElse(null);
+            }
+
+            if (finalTransaction == null) {
+                finalTransaction = loan.getLoanTransactions().stream()
+                        .filter(t -> t.isNotReversed() && t.getTypeOf().equals(originalTransactionType)
+                                && t.getTransactionDate().equals(originalTransactionDate)
+                                && t.getAmount(loanCurrency).getAmount().compareTo(originalTransactionAmount.getAmount()) == 0)
+                        .sorted((t1, t2) -> {
+                            if (t1.getId() != null && t2.getId() != null) {
+                                return t1.getId().compareTo(t2.getId());
+                            }
+                            if (t1.getId() == null && t2.getId() == null) {
+                                return 0;
+                            }
+                            return t1.getId() == null ? 1 : -1;
+                        }).findFirst().orElse(newRepaymentTransaction);
+            }
+            newRepaymentTransaction = finalTransaction;
+        }
 
         if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
             loanAccrualsProcessingService.reprocessExistingAccruals(loan, true);
@@ -273,7 +334,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newRepaymentTransaction);
-        loan = loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loanAccountService.saveLoanWithDataIntegrityViolationChecks(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, newRepaymentTransaction, noteText);
@@ -285,7 +346,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         setLoanDelinquencyTag(loan, transactionDate);
 
-        journalEntryPoster.postJournalEntriesForLoanTransaction(newRepaymentTransaction, isAccountTransfer, isLoanToLoanTransfer);
+        // Post journal entries for the final transaction (original or replacement after reprocessing)
+        // Only post journal entries if the transaction wasn't reprocessed, as journal entries
+        // are already posted during reprocessing in ReprocessLoanTransactionsServiceImpl
+        if (!wasReprocessed) {
+            journalEntryPoster.postJournalEntriesForLoanTransaction(newRepaymentTransaction, isAccountTransfer, isLoanToLoanTransfer);
+        }
         if (!repaymentTransactionType.isChargeRefund()) {
             final LoanTransactionBusinessEvent transactionRepaymentEvent = getTransactionRepaymentTypeBusinessEvent(
                     repaymentTransactionType, isRecoveryRepayment, newRepaymentTransaction);
@@ -317,7 +383,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                             } else {
                                 postDatedChecks.setStatus(PostDatedChecksStatus.POST_DATED_CHECKS_PENDING);
                             }
-                            this.postDatedChecksRepository.saveAndFlush(postDatedChecks);
+                            this.postDatedChecksRepository.save(postDatedChecks);
                         } else {
                             break;
                         }
@@ -423,7 +489,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             loanChargeService.makeChargePayment(loan, chargeId, newPaymentTransaction, installmentNumber);
         }
         loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newPaymentTransaction);
-        loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loanAccountService.saveLoanWithDataIntegrityViolationChecks(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, newPaymentTransaction, noteText);
@@ -502,7 +568,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         loanRefundService.makeRefund(loan, newRefundTransaction);
 
         loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newRefundTransaction);
-        this.loanRepositoryWrapper.saveAndFlush(loan);
+        this.loanRepositoryWrapper.save(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, newRefundTransaction, noteText);
@@ -547,7 +613,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         disbursementTransaction.updateLoan(loan);
         loan.addLoanTransaction(disbursementTransaction);
         loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(disbursementTransaction);
-        loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loanAccountService.saveLoanWithDataIntegrityViolationChecks(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, disbursementTransaction, noteText);
@@ -629,7 +695,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         loanRefundService.creditBalanceRefund(loan, newCreditBalanceRefundTransaction);
 
-        newCreditBalanceRefundTransaction = this.loanTransactionRepository.saveAndFlush(newCreditBalanceRefundTransaction);
+        newCreditBalanceRefundTransaction = this.loanTransactionRepository.save(newCreditBalanceRefundTransaction);
 
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, newCreditBalanceRefundTransaction, noteText);
@@ -679,7 +745,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 newRefundTransaction.getTransactionDate());
         loanRefundService.makeRefundForActiveLoan(loan, newRefundTransaction);
 
-        this.loanTransactionRepository.saveAndFlush(newRefundTransaction);
+        this.loanTransactionRepository.save(newRefundTransaction);
 
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, newRefundTransaction, noteText);
@@ -700,6 +766,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     }
 
     @Override
+    @Transactional
     public LoanTransaction foreCloseLoan(Loan loan, final LocalDate foreClosureDate, final String noteText, final ExternalId externalId,
             Map<String, Object> changes) {
 
@@ -739,6 +806,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             loanForeclosureValidator.validateForForeclosure(loan, payment.getTransactionDate());
         }
         loanDownPaymentTransactionValidator.validateAccountStatus(loan, LoanEvent.LOAN_FORECLOSURE);
+
         handleForeClosureTransactions(loan, payment, scheduleGeneratorDTO);
 
         loanAccrualsProcessingService.reprocessExistingAccruals(loan, true);
@@ -746,16 +814,49 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             loanAccrualsProcessingService.processIncomePostingAndAccruals(loan, true);
         }
 
+        LoanTransaction savedPaymentTransaction = null;
+        ExternalId originalExternalId = externalId; // Store the original external ID passed to this method
+
+        // Pre-process to ensure external ID is properly assigned
+        boolean externalIdAssigned = false;
         for (LoanTransaction newTransaction : newTransactions) {
+            // Check if this transaction already has the expected external ID
+            if (originalExternalId != null && originalExternalId.equals(newTransaction.getExternalId())) {
+                externalIdAssigned = true;
+                break;
+            }
+        }
+
+        for (LoanTransaction newTransaction : newTransactions) {
+            // Assign external ID to the appropriate transaction
+            if (!externalIdAssigned && newTransaction.isRepaymentLikeType() && originalExternalId != null) {
+                // Check if there's already a transaction with this external ID in the loan
+                // Using repository query instead of loading all transactions (PS-2661 optimization)
+                boolean externalIdExists = loanTransactionRepository.existsByLoanAndExternalId(loan, originalExternalId);
+
+                if (!externalIdExists) {
+                    newTransaction.updateExternalId(originalExternalId);
+                    externalIdAssigned = true;
+                }
+            }
+
             LoanTransaction savedNewTransaction = loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newTransaction);
             loan.addLoanTransaction(savedNewTransaction);
             journalEntryPoster.postJournalEntriesForLoanTransaction(newTransaction, false, false);
             transactionIds.add(savedNewTransaction.getId());
+
+            // Track the saved payment transaction - prioritize by external ID, then by repayment type
+            if (originalExternalId != null && originalExternalId.equals(savedNewTransaction.getExternalId())) {
+                savedPaymentTransaction = savedNewTransaction;
+            } else if (savedPaymentTransaction == null && savedNewTransaction.isRepaymentLikeType()) {
+                // Fallback: if no transaction with external ID found, use any repayment-like transaction
+                savedPaymentTransaction = savedNewTransaction;
+            }
         }
         changes.put("transactions", transactionIds);
         changes.put("eventAmount", payPrincipal.getAmount().negate());
 
-        loan = loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loanAccountService.saveLoanWithDataIntegrityViolationChecks(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
@@ -764,8 +865,16 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanForeClosurePostBusinessEvent(payment));
-        return payment;
+        businessEventNotifierService.notifyPostBusinessEvent(
+                new LoanForeClosurePostBusinessEvent(savedPaymentTransaction != null ? savedPaymentTransaction : payment));
+
+        // If we still don't have a saved payment transaction, try to find it by external ID in the loan's transactions
+        if (savedPaymentTransaction == null && originalExternalId != null) {
+            savedPaymentTransaction = loan.getLoanTransactions().stream().filter(t -> originalExternalId.equals(t.getExternalId()))
+                    .findFirst().orElse(null);
+        }
+
+        return savedPaymentTransaction != null ? savedPaymentTransaction : payment;
     }
 
     @Override
@@ -825,17 +934,20 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final boolean isTransactionChronologicallyLatest = loanTransactionService.isChronologicallyLatestRepaymentOrWaiver(loan,
                 refundTransaction);
 
+        List<LoanTransactionType> supportedInterestRefundTypes = loan.getLoanProductRelatedDetail().getSupportedInterestRefundTypes()
+                .stream().map(LoanSupportedInterestRefundTypes::getTransactionType).toList();
         final boolean shouldCreateInterestRefundTransaction = Objects.requireNonNullElseGet(interestRefundCalculationOverride,
-                () -> loan.getLoanProductRelatedDetail().getSupportedInterestRefundTypes().stream()
-                        .map(LoanSupportedInterestRefundTypes::getTransactionType)
-                        .anyMatch(transactionType -> transactionType.equals(loanTransactionType)));
+                () -> supportedInterestRefundTypes.stream().anyMatch(transactionType -> transactionType.equals(loanTransactionType)));
         LoanTransaction interestRefundTransaction = null;
 
         if (shouldCreateInterestRefundTransaction) {
             interestRefundTransaction = createInterestRefundLoanTransaction(loan, refundTransaction);
             if (interestRefundTransaction != null) {
-                interestRefundTransaction.getLoanTransactionRelations().add(LoanTransactionRelation
-                        .linkToTransaction(interestRefundTransaction, refundTransaction, LoanTransactionRelationTypeEnum.RELATED));
+                Set<LoanTransactionRelation> transactionRelations = interestRefundTransaction.getLoanTransactionRelations();
+                transactionRelations.size(); // Force initialization
+                LoanTransactionRelation relatedRelation = LoanTransactionRelation.createTransactionRelation(interestRefundTransaction,
+                        refundTransaction, LoanTransactionRelationTypeEnum.RELATED);
+                transactionRelations.add(relatedRelation);
             }
         }
 
@@ -892,6 +1004,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             businessEventNotifierService
                     .notifyPostBusinessEvent(new LoanTransactionInterestRefundPostBusinessEvent(interestRefundTransaction));
         }
+        loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
+                true);
         return Pair.of(refundTransaction, interestRefundTransaction);
     }
 
@@ -917,7 +1031,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                             } else {
                                 postDatedChecks.setStatus(PostDatedChecksStatus.POST_DATED_CHECKS_PENDING);
                             }
-                            this.postDatedChecksRepository.saveAndFlush(postDatedChecks);
+                            this.postDatedChecksRepository.save(postDatedChecks);
                         } else {
                             break;
                         }

@@ -108,6 +108,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.apache.fineract.organisation.holiday.service.HolidayUtil;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -669,9 +670,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         /*
          * Due to the "saveAndFlushLoanWithDataIntegrityViolationChecks" method the loan is saved and flushed in the
          * middle of the transaction. EclipseLink is in some situations are saving inconsistently the newly created
-         * associations, like the newly created repayment schedule installments. The save and flush cannot be removed
-         * safely till any native queries are used as part of this transaction either. See:
-         * this.loanAccountDomainService.recalculateAccruals(loan);
+         * associations, like the newly created repayment schedule installments.
          */
         try {
             loanRepaymentScheduleInstallmentRepository.saveAll(loan.getRepaymentScheduleInstallments());
@@ -688,23 +687,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                         dataValidationErrors, e);
             }
             throw e;
-        }
-    }
-
-    private void saveLoanWithDataIntegrityViolationChecks(final Loan loan) {
-        try {
-            this.loanRepositoryWrapper.save(loan);
-        } catch (final JpaSystemException | DataIntegrityViolationException e) {
-            final Throwable realCause = e.getCause();
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
-            if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
-                baseDataValidator.reset().parameter(LoanApiConstants.externalIdParameterName).failWithCode("value.must.be.unique");
-            }
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                        dataValidationErrors, e);
-            }
         }
     }
 
@@ -1252,6 +1234,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         LoanTransaction loanTransaction = this.loanTransactionRepository.findByIdAndLoanId(command.entityId(), command.getLoanId())
                 .orElseThrow(() -> new LoanTransactionNotFoundException(command.entityId(), command.getLoanId()));
+        LoanTransaction requestedTransaction = loanTransaction;
+        Loan loan = this.loanAssembler.assembleFrom(loanId);
+
+        MonetaryCurrency currency = loan.getCurrency();
+        LoanTransactionType originalType = loanTransaction.getTypeOf();
+        LocalDate originalDate = loanTransaction.getTransactionDate();
+        Money originalAmount = loanTransaction.getAmount(currency);
+
+        if (loanTransaction.isReversed()) {
+            List<LoanTransaction> candidates = loanTransactionRepository.findNonReversedLoanAndTypeAndDate(loan, originalType,
+                    originalDate);
+            loanTransaction = candidates.stream().filter(t -> t.getAmount(currency).isEqualTo(originalAmount))
+                    .max(Comparator.comparing(LoanTransaction::getId)).orElse(loanTransaction);
+        }
 
         if (loanTransaction.isReversed()) {
             throw new PlatformServiceUnavailableException("error.msg.loan.chargeback.operation.not.allowed",
@@ -1265,8 +1261,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                             + " chargeback not allowed for loan transaction type, its type is " + loanTransaction.getTypeOf().getCode(),
                     transactionId);
         }
-
-        Loan loan = this.loanAssembler.assembleFrom(loanId);
         if (this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.LOAN)) {
             throw new PlatformServiceUnavailableException("error.msg.loan.transfer.transaction.update.not.allowed",
                     "Loan transaction:" + transactionId + " chargeback not allowed as it involves in account transfer", transactionId);
@@ -1304,18 +1298,46 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         validateLoanTransactionAmountChargeBack(loanTransaction, newTransaction);
 
-        // Store the Loan Transaction Relation
-        LoanTransactionRelation loanTransactionRelation = LoanTransactionRelation.linkToTransaction(loanTransaction, newTransaction,
+        // Save the transaction first to get an ID, then create relations before processing
+        newTransaction = this.loanTransactionRepository.save(newTransaction);
+        Long chargebackTransactionId = newTransaction.getId();
+        LoanTransaction relationSource = loanTransaction;
+        if (relationSource.isReversed()) {
+            relationSource = loanTransactionRepository.findNonReversedLoanAndTypeAndDate(loan, originalType, originalDate).stream()
+                    .filter(t -> t.getAmount(currency).isEqualTo(originalAmount)).max(Comparator.comparing(LoanTransaction::getId))
+                    .orElse(relationSource);
+        }
+
+        if (relationSource.isReversed()) {
+            List<LoanTransaction> reprocessingTransactions = loanTransactionService.retrieveListOfTransactionsForReprocessing(loan,
+                    new LoanTransaction[] { newTransaction });
+            relationSource = reprocessingTransactions.stream()
+                    .filter(t -> t.getTypeOf().equals(originalType) && t.getAmount(currency).isEqualTo(originalAmount))
+                    .max(Comparator.comparing(LoanTransaction::getId)).orElse(relationSource);
+        }
+
+        if (relationSource.isReversed()) {
+            relationSource = loanTransactionRepository.findNonReversedByLoanAndTypes(loan, LoanTransactionRepository.REPAYMENT_LIKE_TYPES)
+                    .stream().filter(t -> !t.getId().equals(chargebackTransactionId)).max(Comparator.comparing(LoanTransaction::getId))
+                    .orElse(relationSource);
+        }
+
+        // Create persistent chargeback relations BEFORE transaction processing
+        LoanTransactionRelation loanTransactionRelation = LoanTransactionRelation.linkToTransaction(relationSource, newTransaction,
                 LoanTransactionRelationTypeEnum.CHARGEBACK);
         this.loanTransactionRelationRepository.save(loanTransactionRelation);
+        if (!Objects.equals(relationSource.getId(), requestedTransaction.getId())) {
+            LoanTransactionRelation originalTransactionRelation = LoanTransactionRelation.linkToTransaction(requestedTransaction,
+                    newTransaction, LoanTransactionRelationTypeEnum.CHARGEBACK);
+            this.loanTransactionRelationRepository.save(originalTransactionRelation);
+        }
 
-        handleChargebackTransaction(loan, newTransaction);
-
-        newTransaction = this.loanTransactionRepository.saveAndFlush(newTransaction);
+        // Now process the chargeback with relations already in place
+        handleChargebackTransaction(loan, newTransaction, loanTransaction);
         // Create journal entries immediately for this transaction
         journalEntryPoster.postJournalEntriesForLoanTransaction(newTransaction, false, false);
 
-        loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         final String noteText = command.stringValueOfParameterNamed(LoanApiConstants.noteParamName);
         if (StringUtils.isNotBlank(noteText)) {
@@ -1341,7 +1363,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     private void validateLoanTransactionAmountChargeBack(LoanTransaction loanTransaction, LoanTransaction chargebackTransaction) {
         BigDecimal actualAmount = BigDecimal.ZERO;
-        for (LoanTransactionRelation loanTransactionRelation : loanTransaction.getLoanTransactionRelations()) {
+        // Create a stable collection reference to avoid EclipseLink change tracking issues
+        Set<LoanTransactionRelation> transactionRelations = loanTransaction.getLoanTransactionRelations();
+        for (LoanTransactionRelation loanTransactionRelation : transactionRelations) {
             if (loanTransactionRelation.getRelationType().equals(LoanTransactionRelationTypeEnum.CHARGEBACK)
                     && loanTransactionRelation.getToTransaction().isNotReversed()) {
                 actualAmount = actualAmount.add(loanTransactionRelation.getToTransaction().getAmount());
@@ -1404,7 +1428,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loanAccrualsProcessingService.processIncomePostingAndAccruals(loan, true);
         }
 
-        this.loanTransactionRepository.saveAndFlush(waiveInterestTransaction);
+        this.loanTransactionRepository.save(waiveInterestTransaction);
         journalEntryPoster.postJournalEntriesForLoanTransaction(waiveInterestTransaction, false, false);
         loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
@@ -1494,9 +1518,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
                 loanAccrualsProcessingService.processIncomePostingAndAccruals(loan, true);
             }
-            this.loanTransactionRepository.saveAndFlush(loanTransaction);
+            this.loanTransactionRepository.save(loanTransaction);
             journalEntryPoster.postJournalEntriesForLoanTransaction(loanTransaction, false, false);
-            saveLoanWithDataIntegrityViolationChecks(loan);
+            this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
                 changes.put("note", noteText);
@@ -1556,10 +1580,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         loanTransactionOptional.ifPresent(loanTransaction -> {
-            this.loanTransactionRepository.saveAndFlush(loanTransaction);
+            this.loanTransactionRepository.save(loanTransaction);
             journalEntryPoster.postJournalEntriesForLoanTransaction(loanTransaction, false, false);
         });
-        saveLoanWithDataIntegrityViolationChecks(loan);
+        this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
@@ -1629,7 +1653,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         closeAsMarkedForReschedule(loan, command, changes);
 
-        saveLoanWithDataIntegrityViolationChecks(loan);
+        this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
@@ -1706,9 +1730,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loan.addLoanTransaction(newTransferTransaction);
         loanLifecycleStateMachine.transition(LoanEvent.LOAN_INITIATE_TRANSFER, loan);
 
-        this.loanTransactionRepository.saveAndFlush(newTransferTransaction);
+        this.loanTransactionRepository.save(newTransferTransaction);
         journalEntryPoster.postJournalEntriesForLoanTransaction(newTransferTransaction, false, false);
-        saveLoanWithDataIntegrityViolationChecks(loan);
+        this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanInitiateTransferBusinessEvent(loan));
         return newTransferTransaction;
@@ -1732,9 +1756,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loanOfficerService.reassignLoanOfficer(loan, loanOfficer, transferDate);
         }
 
-        this.loanTransactionRepository.saveAndFlush(newTransferAcceptanceTransaction);
+        this.loanTransactionRepository.save(newTransferAcceptanceTransaction);
         journalEntryPoster.postJournalEntriesForLoanTransaction(newTransferAcceptanceTransaction, false, false);
-        saveLoanWithDataIntegrityViolationChecks(loan);
+        this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanAcceptTransferBusinessEvent(loan));
 
         return newTransferAcceptanceTransaction;
@@ -1752,9 +1776,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loan.addLoanTransaction(newTransferAcceptanceTransaction);
         loanLifecycleStateMachine.transition(LoanEvent.LOAN_WITHDRAW_TRANSFER, loan);
 
-        this.loanTransactionRepository.saveAndFlush(newTransferAcceptanceTransaction);
+        this.loanTransactionRepository.save(newTransferAcceptanceTransaction);
         journalEntryPoster.postJournalEntriesForLoanTransaction(newTransferAcceptanceTransaction, false, false);
-        saveLoanWithDataIntegrityViolationChecks(loan);
+        this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanWithdrawTransferBusinessEvent(loan));
 
         return newTransferAcceptanceTransaction;
@@ -1765,7 +1789,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public void rejectLoanTransfer(final Loan loan) {
         businessEventNotifierService.notifyPreBusinessEvent(new LoanRejectTransferBusinessEvent(loan));
         loanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECT_TRANSFER, loan);
-        saveLoanWithDataIntegrityViolationChecks(loan);
+        this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanRejectTransferBusinessEvent(loan));
     }
 
@@ -1791,7 +1815,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         loanOfficerService.reassignLoanOfficer(loan, toLoanOfficer, dateOfLoanOfficerAssignment);
 
-        saveLoanWithDataIntegrityViolationChecks(loan);
+        this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanReassignOfficerBusinessEvent(loan));
 
         return new CommandProcessingResultBuilder() //
@@ -1835,7 +1859,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 }
 
                 loanOfficerService.reassignLoanOfficer(loan, toLoanOfficer, dateOfLoanOfficerAssignment);
-                saveLoanWithDataIntegrityViolationChecks(loan);
+                this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
                 businessEventNotifierService.notifyPostBusinessEvent(new LoanReassignOfficerBusinessEvent(loan));
             }
         }
@@ -1870,7 +1894,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loanOfficerValidator.validateUnassignDate(loan, dateOfLoanOfficerUnassigned);
         loan.removeLoanOfficer(dateOfLoanOfficerUnassigned);
 
-        saveLoanWithDataIntegrityViolationChecks(loan);
+        this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanRemoveOfficerBusinessEvent(loan));
 
         return new CommandProcessingResultBuilder() //
@@ -1959,7 +1983,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
                     loanAccrualsProcessingService.processIncomePostingAndAccruals(loan, false);
                 }
-                saveLoanWithDataIntegrityViolationChecks(loan);
+                this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
                 businessEventNotifierService.notifyPostBusinessEvent(new LoanRescheduledDueCalendarChangeBusinessEvent(loan));
                 loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
             }
@@ -2826,7 +2850,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         reprocessLoanTransactionsService.reprocessTransactions(loan);
 
-        saveLoanWithDataIntegrityViolationChecks(loan);
+        this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoChargeOffBusinessEvent(chargedOffTransaction));
 
         return new CommandProcessingResultBuilder() //
@@ -2980,7 +3004,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LoanTransaction interestRefundTxn = loanAccountDomainService.createManualInterestRefundWithAmount(loan, targetTransaction,
                 amount, paymentDetail, txnExternalId);
 
-        interestRefundTxn.getLoanTransactionRelations().add(
+        // Create a stable collection reference to avoid EclipseLink change tracking issues
+        Set<LoanTransactionRelation> transactionRelations = interestRefundTxn.getLoanTransactionRelations();
+        transactionRelations.add(
                 LoanTransactionRelation.linkToTransaction(interestRefundTxn, targetTransaction, LoanTransactionRelationTypeEnum.RELATED));
 
         final boolean isTransactionChronologicallyLatest = loanTransactionService.isChronologicallyLatestRepaymentOrWaiver(loan,
@@ -3045,11 +3071,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     public void handleChargebackTransaction(final Loan loan, LoanTransaction chargebackTransaction) {
+        handleChargebackTransaction(loan, chargebackTransaction, null);
+    }
+
+    public void handleChargebackTransaction(final Loan loan, LoanTransaction chargebackTransaction, LoanTransaction originalTransaction) {
         loanTransactionValidator.validateIfTransactionIsChargeback(chargebackTransaction);
 
         loan.addLoanTransaction(chargebackTransaction);
+
+        // Persistent chargeback relations are already created by the calling method before this point
+        // No temporary relations needed since persistent ones already exist
+
         if (loan.isInterestBearing() && loan.isInterestRecalculationEnabled()) {
-            final List<LoanTransaction> transactions = loanTransactionService.retrieveListOfTransactionsForReprocessing(loan);
+            final List<LoanTransaction> transactions = loanTransactionService.retrieveListOfTransactionsForReprocessing(loan,
+                    originalTransaction, new LoanTransaction[] { chargebackTransaction });
             loanTransactionProcessingService.reprocessLoanTransactions(loan.getTransactionProcessingStrategyCode(),
                     loan.getDisbursementDate(), transactions, loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
                     loan.getActiveCharges());
@@ -3058,6 +3093,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                             new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
         }
+
         loanLifecycleStateMachine.determineAndTransition(loan, chargebackTransaction.getTransactionDate());
     }
 

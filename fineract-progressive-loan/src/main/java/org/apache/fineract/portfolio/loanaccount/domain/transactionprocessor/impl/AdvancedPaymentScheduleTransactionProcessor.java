@@ -62,6 +62,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
@@ -693,9 +694,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         Long toId = chargebackId;
         // if the original transaction is not in the ctx, then it means that it has not changed during reverse replay
         Optional<LoanTransaction> fromTransaction = chargebackTransaction.getLoan().getLoanTransactions().stream()
-                .filter(tr -> tr.getLoanTransactionRelations().stream().anyMatch(this.hasMatchingToLoanTransaction(toId, CHARGEBACK))
-                        || tr.getLoanTransactionRelations().stream()
-                                .anyMatch(this.hasMatchingToLoanTransaction(chargebackTransaction, CHARGEBACK)))
+                .filter(tr -> !tr.isReversed()
+                        && (tr.getLoanTransactionRelations().stream().anyMatch(this.hasMatchingToLoanTransaction(toId, CHARGEBACK))
+                                || tr.getLoanTransactionRelations().stream()
+                                        .anyMatch(this.hasMatchingToLoanTransaction(chargebackTransaction, CHARGEBACK))))
                 .findFirst();
         if (fromTransaction.isEmpty()) {
             throw new RuntimeException("Chargeback transaction must have an original transaction");
@@ -1214,6 +1216,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     protected void createNewTransaction(final LoanTransaction oldTransaction, final LoanTransaction newTransaction,
             final TransactionCtx ctx) {
+        // Save external ID before clearing it to check if this was a user-initiated transaction
+        ExternalId originalExternalId = oldTransaction.getExternalId();
+
         oldTransaction.updateExternalId(null);
         oldTransaction.getLoanChargesPaid().clear();
 
@@ -1231,9 +1236,12 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                             .ifPresent(newRelation::setToTransaction));
         }
 
-        // Adding Replayed relation from newly created transaction to reversed transaction
-        newTransaction.getLoanTransactionRelations()
-                .add(LoanTransactionRelation.linkToTransaction(newTransaction, oldTransaction, LoanTransactionRelationTypeEnum.REPLAYED));
+        // Create REPLAYED relation for user-initiated transactions (those with external IDs)
+        // This distinguishes legitimate business operations from internal processing artifacts
+        if (originalExternalId != null) {
+            newTransaction.getLoanTransactionRelations().add(
+                    LoanTransactionRelation.linkToTransaction(newTransaction, oldTransaction, LoanTransactionRelationTypeEnum.REPLAYED));
+        }
 
         // if chargeback is getting reverse-replayed, find the original transaction with CHARGEBACK relation and point
         // the relation to the new chargeback transaction

@@ -235,9 +235,13 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
         LoanTransaction newLoanTransaction = loanTransactionAssembler.assembleAccrualActivityTransaction(loan, installment,
                 transactionDate);
         if (newLoanTransaction != null) {
-            newLoanTransaction.copyLoanTransactionRelations(loanTransaction.getLoanTransactionRelations());
-            newLoanTransaction.getLoanTransactionRelations().add(LoanTransactionRelation.linkToTransaction(newLoanTransaction,
-                    loanTransaction, LoanTransactionRelationTypeEnum.REPLAYED));
+            // Create a stable collection reference to avoid EclipseLink change tracking issues
+            Set<LoanTransactionRelation> originalRelations = loanTransaction.getLoanTransactionRelations();
+            newLoanTransaction.copyLoanTransactionRelations(originalRelations);
+
+            Set<LoanTransactionRelation> newRelations = newLoanTransaction.getLoanTransactionRelations();
+            newRelations.add(LoanTransactionRelation.linkToTransaction(newLoanTransaction, loanTransaction,
+                    LoanTransactionRelationTypeEnum.REPLAYED));
 
             newLoanTransaction.updateExternalId(loanTransaction.getExternalId());
             loanTransaction.reverse();

@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -101,7 +102,11 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
         ProgressiveTransactionCtx progressiveContext = new ProgressiveTransactionCtx(loan.getCurrency(),
                 loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()),
                 new ChangedTransactionDetail(), model, getTotalRefundInterestAmount(loan));
-        progressiveContext.getAlreadyProcessedTransactions().addAll(loanTransactionService.retrieveListOfTransactionsForReprocessing(loan));
+        LinkedHashSet<LoanTransaction> inFlightTransactions = new LinkedHashSet<>();
+        inFlightTransactions.add(loanTransaction);
+        loan.getLoanTransactions().stream().filter(entry -> entry.getId() == null).forEach(inFlightTransactions::add);
+        progressiveContext.getAlreadyProcessedTransactions().addAll(loanTransactionService.retrieveListOfTransactionsForReprocessing(loan,
+                inFlightTransactions.toArray(new LoanTransaction[0])));
         progressiveContext.setChargedOff(loan.isChargedOff());
         progressiveContext.setWrittenOff(loan.isClosedWrittenOff());
         progressiveContext.setContractTerminated(loan.isContractTermination());

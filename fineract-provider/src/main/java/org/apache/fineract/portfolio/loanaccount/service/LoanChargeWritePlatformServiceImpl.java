@@ -879,9 +879,13 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
         LoanTransaction loanChargeAdjustmentTransaction = LoanTransaction.chargeAdjustment(loan, transactionAmount, transactionDate,
                 txnExternalId, paymentDetail);
+
+        // Create a stable collection reference to avoid EclipseLink change tracking issues
+        Set<LoanTransactionRelation> transactionRelations = loanChargeAdjustmentTransaction.getLoanTransactionRelations();
+
         LoanTransactionRelation loanTransactionRelation = LoanTransactionRelation.linkToCharge(loanChargeAdjustmentTransaction, loanCharge,
                 LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT);
-        loanChargeAdjustmentTransaction.getLoanTransactionRelations().add(loanTransactionRelation);
+        transactionRelations.add(loanTransactionRelation);
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
                 .determineProcessor(loan.transactionProcessingStrategy());
@@ -1347,8 +1351,11 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         BigDecimal availableAmountForAdjustment = loanCharge.amount();
         for (LoanTransaction loanTransaction : loanCharge.getLoan().getLoanTransactions()) {
             if (loanTransaction.isNotReversed() && loanTransaction.getTypeOf().isChargeAdjustment()) {
-                LoanTransactionRelation loanTransactionRelation = loanTransaction.getLoanTransactionRelations().stream()
-                        .filter(e -> e.getToCharge() != null).findFirst().orElseThrow();
+                // Create a stable collection reference to avoid EclipseLink change tracking issues
+                Set<LoanTransactionRelation> transactionRelations = loanTransaction.getLoanTransactionRelations();
+
+                LoanTransactionRelation loanTransactionRelation = transactionRelations.stream().filter(e -> e.getToCharge() != null)
+                        .findFirst().orElseThrow();
                 if (loanCharge.equals(loanTransactionRelation.getToCharge())) {
                     availableAmountForAdjustment = availableAmountForAdjustment.subtract(loanTransaction.getAmount());
                 }

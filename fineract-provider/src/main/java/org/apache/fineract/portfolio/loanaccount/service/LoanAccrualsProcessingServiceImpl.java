@@ -219,9 +219,6 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     @Override
     @Transactional
     public void processAccrualsOnInterestRecalculation(@NonNull Loan loan, boolean isInterestRecalculationEnabled, boolean addJournal) {
-        if (isProgressiveAccrual(loan)) {
-            return;
-        }
         LocalDate accruedTill = loan.getAccruedTill();
         if (!isInterestRecalculationEnabled || accruedTill == null) {
             return;
