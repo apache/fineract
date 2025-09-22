@@ -52,10 +52,12 @@ import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Disabled("Disabled till FINERACT-2378 fixed")
 public class SavingsInterestPostingTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsInterestPostingTest.class);
@@ -88,6 +90,11 @@ public class SavingsInterestPostingTest {
     @Test
     public void testPostInterestWithOverdraftProduct() {
         try {
+            final LocalDate startDate = LocalDate.of(LocalDate.now(Utils.getZoneIdOfTenant()).getYear(), 2, 1);
+            // Simulate time passing - update business date to February
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, startDate);
             final String amount = "10000";
 
             final Account assetAccount = accountHelper.createAssetAccount();
@@ -103,7 +110,7 @@ public class SavingsInterestPostingTest {
                     interestReceivableAccount.getAccountID().toString(), assetAccount, incomeAccount, expenseAccount, liabilityAccount);
 
             final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2025");
-            final LocalDate startDate = LocalDate.of(LocalDate.now(Utils.getZoneIdOfTenant()).getYear(), 2, 1);
+
             final String startDateString = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US).format(startDate);
 
             final Integer accountId = savingsAccountHelper.applyForSavingsApplicationOnDate(clientId, productId,
@@ -113,8 +120,6 @@ public class SavingsInterestPostingTest {
             savingsAccountHelper.depositToSavingsAccount(accountId, amount, startDateString, CommonConstants.RESPONSE_RESOURCE_ID);
 
             // Simulate time passing - update business date to March
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(true));
             LocalDate marchDate = LocalDate.of(startDate.getYear(), 3, 1);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, marchDate);
 

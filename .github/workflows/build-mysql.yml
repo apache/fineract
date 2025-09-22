@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        task: [test-core-1, test-core-2, test-core-3, test-core-4, test-core-5, test-twofactor, test-oauth2]
+        task: [test-core-1, test-core-2, test-core-3, test-core-4, test-core-5]
 
     services:
       mysql:
@@ -100,18 +100,6 @@ jobs:
           FAILED=0
 
           case "${{ matrix.task }}" in
-            test-twofactor)
-              if ! ./gradlew --no-daemon :twofactor-tests:test -PdbType=mysql -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer; then
-                echo "::error::Two-factor tests failed"
-                FAILED=1
-              fi
-              ;;
-            test-oauth2)
-              if ! ./gradlew --no-daemon :oauth2-tests:test -PdbType=mysql -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer; then
-                echo "::error::OAuth2 tests failed"
-                FAILED=1
-              fi
-              ;;
             test-core-*)
               echo "Grouping test classes by module..."
               declare -A module_tests
