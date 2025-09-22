@@ -23,11 +23,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -56,10 +58,19 @@ public class LoanReAgeParameter extends AbstractAuditableWithUTCDateTimeCustom<L
     @Column(name = "number_of_installments", nullable = false)
     private Integer numberOfInstallments;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "interest_handling_type")
+    private LoanReAgeInterestHandlingType interestHandlingType;
+
+    @ManyToOne
+    @JoinColumn(name = "reage_reason_code_value_id", nullable = true)
+    private CodeValue reageReason;
+
     // for JPA, don't use
     protected LoanReAgeParameter() {}
 
     public LoanReAgeParameter getCopy(LoanTransaction loanTransaction) {
-        return new LoanReAgeParameter(loanTransaction, frequencyType, frequencyNumber, startDate, numberOfInstallments);
+        return new LoanReAgeParameter(loanTransaction, frequencyType, frequencyNumber, startDate, numberOfInstallments,
+                interestHandlingType, reageReason);
     }
 }

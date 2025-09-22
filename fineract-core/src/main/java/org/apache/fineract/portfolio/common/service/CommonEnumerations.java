@@ -28,6 +28,9 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
 public final class CommonEnumerations {
 
+    public static final List<PeriodFrequencyType> BASIC_PERIOD_FREQUENCY_TYPES = List.of(PeriodFrequencyType.DAYS,
+            PeriodFrequencyType.WEEKS, PeriodFrequencyType.MONTHS, PeriodFrequencyType.YEARS);
+
     private CommonEnumerations() {
 
     }

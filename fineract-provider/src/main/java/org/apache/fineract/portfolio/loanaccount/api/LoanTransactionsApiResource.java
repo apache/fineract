@@ -697,6 +697,8 @@ public class LoanTransactionsApiResource {
                     LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT, transactionId);
         } else if (CommandParameterUtil.is(commandParam, INTEREST_REFUND_COMMAND_VALUE)) {
             transactionData = this.loanReadPlatformService.retrieveManualInterestRefundTemplate(resolvedLoanId, transactionId);
+        } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.REAGE_COMMAND)) {
+            transactionData = this.loanReadPlatformService.retrieveLoanReAgeTemplate(resolvedLoanId);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }

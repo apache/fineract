@@ -30,9 +30,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
+import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 
@@ -115,6 +117,10 @@ public class LoanTransactionData implements Serializable {
     private Collection<CodeValueData> chargeOffReasonOptions = null;
     private Collection<CodeValueData> classificationOptions = null;
     private CodeValueData classification;
+
+    private Collection<CodeValueData> reAgeReasonOptions = null;
+    private Collection<PeriodFrequencyType> periodFrequencyOptions = null;
+    private Collection<StringEnumOptionData> reAgeInterestHandlingOptions = null;
 
     public static LoanTransactionData importInstance(BigDecimal repaymentAmount, LocalDate lastRepaymentDate, Long repaymentTypeId,
             Integer rowIndex, String locale, String dateFormat) {

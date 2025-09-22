@@ -165,4 +165,5 @@ public interface LoanReadPlatformService {
 
     Long getResolvedLoanTransactionId(Long transactionId, ExternalId externalTransactionId);
 
+    LoanTransactionData retrieveLoanReAgeTemplate(Long loanId);
 }

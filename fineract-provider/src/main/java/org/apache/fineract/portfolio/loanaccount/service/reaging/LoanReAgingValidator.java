@@ -26,17 +26,21 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanReAgingApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeInterestHandlingType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.ChangeOperation;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -47,6 +51,7 @@ import org.springframework.stereotype.Component;
 public class LoanReAgingValidator {
 
     private final LoanTransactionRepository loanTransactionRepository;
+    private final CodeValueRepository codeValueRepository;
 
     public void validateReAge(Loan loan, JsonCommand command) {
         validateReAgeRequest(loan, command);
@@ -79,6 +84,21 @@ public class LoanReAgingValidator {
         Integer numberOfInstallments = command.integerValueOfParameterNamed(LoanReAgingApiConstants.numberOfInstallments);
         baseDataValidator.reset().parameter(LoanReAgingApiConstants.numberOfInstallments).value(numberOfInstallments).notNull()
                 .integerGreaterThanZero();
+
+        final LoanReAgeInterestHandlingType reAgeInterestHandlingType = command
+                .enumValueOfParameterNamed(LoanReAgingApiConstants.reAgeInterestHandlingParamName, LoanReAgeInterestHandlingType.class);
+        baseDataValidator.reset().parameter(LoanReAgingApiConstants.reAgeInterestHandlingParamName).value(reAgeInterestHandlingType)
+                .ignoreIfNull();
+
+        Long reasonCodeValueId = command.longValueOfParameterNamed(LoanReAgingApiConstants.reasonCodeValueIdParamName);
+        baseDataValidator.reset().parameter(LoanReAgingApiConstants.reasonCodeValueIdParamName).value(reasonCodeValueId).ignoreIfNull();
+        if (reasonCodeValueId != null) {
+            final CodeValue reasonCodeValue = codeValueRepository.findByCodeNameAndId(LoanApiConstants.REAGE_REASONS, reasonCodeValueId);
+            if (reasonCodeValue == null) {
+                dataValidationErrors.add(ApiParameterError.parameterError("validation.msg.reage.reason.invalid",
+                        "Reage Reason with ID " + reasonCodeValueId + " does not exist", LoanApiConstants.REAGE_REASONS));
+            }
+        }
 
         throwExceptionIfValidationErrorsExist(dataValidationErrors);
     }

@@ -1013,7 +1013,8 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
     }
 
-    protected void reAgeLoan(Long loanId, String frequencyType, int frequencyNumber, String startDate, Integer numberOfInstallments) {
+    protected void reAgeLoan(Long loanId, String frequencyType, int frequencyNumber, String startDate, Integer numberOfInstallments,
+            String reAgeInterestHandling) {
         PostLoansLoanIdTransactionsRequest request = new PostLoansLoanIdTransactionsRequest();
         request.setDateFormat(DATETIME_PATTERN);
         request.setLocale("en");
@@ -1021,6 +1022,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         request.setFrequencyNumber(frequencyNumber);
         request.setStartDate(startDate);
         request.setNumberOfInstallments(numberOfInstallments);
+        request.setReAgeInterestHandling(reAgeInterestHandling);
         loanTransactionHelper.reAge(loanId, request);
     }
 
