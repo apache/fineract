@@ -22,10 +22,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -42,26 +47,32 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.command.CommandHandlerRegistry;
+import org.apache.fineract.command.core.CommandPipeline;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
+import org.apache.fineract.portfolio.account.command.StandingInstructionCreateCommand;
+import org.apache.fineract.portfolio.account.command.StandingInstructionUpdateCommand;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
+import org.apache.fineract.portfolio.account.data.StandingInstructionCreateRequest;
+import org.apache.fineract.portfolio.account.data.StandingInstructionCreateResponse;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDTO;
 import org.apache.fineract.portfolio.account.data.StandingInstructionData;
-import org.apache.fineract.portfolio.account.data.request.StandingInstructionCreationRequest;
+import org.apache.fineract.portfolio.account.data.StandingInstructionUpdateRequest;
+import org.apache.fineract.portfolio.account.data.StandingInstructionUpdateResponse;
 import org.apache.fineract.portfolio.account.data.request.StandingInstructionSearchParam;
-import org.apache.fineract.portfolio.account.data.request.StandingInstructionUpdatesRequest;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformService;
 import org.springframework.stereotype.Component;
@@ -79,6 +90,7 @@ public class StandingInstructionApiResource {
     private final StandingInstructionReadPlatformService standingInstructionReadPlatformService;
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
     private final SqlValidator sqlValidator;
+    private final CommandPipeline commandPipeline;
 
     private static final CommandHandlerRegistry<String, Long, String, CommandWrapper> COMMAND_HANDLER_REGISTRY = new CommandHandlerRegistry<>(
             Map.of(CommandParameterUtil.UPDATE_COMMAND_VALUE,
@@ -110,14 +122,16 @@ public class StandingInstructionApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create new Standing Instruction", description = "Ability to create new instruction for transfer of monetary funds from one account to another")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = StandingInstructionCreationRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StandingInstructionApiResourceSwagger.PostStandingInstructionsResponse.class))) })
-    public CommandProcessingResult create(@Parameter(hidden = true) StandingInstructionCreationRequest creationRequest) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createStandingInstruction()
-                .withJson(toApiJsonSerializer.serialize(creationRequest)).build();
+    public StandingInstructionCreateResponse create(@Valid StandingInstructionCreateRequest creationRequest) {
+        final StandingInstructionCreateCommand command = new StandingInstructionCreateCommand();
 
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        command.setId(UUID.randomUUID());
+        command.setCreatedAt(DateUtils.getAuditOffsetDateTime());
+        command.setPayload(creationRequest);
+
+        final Supplier<StandingInstructionCreateResponse> response = commandPipeline.send(command);
+
+        return response.get();
     }
 
     @PUT
@@ -128,19 +142,23 @@ public class StandingInstructionApiResource {
             + "\n" + "PUT https://DomainName/api/v1/standinginstructions/1?command=update\n" + "\n\n"
             + "Ability to modify existing instruction for transfer of monetary funds from one account to another.\n" + "\n"
             + "PUT https://DomainName/api/v1/standinginstructions/1?command=delete")
-    @RequestBody(content = @Content(schema = @Schema(implementation = StandingInstructionUpdatesRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StandingInstructionApiResourceSwagger.PutStandingInstructionsStandingInstructionIdResponse.class))) })
-    public CommandProcessingResult update(
-            @PathParam("standingInstructionId") @Parameter(description = "standingInstructionId") final Long standingInstructionId,
-            @Parameter(hidden = true) StandingInstructionUpdatesRequest updatesRequest,
-            @QueryParam("command") @Parameter(description = "command") final String commandParam) {
+    public StandingInstructionUpdateResponse update(
+            @PathParam("standingInstructionId") @Parameter(description = "standingInstructionId") @NotNull(message = "{org.apache.fineract.portfolio.account.data.standing.instruction.id.notnull}") @PositiveOrZero(message = "{org.apache.fineract.portfolio.account.data.standing.instruction.id.positiveOrZero}") @Digits(integer = 10, fraction = 0, message = "{org.apache.fineract.portfolio.account.standing.instruction.id.digits}") final Long standingInstructionId,
+            @Valid StandingInstructionUpdateRequest updatesRequest,
+            @QueryParam("command") @Parameter(description = "command") @NotBlank(message = "{org.apache.fineract.portfolio.account.standing.instruction.command.param.notblank}") @Pattern(regexp = "^(update|delete)$", message = "{org.apache.fineract.portfolio.account.command.param.pattern}") final String commandParam) {
 
-        final String serializedUpdatesRequest = toApiJsonSerializer.serialize(updatesRequest);
-        final CommandWrapper commandRequest = COMMAND_HANDLER_REGISTRY.execute(commandParam, standingInstructionId,
-                serializedUpdatesRequest, new UnrecognizedQueryParamException("command", commandParam));
+        StandingInstructionUpdateRequest request = StandingInstructionUpdateRequest.withCommandParamAndStandingInstructionId(commandParam,
+                standingInstructionId, updatesRequest);
 
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final StandingInstructionUpdateCommand command = new StandingInstructionUpdateCommand();
+
+        command.setId(UUID.randomUUID());
+        command.setCreatedAt(DateUtils.getAuditOffsetDateTime());
+        command.setPayload(request);
+
+        final Supplier<StandingInstructionUpdateResponse> response = commandPipeline.send(command);
+
+        return response.get();
     }
 
     @GET

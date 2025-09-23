@@ -22,10 +22,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -35,18 +35,24 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import java.util.UUID;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
+import org.apache.fineract.command.core.CommandPipeline;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.account.command.AccountRefundByTransferCommand;
+import org.apache.fineract.portfolio.account.command.AccountTransferCreateCommand;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
+import org.apache.fineract.portfolio.account.data.AccountTransferRequest;
+import org.apache.fineract.portfolio.account.data.AccountTransferResponse;
+import org.apache.fineract.portfolio.account.data.RefundByTransferRequest;
+import org.apache.fineract.portfolio.account.data.RefundByTransferResponse;
 import org.apache.fineract.portfolio.account.data.request.AccountTransSearchParam;
-import org.apache.fineract.portfolio.account.data.request.AccountTransferRequest;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -60,6 +66,7 @@ public class AccountTransfersApiResource {
     private final DefaultToApiJsonSerializer<AccountTransferData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
+    private final CommandPipeline commandPipeline;
 
     @GET
     @Path("template")
@@ -87,13 +94,16 @@ public class AccountTransfersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create new Transfer", description = "Ability to create new transfer of monetary funds from one account to another.")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccountTransferRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountTransfersApiResourceSwagger.PostAccountTransfersResponse.class)))
-    public CommandProcessingResult create(@Parameter(hidden = true) AccountTransferRequest accountTransferRequest) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createAccountTransfer()
-                .withJson(toApiJsonSerializer.serialize(accountTransferRequest)).build();
+    public AccountTransferResponse create(@Valid AccountTransferRequest accountTransferRequest) {
+        final AccountTransferCreateCommand command = new AccountTransferCreateCommand();
 
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        command.setId(UUID.randomUUID());
+        command.setCreatedAt(DateUtils.getAuditOffsetDateTime());
+        command.setPayload(accountTransferRequest);
+
+        final Supplier<AccountTransferResponse> response = commandPipeline.send(command);
+
+        return response.get();
     }
 
     @GET
@@ -154,12 +164,15 @@ public class AccountTransfersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Refund of an Active Loan by Transfer", description = "Ability to refund an active loan by transferring to a savings account.")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccountTransferRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountTransfersApiResourceSwagger.PostAccountTransfersRefundByTransferResponse.class))) })
-    public CommandProcessingResult templateRefundByTransferPost(@Parameter(hidden = true) AccountTransferRequest accountTransferRequest) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().refundByTransfer()
-                .withJson(toApiJsonSerializer.serialize(accountTransferRequest)).build();
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    public RefundByTransferResponse templateRefundByTransferPost(@Valid RefundByTransferRequest refundByTransferRequest) {
+        final AccountRefundByTransferCommand command = new AccountRefundByTransferCommand();
+
+        command.setId(UUID.randomUUID());
+        command.setCreatedAt(DateUtils.getAuditOffsetDateTime());
+        command.setPayload(refundByTransferRequest);
+
+        final Supplier<RefundByTransferResponse> response = commandPipeline.send(command);
+
+        return response.get();
     }
 }

@@ -41,14 +41,16 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.service.CommandWrapperBuilder;
+import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.portfolio.account.api.AccountTransfersApiResource;
-import org.apache.fineract.portfolio.account.data.request.AccountTransferRequest;
+import org.apache.fineract.portfolio.account.data.AccountTransferRequest;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.self.account.data.SelfAccountTemplateData;
 import org.apache.fineract.portfolio.self.account.data.SelfAccountTransferData;
@@ -71,13 +73,13 @@ public class SelfAccountTransferApiResource {
 
     private final PlatformSecurityContext context;
     private final DefaultToApiJsonSerializer<SelfAccountTransferData> toApiJsonSerializer;
-    private final AccountTransfersApiResource accountTransfersApiResource;
     private final SelfAccountTransferReadService selfAccountTransferReadService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final SelfAccountTransferDataValidator dataValidator;
     private final SelfBeneficiariesTPTReadPlatformService tptBeneficiaryReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @GET
     @Path("template")
@@ -117,7 +119,10 @@ public class SelfAccountTransferApiResource {
         if (type.equals("tpt")) {
             checkForLimits(params);
         }
-        return this.accountTransfersApiResource.create(accountTransferRequest);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createAccountTransfer()
+                .withJson(toApiJsonSerializer.serialize(accountTransferRequest)).build();
+
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     private void checkForLimits(Map<String, Object> params) {
