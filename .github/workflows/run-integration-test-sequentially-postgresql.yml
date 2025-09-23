@@ -4,12 +4,10 @@ on:
   push:
     branches:
       - develop
-
 permissions:
   contents: read
-
 jobs:
-  test:
+  build:
     runs-on: ubuntu-24.04
     timeout-minutes: 180
 
@@ -22,7 +20,6 @@ jobs:
           POSTGRES_USER: root
           POSTGRES_PASSWORD: postgres
         options: --health-cmd="pg_isready -q -d postgres -U root" --health-interval=5s --health-timeout=2s --health-retries=3
-
       mock-oauth2-server:
         image: ghcr.io/navikt/mock-oauth2-server:2.1.10
         ports:
@@ -30,17 +27,9 @@ jobs:
         env:
           SERVER_PORT: 9000
           JSON_CONFIG: '{ "interactiveLogin": true, "httpServer": "NettyWrapper", "tokenCallbacks": [ { "issuerId": "auth/realms/fineract", "tokenExpiry": 120, "requestMappings": [{ "requestParam": "scope", "match": "fineract", "claims": { "sub": "mifos", "scope": [ "test" ] } } ] } ] }'
-
     env:
       TZ: Asia/Kolkata
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
-      AWS_ENDPOINT_URL: http://localhost:4566
-      AWS_ACCESS_KEY_ID: localstack
-      AWS_SECRET_ACCESS_KEY: localstack
-      AWS_REGION: us-east-1
-      FINERACT_REPORT_EXPORT_S3_ENABLED: true
-      FINERACT_REPORT_EXPORT_S3_BUCKET_NAME: fineract-reports
-
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
@@ -53,52 +42,63 @@ jobs:
         with:
           java-version: '21'
           distribution: 'zulu'
-
-      - name: Cache Gradle dependencies
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-
       - name: Setup Gradle and Validate Wrapper
         uses: gradle/actions/setup-gradle@ac638b010cf58a27ee6c972d7336334ccaf61c96 # v4.4.1
         with:
           validate-wrappers: true
-
       - name: Verify PostgreSQL connection
         run: |
           while ! pg_isready -d postgres -U root -h 127.0.0.1 -p 5432 ; do
-            sleep 1
+              sleep 1
           done
-
       - name: Initialise databases
         run: |
           ./gradlew --no-daemon -q createPGDB -PdbName=fineract_tenants
           ./gradlew --no-daemon -q createPGDB -PdbName=fineract_default
 
       - name: Start LocalStack
+        env:
+          AWS_ENDPOINT_URL: http://localhost:4566
+          AWS_ACCESS_KEY_ID: localstack
+          AWS_SECRET_ACCESS_KEY: localstack
+          AWS_REGION: us-east-1
         run: |
           docker run -d --name localstack -p 4566:4566 -p 4510-4559:4510-4559 localstack/localstack:2.1
           sleep 10
           docker exec localstack awslocal s3api create-bucket --bucket fineract-reports
-
-      - name: Run Gradle Task
+          echo "LocalStack initialization complete"
+      - name: Build & Test
+        env:
+          AWS_ENDPOINT_URL: http://localhost:4566
+          AWS_ACCESS_KEY_ID: localstack
+          AWS_SECRET_ACCESS_KEY: localstack
+          AWS_REGION: us-east-1
+          FINERACT_REPORT_EXPORT_S3_ENABLED: true
+          FINERACT_REPORT_EXPORT_S3_BUCKET_NAME: fineract-reports
         run: |
-           ./gradlew test -PdbType=postgresql -x :fineract-e2e-tests-runner:test -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer
+          ./gradlew --no-daemon --console=plain build -x cucumber -x test -x doc
+          ./gradlew --no-daemon --console=plain cucumber -x :fineract-e2e-tests-runner:cucumber
+          ./gradlew --no-daemon --console=plain test -x :twofactor-tests:test -x :oauth2-test:test -x :fineract-e2e-tests-runner:test -PdbType=postgresql
+          ./gradlew --no-daemon --console=plain :twofactor-tests:test -PdbType=postgresql
+          ./gradlew --no-daemon --console=plain :oauth2-tests:test -PdbType=postgresql
       - name: Archive test results
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: test-results
-          path: '**/build/reports/'
           retention-days: 5
-
+          path: |
+            build/reports/
+            integration-tests/build/reports/
+            twofactor-tests/build/reports/
+            oauth2-tests/build/reports/
       - name: Archive server logs
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: server-logs
-          path: '**/build/cargo/'
           retention-days: 5
+          path: |
+            integration-tests/build/cargo/
+            twofactor-tests/build/cargo/
+            oauth2-tests/build/cargo/
