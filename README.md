@@ -69,6 +69,23 @@ Run the following commands:
 1. `./gradlew createDB -PdbName=fineract_default`
 1. `./gradlew devRun`
 
+Fineract is now running, and will be listening for API requests on port 8443 by default.
+
+Confirm Fineract is ready with, for example:
+
+```bash
+curl --insecure https://localhost:8443/fineract-provider/actuator/health`
+```
+
+To test authenticated endpoints, include credentials in your request:
+
+```bash
+curl --location \
+  https://localhost:8443/fineract-provider/api/v1/clients \
+  --header 'Content-Type: application/json' \
+  --header 'Fineract-Platform-TenantId: default' \
+  --header 'Authorization: Basic bWlmb3M6cGFzc3dvcmQ='
+```
 
 <br>INSTRUCTIONS: How to build the JAR file
 ============
