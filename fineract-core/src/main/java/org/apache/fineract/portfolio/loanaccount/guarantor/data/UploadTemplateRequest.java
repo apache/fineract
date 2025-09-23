@@ -16,51 +16,58 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.data;
+package org.apache.fineract.portfolio.loanaccount.guarantor.data;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.core.UriInfo;
 import java.io.File;
 import java.io.InputStream;
+import java.io.Serial;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import org.apache.fineract.validation.constraints.Locale;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
 
+@SuperBuilder(toBuilder = true)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UploadRequest {
+public class UploadTemplateRequest implements Serializable {
 
-    @Schema(type = "string", format = "binary")
-    @FormDataParam("file")
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    @NotNull(message = "{org.apache.fineract.portfolio.loanaccount.guarantor.upload.template.file.required}")
     private InputStream uploadedInputStream;
 
-    @Schema(implementation = File.class, hidden = true)
-    @FormDataParam("file")
     private File uploadedFile;
 
-    @Schema(implementation = FormDataContentDisposition.class, hidden = true)
-    @FormDataParam("file")
+    @NotNull(message = "{org.apache.fineract.portfolio.loanaccount.guarantor.upload.template.fileDetail.required}")
     private FormDataContentDisposition fileDetail;
 
-    @Schema(implementation = UriInfo.class, hidden = true)
-    @FormDataParam("file")
     private UriInfo uriInfo;
 
-    @Schema(implementation = UriInfo.class, hidden = true)
-    @FormDataParam("file")
     private FormDataBodyPart bodyPart;
 
-    @Schema(name = "locale", type = "string", accessMode = Schema.AccessMode.READ_WRITE)
-    @FormDataParam("locale")
+    @NotBlank(message = "{org.apache.fineract.portfolio.loanaccount.guarantor.locale.notBlank}")
+    @Size(max = 50, message = "{org.apache.fineract.portfolio.loanaccount.guarantor.locale.size}")
+    @Locale
     private String locale;
 
-    @Schema(name = "dateFormat", type = "string", accessMode = Schema.AccessMode.READ_WRITE)
-    @FormDataParam("dateFormat")
+    @Size(max = 20, message = "{org.apache.fineract.portfolio.loanaccount.guarantor.date.format.size}")
     private String dateFormat;
+
+    public static UploadTemplateRequest fromParameters(InputStream uploadedInputStream, FormDataContentDisposition fileDetail,
+            String locale, String dateFormat) {
+        return UploadTemplateRequest.builder().uploadedInputStream(uploadedInputStream).fileDetail(fileDetail).locale(locale)
+                .dateFormat(dateFormat).build();
+    }
 }

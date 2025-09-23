@@ -59,6 +59,7 @@ public final class GuarantorCommandFromApiJsonDeserializer extends AbstractFromA
         final Set<String> supportedParameters = GuarantorJSONinputParams.getAllValues();
         supportedParameters.add("locale");
         supportedParameters.add("dateFormat");
+        supportedParameters.add("guarantorId");
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
