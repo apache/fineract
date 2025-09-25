@@ -23,13 +23,13 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.FieldNameConstants;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
-@FieldNameConstants
 @AllArgsConstructor
 @Builder
 public class RepaymentTransactionRequest implements Serializable {
@@ -40,9 +40,9 @@ public class RepaymentTransactionRequest implements Serializable {
     private Long loanId;
     private BigDecimal transactionAmount;
     private Long paymentTypeId;
+    private String externalId;
+    private String note;
     private String accountNumber;
     private String checkNumber;
     private String routingCode;
-    private String receiptNumber;
-    private String bankNumber;
 }
