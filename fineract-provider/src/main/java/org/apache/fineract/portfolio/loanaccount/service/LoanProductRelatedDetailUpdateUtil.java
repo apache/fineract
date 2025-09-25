@@ -373,7 +373,8 @@ public class LoanProductRelatedDetailUpdateUtil {
             final AprCalculator aprCalculator) {
         BigDecimal annualNominalInterestRate = aprCalculator.calculateFrom(loanRepaymentScheduleDetail.getInterestPeriodFrequencyType(),
                 loanRepaymentScheduleDetail.getNominalInterestRatePerPeriod(), loanRepaymentScheduleDetail.getNumberOfRepayments(),
-                loanRepaymentScheduleDetail.getRepayEvery(), loanRepaymentScheduleDetail.getRepaymentPeriodFrequencyType());
+                loanRepaymentScheduleDetail.getRepayEvery(), loanRepaymentScheduleDetail.getRepaymentPeriodFrequencyType(),
+                loanRepaymentScheduleDetail.fetchDaysInYearType());
         loanRepaymentScheduleDetail.setAnnualNominalInterestRate(annualNominalInterestRate);
     }
 }

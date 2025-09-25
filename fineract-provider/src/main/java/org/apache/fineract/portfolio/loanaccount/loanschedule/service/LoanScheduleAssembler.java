@@ -219,6 +219,20 @@ public class LoanScheduleAssembler {
         BigDecimal fixedPrincipalPercentagePerInstallment = this.fromApiJsonHelper
                 .extractBigDecimalWithLocaleNamed(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName, element);
 
+        /**
+         * Interest recalculation settings copy from product definition
+         */
+        final DaysInMonthType daysInMonthType = loanProduct.fetchDaysInMonthType();
+
+        DaysInYearType daysInYearType = null;
+        final Integer daysInYearTypeIntFromApplication = this.fromApiJsonHelper
+                .extractIntegerNamed(LoanApiConstants.daysInYearTypeParameterName, element, Locale.getDefault());
+        if (daysInYearTypeIntFromApplication != null) {
+            daysInYearType = DaysInYearType.fromInt(daysInYearTypeIntFromApplication);
+        } else {
+            daysInYearType = loanProduct.fetchDaysInYearType();
+        }
+
         // interest terms
         final Integer interestType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("interestType", element);
         final InterestMethod interestMethod = allowOverridingInterestMethod ? InterestMethod.fromInt(interestType)
@@ -246,7 +260,7 @@ public class LoanScheduleAssembler {
         BigDecimal annualNominalInterestRate = BigDecimal.ZERO;
         if (interestRatePerPeriod != null) {
             annualNominalInterestRate = this.aprCalculator.calculateFrom(interestRatePeriodFrequencyType, interestRatePerPeriod,
-                    numberOfRepayments, repaymentEvery, repaymentPeriodFrequencyType);
+                    numberOfRepayments, repaymentEvery, repaymentPeriodFrequencyType, daysInYearType);
         }
 
         // disbursement details
@@ -364,20 +378,6 @@ public class LoanScheduleAssembler {
                 .extractBigDecimalWithLocaleNamed(LoanApiConstants.maxOutstandingBalanceParameterName, element);
 
         final List<DisbursementData> disbursementDatas = fetchDisbursementData(element.getAsJsonObject());
-
-        /**
-         * Interest recalculation settings copy from product definition
-         */
-        final DaysInMonthType daysInMonthType = loanProduct.fetchDaysInMonthType();
-
-        DaysInYearType daysInYearType = null;
-        final Integer daysInYearTypeIntFromApplication = this.fromApiJsonHelper
-                .extractIntegerNamed(LoanApiConstants.daysInYearTypeParameterName, element, Locale.getDefault());
-        if (daysInYearTypeIntFromApplication != null) {
-            daysInYearType = DaysInYearType.fromInt(daysInYearTypeIntFromApplication);
-        } else {
-            daysInYearType = loanProduct.fetchDaysInYearType();
-        }
 
         final boolean isInterestRecalculationEnabled = loanProduct.isInterestRecalculationEnabled();
         RecalculationFrequencyType recalculationFrequencyType = null;
