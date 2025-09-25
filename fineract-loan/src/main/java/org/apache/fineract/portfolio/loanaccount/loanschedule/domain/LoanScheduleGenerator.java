@@ -29,6 +29,7 @@ import org.apache.fineract.portfolio.loanaccount.data.OutstandingAmountsDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 
@@ -43,7 +44,7 @@ public interface LoanScheduleGenerator {
 
     LoanScheduleDTO rescheduleNextInstallments(MathContext mc, LoanApplicationTerms loanApplicationTerms, Loan loan,
             HolidayDetailDTO holidayDetailDTO, LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
-            LocalDate rescheduleFrom, LocalDate rescheduleTill);
+            LocalDate rescheduleFrom, LocalDate rescheduleTill, LoanTransaction loanTransaction);
 
     OutstandingAmountsDTO calculatePrepaymentAmount(MonetaryCurrency currency, LocalDate onDate, LoanApplicationTerms loanApplicationTerms,
             MathContext mc, Loan loan, HolidayDetailDTO holidayDetailDTO,

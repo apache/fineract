@@ -860,17 +860,18 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             }
         } else {
             if (loan.isCumulativeSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()) {
-                loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
+                loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO, refundTransaction);
             } else if (loan.isProgressiveSchedule() && ((loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy())
                     || loan.hasContractTerminationTransaction())) {
                 loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
             }
-            loan.getLoanTransactions().add(refundTransaction);
+
+            final List<LoanTransaction> newLoanTransactions = new ArrayList<>(List.of(refundTransaction));
             if (interestRefundTransaction != null) {
-                loan.addLoanTransaction(interestRefundTransaction);
+                newLoanTransactions.add(interestRefundTransaction);
             }
 
-            reprocessLoanTransactionsService.reprocessTransactions(loan);
+            reprocessLoanTransactionsService.reprocessTransactions(loan, newLoanTransactions);
         }
 
         // Store and flush newly created transaction to generate PK

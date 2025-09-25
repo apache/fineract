@@ -51,7 +51,7 @@ public interface LoanTransactionProcessingService {
 
     Optional<ChangedTransactionDetail> processPostDisbursementTransactions(Loan loan);
 
-    LoanScheduleDTO getRecalculatedSchedule(ScheduleGeneratorDTO generatorDTO, Loan loan);
+    LoanScheduleDTO getRecalculatedSchedule(ScheduleGeneratorDTO generatorDTO, Loan loan, LoanTransaction loanTransaction);
 
     OutstandingAmountsDTO fetchPrepaymentDetail(ScheduleGeneratorDTO scheduleGeneratorDTO, LocalDate onDate, Loan loan);
 

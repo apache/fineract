@@ -26,6 +26,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
@@ -93,9 +94,52 @@ public class LoanScheduleService {
 
     }
 
+    public LocalDate getLastUserTransactionDate(final Loan loan, final LoanTransaction loanTransaction) {
+        final List<LoanTransaction> transactions = loanTransactionRepository.findNonReversedByLoan(loan);
+        transactions.add(loanTransaction);
+        return transactions.stream().filter(loan::isUserTransaction).map(LoanTransaction::getTransactionDate)
+                .filter(date -> DateUtils.isBefore(loan.getDisbursementDate(), date)).max(LocalDate::compareTo)
+                .orElse(loan.getDisbursementDate());
+    }
+
+    public void regenerateRepaymentScheduleWithInterestRecalculation(final Loan loan, final ScheduleGeneratorDTO generatorDTO,
+            final LoanTransaction loanTransaction) {
+        final LocalDate lastTransactionDate = getLastUserTransactionDate(loan, loanTransaction);
+        final LoanScheduleDTO loanScheduleDTO = loanTransactionProcessingService.getRecalculatedSchedule(generatorDTO, loan,
+                loanTransaction);
+        if (loanScheduleDTO == null) {
+            return;
+        }
+        // Either the installments got recalculated or the model
+        if (loanScheduleDTO.getInstallments() != null) {
+            loanSchedule.updateLoanSchedule(loan, loanScheduleDTO.getInstallments());
+        } else {
+            loanSchedule.updateLoanSchedule(loan, loanScheduleDTO.getLoanScheduleModel());
+        }
+        loan.setInterestRecalculatedOn(DateUtils.getBusinessLocalDate());
+        final LocalDate lastRepaymentDate = loan.getLastRepaymentPeriodDueDate(true);
+        final Set<LoanCharge> charges = loan.getActiveCharges();
+        for (final LoanCharge loanCharge : charges) {
+            if (!loanCharge.isDueAtDisbursement()) {
+                loanChargeService.updateOverdueScheduleInstallment(loan, loanCharge);
+                if (loanCharge.getDueLocalDate() == null || (!DateUtils.isBefore(lastRepaymentDate, loanCharge.getDueLocalDate())
+                        || loan.getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.PROGRESSIVE))) {
+                    if ((loanCharge.isInstalmentFee() || !loanCharge.isWaived()) && (loanCharge.getDueLocalDate() == null
+                            || !DateUtils.isAfter(lastTransactionDate, loanCharge.getDueLocalDate()))) {
+                        loanChargeService.recalculateLoanCharge(loan, loanCharge, generatorDTO.getPenaltyWaitPeriod());
+                        loanCharge.updateWaivedAmount(loan.getCurrency());
+                    }
+                } else {
+                    loanCharge.setActive(false);
+                }
+            }
+        }
+        loanTransactionProcessingService.processPostDisbursementTransactions(loan);
+    }
+
     public void regenerateRepaymentScheduleWithInterestRecalculation(final Loan loan, final ScheduleGeneratorDTO generatorDTO) {
         final LocalDate lastTransactionDate = loan.getLastUserTransactionDate();
-        final LoanScheduleDTO loanScheduleDTO = loanTransactionProcessingService.getRecalculatedSchedule(generatorDTO, loan);
+        final LoanScheduleDTO loanScheduleDTO = loanTransactionProcessingService.getRecalculatedSchedule(generatorDTO, loan, null);
         if (loanScheduleDTO == null) {
             return;
         }

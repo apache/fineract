@@ -201,7 +201,8 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
     }
 
     @Override
-    public LoanScheduleDTO getRecalculatedSchedule(final ScheduleGeneratorDTO generatorDTO, Loan loan) {
+    public LoanScheduleDTO getRecalculatedSchedule(final ScheduleGeneratorDTO generatorDTO, Loan loan,
+            final LoanTransaction loanTransaction) {
         if (!loan.isInterestBearingAndInterestRecalculationEnabled() || loan.isNpa() || loan.isChargedOff()) {
             return null;
         }
@@ -217,7 +218,8 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
                 loan.getTransactionProcessingStrategyCode());
 
         return loanScheduleGenerator.rescheduleNextInstallments(mc, loanApplicationTerms, loan, generatorDTO.getHolidayDetailDTO(),
-                loanRepaymentScheduleTransactionProcessor, generatorDTO.getRecalculateFrom(), generatorDTO.getRecalculateTill());
+                loanRepaymentScheduleTransactionProcessor, generatorDTO.getRecalculateFrom(), generatorDTO.getRecalculateTill(),
+                loanTransaction);
     }
 
     @Override

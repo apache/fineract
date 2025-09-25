@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionComparator;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
@@ -74,8 +76,20 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
     }
 
     @Override
-    public void reprocessParticularTransactions(final Loan loan, final List<LoanTransaction> loanTransactions) {
-        final ChangedTransactionDetail changedTransactionDetail = reprocessTransactionsAndFetchChangedTransactions(loan, loanTransactions);
+    public void reprocessTransactions(final Loan loan, final List<LoanTransaction> newTransactions) {
+        final List<LoanTransaction> allNonContraTransactionsPostDisbursement = loanTransactionService
+                .retrieveListOfTransactionsForReprocessing(loan);
+
+        final ChangedTransactionDetail changedTransactionDetail = reprocessTransactionsAndFetchChangedTransactions(loan,
+                allNonContraTransactionsPostDisbursement, newTransactions);
+        handleChangedDetail(changedTransactionDetail);
+    }
+
+    @Override
+    public void reprocessParticularTransactions(final Loan loan, final List<LoanTransaction> loanTransactions,
+            final List<LoanTransaction> newTransactions) {
+        final ChangedTransactionDetail changedTransactionDetail = reprocessTransactionsAndFetchChangedTransactions(loan, loanTransactions,
+                newTransactions);
         handleChangedDetail(changedTransactionDetail);
     }
 
@@ -177,6 +191,7 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
         final List<LoanTransaction> newTransactions = changedTransactionDetail.getTransactionChanges().stream()
                 .map(TransactionChangeData::getNewTransaction).peek(transaction -> transaction.updateLoan(loan)).toList();
         loan.getLoanTransactions().addAll(newTransactions);
+        loan.getLoanTransactions().add(loanTransaction);
 
         loanBalanceService.updateLoanSummaryDerivedFields(loan);
         handleChangedDetail(changedTransactionDetail);
@@ -228,6 +243,29 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
         final List<LoanTransaction> newTransactions = changedTransactionDetail.getTransactionChanges().stream()
                 .map(TransactionChangeData::getNewTransaction).toList();
         loan.getLoanTransactions().addAll(newTransactions);
+        loanBalanceService.updateLoanSummaryDerivedFields(loan);
+        return changedTransactionDetail;
+    }
+
+    private ChangedTransactionDetail reprocessTransactionsAndFetchChangedTransactions(final Loan loan,
+            final List<LoanTransaction> loanTransactions, final List<LoanTransaction> newTransactions) {
+        final List<LoanTransaction> missingNecessaryTransactionsForReprocessing = loanTransactionRepository
+                .findNonReversedAccrualTransactionsForReprocessingByLoan(loan);
+        loanTransactions.addAll(newTransactions);
+        final List<LoanTransaction> transactions = new ArrayList<>(loanTransactions);
+        transactions.addAll(missingNecessaryTransactionsForReprocessing);
+        loan.getLoanTransactions().addAll(newTransactions);
+
+        final ChangedTransactionDetail changedTransactionDetail = loanTransactionProcessingService.reprocessLoanTransactions(
+                loan.getTransactionProcessingStrategyCode(), loan.getDisbursementDate(),
+                loanTransactions.stream().sorted(LoanTransactionComparator.INSTANCE).toList(), loan.getCurrency(),
+                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), transactions);
+        for (TransactionChangeData change : changedTransactionDetail.getTransactionChanges()) {
+            change.getNewTransaction().updateLoan(loan);
+        }
+        final List<LoanTransaction> newTransactionsFromReprocessing = changedTransactionDetail.getTransactionChanges().stream()
+                .map(TransactionChangeData::getNewTransaction).toList();
+        loan.getLoanTransactions().addAll(newTransactionsFromReprocessing);
         loanBalanceService.updateLoanSummaryDerivedFields(loan);
         return changedTransactionDetail;
     }

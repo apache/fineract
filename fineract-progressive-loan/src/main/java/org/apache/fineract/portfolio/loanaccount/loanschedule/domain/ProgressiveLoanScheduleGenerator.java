@@ -42,6 +42,7 @@ import org.apache.fineract.portfolio.loanaccount.data.OutstandingAmountsDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
@@ -178,7 +179,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
     @Override
     public LoanScheduleDTO rescheduleNextInstallments(MathContext mc, LoanApplicationTerms loanApplicationTerms, Loan loan,
             HolidayDetailDTO holidayDetailDTO, LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
-            LocalDate rescheduleFrom, LocalDate rescheduleTill) {
+            LocalDate rescheduleFrom, LocalDate rescheduleTill, LoanTransaction newTransaction) {
         return rescheduleNextInstallments(mc, loanApplicationTerms, loan, holidayDetailDTO, loanRepaymentScheduleTransactionProcessor,
                 rescheduleFrom);
     }

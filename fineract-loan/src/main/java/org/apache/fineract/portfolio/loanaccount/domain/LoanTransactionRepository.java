@@ -492,4 +492,16 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
             ORDER BY lt.dateOf, lt.createdDate, lt.id
             """)
     List<LoanTransaction> findNonReversedByLoan(@Param("loan") Loan loan);
+
+    @Query("""
+            SELECT lt FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND lt.reversed = false
+                AND lt.typeOf IN (
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL,
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL_ADJUSTMENT
+                )
+            ORDER BY lt.dateOf, lt.createdDate, lt.id
+            """)
+    List<LoanTransaction> findNonReversedAccrualTransactionsForReprocessingByLoan(@Param("loan") Loan loan);
 }

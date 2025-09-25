@@ -87,7 +87,13 @@ public class LoanContractTerminationServiceImpl {
         final Map<String, Object> changes = new LinkedHashMap<>();
 
         final LoanTransaction contractTermination = LoanTransaction.contractTermination(loan, DateUtils.getBusinessLocalDate(), externalId);
-        loanTransactionRepository.save(contractTermination);
+
+        if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
+            final List<LoanTransaction> loanTransactions = loanTransactionService.retrieveListOfTransactionsForReprocessing(loan);
+            reprocessLoanTransactionsService.reprocessParticularTransactions(loan, loanTransactions, List.of(contractTermination));
+        } else {
+            reprocessLoanTransactionsService.processLatestTransaction(contractTermination, loan);
+        }
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
@@ -100,16 +106,6 @@ public class LoanContractTerminationServiceImpl {
         loan.setLoanSubStatus(LoanSubStatus.CONTRACT_TERMINATION);
         loanRepository.save(loan);
         changes.put(LoanApiConstants.subStatusAttributeName, loan.getLoanSubStatus().getCode());
-
-        if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
-            final List<LoanTransaction> loanTransactions = loanTransactionService.retrieveListOfTransactionsForReprocessing(loan);
-            loanTransactions.add(contractTermination);
-            reprocessLoanTransactionsService.reprocessParticularTransactions(loan, loanTransactions);
-            loan.addLoanTransaction(contractTermination);
-        } else {
-            reprocessLoanTransactionsService.processLatestTransaction(contractTermination, loan);
-            loan.addLoanTransaction(contractTermination);
-        }
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanTransactionContractTerminationPostBusinessEvent(contractTermination));

@@ -2181,7 +2181,7 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
         // Fixed schedule End Date for generating schedule
         final LocalDate scheduleTillDate = null;
         return rescheduleNextInstallments(mc, loanApplicationTerms, loan, holidayDetailDTO, loanRepaymentScheduleTransactionProcessor,
-                rescheduleFrom, scheduleTillDate);
+                rescheduleFrom, scheduleTillDate, null);
 
     }
 
@@ -2189,10 +2189,13 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
     public LoanScheduleDTO rescheduleNextInstallments(final MathContext mc, final LoanApplicationTerms loanApplicationTerms, Loan loan,
             final HolidayDetailDTO holidayDetailDTO,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, LocalDate rescheduleFrom,
-            final LocalDate scheduleTillDate) {
+            final LocalDate scheduleTillDate, final LoanTransaction newTransaction) {
         // Loan transactions to process and find the variation on payments
         Collection<RecalculationDetail> recalculationDetails = new ArrayList<>();
-        List<LoanTransaction> transactions = loan.getLoanTransactions();
+        List<LoanTransaction> transactions = new ArrayList<>(loan.getLoanTransactions());
+        if (newTransaction != null) {
+            transactions.add(newTransaction);
+        }
         for (LoanTransaction loanTransaction : transactions) {
             if (loanTransaction.isPaymentTransaction()) {
                 recalculationDetails.add(new RecalculationDetail(loanTransaction.getTransactionDate(),
@@ -2798,7 +2801,7 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
         }
 
         LoanScheduleDTO loanScheduleDTO = rescheduleNextInstallments(mc, loanApplicationTerms, loan, holidayDetailDTO,
-                loanRepaymentScheduleTransactionProcessor, onDate, calculateTill);
+                loanRepaymentScheduleTransactionProcessor, onDate, calculateTill, null);
         final List<LoanTransaction> loanTransactions = loanTransactionRepository.findNonReversedTransactionsForReprocessingByLoan(loan);
 
         loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(loanApplicationTerms.getExpectedDisbursementDate(),

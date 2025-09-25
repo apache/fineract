@@ -885,18 +885,18 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
                 .determineProcessor(loan.transactionProcessingStrategy());
-        loan.addLoanTransaction(loanChargeAdjustmentTransaction);
         if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
             if (loan.isProgressiveSchedule() && ((loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy())
                     || loan.hasContractTerminationTransaction())) {
                 final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
                 loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
             }
-            reprocessLoanTransactionsService.reprocessTransactions(loan);
+            reprocessLoanTransactionsService.reprocessTransactions(loan, List.of(loanChargeAdjustmentTransaction));
         } else {
             loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanChargeAdjustmentTransaction,
                     TransactionCtx.builder().currency(loan.getCurrency()).installments(loan.getRepaymentScheduleInstallments())
                             .charges(loan.getActiveCharges()).overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney())).build());
+            loan.addLoanTransaction(loanChargeAdjustmentTransaction);
         }
         loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(loanChargeAdjustmentTransaction);
         loanLifecycleStateMachine.determineAndTransition(loan, loan.getLastUserTransactionDate());
@@ -1441,10 +1441,10 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(waiveLoanChargeTransaction, loanCharge,
                 waiveLoanChargeTransaction.getAmount(loan.getCurrency()).getAmount(), loanInstallmentNumber);
         waiveLoanChargeTransaction.getLoanChargesPaid().add(loanChargePaidBy);
-        loan.addLoanTransaction(waiveLoanChargeTransaction);
         if (loan.isCumulativeSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()
                 && DateUtils.isBefore(loanCharge.getDueLocalDate(), businessDate)) {
-            loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
+            loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO,
+                    waiveLoanChargeTransaction);
         } else if (loan.isProgressiveSchedule() && ((loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy())
                 || loan.hasContractTerminationTransaction())) {
             loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
@@ -1452,7 +1452,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         // Waive of charges whose due date falls after latest 'repayment' transaction don't require entire loan schedule
         // to be reprocessed.
         if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(loan.getCurrency())) {
-            reprocessLoanTransactionsService.reprocessTransactions(loan);
+            reprocessLoanTransactionsService.reprocessTransactions(loan, List.of(waiveLoanChargeTransaction));
         } else {
             // reprocess loan schedule based on charge been waived.
             final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();

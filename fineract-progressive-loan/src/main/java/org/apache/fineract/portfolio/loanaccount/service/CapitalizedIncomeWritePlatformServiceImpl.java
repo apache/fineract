@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -87,8 +88,6 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
         final Money capitalizedIncomeAmount = calculateCapitalizedIncomeAmount(loan, transactionAmount);
         final LoanTransaction capitalizedIncomeTransaction = LoanTransaction.capitalizedIncome(loan, capitalizedIncomeAmount, paymentDetail,
                 transactionDate, txnExternalId);
-        // Update loan with capitalized income
-        loan.addLoanTransaction(capitalizedIncomeTransaction);
         // Add Loan Transaction classification
         addClassificationCodeToTransaction(command, LoanTransactionApiConstants.CAPITALIZED_INCOME_CLASSIFICATION_CODE,
                 capitalizedIncomeTransaction);
@@ -144,7 +143,6 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
         capitalizedIncomeAdjustment.getLoanTransactionRelations().add(LoanTransactionRelation.linkToTransaction(capitalizedIncomeAdjustment,
                 capitalizedIncome.get(), LoanTransactionRelationTypeEnum.ADJUSTMENT));
         capitalizedIncomeAdjustment.setClassification(capitalizedIncome.get().getClassification());
-        loan.addLoanTransaction(capitalizedIncomeAdjustment);
         recalculateLoanTransactions(loan, transactionDate, capitalizedIncomeAdjustment);
         LoanTransaction savedCapitalizedIncomeAdjustment = loanTransactionRepository.saveAndFlush(capitalizedIncomeAdjustment);
 
@@ -184,7 +182,7 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
 
     private void recalculateLoanTransactions(Loan loan, LocalDate transactionDate, LoanTransaction transaction) {
         if (loan.isInterestRecalculationEnabled() || DateUtils.isBeforeBusinessDate(transactionDate)) {
-            reprocessLoanTransactionsService.reprocessTransactions(loan);
+            reprocessLoanTransactionsService.reprocessTransactions(loan, List.of(transaction));
         } else {
             reprocessLoanTransactionsService.processLatestTransaction(transaction, loan);
         }
