@@ -233,8 +233,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         final LoanProductRelatedDetail loanProductRelatedDetail = loan.getLoanRepaymentScheduleDetail();
         ProgressiveLoanInterestScheduleModel scheduleModel = emiCalculator.generateInstallmentInterestScheduleModel(installments,
                 loanProductRelatedDetail, loanTermVariations, installmentAmountInMultiplesOf, overpaymentHolder.getMoneyObject().getMc());
-        ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, charges, overpaymentHolder,
-                changedTransactionDetail, scheduleModel, loanTransactions);
+        final ProgressiveTransactionCtx ctx = ProgressiveTransactionCtx.builder().currency(currency).installments(installments)
+                .charges(charges).overpaymentHolder(overpaymentHolder).changedTransactionDetail(changedTransactionDetail)
+                .model(scheduleModel).sumOfInterestRefundAmount(Money.zero(currency)).loanTransactions(loanTransactions).build();
 
         List<ChangeOperation> changeOperations = createSortedChangeList(loanTermVariations, loanTransactionsToReprocess, charges);
 

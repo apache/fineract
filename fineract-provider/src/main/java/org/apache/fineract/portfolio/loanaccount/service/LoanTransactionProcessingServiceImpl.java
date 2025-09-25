@@ -99,9 +99,10 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
                 .orElseGet(() -> advancedProcessor.calculateInterestScheduleModel(loan.getId(), loanTransaction.getTransactionDate()));
 
         final List<LoanTransaction> transactions = loanTransactionService.retrieveListOfTransactionsForReprocessing(loan);
-        ProgressiveTransactionCtx progressiveContext = new ProgressiveTransactionCtx(loan.getCurrency(),
-                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()),
-                new ChangedTransactionDetail(), model, getTotalRefundInterestAmount(loan), transactions);
+        final ProgressiveTransactionCtx progressiveContext = ProgressiveTransactionCtx.builder().currency(loan.getCurrency())
+                .installments(loan.getRepaymentScheduleInstallments()).charges(loan.getActiveCharges())
+                .overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney())).changedTransactionDetail(new ChangedTransactionDetail())
+                .model(model).sumOfInterestRefundAmount(getTotalRefundInterestAmount(loan)).loanTransactions(transactions).build();
         progressiveContext.getAlreadyProcessedTransactions().addAll(transactions);
         progressiveContext.setChargedOff(loan.isChargedOff());
         progressiveContext.setWrittenOff(loan.isClosedWrittenOff());

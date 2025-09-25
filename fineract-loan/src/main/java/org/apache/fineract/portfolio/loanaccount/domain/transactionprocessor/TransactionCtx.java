@@ -20,9 +20,8 @@ package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor;
 
 import java.util.List;
 import java.util.Set;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -30,8 +29,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
 @Data
-@Builder
-@AllArgsConstructor
+@SuperBuilder
 public class TransactionCtx {
 
     private final MonetaryCurrency currency;

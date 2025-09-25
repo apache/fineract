@@ -43,7 +43,6 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -493,8 +492,9 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         ChangedTransactionDetail changedTransactionDetail = mock(ChangedTransactionDetail.class);
 
         // Set up TransactionCtx with installments and charges
-        TransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, Set.of(), overpaymentHolder, changedTransactionDetail,
-                model, Collections.emptyList());
+        TransactionCtx ctx = ProgressiveTransactionCtx.builder().currency(currency).installments(installments).charges(Set.of())
+                .overpaymentHolder(overpaymentHolder).changedTransactionDetail(changedTransactionDetail)
+                .sumOfInterestRefundAmount(Money.zero(currency)).model(model).build();
 
         // Mock additional necessary methods
         LoanCharge loanCharge = mock(LoanCharge.class);
@@ -569,8 +569,9 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
 
         ProgressiveLoanInterestScheduleModel model = mock(ProgressiveLoanInterestScheduleModel.class);
 
-        TransactionCtx ctx = new ProgressiveTransactionCtx(currency, spyInstallments, Set.of(), new MoneyHolder(Money.zero(currency)),
-                mock(ChangedTransactionDetail.class), model, Money.zero(currency), Collections.emptyList());
+        TransactionCtx ctx = ProgressiveTransactionCtx.builder().currency(currency).installments(spyInstallments).charges(Set.of())
+                .overpaymentHolder(new MoneyHolder(Money.zero(currency))).sumOfInterestRefundAmount(Money.zero(currency))
+                .changedTransactionDetail(mock(ChangedTransactionDetail.class)).model(model).build();
 
         underTest.processLatestTransaction(disbursementTransaction, ctx);
 

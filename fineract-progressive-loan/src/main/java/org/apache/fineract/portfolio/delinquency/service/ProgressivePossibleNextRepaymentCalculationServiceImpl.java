@@ -20,12 +20,12 @@ package org.apache.fineract.portfolio.delinquency.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -58,8 +58,10 @@ public class ProgressivePossibleNextRepaymentCalculationServiceImpl extends Abst
             return BigDecimal.ZERO;
         }
         List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();
-        ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(loan.getCurrency(), repaymentScheduleInstallments, Set.of(),
-                new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail(), scheduleModel, Collections.emptyList());
+        final ProgressiveTransactionCtx ctx = ProgressiveTransactionCtx.builder().currency(loan.getCurrency())
+                .installments(repaymentScheduleInstallments).charges(Set.of())
+                .overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney())).changedTransactionDetail(new ChangedTransactionDetail())
+                .sumOfInterestRefundAmount(Money.zero(currency)).model(scheduleModel).build();
         ctx.setChargedOff(loan.isChargedOff());
         ctx.setWrittenOff(loan.isClosedWrittenOff());
         ctx.setContractTerminated(loan.isContractTermination());

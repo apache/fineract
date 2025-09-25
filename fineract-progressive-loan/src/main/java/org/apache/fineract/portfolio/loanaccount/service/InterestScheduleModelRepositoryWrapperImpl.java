@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import jakarta.persistence.FlushModeType;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -29,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.persistence.FlushModeHandler;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -111,9 +111,11 @@ public class InterestScheduleModelRepositoryWrapperImpl implements InterestSched
         if (progressiveLoanModel.isPresent() && !progressiveLoanModel.get().getBusinessDate().isAfter(businessDate)) {
             savedModel = extractModel(progressiveLoanModel);
             if (savedModel.isPresent() && progressiveLoanModel.get().getBusinessDate().isBefore(businessDate)) {
-                ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                        Set.of(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail(), savedModel.get(),
-                        Collections.emptyList());
+                final ProgressiveTransactionCtx ctx = ProgressiveTransactionCtx.builder().currency(loan.getCurrency()).charges(Set.of())
+                        .installments(loan.getRepaymentScheduleInstallments())
+                        .overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney()))
+                        .sumOfInterestRefundAmount(Money.zero(loan.getCurrency())).changedTransactionDetail(new ChangedTransactionDetail())
+                        .model(savedModel.get()).build();
                 ctx.setChargedOff(loan.isChargedOff());
                 ctx.setWrittenOff(loan.isClosedWrittenOff());
                 ctx.setContractTerminated(loan.isContractTermination());

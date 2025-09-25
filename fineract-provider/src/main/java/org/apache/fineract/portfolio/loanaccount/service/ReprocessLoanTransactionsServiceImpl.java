@@ -152,7 +152,7 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
         List<LoanTransaction> transactions = Collections.emptyList();
         if (loanTransaction.isInterestRefund() || loanTransaction.isContractTermination() || loanTransaction.isChargeback()
                 || loanTransaction.isChargeOff()) {
-            transactions = loan.getLoanTransactions();
+            transactions = loanTransactionRepository.findNonReversedByLoan(loan);
         }
 
         TransactionCtx transactionCtx;
@@ -161,9 +161,11 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
                     loanTransaction.getTransactionDate());
             final ProgressiveLoanInterestScheduleModel model = savedModel
                     .orElseGet(() -> advancedProcessor.calculateInterestScheduleModel(loan.getId(), loanTransaction.getTransactionDate()));
-            transactionCtx = new ProgressiveTransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                    loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail(), model,
-                    transactions);
+            transactionCtx = ProgressiveTransactionCtx.builder().currency(loan.getCurrency())
+                    .installments(loan.getRepaymentScheduleInstallments()).charges(loan.getActiveCharges())
+                    .overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney()))
+                    .changedTransactionDetail(new ChangedTransactionDetail()).sumOfInterestRefundAmount(Money.zero(loan.getCurrency()))
+                    .model(model).loanTransactions(transactions).build();
         } else {
             transactionCtx = TransactionCtx.builder().currency(loan.getCurrency()).installments(loan.getRepaymentScheduleInstallments())
                     .charges(loan.getActiveCharges()).overpaymentHolder(new MoneyHolder(loan.getTotalOverpaidAsMoney()))
@@ -216,9 +218,10 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
 
     private ChangedTransactionDetail reprocessTransactionsAndFetchChangedTransactions(final Loan loan,
             final List<LoanTransaction> loanTransactions) {
+        final List<LoanTransaction> transactions = loanTransactionRepository.findNonReversedByLoan(loan);
         final ChangedTransactionDetail changedTransactionDetail = loanTransactionProcessingService.reprocessLoanTransactions(
                 loan.getTransactionProcessingStrategyCode(), loan.getDisbursementDate(), loanTransactions, loan.getCurrency(),
-                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), loan.getLoanTransactions());
+                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), transactions);
         for (TransactionChangeData change : changedTransactionDetail.getTransactionChanges()) {
             change.getNewTransaction().updateLoan(loan);
         }
