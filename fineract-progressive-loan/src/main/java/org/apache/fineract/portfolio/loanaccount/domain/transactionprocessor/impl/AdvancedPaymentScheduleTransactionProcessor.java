@@ -412,7 +412,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             case WAIVE_CHARGES -> log.debug("WAIVE_CHARGES transaction will not be processed.");
             case REAMORTIZE -> handleReAmortization(loanTransaction, ctx);
             case REAGE -> handleReAge(loanTransaction, ctx);
-            case ACCRUAL_ACTIVITY -> calculateAccrualActivity(loanTransaction, ctx);
             case CAPITALIZED_INCOME -> handleCapitalizedIncome(loanTransaction, ctx);
             case CONTRACT_TERMINATION -> handleContractTermination(loanTransaction, ctx);
             // TODO: Cover rest of the transaction types
@@ -2901,10 +2900,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         reAgedInstallment.addToPrincipal(loanTransaction.getTransactionDate(), adjustCalculatedPrincipal);
 
         reprocessInstallments(installments);
-    }
-
-    protected void calculateAccrualActivity(LoanTransaction transaction, TransactionCtx ctx) {
-        super.calculateAccrualActivity(transaction, ctx.getCurrency(), ctx.getInstallments());
     }
 
     private void reprocessInstallments(final List<LoanRepaymentScheduleInstallment> installments) {

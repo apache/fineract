@@ -62,6 +62,7 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
     private final LoanTransactionService loanTransactionService;
     private final LoanJournalEntryPoster loanJournalEntryPoster;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final LoanAccrualActivityProcessingService loanAccrualActivityProcessingService;
 
     @Override
     public void reprocessTransactions(final Loan loan) {
@@ -227,6 +228,7 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
                 .map(TransactionChangeData::getNewTransaction).toList();
         loan.getLoanTransactions().addAll(newTransactions);
         loanBalanceService.updateLoanSummaryDerivedFields(loan);
+        loanAccrualActivityProcessingService.recalculateAccrualActivityTransaction(loan, changedTransactionDetail);
         return changedTransactionDetail;
     }
 }
