@@ -1059,13 +1059,7 @@ public final class LoanProductDataValidator {
 
             final Integer interestType = this.fromApiJsonHelper.extractIntegerNamed(INTEREST_TYPE, element, Locale.getDefault());
 
-            boolean isProgressive = isProgressive(element, loanProduct);
-            if (isProgressive) {
-                baseDataValidator.reset().parameter(INTEREST_TYPE).value(interestType).ignoreIfNull().inMinMaxRange(0, 1);
-            } else {
-                baseDataValidator.reset().parameter(INTEREST_TYPE).value(interestType).ignoreIfNull()
-                        .integerSameAsNumber(InterestMethod.DECLINING_BALANCE.getValue());
-            }
+            baseDataValidator.reset().parameter(INTEREST_TYPE).value(interestType).ignoreIfNull().inMinMaxRange(0, 1);
         }
 
         final String overAppliedCalculationType = this.fromApiJsonHelper.extractStringNamed(OVER_APPLIED_CALCULATION_TYPE, element);

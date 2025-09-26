@@ -494,7 +494,7 @@ public class DataValidatorBuilder {
             final Integer intValue = Integer.valueOf(this.value.toString());
             if (!intValue.equals(number)) {
                 String validationErrorCode = "validation.msg." + this.resource + "." + this.parameter + ".not.equal.to.specified.number";
-                String defaultEnglishMessage = "The parameter `" + this.parameter + "` must be same as" + number;
+                String defaultEnglishMessage = "The parameter `" + this.parameter + "` must be same as " + number;
                 final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode, defaultEnglishMessage, this.parameter,
                         intValue, number);
                 this.dataValidationErrors.add(error);
