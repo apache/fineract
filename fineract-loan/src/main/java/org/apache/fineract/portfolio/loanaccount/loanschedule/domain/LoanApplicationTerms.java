@@ -1085,7 +1085,7 @@ public final class LoanApplicationTerms {
         final BigDecimal loanTermFrequencyBigDecimal = calculatePeriodsInLoanTerm();
 
         return this.annualNominalInterestRate.divide(loanTermPeriodsInYearBigDecimal, mc).divide(divisor, mc)
-                .multiply(loanTermFrequencyBigDecimal);
+                .multiply(loanTermFrequencyBigDecimal, mc);
     }
 
     private BigDecimal calculatePeriodsInLoanTerm() {
@@ -1237,7 +1237,7 @@ public final class LoanApplicationTerms {
             }
 
             if (this.installmentAmountInMultiplesOf != null) {
-                Money roundedPrincipalPerPeriod = Money.roundToMultiplesOf(principalPerPeriod, this.installmentAmountInMultiplesOf);
+                Money roundedPrincipalPerPeriod = Money.roundToMultiplesOf(principalPerPeriod, this.installmentAmountInMultiplesOf, mc);
                 if (interestForThisInstallment != null) {
                     Money roundedInterestForThisInstallment = Money.roundToMultiplesOf(interestForThisInstallment,
                             this.installmentAmountInMultiplesOf);
