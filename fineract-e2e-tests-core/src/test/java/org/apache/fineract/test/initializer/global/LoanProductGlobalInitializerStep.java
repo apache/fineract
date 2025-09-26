@@ -40,6 +40,7 @@ import org.apache.fineract.client.models.CreditAllocationOrder;
 import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.LoanProductPaymentAllocationRule;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
+import org.apache.fineract.client.models.PostClassificationToIncomeAccountMappings;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.services.LoanProductsApi;
@@ -3728,6 +3729,95 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADVANCED_CUSTOM_PAYMENT_ALLOCATION_PROGRESSIVE_LOAN_SCHEDULE_ZERO_CHARGE_OFF,
                 responseLoanProductsRequestAdvCustomPaymentAllocationProgressiveLoanScheduleZeroChargeOff);
+
+        // LP2 with progressive loan schedule + horizontal + interest EMI + 360/30
+        // + interest recalculation, buy down fees enabled
+        // + Classification income map
+        final String name140 = DefaultLoanProduct.LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_CLASSIFICATION_INCOME_MAP
+                .getName();
+
+        List<PostClassificationToIncomeAccountMappings> buydownfeeClassificationToIncomeAccountMappings = new ArrayList<>();
+        PostClassificationToIncomeAccountMappings classificationToIncomeAccountMappings = new PostClassificationToIncomeAccountMappings();
+        classificationToIncomeAccountMappings.setClassificationCodeValueId(25L);
+        classificationToIncomeAccountMappings.setIncomeAccountId(10L);
+        buydownfeeClassificationToIncomeAccountMappings.add(classificationToIncomeAccountMappings);
+
+        final PostLoanProductsRequest loanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesClassificationIncomeMap = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2BuyDownFees()//
+                .name(name140)//
+                .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
+                .loanScheduleType("PROGRESSIVE") //
+                .isInterestRecalculationEnabled(true)//
+                .preClosureInterestCalculationStrategy(1)//
+                .rescheduleStrategyMethod(4)//
+                .interestRecalculationCompoundingMethod(0)//
+                .recalculationRestFrequencyType(2)//
+                .recalculationRestFrequencyInterval(1)//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")))//
+                .buydownfeeClassificationToIncomeAccountMappings(buydownfeeClassificationToIncomeAccountMappings);//
+
+        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesClassificationIncomeMap = loanProductsApi
+                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesClassificationIncomeMap).execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_PROGRESSIVE_ADV_PYMNT_BUYDOWN_FEES_CLASSIFICATION_INCOME_MAP,
+                responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesClassificationIncomeMap);
+
+        // LP2 with progressive loan schedule + horizontal + interest EMI + 360/30 + custom allocation capital
+        // adjustment
+        // + interest recalculation, preClosureInterestCalculationStrategy= till preclose,
+        // Frequency for recalculate Outstanding Principal: Daily, Frequency Interval for recalculation: 1
+        // capitalized income enabled + income type - fee
+        // + Classification income map
+        final String name141 = DefaultLoanProduct.LP2_PROGRESSIVE_ADV_PMNT_ALLOCATION_CAPITALIZED_INCOME_ADJ_CUSTOM_ALLOC_CLASSIFICATION_INCOME_MAP
+                .getName();
+
+        List<PostClassificationToIncomeAccountMappings> capitalizedIncomeClassificationToIncomeAccountMappings = new ArrayList<>();
+        PostClassificationToIncomeAccountMappings classificationToIncomeAccountMappingsCapitalizedIncome = new PostClassificationToIncomeAccountMappings();
+        classificationToIncomeAccountMappingsCapitalizedIncome.setClassificationCodeValueId(24L);
+        classificationToIncomeAccountMappingsCapitalizedIncome.setIncomeAccountId(15L);
+        capitalizedIncomeClassificationToIncomeAccountMappings.add(classificationToIncomeAccountMappingsCapitalizedIncome);
+
+        final PostLoanProductsRequest loanProductsRequestLP2ProgressiveAdvPaymAllocCapitaizedIncomeClassificationIncomeMap = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2EmiCapitalizedIncome()//
+                .name(name141)//
+                .daysInYearType(DaysInYearType.DAYS360.value)//
+                .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                .isInterestRecalculationEnabled(true)//
+                .preClosureInterestCalculationStrategy(1)//
+                .rescheduleStrategyMethod(4)//
+                .interestRecalculationCompoundingMethod(0)//
+                .recalculationRestFrequencyType(2)//
+                .recalculationRestFrequencyInterval(1)//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("CAPITALIZED_INCOME_ADJUSTMENT", "NEXT_INSTALLMENT",
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_PRINCIPAL, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_INTEREST, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_FEE, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_PENALTY, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_PRINCIPAL, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_INTEREST, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_FEE, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_PENALTY, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PRINCIPAL, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_INTEREST, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_FEE, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PENALTY), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")))//
+                .capitalizedIncomeClassificationToIncomeAccountMappings(capitalizedIncomeClassificationToIncomeAccountMappings);//
+
+        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPaymAllocCapitaizedIncomeClassificationIncomeMap = loanProductsApi
+                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPaymAllocCapitaizedIncomeClassificationIncomeMap).execute();
+
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_PROGRESSIVE_ADV_PMNT_ALLOCATION_CAPITALIZED_INCOME_ADJ_CUSTOM_ALLOC_CLASSIFICATION_INCOME_MAP,
+                responseLoanProductsRequestLP2ProgressiveAdvPaymAllocCapitaizedIncomeClassificationIncomeMap);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,

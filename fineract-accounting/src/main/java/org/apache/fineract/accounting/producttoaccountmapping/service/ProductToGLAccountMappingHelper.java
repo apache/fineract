@@ -297,7 +297,7 @@ public class ProductToGLAccountMappingHelper {
 
             // If input map is empty, delete all existing mappings
             if (inputChargeToIncomeAccountMap.size() == 0) {
-                this.accountMappingRepository.deleteAllInBatch(existingChargeToIncomeAccountMappings);
+                this.accountMappingRepository.deleteAll(existingChargeToIncomeAccountMappings);
             } /**
                * Else, <br/>
                * update existing mappings OR <br/>
@@ -377,7 +377,7 @@ public class ProductToGLAccountMappingHelper {
 
             // If input map is empty, delete all existing mappings
             if (inputPaymentChannelFundSourceMap.isEmpty()) {
-                this.accountMappingRepository.deleteAllInBatch(existingPaymentChannelToFundSourceMappings);
+                this.accountMappingRepository.deleteAll(existingPaymentChannelToFundSourceMappings);
             } /**
                * Else, <br/>
                * update existing mappings OR <br/>
@@ -440,7 +440,7 @@ public class ProductToGLAccountMappingHelper {
 
             // If input map is empty, delete all existing mappings
             if (inputChargeOffReasonToGLAccountMap.isEmpty()) {
-                this.accountMappingRepository.deleteAllInBatch(existingChargeOffReasonToGLAccountMappings);
+                this.accountMappingRepository.deleteAll(existingChargeOffReasonToGLAccountMappings);
             } else {
                 for (final ProductToGLAccountMapping existingChargeOffReasonToGLAccountMapping : existingChargeOffReasonToGLAccountMappings) {
                     final Long currentChargeOffReasonId = existingChargeOffReasonToGLAccountMapping.getChargeOffReason().getId();
@@ -504,7 +504,7 @@ public class ProductToGLAccountMappingHelper {
 
             // If input map is empty, delete all existing mappings
             if (inputClassificationToGLAccountMap.isEmpty()) {
-                this.accountMappingRepository.deleteAllInBatch(existingClassificationToGLAccountMappings);
+                this.accountMappingRepository.deleteAll(existingClassificationToGLAccountMappings);
             } else {
                 for (final ProductToGLAccountMapping existingClassificationToGLAccountMapping : existingClassificationToGLAccountMappings) {
                     final Long currentClassificationId = classificationParameter
@@ -699,7 +699,7 @@ public class ProductToGLAccountMappingHelper {
         final List<ProductToGLAccountMapping> productToGLAccountMappings = this.accountMappingRepository
                 .findByProductIdAndProductType(loanProductId, portfolioProductType.getValue());
         if (productToGLAccountMappings != null && !productToGLAccountMappings.isEmpty()) {
-            this.accountMappingRepository.deleteAllInBatch(productToGLAccountMappings);
+            this.accountMappingRepository.deleteAll(productToGLAccountMappings);
         }
     }
 

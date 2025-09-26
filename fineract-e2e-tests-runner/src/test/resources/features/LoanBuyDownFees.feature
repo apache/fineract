@@ -3772,3 +3772,78 @@ Feature:Feature: Buy Down Fees
     And Buy down fee by external-id contains the following data:
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 1.0        | 0.5              | 0.0                      | 0.3             | 0.2                |
+
+  @TestRailId:C4092
+  Scenario: Verify GL entries for Buydown Fee Amortization - UC1: Amortization for Buydown fee with NO classification rule
+    When Admin sets the business date to "01 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                        | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_CLASSIFICATION_INCOME_MAP | 01 January 2024   | 350            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "350" amount and expected disbursement date on "01 January 2024"
+    And Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount
+    And Admin sets the business date to "02 January 2024"
+    And Admin runs inline COB job for Loan
+    Then Loan Transactions tab has a "BUY_DOWN_FEE" transaction with date "01 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | EXPENSE   | 450280       | Buy Down Expense            | 50.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
+    And Loan Transactions tab has a "BUY_DOWN_FEE_AMORTIZATION" transaction with date "01 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 450281       | Income From Buy Down        |       | 0.55   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 0.55  |        |
+
+  @TestRailId:C4093
+  Scenario: Verify GL entries for Buydown Fee Amortization - UC2: Amortization for Buydown fee with classification rule: pending_bankruptcy
+    When Admin sets the business date to "01 January 2024"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                        | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_CLASSIFICATION_INCOME_MAP | 01 January 2024   | 350            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "350" amount and expected disbursement date on "01 January 2024"
+    And Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount and classification: pending_bankruptcy
+    And Admin sets the business date to "02 January 2024"
+    And Admin runs inline COB job for Loan
+    Then Loan Transactions tab has a "BUY_DOWN_FEE" transaction with date "01 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | EXPENSE   | 450280       | Buy Down Expense            | 50.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
+    And Loan Transactions tab has a "BUY_DOWN_FEE_AMORTIZATION" transaction with date "01 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 404007       | Fee Income                  |       | 0.55   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 0.55  |        |
+
+  @TestRailId:C4094
+  Scenario: Verify GL entries for Buydown Fee Amortization - UC3: Amortization for Buydown fees with NO classification and with classification rule: pending_bankruptcy
+    When Admin sets the business date to "01 January 2024"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                        | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_CLASSIFICATION_INCOME_MAP | 01 January 2024   | 350            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "350" amount and expected disbursement date on "01 January 2024"
+    And Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount
+    And Admin sets the business date to "02 January 2024"
+    And Admin runs inline COB job for Loan
+    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "02 January 2024" with "20" EUR transaction amount and classification: pending_bankruptcy
+    And Admin sets the business date to "03 January 2024"
+    And Admin runs inline COB job for Loan
+    Then Loan Transactions tab has a "BUY_DOWN_FEE" transaction with date "01 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | EXPENSE   | 450280       | Buy Down Expense            | 50.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
+    And Loan Transactions tab has a "BUY_DOWN_FEE_AMORTIZATION" transaction with date "01 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 450281       | Income From Buy Down        |       | 0.55   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 0.55  |        |
+    And Loan Transactions tab has a "BUY_DOWN_FEE" transaction with date "02 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | EXPENSE   | 450280       | Buy Down Expense            | 20.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 20.0   |
+    And Loan Transactions tab has a "BUY_DOWN_FEE_AMORTIZATION" transaction with date "02 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 404007       | Fee Income                  |       | 0.22   |
+      | INCOME    | 450281       | Income From Buy Down        |       | 0.55   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 0.77  |        |

@@ -4773,10 +4773,36 @@ public class LoanStepDef extends AbstractStepDef {
         return capitalizedIncomeResponse;
     }
 
+    public Response<PostLoansLoanIdTransactionsResponse> addCapitalizedIncomeToTheLoanOnWithEURTransactionAmountWithClassificationScheduledPayment(
+            final String transactionPaymentType, final String transactionDate, final String amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+
+        final DefaultPaymentType paymentType = DefaultPaymentType.valueOf(transactionPaymentType);
+        final Long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
+
+        final PostLoansLoanIdTransactionsRequest capitalizedIncomeRequest = LoanRequestFactory.defaultCapitalizedIncomeRequest()
+                .transactionDate(transactionDate).transactionAmount(Double.valueOf(amount)).paymentTypeId(paymentTypeValue)
+                .externalId("EXT-CAP-INC-" + UUID.randomUUID()).classificationId(24L);
+
+        final Response<PostLoansLoanIdTransactionsResponse> capitalizedIncomeResponse = loanTransactionsApi
+                .executeLoanTransaction(loanId, capitalizedIncomeRequest, "capitalizedIncome").execute();
+        return capitalizedIncomeResponse;
+    }
+
     @And("Admin adds capitalized income with {string} payment type to the loan on {string} with {string} EUR transaction amount")
     public void adminAddsCapitalizedIncomeToTheLoanOnWithEURTransactionAmount(final String transactionPaymentType,
             final String transactionDate, final String amount) throws IOException {
         final Response<PostLoansLoanIdTransactionsResponse> capitalizedIncomeResponse = addCapitalizedIncomeToTheLoanOnWithEURTransactionAmount(
+                transactionPaymentType, transactionDate, amount);
+        testContext().set(TestContextKey.LOAN_CAPITALIZED_INCOME_RESPONSE, capitalizedIncomeResponse);
+        ErrorHelper.checkSuccessfulApiCall(capitalizedIncomeResponse);
+    }
+
+    @And("Admin adds capitalized income with {string} payment type to the loan on {string} with {string} EUR transaction amount and classification: scheduled_payment")
+    public void adminAddsCapitalizedIncomeToTheLoanOnWithEURTransactionAmountWithClassificationScheduledPayment(
+            final String transactionPaymentType, final String transactionDate, final String amount) throws IOException {
+        final Response<PostLoansLoanIdTransactionsResponse> capitalizedIncomeResponse = addCapitalizedIncomeToTheLoanOnWithEURTransactionAmountWithClassificationScheduledPayment(
                 transactionPaymentType, transactionDate, amount);
         testContext().set(TestContextKey.LOAN_CAPITALIZED_INCOME_RESPONSE, capitalizedIncomeResponse);
         ErrorHelper.checkSuccessfulApiCall(capitalizedIncomeResponse);
@@ -5214,6 +5240,23 @@ public class LoanStepDef extends AbstractStepDef {
         return buyDownFeeResponse;
     }
 
+    public Response<PostLoansLoanIdTransactionsResponse> addBuyDownFeeToTheLoanOnWithEURTransactionAmountWithClassification(
+            final String transactionPaymentType, final String transactionDate, final String amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+
+        final DefaultPaymentType paymentType = DefaultPaymentType.valueOf(transactionPaymentType);
+        final Long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
+
+        final PostLoansLoanIdTransactionsRequest buyDownFeeRequest = LoanRequestFactory.defaultBuyDownFeeIncomeRequest()
+                .transactionDate(transactionDate).transactionAmount(Double.valueOf(amount)).paymentTypeId(paymentTypeValue)
+                .externalId("EXT-BUY-DOWN-FEE" + UUID.randomUUID()).classificationId(25L);
+
+        final Response<PostLoansLoanIdTransactionsResponse> buyDownFeeResponse = loanTransactionsApi
+                .executeLoanTransaction(loanId, buyDownFeeRequest, "buyDownFee").execute();
+        return buyDownFeeResponse;
+    }
+
     public Response<PostLoansLoanIdTransactionsResponse> adjustBuyDownFee(final String transactionPaymentType, final String transactionDate,
             final String amount, final Long transactionId) throws IOException {
         final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
@@ -5237,6 +5280,15 @@ public class LoanStepDef extends AbstractStepDef {
     public void adminAddsBuyDownFeesToTheLoanOnWithEURTransactionAmount(final String transactionPaymentType, final String transactionDate,
             final String amount) throws IOException {
         final Response<PostLoansLoanIdTransactionsResponse> buyDownFeesIncomeResponse = addBuyDownFeeToTheLoanOnWithEURTransactionAmount(
+                transactionPaymentType, transactionDate, amount);
+        testContext().set(TestContextKey.LOAN_BUY_DOWN_FEE_RESPONSE, buyDownFeesIncomeResponse);
+        ErrorHelper.checkSuccessfulApiCall(buyDownFeesIncomeResponse);
+    }
+
+    @And("Admin adds buy down fee with {string} payment type to the loan on {string} with {string} EUR transaction amount and classification: pending_bankruptcy")
+    public void adminAddsBuyDownFeesToTheLoanOnWithEURTransactionAmountWithClassification(final String transactionPaymentType,
+            final String transactionDate, final String amount) throws IOException {
+        final Response<PostLoansLoanIdTransactionsResponse> buyDownFeesIncomeResponse = addBuyDownFeeToTheLoanOnWithEURTransactionAmountWithClassification(
                 transactionPaymentType, transactionDate, amount);
         testContext().set(TestContextKey.LOAN_BUY_DOWN_FEE_RESPONSE, buyDownFeesIncomeResponse);
         ErrorHelper.checkSuccessfulApiCall(buyDownFeesIncomeResponse);
