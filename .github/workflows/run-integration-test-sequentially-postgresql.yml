@@ -1,6 +1,7 @@
 name: Fineract Cargo & Unit- & Integration tests - Sequential Execution - PostgreSQL
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - develop
