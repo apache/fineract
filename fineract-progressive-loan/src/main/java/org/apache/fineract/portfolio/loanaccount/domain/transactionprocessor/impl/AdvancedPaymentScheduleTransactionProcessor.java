@@ -2868,7 +2868,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         target.setReAged(true);
         target.setFromDate(reAgedInstallment.getFromDate());
         target.setDueDate(reAgedInstallment.getDueDate());
-        target.setPrincipal(reAgedInstallment.getPrincipal().add(MathUtil.nullToZero(target.getPrincipalCompleted())));
+        target.setPrincipal(MathUtil.add(reAgedInstallment.getPrincipal(), target.getPrincipalCompleted()));
         target.setInterestCharged(MathUtil.add(reAgedInstallment.getInterestCharged(), target.getInterestPaid()));
         target.updateObligationsMet(currency, transactionDate);
     }

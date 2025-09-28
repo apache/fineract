@@ -31,8 +31,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -103,7 +101,6 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInterestRecalculationData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanSchedulePeriodDataWrapper;
 import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
@@ -136,7 +133,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.reamortization.LoanReAmo
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -158,9 +154,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -188,7 +182,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     private final ConfigurationDomainService configurationDomainService;
     private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
     private final ColumnValidator columnValidator;
-    protected final DatabaseSpecificSQLGenerator sqlGenerator;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final DelinquencyReadPlatformService delinquencyReadPlatformService;
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanChargePaidByReadService loanChargePaidByReadService;
@@ -201,6 +195,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     private final LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository;
     private final InterestRefundServiceDelegate interestRefundServiceDelegate;
     private final LoanMaximumAmountCalculator loanMaximumAmountCalculator;
+    private final LoanRepaymentScheduleService loanRepaymentScheduleService;
 
     @Override
     public LoanAccountData retrieveOne(final Long loanId) {
@@ -280,19 +275,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData, Collection<DisbursementData> disbursementData,
             Collection<LoanTransactionRepaymentPeriodData> capitalizedIncomeData, boolean isInterestRecalculationEnabled,
             LoanScheduleType loanScheduleType) {
-
-        try {
-            this.context.authenticatedUser();
-
-            final LoanScheduleResultSetExtractor fullResultsetExtractor = new LoanScheduleResultSetExtractor(
-                    repaymentScheduleRelatedLoanData, disbursementData, capitalizedIncomeData, isInterestRecalculationEnabled,
-                    loanScheduleType);
-            final String sql = "select " + fullResultsetExtractor.schema() + " where ls.loan_id = ? order by ls.loan_id, ls.installment";
-
-            return this.jdbcTemplate.query(sql, fullResultsetExtractor, loanId); // NOSONAR
-        } catch (final EmptyResultDataAccessException e) {
-            throw new LoanNotFoundException(loanId, e);
-        }
+        this.context.authenticatedUser();
+        return loanRepaymentScheduleService.findLoanScheduleData(loanId, repaymentScheduleRelatedLoanData, disbursementData,
+                capitalizedIncomeData, isInterestRecalculationEnabled, loanScheduleType);
     }
 
     @Override
@@ -1337,373 +1322,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             return new OverdueLoanScheduleData(loanId, chargeId, dueDate, amount, dateFormat, locale, principalOutstanding,
                     interestOutstanding, installmentNumber);
         }
-    }
-
-    private static final class LoanScheduleResultSetExtractor implements ResultSetExtractor<LoanScheduleData> {
-
-        private final CurrencyData currency;
-        private final DisbursementData disbursement;
-        private final BigDecimal totalFeeChargesDueAtDisbursement;
-        private final Collection<DisbursementData> disbursementData;
-        private final Collection<LoanTransactionRepaymentPeriodData> capitalizedIncomeData;
-        private final LoanScheduleType loanScheduleType;
-        private LocalDate lastDueDate;
-        private BigDecimal outstandingLoanPrincipalBalance;
-        private boolean excludePastUnDisbursed;
-
-        LoanScheduleResultSetExtractor(final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData,
-                Collection<DisbursementData> disbursementData, Collection<LoanTransactionRepaymentPeriodData> capitalizedIncomeData,
-                boolean isInterestRecalculationEnabled, LoanScheduleType loanScheduleType) {
-            this.currency = repaymentScheduleRelatedLoanData.getCurrency();
-            this.disbursement = repaymentScheduleRelatedLoanData.disbursementData();
-            this.capitalizedIncomeData = capitalizedIncomeData;
-            this.totalFeeChargesDueAtDisbursement = repaymentScheduleRelatedLoanData.getTotalFeeChargesAtDisbursement();
-            this.lastDueDate = this.disbursement.disbursementDate();
-            this.outstandingLoanPrincipalBalance = this.disbursement.getPrincipal();
-            this.disbursementData = disbursementData;
-            this.excludePastUnDisbursed = isInterestRecalculationEnabled;
-            this.loanScheduleType = loanScheduleType;
-        }
-
-        public String schema() {
-
-            return " ls.loan_id as loanId, ls.installment as period, ls.fromdate as fromDate, ls.duedate as dueDate, ls.obligations_met_on_date as obligationsMetOnDate, ls.completed_derived as complete,"
-                    + " ls.principal_amount as principalDue, ls.principal_completed_derived as principalPaid, ls.principal_writtenoff_derived as principalWrittenOff, ls.is_additional as isAdditional, "
-                    + " ls.interest_amount as interestDue, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived, ls.interest_writtenoff_derived as interestWrittenOff, "
-                    + " ls.fee_charges_amount as feeChargesDue, ls.fee_charges_completed_derived as feeChargesPaid, ls.fee_charges_waived_derived as feeChargesWaived, ls.fee_charges_writtenoff_derived as feeChargesWrittenOff, "
-                    + " ls.penalty_charges_amount as penaltyChargesDue, ls.penalty_charges_completed_derived as penaltyChargesPaid, ls.penalty_charges_waived_derived as penaltyChargesWaived, "
-                    + " ls.penalty_charges_writtenoff_derived as penaltyChargesWrittenOff, ls.total_paid_in_advance_derived as totalPaidInAdvanceForPeriod, "
-                    + " ls.total_paid_late_derived as totalPaidLateForPeriod, ls.credits_amount as principalCredits, ls.credited_fee as feeCredits, ls.credited_penalty as penaltyCredits, ls.is_down_payment isDownPayment, "
-                    + " ls.accrual_interest_derived as accrualInterest " + " from m_loan_repayment_schedule ls ";
-        }
-
-        @Override
-        public LoanScheduleData extractData(@NonNull final ResultSet rs) throws SQLException, DataAccessException {
-            BigDecimal waivedChargeAmount = BigDecimal.ZERO;
-            for (DisbursementData disbursementDetail : disbursementData) {
-                waivedChargeAmount = waivedChargeAmount.add(disbursementDetail.getWaivedChargeAmount());
-            }
-            final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(
-                    this.disbursement.disbursementDate(), this.disbursement.getPrincipal(), this.totalFeeChargesDueAtDisbursement,
-                    this.disbursement.isDisbursed());
-
-            final List<LoanSchedulePeriodData> periods = new ArrayList<>();
-            final MonetaryCurrency monCurrency = new MonetaryCurrency(this.currency.getCode(), this.currency.getDecimalPlaces(),
-                    this.currency.getInMultiplesOf());
-            BigDecimal totalPrincipalDisbursed = BigDecimal.ZERO;
-            BigDecimal disbursementChargeAmount = this.totalFeeChargesDueAtDisbursement;
-            if (disbursementData.isEmpty()) {
-                periods.add(disbursementPeriod);
-                totalPrincipalDisbursed = Money.of(monCurrency, this.disbursement.getPrincipal()).getAmount();
-            } else {
-                if (!this.disbursement.isDisbursed()) {
-                    excludePastUnDisbursed = false;
-                }
-                for (DisbursementData data : disbursementData) {
-                    if (data.getChargeAmount() != null) {
-                        disbursementChargeAmount = disbursementChargeAmount.subtract(data.getChargeAmount());
-                    }
-                }
-                this.outstandingLoanPrincipalBalance = BigDecimal.ZERO;
-            }
-
-            Money totalPrincipalExpected = Money.zero(monCurrency);
-            Money totalPrincipalPaid = Money.zero(monCurrency);
-            Money totalInterestCharged = Money.zero(monCurrency);
-            Money totalFeeChargesCharged = Money.zero(monCurrency);
-            Money totalPenaltyChargesCharged = Money.zero(monCurrency);
-            Money totalWaived = Money.zero(monCurrency);
-            Money totalWrittenOff = Money.zero(monCurrency);
-            Money totalRepaymentExpected = Money.zero(monCurrency);
-            Money totalRepayment = Money.zero(monCurrency);
-            Money totalPaidInAdvance = Money.zero(monCurrency);
-            Money totalPaidLate = Money.zero(monCurrency);
-            Money totalOutstanding = Money.zero(monCurrency);
-            Money totalCredits = Money.zero(monCurrency);
-
-            // update totals with details of fees charged during disbursement
-            totalFeeChargesCharged = totalFeeChargesCharged.plus(disbursementPeriod.getFeeChargesDue().subtract(waivedChargeAmount));
-            totalRepaymentExpected = totalRepaymentExpected.plus(disbursementPeriod.getFeeChargesDue()).minus(waivedChargeAmount);
-            totalRepayment = totalRepayment.plus(disbursementPeriod.getFeeChargesPaid()).minus(waivedChargeAmount);
-            totalOutstanding = totalOutstanding.plus(disbursementPeriod.getFeeChargesDue()).minus(disbursementPeriod.getFeeChargesPaid());
-
-            Integer loanTermInDays = 0;
-            Set<Long> disbursementPeriodIds = new HashSet<>();
-            while (rs.next()) {
-                final Integer period = JdbcSupport.getInteger(rs, "period");
-                LocalDate fromDate = JdbcSupport.getLocalDate(rs, "fromDate");
-                final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "dueDate");
-                final LocalDate obligationsMetOnDate = JdbcSupport.getLocalDate(rs, "obligationsMetOnDate");
-                final boolean complete = rs.getBoolean("complete");
-
-                List<LoanSchedulePeriodDataWrapper> combinedDataList = new ArrayList<>();
-                combinedDataList.addAll(
-                        collectEligibleDisbursementData(loanScheduleType, disbursementData, fromDate, dueDate, disbursementPeriodIds));
-                combinedDataList.addAll(collectEligibleCapitalizedIncomeData(fromDate, dueDate, disbursementPeriodIds));
-                combinedDataList.sort(this::sortPeriodDataHolders);
-                fillLoanSchedulePeriodData(periods, combinedDataList, disbursementChargeAmount, waivedChargeAmount);
-
-                BigDecimal disbursedAmount = calculateDisbursedAmount(combinedDataList);
-
-                // Add the Charge back or Credits to the initial amount to avoid negative balance
-                final BigDecimal principalCredits = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalCredits");
-                final BigDecimal feeCredits = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeCredits");
-                final BigDecimal penaltyCredits = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyCredits");
-                final BigDecimal credits = principalCredits.add(feeCredits).add(penaltyCredits);
-                this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(principalCredits);
-
-                totalPrincipalDisbursed = totalPrincipalDisbursed.add(disbursedAmount);
-
-                Integer daysInPeriod = 0;
-                if (fromDate != null) {
-                    daysInPeriod = DateUtils.getExactDifferenceInDays(fromDate, dueDate);
-                    loanTermInDays = loanTermInDays + daysInPeriod;
-                }
-
-                final BigDecimal principalDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalDue");
-                totalPrincipalExpected = totalPrincipalExpected.plus(principalDue);
-                final BigDecimal principalPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalPaid");
-                totalPrincipalPaid = totalPrincipalPaid.plus(principalPaid);
-                final BigDecimal principalWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalWrittenOff");
-
-                final BigDecimal principalOutstanding = principalDue.subtract(principalPaid).subtract(principalWrittenOff);
-
-                final BigDecimal interestExpectedDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestDue");
-                totalInterestCharged = totalInterestCharged.plus(interestExpectedDue);
-                final BigDecimal interestPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestPaid");
-                final BigDecimal interestWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestWaived");
-                final BigDecimal interestWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestWrittenOff");
-                final BigDecimal accrualInterest = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "accrualInterest");
-
-                final BigDecimal interestActualDue = interestExpectedDue.subtract(interestWaived).subtract(interestWrittenOff);
-                final BigDecimal interestOutstanding = interestActualDue.subtract(interestPaid);
-
-                final BigDecimal feeChargesExpectedDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesDue");
-                totalFeeChargesCharged = totalFeeChargesCharged.plus(feeChargesExpectedDue);
-                final BigDecimal feeChargesPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesPaid");
-                final BigDecimal feeChargesWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesWaived");
-                final BigDecimal feeChargesWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesWrittenOff");
-
-                final BigDecimal feeChargesActualDue = feeChargesExpectedDue.subtract(feeChargesWaived).subtract(feeChargesWrittenOff);
-                final BigDecimal feeChargesOutstanding = feeChargesActualDue.subtract(feeChargesPaid);
-
-                final BigDecimal penaltyChargesExpectedDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesDue");
-                totalPenaltyChargesCharged = totalPenaltyChargesCharged.plus(penaltyChargesExpectedDue);
-                final BigDecimal penaltyChargesPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesPaid");
-                final BigDecimal penaltyChargesWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesWaived");
-                final BigDecimal penaltyChargesWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesWrittenOff");
-
-                final BigDecimal totalPaidInAdvanceForPeriod = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs,
-                        "totalPaidInAdvanceForPeriod");
-                final BigDecimal totalPaidLateForPeriod = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalPaidLateForPeriod");
-
-                final BigDecimal penaltyChargesActualDue = penaltyChargesExpectedDue.subtract(penaltyChargesWaived)
-                        .subtract(penaltyChargesWrittenOff);
-                final BigDecimal penaltyChargesOutstanding = penaltyChargesActualDue.subtract(penaltyChargesPaid);
-
-                final BigDecimal totalExpectedCostOfLoanForPeriod = interestExpectedDue.add(feeChargesExpectedDue)
-                        .add(penaltyChargesExpectedDue);
-
-                final BigDecimal totalDueForPeriod = principalDue.add(totalExpectedCostOfLoanForPeriod);
-                final BigDecimal totalPaidForPeriod = principalPaid.add(interestPaid).add(feeChargesPaid).add(penaltyChargesPaid);
-                final BigDecimal totalWaivedForPeriod = interestWaived.add(feeChargesWaived).add(penaltyChargesWaived);
-                totalWaived = totalWaived.plus(totalWaivedForPeriod);
-                final BigDecimal totalWrittenOffForPeriod = principalWrittenOff.add(interestWrittenOff).add(feeChargesWrittenOff)
-                        .add(penaltyChargesWrittenOff);
-                totalWrittenOff = totalWrittenOff.plus(totalWrittenOffForPeriod);
-
-                final BigDecimal totalOutstandingForPeriod = principalOutstanding.add(interestOutstanding).add(feeChargesOutstanding)
-                        .add(penaltyChargesOutstanding);
-
-                totalRepaymentExpected = totalRepaymentExpected.plus(totalDueForPeriod);
-                totalRepayment = totalRepayment.plus(totalPaidForPeriod);
-                totalPaidInAdvance = totalPaidInAdvance.plus(totalPaidInAdvanceForPeriod);
-                totalPaidLate = totalPaidLate.plus(totalPaidLateForPeriod);
-                totalOutstanding = totalOutstanding.plus(totalOutstandingForPeriod);
-                totalCredits = totalCredits.add(credits);
-
-                if (fromDate == null) {
-                    fromDate = this.lastDueDate;
-                }
-
-                BigDecimal outstandingPrincipalBalanceOfLoan = this.outstandingLoanPrincipalBalance.subtract(principalDue);
-
-                // update based on current period values
-                this.lastDueDate = dueDate;
-                this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.subtract(principalDue);
-
-                final boolean isDownPayment = rs.getBoolean("isDownPayment");
-
-                LoanSchedulePeriodData periodData;
-
-                periodData = LoanSchedulePeriodData.periodWithPayments(period, fromDate, dueDate, obligationsMetOnDate, complete,
-                        principalDue, principalPaid, principalWrittenOff, principalOutstanding, outstandingPrincipalBalanceOfLoan,
-                        interestExpectedDue, interestPaid, interestWaived, interestWrittenOff, interestOutstanding, feeChargesExpectedDue,
-                        feeChargesPaid, feeChargesWaived, feeChargesWrittenOff, feeChargesOutstanding, penaltyChargesExpectedDue,
-                        penaltyChargesPaid, penaltyChargesWaived, penaltyChargesWrittenOff, penaltyChargesOutstanding, totalPaidForPeriod,
-                        totalPaidInAdvanceForPeriod, totalPaidLateForPeriod, totalWaivedForPeriod, totalWrittenOffForPeriod, credits,
-                        isDownPayment, accrualInterest);
-
-                periods.add(periodData);
-            }
-
-            return new LoanScheduleData(this.currency, periods, loanTermInDays, totalPrincipalDisbursed, totalPrincipalExpected.getAmount(),
-                    totalPrincipalPaid.getAmount(), totalInterestCharged.getAmount(), totalFeeChargesCharged.getAmount(),
-                    totalPenaltyChargesCharged.getAmount(), totalWaived.getAmount(), totalWrittenOff.getAmount(),
-                    totalRepaymentExpected.getAmount(), totalRepayment.getAmount(), totalPaidInAdvance.getAmount(),
-                    totalPaidLate.getAmount(), totalOutstanding.getAmount(), totalCredits.getAmount());
-        }
-
-        private List<LoanSchedulePeriodDataWrapper> collectEligibleDisbursementData(LoanScheduleType loanScheduleType,
-                Collection<DisbursementData> disbursementData, LocalDate fromDate, LocalDate dueDate, Set<Long> disbursementPeriodIds) {
-            List<LoanSchedulePeriodDataWrapper> disbursementDataList = new ArrayList<>();
-
-            boolean hasMultipleTranchesOnSameDate = hasMultipleTranchesOnSameDate(disbursementData);
-
-            if (hasMultipleTranchesOnSameDate) {
-                Map<LocalDate, List<DisbursementData>> disbursementsByDate = new HashMap<>();
-
-                for (final DisbursementData data : disbursementData) {
-                    boolean isDueForDisbursement = data.isDueForDisbursement(loanScheduleType, fromDate, dueDate);
-                    boolean isEligible = ((fromDate.equals(this.disbursement.disbursementDate())
-                            && data.disbursementDate().equals(fromDate))
-                            || (fromDate.equals(dueDate) && data.disbursementDate().equals(fromDate))
-                            || canAddDisbursementData(data, isDueForDisbursement, excludePastUnDisbursed))
-                            && !disbursementPeriodIds.contains(data.getId());
-
-                    if (isEligible) {
-                        disbursementsByDate.computeIfAbsent(data.disbursementDate(), k -> new ArrayList<>()).add(data);
-                        disbursementPeriodIds.add(data.getId());
-                    }
-                }
-
-                for (Map.Entry<LocalDate, List<DisbursementData>> entry : disbursementsByDate.entrySet()) {
-                    List<DisbursementData> sameDateDisbursements = entry.getValue();
-
-                    if (sameDateDisbursements.size() > 1) {
-                        List<DisbursementData> disbursedTranches = sameDateDisbursements.stream().filter(DisbursementData::isDisbursed)
-                                .collect(Collectors.toList());
-
-                        if (!disbursedTranches.isEmpty()) {
-                            for (DisbursementData data : disbursedTranches) {
-                                disbursementDataList.add(new LoanSchedulePeriodDataWrapper(data, data.disbursementDate(), true));
-                            }
-                        } else {
-                            for (DisbursementData data : sameDateDisbursements) {
-                                disbursementDataList.add(new LoanSchedulePeriodDataWrapper(data, data.disbursementDate(), true));
-                            }
-                        }
-                    } else {
-                        DisbursementData data = sameDateDisbursements.get(0);
-                        disbursementDataList.add(new LoanSchedulePeriodDataWrapper(data, data.disbursementDate(), true));
-                    }
-                }
-            } else {
-                for (final DisbursementData data : disbursementData) {
-                    boolean isDueForDisbursement = data.isDueForDisbursement(loanScheduleType, fromDate, dueDate);
-                    boolean isEligible = ((fromDate.equals(this.disbursement.disbursementDate())
-                            && data.disbursementDate().equals(fromDate))
-                            || (fromDate.equals(dueDate) && data.disbursementDate().equals(fromDate))
-                            || canAddDisbursementData(data, isDueForDisbursement, excludePastUnDisbursed))
-                            && !disbursementPeriodIds.contains(data.getId());
-
-                    if (isEligible) {
-                        disbursementDataList.add(new LoanSchedulePeriodDataWrapper(data, data.disbursementDate(), true));
-                        disbursementPeriodIds.add(data.getId());
-                    }
-                }
-            }
-
-            return disbursementDataList;
-        }
-
-        private boolean hasMultipleTranchesOnSameDate(Collection<DisbursementData> disbursementData) {
-            if (disbursementData == null || disbursementData.size() <= 1) {
-                return false;
-            }
-            return disbursementData.stream().collect(Collectors.groupingBy(DisbursementData::disbursementDate, Collectors.counting()))
-                    .values().stream().anyMatch(count -> count > 1);
-        }
-
-        private List<LoanSchedulePeriodDataWrapper> collectEligibleCapitalizedIncomeData(LocalDate fromDate, LocalDate dueDate,
-                Set<Long> disbursementPeriodIds) {
-            List<LoanSchedulePeriodDataWrapper> capitalizedIncomeDataList = new ArrayList<>();
-            // Collect eligible capitalized income data
-            for (LoanTransactionRepaymentPeriodData data : capitalizedIncomeData) {
-                boolean isEligible = canAddCapitalizedIncomeData(data, fromDate, dueDate)
-                        && !disbursementPeriodIds.contains(data.getTransactionId());
-
-                if (isEligible) {
-                    capitalizedIncomeDataList.add(new LoanSchedulePeriodDataWrapper(data, data.getDate(), false));
-                    disbursementPeriodIds.add(data.getTransactionId());
-                }
-            }
-            return capitalizedIncomeDataList;
-        }
-
-        private void fillLoanSchedulePeriodData(List<LoanSchedulePeriodData> periods, List<LoanSchedulePeriodDataWrapper> combinedDataList,
-                BigDecimal disbursementChargeAmount, BigDecimal waivedChargeAmount) {
-            // Process all collected data in chronological order
-            for (LoanSchedulePeriodDataWrapper dataItem : combinedDataList) {
-                LoanSchedulePeriodData periodData;
-                if (dataItem.isDisbursement()) {
-                    // Process disbursement data
-                    DisbursementData data = (DisbursementData) dataItem.getData();
-                    periodData = createLoanSchedulePeriodData(data, disbursementChargeAmount, waivedChargeAmount);
-                } else {
-                    // Process capitalized income data
-                    LoanTransactionRepaymentPeriodData data = (LoanTransactionRepaymentPeriodData) dataItem.getData();
-                    periodData = createLoanSchedulePeriodData(data);
-                }
-
-                // Common processing for both data types
-                periods.add(periodData);
-                this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(periodData.getPrincipalDisbursed());
-            }
-        }
-
-        private BigDecimal calculateDisbursedAmount(List<LoanSchedulePeriodDataWrapper> combinedDataList) {
-            BigDecimal disbursedAmount = BigDecimal.ZERO;
-            for (LoanSchedulePeriodDataWrapper dataItem : combinedDataList) {
-                if (dataItem.isDisbursement()) {
-                    DisbursementData data = (DisbursementData) dataItem.getData();
-                    disbursedAmount = disbursedAmount.add(data.getPrincipal());
-                }
-            }
-            return disbursedAmount;
-        }
-
-        private int sortPeriodDataHolders(LoanSchedulePeriodDataWrapper item1, LoanSchedulePeriodDataWrapper item2) {
-            int dateComparison = item1.getDate().compareTo(item2.getDate());
-            if (dateComparison == 0 && item1.isDisbursement() != item2.isDisbursement()) {
-                // If dates are equal, prioritize disbursement data
-                return item1.isDisbursement() ? -1 : 1;
-            }
-            return dateComparison;
-        }
-
-        private LoanSchedulePeriodData createLoanSchedulePeriodData(final DisbursementData data, BigDecimal disbursementChargeAmount,
-                BigDecimal waivedChargeAmount) {
-            BigDecimal chargeAmount = data.getChargeAmount() == null ? disbursementChargeAmount
-                    : disbursementChargeAmount.add(data.getChargeAmount()).subtract(waivedChargeAmount);
-            return LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.getPrincipal(), chargeAmount,
-                    data.isDisbursed());
-        }
-
-        private LoanSchedulePeriodData createLoanSchedulePeriodData(final LoanTransactionRepaymentPeriodData data) {
-            BigDecimal feeCharges = Objects.isNull(data.getFeeChargesPortion()) ? BigDecimal.ZERO : data.getFeeChargesPortion();
-            return LoanSchedulePeriodData.disbursementOnlyPeriod(data.getDate(), data.getAmount(), feeCharges, !data.isReversed());
-        }
-
-        private boolean canAddDisbursementData(DisbursementData data, boolean isDueForDisbursement, boolean excludePastUnDisbursed) {
-            return (!excludePastUnDisbursed || data.isDisbursed() || !DateUtils.isBeforeBusinessDate(data.disbursementDate()))
-                    && isDueForDisbursement;
-        }
-
-        private boolean canAddCapitalizedIncomeData(LoanTransactionRepaymentPeriodData data, LocalDate fromDate, LocalDate dueDate) {
-            return !data.isReversed() && DateUtils.isDateInRangeFromInclusiveToExclusive(fromDate, dueDate, data.getDate());
-        }
-
     }
 
     protected static class LoanTransactionsMapper implements RowMapper<LoanTransactionData> {

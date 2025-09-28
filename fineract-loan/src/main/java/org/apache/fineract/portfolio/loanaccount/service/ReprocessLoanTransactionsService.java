@@ -32,6 +32,8 @@ public interface ReprocessLoanTransactionsService {
 
     void reprocessTransactionsWithPostTransactionChecks(Loan loan, LocalDate transactionDate);
 
+    void reprocessTransactionsWithoutChecks(Loan loan, LocalDate transactionDate, List<LoanTransaction> newTransactions);
+
     void processPostDisbursementTransactions(Loan loan);
 
     void removeLoanCharge(Loan loan, LoanCharge loanCharge);

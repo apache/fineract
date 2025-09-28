@@ -91,6 +91,14 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
     }
 
     @Override
+    public void reprocessTransactionsWithoutChecks(final Loan loan, final LocalDate transactionDate,
+            final List<LoanTransaction> newTransactions) {
+        final List<LoanTransaction> transactions = loanTransactionRepository.findNonReversedTransactionsForReprocessingByLoan(loan);
+        transactions.addAll(newTransactions);
+        reprocessTransactionsAndFetchChangedTransactions(loan, transactions);
+    }
+
+    @Override
     public void processPostDisbursementTransactions(final Loan loan) {
         loanTransactionProcessingService.processPostDisbursementTransactions(loan).ifPresent(this::handleChangedDetail);
     }

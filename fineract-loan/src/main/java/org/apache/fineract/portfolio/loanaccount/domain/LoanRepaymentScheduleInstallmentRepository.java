@@ -64,4 +64,12 @@ public interface LoanRepaymentScheduleInstallmentRepository
             @Param("businessDate") LocalDate businessDate, @Param("obligationsMet") boolean obligationsMet,
             @Param("loanIds") List<Long> loanIds);
 
+    @Query("""
+            SELECT i
+            FROM LoanRepaymentScheduleInstallment i
+            WHERE i.loan.id = :loanId
+            ORDER BY i.loan.id, i.installmentNumber
+            """)
+    List<LoanRepaymentScheduleInstallment> findByLoanId(@Param("loanId") Long loanId);
+
 }
