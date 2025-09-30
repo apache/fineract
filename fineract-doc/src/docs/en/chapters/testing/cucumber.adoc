@@ -1,6 +1,556 @@
 [[testing-cucumber]]
-= Cucumber
+= Cucumber E2E Tests
 
-TBD
+Apache Fineract's E2E test suite provides comprehensive coverage of business functionality using Cucumber BDD (Behavior-Driven Development) framework. These tests serve as both functional validation and living documentation of the system's capabilities.
+
+== Overview
+
+=== Architecture
+
+* *fineract-e2e-tests-runner*: Contains all Cucumber feature files and test scenarios
+* *fineract-e2e-tests-core*: Contains step definitions, test utilities, and supporting code
+* *Framework*: Cucumber with Java, using Gherkin syntax for readable test specifications
+* *Prerequisites*: Running Apache Fineract instance (typically on port 8443 with HTTPS)
+
+=== Test Organization
+
+* Feature files located in: `fineract-e2e-tests-runner/src/test/resources/features/`
+* Step definitions in: `fineract-e2e-tests-core/src/test/java/org/apache/fineract/test/stepdef/`
+* Tests are tagged with TestRail IDs for traceability (e.g., `@TestRailId:C16`)
+* Special tags include `@Smoke` for quick validation tests
+
+== Prerequisites
+
+=== Required Software
+
+* *Java 21*: Apache Fineract requires Java 21 (Azul Zulu JDK recommended)
+* *Database*: MariaDB 11.5.2, PostgreSQL 17.4, or MySQL 9.1
+* *Git*: For source code management
+* *Gradle 8.14.3*: Included via wrapper
+
+=== Database Setup
+
+Before running E2E tests, ensure the databases are created:
+
+[source,bash]
+----
+# Create required databases
+./gradlew createDB -PdbName=fineract_tenants
+./gradlew createDB -PdbName=fineract_default
+----
+
+== Configuration
+
+=== Connection Configuration
+
+E2E tests connect to the running Fineract instance. Default configuration in `fineract-e2e-tests-core/src/test/resources/fineract-test-application.properties`:
+
+[source,properties]
+----
+# Connection details to running backend
+fineract-test.api.base-url=${BASE_URL:https://localhost:8443}
+fineract-test.api.username=${TEST_USERNAME:mifos}
+fineract-test.api.password=${TEST_PASSWORD:password}
+fineract-test.api.tenant-id=${TEST_TENANT_ID:default}
+----
+
+To override defaults, use environment variables:
+
+[source,bash]
+----
+export BASE_URL=http://localhost:8080
+export TEST_USERNAME=mifos
+export TEST_PASSWORD=password
+export TEST_TENANT_ID=default
+----
+
+=== Test Data Initialization
+
+IMPORTANT: Many E2E tests require pre-configured test data (loan products, charges, configurations). This initialization is controlled by the `fineract-test.initialization.enabled` property.
+
+*Default Behavior*:
+
+* By default, initialization is *DISABLED* (`fineract-test.initialization.enabled=false`)
+* Without initialization, tests will fail with errors like:
+
+[source]
+----
+java.lang.IllegalArgumentException: Loan product [LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL] not found
+----
+
+*How to Enable Initialization*:
+
+Method 1 - Environment Variable (Recommended):
+[source,bash]
+----
+cd fineract-e2e-tests-runner
+INITIALIZATION_ENABLED=true ../gradlew cucumber
+----
+
+Method 2 - System Property:
+[source,bash]
+----
+cd fineract-e2e-tests-runner
+../gradlew cucumber -DINITIALIZATION_ENABLED=true
+----
+
+Method 3 - Modify Properties File:
+Edit `fineract-e2e-tests-core/src/test/resources/fineract-test-application.properties`:
+[source,properties]
+----
+fineract-test.initialization.enabled=true
+----
+
+*What Initialization Creates*:
+
+* 100+ loan products with specific configurations
+* Various charge types (NSF fees, processing fees, etc.)
+* Payment allocation rules
+* Interest calculation configurations
+* Advanced payment allocation strategies
+* Progressive loan schedule configurations
+
+*When to Use Initialization*:
+
+* First-time test execution on a fresh database
+* After database reset/recreation
+* When running tests that require specific loan products
+* Testing new features that depend on pre-configured products
+
+NOTE: Initialization takes additional time (2-5 minutes) as it creates extensive test data. Consider running it once and reusing the database for multiple test runs.
+
+=== Business Date Configuration
+
+CRITICAL: The Business Date feature must be enabled in the database for many E2E tests to function correctly.
+
+*Default Behavior*:
+
+* Business Date is *DISABLED* by default in fresh Fineract installations
+* Without Business Date enabled, tests fail with:
+
+[source,json]
+----
+{"errors":[{
+  "defaultUserMessage":"Business date functionality is not enabled",
+  "developerMessage":"Business date functionality is not enabled",
+  "userMessageGlobalisationCode":"business.date.is.not.enabled"
+}]}
+----
+
+*How to Enable Business Date*:
+
+Method 1 - Via SQL (Direct Database):
+[source,bash]
+----
+mysql -u root -pmysql fineract_default -e \
+  "UPDATE c_configuration SET enabled = 1 WHERE name = 'enable-business-date';"
+----
+
+Method 2 - Via API (After Fineract is Running):
+[source,bash]
+----
+curl -X PUT https://localhost:8443/fineract-provider/api/v1/configurations/name/enable-business-date \
+  -H "Authorization: Basic bWlmb3M6cGFzc3dvcmQ=" \
+  -H "Content-Type: application/json" \
+  -d '{"enabled": true}'
+----
+
+*Verification*:
+[source,bash]
+----
+mysql -u root -pmysql fineract_default -e \
+  "SELECT * FROM c_configuration WHERE name LIKE '%business%';"
+----
+
+== Running E2E Tests
+
+=== Complete Workflow
+
+==== Step 1: Start Fineract
+
+[source,bash]
+----
+# Start Fineract in background
+./gradlew bootRun
+----
+
+Wait for Fineract to be fully started. You can verify by checking:
+[source,bash]
+----
+curl -k https://localhost:8443/actuator/health
+----
+
+==== Step 2: Enable Business Date (if needed)
+
+[source,bash]
+----
+mysql -u root -pmysql fineract_default -e \
+  "UPDATE c_configuration SET enabled = 1 WHERE name = 'enable-business-date';"
+----
+
+==== Step 3: Run E2E Tests
+
+Navigate to the E2E tests module:
+[source,bash]
+----
+cd fineract-e2e-tests-runner
+----
+
+*Run All E2E Tests*:
+[source,bash]
+----
+# First run with initialization
+INITIALIZATION_ENABLED=true ../gradlew cucumber
+
+# Subsequent runs without initialization (faster)
+../gradlew cucumber
+----
+
+*Run Specific Feature File*:
+[source,bash]
+----
+../gradlew cucumber -Pcucumber.features="src/test/resources/features/Loan.feature"
+----
+
+*Run Tests by Tag*:
+[source,bash]
+----
+# Run only smoke tests
+../gradlew cucumber -Pcucumber.tags="@Smoke"
+
+# Run specific TestRail test
+../gradlew cucumber -Pcucumber.tags="@TestRailId:C16"
+
+# Run multiple tags
+../gradlew cucumber -Pcucumber.tags="@Smoke and @TestRailId:C16"
+----
+
+*Run Tests with Custom Configuration*:
+[source,bash]
+----
+BASE_URL=http://localhost:8080 \
+TEST_USERNAME=admin \
+TEST_PASSWORD=admin123 \
+INITIALIZATION_ENABLED=true \
+../gradlew cucumber
+----
+
+=== Gradle Command Options
+
+==== Basic Cucumber Task
+
+[source,bash]
+----
+../gradlew cucumber
+----
+
+==== Feature File Selection
+
+[source,bash]
+----
+# Single feature
+../gradlew cucumber -Pcucumber.features="src/test/resources/features/Client.feature"
+
+# Multiple features
+../gradlew cucumber -Pcucumber.features="src/test/resources/features/Client.feature:src/test/resources/features/Loan.feature"
+
+# Specific scenario by line number
+../gradlew cucumber -Pcucumber.features="src/test/resources/features/Loan.feature:45"
+----
+
+==== Tag-Based Execution
+
+[source,bash]
+----
+# Single tag
+../gradlew cucumber -Pcucumber.tags="@Smoke"
+
+# Multiple tags (AND)
+../gradlew cucumber -Pcucumber.tags="@Smoke and @TestRailId:C16"
+
+# Multiple tags (OR)
+../gradlew cucumber -Pcucumber.tags="@Smoke or @TestRailId:C16"
+
+# Exclude tags
+../gradlew cucumber -Pcucumber.tags="not @ignore"
+
+# Complex tag expression
+../gradlew cucumber -Pcucumber.tags="@Smoke and not @ignore"
+----
+
+==== Report Generation
+
+[source,bash]
+----
+# Generate HTML report
+../gradlew cucumber -Dcucumber.plugin="pretty,html:build/cucumber-reports/cucumber.html"
+
+# Generate JSON report
+../gradlew cucumber -Dcucumber.plugin="json:build/cucumber-reports/cucumber.json"
+
+# Multiple report formats
+../gradlew cucumber -Dcucumber.plugin="pretty,html:build/cucumber-reports/cucumber.html,json:build/cucumber-reports/cucumber.json"
+
+# Generate Allure report (comprehensive visual reporting)
+../gradlew cucumber allureReport
+----
+
+After running tests with Allure, the report is available at:
+[source]
+----
+fineract-e2e-tests-runner/build/reports/allure-report/index.html
+----
+
+NOTE: Allure provides rich visual reports with test history, statistics, and detailed execution information. Open the `index.html` file in a browser to view the interactive report.
+
+==== Clean and Run
+
+[source,bash]
+----
+# Clean previous test results and run
+../gradlew clean cucumber
+----
+
+=== Advanced Execution Scenarios
+
+==== Running Against Different Environment
+
+[source,bash]
+----
+# Against staging environment
+BASE_URL=https://staging.example.com:8443 \
+TEST_USERNAME=staging_user \
+TEST_PASSWORD=staging_pass \
+../gradlew cucumber
+----
+
+==== Running with External Event Verification
+
+[source,bash]
+----
+# Enable external event verification (requires ActiveMQ)
+ACTIVEMQ_BROKER_URL=tcp://localhost:61616 \
+ACTIVEMQ_BROKER_USERNAME=admin \
+ACTIVEMQ_BROKER_PASSWORD=admin \
+ACTIVEMQ_TOPIC_NAME=fineract-events \
+EVENT_VERIFICATION_ENABLED=true \
+../gradlew cucumber
+----
+
+==== Running with TestRail Integration
+
+[source,bash]
+----
+TESTRAIL_ENABLED=true \
+TESTRAIL_BASEURL=https://testrail.example.com \
+TESTRAIL_USERNAME=test@example.com \
+TESTRAIL_PASSWORD=testrail_password \
+TESTRAIL_RUN_ID=123 \
+../gradlew cucumber
+----
+
+== Test Development
+
+=== Feature Coverage
+
+The E2E tests cover the following functional domains:
+
+==== Client Management
+* Client creation and management
+* Address management
+* Document management
+* Family member tracking
+
+==== Loan Management
+* Loan application and approval
+* Disbursement
+* Repayment processing
+* Charges and fees
+* Advanced features: chargeback, charge-off, re-aging, re-amortization
+* Specialized loans: down payment, merchant-issued refund
+
+==== Savings Account Management
+* Account opening and activation
+* Deposits and withdrawals
+* Interest calculation
+* Account closure
+
+==== Accounting
+* Journal entry validation
+* Asset externalization
+* GL account mapping
+
+==== Operational Processes
+* Close of Business (COB)
+* Inline COB
+* Business date management
+* Batch API operations
+
+=== Writing New E2E Tests
+
+When writing new Cucumber tests:
+
+1. *Create Feature File*: Add new `.feature` file in `fineract-e2e-tests-runner/src/test/resources/features/`
+
+2. *Use Gherkin Syntax*:
+[source,gherkin]
+----
+Feature: Loan Disbursement
+
+  Scenario: Successful loan disbursement
+    Given A client named "John Doe"
+    When Admin creates a loan for client with amount "1000"
+    And Admin approves the loan
+    And Admin disburses the loan on business date
+    Then Loan status is "Active"
+    And Loan outstanding balance is "1000"
+----
+
+3. *Implement Step Definitions*: Add corresponding step definitions in `fineract-e2e-tests-core/src/test/java/org/apache/fineract/test/stepdef/`
+
+4. *Add Tags*: Tag scenarios appropriately:
+[source,gherkin]
+----
+@TestRailId:C1234 @Smoke
+Scenario: Critical loan test
+----
+
+5. *Verify with Gradle*:
+[source,bash]
+----
+cd fineract-e2e-tests-runner
+../gradlew cucumber -Pcucumber.features="src/test/resources/features/YourNewFeature.feature"
+----
+
+== Troubleshooting
+
+=== Common Test Failures
+
+==== Connection Issues
+
+*Symptom*: Tests fail with connection refused errors
+
+*Solutions*:
+[source,bash]
+----
+# Verify Fineract is running
+curl -k https://localhost:8443/actuator/health
+
+# Check if port is in use
+netstat -tulpn | grep 8443
+
+# Check logs (logs go to console/stdout)
+# If running in background, redirect output:
+# ./gradlew bootRun > build/bootRun.log 2>&1 &
+# tail -f build/bootRun.log
+----
+
+==== Business Date Issues
+
+*Symptom*: Tests fail with "Business date functionality is not enabled"
+
+*Solutions*:
+[source,bash]
+----
+# Enable Business Date
+mysql -u root -pmysql fineract_default -e \
+  "UPDATE c_configuration SET enabled = 1 WHERE name = 'enable-business-date';"
+
+# Verify
+mysql -u root -pmysql fineract_default -e \
+  "SELECT * FROM c_configuration WHERE name = 'enable-business-date';"
+----
+
+==== Data Dependencies
+
+*Symptom*: Tests fail due to missing products or charges
+
+*Solutions*:
+[source,bash]
+----
+# Run with initialization enabled
+cd fineract-e2e-tests-runner
+INITIALIZATION_ENABLED=true ../gradlew cucumber
+----
+
+==== Authentication Failures
+
+*Symptom*: 401 or 403 errors
+
+*Solutions*:
+[source,bash]
+----
+# Verify credentials
+TEST_USERNAME=mifos TEST_PASSWORD=password ../gradlew cucumber
+
+# Check user permissions in database
+mysql -u root -pmysql fineract_default -e \
+  "SELECT * FROM m_appuser WHERE username = 'mifos';"
+----
+
+=== Debugging Tips
+
+==== Enable Detailed Logging
+
+[source,bash]
+----
+# Run with verbose output
+../gradlew cucumber -Dcucumber.plugin="pretty" --info
+
+# Save output to file
+../gradlew cucumber > test-output.log 2>&1
+----
+
+==== Check Database State
+
+[source,bash]
+----
+# Check loan products after initialization
+mysql -u root -pmysql fineract_default -e \
+  "SELECT id, product_name FROM m_product_loan LIMIT 20;"
+
+# Check configurations
+mysql -u root -pmysql fineract_default -e \
+  "SELECT name, enabled FROM c_configuration WHERE name LIKE '%enable%';"
+----
+
+==== View Test Reports
+
+After test execution, reports are available in:
+[source]
+----
+fineract-e2e-tests-runner/build/cucumber-reports/
+fineract-e2e-tests-runner/build/reports/tests/
+----
+
+== Best Practices
+
+=== Test Organization
+
+* Keep feature files focused on specific business domains
+* Use descriptive scenario names
+* Include business context in scenario descriptions
+* Tag tests appropriately for organization and execution
+
+=== Test Isolation
+
+* Each test should be independent
+* Don't rely on state from other tests
+* Clean up test data in `@After` hooks
+* Use unique identifiers for test entities
+
+=== Test Data Management
+
+* Use initialization for complex test data setup
+* Create minimal required data in test scenarios
+* Document test data dependencies
+* Reuse database for multiple test runs when possible
+
+=== Performance Optimization
+
+* Run initialization once per database
+* Use tags to run subset of tests during development
+* Run full suite in CI/CD pipelines
+* Consider parallel execution for large test suites
 
 include::cucumber-cheatsheet.adoc[leveloffset=+1]
