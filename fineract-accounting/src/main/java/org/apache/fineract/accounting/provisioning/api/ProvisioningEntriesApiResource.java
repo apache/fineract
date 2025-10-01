@@ -50,10 +50,8 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.stereotype.Component;
 
 @Path("/v1/provisioningentries")
-@Component
 @Tag(name = "Provisioning Entries", description = """
         This defines the Provisioning Entries for all active loan products
 

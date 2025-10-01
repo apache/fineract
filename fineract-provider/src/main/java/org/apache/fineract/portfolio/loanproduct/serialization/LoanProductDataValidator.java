@@ -38,7 +38,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingConstants.LoanProductAccountingParams;
 import org.apache.fineract.accounting.common.AccountingValidations;
-import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingHelper;
+import org.apache.fineract.accounting.producttoaccountmapping.service.LoanProductToGLAccountMappingHelper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -226,7 +226,7 @@ public final class LoanProductDataValidator {
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final AdvancedPaymentAllocationsJsonParser advancedPaymentAllocationsJsonParser;
     private final AdvancedPaymentAllocationsValidator advancedPaymentAllocationsValidator;
-    private final ProductToGLAccountMappingHelper productToGLAccountMappingHelper;
+    private final LoanProductToGLAccountMappingHelper loanProductToGLAccountMappingHelper;
 
     public void validateForCreate(final JsonCommand command) {
         String json = command.json();
@@ -2075,7 +2075,7 @@ public final class LoanProductDataValidator {
         LoanProductAccountingParams reasonCodeValueId = LoanProductAccountingParams.CHARGE_OFF_REASON_CODE_VALUE_ID;
         String failCode = "chargeOffReason";
         validateAdditionalAccountMappings(baseDataValidator, element, parameterName, reasonCodeValueId, failCode,
-                productToGLAccountMappingHelper::validateChargeOffMappingsInDatabase);
+                loanProductToGLAccountMappingHelper::validateChargeOffMappingsInDatabase);
     }
 
     private void validateWriteOffToExpenseMappings(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
@@ -2083,7 +2083,7 @@ public final class LoanProductDataValidator {
         LoanProductAccountingParams reasonCodeValueId = LoanProductAccountingParams.WRITE_OFF_REASON_CODE_VALUE_ID;
         String failCode = "writeOffReason";
         validateAdditionalAccountMappings(baseDataValidator, element, parameterName, reasonCodeValueId, failCode,
-                productToGLAccountMappingHelper::validateWriteOffMappingsInDatabase);
+                loanProductToGLAccountMappingHelper::validateWriteOffMappingsInDatabase);
     }
 
     private void validateAdditionalAccountMappings(DataValidatorBuilder baseDataValidator, JsonElement element, String parameterName,
@@ -2138,7 +2138,7 @@ public final class LoanProductDataValidator {
 
                 // Call the new validation method for additional checks
                 final List<ApiParameterError> validationErrors = new ArrayList<>();
-                productToGLAccountMappingHelper.validateGLAccountInDatabase(validationErrors, processedMappings);
+                loanProductToGLAccountMappingHelper.validateGLAccountInDatabase(validationErrors, processedMappings);
                 if (additionalMappingValidator != null) {
                     additionalMappingValidator.accept(validationErrors, processedMappings);
                 }
@@ -2203,7 +2203,7 @@ public final class LoanProductDataValidator {
                         .equals(LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS)
                                 ? LoanTransactionApiConstants.CAPITALIZED_INCOME_CLASSIFICATION_CODE
                                 : LoanTransactionApiConstants.BUY_DOWN_FEE_CLASSIFICATION_CODE;
-                productToGLAccountMappingHelper.validateClassificationMappingsInDatabase(processedMappings, dataCodeName);
+                loanProductToGLAccountMappingHelper.validateClassificationMappingsInDatabase(processedMappings, dataCodeName);
             }
         }
     }

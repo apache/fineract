@@ -50,10 +50,8 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.stereotype.Component;
 
 @Path("/v1/financialactivityaccounts")
-@Component
 @Tag(name = "Mapping Financial Activities to Accounts", description = """
         Organization Level Financial Activities like Asset and Liability Transfer can be mapped to GL Account. \
         Integrated accounting takes these accounts into consideration when an Account transfer is made between \

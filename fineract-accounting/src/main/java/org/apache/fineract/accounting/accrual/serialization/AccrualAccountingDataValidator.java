@@ -40,9 +40,7 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.springframework.stereotype.Component;
 
-@Component
 @RequiredArgsConstructor
 public final class AccrualAccountingDataValidator {
 

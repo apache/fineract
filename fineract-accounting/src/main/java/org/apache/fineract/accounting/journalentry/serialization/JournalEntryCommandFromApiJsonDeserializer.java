@@ -38,12 +38,10 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.springframework.stereotype.Component;
 
 /**
  * Implementation of {@link FromApiJsonDeserializer} for {@link JournalEntryCommand}'s.
  */
-@Component
 @RequiredArgsConstructor
 public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<JournalEntryCommand> {
 

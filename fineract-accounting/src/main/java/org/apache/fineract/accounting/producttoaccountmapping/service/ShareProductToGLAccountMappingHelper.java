@@ -34,9 +34,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMappingHelper {
 
     public ShareProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,

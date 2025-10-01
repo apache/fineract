@@ -38,9 +38,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.provisioning.exception.ProvisioningCriteriaCannotBeCreatedException;
-import org.springframework.stereotype.Component;
 
-@Component
 @RequiredArgsConstructor
 public class ProvisioningEntriesDefinitionJsonDeserializer implements ProvisioningEntriesApiConstants {
 

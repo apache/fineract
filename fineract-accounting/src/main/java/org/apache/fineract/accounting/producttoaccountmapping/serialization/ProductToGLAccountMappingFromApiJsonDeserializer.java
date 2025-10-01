@@ -41,7 +41,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.shareproducts.constants.ShareProductApiConstants;
-import org.springframework.stereotype.Component;
 
 /**
  * TODO Vishwas find a better approach for validation
@@ -63,7 +62,6 @@ import org.springframework.stereotype.Component;
  * Also, the class is probably named wrong (*FromApiJsonDeserializer) should probably be named as (*Validator) instead
  *
  */
-@Component
 @RequiredArgsConstructor
 public final class ProductToGLAccountMappingFromApiJsonDeserializer {
 
