@@ -218,4 +218,7 @@
     <include file="parts/0197_add_deleted_and_closed_to_capitalized_income_balance.xml" relativeToChangelogFile="true" />
     <include file="parts/0198_add_classification_id_to_acc_product_mapping.xml" relativeToChangelogFile="true" />
     <include file="parts/0199_write_off_reason_mapping_loan.xml" relativeToChangelogFile="true" />
+    <include file="parts/0200_add_journal_entry_aggregation_tables.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0201_add_journal_entry_aggregation_job.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0202_trial_balance_summary_with_asset_owner_journal_entry_aggregation.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

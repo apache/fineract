@@ -417,6 +417,16 @@ public class FineractProperties {
 
         private int stuckRetryThreshold;
         private boolean loanCobEnabled;
+        private FineractJournalEntryAggregationProperties journalEntryAggregation;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractJournalEntryAggregationProperties {
+
+        private Integer excludeRecentNDays;
+        private boolean enabled;
+        private Integer chunkSize;
     }
 
     @Getter
