@@ -21,11 +21,10 @@ package org.apache.fineract.accounting.producttoaccountmapping.service;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.accounting.common.AccountingConstants.LoanProductAccountingParams;
-import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeOffReasonToGLAccountMapper;
+import org.apache.fineract.accounting.producttoaccountmapping.data.AdvancedMappingToExpenseAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ClassificationToGLAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
-import org.apache.fineract.accounting.producttoaccountmapping.data.WriteOffReasonsToExpenseAccountMapper;
 
 public interface ProductToGLAccountMappingReadPlatformService {
 
@@ -51,9 +50,9 @@ public interface ProductToGLAccountMappingReadPlatformService {
 
     List<ChargeToGLAccountMapper> fetchFeeToIncomeAccountMappingsForShareProduct(Long productId);
 
-    List<ChargeOffReasonToGLAccountMapper> fetchChargeOffReasonMappingsForLoanProduct(Long loanProductId);
+    List<AdvancedMappingToExpenseAccountData> fetchChargeOffReasonMappingsForLoanProduct(Long loanProductId);
 
-    List<WriteOffReasonsToExpenseAccountMapper> fetchWriteOffReasonMappingsForLoanProduct(Long loanProductId);
+    List<AdvancedMappingToExpenseAccountData> fetchWriteOffReasonMappingsForLoanProduct(Long loanProductId);
 
     List<ClassificationToGLAccountData> fetchClassificationMappingsForLoanProduct(Long loanProductId,
             LoanProductAccountingParams classificationParameter);

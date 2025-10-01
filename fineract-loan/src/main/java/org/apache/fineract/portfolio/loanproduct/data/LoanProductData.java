@@ -30,11 +30,10 @@ import lombok.Getter;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
-import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeOffReasonToGLAccountMapper;
+import org.apache.fineract.accounting.producttoaccountmapping.data.AdvancedMappingToExpenseAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ClassificationToGLAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
-import org.apache.fineract.accounting.producttoaccountmapping.data.WriteOffReasonsToExpenseAccountMapper;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -164,9 +163,9 @@ public class LoanProductData implements Serializable {
     private Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings;
     private Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings;
     private Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
-    private List<ChargeOffReasonToGLAccountMapper> chargeOffReasonToExpenseAccountMappings;
+    private List<AdvancedMappingToExpenseAccountData> chargeOffReasonToExpenseAccountMappings;
     private final boolean enableAccrualActivityPosting;
-    private List<WriteOffReasonsToExpenseAccountMapper> writeOffReasonsToExpenseMappings;
+    private List<AdvancedMappingToExpenseAccountData> writeOffReasonsToExpenseMappings;
     private final List<CodeValueData> writeOffReasonOptions;
     // rates
     private final boolean isRatesEnabled;
@@ -381,7 +380,7 @@ public class LoanProductData implements Serializable {
         final StringEnumOptionData buyDownFeeStrategy = null;
         final StringEnumOptionData buyDownFeeIncomeType = null;
         final boolean merchantBuyDownFee = false;
-        final List<WriteOffReasonsToExpenseAccountMapper> writeOffReasonsToExpenseMappings = null;
+        final List<AdvancedMappingToExpenseAccountData> writeOffReasonsToExpenseMappings = null;
         final List<CodeValueData> writeOffReasonOptions = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
@@ -521,7 +520,7 @@ public class LoanProductData implements Serializable {
         final StringEnumOptionData buyDownFeeStrategy = null;
         final StringEnumOptionData buyDownFeeIncomeType = null;
         final boolean merchantBuyDownFee = false;
-        final List<WriteOffReasonsToExpenseAccountMapper> writeOffReasonsToExpenseMappings = null;
+        final List<AdvancedMappingToExpenseAccountData> writeOffReasonsToExpenseMappings = null;
         final List<CodeValueData> writeOffReasonOptions = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
@@ -668,7 +667,7 @@ public class LoanProductData implements Serializable {
         final StringEnumOptionData buyDownFeeStrategy = null;
         final StringEnumOptionData buyDownFeeIncomeType = null;
         final boolean merchantBuyDownFee = false;
-        final List<WriteOffReasonsToExpenseAccountMapper> writeOffReasonsToExpenseMappings = null;
+        final List<AdvancedMappingToExpenseAccountData> writeOffReasonsToExpenseMappings = null;
         final List<CodeValueData> writeOffReasonOptions = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
@@ -809,7 +808,7 @@ public class LoanProductData implements Serializable {
         final StringEnumOptionData buyDownFeeStrategy = null;
         final StringEnumOptionData buyDownFeeIncomeType = null;
         final boolean merchantBuyDownFee = false;
-        final List<WriteOffReasonsToExpenseAccountMapper> writeOffReasonsToExpenseMappings = null;
+        final List<AdvancedMappingToExpenseAccountData> writeOffReasonsToExpenseMappings = null;
         final List<CodeValueData> writeOffReasonOptions = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
@@ -842,8 +841,8 @@ public class LoanProductData implements Serializable {
             final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings,
             final Collection<ChargeToGLAccountMapper> feeToGLAccountMappings,
             final Collection<ChargeToGLAccountMapper> penaltyToGLAccountMappings,
-            final List<ChargeOffReasonToGLAccountMapper> chargeOffReasonToGLAccountMappings,
-            final List<WriteOffReasonsToExpenseAccountMapper> writeOffReasonToGLAccountMappings,
+            final List<AdvancedMappingToExpenseAccountData> chargeOffReasonToGLAccountMappings,
+            final List<AdvancedMappingToExpenseAccountData> writeOffReasonToGLAccountMappings,
             final List<ClassificationToGLAccountData> capitalizedIncomeClassificationToIncomeAccountMappings,
             final List<ClassificationToGLAccountData> buydownFeeClassificationToIncomeAccountMappings) {
         productData.accountingMappings = accountingMappings;
@@ -901,7 +900,7 @@ public class LoanProductData implements Serializable {
             final StringEnumOptionData capitalizedIncomeType, final boolean enableBuyDownFee,
             final StringEnumOptionData buyDownFeeCalculationType, final StringEnumOptionData buyDownFeeStrategy,
             final StringEnumOptionData buyDownFeeIncomeType, final boolean merchantBuyDownFee,
-            final List<WriteOffReasonsToExpenseAccountMapper> writeOffReasonsToExpenseMappings,
+            final List<AdvancedMappingToExpenseAccountData> writeOffReasonsToExpenseMappings,
             final List<CodeValueData> writeOffReasonOptions) {
         this.id = id;
         this.name = name;

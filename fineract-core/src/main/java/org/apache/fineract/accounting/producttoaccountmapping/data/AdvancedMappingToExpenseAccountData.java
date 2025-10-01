@@ -28,9 +28,9 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 @Data
 @NoArgsConstructor
 @Accessors(chain = true)
-public class ChargeOffReasonToGLAccountMapper implements Serializable {
+public class AdvancedMappingToExpenseAccountData implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private CodeValueData chargeOffReasonCodeValue;
+    private CodeValueData reasonCodeValue;
     private GLAccountData expenseAccount;
 }

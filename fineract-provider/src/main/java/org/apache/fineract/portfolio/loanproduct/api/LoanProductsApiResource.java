@@ -49,11 +49,10 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingConstants.LoanProductAccountingParams;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
-import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeOffReasonToGLAccountMapper;
+import org.apache.fineract.accounting.producttoaccountmapping.data.AdvancedMappingToExpenseAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ClassificationToGLAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
-import org.apache.fineract.accounting.producttoaccountmapping.data.WriteOffReasonsToExpenseAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingReadPlatformService;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -355,8 +354,8 @@ public class LoanProductsApiResource {
         Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings;
         Collection<ChargeToGLAccountMapper> feeToGLAccountMappings;
         Collection<ChargeToGLAccountMapper> penaltyToGLAccountMappings;
-        List<ChargeOffReasonToGLAccountMapper> chargeOffReasonToGLAccountMappings;
-        List<WriteOffReasonsToExpenseAccountMapper> writeOffReasonsToExpenseAccountMappings;
+        List<AdvancedMappingToExpenseAccountData> chargeOffReasonToGLAccountMappings;
+        List<AdvancedMappingToExpenseAccountData> writeOffReasonsToExpenseAccountMappings;
         List<ClassificationToGLAccountData> capitalizedIncomeClassificationToGLAccountMappings;
         List<ClassificationToGLAccountData> buydowFeeClassificationToGLAccountMappings;
         if (loanProduct.hasAccountingEnabled()) {

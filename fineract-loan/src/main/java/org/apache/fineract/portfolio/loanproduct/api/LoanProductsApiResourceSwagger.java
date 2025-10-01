@@ -1346,25 +1346,9 @@ public final class LoanProductsApiResourceSwagger {
 
             private GetChargeOffReasonToExpenseAccountMappings() {}
 
-            public GetCodeValueData chargeOffReasonCodeValue;
+            public GetCodeValuesDataResponse reasonCodeValue;
             public GetGLAccountData expenseAccount;
 
-            static final class GetCodeValueData {
-
-                private GetCodeValueData() {}
-
-                @Schema(example = "1")
-                public Long id;
-                @Schema(example = "ChargeOffReasons")
-                public String name;
-                @Schema(example = "1")
-                public Integer position;
-                public String description;
-                @Schema(example = "true")
-                public Boolean active;
-                @Schema(example = "false")
-                public Boolean mandatory;
-            }
         }
 
         static final class GetLoanFeeToIncomeAccountMappings {
@@ -1492,7 +1476,7 @@ public final class LoanProductsApiResourceSwagger {
         public Set<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
         public Set<GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings;
         public List<GetChargeOffReasonToExpenseAccountMappings> chargeOffReasonToExpenseAccountMappings;
-        public List<PostLoanProductsRequest.PostWriteOffReasonToExpenseAccountMappings> writeOffReasonsToExpenseMappings;
+        public List<GetChargeOffReasonToExpenseAccountMappings> writeOffReasonsToExpenseMappings;
         @Schema(example = "false")
         public Boolean isRatesEnabled;
         @Schema(example = "true")

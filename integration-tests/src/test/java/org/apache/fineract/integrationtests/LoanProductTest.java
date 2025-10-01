@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.GetChargeOffReasonToExpenseAccountMappings;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoanProductsTemplateResponse;
 import org.apache.fineract.client.models.GetLoanProductsWriteOffReasonOptions;
@@ -546,14 +547,14 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
 
             // Verify that get loan product API has the corresponding fields
             GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper.retrieveLoanProductById(loanProductId);
-            List<PostWriteOffReasonToExpenseAccountMappings> writeOffReasonToExpenseAccountMappings = getLoanProductsProductIdResponse
+            List<GetChargeOffReasonToExpenseAccountMappings> writeOffReasonToExpenseAccountMappings = getLoanProductsProductIdResponse
                     .getWriteOffReasonsToExpenseMappings();
             Assertions.assertNotNull(writeOffReasonToExpenseAccountMappings);
             Assertions.assertEquals(1, writeOffReasonToExpenseAccountMappings.size());
-            PostWriteOffReasonToExpenseAccountMappings writeOffMapping = writeOffReasonToExpenseAccountMappings.getFirst();
+            GetChargeOffReasonToExpenseAccountMappings writeOffMapping = writeOffReasonToExpenseAccountMappings.getFirst();
             Assertions.assertNotNull(writeOffMapping);
-            Assertions.assertEquals(expenseAccountId, writeOffMapping.getExpenseAccountId());
-            Assertions.assertEquals(reasonCodeId, writeOffMapping.getWriteOffReasonCodeValueId());
+            Assertions.assertEquals(expenseAccountId, writeOffMapping.getExpenseAccount().getId().toString());
+            Assertions.assertEquals(reasonCodeId, writeOffMapping.getReasonCodeValue().getId().toString());
 
             List<GetLoanProductsWriteOffReasonOptions> writeOffReasonOptionsResultNonTemplate = getLoanProductsProductIdResponse
                     .getWriteOffReasonOptions();
