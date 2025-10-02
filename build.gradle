@@ -692,7 +692,9 @@ configure(project.fineractJavaProjects) {
 
         if (project.hasProperty('excludeTests')) {
             filter {
-                excludeTestsMatching project.property('excludeTests')
+                project.property('excludeTests').split(",").each {
+                    excludeTestsMatching "*${it.trim()}*"
+                }
             }
         }
     }

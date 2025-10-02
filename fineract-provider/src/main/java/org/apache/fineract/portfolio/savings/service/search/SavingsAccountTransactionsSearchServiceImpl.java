@@ -70,10 +70,11 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
     private final DataTableValidator dataTableValidator;
     private final JdbcTemplate jdbcTemplate;
     private final SearchUtil searchUtil;
+    protected SavingsAccountReadPlatformServiceImpl.SavingsAccountTransactionsMapper tm = new SavingsAccountReadPlatformServiceImpl.SavingsAccountTransactionsMapper();
 
     @Override
     public Page<SavingsAccountTransactionData> searchTransactions(@NotNull Long savingsId,
-            @NotNull TransactionSearchRequest searchParameters) {
+                                                                  @NotNull TransactionSearchRequest searchParameters) {
         context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         String apptable = EntityTables.SAVINGS_TRANSACTION.getApptableName();
@@ -111,7 +112,6 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
         ArrayList<Object> params = new ArrayList<>();
         searchUtil.buildQueryCondition(columnFilters, where, params, alias, headersByName, null, null, null, false, sqlGenerator);
 
-        SavingsAccountReadPlatformServiceImpl.SavingsAccountTransactionsMapper tm = new SavingsAccountReadPlatformServiceImpl.SavingsAccountTransactionsMapper();
         Object[] args = params.toArray();
 
         String countQuery = "SELECT COUNT(*) " + tm.from() + where;
@@ -131,7 +131,7 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
     }
 
     private static void addFromToFilter(@NotNull String column, String fromValue, String toValue,
-            @NotNull List<ColumnFilterData> columnFilters) {
+                                        @NotNull List<ColumnFilterData> columnFilters) {
         if (fromValue != null) {
             columnFilters.add(toValue == null ? ColumnFilterData.create(column, SqlOperator.GTE, fromValue)
                     : ColumnFilterData.btw(column, fromValue, toValue));
@@ -142,7 +142,7 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
 
     @Nullable
     private static Boolean addTransactionTypesFilter(@NotNull TransactionSearchRequest searchParameters,
-            List<ColumnFilterData> columnFilters) {
+                                                     List<ColumnFilterData> columnFilters) {
         Predicate<SavingsAccountTransactionType> filter = null;
         Boolean credit = searchParameters.getCredit();
         Boolean debit = searchParameters.getDebit();

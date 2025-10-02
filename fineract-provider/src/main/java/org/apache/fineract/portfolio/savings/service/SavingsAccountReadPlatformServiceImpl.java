@@ -89,7 +89,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
     // mappers
     private final SavingsAccountTransactionTemplateMapper transactionTemplateMapper;
-    private final SavingsAccountTransactionsMapper transactionsMapper;
+    protected SavingsAccountTransactionsMapper transactionsMapper;
     private final SavingsAccountTransactionsForBatchMapper savingsAccountTransactionsForBatchMapper;
     private final SavingAccountMapper savingAccountMapper;
     private final SavingAccountMapperForInterestPosting savingAccountMapperForInterestPosting;
@@ -104,8 +104,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     private final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper;
 
     public SavingsAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final SavingsAccountAssembler savingAccountAssembler, PaginationHelper paginationHelper, ColumnValidator columnValidator,
-            DatabaseSpecificSQLGenerator sqlGenerator, SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper) {
+                                                 final SavingsAccountAssembler savingAccountAssembler, PaginationHelper paginationHelper, ColumnValidator columnValidator,
+                                                 DatabaseSpecificSQLGenerator sqlGenerator, SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;
         this.sqlGenerator = sqlGenerator;
@@ -142,7 +142,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
     @Override
     public Collection<SavingsAccountData> retrieveActiveForLookup(final Long clientId, DepositAccountType depositAccountType,
-            String currencyCode) {
+                                                                  String currencyCode) {
         final StringBuilder sqlBuilder = new StringBuilder("select " + this.savingAccountMapper.schema());
         sqlBuilder.append(" where sa.client_id = ? and sa.status_enum = 300 and sa.deposit_type_enum = ? and sa.currency_code = ? ");
 
@@ -234,7 +234,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
     @Override
     public List<SavingsAccountData> retrieveAllSavingsDataForInterestPosting(final boolean backdatedTxnsAllowedTill, final int pageSize,
-            final Integer status, final Long maxSavingsId) {
+                                                                             final Integer status, final Long maxSavingsId) {
         LocalDate yesterday = DateUtils.getBusinessLocalDate().minusDays(1);
         String sql = "select " + this.savingAccountMapperForInterestPosting.schema()
                 + "join (select a.id from m_savings_account a where a.id > ? and a.status_enum = ? limit ?) b on b.id = sa.id ";
@@ -1003,7 +1003,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
     @Override
     public SavingsAccountTransactionData retrieveDepositTransactionTemplate(final Long savingsId,
-            final DepositAccountType depositAccountType) {
+                                                                            final DepositAccountType depositAccountType) {
 
         try {
             final String sql = "select " + this.transactionTemplateMapper.schema() + " where sa.id = ? and sa.deposit_type_enum = ?";
@@ -1026,7 +1026,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
     @Override
     public SavingsAccountTransactionData retrieveSavingsTransaction(final Long savingsId, final Long transactionId,
-            DepositAccountType depositAccountType) {
+                                                                    DepositAccountType depositAccountType) {
 
         final String sql = "select " + this.transactionsMapper.schema() + " where sa.id = ? and sa.deposit_type_enum = ? and tr.id= ?";
 
@@ -1069,7 +1069,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
      * return this.jdbcTemplate.query(sql, this.annualFeeMapper, new Object[] {}); }
      */
 
-    public static final class SavingsAccountTransactionsMapper implements RowMapper<SavingsAccountTransactionData> {
+    public static class SavingsAccountTransactionsMapper implements RowMapper<SavingsAccountTransactionData> {
 
         private static final String SELECT = buildSelect();
         private static final String FROM = buildFrom();
@@ -1077,7 +1077,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
         public SavingsAccountTransactionsMapper() {}
 
-        private static String buildSelect() {
+        protected static String buildSelect() {
             return "tr.id as transactionId, tr.transaction_type_enum as transactionType, "
                     + "tr.transaction_date as transactionDate, tr.amount as transactionAmount, "
                     + "tr.release_id_of_hold_amount as releaseTransactionId, tr.reason_for_block as reasonForBlock, "
@@ -1097,7 +1097,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     + "curr.display_symbol as currencyDisplaySymbol, pt.value as paymentTypeName, " + "tr.is_manual as postInterestAsOn ";
         }
 
-        private static String buildFrom() {
+        protected static String buildFrom() {
             return " FROM m_savings_account_transaction tr join m_savings_account sa on tr.savings_account_id = sa.id "
                     + "join m_currency curr on curr.code = sa.currency_code "
                     + "left join m_account_transfer_transaction fromtran on fromtran.from_savings_transaction_id = tr.id "
@@ -1326,7 +1326,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
     @Override
     public boolean isAccountBelongsToClient(final Long clientId, final Long accountId, final DepositAccountType depositAccountType,
-            final String currencyCode) {
+                                            final String currencyCode) {
         try {
             final StringBuilder buff = new StringBuilder("select count(*) from m_savings_account sa ");
             buff.append(

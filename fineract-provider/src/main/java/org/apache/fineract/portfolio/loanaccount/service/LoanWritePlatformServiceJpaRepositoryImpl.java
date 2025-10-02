@@ -321,7 +321,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Transactional
     @Override
     public CommandProcessingResult disburseLoan(final Long loanId, final JsonCommand command, Boolean isAccountTransfer,
-            Boolean isWithoutAutoPayment) {
+                                                Boolean isWithoutAutoPayment) {
         loanTransactionValidator.validateDisbursement(command, isAccountTransfer, loanId);
 
         Loan loan = loanAssembler.assembleFrom(loanId);
@@ -550,7 +550,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private void disburseLoan(JsonCommand command, boolean isPaymentTypeApplicableForDisbursementCharge, PaymentDetail paymentDetail,
-            Loan loan, AppUser currentUser, Map<String, Object> changes, ScheduleGeneratorDTO scheduleGeneratorDTO) {
+                              Loan loan, AppUser currentUser, Map<String, Object> changes, ScheduleGeneratorDTO scheduleGeneratorDTO) {
         final PaymentDetail paymentDetail1 = isPaymentTypeApplicableForDisbursementCharge ? paymentDetail : null;
         final LocalDate actualDisbursementDate1 = command.localDateValueOfParameterNamed(ACTUAL_DISBURSEMENT_DATE);
 
@@ -725,7 +725,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Transactional
     @Override
     public Map<String, Object> bulkLoanDisbursal(final JsonCommand command, final CollectionSheetBulkDisbursalCommand bulkDisbursalCommand,
-            Boolean isAccountTransfer) {
+                                                 Boolean isAccountTransfer) {
         final AppUser currentUser = getAppUserIfPresent();
 
         final SingleDisbursalCommand[] disbursalCommand = bulkDisbursalCommand.getDisburseTransactions();
@@ -960,7 +960,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Transactional
     @Override
     public CommandProcessingResult makeLoanRepayment(final LoanTransactionType repaymentTransactionType, final Long loanId,
-            final JsonCommand command, final boolean isRecoveryRepayment) {
+                                                     final JsonCommand command, final boolean isRecoveryRepayment) {
         final String chargeRefundChargeType = null;
         return makeLoanRepaymentWithChargeRefundChargeType(repaymentTransactionType, loanId, command, isRecoveryRepayment,
                 chargeRefundChargeType);
@@ -988,7 +988,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         boolean reprocess = true;
         if (!loan.isForeclosure() && isTransactionChronologicallyLatest && DateUtils.isEqualBusinessDate(transactionDate)
                 && currentInstallment != null && currentInstallment.getTotalOutstanding(loan.getCurrency())
-                        .isEqualTo(newInterestPaymentWaiverTransaction.getAmount(loan.getCurrency()))) {
+                .isEqualTo(newInterestPaymentWaiverTransaction.getAmount(loan.getCurrency()))) {
             reprocess = false;
         }
 
@@ -1103,7 +1103,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Transactional
     @Override
     public CommandProcessingResult makeLoanRepaymentWithChargeRefundChargeType(final LoanTransactionType repaymentTransactionType,
-            final Long loanId, final JsonCommand command, final boolean isRecoveryRepayment, final String chargeRefundChargeType) {
+                                                                               final Long loanId, final JsonCommand command, final boolean isRecoveryRepayment, final String chargeRefundChargeType) {
 
         this.loanUtilService.validateRepaymentTransactionType(repaymentTransactionType);
         this.loanTransactionValidator.validateNewRepaymentTransaction(command.json());
@@ -1295,7 +1295,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (!loanTransaction.isTypeAllowedForChargeback()) {
             throw new PlatformServiceUnavailableException(
                     "error.msg.loan.chargeback.operation.not.allowed", "Loan transaction:" + transactionId
-                            + " chargeback not allowed for loan transaction type, its type is " + loanTransaction.getTypeOf().getCode(),
+                    + " chargeback not allowed for loan transaction type, its type is " + loanTransaction.getTypeOf().getCode(),
                     transactionId);
         }
 
@@ -1723,7 +1723,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loan.getTopupLoanDetails().setTopupAmount(amount);
     }
 
-    private void disburseLoanToSavings(final Loan loan, final JsonCommand command, final Money amount, final PaymentDetail paymentDetail) {
+    protected Long disburseLoanToSavings(final Loan loan, final JsonCommand command, final Money amount, final PaymentDetail paymentDetail) {
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
         final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
 
@@ -1742,7 +1742,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 PortfolioAccountType.SAVINGS, loan.getId(), portfolioAccountData.getId(), "Loan Disbursement", locale, fmt, paymentDetail,
                 LoanTransactionType.DISBURSEMENT.getValue(), null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null,
                 txnExternalId, loan, null, fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
-        this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+        return this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
     }
 
     @Transactional
@@ -1771,7 +1771,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Transactional
     @Override
     public LoanTransaction acceptLoanTransfer(final Loan loan, final LocalDate transferDate, final Office acceptedInOffice,
-            final Staff loanOfficer) {
+                                              final Staff loanOfficer) {
         businessEventNotifierService.notifyPreBusinessEvent(new LoanAcceptTransferBusinessEvent(loan));
         final List<Long> existingTransactionIds = new ArrayList<>(loanTransactionRepository.findTransactionIdsByLoan(loan));
         final List<Long> existingReversedTransactionIds = new ArrayList<>(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
@@ -1960,7 +1960,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Transactional
     @Override
     public void applyMeetingDateChanges(final Calendar calendar, final Collection<CalendarInstance> loanCalendarInstances,
-            final Boolean rescheduleBasedOnMeetingDates, final LocalDate presentMeetingDate, final LocalDate newMeetingDate) {
+                                        final Boolean rescheduleBasedOnMeetingDates, final LocalDate presentMeetingDate, final LocalDate newMeetingDate) {
 
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
@@ -2097,7 +2097,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private void updateLoanCounter(final Loan loan, final List<Loan> loansToUpdateForLoanCounter, Integer newLoanCounter,
-            Integer newLoanProductCounter) {
+                                   Integer newLoanProductCounter) {
 
         final boolean includeInBorrowerCycle = loan.loanProduct().isIncludeInBorrowerCycle();
         for (final Loan loanToUpdate : loansToUpdateForLoanCounter) {
@@ -2232,7 +2232,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private void validateMultiDisbursementData(final JsonCommand command, LocalDate expectedDisbursementDate,
-            boolean isDisallowExpectedDisbursements, Loan loan) {
+                                               boolean isDisallowExpectedDisbursements, Loan loan) {
         final String json = command.json();
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
@@ -2327,7 +2327,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private CommandProcessingResult processLoanDisbursementDetail(Loan loan, Long loanId, JsonCommand command,
-            LoanDisbursementDetails loanDisbursementDetails) {
+                                                                  LoanDisbursementDetails loanDisbursementDetails) {
         final List<Long> existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
         final List<Long> existingReversedTransactionIds = loanTransactionRepository.findReversedTransactionIdsByLoan(loan);
         final Map<String, Object> changes = new LinkedHashMap<>();
@@ -2376,7 +2376,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     @Transactional
     public CommandProcessingResult updateDisbursementDateAndAmountForTranche(final Long loanId, final Long disbursementId,
-            final JsonCommand command) {
+                                                                             final JsonCommand command) {
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
@@ -2465,8 +2465,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private void regenerateScheduleOnDisbursement(final JsonCommand command, final Loan loan, final boolean recalculateSchedule,
-            final ScheduleGeneratorDTO scheduleGeneratorDTO, final LocalDate nextPossibleRepaymentDate,
-            final LocalDate rescheduledRepaymentDate) {
+                                                  final ScheduleGeneratorDTO scheduleGeneratorDTO, final LocalDate nextPossibleRepaymentDate,
+                                                  final LocalDate rescheduledRepaymentDate) {
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
         BigDecimal emiAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.fixedEmiAmountParameterName);
 
@@ -3062,7 +3062,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private Map<String, Object> undoDisbursal(final Loan loan, final ScheduleGeneratorDTO scheduleGeneratorDTO,
-            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
+                                              final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
         final LoanStatus currentStatus = loan.getStatus();
         final LoanStatus statusEnum = this.loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_DISBURSAL_UNDO, loan);
@@ -3070,7 +3070,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         existingReversedTransactionIds.addAll(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
         if (!statusEnum.hasStateOf(currentStatus)) {
             this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSAL_UNDO, loan); // tis will update the loan
-                                                                                            // status
+            // status
             actualChanges.put(PARAM_STATUS, LoanEnumerations.status(loan.getLoanStatus()));
 
             final LocalDate actualDisbursementDate = loan.getDisbursementDate();
@@ -3168,8 +3168,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private Optional<LoanTransaction> closeAsWrittenOff(final Loan loan, final JsonCommand command, final Map<String, Object> changes,
-            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds, final AppUser currentUser,
-            final ScheduleGeneratorDTO scheduleGeneratorDTO) {
+                                                        final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds, final AppUser currentUser,
+                                                        final ScheduleGeneratorDTO scheduleGeneratorDTO) {
         closeDisbursements(loan, scheduleGeneratorDTO);
 
         final LocalDate writtenOffOnLocalDate = command.localDateValueOfParameterNamed(TRANSACTION_DATE);
@@ -3248,8 +3248,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private Optional<LoanTransaction> close(final Loan loan, final JsonCommand command, final Map<String, Object> changes,
-            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
-            final ScheduleGeneratorDTO scheduleGeneratorDTO) {
+                                            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
+                                            final ScheduleGeneratorDTO scheduleGeneratorDTO) {
         existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
         existingReversedTransactionIds.addAll(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
 
@@ -3332,7 +3332,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private void updateDisbursementDateAndAmountForTranche(final Loan loan, final LoanDisbursementDetails disbursementDetails,
-            final JsonCommand command, final Map<String, Object> actualChanges, final ScheduleGeneratorDTO scheduleGeneratorDTO) {
+                                                           final JsonCommand command, final Map<String, Object> actualChanges, final ScheduleGeneratorDTO scheduleGeneratorDTO) {
         final Locale locale = command.extractLocale();
         final BigDecimal principal = command.bigDecimalValueOfParameterNamed(LoanApiConstants.updatedDisbursementPrincipalParameterName,
                 locale);
@@ -3359,7 +3359,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private Map<String, Object> undoLastDisbursal(final ScheduleGeneratorDTO scheduleGeneratorDTO, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds, final Loan loan) {
+                                                  final List<Long> existingReversedTransactionIds, final Loan loan) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
         List<LoanTransaction> loanTransactions = loan.retrieveListOfTransactionsByType(LoanTransactionType.DISBURSEMENT);
         loanTransactions.sort(Comparator.comparing(LoanTransaction::getId));
@@ -3374,7 +3374,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         for (final LoanTransaction previousTransaction : loanTransactions) {
             if (DateUtils.isBefore(lastTransactionDate, previousTransaction.getTransactionDate())
                     && (previousTransaction.isRepaymentLikeType() || previousTransaction.isWaiver()
-                            || previousTransaction.isChargePayment())) {
+                    || previousTransaction.isChargePayment())) {
                 throw new UndoLastTrancheDisbursementException(previousTransaction.getId());
             }
             if (previousTransaction.getId().compareTo(lastDisbursalTransaction.getId()) < 0) {
@@ -3388,7 +3388,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .removeIf(loanTermVariations -> (loanTermVariations.getTermType().isDueDateVariation()
                         && DateUtils.isAfter(loanTermVariations.fetchDateValue(), lastTransactionDate))
                         || (loanTermVariations.getTermType().isEMIAmountVariation()
-                                && DateUtils.isEqual(loanTermVariations.getTermApplicableFrom(), lastTransactionDate))
+                        && DateUtils.isEqual(loanTermVariations.getTermApplicableFrom(), lastTransactionDate))
                         || DateUtils.isAfter(loanTermVariations.getTermApplicableFrom(), lastTransactionDate));
         reverseExistingTransactionsTillLastDisbursal(loan, lastDisbursalTransaction);
         loanScheduleService.recalculateSchedule(loan, scheduleGeneratorDTO);
@@ -3400,7 +3400,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private void waiveInterest(final Loan loan, final LoanTransaction waiveInterestTransaction, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds, final ScheduleGeneratorDTO scheduleGeneratorDTO) {
+                               final List<Long> existingReversedTransactionIds, final ScheduleGeneratorDTO scheduleGeneratorDTO) {
         existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
         existingReversedTransactionIds.addAll(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
 
@@ -3515,8 +3515,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private void updateLoanRepaymentScheduleDates(final Loan loan, final LocalDate meetingStartDate, final String recuringRule,
-            final boolean isHolidayEnabled, final List<Holiday> holidays, final WorkingDays workingDays,
-            final boolean isSkipRepaymentonfirstdayofmonth, final Integer numberofDays) {
+                                                  final boolean isHolidayEnabled, final List<Holiday> holidays, final WorkingDays workingDays,
+                                                  final boolean isSkipRepaymentonfirstdayofmonth, final Integer numberofDays) {
         // first repayment's from date is same as disbursement date.
         LocalDate tmpFromDate = loan.getDisbursementDate();
         final PeriodFrequencyType repaymentPeriodFrequencyType = loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType();
@@ -3563,7 +3563,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private LocalDate getMaxDateLimitForNewRepayment(final PeriodFrequencyType periodFrequencyType, final Integer loanRepaymentInterval,
-            final LocalDate startDate) {
+                                                     final LocalDate startDate) {
         LocalDate dueRepaymentPeriodDate = startDate;
         final int repaidEvery = 2 * loanRepaymentInterval;
         switch (periodFrequencyType) {
@@ -3578,8 +3578,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private void updateLoanRepaymentScheduleDates(final Loan loan, final String recurringRule, final boolean isHolidayEnabled,
-            final List<Holiday> holidays, final WorkingDays workingDays, final LocalDate presentMeetingDate, final LocalDate newMeetingDate,
-            final boolean isSkipRepaymentOnFirstDayOfMonth, final Integer numberOfDays) {
+                                                  final List<Holiday> holidays, final WorkingDays workingDays, final LocalDate presentMeetingDate, final LocalDate newMeetingDate,
+                                                  final boolean isSkipRepaymentOnFirstDayOfMonth, final Integer numberOfDays) {
         // first repayment's from date is same as disbursement date.
         // meetingStartDate is used as seedDate Capture the seedDate from user and use the seedDate as meetingStart date
 

@@ -68,7 +68,7 @@ public class EventStore {
         return receivedEvents;
     }
 
-    void receive(byte[] message) throws Exception {
+    public void receive(byte[] message) throws Exception {
         MessageV1 msgObject = MessageV1.fromByteBuffer(ByteBuffer.wrap(message));
         String type = msgObject.getType();
         String idempotencyKey = msgObject.getIdempotencyKey();
