@@ -29,11 +29,14 @@ import org.apache.fineract.client.models.PostSavingsProductsResponse;
 import org.apache.fineract.client.models.SavingsAccountData;
 import org.apache.fineract.client.models.SavingsAccountTransactionData;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
 import org.apache.fineract.integrationtests.savings.base.BaseSavingsIntegrationTest;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @Order(2)
+@ExtendWith({ SavingsTestLifecycleExtension.class })
 public class SavingsInterestPostingTest extends BaseSavingsIntegrationTest {
 
     @Test

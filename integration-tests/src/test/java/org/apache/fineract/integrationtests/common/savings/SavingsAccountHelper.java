@@ -44,6 +44,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.fineract.client.models.PagedLocalRequestAdvancedQueryRequest;
+import org.apache.fineract.client.models.PostSavingsAccountTransactionsRequest;
+import org.apache.fineract.client.models.PostSavingsAccountTransactionsResponse;
+import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
+import org.apache.fineract.client.models.PostSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.SavingsAccountTransactionsSearchResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
@@ -56,6 +60,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import retrofit2.Response;
 
 @SuppressWarnings({ "rawtypes" })
 public class SavingsAccountHelper {
@@ -114,6 +119,10 @@ public class SavingsAccountHelper {
     public SavingsAccountHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
+    }
+
+    public static List<Long> getSavingsIdsByStatusId(int status) {
+        return Calls.ok(FineractClientHelper.getFineractClient().legacy.getSavingsAccountsByStatus(status));
     }
 
     public RequestSpecification getRequestSpec() {
@@ -368,6 +377,10 @@ public class SavingsAccountHelper {
                 getCloseAccountJSON(withdrawBalance, LAST_TRANSACTION_DATE), IS_BLOCK);
     }
 
+    public PostSavingsAccountsAccountIdResponse closeSavingsAccount(final Long savingsId, PostSavingsAccountsAccountIdRequest request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().savingsAccounts.handleCommands6(savingsId, request, "close"));
+    }
+
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
@@ -414,6 +427,16 @@ public class SavingsAccountHelper {
     public Object withdrawalFromSavingsAccount(final Integer savingsId, final String amount, String date, String jsonAttributeToGetback) {
         LOG.info("\n--------------------------------- SAVINGS TRANSACTION WITHDRAWAL --------------------------------");
         return withdrawalFromSavingsAccount(savingsId, getSavingsTransactionJSON(amount, date), jsonAttributeToGetback);
+    }
+
+    public Response<PostSavingsAccountTransactionsResponse> withdrawalFromSavingsAccount(final Long savingsId,
+            PostSavingsAccountTransactionsRequest request) {
+        return Calls.executeU(FineractClientHelper.getFineractClient().savingsTransactions.transaction2(savingsId, request, "withdrawal"));
+    }
+
+    public Response<PostSavingsAccountTransactionsResponse> depositIntoSavingsAccount(final Long savingsId,
+            PostSavingsAccountTransactionsRequest request) {
+        return Calls.executeU(FineractClientHelper.getFineractClient().savingsTransactions.transaction2(savingsId, request, "deposit"));
     }
 
     // TODO: Rewrite to use fineract-client instead!
