@@ -1216,8 +1216,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         return value.setScale(6, MoneyHelper.getRoundingMode());
     }
 
-    public boolean isFirstNormalInstallment() {
-        return loan.getRepaymentScheduleInstallments().stream().filter(rp -> !rp.isDownPayment()).findFirst().stream()
-                .anyMatch(rp -> rp.equals(this));
+    public boolean isFirstNormalInstallment(List<LoanRepaymentScheduleInstallment> installments) {
+        return installments.stream().filter(rp -> !rp.isDownPayment()).findFirst().stream().anyMatch(rp -> rp.equals(this));
     }
 }

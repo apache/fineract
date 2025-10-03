@@ -4058,6 +4058,39 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY,
                 responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmi36030InterestRecalculationDaily);
 
+        // LP2 with progressive loan schedule + horizontal + interest EMI + 360/30 + multidisbursement +
+        // contract termination with interest recognition
+        // (LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_CONTRACT_TERMINATION_INT_RECOGNITION)
+        final String name148 = DefaultLoanProduct.LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_CONTRACT_TERMINATION_INT_RECOGNITION
+                .getName();
+
+        final PostLoanProductsRequest loanProductsRequestAdvCustomContractTerminationProgressiveLoanScheduleIntRecalcRecog = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2InterestDailyRecalculation()//
+                .interestRecognitionOnDisbursementDate(true) //
+                .name(name148)//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT",
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_PENALTY, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_FEE, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_INTEREST, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_PRINCIPAL, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_PENALTY, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_FEE, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_PRINCIPAL, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_INTEREST, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PENALTY, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_FEE, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PRINCIPAL, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_INTEREST), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvCustomContractTerminationProgressiveLoanScheduleIntRecalcRecog = loanProductsApi
+                .createLoanProduct(loanProductsRequestAdvCustomContractTerminationProgressiveLoanScheduleIntRecalcRecog).execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_CONTRACT_TERMINATION_INT_RECOGNITION,
+                responseLoanProductsRequestAdvCustomContractTerminationProgressiveLoanScheduleIntRecalcRecog);
+
         // (LP1_WITH_OVERRIDES) - Loan product with all attribute overrides ENABLED
         final String nameWithOverrides = DefaultLoanProduct.LP1_WITH_OVERRIDES.getName();
         final PostLoanProductsRequest loanProductsRequestWithOverrides = loanProductsRequestFactory.defaultLoanProductsRequestLP1() //
@@ -4106,33 +4139,6 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .execute();
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_NO_OVERRIDES, responseNoOverrides);
 
-        // LP2 advanced + progressive loan schedule + horizontal + interest recalculation
-        // Frequency for recalculate Outstanding Principal: Daily, Frequency Interval for recalculation: 1
-        String name148 = DefaultLoanProduct.LP2_ADV_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OF_ACCRUAL.getName();
-        PostLoanProductsRequest loanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals = loanProductsRequestFactory
-                .defaultLoanProductsRequestLP2Emi()//
-                .name(name148)//
-                .supportedInterestRefundTypes(supportedInterestRefundTypes).installmentAmountInMultiplesOf(null) //
-                .daysInYearType(DaysInYearType.ACTUAL.value)//
-                .daysInMonthType(DaysInMonthType.ACTUAL.value)//
-                .daysInYearCustomStrategy(FEB_29_PERIOD_ONLY.getValue()).isInterestRecalculationEnabled(true)//
-                .preClosureInterestCalculationStrategy(1)//
-                .rescheduleStrategyMethod(4)//
-                .interestRecalculationCompoundingMethod(0)//
-                .recalculationRestFrequencyType(2)//
-                .recalculationRestFrequencyInterval(1)//
-                .enableAccrualActivityPosting(true) //
-                .chargeOffBehaviour(ZERO_INTEREST.value)//
-                .paymentAllocation(List.of(//
-                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"))); //
-        Response<PostLoanProductsResponse> responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals = loanProductsApi
-                .createLoanProduct(
-                        loanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals)
-                .execute();
-        TestContext.INSTANCE.set(
-                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OF_ACCRUAL,
-                responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals);
-
         // LP2 advanced custom payment allocation + progressive loan schedule + horizontal + interest recalculation
         // Frequency for recalculate Outstanding Principal: Daily, Frequency Interval for recalculation: 1
         String name149 = DefaultLoanProduct.LP2_ADV_CUSTOM_PMT_ALLOC_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OFF_ACCRUAL
@@ -4163,6 +4169,33 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_CUSTOM_PMT_ALLOC_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OFF_ACCRUAL,
                 responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffAccruals);
+
+        // LP2 advanced + progressive loan schedule + horizontal + interest recalculation
+        // Frequency for recalculate Outstanding Principal: Daily, Frequency Interval for recalculation: 1
+        String name150 = DefaultLoanProduct.LP2_ADV_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OF_ACCRUAL.getName();
+        PostLoanProductsRequest loanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2Emi()//
+                .name(name150)//
+                .supportedInterestRefundTypes(supportedInterestRefundTypes).installmentAmountInMultiplesOf(null) //
+                .daysInYearType(DaysInYearType.ACTUAL.value)//
+                .daysInMonthType(DaysInMonthType.ACTUAL.value)//
+                .daysInYearCustomStrategy(FEB_29_PERIOD_ONLY.getValue()).isInterestRecalculationEnabled(true)//
+                .preClosureInterestCalculationStrategy(1)//
+                .rescheduleStrategyMethod(4)//
+                .interestRecalculationCompoundingMethod(0)//
+                .recalculationRestFrequencyType(2)//
+                .recalculationRestFrequencyInterval(1)//
+                .enableAccrualActivityPosting(true) //
+                .chargeOffBehaviour(ZERO_INTEREST.value)//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"))); //
+        Response<PostLoanProductsResponse> responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals = loanProductsApi
+                .createLoanProduct(
+                        loanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals)
+                .execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OF_ACCRUAL,
+                responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,

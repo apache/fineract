@@ -1410,10 +1410,17 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
      * @param date
      * @return a schedule installment is related to the provided date
      **/
-    public LoanRepaymentScheduleInstallment getRelatedRepaymentScheduleInstallment(LocalDate date) {
-        return getRepaymentScheduleInstallment(
-                e -> (e.isFirstNormalInstallment() && DateUtils.isDateInRangeInclusive(date, e.getFromDate(), e.getDueDate()))
-                        || DateUtils.isDateInRangeFromExclusiveToInclusive(date, e.getFromDate(), e.getDueDate()));
+    public LoanRepaymentScheduleInstallment getRelatedRepaymentScheduleInstallment(final LocalDate date) {
+        return getRepaymentScheduleInstallment(e -> (DateUtils.isDateInRangeFromExclusiveToInclusive(date, e.getFromDate(), e.getDueDate())
+                || (e.isFirstNormalInstallment(getRepaymentScheduleInstallments())
+                        && DateUtils.isDateInRangeInclusive(date, e.getFromDate(), e.getDueDate()))));
+    }
+
+    public List<LoanRepaymentScheduleInstallment> getInstallmentsUpToTransactionDate(final LocalDate transactionDate) {
+        return getRepaymentScheduleInstallments().stream()
+                .filter(i -> (transactionDate.isAfter(i.getFromDate())
+                        || (i.isFirstNormalInstallment(getRepaymentScheduleInstallments()) && !transactionDate.isBefore(i.getFromDate()))))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public LoanRepaymentScheduleInstallment fetchRepaymentScheduleInstallment(final Integer installmentNumber) {

@@ -1861,10 +1861,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         final Loan loan = loanTransaction.getLoan();
         final LoanRepaymentScheduleInstallment currentInstallment = loan.getRelatedRepaymentScheduleInstallment(transactionDate);
 
-        if (!installments.isEmpty() && transactionDate.isBefore(loan.getMaturityDate())) {
+        if (!installments.isEmpty() && transactionDate.isBefore(loan.getMaturityDate()) && currentInstallment != null) {
             if (currentInstallment.isNotFullyPaidOff()) {
                 if (transactionCtx instanceof ProgressiveTransactionCtx progressiveTransactionCtx
-                        && loanTransaction.getLoan().isInterestBearingAndInterestRecalculationEnabled()) {
+                        && loan.isInterestBearingAndInterestRecalculationEnabled()) {
                     final BigDecimal interestOutstanding = currentInstallment.getInterestOutstanding(loan.getCurrency()).getAmount();
                     final BigDecimal newInterest = emiCalculator.getPeriodInterestTillDate(progressiveTransactionCtx.getModel(),
                             currentInstallment.getDueDate(), transactionDate, true).getAmount();
@@ -1918,9 +1918,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         MathUtil.nullToZero(currentInstallment.getTotalPaidInAdvance()).add(futureTotalPaidInAdvance));
             }
 
-            final List<LoanRepaymentScheduleInstallment> installmentsUpToTransactionDate = installments.stream()
-                    .filter(installment -> transactionDate.isAfter(installment.getFromDate()))
-                    .collect(Collectors.toCollection(ArrayList::new));
+            final List<LoanRepaymentScheduleInstallment> installmentsUpToTransactionDate = loan
+                    .getInstallmentsUpToTransactionDate(transactionDate);
 
             final List<LoanTransaction> transactionsToBeReprocessed = loan.getLoanTransactions().stream()
                     .filter(transaction -> transaction.getTransactionDate().isBefore(transactionDate))
