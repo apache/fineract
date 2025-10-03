@@ -5821,6 +5821,43 @@ public class LoanStepDef extends AbstractStepDef {
         checkLoanAmortizationAllocationMappingData(resourceId, loanAmortizationAllocationResponse.body(), table);
     }
 
+    @And("Loan Amortization Allocation Mapping for the {string}th {string} transaction created on {string} contains the following data:")
+    public void checkLoanAmortizationAllocationMapping(final String nthTransactionStr, final String transactionType,
+            final String transactionDate, DataTable table) throws IOException {
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+        final Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanCreateResponse.body().getLoanId();
+        final String resourceId = String.valueOf(loanId);
+
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        final TransactionType transactionType1 = TransactionType.valueOf(transactionType);
+        final String transactionTypeExpected = transactionType1.getValue();
+
+        assert loanDetailsResponse.body() != null;
+        final List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+        assert transactions != null;
+        final int nthTransaction = Integer.parseInt(nthTransactionStr) - 1;
+        final GetLoansLoanIdTransactions transactionMatch = transactions.stream().filter(t -> {
+            assert t.getDate() != null;
+            if (!transactionDate.equals(formatter.format(t.getDate()))) {
+                return false;
+            }
+            assert t.getType() != null;
+            assert t.getType().getCode() != null;
+            return transactionTypeExpected.equals(t.getType().getCode().substring(20));
+        }).toList().get(nthTransaction);
+
+        final Response<LoanAmortizationAllocationResponse> loanAmortizationAllocationResponse = transactionMatch.getType().getCode()
+                .substring(20).equals(GetLoansLoanIdLoanTransactionEnumData.SERIALIZED_NAME_CAPITALIZED_INCOME)
+                        ? loanCapitalizedIncomeApi.retrieveCapitalizedIncomeAllocationData(loanId, transactionMatch.getId()).execute()
+                        : loanBuyDownFeesApi.retrieveBuyDownFeesAllocationData(loanId, transactionMatch.getId()).execute();
+        ErrorHelper.checkSuccessfulApiCall(loanAmortizationAllocationResponse);
+
+        checkLoanAmortizationAllocationMappingData(resourceId, loanAmortizationAllocationResponse.body(), table);
+    }
+
     private void checkLoanAmortizationAllocationMappingData(final String resourceId,
             final LoanAmortizationAllocationResponse amortizationAllocationResponse, final DataTable table) {
         final List<List<String>> data = table.asLists();

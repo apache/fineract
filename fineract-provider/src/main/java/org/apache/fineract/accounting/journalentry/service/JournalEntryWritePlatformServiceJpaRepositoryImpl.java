@@ -91,6 +91,7 @@ import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeDataDTO;
 import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeLoanTransactionDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByDTO;
+import org.apache.fineract.portfolio.loanaccount.domain.AmortizationType;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAmortizationAllocationMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAmortizationAllocationMappingRepository;
@@ -881,18 +882,21 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     }
 
     private List<AdvancedMappingtDTO> getLoanTransactionClassificationId(final LoanTransaction loanTransaction) {
-        List<AdvancedMappingtDTO> advancedMappingData = new ArrayList<AdvancedMappingtDTO>();
+        final List<AdvancedMappingtDTO> advancedMappingData = new ArrayList<AdvancedMappingtDTO>();
         if (loanTransaction.isCapitalizedIncomeAmortization() || loanTransaction.isBuyDownFeeAmortization()) {
             final List<LoanAmortizationAllocationMapping> loanTransactionAllocations = loanAmortizationAllocationMappingRepository
                     .fetchLoanTransactionAllocationByAmortizationLoanTransactionId(loanTransaction.getId(),
                             loanTransaction.getLoan().getId());
-            loanTransactionAllocations.stream().forEach(loanTransactionAllocation -> {
+            loanTransactionAllocations.forEach(loanTransactionAllocation -> {
                 final CodeValue classification = loanTransactionRepository
                         .fetchClassificationCodeValueByTransactionId(loanTransactionAllocation.getBaseLoanTransactionId());
+                final BigDecimal allocationAmount = loanTransactionAllocation.getAmortizationType().equals(AmortizationType.AM)
+                        ? loanTransactionAllocation.getAmount()
+                        : loanTransactionAllocation.getAmount().negate();
                 if (classification != null) {
-                    advancedMappingData.add(new AdvancedMappingtDTO(classification.getId(), loanTransactionAllocation.getAmount()));
+                    advancedMappingData.add(new AdvancedMappingtDTO(classification.getId(), allocationAmount));
                 } else {
-                    advancedMappingData.add(new AdvancedMappingtDTO(null, loanTransactionAllocation.getAmount()));
+                    advancedMappingData.add(new AdvancedMappingtDTO(null, allocationAmount));
                 }
             });
         }

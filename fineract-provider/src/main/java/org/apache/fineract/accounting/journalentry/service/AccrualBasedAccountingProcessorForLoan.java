@@ -316,12 +316,25 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                     }
 
                     if (mapping == null) {
-                        populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId,
-                                creditAccountType.getValue(), AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
-                                glAccountBalanceHolder);
+                        if (MathUtil.isGreaterThanZero(classificationCodeValue.getAmount())) {
+                            populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId,
+                                    creditAccountType.getValue(), AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
+                                    glAccountBalanceHolder);
+                        } else {
+                            populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount().negate(), paymentTypeId,
+                                    AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), creditAccountType.getValue(),
+                                    glAccountBalanceHolder);
+                        }
                     } else {
-                        populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId, mapping.getGlAccount(),
-                                AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), glAccountBalanceHolder);
+                        if (MathUtil.isGreaterThanZero(classificationCodeValue.getAmount())) {
+                            populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId,
+                                    mapping.getGlAccount(), AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
+                                    glAccountBalanceHolder);
+                        } else {
+                            populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount().negate(), paymentTypeId,
+                                    AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), mapping.getGlAccount(),
+                                    glAccountBalanceHolder);
+                        }
                     }
                 });
             }
@@ -340,12 +353,25 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                     }
 
                     if (mapping == null) {
-                        populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId,
-                                creditAccountType.getValue(), AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
-                                glAccountBalanceHolder);
+                        if (MathUtil.isGreaterThanZero(classificationCodeValue.getAmount())) {
+                            populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId,
+                                    creditAccountType.getValue(), AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
+                                    glAccountBalanceHolder);
+                        } else {
+                            populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount().negate(), paymentTypeId,
+                                    AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), creditAccountType.getValue(),
+                                    glAccountBalanceHolder);
+                        }
                     } else {
-                        populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId, mapping.getGlAccount(),
-                                AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), glAccountBalanceHolder);
+                        if (MathUtil.isGreaterThanZero(classificationCodeValue.getAmount())) {
+                            populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId,
+                                    mapping.getGlAccount(), AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
+                                    glAccountBalanceHolder);
+                        } else {
+                            populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount().negate(), paymentTypeId,
+                                    AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), mapping.getGlAccount(),
+                                    glAccountBalanceHolder);
+                        }
                     }
                 });
             }
@@ -550,7 +576,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                 populateCreditDebitMaps(loanProductId, interestAmount, paymentTypeId, creditAccountType.getValue(),
                         AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), glAccountBalanceHolder);
             } else {
-                classificationCodeValues.stream().forEach(classificationCodeValue -> {
+                classificationCodeValues.forEach(classificationCodeValue -> {
                     ProductToGLAccountMapping mapping = null;
                     if (classificationCodeValue.getReferenceValueId() != null) {
                         mapping = fetchAdvanceAccountingMappingForCodeValue(loanProductId, classificationCodeValue.getReferenceValueId(),
@@ -558,12 +584,25 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                     }
 
                     if (mapping == null) {
-                        populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId,
-                                creditAccountType.getValue(), AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
-                                glAccountBalanceHolder);
+                        if (MathUtil.isGreaterThanZero(classificationCodeValue.getAmount())) {
+                            populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId,
+                                    creditAccountType.getValue(), AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
+                                    glAccountBalanceHolder);
+                        } else {
+                            populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount().negate(), paymentTypeId,
+                                    AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), creditAccountType.getValue(),
+                                    glAccountBalanceHolder);
+                        }
                     } else {
-                        populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId, mapping.getGlAccount(),
-                                AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), glAccountBalanceHolder);
+                        if (MathUtil.isGreaterThanZero(classificationCodeValue.getAmount())) {
+                            populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId,
+                                    mapping.getGlAccount(), AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
+                                    glAccountBalanceHolder);
+                        } else {
+                            populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount().negate(), paymentTypeId,
+                                    AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), mapping.getGlAccount(),
+                                    glAccountBalanceHolder);
+                        }
                     }
                 });
             }
@@ -582,12 +621,25 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                     }
 
                     if (mapping == null) {
-                        populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId,
-                                creditAccountType.getValue(), AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
-                                glAccountBalanceHolder);
+                        if (MathUtil.isGreaterThanZero(classificationCodeValue.getAmount())) {
+                            populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId,
+                                    creditAccountType.getValue(), AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
+                                    glAccountBalanceHolder);
+                        } else {
+                            populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount().negate(), paymentTypeId,
+                                    AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), creditAccountType.getValue(),
+                                    glAccountBalanceHolder);
+                        }
                     } else {
-                        populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId, mapping.getGlAccount(),
-                                AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), glAccountBalanceHolder);
+                        if (MathUtil.isGreaterThanZero(classificationCodeValue.getAmount())) {
+                            populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount(), paymentTypeId,
+                                    mapping.getGlAccount(), AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
+                                    glAccountBalanceHolder);
+                        } else {
+                            populateCreditDebitMaps(loanProductId, classificationCodeValue.getAmount().negate(), paymentTypeId,
+                                    AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), mapping.getGlAccount(),
+                                    glAccountBalanceHolder);
+                        }
                     }
                 });
             }
@@ -894,6 +946,17 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             glAccountBalanceHolder.addToCredit(accountCredit, transactionPartAmount);
             // Resolve Debit
             GLAccount accountDebit = this.helper.getLinkedGLAccountForLoanProduct(loanProductId, debitAccountType, paymentTypeId);
+            glAccountBalanceHolder.addToDebit(accountDebit, transactionPartAmount);
+        }
+    }
+
+    private void populateCreditDebitMaps(final Long loanProductId, final BigDecimal transactionPartAmount, final Long paymentTypeId,
+            final Integer creditAccountType, final GLAccount accountDebit, final GLAccountBalanceHolder glAccountBalanceHolder) {
+        if (MathUtil.isGreaterThanZero(transactionPartAmount)) {
+            // Resolve Credit
+            final GLAccount accountCredit = this.helper.getLinkedGLAccountForLoanProduct(loanProductId, creditAccountType, paymentTypeId);
+            glAccountBalanceHolder.addToCredit(accountCredit, transactionPartAmount);
+            // Resolve Debit
             glAccountBalanceHolder.addToDebit(accountDebit, transactionPartAmount);
         }
     }
