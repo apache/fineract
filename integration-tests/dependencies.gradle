@@ -21,7 +21,8 @@ dependencies {
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
     tomcat 'org.apache.tomcat:tomcat:10.1.42@zip'
-    testImplementation( files("$rootDir/fineract-provider/build/classes/java/main/"),
+    def providerMainOutput = project(':fineract-provider').extensions.getByType(SourceSetContainer).named('main').get().output
+    testImplementation( providerMainOutput,
             project(path: ':fineract-core', configuration: 'runtimeElements'),
             project(path: ':fineract-accounting', configuration: 'runtimeElements'),
             project(path: ':fineract-investor', configuration: 'runtimeElements'),
@@ -32,9 +33,17 @@ dependencies {
             project(path: ':fineract-savings', configuration: 'runtimeElements'),
             project(path: ':fineract-provider', configuration: 'runtimeElements'),
             project(path: ':fineract-avro-schemas', configuration: 'runtimeElements'),
-            project(path: ':fineract-client', configuration: 'runtimeElements'),
             project(path: ':fineract-progressive-loan', configuration: 'runtimeElements')
             )
+
+    // Retrofit client for existing tests
+    testImplementation project(path: ':fineract-client', configuration: 'runtimeElements')
+
+    // Feign client - exclude fineract-client module to avoid Retrofit/Feign model conflicts
+    // Both generated and hand-written Feign services are available in feign.services package
+    testImplementation(project(path: ':fineract-client-feign', configuration: 'runtimeElements')) {
+        exclude group: 'org.apache.fineract', module: 'fineract-client'
+    }
     testImplementation ('org.mock-server:mockserver-junit-jupiter') {
         exclude group: 'com.sun.mail', module: 'mailapi'
         exclude group: 'javax.servlet', module: 'javax.servlet-api'

@@ -1,0 +1,32 @@
+**/README.md
+**/pom.xml
+**/build.sbt
+**/*.gradle
+**/.gitignore
+**/git_push.sh
+**/api/*
+**/gradle*
+**/gradle
+**/src/main/AndroidManifest.xml
+
+# https://issues.apache.org/jira/browse/FINERACT-1231
+**/feign/*.java
+!**/feign/CollectionFormats.java
+!**/feign/StringUtil.java
+
+# Manual API overrides - do not regenerate
+# https://issues.apache.org/jira/browse/FINERACT-1263
+**/services/RunReportsApi.java
+**/services/ImagesApi.java
+**/services/DocumentsApiFixed.java
+
+# Utility classes - do not regenerate
+**/util/*.java
+**/adapter/*.java
+
+# Feign configuration - do not regenerate
+**/feign/FineractFeignClient.java
+**/feign/FineractFeignClientConfig.java
+**/feign/BasicAuthRequestInterceptor.java
+**/feign/ObjectMapperFactory.java
+**/feign/FeignException.java
