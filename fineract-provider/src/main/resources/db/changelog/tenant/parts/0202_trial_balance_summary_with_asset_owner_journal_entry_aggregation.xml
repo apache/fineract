@@ -23,7 +23,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
-    <changeSet author="fineract" id="trial-balance-summary-with-asset-owner-update-1">
+    <changeSet author="fineract" id="trial-balance-summary-with-asset-owner-update-2">
         <update tableName="stretchy_report">
             <column name="report_sql"  value="WITH retained_earning AS (
       SELECT DISTINCT '${endDate}' AS postingdate,
@@ -46,7 +46,6 @@
       FROM m_journal_entry_aggregation_tracking
   ),
   summary_snapshot_baseline_data AS (
-      --using m_journal_entry_aggregation_summary to fetch aggregated journal entry data
       SELECT lp.NAME AS productname,
              acc_gl_account.gl_code AS glcode,
              acc_gl_account.NAME AS glname,
@@ -63,7 +62,6 @@
       GROUP BY productname, glcode, glname, assetowner
   ),
   post_snapshot_delta_data AS (
-      -- still using acc_gl_journal_entry for dates after last aggregated data and before the cob date
       SELECT lp.NAME AS productname,
              acc_gl_account.gl_code AS glcode,
              acc_gl_account.NAME AS glname,
@@ -82,7 +80,6 @@
         AND (acc_gl_journal_entry.office_id = ${officeId})
       GROUP BY productname, glcode, glname, assetowner
   ),
-  -- fetch all data before cob date
   merged_historical_data AS (
       SELECT summary_snapshot_baseline_data.productname,
              summary_snapshot_baseline_data.glcode,
@@ -95,7 +92,6 @@
            AND summary_snapshot_baseline_data.productname = post_snapshot_delta_data.productname
            AND summary_snapshot_baseline_data.assetowner = post_snapshot_delta_data.assetowner
   ),
-  -- fetch data for cob date
   current_cob_data AS (
       SELECT lp.name AS productname,
              account_id,

@@ -112,26 +112,6 @@
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_journal_entry_aggregation_tracking" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_TRACKING_ON_CREATED_BY" referencedColumnNames="id" referencedTableName="m_appuser"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_journal_entry_aggregation_tracking" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_TRACKING_ON_LAST_MODIFIED_BY" referencedColumnNames="id" referencedTableName="m_appuser"/>
        </changeSet>
-    <changeSet id="4" author="fineract"  runInTransaction="false" context="postgresql">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <indexExists tableName="m_journal_entry_aggregation_tracking" columnNames="submitted_on_date"/>
-            </not>
-        </preConditions>
-        <sql>
-            create index concurrently idx_m_journal_entry_aggregation_tracking on m_journal_entry_aggregation_tracking(submitted_on_date);
-        </sql>
-    </changeSet>
-    <changeSet id="5" author="fineract"  runInTransaction="false" context="postgresql">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <indexExists tableName="m_journal_entry_aggregation_tracking" columnNames="aggregated_on_date_to"/>
-            </not>
-        </preConditions>
-        <sql>
-            create unique index concurrently idx2_m_journal_entry_aggregation_tracking on m_journal_entry_aggregation_tracking(aggregated_on_date_to);
-        </sql>
-    </changeSet>
 
     <changeSet id="6" author="fineract" context="mysql">
         <preConditions onFail="MARK_RAN">
@@ -223,6 +203,26 @@
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_journal_entry_aggregation_tracking" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_TRACKING_ON_CREATED_BY" referencedColumnNames="id" referencedTableName="m_appuser"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_journal_entry_aggregation_tracking" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_TRACKING_ON_LAST_MODIFIED_BY" referencedColumnNames="id" referencedTableName="m_appuser"/>
     </changeSet>
+    <changeSet id="4" author="fineract"  runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_tracking" columnNames="submitted_on_date"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_journal_entry_aggregation_tracking on m_journal_entry_aggregation_tracking(submitted_on_date);
+        </sql>
+    </changeSet>
+    <changeSet id="5" author="fineract"  runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_tracking" columnNames="aggregated_on_date_to"/>
+            </not>
+        </preConditions>
+        <sql>
+            create unique index concurrently idx2_m_journal_entry_aggregation_tracking on m_journal_entry_aggregation_tracking(aggregated_on_date_to);
+        </sql>
+    </changeSet>
     <changeSet id="9" author="fineract"  runInTransaction="false" context="mysql">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -241,6 +241,106 @@
         </preConditions>
         <sql>
             create unique index idx2_m_journal_entry_aggregation_tracking on m_journal_entry_aggregation_tracking(aggregated_on_date_to);
+        </sql>
+    </changeSet>
+    <changeSet id="11" author="fineract"  runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_tracking" columnNames="job_execution_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_jour_ent_aggr_trac_job_exec_id on m_journal_entry_aggregation_tracking(job_execution_id);
+        </sql>
+    </changeSet>
+    <changeSet id="12" author="fineract"  runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_tracking" columnNames="job_execution_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index idx_m_jour_ent_aggr_trac_job_exec_id on m_journal_entry_aggregation_tracking(job_execution_id);
+        </sql>
+    </changeSet>
+    <changeSet id="13" author="fineract"  runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="job_execution_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_jour_ent_aggr_sum_job_exec_id on m_journal_entry_aggregation_summary(job_execution_id);
+        </sql>
+    </changeSet>
+    <changeSet id="14" author="fineract"  runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="job_execution_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index idx_m_jour_ent_aggr_sum_job_exec_id on m_journal_entry_aggregation_summary(job_execution_id);
+        </sql>
+    </changeSet>
+    <changeSet id="15" author="fineract"  runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="product_id,entity_type_enum"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_jour_ent_aggr_sum_prod_id_entity_type on m_journal_entry_aggregation_summary(product_id, entity_type_enum);
+        </sql>
+    </changeSet>
+    <changeSet id="16" author="fineract"  runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="product_id,entity_type_enum"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index idx_m_jour_ent_aggr_sum_prod_id_entity_type on m_journal_entry_aggregation_summary(product_id, entity_type_enum);
+        </sql>
+    </changeSet>
+    <changeSet id="17" author="fineract"  runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="aggregated_on_date"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_jour_ent_aggr_sum_aggr_date on m_journal_entry_aggregation_summary(aggregated_on_date);
+        </sql>
+    </changeSet>
+    <changeSet id="18" author="fineract"  runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="aggregated_on_date"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index idx_m_jour_ent_aggr_sum_aggr_date on m_journal_entry_aggregation_summary(aggregated_on_date);
+        </sql>
+    </changeSet>
+    <changeSet id="19" author="fineract"  runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="office_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_jour_ent_aggr_sum_office_id on m_journal_entry_aggregation_summary(office_id);
+        </sql>
+    </changeSet>
+    <changeSet id="20" author="fineract"  runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="office_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index idx_m_jour_ent_aggr_sum_office_id on m_journal_entry_aggregation_summary(office_id);
         </sql>
     </changeSet>
 </databaseChangeLog>

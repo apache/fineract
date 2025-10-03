@@ -79,25 +79,75 @@ public class JournalEntryAggregationJobReader extends JdbcCursorItemReader<Journ
 
     private String buildAggregationQuery() {
         return """
-                SELECT lp.id AS productId,
-                       acc_gl_account.id AS glAccountId,
-                       acc_gl_journal_entry.entity_type_enum AS entityTypeEnum,
-                       acc_gl_journal_entry.office_id AS officeId,
-                       aw.owner_id AS externalOwner,
-                       SUM(CASE WHEN acc_gl_journal_entry.type_enum = 2 THEN amount ELSE 0 END) AS debitAmount,
-                       SUM(CASE WHEN acc_gl_journal_entry.type_enum = 1 THEN amount ELSE 0 END) AS creditAmount,
-                       acc_gl_journal_entry.submitted_on_date as aggregatedOnDate,
-                       acc_gl_journal_entry.currency_code as currencyCode
+                SELECT
+                    COALESCE(
+                        loan_product.id,
+                        savings_product.id,
+                        prov_product.id,
+                        share_product.id
+                    ) AS productId,
+                    acc_gl_account.id AS glAccountId,
+                    acc_gl_journal_entry.entity_type_enum AS entityTypeEnum,
+                    acc_gl_journal_entry.office_id AS officeId,
+                    aw.owner_id AS externalOwner,
+                    SUM(CASE WHEN acc_gl_journal_entry.type_enum = 2 THEN amount ELSE 0 END) AS debitAmount,
+                    SUM(CASE WHEN acc_gl_journal_entry.type_enum = 1 THEN amount ELSE 0 END) AS creditAmount,
+                    acc_gl_journal_entry.submitted_on_date AS aggregatedOnDate,
+                    acc_gl_journal_entry.currency_code AS currencyCode
                 FROM acc_gl_account
-                JOIN acc_gl_journal_entry ON acc_gl_account.id = acc_gl_journal_entry.account_id
-                JOIN m_loan m ON m.id = acc_gl_journal_entry.entity_id
-                JOIN m_product_loan lp ON lp.id = m.product_id
+                JOIN acc_gl_journal_entry
+                    ON acc_gl_account.id = acc_gl_journal_entry.account_id
+
+                -- entity_type_enum = 1 → LOAN
+                LEFT JOIN m_loan loan
+                    ON loan.id = acc_gl_journal_entry.entity_id
+                    AND acc_gl_journal_entry.entity_type_enum = 1
+                LEFT JOIN m_product_loan loan_product
+                    ON loan_product.id = loan.product_id
+                    AND acc_gl_journal_entry.entity_type_enum = 1
+
+                -- entity_type_enum = 2 → SAVING
+                LEFT JOIN m_savings_account savings
+                    ON savings.id = acc_gl_journal_entry.entity_id
+                    AND acc_gl_journal_entry.entity_type_enum = 2
+                LEFT JOIN m_savings_product savings_product
+                    ON savings_product.id = savings.product_id
+                    AND acc_gl_journal_entry.entity_type_enum = 2
+
+                -- entity_type_enum = 3 → PROVISIONING
+                LEFT JOIN m_provisioning_history prov
+                    ON prov.id = acc_gl_journal_entry.entity_id
+                    AND acc_gl_journal_entry.entity_type_enum = 3
+                LEFT JOIN m_loanproduct_provisioning_entry prov_entry
+                    ON prov_entry.history_id = prov.id
+                    AND acc_gl_journal_entry.entity_type_enum = 3
+                LEFT JOIN m_product_loan prov_product
+                    ON prov_product.id = prov_entry.product_id
+                    AND acc_gl_journal_entry.entity_type_enum = 3
+
+                -- entity_type_enum = 4 → SHARED
+                LEFT JOIN m_share_account share
+                    ON share.id = acc_gl_journal_entry.entity_id
+                    AND acc_gl_journal_entry.entity_type_enum = 4
+                LEFT JOIN m_share_product share_product
+                    ON share_product.id = share.product_id
+                    AND acc_gl_journal_entry.entity_type_enum = 4
+
+                -- external owner
                 LEFT JOIN m_external_asset_owner_journal_entry_mapping aw
-                       ON aw.journal_entry_id = acc_gl_journal_entry.id
-                WHERE acc_gl_journal_entry.entity_type_enum = 1
-                  AND acc_gl_journal_entry.submitted_on_date > ?
+                    ON aw.journal_entry_id = acc_gl_journal_entry.id
+
+                WHERE acc_gl_journal_entry.submitted_on_date > ?
                   AND acc_gl_journal_entry.submitted_on_date <= ?
-                GROUP BY productId, glAccountId, externalOwner, aggregatedOnDate, currencyCode, entityTypeEnum, officeId
+
+                GROUP BY
+                    productId,
+                    glAccountId,
+                    externalOwner,
+                    aggregatedOnDate,
+                    currencyCode,
+                    entityTypeEnum,
+                    officeId
                 """;
     }
 }
