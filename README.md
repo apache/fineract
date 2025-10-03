@@ -1,80 +1,67 @@
-Apache Fineract: A Platform for Microfinance
-============
+# Apache Fineract
 <!-- TODO Reactivate when there is a working CI-CD instance: [![Swagger Validation](https://validator.swagger.io/validator?url=https://sandbox.mifos.community/fineract-provider/swagger-ui/fineract.yaml)](https://validator.swagger.io/validator/debug?url=https://sandbox.mifos.community/fineract-provider/swagger-ui/fineract.yaml) -->
 [![Build](https://github.com/apache/fineract/actions/workflows/build-mariadb.yml/badge.svg?branch=develop)](https://github.com/apache/fineract/actions/workflows/build-mariadb.yml)
 [![Docker Hub](https://img.shields.io/docker/pulls/apache/fineract.svg?logo=Docker)](https://hub.docker.com/r/apache/fineract)
 [![Docker Build](https://github.com/apache/fineract/actions/workflows/publish-dockerhub.yml/badge.svg)](https://github.com/apache/fineract/actions/workflows/publish-dockerhub.yml)
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=apache_fineract&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=apache_fineract)
 
-</b>
+Apache Fineract is an open-source core banking platform providing a
+flexible, extensible foundation for a wide range of financial services. By
+making robust banking technology openly available, it lowers barriers for
+institutions and innovators to reach underserved and unbanked populations.
 
-Fineract is a mature platform with open APIs that provides a reliable, robust, and affordable core banking solution for financial institutions offering services to the world’s 3 billion underbanked and unbanked.
+Have a look at the [documentation](https://fineract.apache.org/docs/current), the [wiki](https://cwiki.apache.org/confluence/display/FINERACT) or at the [FAQ](https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=91554327), if this README does not answer what you are looking for.
 
-[Have a look at the FAQ on our Wiki at apache.org](https://cwiki.apache.org/confluence/display/FINERACT/FAQ) if this README does not answer what you are looking for.  [Visit our JIRA Dashboard](https://issues.apache.org/jira/secure/Dashboard.jspa?selectPageId=12335824) to find issues to work on, see what others are working on, or open new issues.
 
 COMMUNITY
 =========
 
-If you are interested in contributing to this project, but perhaps don't quite know how and where to get started, please [join our developer mailing list](http://fineract.apache.org/#contribute), listen into our conversations, chime into threads, and just send us a "Hello!" introduction email; we're a friendly bunch, and look forward to hearing from you.
+If you are interested in contributing to this project, but perhaps don't quite know how and where to get started, please [join our developer mailing list](http://fineract.apache.org/#contribute), listen into our conversations, chime into threads, or just send us a "Hello!" introduction email; we're a friendly bunch, and look forward to hearing from you. A more informal alternative is the [Fineract Slack channel](https://app.slack.com/client/T0F5GHE8Y/C028634A61L) (thank you, Mifos, for supporting the Slack channel!).
+
+For the developer wiki, see [Contributor's Zone](https://cwiki.apache.org/confluence/display/FINERACT/Contributor%27s+Zone). Maybe [these how-to articles](https://cwiki.apache.org/confluence/display/FINERACT/How-to+articles) help you to get started.
+
+In any case visit [our JIRA Dashboard](https://issues.apache.org/jira/secure/Dashboard.jspa?selectPageId=12335824) to find issues to work on, see what others are doing, or open new issues.
+
+In the moment you get started writing code, please consult our [CONTRIBUTING](CONTRIBUTING.md) guidelines, where you will find more information on subjects like coding style, testing and pull requests.
 
 
 REQUIREMENTS
 ============
+* min. 16GB RAM and 8 core CPU
+* `MariaDB >= 11.5.2` or `PostgreSQL >= 17.0`
 * `Java >= 21` (Azul Zulu JVM is tested by our CI on GitHub Actions)
-* MariaDB `11.5.2`
 
-You can run the required version of the database server in a container, instead of having to install it, like this:
+Tomcat (min. v10) is only required, if you wish to deploy the Fineract WAR to a separate external servlet container.  You do not need to install Tomcat to run Fineract. We recommend the use of the self-contained JAR, which transparently embeds a servlet container using Spring Boot.
 
-    docker run --name mariadb-11.5 -p 3306:3306 -e MARIADB_ROOT_PASSWORD=mysql -d mariadb:11.5.2
 
-and stop and destroy it like this:
+SECURITY
+============
+If you believe you have found a security vulnerability, [let us know privately](https://fineract.apache.org/#contribute).
 
-    docker rm -f mariadb-11.5
+For details about security during development and deployment, see the documentation [here](https://fineract.apache.org/docs/current/#_security).
 
-<br>Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mariadb) re. how to make it persistent instead of ephemeral.<br>
 
-Tomcat v10 is only required if you wish to deploy the Fineract WAR to a separate external servlet container.  Note that you do not require to install Tomcat to develop Fineract, or to run it in production if you use the self-contained JAR, which transparently embeds a servlet container using Spring Boot.  (Until FINERACT-730, Tomcat 7/8 were also supported, but now Tomcat 10 is required.)
-
-<br>IMPORTANT: If you use MySQL or MariaDB
+INSTRUCTIONS
 ============
 
-Recently (after release `1.7.0`), we introduced improved date time handling in Fineract. Date time is from now on stored in UTC and we are enforcing UTC timezone even on the JDBC driver, e. g. for MySQL:
+The following how-to's assume you have Java installed, you cloned the repository (or downloaded and extracted a [specific version](https://github.com/apache/fineract/releases)) and you have a [database server](#database-and-tables) (MariaDB or PostgreSQL) running.
 
+How to run for local development
+---
+
+Run the following commands in this order:
+```bash
+./gradlew createDB -PdbName=fineract_tenants
+./gradlew createDB -PdbName=fineract_default
+./gradlew devRun
 ```
-serverTimezone=UTC&useLegacyDatetimeCode=false&sessionVariables=time_zone=‘-00:00’
-```
 
-__DO__: If you do use MySQL as your Fineract database then the following configuration is highly recommended:
-
-* Run the application in UTC (the default command line in our Docker image has the necessary parameters already set)
-* Run the MySQL database server in UTC (if you use managed services like AWS RDS then this should be the default anyway, but it would be good to double-check)
-
-__DON'T__: In case the Fineract instance and the MySQL server are __not__ running in UTC then the following could happen:
-
-* MySQL is saving date time values differently from PostgreSQL
-* Example scenario: if the Fineract instance runs in timezone: GMT+2, and the local date time is 2022-08-11 17:15 ...
-* ... then __PostgreSQL saves__ the LocalDateTime as is: __2022-08-11 17:15__
-* ... and __MySQL saves__ the LocalDateTime in UTC: __2022-08-11 15:15__
-* ... but when we __read__ the date time from PostgreSQL __or__ from MySQL, then both systems give us the same values: __2022-08-11 17:15 GMT+2__
-
-If a previously used Fineract instance didn't run in UTC (backward compatibility), then all prior dates will be read wrongly by MySQL/MariaDB. This can cause issues when you run the database migration scripts.
-
-__RECOMMENDATION__: you need to shift all dates in your database by the timezone offset that your Fineract instance used.
-
-<br>INSTRUCTIONS: How to run for local development
-============
-
-Run the following commands:
-1. `./gradlew createDB -PdbName=fineract_tenants`
-1. `./gradlew createDB -PdbName=fineract_default`
-1. `./gradlew devRun`
-
-Fineract is now running, and will be listening for API requests on port 8443 by default.
+This creates two databases and builds and runs Fineract, which will be listening for API requests on port 8443 (by default) now.
 
 Confirm Fineract is ready with, for example:
 
 ```bash
-curl --insecure https://localhost:8443/fineract-provider/actuator/health`
+curl --insecure https://localhost:8443/fineract-provider/actuator/health
 ```
 
 To test authenticated endpoints, include credentials in your request:
@@ -87,233 +74,102 @@ curl --location \
   --header 'Authorization: Basic bWlmb3M6cGFzc3dvcmQ='
 ```
 
-<br>INSTRUCTIONS: How to build the JAR file
-============
-1. Clone the repository or download and extract the archive file to your local directory.
-2. Run `./gradlew clean bootJar` to build a modern cloud native fully self contained JAR file which will be created at `fineract-provider/build/libs` directory.
-3. As we are not allowed to include a JDBC driver in the built JAR, download a JDBC driver of your choice. For example: `wget https://dlm.mariadb.com/4174416/Connectors/java/connector-java-3.5.2/mariadb-java-client-3.5.2.jar`
-4. Start the jar and pass the directory where you have downloaded the JDBC driver as loader.path, for example: `java -Dloader.path=. -jar fineract-provider/build/libs/fineract-provider.jar` (does not require external Tomcat)
-
-The tenants database connection details are configured [via environment variables (as with Docker container)](#instructions-to-run-using-docker-and-docker-compose), e.g. like this:
-
-    export FINERACT_HIKARI_PASSWORD=verysecret
-    ...
-    java -jar fineract-provider.jar
+How to run for production
+---
+Running Fineract to try it out is relatively easy. If you intend to use it in a production environment, be aware that a proper deployment can be complex, costly, and time-consuming. Considerations include: Security, privacy, compliance, performance, service availability, backups, and more. The Fineract project does not provide a comprehensive guide for deploying Fineract in production. You might need skills in enterprise Java applications and more. Alternatively, you could pay a vendor for Fineract deployment and maintenance. You will find tips and tricks for deploying and securing Fineract in our official documentation and in the community-maintained wiki.
 
 
-<br>SECURITY
-============
-If you believe you have found a security vulnerability, [let us know privately](https://fineract.apache.org/#contribute).
+How to build the JAR file
+---
+Build a modern, cloud native, fully self contained JAR file:
+```bash
+./gradlew clean bootJar
+```
+The JAR will be created in the `fineract-provider/build/libs` directory.
+As we are not allowed to include a JDBC driver in the built JAR, download a JDBC driver of your choice. For example:
+```bash
+wget https://dlm.mariadb.com/4174416/Connectors/java/connector-java-3.5.2/mariadb-java-client-3.5.2.jar
+```
+Start the JAR and specify the directory containing the JDBC driver using the loader.path option, for example:
+```bash
+java -Dloader.path=. -jar fineract-provider/build/libs/fineract-provider.jar
+```
+This does not require an external Tomcat.
 
-For details about security during development and deployment, see <https://fineract.apache.org/docs/current/#_security>.
+The tenants database connection details are configured [via environment variables (as with Docker container)](#instructions-to-run-using-docker-or-podman), e.g. like this:
+```bash
+export FINERACT_HIKARI_PASSWORD=verysecret
+...
+java -jar fineract-provider.jar
+```
 
-
-<br>INSTRUCTIONS: How to build a WAR file
-============
-1. Clone the repository or download and extract the archive file to your local directory.
-2. Run `./gradlew :fineract-war:clean :fineract-war:war` to build a traditional WAR file which will be created at `fineract-war/build/libs` directory.
-3. Deploy this WAR to your Tomcat v10 Servlet Container.
+How to build the WAR file
+---
+Build a traditional WAR file:
+```bash
+./gradlew :fineract-war:clean :fineract-war:war
+```
+The WAR will be created in the `fineract-war/build/libs` directory. Afterwards deploy the WAR to your Tomcat Servlet Container.
 
 We recommend using the JAR instead of the WAR file deployment, because it's much easier.
 
-Note that with the 1.4 release the tenants database pool configuration changed from Tomcat DBCP in XML to an embedded Hikari, configured by environment variables, see above.
 
-
-INSTRUCTIONS: How to run tests
-============
-
-Unit tests
-----------
-
-Here's how to run the set of relatviely fast and indepedent Fineract tests:
-
-```bash
-./gradlew test -x :twofactor-tests:test -x :oauth2-tests:test -x :integration-tests:test
-```
-
-This runs nearly 1,000 tests and completes in a few minutes on decent hardware.
-They shouldn't need any special servers/services running.
-
-Integration tests
------------------
-
-Running tests with external dependencies yourself is a multi-step process with many moving parts.
-Sometimes there are arbitrary failures and the prerequisite setup can be daunting.
-A full local integration test run (on a developer workstation) covering every possible test using every external service and every supported relational database engine could take an entire day, and that's assuming everything is properly configured and runs as expected.
-
-Right now we depend on GitHub to know if "the build" is passing (it's actually multiple builds).
-The authoritative source of truth for what commands/services/tests to run, how, and when are the files in `.github/workflows/`.
-Output from runs based on those configuration files appears at <https://github.com/apache/fineract/actions>.
-
-Incorrect default Java-related executables may cause test failures.
-To fix this on Debian and Ubuntu systems, run the following:
-
-```bash
-export JAVA_HOME=/usr/lib/jvm/zulu21
-sudo update-alternatives --set java $JAVA_HOME/bin/java
-sudo update-alternatives --set javac $JAVA_HOME/bin/javac
-sudo update-alternatives --set javadoc $JAVA_HOME/bin/javadoc
-```
-
-This would correct, for example, a [class file verson error](https://en.wikipedia.org/wiki/Java_class_file#General_layout).
-You might see something like this if a Java 11 executable (class file format version 56) was the system default, but the integration tests were using Java 21 (class file format version 65):
-
-```
-UnsupportedClassVersionError: com.example.package/ClassName has been compiled by a more recent version of the Java Runtime (class file version 65.0), this version of the Java Runtime only recognizes class file versions up to 55.0
-```
-
-The GitHub builds are run in [short-lived virtual machines](https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners), so locally reproducing the same may require additional effort, such as these extra clean-up procedures:
-
-```bash
-# Might fix `error: cannot find symbol` or other intermittent failures.
-# `doc` here is a placeholder for any task(s) you are trying to run.
-# 💚 This is generally very safe to run between builds.
-./gradlew --refresh-dependencies doc
-
-# Destroy anything untracked by git.
-# ⚠️ This may delete something important, e.g. a finely-tuned IDE configuration.
-git clean --force -dx
-
-# Destroy various caches and configs.
-# ⚠️ This may delete gibibytes of cached data, making the next build very slow.
-rm -rf ~/.gradle ~/.m2 /tmp/cargo*
-
-# Destroy any Java containers left running.
-# 💚 This is generally very safe to run between builds.
-ps auxwww | grep [c]argo | awk '{ print $2 }' | xargs -r kill
-```
-
-Integration test runs such as `./gradlew --no-daemon --console=plain test -x :twofactor-tests:test -x :oauth2-test:test :fineract-e2e-tests-runner:test -PdbType=postgresql` in `.github/workflows/build-postgresql.yml` often take an hour or longer to complete.
-If you notice the `:integration-tests:test` task taking significantly less time, say, one minute, gradle may be skipping it.
-Look for something like this in the test output:
-
-```
-> Task :integration-tests:test UP-TO-DATE 👀
-Custom actions are attached to task ':integration-tests:test'.
-Build cache key for task ':integration-tests:test' is 6aeeec3f58bf9703d4c100fbaa657f5c
-Skipping task ':integration-tests:test' as it is up-to-date.
-Resolve mutations for :integration-tests:cargoStopLocal (Thread[Execution worker Thread 11,5,main]) started.
-:integration-tests:cargoStopLocal (Thread[Execution worker Thread 11,5,main]) started.
-```
-
-(This is with the `--info` gradle argument with eyeballs added for emphasis)
-The `--rerun-tasks` gradle argument may help, or you can try destroying `~/.gradle` and other clean-up procedures as indicated above then re-running tests.
-This is useful for repeated test runs (say, for timing) when gradle would otherwise assume a task is "up-to-date" and not re-run it.
-
-Testing within IDEs
------------------
-
-See the next section for testing in Eclipse.
-
-See <https://fineract-academy.com> for testing in IntelliJ.
-
-INSTRUCTIONS: How to run and debug in Eclipse IDE
-============
-
-It is possible to run Fineract in Eclipse IDE and also to debug Fineract using Eclipse's debugging facilities.
-To do this, you need to create the Eclipse project files and import the project into an Eclipse workspace:
-
-1. Create Eclipse project files into the Fineract project by running `./gradlew cleanEclipse eclipse`
-2. Import the fineract-provider project into your Eclipse workspace (File->Import->General->Existing Projects into Workspace, choose root directory fineract/fineract-provider)
-3. Do a clean build of the project in Eclipse (Project->Clean...)
-3. Run / debug Fineract by right clicking on org.apache.fineract.ServerApplication class and choosing Run As / Debug As -> Java Application. All normal Eclipse debugging features (breakpoints, watchpoints etc) should work as expected.
-
-If you change the project settings (dependencies etc) in Gradle, you should redo step 1 and refresh the project in Eclipse.
-
-You can also use Eclipse Junit support to run tests in Eclipse (Run As->Junit Test)
-
-Finally, modifying source code in Eclipse automatically triggers hot code replace to a running instance, allowing you to immediately test your changes
-
-
-INSTRUCTIONS: How to run using Docker and docker-compose
-===================================================
+How to run using Docker or Podman
+---
 
 It is possible to do a 'one-touch' installation of Fineract using containers (AKA "Docker").
-Fineract now packs the mifos community-app web UI in it's docker deploy.
-You can now run and test fineract with a GUI directly from the combined docker builds.
-This includes the database running in a container.
+This includes the database running in the container.
 
-As Prerequisites, you must have `docker` and `docker-compose` installed on your machine; see
-[Docker Install](https://docs.docker.com/install/) and
-[Docker Compose Install](https://docs.docker.com/compose/install/).
+As prerequisites, you must have `docker` and `docker-compose` installed on your machine; see
+[Docker Install](https://docs.docker.com/install/) and [Docker Compose Install](https://docs.docker.com/compose/install/).
 
 Alternatively, you can also use [Podman](https://github.com/containers/libpod)
 (e.g. via `dnf install podman-docker`), and [Podman Compose](https://github.com/containers/podman-compose/)
 (e.g. via `pip3 install podman-compose`) instead of Docker.
 
-Now to run a new Fineract instance you can simply:
+To run a new Fineract instance on Linux you can simply:
+```bash
+git clone https://github.com/apache/fineract.git
+cd fineract
+./gradlew :fineract-provider:jibDockerBuild -x test
+```
+On Windows, do this instead:
+```cmd
+git clone https://github.com/apache/fineract.git --config core.autocrlf=input
+cd fineract
+gradlew :fineract-provider:jibDockerBuild -x test
+```
+Install the Loki log driver and start:
+```bash
+docker plugin install grafana/loki-docker-driver:latest \
+  --alias loki --grant-all-permissions
+docker compose -f docker-compose-development.yml up -d
+```
+The Fineract (back-end) should be running at https://localhost:8443/fineract-provider/ now.
+Wait for https://localhost:8443/fineract-provider/actuator/health to return `{"status":"UP"}`.
+You must go to https://localhost:8443 and remember to accept the self-signed SSL certificate of the API once in your browser.
 
-1. `git clone https://github.com/apache/fineract.git ; cd fineract`
-1. for windows, use `git clone https://github.com/apache/fineract.git --config core.autocrlf=input ; cd fineract`
-1. `./gradlew :fineract-provider:jibDockerBuild -x test`
-1. install the Loki log driver with `docker plugin install grafana/loki-docker-driver:latest --alias loki --grant-all-permissions`
-1. `docker compose -f docker-compose-development.yml up -d`
-1. fineract (back-end) is running at https://localhost:8443/fineract-provider/
-1. wait for https://localhost:8443/fineract-provider/actuator/health to return `{"status":"UP"}`
-1. you must go to https://localhost:8443 and remember to accept the self-signed SSL certificate of the API once in your browser, otherwise  you get a message that is rather misleading from the UI.
-1. community-app (UI) is running at http://localhost:9090/?baseApiUrl=https://localhost:8443/fineract-provider&tenantIdentifier=default
-1. login using default _username_ `mifos` and _password_ `password`
-
-https://hub.docker.com/r/apache/fineract has a pre-built container image of this project, built continuously.
+[Docker Hub](https://hub.docker.com/r/apache/fineract) has a pre-built container image of this project, built continuously.
 
 You must specify the MySQL tenants database JDBC URL by passing it to the `fineract` container via environment
 variables; please consult the [`docker-compose.yml`](docker-compose.yml) for exact details how to specify those.
-_(Note that in previous versions, the `mysqlserver` environment variable used at `docker build` time instead of at
-`docker run` time did something similar; this has changed in [FINERACT-773](https://issues.apache.org/jira/browse/FINERACT-773)),
-and the `mysqlserver` environment variable is now no longer supported.)_
 
-The logfiles and the Java Flight Recorder output are available in `PROJECT_ROOT/build/fineract/logs`. If you use IntelliJ then you can double-click on the `.jfr` file and open it with the IDE. You can also download Azul Mission Control from here https://www.azul.com/products/components/azul-mission-control/ to analyze the Java Flight Recorder file.
+The logfiles and the Java Flight Recorder output are available in `PROJECT_ROOT/build/fineract/logs`. If you use IntelliJ then you can double-click on the `.jfr` file and open it with the IDE. You can also download [Azul Mission Control](https://www.azul.com/products/components/azul-mission-control/) to analyze the Java Flight Recorder file.
 
 NOTE: If you have issues with the file permissions and Docker Compose then you might need to change the variable values for `FINERACT_USER` and `FINERACT_GROUP` in `PROJECT_ROOT/config/docker/env/fineract-common.env`. You can find out what values you need to put there with the following commands:
 
-```
-id -u ${USER}
-id -u ${GROUP}
-```
-
-Please make sure that you are not checking in your changed values. The defaults should normally work for most people.
-
-INSTRUCTIONS: How to build documentation
-===================================================
-
-Run the following command:
-
 ```bash
-./gradlew doc
+id -u ${USER}
+id -g ${GROUP}
 ```
 
-Some dependencies are required (e.g. Ghostscript, Graphviz), see `.github/workflows/build-documentation.yml` for hints.
-
-Additionally, IDEs such as IntelliJ are useful for editing the AsciiDoc source files while providing a live rendered preview.
-
-HTML rendered from the AsciiDoc source files is also available online at <https://fineract.apache.org/docs/current/>.
-
-A release version is derived from source control. The version will include `-SNAPSHOT` unless the current branch looks like a release or release maintenance branch. See `gitVersioning` settings in `build.gradle` for details.
-
-Connection pool configuration
-=============================
-
-Please check `application.properties` to see which connection pool settings can be tweaked. The associated environment variables are prefixed with `FINERACT_HIKARI_*`. You can find more information about specific connection pool settings (Hikari) at https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby
-
-NOTE: we'll keep backwards compatibility until one of the next releases to ensure that things are working as expected. Environment variables prefixed `fineract_tenants_*` can still be used to configure the database connection, but we strongly encourage using `FINERACT_HIKARI_*` with more options.
-
-<br>SSL CONFIGURATION
-=================
-
-See [the HTTPS related doc](https://fineract.apache.org/docs/current/#_https).
+Please make sure that you are not checking in your changed values. The defaults should work for most people.
 
 
-<br>TOMCAT CONFIGURATION
-====================
+How to run on Kubernetes
+---
 
-Please refer to the `application.properties` and the official Spring Boot documentation (https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html) on how to do performance tuning for Tomcat. Note: you can set now the acceptable form POST size (default is 2MB) via environment variable `FINERACT_SERVER_TOMCAT_MAX_HTTP_FORM_POST_SIZE`.
-
-
-<br>INSTRUCTIONS: How to run on Kubernetes
-=================================
-
-<br>General Clusters
-----------------
+### General Clusters
 
 You can also run Fineract using containers on a Kubernetes cluster.
 Make sure you set up and connect to your Kubernetes cluster.
@@ -321,72 +177,53 @@ You can follow [this](https://cwiki.apache.org/confluence/display/FINERACT/Insta
 
 Now e.g. from your Google Cloud shell, run the following commands:
 
-1. `git clone https://github.com/apache/fineract.git ; cd fineract/kubernetes`
-1. `./kubectl-startup.sh`
+```bash
+git clone https://github.com/apache/fineract.git
+cd fineract/kubernetes
+./kubectl-startup.sh
+```
 
 To shutdown and reset your Cluster, run:
+```bash
+./kubectl-shutdown.sh
+```
 
-    ./kubectl-shutdown.sh
-
-Using Minikube
---------------
+### Using Minikube
 
 Alternatively, you can run fineract on a local kubernetes cluster using [minikube](https://minikube.sigs.k8s.io/docs/).
-As Prerequisites, you must have `minikube` and `kubectl` installed on your machine; see
+As prerequisite you must have `minikube` and `kubectl` installed on your machine; see
 [Minikube & Kubectl install](https://kubernetes.io/docs/tasks/tools/install-minikube/).
 
-Now to run a new Fineract instance on Minikube you can simply:
+To run a new Fineract instance on Minikube you can simply:
 
-1. `git clone https://github.com/apache/fineract.git ; cd fineract/kubernetes`
-1. `minikube start`
-1. `./kubectl-startup.sh`
-1. `minikube service fineract-server --url --https`
-1. Fineract is now running at the printed URL (note HTTP), which you can check e.g. using:
+```bash
+git clone https://github.com/apache/fineract.git
+cd fineract/kubernetes
+minikube start
+./kubectl-startup.sh
+minikube service fineract-server --url --https
+```
 
-   http --verify=no --timeout 240 --check-status get $(minikube service fineract-server --url --https)/fineract-provider/actuator/health
-
+Fineract is now running at the printed URL, which you can check e.g. using:
+```bash
+http --verify=no --timeout 240 --check-status get $(minikube service fineract-server --url --https)/fineract-provider/actuator/health
+```
 To check the status of your containers on your local minikube Kubernetes cluster, run:
-
-    minikube dashboard
-
+```bash
+minikube dashboard
+```
 You can check Fineract logs using:
-
-    kubectl logs deployment/fineract-server
-
+```bash
+kubectl logs deployment/fineract-server
+```
 To shutdown and reset your cluster, run:
-
-    ./kubectl-shutdown.sh
-
-To shutdown and reset your cluster, run:
-
-    minikube ssh
-
-    sudo rm -rf /mnt/data/
-
-We have [some open issues in JIRA with Kubernetes related enhancement ideas](https://jira.apache.org/jira/browse/FINERACT-783?jql=labels%20%3D%20kubernetes%20AND%20project%20%3D%20%22Apache%20Fineract%22%20) which you are welcome to contribute to.
+```bash
+./kubectl-shutdown.sh
+```
 
 
-INSTRUCTIONS: How to download Gradle wrapper
-============
-The file gradle/wrapper/gradle-wrapper.jar binary is checked into this projects Git source repository,
-but won't exist in your copy of the Fineract codebase if you downloaded a released source archive from apache.org.
-In that case, you need to download it using the commands below:
-
-    wget --no-check-certificate -P gradle/wrapper https://github.com/apache/fineract/raw/develop/gradle/wrapper/gradle-wrapper.jar
-
-(or)
-
-    curl --insecure -L https://github.com/apache/fineract/raw/develop/gradle/wrapper/gradle-wrapper.jar > gradle/wrapper/gradle-wrapper.jar
-
-
-INSTRUCTIONS: How to run Apache RAT (Release Audit Tool)
-============
-1. Extract the archive file to your local directory.
-2. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt
-
-
-INSTRUCTIONS: How to enable External Message Broker (ActiveMQ or Apache Kafka)
-============
+How to enable External Message Broker (ActiveMQ or Apache Kafka)
+---
 
 There are two use-cases where external message broker is needed:
  - External Business Events / Reliable Event Framework
@@ -394,10 +231,11 @@ There are two use-cases where external message broker is needed:
 
 External Events are business events, e.g.: `ClientCreated`, which might be important for third party systems. Apache Fineract supports ActiveMQ (or other JMS compliant brokers) and Apache Kafka endpoints for sending out Business Events. By default, they are not emitted.
 
-In case of a large deployment with millions of accounts, the Close of Business Day Spring Batch job may run several hours. In order to speed up this task, remote partitioning of the job is supported. The Manager node partitions (breaks up) the COB job into smaller pieces (sub tasks) which then can be executed on multiple Worker nodes in parallel. The worker nodes are notified either by ActiveMQ or Kafka regarding their new sub tasks.
-### Active MQ
+In case of a large deployment with millions of accounts, the Close of Business Day Spring Batch job may run several hours. In order to speed up this task, remote partitioning of the job is supported. The Manager node partitions breaks up the COB job into smaller pieces (sub tasks), which then can be executed on multiple Worker nodes in parallel. The worker nodes are notified either by ActiveMQ or Kafka regarding their new sub tasks.
 
-JMS based messaging is disabled by default. In `docker-compose-postgresql-activemq.yml` an example is shown where ActiveMQ is enabled. In that configuration one Spring Batch Manager instance and two Spring Batch Worker instances are created.
+### ActiveMQ
+
+JMS based messaging is disabled by default. In `docker-compose-postgresql-activemq.yml` an example is shown, where ActiveMQ is enabled. In that configuration one Spring Batch Manager instance and two Spring Batch Worker instances are created.
 Spring based events should be disabled and jms based event handling should be enabled. Furthermore, proper broker JMS URL should be configured.
 
 ```
@@ -410,186 +248,88 @@ For additional ActiveMQ related configuration please take a look to the `applica
 
 ### Kafka
 
-Kafka support also disabled by default. In `docker-compose-postgresql-kafka.yml` an example is shown where self-hosted Kafka is enabled for both External Events and Spring Batch Remote Job execution.
+Kafka support is also disabled by default. In `docker-compose-postgresql-kafka.yml` an example is shown, where self-hosted Kafka is enabled for both External Events and Spring Batch Remote Job execution.
 
-During the development Fineract was tested with PLAINTEXT Kafka brokers without authentication and with AWS MSK using IAM authentication. The extra [jar file](https://github.com/aws/aws-msk-iam-auth/releases) required for IAM authentication is already added to the classpath.
+During the development Fineract was tested with PLAINTEXT Kafka brokers without authentication and with AWS MSK using IAM authentication. The extra [JAR file](https://github.com/aws/aws-msk-iam-auth/releases) required for IAM authentication is already added to the classpath.
 An example MSK setup can be found in `docker-compose-postgresql-kafka-msk.yml`.
 
-The full list of supported Kafka related properties are documented here: https://fineract.apache.org/docs/current/
+The full list of supported Kafka related properties is documented in the [Fineract Platform documentation](https://fineract.apache.org/docs/current/).
 
-Checkstyle and Spotless
+
+DATABASE AND TABLES
+===================
+
+You can run the required version of the database server in a container, instead of having to install it, like this:
+
+    docker run --name mariadb-11.5 -p 3306:3306 -e MARIADB_ROOT_PASSWORD=mysql -d mariadb:11.5.2
+
+and stop and destroy it like this:
+
+    docker rm -f mariadb-11.5
+
+Beware that this container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mariadb) regarding how to make it persistent instead of ephemeral.
+
+
+MySQL/MariaDB and UTC timezone
+---
+With release `1.8.0` we introduced improved date time handling in Fineract. Date time is stored in UTC, and UTC timezone enforced even on the JDBC driver, e. g. for MySQL:
+
+```
+serverTimezone=UTC&useLegacyDatetimeCode=false&sessionVariables=time_zone='-00:00'
+```
+
+If you use MySQL as Fineract database, the following configuration is highly recommended:
+
+* Run the application in UTC (the default command line in our Docker image has the necessary parameters already set)
+* Run the MySQL database server in UTC (if you use managed services like AWS RDS, then this should be the default anyway, but it would be good to double-check)
+
+In case Fineract and MySQL do not run in UTC, MySQL might save date time values differently from PostgreSQL
+
+Example scenario: If the Fineract instance runs in timezone: GMT+2, and the local date time is 2022-08-11 17:15 ...
+* ... then PostgreSQL saves the LocalDateTime as is: 2022-08-11 17:15
+* ... and MySQL saves the LocalDateTime in UTC: 2022-08-11 15:15
+* ... but when we read the date time from PostgreSQL or from MySQL, both systems give us the same value: 2022-08-11 17:15 GMT+2
+
+If a previously used Fineract instance didn't run in UTC (backward compatibility), all prior dates will be read wrongly by MySQL. This can cause issues, when you run the database migration scripts.
+
+Recommendation: Shift all dates in your database by the timezone offset that your Fineract instance used.
+
+
+CONNECTION POOL CONFIGURATION
+=======
+
+Please check `application.properties` to see which connection pool settings can be tweaked. The associated environment variables are prefixed with `FINERACT_HIKARI_*`. You can find more information about specific connection pool settings at the [HikariCP Github repository](https://github.com/brettwooldridge/HikariCP?tab=readme-ov-file#gear-configuration-knobs-baby).
+
+NOTE: We keep backwards compatibility until one of the next releases to ensure that things are working as expected. Environment variables prefixed `fineract_tenants_*` can still be used to configure the database connection, but we strongly encourage using `FINERACT_HIKARI_*` with more options.
+
+
+VERSIONS
 ============
 
-This project enforces its code conventions using [checkstyle.xml](config/checkstyle/checkstyle.xml) through Checkstyle and [fineract-formatting-preferences.xml](config/fineract-formatting-preferences.xml) through Spotless. They are configured to run automatically during the normal Gradle build, and fail if there are any violations detected. You can run the following command to automatically fix spotless violations:
-
-    `./gradlew spotlessApply`
-
-Since some checks are present in both Checkstyle and Spotless, the same command can help you fix some of the Checkstyle violations (but not all, other Checkstyle violations need to fixed manually).
-
-You can also check for Spotless violations (only; but normally don't have to, because the regular build full already includes this anyway):
-
-    `./gradlew spotlessCheck`
-
-We recommend that you configure your favourite Java IDE to match those conventions. For Eclipse, you can go to
-Window > Java > Code Style and import our [config/fineractdev-formatter.xml](config/fineractdev-formatter.xml) under formatter section and [config/fineractdev-cleanup.xml](config/fineractdev-cleanup.xml) under Clean up section. The same fineractdev-formatter.xml configuration file (that can be used in Eclipse IDE) is also used by Spotless to both check for violations and autoformat code on the CLI.
-You could also use Checkstyle directly in your IDE (but you don't neccesarily have to, it may just be more convenient for you).  For Eclipse, use https://checkstyle.org/eclipse-cs/ and load our checkstyle.xml into it, for IntelliJ you can use [CheckStyle-IDEA](https://plugins.jetbrains.com/plugin/1065-checkstyle-idea).
-
-
-Code Coverage Reports
-============
-
-The project uses Jacoco to measure unit tests code coverage, to generate a report run the following command:
-
-    `./gradlew clean build jacocoTestReport`
-
-Generated reports can be found in build/code-coverage directory.
-
-
-Versions
-============
+A release version is derived from source control. The version will include `-SNAPSHOT` unless the current branch looks like a release or release maintenance branch. See `gitVersioning` settings in `build.gradle` for details.
 
 The latest stable release can be viewed on the develop branch: [Latest Release on Develop](https://github.com/apache/fineract/tree/develop "Latest Release").
 
-The progress of this project can be viewed here: [View change log](https://github.com/apache/fineract/blob/develop/CHANGELOG.md "Latest release change log")
+The progress of this project can be viewed in the left hand navigation under [this page of the wiki](https://cwiki.apache.org/confluence/display/FINERACT/Fineract+Releases)
 
 
-License
+LICENSE
 ============
 
-This project is licensed under Apache License Version 2.0. See <https://github.com/apache/fineract/blob/develop/APACHE_LICENSETEXT.md> for reference.
+This project is licensed under [Apache License Version 2.0](https://github.com/apache/fineract/blob/develop/APACHE_LICENSETEXT.md).
 
-The Connector/J JDBC Driver client library from MariaDB.org, which is licensed under the LGPL,
-is used in development when running integration tests that use the Liquibase library.  That JDBC
-driver is however not included in and distributed with the Fineract product and is not
-required to use the product.
-If you are developer and object to using the LGPL licensed Connector/J JDBC driver,
-simply do not run the integration tests that use the Liquibase library and/or use another JDBC driver.
+The Connector/J JDBC Driver client library from [MariaDB](https://www.mariadb.org) is licensed under the LGPL.
+The library is often used in development when running integration tests that use the Liquibase library. That JDBC
+driver is however not distributed with the Fineract product and is not required to use the product.
+If you are a developer and object to using the LGPL licensed Connector/J JDBC driver,
+simply do not run the integration tests that use the Liquibase library and use another JDBC driver.
 As discussed in [LEGAL-462](https://issues.apache.org/jira/browse/LEGAL-462), this project therefore
 complies with the [Apache Software Foundation third-party license policy](https://www.apache.org/legal/resolved.html).
 
 
-<br><br>APACHE FINERACT PLATFORM API
+PLATFORM API
 ============
 
-The API for Fineract is documented in [apiLive.htm](fineract-provider/src/main/resources/static/legacy-docs/apiLive.htm), and the [apiLive.htm can be viewed on fineract.apache.org](https://fineract.apache.org/docs/legacy/ "API Documentation").  If you have your own Fineract instance running, you can find this documentation under [/fineract-provider/legacy-docs/apiLive.htm](https://localhost:8443/fineract-provider/legacy-docs/apiLive.htm).
+Fineract does not provide a UI, but provides an API. Running Fineract locally, the Swagger documentation can be accessed under `https://localhost:8443/fineract-provider/swagger-ui/index.html`. A live version can be accessed via [this Sandbox](https://sandbox.mifos.community/fineract-provider/swagger-ui/index.html) (not hosted by us).
 
-The Swagger documentation (work in progress; see [FINERACT-733](https://issues.apache.org/jira/browse/FINERACT-733)) can be accessed under [/fineract-provider/swagger-ui/index.html](https://localhost:8443/fineract-provider/swagger-ui/index.html) and [live Swagger UI here on Fineract.dev](https://sandbox.mifos.community/fineract-provider/swagger-ui/index.html).
-
-Apache Fineract supports client code generation using [Swagger Codegen](https://github.com/swagger-api/swagger-codegen) based on the [OpenAPI Specification](https://swagger.io/specification/).  For more instructions on how to generate the client code, check [fineract-doc/src/docs/en/chapters/sdk/client.adoc](fineract-doc/src/docs/en/chapters/sdk/client.adoc).
-
-
-<br>API CLIENTS (Web UIs, Mobile, etc.)
-============
-
-* https://github.com/openMF/community-app/ is the "traditional" Reference Client App Web UI for the API offered by this project
-* https://github.com/openMF/web-app is the next generation UI rewrite also using this project's API
-* https://github.com/openMF/android-client is an Android Mobile App client for this project's API
-* https://github.com/openMF has more related proejcts
-
-
-<br>ONLINE DEMOS
-============
-
-* [sandbox.mifos.community](https://sandbox.mifos.community) always runs the latest version of this code
-* [demo.mifos.io](https://demo.mifos.io) A demo account is provided for users to experience the functionality of the Community App.  Users can use "mifos" for USERNAME and "password" for PASSWORD (without quotation marks).
-* [Swagger-UI Demo video](https://www.youtube.com/watch?v=FlVd-0YAo6c) This is a demo video for Swagger-UI documentation, more information [here](https://github.com/apache/fineract#swagger-ui-documentation).
-
-
-<br>DEVELOPERS
-============
-Please see <https://cwiki.apache.org/confluence/display/FINERACT/Contributor%27s+Zone> for the developers wiki page.
-
-Please refer to <https://cwiki.apache.org/confluence/display/FINERACT/Fineract+101> for the first-time contribution to this project.
-
-Please see <https://cwiki.apache.org/confluence/display/FINERACT/How-to+articles> for technical details to get started.
-
-Please visit [our JIRA Dashboard](https://issues.apache.org/jira/secure/Dashboard.jspa?selectPageId=12335824) to find issues to work on, see what others are working on, or open new issues.
-
-
-<br>VIDEO DEMONSTRATION
-============
-
-Apache Fineract / Mifos X Demo (November 2016) - <https://www.youtube.com/watch?v=h61g9TptMBo>
-
-<br>SWAGGER UI DEMONSTRATION
-============
-
-We use Swagger-UI to generate and maintain our API documentation, you can see the demo video [here](https://www.youtube.com/watch?v=FlVd-0YAo6c) or a live version
-[here](https://sandbox.mifos.community/fineract-provider/swagger-ui/index.html). If you interested to know more about Swagger-UI you can check their [website](https://swagger.io/).
-
-<br>GOVERNANCE AND POLICIES
-=======================
-
-[Becoming a Committer](https://cwiki.apache.org/confluence/display/FINERACT/Becoming+a+Committer)
-documents the process through which you can become a committer in this project.
-
-
-<br>ERROR HANDLING GUIDELINES
-------------------
-* When catching exceptions, either rethrow them, or log them.  Either way, include the root cause by using `catch (SomeException e)` and then either `throw AnotherException("..details..", e)` or `LOG.error("...context...", e)`.
-* Completely empty catch blocks are VERY suspicous!  Are you sure that you want to just "swallow" an exception?  Really, 100% totally absolutely sure?? ;-) Such "normal exceptions which just happen sometimes but are actually not really errors" are almost always a bad idea, can be a performance issue, and typically are an indication of another problem - e.g. the use of a wrong API which throws an Exception for an expected condition, when really you would want to use another API that instead returns something empty or optional.
-* In tests, you'll typically never catch exceptions, but just propagate them, with `@Test void testXYZ() throws SomeException, AnotherException`..., so that the test fails if the exception happens.  Unless you actually really want to test for the occurence of a problem - in that case, use [JUnit's Assert.assertThrows()](https://github.com/junit-team/junit4/wiki/Exception-testing) (but not `@Test(expected = SomeException.class)`).
-* Never catch `NullPointerException` & Co.
-
-<br>LOGGING GUIDELINES
-------------------
-* We use [SLF4J](http://www.slf4j.org) as our logging API.
-* Never, ever, use `System.out` and `System.err` or `printStackTrace()` anywhere, but always `LOG.info()` or `LOG.error()` instead.
-* Use placeholder (`LOG.error("Could not... details: {}", something, exception)`) and never String concatenation (`LOG.error("Could not... details: " + something, exception)`)
-* Which Log Level is appropriate?
-    * `LOG.error()` should be used to inform an "operator" running Fineract who supervises error logs of an unexpected condition.  This includes technical problems with an external "environment" (e.g. can't reach a database), and situations which are likely bugs which need to be fixed in the code.  They do NOT include e.g. validation errors for incoming API requests - that is signaled through the API response - and does (should) not be logged as an error.  (Note that there is no _FATAL_ level in SLF4J; a "FATAL" event should just be logged as an _ERROR_.)
-    * `LOG.warn()` should be using sparingly.  Make up your mind if it's an error (above) - or not!
-    * `LOG.info()` can be used notably for one-time actions taken during start-up.  It should typically NOT be used to print out "regular" application usage information.  The default logging configuration always outputs the application INFO logs, and in production under load, there's really no point to constantly spew out lots of information from frequently traversed paths in the code about what's going on.  (Metrics are a better way.)  `LOG.info()` *can* be used freely in tests though.
-    * `LOG.debug()` can be used anywhere in the code to log things that may be useful during investigations of specific problems.  They are not shown in the default logging configuration, but can be enabled for troubleshooting.  Developers should typically "turn down" most `LOG.info()` which they used while writing a new feature to "follow along what happens during local testing" to `LOG.debug()` for production before we merge their PRs.
-    * `LOG.trace()` is not used in Fineract.
-
-Pull Requests
--------------
-
-We request that your commit message include a FINERACT JIRA issue, and a one-liner that describe the changes.
-Start with an upper case imperative verb (not past form), and a short but concise clear description. (E.g. "FINERACT-821: Add enforced HideUtilityClassConstructor checkstyle").
-
-If your PR is failing to pass our CI build due to a test failure, then:
-
-1. Understand if the failure is due to your PR or an unrelated unstable test.
-1. If you suspect it is because of a "flaky" test, and not due to a change in your PR, then please do not simply wait for an active maintainer to come and help you, but instead be a proactive contributor to the project - see next steps.  Do understand that we may not review PRs that are not green - it is the contributor's (that's you!) responsability to get a proposed PR to pass the build, not primarily the maintainers.
-1. Search for the name of the failed test on https://issues.apache.org/jira/, e.g. for `AccountingScenarioIntegrationTest` you would find [FINERACT-899](https://issues.apache.org/jira/browse/FINERACT-899).
-1. If you happen to read in such bugs that tests were just recently fixed, or ignored, then rebase your PR to pick up that change.
-1. If you find previous comments "proving" that the same test has arbitrarily failed in at least 3 past PRs, then please do yourself raise a small separate new PR proposing to add an `@Disabled // TODO FINERACT-123` to the respective unstable test (e.g. [#774](https://github.com/apache/fineract/pull/774)) with the commit message mentioning said JIRA, as always.  (Please do NOT just `@Disabled` any existing tests mixed in as part of your larger PR.)
-1. If there is no existing JIRA for the test, then first please evaluate whether the failure couldn't be a (perhaps strange) impact of the change you are proposing after all.  If it's not, then please raise a new JIRA to document the suspected Flaky Test, and link it to [FINERACT-850](https://issues.apache.org/jira/browse/FINERACT-850).  This will allow the next person coming along hitting the same test failure to easily find it, and eventually propose to ignore the unstable test.
-1. Then (only) Close and Reopen your PR, which will cause a new build, to see if it passes.
-1. Of course, we very much appreciate you then jumping onto any such bugs and helping us figure out how to fix all ignored tests!
-
-[Pull Request Size Limit](https://cwiki.apache.org/confluence/display/FINERACT/Pull+Request+Size+Limit)
-documents that we cannot accept huge "code dump" Pull Requests, with some related suggestions.
-
-Guideline for new Feature commits involving Refactoring: If you are submitting PR for a new Feature,
-and it involves refactoring, try to differentiate "new Feature code" with "Refactored" by placing
-them in different commits. This helps review to review your code faster.
-
-We have an automated Bot which marks pull requests as "stale" after a while, and ultimately automatically closes them.
-
-
-Merge Strategy
---------------
-
-This project's committers typically prefer to bring your Pull Requests in through _Rebase and Merge_ instead of _Create a Merge Commit_. (If you are unfamiliar with GitHub's UI re. this, note the somewhat hidden little triangle drop-down at the bottom of PR, visible only to committers, not contributors.)  This avoids the "merge commits" which we consider to be somewhat "polluting" the projects commits log history view.  We understand this doesn't give an easy automatic reference to the original PR (which GitHub automatically adds to the Merge Commit message it generates), but we consider this an only very minor inconvenience; it's typically relatively easy to find the original PR even just from the commit message, and JIRA.
-
-We expect most proposed PRs to typically consist of a single commit.  Committers may use _Squash and merge_ to combine your commits at merge time, and if they do so will rewrite your commit message as they see fit.
-
-Neither of these two are hard absolute rules, but mere conventions.  Multiple commits in single PR make sense in certain cases (e.g. branch backports).
-
-
-Dependency Upgrades
--------------------
-
-This project uses a number of 3rd-party libraries, and this section provides some guidance for their updates. We have set-up [Renovate's bot](https://renovate.whitesourcesoftware.com) to automatically raise Pull Requests for our review when new dependencies are available [FINERACT-962](https://issues.apache.org/jira/browse/FINERACT-962).
-
-Upgrades sometimes require package name changes.  Changed code should ideally have test coverage.
-
-Our `ClasspathHellDuplicatesCheckRuleTest` detects classes that appear in more than 1 JAR.  If a version bump in [`build.gradle`](https://github.com/search?q=repo%3Aapache%2Ffineract+filename%3Abuild.gradle&type=Code&ref=advsearch&l=&l=) causes changes in transitives dependencies, then you may have to add related `exclude` to our [`dependencies.gradle`](https://github.com/apache/fineract/search?q=dependencies.gradle).  Running `./gradlew dependencies` helps to understand what is required.
-
-
-More Information
-============
-More details of the project can be found at <https://cwiki.apache.org/confluence/display/FINERACT>.
+Apache Fineract supports client code generation using [Swagger Codegen](https://github.com/swagger-api/swagger-codegen) based on the [OpenAPI Specification](https://swagger.io/specification/). For more instructions on how to generate client code, check [this section](https://fineract.apache.org/docs/current/#_generate_api_client) of the Fineract documentation. [This video](https://www.youtube.com/watch?v=FlVd-0YAo6c) documents the use of the Swagger-UI.
