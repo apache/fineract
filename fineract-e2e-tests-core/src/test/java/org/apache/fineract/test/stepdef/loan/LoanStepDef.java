@@ -3286,6 +3286,28 @@ public class LoanStepDef extends AbstractStepDef {
         ErrorHelper.checkSuccessfulApiCall(writeOffResponse);
     }
 
+    @And("Admin does write-off the loan on {string} with write off reason: {string}")
+    public void writeOffLoan(String transactionDate, String writeOffReason) throws IOException {
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+
+        final Long writeOffReasonCodeId = codeHelper.retrieveCodeByName("WriteOffReasons").getId();
+        final CodeValue writeOffReasonCodeValueBadDebt = DefaultCodeValue.valueOf(writeOffReason);
+        long writeOffReasonId = codeValueResolver.resolve(writeOffReasonCodeId, writeOffReasonCodeValueBadDebt);
+
+        PostLoansLoanIdTransactionsRequest writeOffRequest = new PostLoansLoanIdTransactionsRequest()//
+                .transactionDate(transactionDate)//
+                .writeoffReasonId(writeOffReasonId)//
+                .dateFormat(DATE_FORMAT)//
+                .locale(DEFAULT_LOCALE)//
+                .note("Write Off");//
+
+        Response<PostLoansLoanIdTransactionsResponse> writeOffResponse = loanTransactionsApi
+                .executeLoanTransaction(loanId, writeOffRequest, "writeoff").execute();
+        testContext().set(TestContextKey.LOAN_WRITE_OFF_RESPONSE, writeOffResponse);
+        ErrorHelper.checkSuccessfulApiCall(writeOffResponse);
+    }
+
     @Then("Admin fails to undo {string}th transaction made on {string}")
     public void undoTransaction(String nthTransaction, String transactionDate) throws IOException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);

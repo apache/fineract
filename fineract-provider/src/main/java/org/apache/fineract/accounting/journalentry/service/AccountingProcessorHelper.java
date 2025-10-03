@@ -174,12 +174,17 @@ public class AccountingProcessorHelper {
                 periodicAccrualBasedAccountingEnabled, newLoanTransactions, isLoanMarkedAsChargeOff, isLoanMarkedAsFraud,
                 chargeOffReasonCodeValue, isLoanMarkedAsWrittenOff, merchantBuyDownFee,
                 accountingBridgeData.getBuydownFeeClassificationCodeValue(),
-                accountingBridgeData.getCapitalizedIncomeClassificationCodeValue());
+                accountingBridgeData.getCapitalizedIncomeClassificationCodeValue(), accountingBridgeData.getWriteOffReasonCodeValue());
     }
 
     public ProductToGLAccountMapping getChargeOffMappingByCodeValue(Long loanProductId, PortfolioProductType productType,
             Long chargeOffReasonId) {
         return accountMappingRepository.findChargeOffReasonMapping(loanProductId, productType.getValue(), chargeOffReasonId);
+    }
+
+    public ProductToGLAccountMapping getWriteOffMappingByCodeValue(Long loanProductId, PortfolioProductType productType,
+            Long writeOffReasonId) {
+        return accountMappingRepository.findWriteOffReasonMapping(loanProductId, productType.getValue(), writeOffReasonId);
     }
 
     public ProductToGLAccountMapping getClassificationMappingByCodeValue(Long loanProductId, PortfolioProductType productType,
@@ -937,7 +942,7 @@ public class AccountingProcessorHelper {
         persistJournalEntry(journalEntry);
     }
 
-    private void createDebitJournalEntryForLoan(final Office office, final String currencyCode, final GLAccount account, final Long loanId,
+    public void createDebitJournalEntryForLoan(final Office office, final String currencyCode, final GLAccount account, final Long loanId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal amount) {
         final boolean manualEntry = false;
         Long loanTransactionId = null;

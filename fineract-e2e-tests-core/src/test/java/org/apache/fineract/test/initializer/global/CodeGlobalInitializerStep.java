@@ -107,9 +107,12 @@ public class CodeGlobalInitializerStep implements FineractGlobalInitializerStep 
     public static final String CODE_VALUE_FAMILY_MARITAL_STATUS_WIDOWED = "Widowed";
     public static final Long CODE_VALUE_CONSTITUTION_ID = 24L;
     public static final String CODE_VALUE_CONSTITUTION_TEST = "Test";
-
     public static final Long CODE_VALUE_RESCHEDULE_REASON_ID = 23L;
     public static final String CODE_VALUE_RESCHEDULE_REASON_TEST = "Test";
+    public static final Long CODE_VALUE_WRITE_OFF_REASON_ID = 26L;
+    public static final String CODE_VALUE_WRITE_OFF_REASON_TEST_1 = "Bad Debt";
+    public static final String CODE_VALUE_WRITE_OFF_REASON_TEST_2 = "Forgiven";
+    public static final String CODE_VALUE_WRITE_OFF_REASON_TEST_3 = "Test";
 
     private final CodesApi codesApi;
     private final CodeValuesApi codeValuesApi;
@@ -246,6 +249,13 @@ public class CodeGlobalInitializerStep implements FineractGlobalInitializerStep 
         List<String> rescheduleReasonNames = new ArrayList<>();
         rescheduleReasonNames.add(CODE_VALUE_RESCHEDULE_REASON_TEST);
         createCodeValues(CODE_VALUE_RESCHEDULE_REASON_ID, rescheduleReasonNames);
+
+        // add Write-off reasons
+        List<String> writeOffReasonNames = new ArrayList<>();
+        writeOffReasonNames.add(CODE_VALUE_WRITE_OFF_REASON_TEST_1);
+        writeOffReasonNames.add(CODE_VALUE_WRITE_OFF_REASON_TEST_2);
+        writeOffReasonNames.add(CODE_VALUE_WRITE_OFF_REASON_TEST_3);
+        createCodeValues(CODE_VALUE_WRITE_OFF_REASON_ID, writeOffReasonNames);
     }
 
     public void createCodeValues(Long codeId, List<String> codeValueNames) {

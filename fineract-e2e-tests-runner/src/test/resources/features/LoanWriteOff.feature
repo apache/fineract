@@ -361,3 +361,102 @@
         | Type    | Account code | Account name               | Debit | Credit |
         | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud |       | 750.0  |
         | EXPENSE | e4           | Written off                | 750.0 |        |
+
+    @TestRailId:C4111
+    Scenario: Verify GL entries for Write Off reason mapping - UC1: Write off, LP with write off reason mapping, NO write off reason to expense account
+      When Admin sets the business date to "01 January 2025"
+      And Admin creates a client with random data
+      And Admin creates a fully customized loan with the following data:
+        | LoanProduct                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+        | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_WRITE_OFF_REASON_MAP | 01 January 2025   | 1000           | 12                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      And Admin successfully approves the loan on "01 January 2025" with "1000" amount and expected disbursement date on "01 January 2025"
+      And Admin successfully disburse the loan on "01 January 2025" with "1000" EUR transaction amount
+      And Admin sets the business date to "02 January 2025"
+      And Admin runs inline COB job for Loan
+      And Admin does write-off the loan on "02 January 2025"
+      Then Loan status will be "CLOSED_WRITTEN_OFF"
+      And Loan Repayment schedule has 4 periods, with the following data for periods:
+        | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+        |    |      | 01 January 2025  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+        | 1  | 31   | 01 February 2025 | 02 January 2025 | 753.72          | 246.28        | 10.0     | 0.0  | 0.0       | 256.28 | 0.0  | 0.0        | 0.0  | 0.0         |
+        | 2  | 28   | 01 March 2025    | 02 January 2025 | 504.98          | 248.74        | 7.54     | 0.0  | 0.0       | 256.28 | 0.0  | 0.0        | 0.0  | 0.0         |
+        | 3  | 31   | 01 April 2025    | 02 January 2025 | 253.75          | 251.23        | 5.05     | 0.0  | 0.0       | 256.28 | 0.0  | 0.0        | 0.0  | 0.0         |
+        | 4  | 30   | 01 May 2025      | 02 January 2025 | 0.0             | 253.75        | 2.54     | 0.0  | 0.0       | 256.29 | 0.0  | 0.0        | 0.0  | 0.0         |
+      And Loan Repayment schedule has the following data in Total row:
+        | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+        | 1000          | 25.13    | 0    | 0         | 1025.13 | 0    | 0          | 0    | 0.0         |
+      And Loan Transactions tab has the following data:
+        | Transaction date | Transaction Type       | Amount  | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+        | 01 January 2025  | Disbursement           | 1000.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+        | 02 January 2025  | Close (as written-off) | 1025.13 | 1000.0    | 25.13    | 0.0  | 0.0       | 0.0          | false    | false    |
+      And Loan Transactions tab has a "WRITE_OFF" transaction with date "02 January 2025" which has the following Journal entries:
+        | Type    | Account code | Account name            | Debit   | Credit |
+        | ASSET   | 112601       | Loans Receivable        |         | 1000.0 |
+        | ASSET   | 112603       | Interest/Fee Receivable |         | 25.13  |
+        | EXPENSE | e4           | Written off             | 1025.13 |        |
+
+    @TestRailId:C4112
+    Scenario: Verify GL entries for Write Off reason mapping - UC2: Write off, LP with write off reason mapping, with write off reason: Bad Debt
+      When Admin sets the business date to "01 January 2025"
+      And Admin creates a client with random data
+      And Admin creates a fully customized loan with the following data:
+        | LoanProduct                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+        | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_WRITE_OFF_REASON_MAP | 01 January 2025   | 1000           | 12                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      And Admin successfully approves the loan on "01 January 2025" with "1000" amount and expected disbursement date on "01 January 2025"
+      And Admin successfully disburse the loan on "01 January 2025" with "1000" EUR transaction amount
+      And Admin sets the business date to "02 January 2025"
+      And Admin runs inline COB job for Loan
+      And Admin does write-off the loan on "02 January 2025" with write off reason: "BAD_DEBT"
+      Then Loan status will be "CLOSED_WRITTEN_OFF"
+      And Loan Repayment schedule has 4 periods, with the following data for periods:
+        | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+        |    |      | 01 January 2025  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+        | 1  | 31   | 01 February 2025 | 02 January 2025 | 753.72          | 246.28        | 10.0     | 0.0  | 0.0       | 256.28 | 0.0  | 0.0        | 0.0  | 0.0         |
+        | 2  | 28   | 01 March 2025    | 02 January 2025 | 504.98          | 248.74        | 7.54     | 0.0  | 0.0       | 256.28 | 0.0  | 0.0        | 0.0  | 0.0         |
+        | 3  | 31   | 01 April 2025    | 02 January 2025 | 253.75          | 251.23        | 5.05     | 0.0  | 0.0       | 256.28 | 0.0  | 0.0        | 0.0  | 0.0         |
+        | 4  | 30   | 01 May 2025      | 02 January 2025 | 0.0             | 253.75        | 2.54     | 0.0  | 0.0       | 256.29 | 0.0  | 0.0        | 0.0  | 0.0         |
+      And Loan Repayment schedule has the following data in Total row:
+        | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+        | 1000          | 25.13    | 0    | 0         | 1025.13 | 0    | 0          | 0    | 0.0         |
+      And Loan Transactions tab has the following data:
+        | Transaction date | Transaction Type       | Amount  | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+        | 01 January 2025  | Disbursement           | 1000.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+        | 02 January 2025  | Close (as written-off) | 1025.13 | 1000.0    | 25.13    | 0.0  | 0.0       | 0.0          | false    | false    |
+      And Loan Transactions tab has a "WRITE_OFF" transaction with date "02 January 2025" which has the following Journal entries:
+        | Type    | Account code | Account name            | Debit   | Credit |
+        | ASSET   | 112601       | Loans Receivable        |         | 1000.0 |
+        | ASSET   | 112603       | Interest/Fee Receivable |         | 25.13  |
+        | EXPENSE | 744007       | Credit Loss/Bad Debt    | 1025.13 |        |
+
+    @TestRailId:C4113
+    Scenario: Verify GL entries for Write Off reason mapping - UC3: Write off, LP without write off reason mapping, with write off reason: Bad Debt
+      When Admin sets the business date to "01 January 2025"
+      And Admin creates a client with random data
+      And Admin creates a fully customized loan with the following data:
+        | LoanProduct                                                                        | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+        | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_CLASSIFICATION_INCOME_MAP | 01 January 2025   | 1000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      And Admin successfully approves the loan on "01 January 2025" with "1000" amount and expected disbursement date on "01 January 2025"
+      And Admin successfully disburse the loan on "01 January 2025" with "1000" EUR transaction amount
+      And Admin sets the business date to "02 January 2025"
+      And Admin runs inline COB job for Loan
+      And Admin does write-off the loan on "02 January 2025"
+      Then Loan status will be "CLOSED_WRITTEN_OFF"
+      And Loan Repayment schedule has 4 periods, with the following data for periods:
+        | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+        |    |      | 01 January 2025  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+        | 1  | 31   | 01 February 2025 | 02 January 2025 | 753.72          | 246.28        | 10.0     | 0.0  | 0.0       | 256.28 | 0.0  | 0.0        | 0.0  | 0.0         |
+        | 2  | 28   | 01 March 2025    | 02 January 2025 | 504.98          | 248.74        | 7.54     | 0.0  | 0.0       | 256.28 | 0.0  | 0.0        | 0.0  | 0.0         |
+        | 3  | 31   | 01 April 2025    | 02 January 2025 | 253.75          | 251.23        | 5.05     | 0.0  | 0.0       | 256.28 | 0.0  | 0.0        | 0.0  | 0.0         |
+        | 4  | 30   | 01 May 2025      | 02 January 2025 | 0.0             | 253.75        | 2.54     | 0.0  | 0.0       | 256.29 | 0.0  | 0.0        | 0.0  | 0.0         |
+      And Loan Repayment schedule has the following data in Total row:
+        | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+        | 1000          | 25.13    | 0    | 0         | 1025.13 | 0    | 0          | 0    | 0.0         |
+      And Loan Transactions tab has the following data:
+        | Transaction date | Transaction Type       | Amount  | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+        | 01 January 2025  | Disbursement           | 1000.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+        | 02 January 2025  | Close (as written-off) | 1025.13 | 1000.0    | 25.13    | 0.0  | 0.0       | 0.0          | false    | false    |
+      And Loan Transactions tab has a "WRITE_OFF" transaction with date "02 January 2025" which has the following Journal entries:
+        | Type    | Account code | Account name            | Debit   | Credit |
+        | ASSET   | 112601       | Loans Receivable        |         | 1000.0 |
+        | ASSET   | 112603       | Interest/Fee Receivable |         | 25.13  |
+        | EXPENSE | e4           | Written off             | 1025.13 |        |

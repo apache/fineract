@@ -43,6 +43,7 @@ import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostClassificationToIncomeAccountMappings;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.client.models.PostWriteOffReasonToExpenseAccountMappings;
 import org.apache.fineract.client.services.LoanProductsApi;
 import org.apache.fineract.test.data.AdvancePaymentsAdjustmentType;
 import org.apache.fineract.test.data.ChargeProductType;
@@ -55,8 +56,12 @@ import org.apache.fineract.test.data.OverAppliedCalculationType;
 import org.apache.fineract.test.data.PreClosureInterestCalculationRule;
 import org.apache.fineract.test.data.RecalculationRestFrequencyType;
 import org.apache.fineract.test.data.TransactionProcessingStrategyCode;
+import org.apache.fineract.test.data.codevalue.CodeValue;
+import org.apache.fineract.test.data.codevalue.CodeValueResolver;
+import org.apache.fineract.test.data.codevalue.DefaultCodeValue;
 import org.apache.fineract.test.data.loanproduct.DefaultLoanProduct;
 import org.apache.fineract.test.factory.LoanProductsRequestFactory;
+import org.apache.fineract.test.helper.CodeHelper;
 import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.support.TestContext;
 import org.apache.fineract.test.support.TestContextKey;
@@ -69,6 +74,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
 
     private final LoanProductsApi loanProductsApi;
     private final LoanProductsRequestFactory loanProductsRequestFactory;
+    private final CodeHelper codeHelper;
+    private final CodeValueResolver codeValueResolver;
 
     @Override
     public void initialize() throws Exception {
@@ -1319,7 +1326,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .recalculationRestFrequencyType(1)//
                 .recalculationRestFrequencyInterval(1)//
                 .repaymentEvery(1)//
-                .interestRatePerPeriod((double) 7.0)//
+                .interestRatePerPeriod(7D)//
                 .interestRateFrequencyType(INTEREST_RATE_FREQUENCY_TYPE_MONTH)//
                 .enableDownPayment(false)//
                 .interestRecalculationCompoundingMethod(0)//
@@ -3818,6 +3825,56 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_PROGRESSIVE_ADV_PMNT_ALLOCATION_CAPITALIZED_INCOME_ADJ_CUSTOM_ALLOC_CLASSIFICATION_INCOME_MAP,
                 responseLoanProductsRequestLP2ProgressiveAdvPaymAllocCapitaizedIncomeClassificationIncomeMap);
+
+        // LP2 with progressive loan schedule + horizontal + interest EMI + 360/30
+        // + interest recalculation, buy down fees enabled
+        // + Write off reason expense map
+        final String name142 = DefaultLoanProduct.LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_WRITE_OFF_REASON_MAP.getName();
+        final Long writeOffReasonCodeId = codeHelper.retrieveCodeByName("WriteOffReasons").getId();
+        final CodeValue writeOffReasonCodeValueBadDebt = DefaultCodeValue.valueOf("BAD_DEBT");
+        final CodeValue writeOffReasonCodeValueForgiven = DefaultCodeValue.valueOf("FORGIVEN");
+        final CodeValue writeOffReasonCodeValueTest = DefaultCodeValue.valueOf("TEST");
+        long writeOffReasonIdBadDebt = codeValueResolver.resolve(writeOffReasonCodeId, writeOffReasonCodeValueBadDebt);
+        long writeOffReasonIdForgiven = codeValueResolver.resolve(writeOffReasonCodeId, writeOffReasonCodeValueForgiven);
+        long writeOffReasonIdTest = codeValueResolver.resolve(writeOffReasonCodeId, writeOffReasonCodeValueTest);
+
+        List<PostWriteOffReasonToExpenseAccountMappings> writeOffReasonToExpenseAccountMappings = new ArrayList<>();
+        PostWriteOffReasonToExpenseAccountMappings writeOffReasonToExpenseAccountMappingsBadDebt = new PostWriteOffReasonToExpenseAccountMappings();
+        writeOffReasonToExpenseAccountMappingsBadDebt.setWriteOffReasonCodeValueId(String.valueOf(writeOffReasonIdBadDebt));
+        writeOffReasonToExpenseAccountMappingsBadDebt.setExpenseAccountId("12"); // Credit Loss/Bad Debt
+        PostWriteOffReasonToExpenseAccountMappings writeOffReasonToExpenseAccountMappingsForgiven = new PostWriteOffReasonToExpenseAccountMappings();
+        writeOffReasonToExpenseAccountMappingsForgiven.setWriteOffReasonCodeValueId(String.valueOf(writeOffReasonIdForgiven));
+        writeOffReasonToExpenseAccountMappingsForgiven.setExpenseAccountId("23"); // Buy Down Expense
+        PostWriteOffReasonToExpenseAccountMappings writeOffReasonToExpenseAccountMappingsTest = new PostWriteOffReasonToExpenseAccountMappings();
+        writeOffReasonToExpenseAccountMappingsTest.setWriteOffReasonCodeValueId(String.valueOf(writeOffReasonIdTest));
+        writeOffReasonToExpenseAccountMappingsTest.setExpenseAccountId("16"); // Written off
+
+        writeOffReasonToExpenseAccountMappings.add(writeOffReasonToExpenseAccountMappingsBadDebt);
+        writeOffReasonToExpenseAccountMappings.add(writeOffReasonToExpenseAccountMappingsForgiven);
+        writeOffReasonToExpenseAccountMappings.add(writeOffReasonToExpenseAccountMappingsTest);
+
+        final PostLoanProductsRequest loanProductsRequestLP2ProgressiveAdvPaymentWriteOffReasonMap = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2BuyDownFees()//
+                .name(name142)//
+                .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
+                .loanScheduleType("PROGRESSIVE") //
+                .isInterestRecalculationEnabled(true)//
+                .preClosureInterestCalculationStrategy(1)//
+                .rescheduleStrategyMethod(4)//
+                .interestRecalculationCompoundingMethod(0)//
+                .recalculationRestFrequencyType(2)//
+                .recalculationRestFrequencyInterval(1)//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")))//
+                .writeOffReasonsToExpenseMappings(writeOffReasonToExpenseAccountMappings);//
+
+        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPaymentWriteOffReasonMap = loanProductsApi
+                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPaymentWriteOffReasonMap).execute();
+        TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_PROGRESSIVE_ADV_PYMNT_WRITE_OFF_REASON_MAP,
+                responseLoanProductsRequestLP2ProgressiveAdvPaymentWriteOffReasonMap);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,

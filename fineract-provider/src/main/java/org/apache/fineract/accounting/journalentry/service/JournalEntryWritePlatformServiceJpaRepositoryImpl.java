@@ -872,13 +872,17 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         } else if (loanTransaction.isCapitalizedIncomeAmortization()) {
             capitalizedIncomeAdvancedMappingData = getLoanTransactionClassificationId(loanTransaction);
         }
+        AdvancedMappingtDTO writeOffReasonAdvancedMappingData = null;
+        if (loan.isClosedWrittenOff() && loan.getWriteOffReason() != null) {
+            writeOffReasonAdvancedMappingData = new AdvancedMappingtDTO(loan.getWriteOffReason().getId(), BigDecimal.ZERO);
+        }
 
         return new AccountingBridgeDataDTO(loan.getId(), loan.productId(), loan.getOfficeId(), currencyCode,
                 loan.getSummary().getTotalInterestCharged(), loan.isCashBasedAccountingEnabledOnLoanProduct(),
                 loan.isUpfrontAccrualAccountingEnabledOnLoanProduct(), loan.isPeriodicAccrualAccountingEnabledOnLoanProduct(),
                 isAccountTransfer, wasChargedOffAtTransactionTime, loan.isFraud(), loan.fetchChargeOffReasonId(), loan.isClosedWrittenOff(),
                 transactions, loan.getLoanProductRelatedDetail().isMerchantBuyDownFee(), buydownFeeAdvancedMappingData,
-                capitalizedIncomeAdvancedMappingData);
+                capitalizedIncomeAdvancedMappingData, writeOffReasonAdvancedMappingData);
     }
 
     private List<AdvancedMappingtDTO> getLoanTransactionClassificationId(final LoanTransaction loanTransaction) {
