@@ -195,16 +195,17 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
         for (TransactionChangeData change : changedTransactionDetail.getTransactionChanges()) {
             final LoanTransaction newTransaction = change.getNewTransaction();
             final LoanTransaction oldTransaction = change.getOldTransaction();
+            if (newTransaction.isNotReversed()) {
+                loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newTransaction);
 
-            loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newTransaction);
-
-            // Create journal entries for new transaction
-            loanJournalEntryPoster.postJournalEntriesForLoanTransaction(newTransaction, false, false);
-            if (oldTransaction == null && (newTransaction.isAccrual() || newTransaction.isAccrualAdjustment())) {
-                final LoanTransactionBusinessEvent businessEvent = newTransaction.isAccrual()
-                        ? new LoanAccrualTransactionCreatedBusinessEvent(newTransaction)
-                        : new LoanAccrualAdjustmentTransactionBusinessEvent(newTransaction);
-                businessEventNotifierService.notifyPostBusinessEvent(businessEvent);
+                // Create journal entries for new transaction
+                loanJournalEntryPoster.postJournalEntriesForLoanTransaction(newTransaction, false, false);
+                if (oldTransaction == null && (newTransaction.isAccrual() || newTransaction.isAccrualAdjustment())) {
+                    final LoanTransactionBusinessEvent businessEvent = newTransaction.isAccrual()
+                            ? new LoanAccrualTransactionCreatedBusinessEvent(newTransaction)
+                            : new LoanAccrualAdjustmentTransactionBusinessEvent(newTransaction);
+                    businessEventNotifierService.notifyPostBusinessEvent(businessEvent);
+                }
             }
 
             if (oldTransaction != null) {
