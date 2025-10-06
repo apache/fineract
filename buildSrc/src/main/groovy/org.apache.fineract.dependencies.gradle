@@ -237,7 +237,7 @@ dependencyManagement {
 
         //v42.7.5: performance issue: https://github.com/pgjdbc/pgjdbc/issues/3511#issuecomment-2637277977
         //v42.7.4: CVE-2025-49146: https://nvd.nist.gov/vuln/detail/CVE-2025-49146
-        dependency 'org.postgresql:postgresql:42.7.3'
+        dependency 'org.postgresql:postgresql:42.7.8'
 
         dependency 'com.mysql:mysql-connector-j:9.2.0'
 
