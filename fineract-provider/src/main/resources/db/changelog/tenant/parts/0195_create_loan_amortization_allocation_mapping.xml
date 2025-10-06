@@ -104,4 +104,64 @@
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_loan_transaction" validate="true"/>
     </changeSet>
+    <changeSet id="4" author="fineract" context="postgresql" runInTransaction="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_loan_amortization_allocation_mapping" columnNames="loan_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_loan_am_all_map_base_loan_id on m_loan_amortization_allocation_mapping(loan_id);
+        </sql>
+    </changeSet>
+    <changeSet id="5" author="fineract" context="mysql" runInTransaction="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_loan_amortization_allocation_mapping" columnNames="loan_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index idx_m_loan_am_all_map_base_loan_id on batch_step_execution(loan_id);
+        </sql>
+    </changeSet>
+    <changeSet id="6" author="fineract" context="postgresql" runInTransaction="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_loan_amortization_allocation_mapping" columnNames="base_loan_transaction_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_loan_am_all_map_base_loan_txn_id on m_loan_amortization_allocation_mapping(base_loan_transaction_id);
+        </sql>
+    </changeSet>
+    <changeSet id="7" author="fineract" context="mysql" runInTransaction="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_loan_amortization_allocation_mapping" columnNames="base_loan_transaction_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index idx_m_loan_am_all_map_base_loan_txn_id on batch_step_execution(base_loan_transaction_id);
+        </sql>
+    </changeSet>
+    <changeSet id="8" author="fineract" context="postgresql" runInTransaction="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_loan_amortization_allocation_mapping" columnNames="amortization_loan_transaction_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_loan_am_all_map_amort_loan_txn_id on m_loan_amortization_allocation_mapping(amortization_loan_transaction_id);
+        </sql>
+    </changeSet>
+    <changeSet id="9" author="fineract" context="mysql" runInTransaction="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_loan_amortization_allocation_mapping" columnNames="amortization_loan_transaction_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index idx_m_loan_am_all_map_amort_loan_txn_id on batch_step_execution(amortization_loan_transaction_id);
+        </sql>
+    </changeSet>
 </databaseChangeLog>
