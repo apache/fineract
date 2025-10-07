@@ -65,11 +65,24 @@ public class LoanPointInTimeServiceImpl implements LoanPointInTimeService {
             ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, date)));
 
             Loan loan = loanAssembler.assembleFrom(loanId);
+
+            int txCount = loan.getLoanTransactions().size();
+            int chargeCount = loan.getCharges().size();
             removeAfterDateTransactions(loan, date);
             removeAfterDateCharges(loan, date);
+            int afterRemovalTxCount = loan.getLoanTransactions().size();
+            int afterRemovalChargeCount = loan.getCharges().size();
 
-            ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null, null);
-            loanScheduleService.recalculateSchedule(loan, scheduleGeneratorDTO);
+            // In case the loan is cumulative and is being prepaid by the latest repayment tx, we need the
+            // recalculateFrom and recalculateTill
+            // set to the same date which is the prepaying transaction's date
+            // currently this is not implemented and opens up buggy edge cases
+            // we work this around only for cases when the loan is already closed or the requested date doesn't change
+            // the loan's state
+            if (txCount != afterRemovalTxCount || chargeCount != afterRemovalChargeCount) {
+                ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null, null);
+                loanScheduleService.recalculateSchedule(loan, scheduleGeneratorDTO);
+            }
 
             LoanArrearsData arrearsData = arrearsAgingService.calculateArrearsForLoan(loan);
 

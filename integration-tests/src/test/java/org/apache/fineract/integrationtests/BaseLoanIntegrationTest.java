@@ -992,7 +992,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         }
     }
 
-    protected void verifyArreals(LoanPointInTimeData pointInTimeData, boolean isOverDue, String overdueSince) {
+    protected void verifyArrears(LoanPointInTimeData pointInTimeData, boolean isOverDue, String overdueSince) {
         assertThat(Objects.requireNonNull(pointInTimeData.getArrears()).getOverdue()).isEqualTo(isOverDue);
         if (isOverDue) {
             assertThat(Objects.requireNonNull(pointInTimeData.getArrears().getOverDueSince()).toString()).isEqualTo(overdueSince);
