@@ -138,7 +138,7 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
     }
 
     public BigDecimal getCalculatedDueInterest() {
-        if (isPaused()) {
+        if (isPaused() || getRepaymentPeriod().isReAged()) {
             return getCreditedInterest().getAmount();
         }
 

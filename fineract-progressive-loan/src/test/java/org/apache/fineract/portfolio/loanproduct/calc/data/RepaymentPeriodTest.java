@@ -122,7 +122,12 @@ class RepaymentPeriodTest {
                 null, // paidInterest
                 null, // futureUnrecognizedInterest
                 MC, // mc
-                loanProductRelatedDetail);
+                loanProductRelatedDetail, //
+                false, // noUnrecognizedInterest
+                false, // reAged
+                false, // reAgedEarlyRepaymentHolder
+                null // reAgedInterest
+        );
 
         // Test that getters don't throw and return non-null
         assertDoesNotThrow(period::getEmi);

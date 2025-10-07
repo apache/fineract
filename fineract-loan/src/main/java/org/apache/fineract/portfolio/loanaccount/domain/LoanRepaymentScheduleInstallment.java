@@ -261,9 +261,21 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     public static LoanRepaymentScheduleInstallment newReAgedInstallment(final Loan loan, final Integer installmentNumber,
-            final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal) {
-        return new LoanRepaymentScheduleInstallment(loan, installmentNumber, fromDate, dueDate, principal, null, null, null, null, null,
-                null, null, false, false, true);
+            final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal fees,
+            final BigDecimal penalties, final BigDecimal interestAccrued, final BigDecimal feeAccrued, final BigDecimal penaltyAccrued) {
+        LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan, installmentNumber, fromDate, dueDate,
+                principal, interest, fees, penalties, null, null, null, null, false, false, true);
+        installment.setInterestAccrued(interestAccrued);
+        installment.setFeeAccrued(feeAccrued);
+        installment.setPenaltyAccrued(penaltyAccrued);
+        return installment;
+    }
+
+    public static LoanRepaymentScheduleInstallment newReAgedInstallment(final Loan loan, final Integer installmentNumber,
+            final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal fees,
+            final BigDecimal penalties) {
+        return new LoanRepaymentScheduleInstallment(loan, installmentNumber, fromDate, dueDate, principal, interest, fees, penalties, null,
+                null, null, null, false, false, true);
     }
 
     public static LoanRepaymentScheduleInstallment getLastNonDownPaymentInstallment(List<LoanRepaymentScheduleInstallment> installments) {
