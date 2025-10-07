@@ -23,7 +23,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
-    <changeSet author="fineract" id="trial-balance-summary-with-asset-owner-update-2">
+    <changeSet author="fineract" id="trial-balance-summary-with-asset-owner-update-3">
         <update tableName="stretchy_report">
             <column name="report_sql"  value="WITH retained_earning AS (
       SELECT DISTINCT '${endDate}' AS postingdate,
@@ -81,10 +81,10 @@
       GROUP BY productname, glcode, glname, assetowner
   ),
   merged_historical_data AS (
-      SELECT summary_snapshot_baseline_data.productname,
-             summary_snapshot_baseline_data.glcode,
-             summary_snapshot_baseline_data.glname,
-             summary_snapshot_baseline_data.assetowner,
+      SELECT COALESCE(summary_snapshot_baseline_data.productname, post_snapshot_delta_data.productname) AS productname,
+             COALESCE(summary_snapshot_baseline_data.glcode, post_snapshot_delta_data.glcode) AS glcode,
+             COALESCE(summary_snapshot_baseline_data.glname, post_snapshot_delta_data.glname) AS glname,
+             COALESCE(summary_snapshot_baseline_data.assetowner, post_snapshot_delta_data.assetowner, 0) AS assetowner,
              COALESCE(summary_snapshot_baseline_data.debitamount, 0) + COALESCE(post_snapshot_delta_data.debitamount, 0) AS debitamount,
              COALESCE(summary_snapshot_baseline_data.creditamount, 0) + COALESCE(post_snapshot_delta_data.creditamount, 0) AS creditamount
       FROM summary_snapshot_baseline_data
