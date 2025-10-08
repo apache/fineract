@@ -1214,7 +1214,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     protected void createNewTransaction(final LoanTransaction oldTransaction, final LoanTransaction newTransaction,
             final TransactionCtx ctx) {
-        oldTransaction.updateExternalId(null);
+        if (newTransaction.isNotReversed()) {
+            oldTransaction.updateExternalId(null);
+        }
         oldTransaction.getLoanChargesPaid().clear();
 
         if (newTransaction.getTypeOf().isInterestRefund()) {

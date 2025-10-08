@@ -125,11 +125,14 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
     protected void createNewTransaction(LoanTransaction loanTransaction, LoanTransaction newLoanTransaction,
             ChangedTransactionDetail changedTransactionDetail) {
         loanTransaction.reverse();
-        loanTransaction.updateExternalId(null);
-        newLoanTransaction.copyLoanTransactionRelations(loanTransaction.getLoanTransactionRelations());
-        // Adding Replayed relation from newly created transaction to reversed transaction
-        newLoanTransaction.getLoanTransactionRelations().add(
-                LoanTransactionRelation.linkToTransaction(newLoanTransaction, loanTransaction, LoanTransactionRelationTypeEnum.REPLAYED));
+
+        if (newLoanTransaction.isNotReversed()) {
+            loanTransaction.updateExternalId(null);
+            newLoanTransaction.copyLoanTransactionRelations(loanTransaction.getLoanTransactionRelations());
+            // Adding Replayed relation from newly created transaction to reversed transaction
+            newLoanTransaction.getLoanTransactionRelations().add(LoanTransactionRelation.linkToTransaction(newLoanTransaction,
+                    loanTransaction, LoanTransactionRelationTypeEnum.REPLAYED));
+        }
         changedTransactionDetail.addTransactionChange(new TransactionChangeData(loanTransaction, newLoanTransaction));
     }
 
