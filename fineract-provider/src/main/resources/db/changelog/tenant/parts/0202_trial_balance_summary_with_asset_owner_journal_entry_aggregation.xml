@@ -23,7 +23,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
-    <changeSet author="fineract" id="trial-balance-summary-with-asset-owner-update-3">
+    <changeSet author="fineract" id="trial-balance-summary-with-asset-owner-update-4">
         <update tableName="stretchy_report">
             <column name="report_sql"  value="WITH retained_earning AS (
       SELECT DISTINCT '${endDate}' AS postingdate,
@@ -57,7 +57,7 @@
       JOIN m_product_loan lp ON lp.id = ags.product_id
       WHERE ags.entity_type_enum = 1
         AND ags.manual_entry = false
-        AND ags.submitted_on_date &lt;= (select latest from aggregated_date)
+        AND ags.aggregated_on_date &lt;= (select latest from aggregated_date)
         AND (ags.office_id = ${officeId})
       GROUP BY productname, glcode, glname, assetowner
   ),
@@ -75,7 +75,10 @@
       LEFT JOIN m_external_asset_owner_journal_entry_mapping aw ON aw.journal_entry_id = acc_gl_journal_entry.id
       WHERE acc_gl_journal_entry.entity_type_enum = 1
         AND acc_gl_journal_entry.manual_entry = false
-        AND acc_gl_journal_entry.submitted_on_date &gt; (select latest from aggregated_date)
+        AND (
+              (SELECT latest FROM aggregated_date) IS NULL
+              OR acc_gl_journal_entry.submitted_on_date &gt; (SELECT latest FROM aggregated_date)
+          )
         AND acc_gl_journal_entry.submitted_on_date &lt; '${endDate}'
         AND (acc_gl_journal_entry.office_id = ${officeId})
       GROUP BY productname, glcode, glname, assetowner
