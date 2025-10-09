@@ -245,6 +245,7 @@ public abstract class TestContextKey {
     public static final String LOAN_WRITE_OFF_RESPONSE = "loanWriteOffResponse";
     public static final String LOAN_DELINQUENCY_ACTION_RESPONSE = "loanDelinquencyActionResponse";
     public static final String LOAN_TRANSACTION_RESPONSE = "loanTransactionResponse";
+    public static final String LOAN_SECOND_TRANSACTION_RESPONSE = "loanSecondTransactionResponse";
     public static final String LOAN_CAPITALIZED_INCOME_RESPONSE = "loanCapitalizedIncomeResponse";
     public static final String LOAN_DISBURSEMENT_DETAIL_RESPONSE = "loanDisbursementDetailResponse";
     public static final String LOAN_CAPITALIZED_INCOME_AMORTIZATION_ID = "loanCapitalizedIncomeAmortizationId";

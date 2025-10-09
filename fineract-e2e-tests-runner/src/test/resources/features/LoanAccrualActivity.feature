@@ -3455,7 +3455,7 @@ Feature: LoanAccrualActivity
       | 16 January 2025  | Repayment        | 10.0   | 0.32      | 0.0      | 0.0  | 0.0       | 0.0          | true     | false    |
       | 16 January 2025  | Accrual          | 0.32   | 0.0       | 0.32     | 0.0  | 0.0       | 0.0          | false    | false    |
 #   --- check if 'Accrual Activity' is reversed and has non-null external-id
-    Then Check required transaction for non-null eternal-id
+    Then Check required "1"th transaction for non-null eternal-id
     Then In Loan Transactions all transactions have non-null external-id
 
   @TestRailId:C3398
@@ -5342,7 +5342,6 @@ Feature: LoanAccrualActivity
       | 30 June 2024     | Accrual          | 0.06   | 0.0       | 0.06     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 July 2024     | Repayment        | 340.17 | 336.11    | 1.96     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 July 2024     | Accrual Activity | 1.96   | 0.0       | 1.96     | 0.0  | 0.0       | 0.0          | false    | false    |
-
 
   @TestRailId:C3525
   Scenario: Verify accrual activity behavior in case of backdated repayment - UC1
@@ -7785,7 +7784,7 @@ Feature: LoanAccrualActivity
     When Admin sets the business date to "13 June 2025"
     And Admin creates a client with random data
     And Admin creates a fully customized loan with the following data:
-      | LoanProduct                                                                                | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_REFUND_INTEREST_RECALC_ACCRUAL_ACTIVITY | 13 June 2025      | 135.94         | 11.32                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                | MONTHS                  | 1             | MONTHS                   | 6                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "13 June 2025" with "135.94" amount and expected disbursement date on "13 June 2025"
     And Admin successfully disburse the loan on "13 June 2025" with "135.94" EUR transaction amount
@@ -8243,5 +8242,854 @@ Feature: LoanAccrualActivity
       | 18 July 2025     | Accrual                | 2.8    | 0.0       | 0.0      | 2.8  | 0.0       | 0.0          | false    | false    |
       | 18 July 2025     | Accrual Adjustment     | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 July 2025     | Accrual                | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+  @TestRailId:C3955
+  Scenario: Verify accrual activity trn just reversed but nt replayed with backdated repayment that overpays loan - UC1
+    When Admin sets the business date to "01 August 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_REFUND_INTEREST_RECALC_ACCRUAL_ACTIVITY | 01 August 2025    | 135.94         | 11.32                  | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1             | MONTHS                  | 4                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 August 2025" with "135.94" amount and expected disbursement date on "01 August 2025"
+    And Admin successfully disburse the loan on "01 August 2025" with "135.94" EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 August 2025    |           | 135.94          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 September 2025 |           | 102.43          | 33.51         | 1.28     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 2  | 30   | 01 October 2025   |           | 68.61           | 33.82         | 0.97     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 3  | 31   | 01 November 2025  |           | 34.47           | 34.14         | 0.65     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 4  | 30   | 01 December 2025  |           |  0.0            | 34.47         | 0.33     | 0.0  | 0.0       | 34.8  | 0.0  | 0.0        | 0.0  | 34.8       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 135.94        | 3.23     | 0.0  | 0.0       | 139.17 | 0.0  | 0.0        | 0.0  | 139.17      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2025   | Disbursement     | 135.94 | 0.0       | 0.0      | 0.0  | 0.0       | 135.94       | false    | false    |
+    When Admin sets the business date to "02 August 2025"
+    When Admin runs inline COB job for Loan
+
+    When Admin sets the business date to "06 October 2025"
+    When Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 August 2025    |           | 135.94          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 September 2025 |           | 102.43          | 33.51         | 1.28     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 2  | 30   | 01 October 2025   |           | 68.92           | 33.51         | 1.28     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 3  | 31   | 01 November 2025  |           | 34.88           | 34.04         | 0.75     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 4  | 30   | 01 December 2025  |           |  0.0            | 34.88         | 0.33     | 0.0  | 0.0       | 35.21 | 0.0  | 0.0        | 0.0  | 35.21      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 135.94        | 3.64     | 0.0  | 0.0       | 139.58 | 0.0  | 0.0        | 0.0  | 139.58      |
+    And Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2025    | Disbursement     | 135.94 | 0.0       | 0.0      | 0.0  | 0.0       | 135.94       | false    | false    |
+      | 02 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 31 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+      | 01 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 September 2025 | Accrual Activity | 1.28   | 0.0       | 1.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+      | 01 October 2025   | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 October 2025   | Accrual Activity | 1.28   | 0.0       | 1.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 October 2025   | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 October 2025   | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 October 2025   | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 October 2025   | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+    And Store "Accrual Activity" transaction created on "01 September 2025" date as "1"th transaction
+    And Store "Accrual Activity" transaction created on "01 October 2025" date as "2"th transaction
+
+#    --- backdated repayment on 01 August 2025 ---
+    And Admin makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 August 2025" with 140 EUR transaction amount
+    And Loan status will be "OVERPAID"
+    And Loan has 4.06 overpaid amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 August 2025    |                | 135.94          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 September 2025 | 01 August 2025 | 101.15          | 34.79         | 0.0      | 0.0  | 0.0       | 34.79 | 34.79 | 34.79      | 0.0  | 0.0         |
+      | 2  | 30   | 01 October 2025   | 01 August 2025 | 66.36           | 34.79         | 0.0      | 0.0  | 0.0       | 34.79 | 34.79 | 34.79      | 0.0  | 0.0         |
+      | 3  | 31   | 01 November 2025  | 01 August 2025 | 31.57           | 34.79         | 0.0      | 0.0  | 0.0       | 34.79 | 34.79 | 34.79      | 0.0  | 0.0         |
+      | 4  | 30   | 01 December 2025  | 01 August 2025 |  0.0            | 31.57         | 0.0      | 0.0  | 0.0       | 31.57 | 31.57 | 31.57      | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 135.94        | 0.0      | 0.0  | 0.0       | 135.94 | 135.94 | 135.94     | 0.0  | 0.0         |
+    And Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2025    | Disbursement       | 135.94 | 0.0       | 0.0      | 0.0  | 0.0       | 135.94       | false    | false    |
+      | 01 August 2025    | Repayment          | 140.0  | 135.94    | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 August 2025    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 August 2025    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 August 2025    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 August 2025    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 31 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+      | 01 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+      | 01 October 2025   | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 October 2025   | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 October 2025   | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 October 2025   | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 October 2025   | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 October 2025   | Accrual Adjustment | 2.73   | 0.0       | 2.73     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+    And LoanAdjustTransactionBusinessEvent is raised with transaction on "01 September 2025" got reversed on "06 October 2025"
+    And LoanAdjustTransactionBusinessEvent is raised with transaction on "01 October 2025" got reversed on "06 October 2025"
+
+   And Check required "1"th transaction for non-null eternal-id
+   And Check required "2"th transaction for non-null eternal-id
+   And In Loan Transactions all transactions have non-null external-id
+
+    When Admin makes Credit Balance Refund transaction on "06 October 2025" with 4.06 EUR transaction amount
+    Then Loan's all installments have obligations met
+
+  @TestRailId:C3956
+  Scenario: Verify accrual activity trn just reversed but not replayed with backdated repayment that fully pays loan and charge - UC2
+    When Admin sets the business date to "01 August 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_REFUND_INTEREST_RECALC_ACCRUAL_ACTIVITY | 01 August 2025    | 135.94         | 11.32                  | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1             | MONTHS                  | 4                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 August 2025" with "135.94" amount and expected disbursement date on "01 August 2025"
+    And Admin successfully disburse the loan on "01 August 2025" with "135.94" EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 August 2025    |           | 135.94          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 September 2025 |           | 102.43          | 33.51         | 1.28     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 2  | 30   | 01 October 2025   |           | 68.61           | 33.82         | 0.97     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 3  | 31   | 01 November 2025  |           | 34.47           | 34.14         | 0.65     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 4  | 30   | 01 December 2025  |           |  0.0            | 34.47         | 0.33     | 0.0  | 0.0       | 34.8  | 0.0  | 0.0        | 0.0  | 34.8       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 135.94        | 3.23     | 0.0  | 0.0       | 139.17 | 0.0  | 0.0        | 0.0  | 139.17      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2025   | Disbursement     | 135.94 | 0.0       | 0.0      | 0.0  | 0.0       | 135.94       | false    | false    |
+    When Admin sets the business date to "02 August 2025"
+    When Admin runs inline COB job for Loan
+
+    When Admin sets the business date to "06 October 2025"
+    When Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 August 2025    |           | 135.94          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 September 2025 |           | 102.43          | 33.51         | 1.28     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 2  | 30   | 01 October 2025   |           | 68.92           | 33.51         | 1.28     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 3  | 31   | 01 November 2025  |           | 34.88           | 34.04         | 0.75     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 4  | 30   | 01 December 2025  |           |  0.0            | 34.88         | 0.33     | 0.0  | 0.0       | 35.21 | 0.0  | 0.0        | 0.0  | 35.21      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 135.94        | 3.64     | 0.0  | 0.0       | 139.58 | 0.0  | 0.0        | 0.0  | 139.58      |
+    And Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2025    | Disbursement     | 135.94 | 0.0       | 0.0      | 0.0  | 0.0       | 135.94       | false    | false    |
+      | 02 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 31 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+      | 01 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 September 2025 | Accrual Activity | 1.28   | 0.0       | 1.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+      | 01 October 2025   | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 October 2025   | Accrual Activity | 1.28   | 0.0       | 1.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 October 2025   | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 October 2025   | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 October 2025   | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 October 2025   | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+    And Store "Accrual Activity" transaction created on "01 September 2025" date as "1"th transaction
+    And Store "Accrual Activity" transaction created on "01 October 2025" date as "2"th transaction
+
+    When Admin adds "LOAN_NSF_FEE" due date charge with "06 October 2025" due date and 9.8 EUR transaction amount
+    Then Loan Charges tab has the following data:
+      | Name    | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
+      | NSF fee | true      | Specified due date | 06 October 2025 | Flat             | 9.8  | 0.0  | 0.0    | 9.8         |
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 August 2025    |           | 135.94          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 September 2025 |           | 102.43          | 33.51         | 1.28     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 2  | 30   | 01 October 2025   |           | 68.92           | 33.51         | 1.28     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 3  | 31   | 01 November 2025  |           | 34.88           | 34.04         | 0.75     | 0.0  | 9.8       | 44.59 | 0.0  | 0.0        | 0.0  | 44.59       |
+      | 4  | 30   | 01 December 2025  |           |  0.0            | 34.88         | 0.33     | 0.0  | 0.0       | 35.21 | 0.0  | 0.0        | 0.0  | 35.21      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 135.94        | 3.64     | 0.0  | 9.8       | 149.38 | 0.0  | 0.0        | 0.0  | 149.38      |
+    And Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2025    | Disbursement     | 135.94 | 0.0       | 0.0      | 0.0  | 0.0       | 135.94       | false    | false    |
+      | 02 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 31 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+      | 01 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 September 2025 | Accrual Activity | 1.28   | 0.0       | 1.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+      | 01 October 2025   | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 October 2025   | Accrual Activity | 1.28   | 0.0       | 1.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 October 2025   | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 October 2025   | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 October 2025   | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 October 2025   | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+    When Admin sets the business date to "07 October 2025"
+    When Admin runs inline COB job for Loan
+#  --- backdated repayment on 01 August 2025 ---
+    And Admin makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 August 2025" with 145.74 EUR transaction amount
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan has 0 outstanding amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 August 2025    |                | 135.94          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 September 2025 | 01 August 2025 | 101.15          | 34.79         | 0.0      | 0.0  | 0.0       | 34.79 | 34.79 | 34.79      | 0.0  | 0.0         |
+      | 2  | 30   | 01 October 2025   | 01 August 2025 | 66.36           | 34.79         | 0.0      | 0.0  | 0.0       | 34.79 | 34.79 | 34.79      | 0.0  | 0.0         |
+      | 3  | 31   | 01 November 2025  | 01 August 2025 | 31.57           | 34.79         | 0.0      | 0.0  | 9.8       | 44.59 | 44.59 | 44.59      | 0.0  | 0.0         |
+      | 4  | 30   | 01 December 2025  | 01 August 2025 |  0.0            | 31.57         | 0.0      | 0.0  | 0.0       | 31.57 | 31.57 | 31.57      | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 135.94        | 0.0      | 0.0  | 9.8       | 145.74 | 145.74 | 145.74     | 0.0  | 0.0         |
+    And Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2025    | Disbursement       | 135.94 | 0.0       | 0.0      | 0.0  | 0.0       | 135.94       | false    | false    |
+      | 01 August 2025    | Repayment          | 145.74 | 135.94    | 0.0      | 0.0  | 9.8       |   0.0        | false    | false    |
+      | 01 August 2025    | Accrual Activity   | 9.8    | 0.0       | 0.0      | 0.0  | 9.8       |   0.0        | false    | false    |
+      | 02 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 August 2025    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 August 2025    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 August 2025    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 August 2025    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 31 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+      | 01 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+      | 01 October 2025   | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 October 2025   | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 October 2025   | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 October 2025   | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 October 2025   | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 October 2025   | Accrual            | 9.84   | 0.0       | 0.04     | 0.0  | 9.8       | 0.0          | false    | false    |
+      | 07 October 2025   | Accrual Adjustment | 2.77   | 0.0       | 2.77     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+    And LoanAdjustTransactionBusinessEvent is raised with transaction on "01 September 2025" got reversed on "07 October 2025"
+    And LoanAdjustTransactionBusinessEvent is raised with transaction on "01 October 2025" got reversed on "07 October 2025"
+
+    And Check required "1"th transaction for non-null eternal-id
+    And Check required "2"th transaction for non-null eternal-id
+    And In Loan Transactions all transactions have non-null external-id
+
+  @TestRailId:C3957
+  Scenario: Verify accrual activity trn just reversed but not replayed with backdated repayment that fully pays loan - UC3
+    When Admin sets the business date to "01 August 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_REFUND_INTEREST_RECALC_ACCRUAL_ACTIVITY | 01 August 2025    | 135.94         | 11.32                  | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1             | MONTHS                  | 4                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 August 2025" with "135.94" amount and expected disbursement date on "01 August 2025"
+    And Admin successfully disburse the loan on "01 August 2025" with "135.94" EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 August 2025    |           | 135.94          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 September 2025 |           | 102.43          | 33.51         | 1.28     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 2  | 30   | 01 October 2025   |           | 68.61           | 33.82         | 0.97     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 3  | 31   | 01 November 2025  |           | 34.47           | 34.14         | 0.65     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 4  | 30   | 01 December 2025  |           |  0.0            | 34.47         | 0.33     | 0.0  | 0.0       | 34.8  | 0.0  | 0.0        | 0.0  | 34.8       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 135.94        | 3.23     | 0.0  | 0.0       | 139.17 | 0.0  | 0.0        | 0.0  | 139.17      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2025   | Disbursement     | 135.94 | 0.0       | 0.0      | 0.0  | 0.0       | 135.94       | false    | false    |
+    When Admin sets the business date to "02 August 2025"
+    When Admin runs inline COB job for Loan
+
+    When Admin sets the business date to "06 September 2025"
+    When Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 August 2025    |           | 135.94          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 September 2025 |           | 102.43          | 33.51         | 1.28     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 2  | 30   | 01 October 2025   |           | 68.66           | 33.77         | 1.02     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 3  | 31   | 01 November 2025  |           | 34.52           | 34.14         | 0.65     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 4  | 30   | 01 December 2025  |           |  0.0            | 34.52         | 0.33     | 0.0  | 0.0       | 34.85 | 0.0  | 0.0        | 0.0  | 34.85      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 135.94        | 3.28     | 0.0  | 0.0       | 139.22 | 0.0  | 0.0        | 0.0  | 139.22      |
+    And Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2025    | Disbursement     | 135.94 | 0.0       | 0.0      | 0.0  | 0.0       | 135.94       | false    | false    |
+      | 02 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 31 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+      | 01 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 September 2025 | Accrual Activity | 1.28   | 0.0       | 1.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+    And Store "Accrual Activity" transaction created on "01 September 2025" date as "1"th transaction
+
+#    --- backdated repayment on 01 August 2025 ---
+    And Admin makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 August 2025" with 135.94 EUR transaction amount
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan has 0 outstanding amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 August 2025    |                | 135.94          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 September 2025 | 01 August 2025 | 101.15          | 34.79         | 0.0      | 0.0  | 0.0       | 34.79 | 34.79 | 34.79      | 0.0  | 0.0         |
+      | 2  | 30   | 01 October 2025   | 01 August 2025 | 66.36           | 34.79         | 0.0      | 0.0  | 0.0       | 34.79 | 34.79 | 34.79      | 0.0  | 0.0         |
+      | 3  | 31   | 01 November 2025  | 01 August 2025 | 31.57           | 34.79         | 0.0      | 0.0  | 0.0       | 34.79 | 34.79 | 34.79      | 0.0  | 0.0         |
+      | 4  | 30   | 01 December 2025  | 01 August 2025 |  0.0            | 31.57         | 0.0      | 0.0  | 0.0       | 31.57 | 31.57 | 31.57      | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 135.94        | 0.0      | 0.0  | 0.0       | 135.94 | 135.94 | 135.94     | 0.0  | 0.0         |
+    And Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2025    | Disbursement       | 135.94 | 0.0       | 0.0      | 0.0  | 0.0       | 135.94       | false    | false    |
+      | 01 August 2025    | Repayment          | 135.94 | 135.94    | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 August 2025    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 August 2025    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 August 2025    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 August 2025    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 31 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+      | 01 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 September 2025 | Accrual Adjustment | 1.45   | 0.0       | 1.45     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+    And LoanAdjustTransactionBusinessEvent is raised with transaction got reversed on "06 September 2025"
+    And LoanAccrualAdjustmentTransactionBusinessEvent is raised on "06 September 2025"
+
+    And Check required "1"th transaction for non-null eternal-id
+    And In Loan Transactions all transactions have non-null external-id
+
+  @TestRailId:C3953
+  Scenario: Verify accrual activity trn just reversed but not replayed with backdated repayment that overpays loan and Snooze fee charge - UC4
+    When Admin sets the business date to "01 August 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_REFUND_INTEREST_RECALC_ACCRUAL_ACTIVITY | 01 August 2025    | 135.94         | 11.32                  | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1             | MONTHS                  | 4                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 August 2025" with "135.94" amount and expected disbursement date on "01 August 2025"
+    And Admin successfully disburse the loan on "01 August 2025" with "135.94" EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 August 2025    |           | 135.94          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 September 2025 |           | 102.43          | 33.51         | 1.28     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 2  | 30   | 01 October 2025   |           | 68.61           | 33.82         | 0.97     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 3  | 31   | 01 November 2025  |           | 34.47           | 34.14         | 0.65     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 4  | 30   | 01 December 2025  |           |  0.0            | 34.47         | 0.33     | 0.0  | 0.0       | 34.8  | 0.0  | 0.0        | 0.0  | 34.8       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 135.94        | 3.23     | 0.0  | 0.0       | 139.17 | 0.0  | 0.0        | 0.0  | 139.17      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2025   | Disbursement     | 135.94 | 0.0       | 0.0      | 0.0  | 0.0       | 135.94       | false    | false    |
+    When Admin sets the business date to "02 August 2025"
+    When Admin runs inline COB job for Loan
+
+    When Admin sets the business date to "06 September 2025"
+    When Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 August 2025    |           | 135.94          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 September 2025 |           | 102.43          | 33.51         | 1.28     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 2  | 30   | 01 October 2025   |           | 68.66           | 33.77         | 1.02     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 3  | 31   | 01 November 2025  |           | 34.52           | 34.14         | 0.65     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 4  | 30   | 01 December 2025  |           |  0.0            | 34.52         | 0.33     | 0.0  | 0.0       | 34.85 | 0.0  | 0.0        | 0.0  | 34.85      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 135.94        | 3.28     | 0.0  | 0.0       | 139.22 | 0.0  | 0.0        | 0.0  | 139.22      |
+    And Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2025    | Disbursement     | 135.94 | 0.0       | 0.0      | 0.0  | 0.0       | 135.94       | false    | false    |
+      | 02 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 31 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+      | 01 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 September 2025 | Accrual Activity | 1.28   | 0.0       | 1.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+    And Store "Accrual Activity" transaction created on "01 September 2025" date as "1"th transaction
+
+  # --- NSF fee charge on current date --- #
+    And Admin adds "LOAN_SNOOZE_FEE" due date charge with "06 September 2025" due date and 10.15 EUR transaction amount
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of         | Calculation type | Due   | Paid | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 06 September 2025 | Flat             | 10.15 | 0.0  | 0.0    | 10.15       |
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 August 2025    |           | 135.94          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 September 2025 |           | 102.43          | 33.51         | 1.28     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 2  | 30   | 01 October 2025   |           | 68.66           | 33.77         | 1.02     | 10.15| 0.0       | 44.94 | 0.0  | 0.0        | 0.0  | 44.94       |
+      | 3  | 31   | 01 November 2025  |           | 34.52           | 34.14         | 0.65     | 0.0  | 0.0       | 34.79 | 0.0  | 0.0        | 0.0  | 34.79       |
+      | 4  | 30   | 01 December 2025  |           |  0.0            | 34.52         | 0.33     | 0.0  | 0.0       | 34.85 | 0.0  | 0.0        | 0.0  | 34.85      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees  | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 135.94        | 3.28     | 10.15 | 0.0       | 149.37 | 0.0  | 0.0        | 0.0  | 149.37      |
+    And Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2025    | Disbursement     | 135.94 | 0.0       | 0.0      | 0.0  | 0.0       | 135.94       | false    | false    |
+      | 02 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 August 2025    | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 31 August 2025    | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+      | 01 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 September 2025 | Accrual Activity | 1.28   | 0.0       | 1.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 September 2025 | Accrual          | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 September 2025 | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+#  --- backdated repayment on 01 August 2025 ---
+    And Admin makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 August 2025" with 150 EUR transaction amount
+    And Loan status will be "OVERPAID"
+    And Loan has 3.91 overpaid amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 August 2025    |                | 135.94          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 September 2025 | 01 August 2025 | 101.15          | 34.79         | 0.0      | 0.0  | 0.0       | 34.79 | 34.79| 34.79      | 0.0  | 0.0         |
+      | 2  | 30   | 01 October 2025   | 01 August 2025 | 66.36           | 34.79         | 0.0      | 10.15| 0.0       | 44.94 | 44.94| 44.94      | 0.0  | 0.0         |
+      | 3  | 31   | 01 November 2025  | 01 August 2025 | 31.57           | 34.79         | 0.0      | 0.0  | 0.0       | 34.79 | 34.79| 34.79      | 0.0  | 0.0         |
+      | 4  | 30   | 01 December 2025  | 01 August 2025 |  0.0            | 31.57         | 0.0      | 0.0  | 0.0       | 31.57 | 31.57| 31.57      | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees  | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 135.94        | 0.0      | 10.15 | 0.0       | 146.09 | 146.09 | 146.09     | 0.0  | 0.0         |
+    And Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 August 2025    | Disbursement       | 135.94 | 0.0       | 0.0      | 0.0  | 0.0       | 135.94       | false    | false    |
+      | 01 August 2025    | Repayment          | 150.0  | 135.94    | 0.0      | 10.15| 0.0       | 0.0          | false    | false    |
+      | 01 August 2025    | Accrual Activity   | 10.15  | 0.0       | 0.0      | 10.15| 0.0       | 0.0          | false    | false    |
+      | 02 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 August 2025    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 August 2025    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 August 2025    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 August 2025    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 31 August 2025    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+      | 01 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 September 2025 | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 September 2025 | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 September 2025 | Accrual            | 10.15  | 0.0       | 0.0      | 10.15| 0.0       | 0.0          | false    | false    |
+      | 06 September 2025 | Accrual Adjustment | 1.45   | 0.0       | 1.45     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+    And LoanAdjustTransactionBusinessEvent is raised with transaction got reversed on "06 September 2025"
+    And LoanAccrualAdjustmentTransactionBusinessEvent is raised on "06 September 2025"
+
+    And Check required "1"th transaction for non-null eternal-id
+    And In Loan Transactions all transactions have non-null external-id
+
+    When Admin makes Credit Balance Refund transaction on "06 September 2025" with 3.91 EUR transaction amount
+    Then Loan's all installments have obligations met
 
 

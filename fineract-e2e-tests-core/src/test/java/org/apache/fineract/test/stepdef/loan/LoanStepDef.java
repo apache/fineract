@@ -60,6 +60,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
 import org.apache.fineract.avro.loan.v1.LoanChargePaidByDataV1;
 import org.apache.fineract.avro.loan.v1.LoanStatusEnumDataV1;
+import org.apache.fineract.avro.loan.v1.LoanTransactionAdjustmentDataV1;
 import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.AmortizationMappingData;
@@ -2424,12 +2425,17 @@ public class LoanStepDef extends AbstractStepDef {
                 .as(ErrorMessageHelper.transactionHasNullResourceValue("", "external-id")).isTrue();
     }
 
-    @Then("Check required transaction for non-null eternal-id")
-    public void loanTransactionHasNonNullExternalId() throws IOException {
+    @Then("Check required {string}th transaction for non-null eternal-id")
+    public void loanTransactionHasNonNullExternalId(String nThNumber) throws IOException {
         Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanCreateResponse.body().getLoanId();
 
-        GetLoansLoanIdTransactions targetTransaction = testContext().get(TestContextKey.LOAN_TRANSACTION_RESPONSE);
+        GetLoansLoanIdTransactions targetTransaction;
+        if (nThNumber.equals("1")) {
+            targetTransaction = testContext().get(TestContextKey.LOAN_TRANSACTION_RESPONSE);
+        } else {
+            targetTransaction = testContext().get(TestContextKey.LOAN_SECOND_TRANSACTION_RESPONSE);
+        }
         Long targetTransactionId = targetTransaction.getId();
 
         Response<GetLoansLoanIdTransactionsTransactionIdResponse> transactionResponse = loanTransactionsApi
@@ -2890,11 +2896,11 @@ public class LoanStepDef extends AbstractStepDef {
 
         List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
 
-        GetLoansLoanIdTransactions loadTransaction = transactions.stream()
+        GetLoansLoanIdTransactions loanTransaction = transactions.stream()
                 .filter(t -> date.equals(FORMATTER.format(t.getDate())) && "Charge Adjustment".equals(t.getType().getValue())).findFirst()
                 .orElseThrow(() -> new IllegalStateException(String.format("No Charge Adjustment transaction found on %s", date)));
 
-        eventAssertion.assertEventRaised(LoanChargeAdjustmentPostBusinessEvent.class, loadTransaction.getId());
+        eventAssertion.assertEventRaised(LoanChargeAdjustmentPostBusinessEvent.class, loanTransaction.getId());
     }
 
     @Then("BulkBusinessEvent is not raised on {string}")
@@ -2919,9 +2925,7 @@ public class LoanStepDef extends AbstractStepDef {
                 em -> FORMATTER.format(em.getBusinessDate()).equals(date));
     }
 
-    @Then("{string} transaction on {string} got reverse-replayed on {string}")
-    public void checkLoanAdjustTransactionBusinessEvent(String transactionType, String transactionDate, String submittedOnDate)
-            throws IOException {
+    public GetLoansLoanIdTransactions getLoanTransactionIdByDate(String transactionType, String transactionDate) throws IOException {
         Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanCreateResponse.body().getLoanId();
 
@@ -2930,41 +2934,96 @@ public class LoanStepDef extends AbstractStepDef {
 
         List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
 
-        GetLoansLoanIdTransactions loadTransaction = transactions.stream()
+        GetLoansLoanIdTransactions loanTransaction = transactions.stream()
                 .filter(t -> transactionDate.equals(FORMATTER.format(t.getDate())) && transactionType.equals(t.getType().getValue()))
                 .findFirst().orElseThrow(
                         () -> new IllegalStateException(String.format("No %s transaction found on %s", transactionType, transactionDate)));
+        return loanTransaction;
+    }
 
-        Set<GetLoansLoanIdLoanTransactionRelation> transactionRelations = loadTransaction.getTransactionRelations();
+    public GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransactionIdById(Long transactionId) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.body().getLoanId();
+
+        Response<GetLoansLoanIdTransactionsTransactionIdResponse> loanTransactionResponse = loanTransactionsApi
+                .retrieveTransaction(loanId, transactionId, "").execute();
+        GetLoansLoanIdTransactionsTransactionIdResponse loanTransaction = loanTransactionResponse.body();
+        return loanTransaction;
+    }
+
+    @Then("{string} transaction on {string} got reverse-replayed on {string}")
+    public void checkLoanAdjustTransactionBusinessEvent(String transactionType, String transactionDate, String submittedOnDate)
+            throws IOException {
+        GetLoansLoanIdTransactions loanTransaction = getLoanTransactionIdByDate(transactionType, transactionDate);
+
+        Set<GetLoansLoanIdLoanTransactionRelation> transactionRelations = loanTransaction.getTransactionRelations();
         Long originalTransactionId = transactionRelations.stream().map(GetLoansLoanIdLoanTransactionRelation::getToLoanTransaction)
                 .filter(Objects::nonNull).findFirst()
                 .orElseThrow(() -> new IllegalStateException("Transaction was reversed, but not replayed!"));
 
         // Check whether reverse-replay event got occurred
-        eventAssertion.assertEvent(LoanAdjustTransactionBusinessEvent.class, originalTransactionId).extractingData(
-                e -> e.getNewTransactionDetail() != null && e.getNewTransactionDetail().getId().equals(loadTransaction.getId()));
+        eventAssertion.assertEvent(LoanAdjustTransactionBusinessEvent.class, originalTransactionId)
+                .extractingData(LoanTransactionAdjustmentDataV1::getNewTransactionDetail).isNotEqualTo(null)
+                .extractingData(e -> e.getNewTransactionDetail().getId()).isEqualTo(loanTransaction.getId());
         // Check whether there was just ONE event related to this transaction
         eventAssertion.assertEventNotRaised(LoanAdjustTransactionBusinessEvent.class, originalTransactionId);
-        assertThat(FORMATTER.format(loadTransaction.getSubmittedOnDate()))
-                .as("Loan got replayed on %s", loadTransaction.getSubmittedOnDate()).isEqualTo(submittedOnDate);
+        assertThat(FORMATTER.format(loanTransaction.getSubmittedOnDate()))
+                .as("Loan got replayed on %s", loanTransaction.getSubmittedOnDate()).isEqualTo(submittedOnDate);
+    }
+
+    @Then("Store {string} transaction created on {string} date as {string}th transaction")
+    public void storeLoanTransactionId(String transactionType, String transactionDate, String nthTrnOrderNumber) throws IOException {
+        GetLoansLoanIdTransactions loanTransaction = getLoanTransactionIdByDate(transactionType, transactionDate);
+        if (nthTrnOrderNumber.equals("1")) {
+            testContext().set(TestContextKey.LOAN_TRANSACTION_RESPONSE, loanTransaction);
+        } else {
+            testContext().set(TestContextKey.LOAN_SECOND_TRANSACTION_RESPONSE, loanTransaction);
+        }
+    }
+
+    @Then("LoanAdjustTransactionBusinessEvent is raised with transaction got reversed on {string}")
+    public void checkLoanAdjustTransactionBusinessEventWithReversedTrn(String submittedOnDate) throws IOException {
+        GetLoansLoanIdTransactions originalTransaction = testContext().get(TestContextKey.LOAN_TRANSACTION_RESPONSE);
+        Long originalTransactionId = originalTransaction.getId();
+        GetLoansLoanIdTransactionsTransactionIdResponse loanTransaction = getLoanTransactionIdById(originalTransactionId);
+
+        // Check whether reversed event got occurred
+        eventAssertion.assertEvent(LoanAdjustTransactionBusinessEvent.class, originalTransactionId)
+                .extractingData(LoanTransactionAdjustmentDataV1::getNewTransactionDetail).isEqualTo(null)
+                .extractingData(e -> e.getTransactionToAdjust().getId()).isEqualTo(originalTransactionId);
+        // Check whether there was just ONE event related to this transaction
+        eventAssertion.assertEventNotRaised(LoanAdjustTransactionBusinessEvent.class, originalTransactionId);
+        assertThat(FORMATTER.format(loanTransaction.getReversedOnDate())).as("Loan got replayed on %s", loanTransaction.getReversedOnDate())
+                .isEqualTo(submittedOnDate);
+    }
+
+    @Then("LoanAdjustTransactionBusinessEvent is raised with transaction on {string} got reversed on {string}")
+    public void checkLoanAdjustTransactionBusinessEventWithReversedTrn(String transactionDate, String submittedOnDate) throws IOException {
+        Long originalTransactionId;
+        GetLoansLoanIdTransactions loanTransaction1 = testContext().get(TestContextKey.LOAN_TRANSACTION_RESPONSE);
+        GetLoansLoanIdTransactions loanTransaction2 = testContext().get(TestContextKey.LOAN_SECOND_TRANSACTION_RESPONSE);
+        if (FORMATTER.format(loanTransaction1.getDate()).equals(transactionDate)) {
+            originalTransactionId = loanTransaction1.getId();
+        } else {
+            originalTransactionId = loanTransaction2.getId();
+        }
+        GetLoansLoanIdTransactionsTransactionIdResponse loanTransaction = getLoanTransactionIdById(originalTransactionId);
+
+        // Check whether reversedevent got occurred
+        eventAssertion.assertEvent(LoanAdjustTransactionBusinessEvent.class, originalTransactionId)
+                .extractingData(e -> e.getTransactionToAdjust().getId()).isEqualTo(originalTransactionId)
+                .extractingData(LoanTransactionAdjustmentDataV1::getNewTransactionDetail).isEqualTo(null);
+        // Check whether there was just ONE event related to this transaction
+        eventAssertion.assertEventNotRaised(LoanAdjustTransactionBusinessEvent.class, originalTransactionId);
+        assertThat(FORMATTER.format(loanTransaction.getReversedOnDate())).as("Loan got replayed on %s", loanTransaction.getReversedOnDate())
+                .isEqualTo(submittedOnDate);
     }
 
     @When("Save external ID of {string} transaction made on {string} as {string}")
     public void saveExternalIdForTransaction(String transactionName, String transactionDate, String externalIdKey) throws IOException {
-        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        long loanId = loanCreateResponse.body().getLoanId();
+        GetLoansLoanIdTransactions loanTransaction = getLoanTransactionIdByDate(transactionName, transactionDate);
 
-        Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
-        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
-
-        List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
-
-        GetLoansLoanIdTransactions loadTransaction = transactions.stream()
-                .filter(t -> transactionDate.equals(FORMATTER.format(t.getDate())) && transactionName.equals(t.getType().getValue()))
-                .findFirst().orElseThrow(
-                        () -> new IllegalStateException(String.format("No %s transaction found on %s", transactionName, transactionDate)));
-
-        String externalId = loadTransaction.getExternalId();
+        String externalId = loanTransaction.getExternalId();
         testContext().set(externalIdKey, externalId);
         log.debug("Transaction external ID: {} saved to testContext", externalId);
     }
@@ -2975,15 +3034,7 @@ public class LoanStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanCreateResponse.body().getLoanId();
 
-        Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
-        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
-
-        List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
-
-        GetLoansLoanIdTransactions transactionDetails = transactions.stream()
-                .filter(t -> transactionDate.equals(FORMATTER.format(t.getDate())) && transactionType.equals(t.getType().getValue()))
-                .findFirst().orElseThrow(
-                        () -> new IllegalStateException(String.format("No %s transaction found on %s", transactionType, transactionDate)));
+        GetLoansLoanIdTransactions transactionDetails = getLoanTransactionIdByDate(transactionType, transactionDate);
 
         Set<GetLoansLoanIdLoanTransactionRelation> transactionRelations = transactionDetails.getTransactionRelations();
         Long originalTransactionId = transactionRelations.stream().map(GetLoansLoanIdLoanTransactionRelation::getToLoanTransaction)
