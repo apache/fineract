@@ -4,17 +4,15 @@
 
 Create source and binary tarballs.
 
-// FIXME - clean this up? focus on what commands should actually be run
-
 [source,bash,subs="attributes+"]
 ----
-./gradlew --rerun-tasks srcDistTar binaryDistTar <1>
+./gradlew clean
+./gradlew srcDistTar binaryDistTar
 ----
-<1> The source tarball might not be created if `--rerun-tasks` is omitted.
 
 Look in `fineract-war/build/distributions/` for the tarballs.
 
-Make sure to do some sanity checks. The source tarball and the code in the release branch (at the commit with the release tag) should match.
+Do some sanity checks. The source tarball and the code in the release branch (at the commit with the release tag) should match.
 
 [source,bash,subs="attributes+"]
 ----
@@ -26,8 +24,6 @@ git checkout tags/{revnumber}
 cd ..
 diff -r fineract apache-fineract-src-{revnumber}
 ----
-
-// FIXME - add output example
 
 Make sure the code compiles and tests pass on the uncompressed source. Do as much testing as you can and share what you did. Here's the bare minimum check:
 
