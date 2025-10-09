@@ -2,7 +2,7 @@
 
 == Description
 
-Finally create a directory with release name ({revnumber} in this example) in https://dist.apache.org/repos/dist/dev/fineract and add the following files in this new directory:
+Next we'll stage the release candidate. Create a new folder and add these files:
 
 * apache-fineract-bin-{revnumber}.tar.gz
 * apache-fineract-bin-{revnumber}.tar.gz.sha512
@@ -11,16 +11,18 @@ Finally create a directory with release name ({revnumber} in this example) in ht
 * apache-fineract-src-{revnumber}.tar.gz.sha512
 * apache-fineract-src-{revnumber}.tar.gz.asc
 
-These files (or "artifacts") make up the release candidate.
-
-Upload these files to ASF's distribution dev (staging) area:
+These files (or "artifacts") comprise the release candidate. Upload these files to https://www.apache.org/legal/release-policy.html#stage[ASF's distribution dev/staging area] like so:
 
 [source,bash,subs="attributes+"]
 ----
+# this is a remote operation
 svn mkdir https://dist.apache.org/repos/dist/dev/fineract/{revnumber}
+# create local svn-tracked folder "{revnumber}"
 svn checkout https://dist.apache.org/repos/dist/dev/fineract/{revnumber}
-cp path/to/files/* {revnumber}/
+# prepare to upload
+cp path/to/new/folder/* {revnumber}/
 cd {revnumber}/
+# actual upload occurs here
 svn add * && svn commit
 ----
 
