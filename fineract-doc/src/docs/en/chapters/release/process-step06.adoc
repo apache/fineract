@@ -17,7 +17,7 @@ Do some sanity checks. The source tarball and the code in the release branch (at
 [source,bash,subs="attributes+"]
 ----
 cd /fineract-release-preparations
-tar -xvf path/to/apache-fineract-src-{revnumber}.tar.gz
+tar -xvzf path/to/apache-fineract-src-{revnumber}.tar.gz
 git clone git@github.com:apache/fineract.git
 cd fineract/
 git checkout tags/{revnumber}
