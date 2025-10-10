@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -95,16 +96,25 @@ public class LoanReAgingServiceImpl {
         LoanReAgeParameter reAgeParameter = createReAgeParameter(reAgeTransaction, command);
         reAgeTransaction.setLoanReAgeParameter(reAgeParameter);
         loanTransactionRepository.saveAndFlush(reAgeTransaction);
-
-        if (reAgeTransaction.getTransactionDate().isBefore(reAgeTransaction.getSubmittedOnDate())) {
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
+                .determineProcessor(loan.transactionProcessingStrategy());
+        if (reAgeTransaction.getTransactionDate().isBefore(reAgeTransaction.getSubmittedOnDate())
+                && !loan.isInterestBearingAndInterestRecalculationEnabled()) {
             reprocessLoanTransactionsService.reprocessTransactionsWithPostTransactionChecks(loan, reAgeTransaction.getTransactionDate());
+        } else if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
+            if (loan.isProgressiveSchedule() && ((loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy())
+                    || loan.hasContractTerminationTransaction()
+                    || (loan.isInterestRecalculationEnabled() && loan.hasReAgingTransaction()))) {
+                final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
+                loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
+            }
+            final List<LoanTransaction> loanTransactions = loanTransactionRepository.findNonReversedTransactionsForReprocessingByLoan(loan);
+            loanTransactions.add(reAgeTransaction);
+            reprocessLoanTransactionsService.reprocessParticularTransactions(loan, loanTransactions);
         } else {
-            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
-                    .determineProcessor(loan.transactionProcessingStrategy());
             loanRepaymentScheduleTransactionProcessor.processLatestTransaction(reAgeTransaction,
                     new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                             new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
-
         }
         loan.updateLoanScheduleDependentDerivedFields();
         persistNote(loan, command, changes);
@@ -135,13 +145,13 @@ public class LoanReAgingServiceImpl {
         if (reAgeTransaction == null) {
             throw new LoanTransactionNotFoundException("Re-Age transaction for loan was not found");
         }
-        reverseReAgeTransaction(reAgeTransaction, command);
-        loanTransactionRepository.saveAndFlush(reAgeTransaction);
         if (loan.isProgressiveSchedule() && ((loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy())
-                || loan.hasContractTerminationTransaction())) {
+                || loan.hasContractTerminationTransaction() || (loan.isInterestRecalculationEnabled() && loan.hasReAgingTransaction()))) {
             final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
             loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
         }
+        reverseReAgeTransaction(reAgeTransaction, command);
+        loanTransactionRepository.saveAndFlush(reAgeTransaction);
         reprocessLoanTransactionsService.reprocessTransactions(loan);
         loan.updateLoanScheduleDependentDerivedFields();
         persistNote(loan, command, changes);

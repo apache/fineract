@@ -289,20 +289,6 @@ class LoanReAgingValidatorTest {
     }
 
     @Test
-    public void testValidateReAge_ShouldThrowException_WhenLoanIsBeforeMaturity() {
-        // given
-        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, actualDate)));
-        Loan loan = loan();
-        JsonCommand command = jsonCommand();
-        // when
-        GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
-                () -> underTest.validateReAge(loan, command));
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reage.cannot.be.submitted.before.maturity");
-    }
-
-    @Test
     public void testValidateReAge_ShouldThrowException_WhenStartDateIsBeforeMaturity() {
         // given
         Loan loan = loan();
@@ -348,20 +334,6 @@ class LoanReAgingValidatorTest {
         assertThat(result).isNotNull();
         assertThat(result.getGlobalisationMessageCode())
                 .isEqualTo("error.msg.loan.reage.supported.only.for.progressive.loan.schedule.type");
-    }
-
-    @Test
-    public void testValidateReAge_ShouldThrowException_WhenLoanIsInterestBearing() {
-        // given
-        Loan loan = loan();
-        given(loan.isInterestBearing()).willReturn(true);
-        JsonCommand command = jsonCommand();
-        // when
-        GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
-                () -> underTest.validateReAge(loan, command));
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reage.supported.only.for.non.interest.loans");
     }
 
     @Test

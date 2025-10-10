@@ -1824,4 +1824,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return getLoanTransactions().stream().anyMatch(t -> t.isContractTermination() && t.isNotReversed());
     }
 
+    public boolean hasReAgingTransaction() {
+        return getLoanTransactions().stream().anyMatch(t -> t.isReAge() && t.isNotReversed());
+    }
 }
