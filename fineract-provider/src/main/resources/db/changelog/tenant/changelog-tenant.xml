@@ -221,4 +221,5 @@
     <include file="parts/0200_add_journal_entry_aggregation_tables.xml" relativeToChangelogFile="true"/>
     <include file="parts/0201_add_journal_entry_aggregation_job.xml" relativeToChangelogFile="true"/>
     <include file="parts/0202_trial_balance_summary_with_asset_owner_journal_entry_aggregation.xml" relativeToChangelogFile="true" />
+    <include file="parts/0203_transaction_summary_with_asset_owner_report_with_capitalized_income.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
