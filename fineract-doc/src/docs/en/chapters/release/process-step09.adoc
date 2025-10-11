@@ -21,8 +21,7 @@ Make sure release artifacts are hosted at https://dist.apache.org/repos/dist/dev
 ----
 # source tarball signature and checksum verification steps
 # we'll check the source tarball first
-version={revnumber}
-src=apache-fineract-src-$version.tar.gz
+src=apache-fineract-src-{revnumber}.tar.gz
 
 # upon success: prints "Good signature" and returns successful exit code
 # upon failure: prints "BAD signature" and returns error exit code
@@ -33,7 +32,7 @@ gpg --verify $src.asc
 gpg --print-md SHA512 $src | diff - $src.sha512
 
 # binary tarball signature and checksum verification steps and outputs are similar
-bin=apache-fineract-bin-$version.tar.gz
+bin=apache-fineract-bin-{revnumber}.tar.gz
 gpg --verify $bin.asc
 gpg --print-md SHA512 $bin | diff - $bin.sha512
 ----
@@ -48,28 +47,44 @@ TIP: Consider also https://en.wikipedia.org/wiki/Key_signing_party[signing] and 
 
 === Build from source
 
-[source,bash]
+[source,bash,subs="attributes+"]
 ----
 tar -xzf $src
-cd apache-fineract-src-$version
-gradle build -x test -x doc
+cd apache-fineract-src-{revnumber}
+./gradlew build -x test -x doc
 cd ..
 ----
 
 === Run from binary
 
-Before running this you must first start a database server and ensure the `fineract_default` and `fineract_tenant` databases exist. Then:
+Before running Fineract you must first start a <<Database support,supported relational database server>> and ensure the `fineract_default` and `fineract_tenants` databases exist. Detailed steps for database preparation are left as an exercise for the reader. You can find ideas on how to do prepare your database in the `build-mariadb.yml`, `build-mysql.yml`, and `build-postgresql.yml` files in source control.
 
-[source,bash]
+Finally, start your Fineract server:
+
+[source,bash,subs="attributes+"]
 ----
-tar -xzf $bin
-cd apache-fineract-bin-$version
+tar -xvzf apache-fineract-bin-{revnumber}
+cd apache-fineract-bin-{revnumber}
+export FINERACT_SERVER_SSL_ENABLED=false
+export FINERACT_SERVER_PORT=8080
+export BACKEND_PROTOCOL=http
+export BACKEND_PORT=$FINERACT_SERVER_PORT
+# assumes reachable, healthy mariadb with default username, password, and port
+java -jar fineract-provider-{revnumber}.jar
+----
+
+Alternatively, you can run it in Tomcat:
+
+[source,bash,subs="attributes+"]
+----
 cat << 'EndOfRcenv' >> rcenv
 FINERACT_SERVER_SSL_ENABLED=false
 FINERACT_SERVER_PORT=8080
 BACKEND_PROTOCOL=http
 BACKEND_PORT=$FINERACT_SERVER_PORT
 EndOfRcenv
+source rcenv
+# assumes reachable, healthy mariadb with default username, password, and port
 docker run --rm -it -v "$(pwd):/usr/local/tomcat/webapps" \
   --net=host --env-file=rcenv tomcat:jre21
 ----

@@ -6,9 +6,10 @@ Create source and binary tarballs.
 
 [source,bash,subs="attributes+"]
 ----
-./gradlew clean
-./gradlew srcDistTar binaryDistTar
+./gradlew clean srcDistTar binaryDistTar
 ----
+
+Check that `fineract-provider/build/classes/java/main/git.properties` exists. If so, continue. If not, you're likely encountering https://github.com/n0mer/gradle-git-properties/issues/233[this bug], and you need to re-run the command above to create proper source and binary tarballs. That `git.properties` file is supposed to end up at `BOOT-INF/classes/git.properties` in `fineract-provider-{revnumber}.jar` in the binary release tarball. Its contents are displayed at the `/fineract-provider/actuator/info` endpoint. It may be possible to fix this heisenbug entirely by https://github.com/gradle/gradle/issues/34177#issuecomment-3051970053[modifying our git properties gradle plugin config] in `fineract-provider/build.gradle`, perhaps by changing where `git.properties` is written.
 
 Look in `fineract-war/build/distributions/` for the tarballs.
 
@@ -25,16 +26,9 @@ cd ..
 diff -r fineract apache-fineract-src-{revnumber}
 ----
 
-Make sure the code compiles and tests pass on the uncompressed source. Do as much testing as you can and share what you did. Here's the bare minimum check:
-
-[source,bash,subs="attributes+"]
-----
-./gradlew build -x test -x doc
-----
+Make sure the code compiles and tests pass on the uncompressed source. You should at the very least do exactly what you will ask the community to do in <<Step 9: Verify Distribution Staging>>.
 
 Ideally you'd build code and docs and run every possible test and check, but https://github.com/apache/fineract/actions[running everything has complex dependencies, caches, and takes many hours]. It is rarely done in practice offline / local / on developer machines. But please, go ahead and run the test and doc tasks, and more! Grab a cup of coffee and run everything you can. See the various builds in `.github/workflows/` and try the same things on your own. We should all hammer on a release candidate as much as we can to see if it breaks and fix it if so. All that of course improves our final release.
-
-Finally, inspect `apache-fineract-bin-{revnumber}.tar.gz`. Make sure the `fineract-provider-{revnumber}.jar` can be run directly, and the `fineract-provider.war` can be run with Tomcat.
 
 NOTE: We don't release any artifacts to Apache's Maven repository.
 
