@@ -63,7 +63,7 @@ Finally, start your Fineract server:
 
 [source,bash,subs="attributes+"]
 ----
-tar -xvzf apache-fineract-bin-{revnumber}
+tar -xvzf apache-fineract-bin-{revnumber}.tar.gz
 cd apache-fineract-bin-{revnumber}
 export FINERACT_SERVER_SSL_ENABLED=false
 export FINERACT_SERVER_PORT=8080
