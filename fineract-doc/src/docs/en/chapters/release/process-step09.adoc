@@ -41,7 +41,7 @@ Look for `Good signature` in the `gpg` output:
 
 [source,text,subs="attributes+"]
 ----
-$ gpg --verify $src.asc
+$ gpg --verify $bin.asc
 gpg: assuming signed data in 'apache-fineract-bin-{revnumber}.tar.gz'
 gpg: Signature made Sat 11 Oct 2025 05:46:42 PM PDT
 gpg:                using EDDSA key 250775BDB5FE7D53E4AF95C00E895A1A7A090CFC
@@ -74,7 +74,7 @@ cd ..
 
 === Run from binary
 
-Before running Fineract you must first start a <<Database support,supported relational database server>> and ensure the `fineract_default` and `fineract_tenants` databases exist. Detailed steps for database preparation are left as an exercise for the reader. You can find ideas on how to do prepare your database in the `build-mariadb.yml`, `build-mysql.yml`, and `build-postgresql.yml` files in source control.
+Before running Fineract you must first start a <<Database support,supported relational database server>> and ensure the `fineract_default` and `fineract_tenants` databases exist. Detailed steps for database preparation are left as an exercise for the reader. You can find ideas on how to prepare your database in the `build-mariadb.yml`, `build-mysql.yml`, and `build-postgresql.yml` files in source control.
 
 Finally, start your Fineract server:
 
@@ -100,7 +100,6 @@ FINERACT_SERVER_PORT=8080
 BACKEND_PROTOCOL=http
 BACKEND_PORT=$FINERACT_SERVER_PORT
 EndOfRcenv
-source rcenv
 # assumes reachable, healthy mariadb with default username, password, and port
 docker run --rm -it -v "$(pwd):/usr/local/tomcat/webapps" \
   --net=host --env-file=rcenv tomcat:jre21
