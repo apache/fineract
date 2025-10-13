@@ -82,6 +82,7 @@ import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtens
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -1324,14 +1325,27 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
             loanTransactionHelper.printDelinquencyData(getLoansLoanIdResponse);
             GetLoansLoanIdDelinquencySummary delinquent = getLoansLoanIdResponse.getDelinquent();
-            assertEquals(2049.99, Utils.getDoubleValue(delinquent.getDelinquentAmount()));
-            assertEquals(LocalDate.of(2012, 2, 1), delinquent.getDelinquentDate());
-            assertEquals(31, delinquent.getDelinquentDays());
-            assertEquals(2, delinquent.getInstallmentLevelDelinquency().size());
-            GetLoansLoanIdLoanInstallmentLevelDelinquency firstInstallmentDelinquent = delinquent.getInstallmentLevelDelinquency().get(0);
-            assertEquals(BigDecimal.valueOf(1016.66), firstInstallmentDelinquent.getDelinquentAmount().stripTrailingZeros());
-            GetLoansLoanIdLoanInstallmentLevelDelinquency secondInstallmentDelinquent = delinquent.getInstallmentLevelDelinquency().get(1);
-            assertEquals(BigDecimal.valueOf(1033.33), secondInstallmentDelinquent.getDelinquentAmount().stripTrailingZeros());
+
+            SoftAssertions softly = new SoftAssertions();
+            softly.assertThat(Utils.getDoubleValue(delinquent.getDelinquentAmount())).as("Total delinquent amount").isEqualTo(2049.99);
+            softly.assertThat(delinquent.getDelinquentDate()).as("Delinquent date").isEqualTo(LocalDate.of(2012, 2, 1));
+            softly.assertThat(delinquent.getDelinquentDays()).as("Delinquent days").isEqualTo(31);
+
+            // Installment-level delinquency is aggregated by range
+            // Both installments (31 days and 13 days) fall into Range 2 (4-60 days)
+            // So we expect 1 aggregated entry with total amount 2049.99
+            softly.assertThat(delinquent.getInstallmentLevelDelinquency()).as("Installment level delinquency size").hasSize(1);
+
+            if (delinquent.getInstallmentLevelDelinquency().size() >= 1) {
+                GetLoansLoanIdLoanInstallmentLevelDelinquency rangeDelinquency = delinquent.getInstallmentLevelDelinquency().get(0);
+                // This is the aggregated amount for all installments in Range 2 (4-60 days)
+                softly.assertThat(rangeDelinquency.getDelinquentAmount().stripTrailingZeros())
+                        .as("Range 2 (4-60 days) aggregated delinquent amount").isEqualByComparingTo(BigDecimal.valueOf(2049.99));
+                softly.assertThat(rangeDelinquency.getMinimumAgeDays()).as("Range minimum days").isEqualTo(4);
+                softly.assertThat(rangeDelinquency.getMaximumAgeDays()).as("Range maximum days").isEqualTo(60);
+            }
+
+            softly.assertAll();
         });
     }
 
