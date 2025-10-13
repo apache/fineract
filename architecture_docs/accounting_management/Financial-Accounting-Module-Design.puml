@@ -1,0 +1,587 @@
+@startuml Financial-Accounting-Module-Design
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Force top to bottom layout
+top to bottom direction
+
+title Apache Fineract - Financial Accounting Module (Class/Interface Level Design)
+
+' Financial Accounting Module
+Package "org.apache.fineract.accounting" {
+    
+    ' Chart of Accounts Domain
+    Package "glaccount.domain" {
+        
+        ' General Ledger Account Entity
+        Class GLAccount {
+            - Long id
+            - String name
+            - String glCode
+            - Boolean disabled
+            - Boolean manualEntriesAllowed
+            - GLAccountType type
+            - GLAccountUsage usage
+            - String description
+            - String nameDecorated
+            - String tagId
+            - GLAccount parent
+            - Set<GLAccount> children
+            - GLAccountClassification classification
+            - Set<GLAccountClosure> closures
+            --
+            + isHeaderAccount() : Boolean
+            + isDetailAccount() : Boolean
+            + canReceiveManualEntries() : Boolean
+            + isAssetAccount() : Boolean
+            + isLiabilityAccount() : Boolean
+            + isEquityAccount() : Boolean
+            + isIncomeAccount() : Boolean
+            + isExpenseAccount() : Boolean
+            + getAccountTypeEnumValue() : GLAccountType
+            + getUsageEnumValue() : GLAccountUsage
+            + generateHierarchy() : String
+            + validateForUpdate(GLAccountCommand command) : void
+            + validateAccountCodeNotDuplicated(String glCode) : void
+            + addChild(GLAccount child) : void
+            + removeChild(GLAccount child) : void
+            + calculateBalance(LocalDate asOfDate) : Money
+            + getDebitBalance(LocalDate fromDate, LocalDate toDate) : Money
+            + getCreditBalance(LocalDate fromDate, LocalDate toDate) : Money
+            + isValidParentAccount(GLAccount proposedParent) : Boolean
+        }
+        
+        ' GL Account Type Enumeration
+        Enum GLAccountType {
+            ASSET(1, "accountType.asset")
+            LIABILITY(2, "accountType.liability") 
+            EQUITY(3, "accountType.equity")
+            INCOME(4, "accountType.income")
+            EXPENSE(5, "accountType.expense")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer accountType) : GLAccountType
+            + isAsset() : Boolean
+            + isLiability() : Boolean
+            + isEquity() : Boolean
+            + isIncome() : Boolean
+            + isExpense() : Boolean
+            + isDebitType() : Boolean
+            + isCreditType() : Boolean
+        }
+        
+        ' GL Account Usage
+        Enum GLAccountUsage {
+            DETAIL(1, "accountUsage.detail")
+            HEADER(2, "accountUsage.header")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer usage) : GLAccountUsage
+            + isDetailAccount() : Boolean
+            + isHeaderAccount() : Boolean
+        }
+        
+        ' GL Account Classification
+        Enum GLAccountClassification {
+            CURRENT_ASSET(1, "classification.currentAsset")
+            NON_CURRENT_ASSET(2, "classification.nonCurrentAsset")
+            CURRENT_LIABILITY(3, "classification.currentLiability")
+            NON_CURRENT_LIABILITY(4, "classification.nonCurrentLiability")
+            EQUITY_CAPITAL(5, "classification.equityCapital")
+            OPERATING_INCOME(6, "classification.operatingIncome")
+            NON_OPERATING_INCOME(7, "classification.nonOperatingIncome")
+            OPERATING_EXPENSE(8, "classification.operatingExpense")
+            NON_OPERATING_EXPENSE(9, "classification.nonOperatingExpense")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer classification) : GLAccountClassification
+            + isCurrentAsset() : Boolean
+            + isLiability() : Boolean
+            + isEquity() : Boolean
+        }
+    }
+    
+    ' Journal Entry Domain
+    Package "journalentry.domain" {
+        
+        ' Journal Entry Aggregate Root
+        Class JournalEntry {
+            - Long id
+            - Office office
+            - String transactionId
+            - String referenceNumber
+            - LocalDate transactionDate
+            - GLAccount glAccount
+            - JournalEntryType entryType
+            - Money amount
+            - String description
+            - Boolean manualEntry
+            - EntityType entityType
+            - Long entityId
+            - AppUser createdBy
+            - LocalDate createdDate
+            - Boolean reversed
+            - LocalDate reversedOnDate
+            - String comments
+            - Currency currency
+            - Set<JournalEntryIdentifier> compoundEntry
+            --
+            + isDebitEntry() : Boolean
+            + isCreditEntry() : Boolean
+            + isManualEntry() : Boolean
+            + isSystemEntry() : Boolean
+            + isReversed() : Boolean
+            + canBeReversed() : Boolean
+            + reverse(String comments, AppUser reversedBy, LocalDate reversalDate) : JournalEntry
+            + validateTransactionId(String transactionId) : void
+            + validateAmount(Money amount) : void
+            + validateGLAccount(GLAccount account) : void
+            + validateTransactionDate(LocalDate date) : void
+            + isCompoundEntry() : Boolean
+            + getCompoundEntries() : Set<JournalEntry>
+            + linkCompoundEntries(Set<JournalEntry> entries) : void
+            + copyForReversal() : JournalEntry
+        }
+        
+        ' Journal Entry Type
+        Enum JournalEntryType {
+            DEBIT(1, "journalEntryType.debit")
+            CREDIT(2, "journalEntryType.credit")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer entryType) : JournalEntryType
+            + isDebit() : Boolean
+            + isCredit() : Boolean
+        }
+        
+        ' Entity Type for Journal Entries
+        Enum EntityType {
+            CLIENT(1, "entityType.client")
+            LOAN(2, "entityType.loan")
+            SAVINGS_ACCOUNT(3, "entityType.savingsAccount")
+            CENTER(4, "entityType.center")
+            GROUP(5, "entityType.group")
+            LOAN_PRODUCT(6, "entityType.loanProduct")
+            SAVINGS_PRODUCT(7, "entityType.savingsProduct")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer entityType) : EntityType
+        }
+        
+        ' Compound Journal Entry Identifier
+        Class JournalEntryIdentifier {
+            - String transactionId
+            - LocalDate transactionDate
+            - Office office
+            --
+            + getTransactionId() : String
+            + getTransactionDate() : LocalDate
+            + getOffice() : Office
+            + equals(Object obj) : Boolean
+            + hashCode() : Integer
+        }
+    }
+    
+    ' Accounting Rules Domain
+    Package "rule.domain" {
+        
+        ' Accounting Rule
+        Class AccountingRule {
+            - Long id
+            - String name
+            - Office office
+            - Boolean systemDefined
+            - String description
+            - Set<AccountingTagRule> accountingTagRules
+            - Set<CreditAccountRule> creditAccountRules
+            - Set<DebitAccountRule> debitAccountRules
+            --
+            + isSystemDefined() : Boolean
+            + validateRuleIntegrity() : void
+            + getApplicableDebitAccount(AccountingTagRuleData tagData) : GLAccount
+            + getApplicableCreditAccount(AccountingTagRuleData tagData) : GLAccount
+            + createJournalEntries(AccountingRuleData ruleData) : List<JournalEntry>
+        }
+        
+        ' Debit Account Rule
+        Class DebitAccountRule {
+            - Long id
+            - AccountingRule accountingRule
+            - GLAccount account
+            - Set<AccountingTagRule> tags
+            --
+            + getAccount() : GLAccount
+            + getTags() : Set<AccountingTagRule>
+            + matchesTags(Set<AccountingTagRuleData> providedTags) : Boolean
+        }
+        
+        ' Credit Account Rule  
+        Class CreditAccountRule {
+            - Long id
+            - AccountingRule accountingRule
+            - GLAccount account
+            - Set<AccountingTagRule> tags
+            --
+            + getAccount() : GLAccount
+            + getTags() : Set<AccountingTagRule>
+            + matchesTags(Set<AccountingTagRuleData> providedTags) : Boolean
+        }
+        
+        ' Accounting Tag Rule
+        Class AccountingTagRule {
+            - Long id
+            - String tagName
+            - String tagValue
+            - AccountingRule accountingRule
+            --
+            + getTagName() : String
+            + getTagValue() : String
+            + matches(AccountingTagRuleData tagData) : Boolean
+        }
+    }
+    
+    ' Product Mapping Domain
+    Package "producttoaccountmapping.domain" {
+        
+        ' Product to GL Account Mapping
+        Class ProductToGLAccountMapping {
+            - Long id
+            - GLAccount glAccount
+            - Long productId
+            - ProductType productType
+            - PortfolioProductType portfolioProductType
+            - PaymentType paymentType
+            - ChargeTimeType chargeTimeType
+            - GLAccountType glAccountType
+            --
+            + getGLAccount() : GLAccount
+            + getProductId() : Long
+            + getProductType() : ProductType
+            + isLoanProductMapping() : Boolean
+            + isSavingsProductMapping() : Boolean
+            + isChargeMapping() : Boolean
+            + isPaymentTypeMapping() : Boolean
+            + validateMapping() : void
+        }
+        
+        ' Portfolio Product Type
+        Enum PortfolioProductType {
+            LOAN(1, "portfolioProductType.loan")
+            SAVING(2, "portfolioProductType.saving")
+            PROVISIONING(3, "portfolioProductType.provisioning")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer productType) : PortfolioProductType
+        }
+    }
+    
+    ' Accounting Services
+    Package "service" {
+        
+        ' GL Account Service
+        Interface GLAccountWritePlatformService {
+            + createGLAccount(JsonCommand command) : CommandProcessingResult
+            + updateGLAccount(Long glAccountId, JsonCommand command) : CommandProcessingResult
+            + deleteGLAccount(Long glAccountId) : CommandProcessingResult
+        }
+        
+        ' GL Account Service Implementation  
+        Class GLAccountWritePlatformServiceImpl <<Service>> {
+            - GLAccountRepository glAccountRepository
+            - PlatformSecurityContext context
+            - GLAccountCommandFromApiJsonDeserializer fromApiJsonDeserializer
+            - GLAccountDataValidator dataValidator
+            --
+            + createGLAccount(JsonCommand command) : CommandProcessingResult
+            + updateGLAccount(Long glAccountId, JsonCommand command) : CommandProcessingResult
+            + deleteGLAccount(Long glAccountId) : CommandProcessingResult
+            - validateGLAccountForCreate(GLAccount glAccount) : void
+            - validateGLAccountForUpdate(GLAccount glAccount, JsonCommand command) : void
+        }
+        
+        ' Journal Entry Service
+        Interface JournalEntryWritePlatformService {
+            + createJournalEntry(JsonCommand command) : CommandProcessingResult
+            + revertJournalEntry(Long transactionId, JsonCommand command) : CommandProcessingResult
+            + createJournalEntriesForLoan(LoanTransaction loanTransaction) : List<JournalEntry>
+            + createJournalEntriesForSavings(SavingsAccountTransaction savingsTransaction) : List<JournalEntry>
+        }
+        
+        ' Journal Entry Service Implementation
+        Class JournalEntryWritePlatformServiceImpl <<Service>> {
+            - JournalEntryRepository journalEntryRepository
+            - GLAccountRepository glAccountRepository
+            - AccountingProcessorForLoanFactory accountingProcessorForLoanFactory
+            - AccountingProcessorForSavingsFactory accountingProcessorForSavingsFactory
+            - PlatformSecurityContext context
+            - JournalEntryDataValidator dataValidator
+            --
+            + createJournalEntry(JsonCommand command) : CommandProcessingResult
+            + revertJournalEntry(Long transactionId, JsonCommand command) : CommandProcessingResult
+            + createJournalEntriesForLoan(LoanTransaction loanTransaction) : List<JournalEntry>
+            + createJournalEntriesForSavings(SavingsAccountTransaction savingsTransaction) : List<JournalEntry>
+            - validateJournalEntryForCreate(JournalEntry journalEntry) : void
+            - ensureDebitCreditBalance(List<JournalEntry> journalEntries) : void
+        }
+        
+        ' Accounting Processor for Loans
+        Interface AccountingProcessorForLoan {
+            + createJournalEntriesForLoan(LoanDTO loanDTO) : void
+            + createJournalEntriesForRepayments(LoanTransactionDTO loanTransactionDTO) : void
+            + createJournalEntriesForRefund(LoanTransactionDTO loanTransactionDTO) : void
+            + createJournalEntriesForCharges(LoanChargeDTO loanChargeDTO) : void
+        }
+        
+        ' Cash Based Accounting Processor
+        Class CashBasedAccountingProcessorForLoan <<Service>> {
+            - GLAccountRepository glAccountRepository
+            - JournalEntryWritePlatformService journalEntryWritePlatformService
+            - AccountingProcessorHelper helper
+            --
+            + createJournalEntriesForLoan(LoanDTO loanDTO) : void
+            + createJournalEntriesForRepayments(LoanTransactionDTO loanTransactionDTO) : void
+            + createJournalEntriesForRefund(LoanTransactionDTO loanTransactionDTO) : void
+            + createJournalEntriesForCharges(LoanChargeDTO loanChargeDTO) : void
+            - createDebitJournalEntryForAsset(GLAccount account, Money amount, String transactionId) : JournalEntry
+            - createCreditJournalEntryForLiability(GLAccount account, Money amount, String transactionId) : JournalEntry
+        }
+        
+        ' Accrual Based Accounting Processor
+        Class AccrualBasedAccountingProcessorForLoan <<Service>> {
+            - GLAccountRepository glAccountRepository
+            - JournalEntryWritePlatformService journalEntryWritePlatformService
+            - AccountingProcessorHelper helper
+            --
+            + createJournalEntriesForLoan(LoanDTO loanDTO) : void
+            + createJournalEntriesForRepayments(LoanTransactionDTO loanTransactionDTO) : void
+            + createJournalEntriesForRefund(LoanTransactionDTO loanTransactionDTO) : void
+            + createJournalEntriesForCharges(LoanChargeDTO loanChargeDTO) : void
+            - createAccrualJournalEntries(LoanTransactionDTO loanTransactionDTO) : void
+            - reverseAccrualJournalEntries(LoanTransactionDTO loanTransactionDTO) : void
+        }
+        
+        ' Accounting Processor Helper
+        Class AccountingProcessorHelper {
+            - GLAccountRepository glAccountRepository
+            - ProductToGLAccountMappingRepository productMappingRepository
+            --
+            + getLoanProductToGLAccountMapping(Long productId, Integer paymentTypeId) : Map<String, GLAccount>
+            + getSavingsProductToGLAccountMapping(Long productId, Integer paymentTypeId) : Map<String, GLAccount>
+            + createJournalEntriesForAsset(GLAccount account, Money amount, String transactionId) : JournalEntry
+            + createJournalEntriesForLiability(GLAccount account, Money amount, String transactionId) : JournalEntry
+            + createJournalEntriesForIncome(GLAccount account, Money amount, String transactionId) : JournalEntry
+            + createJournalEntriesForExpense(GLAccount account, Money amount, String transactionId) : JournalEntry
+        }
+        
+        ' Accounting Rules Service
+        Interface AccountingRuleWritePlatformService {
+            + createAccountingRule(JsonCommand command) : CommandProcessingResult
+            + updateAccountingRule(Long ruleId, JsonCommand command) : CommandProcessingResult
+            + deleteAccountingRule(Long ruleId) : CommandProcessingResult
+        }
+    }
+    
+    ' Accounting Repositories
+    Package "repository" {
+        
+        ' GL Account Repository
+        Interface GLAccountRepository <<Repository>> {
+            + findByGlCode(String glCode) : Optional<GLAccount>
+            + findByName(String name) : Optional<GLAccount>
+            + findByParentId(Long parentId) : List<GLAccount>
+            + findByType(GLAccountType type) : List<GLAccount>
+            + findByUsage(GLAccountUsage usage) : List<GLAccount>
+            + findHeaderAccounts() : List<GLAccount>
+            + findDetailAccounts() : List<GLAccount>
+            + findAssetAccounts() : List<GLAccount>
+            + findLiabilityAccounts() : List<GLAccount>
+            + findIncomeAccounts() : List<GLAccount>
+            + findExpenseAccounts() : List<GLAccount>
+        }
+        
+        ' Journal Entry Repository
+        Interface JournalEntryRepository <<Repository>> {
+            + findByTransactionId(String transactionId) : List<JournalEntry>
+            + findByGLAccount(GLAccount glAccount) : List<JournalEntry>
+            + findByDateRange(LocalDate fromDate, LocalDate toDate) : List<JournalEntry>
+            + findByOfficeAndDateRange(Office office, LocalDate fromDate, LocalDate toDate) : List<JournalEntry>
+            + findByEntityTypeAndEntityId(EntityType entityType, Long entityId) : List<JournalEntry>
+            + findCompoundEntries(String transactionId) : List<JournalEntry>
+            + findReversedEntries() : List<JournalEntry>
+            + getTotalDebitsByAccount(GLAccount account, LocalDate fromDate, LocalDate toDate) : BigDecimal
+            + getTotalCreditsByAccount(GLAccount account, LocalDate fromDate, LocalDate toDate) : BigDecimal
+        }
+        
+        ' Product to GL Account Mapping Repository
+        Interface ProductToGLAccountMappingRepository <<Repository>> {
+            + findByProductId(Long productId) : List<ProductToGLAccountMapping>
+            + findByProductIdAndProductType(Long productId, PortfolioProductType productType) : List<ProductToGLAccountMapping>
+            + findByGLAccount(GLAccount glAccount) : List<ProductToGLAccountMapping>
+        }
+        
+        ' Accounting Rule Repository
+        Interface AccountingRuleRepository <<Repository>> {
+            + findByName(String name) : Optional<AccountingRule>
+            + findByOffice(Office office) : List<AccountingRule>
+            + findSystemDefinedRules() : List<AccountingRule>
+        }
+    }
+    
+    ' Financial Reports
+    Package "reports" {
+        
+        ' Trial Balance Report
+        Class TrialBalanceReport {
+            - LocalDate asOfDate
+            - Office office
+            - List<TrialBalanceEntry> entries
+            --
+            + generate(LocalDate asOfDate, Office office) : TrialBalanceReport
+            + getTotalDebits() : Money
+            + getTotalCredits() : Money
+            + isBalanced() : Boolean
+            + getEntries() : List<TrialBalanceEntry>
+        }
+        
+        ' Trial Balance Entry
+        Class TrialBalanceEntry {
+            - GLAccount account
+            - Money debitAmount
+            - Money creditAmount
+            - Money balance
+            --
+            + getAccount() : GLAccount
+            + getDebitAmount() : Money
+            + getCreditAmount() : Money
+            + getBalance() : Money
+            + isDebitBalance() : Boolean
+            + isCreditBalance() : Boolean
+        }
+        
+        ' Profit and Loss Report
+        Class ProfitAndLossReport {
+            - LocalDate fromDate
+            - LocalDate toDate
+            - Office office
+            - Money totalIncome
+            - Money totalExpense
+            - Money netIncome
+            --
+            + generate(LocalDate fromDate, LocalDate toDate, Office office) : ProfitAndLossReport
+            + getTotalIncome() : Money
+            + getTotalExpense() : Money
+            + getNetIncome() : Money
+            + getIncomeEntries() : List<AccountBalanceEntry>
+            + getExpenseEntries() : List<AccountBalanceEntry>
+        }
+        
+        ' Balance Sheet Report
+        Class BalanceSheetReport {
+            - LocalDate asOfDate
+            - Office office
+            - Money totalAssets
+            - Money totalLiabilities
+            - Money totalEquity
+            --
+            + generate(LocalDate asOfDate, Office office) : BalanceSheetReport
+            + getTotalAssets() : Money
+            + getTotalLiabilities() : Money
+            + getTotalEquity() : Money
+            + isBalanced() : Boolean
+            + getAssetEntries() : List<AccountBalanceEntry>
+            + getLiabilityEntries() : List<AccountBalanceEntry>
+            + getEquityEntries() : List<AccountBalanceEntry>
+        }
+        
+        ' Account Balance Entry
+        Class AccountBalanceEntry {
+            - GLAccount account
+            - Money balance
+            --
+            + getAccount() : GLAccount
+            + getBalance() : Money
+        }
+    }
+}
+
+' Relationships
+GLAccount --> GLAccountType : "has type"
+GLAccount --> GLAccountUsage : "has usage"
+GLAccount --> GLAccountClassification : "classified as"
+JournalEntry --> JournalEntryType : "has type"
+JournalEntry --> EntityType : "relates to"
+JournalEntry --> GLAccount : "posted to"
+
+GLAccountWritePlatformServiceImpl ..|> GLAccountWritePlatformService : "implements"
+JournalEntryWritePlatformServiceImpl ..|> JournalEntryWritePlatformService : "implements"
+CashBasedAccountingProcessorForLoan ..|> AccountingProcessorForLoan : "implements"
+AccrualBasedAccountingProcessorForLoan ..|> AccountingProcessorForLoan : "implements"
+
+GLAccountWritePlatformServiceImpl --> GLAccountRepository : "uses"
+JournalEntryWritePlatformServiceImpl --> JournalEntryRepository : "uses"
+AccountingProcessorHelper --> ProductToGLAccountMappingRepository : "uses"
+
+SHOW_LEGEND()
+
+note top of GLAccount
+**Chart of Accounts**
+• Hierarchical account structure
+• Asset, Liability, Equity, Income, Expense types
+• Manual and system entries
+• Balance calculations
+• Account validations
+end note
+
+note right of JournalEntry
+**Double-Entry Bookkeeping**
+• Debit and credit entries
+• Compound transactions
+• Reversal capabilities
+• Entity linking
+• Audit trail
+end note
+
+note bottom of AccountingProcessorForLoan
+**Automated Accounting**
+• Cash-based accounting
+• Accrual-based accounting
+• Product-to-account mapping
+• Transaction-driven entries
+• Compliance automation
+end note
+
+note left of TrialBalanceReport
+**Financial Reporting**
+• Trial Balance validation
+• Profit & Loss statements
+• Balance Sheet generation
+• Multi-office support
+• Date range flexibility
+end note
+
+@enduml

@@ -1,0 +1,621 @@
+@startuml Charge-Management-Module-Design
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Force top to bottom layout
+top to bottom direction
+
+title Apache Fineract - Charge Management Module (Class/Interface Level Design)
+
+' Charge Management Module
+Package "org.apache.fineract.portfolio.charge" {
+    
+    ' Charge Domain Model
+    Package "domain" {
+        
+        ' Core Charge Entity
+        Class Charge {
+            - Long id
+            - String name
+            - ChargeTimeType chargeTimeType
+            - ChargeAppliesTo chargeAppliesTo
+            - ChargeCalculationType chargeCalculationType
+            - ChargePaymentMode chargePaymentMode
+            - BigDecimal amount
+            - MonetaryCurrency currency
+            - Boolean penalty
+            - Boolean active
+            - Boolean deleted
+            - Set<ChargeToGLAccountMapping> chargeToGLAccountMappings
+            - FeeFrequency feeFrequency
+            - Integer feeInterval
+            - FeeOnMonthDay feeOnMonthDay
+            - Integer minCap
+            - Integer maxCap
+            - Boolean enableFreeWithdrawal
+            - Integer freeWithdrawalChargeFrequency
+            - Integer restartFrequency
+            - Integer restartFrequencyEnum
+            - CountryCode countryCode
+            --
+            + isLoanCharge() : Boolean
+            + isSavingsCharge() : Boolean
+            + isClientCharge() : Boolean
+            + isSharesCharge() : Boolean
+            + isPenalty() : Boolean
+            + isFee() : Boolean
+            + isActive() : Boolean
+            + isPercentageOfAmount() : Boolean
+            + isPercentageOfAmountAndInterest() : Boolean
+            + isPercentageOfInterest() : Boolean
+            + isFlatFee() : Boolean
+            + isPercentageOfDisbursementAmount() : Boolean
+            + isSpecifiedDueDate() : Boolean
+            + isDisbursementCharge() : Boolean
+            + isInstallmentFee() : Boolean
+            + isOverdueInstallment() : Boolean
+            + isWeeklyFee() : Boolean
+            + isMonthlyFee() : Boolean
+            + isAnnualFee() : Boolean
+            + isWithdrawalFee() : Boolean
+            + isAnnualFee() : Boolean
+            + isMonthlyFee() : Boolean
+            + isOverdraftFee() : Boolean
+            + isDisbursementCharge() : Boolean
+            + chargeAmount() : BigDecimal
+            + getAmount() : BigDecimal
+            + getChargeTimeType() : ChargeTimeType
+            + getChargeCalculationType() : ChargeCalculationType
+            + getChargePaymentMode() : ChargePaymentMode
+            + calculateChargeAmount(Money principalAmount, Money interestAmount) : Money
+            + calculateFlatChargeAmount() : Money
+            + calculatePercentageChargeAmount(Money baseAmount) : Money
+            + validateChargeTimeTypeForLoan() : void
+            + validateChargeTimeTypeForSavings() : void
+            + validateChargeCalculationType() : void
+            + validateAmount(BigDecimal amount) : void
+            + update(ChargeCommand command) : Map<String, Object>
+            + delete() : void
+            + activate() : void
+            + deactivate() : void
+        }
+        
+        ' Charge Time Type - When charge is applied
+        Enum ChargeTimeType {
+            INVALID(0, "chargeTimeType.invalid")
+            DISBURSEMENT(1, "chargeTimeType.disbursement")
+            SPECIFIED_DUE_DATE(2, "chargeTimeType.specifiedDueDate")
+            SAVINGS_ACTIVATION(3, "chargeTimeType.savingsActivation")
+            SAVINGS_CLOSURE(4, "chargeTimeType.savingsClosure")
+            WITHDRAWAL_FEE(5, "chargeTimeType.withdrawalFee")
+            ANNUAL_FEE(6, "chargeTimeType.annualFee")
+            MONTHLY_FEE(7, "chargeTimeType.monthlyFee")
+            INSTALLMENT_FEE(8, "chargeTimeType.installmentFee")
+            OVERDUE_INSTALLMENT(9, "chargeTimeType.overdueInstallment")
+            OVERDRAFT_FEE(10, "chargeTimeType.overdraftFee")
+            WEEKLY_FEE(11, "chargeTimeType.weeklyFee")
+            SHARE_ACCOUNT_ACTIVATE(12, "chargeTimeType.activation")
+            SHARE_PURCHASE(13, "chargeTimeType.sharepurchase")
+            SHARE_REDEEM(14, "chargeTimeType.shareredeem")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer chargeTime) : ChargeTimeType
+            + isTimeOfDisbursement() : Boolean
+            + isSpecifiedDueDate() : Boolean
+            + isSavingsActivation() : Boolean
+            + isSavingsClosure() : Boolean
+            + isWithdrawalFee() : Boolean
+            + isAnnualFee() : Boolean
+            + isMonthlyFee() : Boolean
+            + isWeeklyFee() : Boolean
+            + isInstallmentFee() : Boolean
+            + isOverdueInstallment() : Boolean
+            + isOverdraftFee() : Boolean
+            + isAllowedLoanChargeTime() : Boolean
+            + isAllowedSavingsChargeTime() : Boolean
+            + isAllowedShareChargeTime() : Boolean
+            + isAllowedClientChargeTime() : Boolean
+        }
+        
+        ' Charge Applies To - What entity the charge applies to
+        Enum ChargeAppliesTo {
+            INVALID(0, "chargeAppliesTo.invalid")
+            LOAN(1, "chargeAppliesTo.loan")
+            SAVINGS(2, "chargeAppliesTo.savings")
+            CLIENT(3, "chargeAppliesTo.client")
+            SHARES(4, "chargeAppliesTo.shares")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer appliesTo) : ChargeAppliesTo
+            + isLoanCharge() : Boolean
+            + isSavingsCharge() : Boolean
+            + isClientCharge() : Boolean
+            + isSharesCharge() : Boolean
+        }
+        
+        ' Charge Calculation Type - How charge amount is calculated
+        Enum ChargeCalculationType {
+            INVALID(0, "chargeCalculationType.invalid")
+            FLAT(1, "chargeCalculationType.flat")
+            PERCENT_OF_AMOUNT(2, "chargeCalculationType.percent.of.amount")
+            PERCENT_OF_AMOUNT_AND_INTEREST(3, "chargeCalculationType.percent.of.amount.and.interest")
+            PERCENT_OF_INTEREST(4, "chargeCalculationType.percent.of.interest")
+            PERCENT_OF_DISBURSEMENT_AMOUNT(5, "chargeCalculationType.percent.of.disbursement.amount")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer calculationType) : ChargeCalculationType
+            + isPercentageOfAmount() : Boolean
+            + isPercentageOfAmountAndInterest() : Boolean
+            + isPercentageOfInterest() : Boolean
+            + isFlatFee() : Boolean
+            + isPercentageOfDisbursementAmount() : Boolean
+            + isAllowedForLoanCharge() : Boolean
+            + isAllowedForSavingsCharge() : Boolean
+        }
+        
+        ' Charge Payment Mode - How charge is paid
+        Enum ChargePaymentMode {
+            INVALID(0, "chargePaymentMode.invalid")
+            REGULAR(1, "chargePaymentMode.regular")
+            ACCOUNT_TRANSFER(2, "chargePaymentMode.account.transfer")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer paymentMode) : ChargePaymentMode
+            + isPaymentModeRegular() : Boolean
+            + isPaymentModeAccountTransfer() : Boolean
+        }
+        
+        ' Fee Frequency - How often recurring charges occur
+        Enum FeeFrequency {
+            INVALID(0, "feeFrequency.invalid")
+            WEEKLY(1, "feeFrequency.weekly")
+            MONTHLY(2, "feeFrequency.monthly")
+            QUARTERLY(3, "feeFrequency.quarterly")
+            ANNUALLY(4, "feeFrequency.annually")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer frequency) : FeeFrequency
+            + isWeekly() : Boolean
+            + isMonthly() : Boolean
+            + isQuarterly() : Boolean
+            + isAnnually() : Boolean
+        }
+        
+        ' Fee on Month Day - Specific day of month for monthly fees
+        Class FeeOnMonthDay {
+            - Integer dayOfMonth
+            --
+            + getDayOfMonth() : Integer
+            + isValidDay() : Boolean
+            + getNextOccurrence(LocalDate fromDate) : LocalDate
+            + isApplicableOn(LocalDate date) : Boolean
+        }
+        
+        ' Charge to GL Account Mapping
+        Class ChargeToGLAccountMapping {
+            - Long id
+            - Charge charge
+            - GLAccount glAccount
+            --
+            + getCharge() : Charge
+            + getGLAccount() : GLAccount
+            + isValidMapping() : Boolean
+        }
+    }
+    
+    ' Charge Services
+    Package "service" {
+        
+        ' Charge Write Platform Service
+        Interface ChargeWritePlatformService {
+            + createCharge(JsonCommand command) : CommandProcessingResult
+            + updateCharge(Long chargeId, JsonCommand command) : CommandProcessingResult
+            + deleteCharge(Long chargeId, JsonCommand command) : CommandProcessingResult
+        }
+        
+        ' Charge Write Platform Service Implementation
+        Class ChargeWritePlatformServiceImpl <<Service>> {
+            - PlatformSecurityContext context
+            - ChargeRepository chargeRepository
+            - ChargeDataValidator fromApiJsonDeserializer
+            - ChargeAssembler chargeAssembler
+            --
+            + createCharge(JsonCommand command) : CommandProcessingResult
+            + updateCharge(Long chargeId, JsonCommand command) : CommandProcessingResult
+            + deleteCharge(Long chargeId, JsonCommand command) : CommandProcessingResult
+            - validateChargeForCreate(Charge charge) : void
+            - validateChargeForUpdate(Charge existingCharge, JsonCommand command) : void
+            - checkIfChargeCanBeDeleted(Charge charge) : void
+        }
+        
+        ' Charge Read Platform Service
+        Interface ChargeReadPlatformService {
+            + retrieveCharge(Long chargeId) : ChargeData
+            + retrieveAllCharges() : Collection<ChargeData>
+            + retrieveLoanCharges() : Collection<ChargeData>
+            + retrieveSavingsCharges() : Collection<ChargeData>
+            + retrieveClientCharges() : Collection<ChargeData>
+            + retrieveShareCharges() : Collection<ChargeData>
+            + retrieveChargeTemplate() : ChargeData
+            + retrieveLoanChargeTemplate() : ChargeData
+            + retrieveSavingsChargeTemplate() : ChargeData
+        }
+        
+        ' Charge Read Platform Service Implementation
+        Class ChargeReadPlatformServiceImpl <<Service>> {
+            - JdbcTemplate jdbcTemplate
+            - PlatformSecurityContext context
+            - ChargeDropdownReadPlatformService chargeDropdownReadPlatformService
+            --
+            + retrieveCharge(Long chargeId) : ChargeData
+            + retrieveAllCharges() : Collection<ChargeData>
+            + retrieveLoanCharges() : Collection<ChargeData>
+            + retrieveSavingsCharges() : Collection<ChargeData>
+            + retrieveClientCharges() : Collection<ChargeData>
+            + retrieveShareCharges() : Collection<ChargeData>
+            + retrieveChargeTemplate() : ChargeData
+            + retrieveLoanChargeTemplate() : ChargeData
+            + retrieveSavingsChargeTemplate() : ChargeData
+            - mapRowToChargeData(ResultSet rs) : ChargeData
+            - extractChargeTemplateData() : ChargeData
+        }
+        
+        ' Charge Calculation Service
+        Interface ChargeCalculationService {
+            + calculateChargeAmount(Charge charge, Money baseAmount) : Money
+            + calculateChargeAmount(Charge charge, Money principalAmount, Money interestAmount) : Money
+            + calculateLoanChargeAmount(Charge charge, Money loanAmount) : Money
+            + calculateSavingsChargeAmount(Charge charge, Money savingsBalance) : Money
+            + calculateInstallmentChargeAmount(Charge charge, Money installmentAmount) : Money
+            + calculateOverdueChargeAmount(Charge charge, Money overdueAmount, Integer daysOverdue) : Money
+            + calculateWithdrawalFee(Charge charge, Money withdrawalAmount) : Money
+            + isChargeApplicable(Charge charge, LocalDate applicationDate) : Boolean
+        }
+        
+        ' Charge Calculation Service Implementation
+        Class ChargeCalculationServiceImpl <<Service>> {
+            - MathContext mathContext
+            --
+            + calculateChargeAmount(Charge charge, Money baseAmount) : Money
+            + calculateChargeAmount(Charge charge, Money principalAmount, Money interestAmount) : Money
+            + calculateLoanChargeAmount(Charge charge, Money loanAmount) : Money
+            + calculateSavingsChargeAmount(Charge charge, Money savingsBalance) : Money
+            + calculateInstallmentChargeAmount(Charge charge, Money installmentAmount) : Money
+            + calculateOverdueChargeAmount(Charge charge, Money overdueAmount, Integer daysOverdue) : Money
+            + calculateWithdrawalFee(Charge charge, Money withdrawalAmount) : Money
+            + isChargeApplicable(Charge charge, LocalDate applicationDate) : Boolean
+            - calculateFlatAmount(Charge charge, MonetaryCurrency currency) : Money
+            - calculatePercentageAmount(Charge charge, Money baseAmount) : Money
+            - applyMinMaxCap(Money calculatedAmount, Charge charge) : Money
+            - roundChargeAmount(Money amount, MathContext mathContext) : Money
+        }
+        
+        ' Charge Application Service
+        Interface ChargeApplicationService {
+            + applyChargeToLoan(Long loanId, Long chargeId, ChargeApplicationData applicationData) : CommandProcessingResult
+            + applyChargeToSavingsAccount(Long savingsId, Long chargeId, ChargeApplicationData applicationData) : CommandProcessingResult
+            + applyChargeToClient(Long clientId, Long chargeId, ChargeApplicationData applicationData) : CommandProcessingResult
+            + applyChargeToShareAccount(Long shareAccountId, Long chargeId, ChargeApplicationData applicationData) : CommandProcessingResult
+            + waiveCharge(Long entityId, Long chargeId, EntityType entityType) : CommandProcessingResult
+            + payCharge(Long entityId, Long chargeId, EntityType entityType, ChargePaymentData paymentData) : CommandProcessingResult
+        }
+        
+        ' Charge Application Service Implementation
+        Class ChargeApplicationServiceImpl <<Service>> {
+            - ChargeRepository chargeRepository
+            - LoanRepository loanRepository
+            - SavingsAccountRepository savingsAccountRepository
+            - ClientRepository clientRepository
+            - ChargeCalculationService chargeCalculationService
+            - LoanChargeAssembler loanChargeAssembler
+            - SavingsAccountChargeAssembler savingsChargeAssembler
+            - PlatformSecurityContext context
+            --
+            + applyChargeToLoan(Long loanId, Long chargeId, ChargeApplicationData applicationData) : CommandProcessingResult
+            + applyChargeToSavingsAccount(Long savingsId, Long chargeId, ChargeApplicationData applicationData) : CommandProcessingResult
+            + applyChargeToClient(Long clientId, Long chargeId, ChargeApplicationData applicationData) : CommandProcessingResult
+            + applyChargeToShareAccount(Long shareAccountId, Long chargeId, ChargeApplicationData applicationData) : CommandProcessingResult
+            + waiveCharge(Long entityId, Long chargeId, EntityType entityType) : CommandProcessingResult
+            + payCharge(Long entityId, Long chargeId, EntityType entityType, ChargePaymentData paymentData) : CommandProcessingResult
+            - validateChargeApplication(Charge charge, Object entity, ChargeApplicationData applicationData) : void
+            - createLoanCharge(Loan loan, Charge charge, ChargeApplicationData applicationData) : LoanCharge
+            - createSavingsCharge(SavingsAccount account, Charge charge, ChargeApplicationData applicationData) : SavingsAccountCharge
+        }
+        
+        ' Recurring Charge Processing Service
+        Interface RecurringChargeProcessingService {
+            + processRecurringCharges(LocalDate businessDate) : void
+            + processMonthlyCharges(LocalDate businessDate) : List<Long>
+            + processWeeklyCharges(LocalDate businessDate) : List<Long>
+            + processAnnualCharges(LocalDate businessDate) : List<Long>
+            + processOverdueCharges(LocalDate businessDate) : List<Long>
+            + scheduleNextOccurrence(Charge charge, LocalDate currentDate) : LocalDate
+        }
+        
+        ' Recurring Charge Processing Implementation
+        Class RecurringChargeProcessingServiceImpl <<Service>> {
+            - ChargeRepository chargeRepository
+            - LoanRepository loanRepository
+            - SavingsAccountRepository savingsAccountRepository
+            - ChargeApplicationService chargeApplicationService
+            - ChargeCalculationService chargeCalculationService
+            - ConfigurationDomainService configurationService
+            --
+            + processRecurringCharges(LocalDate businessDate) : void
+            + processMonthlyCharges(LocalDate businessDate) : List<Long>
+            + processWeeklyCharges(LocalDate businessDate) : List<Long>
+            + processAnnualCharges(LocalDate businessDate) : List<Long>
+            + processOverdueCharges(LocalDate businessDate) : List<Long>
+            + scheduleNextOccurrence(Charge charge, LocalDate currentDate) : LocalDate
+            - findAccountsForChargeApplication(Charge charge, LocalDate applicationDate) : List<Object>
+            - applyRecurringCharge(Object account, Charge charge, LocalDate applicationDate) : void
+            - calculateNextMonthlyOccurrence(Charge charge, LocalDate currentDate) : LocalDate
+            - calculateNextWeeklyOccurrence(Charge charge, LocalDate currentDate) : LocalDate
+            - calculateNextAnnualOccurrence(Charge charge, LocalDate currentDate) : LocalDate
+        }
+    }
+    
+    ' Charge Repositories
+    Package "repository" {
+        
+        ' Charge Repository
+        Interface ChargeRepository <<Repository>> {
+            + findByName(String chargeName) : Optional<Charge>
+            + findActiveCharges() : List<Charge>
+            + findLoanCharges() : List<Charge>
+            + findSavingsCharges() : List<Charge>
+            + findClientCharges() : List<Charge>
+            + findShareCharges() : List<Charge>
+            + findChargesByTimeType(ChargeTimeType chargeTimeType) : List<Charge>
+            + findChargesByCalculationType(ChargeCalculationType calculationType) : List<Charge>
+            + findRecurringCharges() : List<Charge>
+            + findChargesForProcessing(ChargeTimeType timeType, LocalDate applicationDate) : List<Charge>
+            + countChargesInUse(Long chargeId) : Integer
+        }
+        
+        ' Charge to GL Account Mapping Repository
+        Interface ChargeToGLAccountMappingRepository <<Repository>> {
+            + findByCharge(Charge charge) : List<ChargeToGLAccountMapping>
+            + findByGLAccount(GLAccount glAccount) : List<ChargeToGLAccountMapping>
+            + findByChargeAndGLAccount(Charge charge, GLAccount glAccount) : Optional<ChargeToGLAccountMapping>
+        }
+    }
+    
+    ' Charge Validation
+    Package "validation" {
+        
+        ' Charge Data Validator
+        Class ChargeDataValidator {
+            - FromJsonHelper fromApiJsonHelper
+            --
+            + validateForCreate(String json) : void
+            + validateForUpdate(String json, Charge existingCharge) : void
+            + validateChargeTimeType(ChargeTimeType chargeTimeType, ChargeAppliesTo chargeAppliesTo) : void
+            + validateChargeCalculationType(ChargeCalculationType calculationType, ChargeAppliesTo chargeAppliesTo) : void
+            + validateChargePaymentMode(ChargePaymentMode paymentMode, ChargeAppliesTo chargeAppliesTo) : void
+            + validateAmount(BigDecimal amount, ChargeCalculationType calculationType) : void
+            + validateFeeFrequency(FeeFrequency feeFrequency, ChargeTimeType chargeTimeType) : void
+            + validateMinMaxCap(Integer minCap, Integer maxCap) : void
+            - validateCommonParameters(JsonElement element) : void
+            - validateChargeAppliesTo(JsonElement element) : void
+            - validateCurrencyCode(JsonElement element) : void
+            - performDataIntegrityChecks(JsonElement element) : void
+        }
+        
+        ' Charge Application Validator
+        Class ChargeApplicationValidator {
+            - ChargeRepository chargeRepository
+            --
+            + validateChargeApplication(Charge charge, Object entity, ChargeApplicationData applicationData) : void
+            + validateLoanChargeApplication(Charge charge, Loan loan, ChargeApplicationData applicationData) : void
+            + validateSavingsChargeApplication(Charge charge, SavingsAccount account, ChargeApplicationData applicationData) : void
+            + validateChargeAmount(Money chargeAmount, Charge charge) : void
+            + validateApplicationDate(LocalDate applicationDate, Charge charge, Object entity) : void
+            - validateEntityStatus(Object entity) : void
+            - validateChargeCompatibility(Charge charge, Object entity) : void
+        }
+    }
+    
+    ' Charge Events
+    Package "events" {
+        
+        ' Charge Created Event
+        Class ChargeCreatedEvent {
+            - Long chargeId
+            - String chargeName
+            - ChargeAppliesTo appliesTo
+            - ChargeTimeType timeType
+            - BigDecimal amount
+            --
+            + getChargeId() : Long
+            + getChargeName() : String
+            + getAppliesTo() : ChargeAppliesTo
+            + getTimeType() : ChargeTimeType
+            + getAmount() : BigDecimal
+        }
+        
+        ' Charge Applied Event
+        Class ChargeAppliedEvent {
+            - Long chargeId
+            - Long entityId
+            - EntityType entityType
+            - Money appliedAmount
+            - LocalDate applicationDate
+            --
+            + getChargeId() : Long
+            + getEntityId() : Long
+            + getEntityType() : EntityType
+            + getAppliedAmount() : Money
+            + getApplicationDate() : LocalDate
+        }
+        
+        ' Charge Waived Event
+        Class ChargeWaivedEvent {
+            - Long chargeId
+            - Long entityId
+            - EntityType entityType
+            - Money waivedAmount
+            - LocalDate waiverDate
+            - String reason
+            --
+            + getChargeId() : Long
+            + getEntityId() : Long
+            + getEntityType() : EntityType
+            + getWaivedAmount() : Money
+            + getWaiverDate() : LocalDate
+            + getReason() : String
+        }
+        
+        ' Charge Paid Event
+        Class ChargePaidEvent {
+            - Long chargeId
+            - Long entityId
+            - EntityType entityType
+            - Money paidAmount
+            - LocalDate paymentDate
+            - PaymentDetail paymentDetail
+            --
+            + getChargeId() : Long
+            + getEntityId() : Long
+            + getEntityType() : EntityType
+            + getPaidAmount() : Money
+            + getPaymentDate() : LocalDate
+            + getPaymentDetail() : PaymentDetail
+        }
+    }
+    
+    ' DTOs and Data Classes
+    Package "data" {
+        
+        ' Charge Application Data
+        Class ChargeApplicationData {
+            - LocalDate applicationDate
+            - BigDecimal amount
+            - LocalDate dueDate
+            - String locale
+            - String dateFormat
+            --
+            + getApplicationDate() : LocalDate
+            + getAmount() : BigDecimal
+            + getDueDate() : LocalDate
+            + getLocale() : String
+            + getDateFormat() : String
+        }
+        
+        ' Charge Payment Data
+        Class ChargePaymentData {
+            - Money paymentAmount
+            - LocalDate paymentDate
+            - PaymentDetail paymentDetail
+            - String transactionId
+            --
+            + getPaymentAmount() : Money
+            + getPaymentDate() : LocalDate
+            + getPaymentDetail() : PaymentDetail
+            + getTransactionId() : String
+        }
+        
+        ' Charge Data
+        Class ChargeData {
+            - Long id
+            - String name
+            - Boolean active
+            - Boolean penalty
+            - ChargeTimeType chargeTimeType
+            - ChargeAppliesTo chargeAppliesTo
+            - ChargeCalculationType chargeCalculationType
+            - ChargePaymentMode chargePaymentMode
+            - BigDecimal amount
+            - String currencyCode
+            --
+            + getId() : Long
+            + getName() : String
+            + isActive() : Boolean
+            + isPenalty() : Boolean
+            + getChargeTimeType() : ChargeTimeType
+            + getChargeAppliesTo() : ChargeAppliesTo
+            + getChargeCalculationType() : ChargeCalculationType
+            + getAmount() : BigDecimal
+        }
+    }
+}
+
+' Relationships
+Charge --> ChargeTimeType : "applied at"
+Charge --> ChargeAppliesTo : "applies to"
+Charge --> ChargeCalculationType : "calculated by"
+Charge --> ChargePaymentMode : "paid via"
+Charge --> FeeFrequency : "occurs with"
+Charge --> ChargeToGLAccountMapping : "mapped to"
+
+ChargeWritePlatformServiceImpl ..|> ChargeWritePlatformService : "implements"
+ChargeReadPlatformServiceImpl ..|> ChargeReadPlatformService : "implements"
+ChargeCalculationServiceImpl ..|> ChargeCalculationService : "implements"
+ChargeApplicationServiceImpl ..|> ChargeApplicationService : "implements"
+RecurringChargeProcessingServiceImpl ..|> RecurringChargeProcessingService : "implements"
+
+ChargeWritePlatformServiceImpl --> ChargeRepository : "uses"
+ChargeReadPlatformServiceImpl --> ChargeRepository : "reads from"
+ChargeApplicationServiceImpl --> ChargeCalculationService : "uses"
+RecurringChargeProcessingServiceImpl --> ChargeApplicationService : "uses"
+
+SHOW_LEGEND()
+
+note top of Charge
+**Flexible Charge Engine**
+• Multiple charge types & timing
+• Percentage and flat fee calculations
+• Recurring charge support
+• Min/max caps and free withdrawals
+• Multi-entity application (Loan/Savings/Client)
+end note
+
+note right of ChargeCalculationService
+**Advanced Calculations**
+• Multiple calculation methods
+• Percentage-based charges
+• Compound interest support
+• Min/max capping
+• Precision arithmetic
+end note
+
+note bottom of RecurringChargeProcessingService
+**Automated Processing**
+• Scheduled charge application
+• Monthly, weekly, annual cycles
+• Overdue charge handling
+• Batch processing support
+• Configuration-driven timing
+end note
+
+note left of ChargeApplicationService
+**Multi-Entity Support**
+• Loan charge application
+• Savings fee processing
+• Client charge management
+• Share account fees
+• Waiver and payment processing
+end note
+
+@enduml

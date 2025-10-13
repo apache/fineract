@@ -1,0 +1,583 @@
+@startuml Command-Framework-Module-Design
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Force top to bottom layout
+top to bottom direction
+
+title Apache Fineract - Command Framework Module (Class/Interface Level Design)
+
+' Command Framework Module
+Package "org.apache.fineract.commands" {
+    
+    ' Command Domain Model
+    Package "domain" {
+        
+        ' Core Command Entity
+        Class CommandWrapper {
+            - Long commandId
+            - String actionName
+            - String entityName
+            - Long entityId
+            - Long subentityId
+            - String href
+            - String json
+            - String transactionId
+            - Long productId
+            - Long officeId
+            - Long groupId
+            - Long clientId
+            - Long loanId
+            - Long savingsId
+            - String idempotencyKey
+            --
+            + getCommandId() : Long
+            + getActionName() : String
+            + getEntityName() : String
+            + getEntityId() : Long
+            + getSubentityId() : Long
+            + getHref() : String
+            + getJson() : String
+            + getTransactionId() : String
+            + getIdempotencyKey() : String
+            + isCreate() : Boolean
+            + isUpdate() : Boolean
+            + isDelete() : Boolean
+            + isApproval() : Boolean
+            + isRejection() : Boolean
+            + isActivation() : Boolean
+            + isClose() : Boolean
+            + isUndo() : Boolean
+            + commandName() : String
+            + entityContext() : String
+            + getTaskPermissionName() : String
+        }
+        
+        ' Command Source Entity
+        Class CommandSource {
+            - Long id
+            - String actionName
+            - String entityName
+            - Long entityId
+            - Long subentityId
+            - String href
+            - String commandAsJson
+            - LocalDateTime madeOnDate
+            - Boolean checkedOnDate
+            - LocalDateTime checkedOnDate
+            - AppUser madeByUser
+            - AppUser checkedByUser
+            - CommandProcessingResultType processingResult
+            - Long productId
+            - String transactionId
+            - Office office
+            - Long groupId
+            - Long clientId
+            - Long loanId
+            - Long savingsId
+            - Long creditBureauId
+            - Long organisationCreditBureauId
+            - String idempotencyKey
+            - CommandProcessingResult result
+            - Integer status
+            --
+            + markAsChecked(LocalDateTime checkedOnDate, AppUser checkedByUser) : void
+            + updateForAudit(Long officeId, Long groupId, Long clientId) : void
+            + commandName() : String
+            + entityContext() : String
+            + getEntityName() : String
+            + getActionName() : String
+            + resourceDetails() : String
+            + isCreate() : Boolean
+            + isCreateDatatable() : Boolean
+            + isUpdateDatatable() : Boolean
+            + isDeleteDatatable() : Boolean
+            + isUpdate() : Boolean
+            + isDelete() : Boolean
+            + getCommandAsJson() : String
+            + getTransactionId() : String
+            + getMadeOnDate() : LocalDateTime
+            + getResult() : CommandProcessingResult
+            + setResult(CommandProcessingResult result) : void
+            + getStatus() : Integer
+            + setStatus(Integer status) : void
+            + isProcessed() : Boolean
+            + isFailed() : Boolean
+            + isPending() : Boolean
+            + hasIdempotencyKey() : Boolean
+        }
+        
+        ' Command Processing Result
+        Class CommandProcessingResult {
+            - Long commandId
+            - Long officeId
+            - Long groupId
+            - Long clientId
+            - Long loanId
+            - Long savingsId
+            - String transactionId
+            - Long resourceId
+            - String resourceIdentifier
+            - Long subResourceId
+            - String subResourceExternalId
+            - Map<String, Object> changes
+            - String rollbackTransaction
+            - Boolean rollbackTransactionManually
+            --
+            + getCommandId() : Long
+            + getOfficeId() : Long
+            + getGroupId() : Long
+            + getClientId() : Long
+            + getLoanId() : Long
+            + getSavingsId() : Long
+            + getTransactionId() : String
+            + getResourceId() : Long
+            + getResourceIdentifier() : String
+            + getSubResourceId() : Long
+            + getChanges() : Map<String, Object>
+            + hasChanges() : Boolean
+            + isRollbackTransaction() : Boolean
+            + setRollbackTransaction(String rollbackTransaction) : void
+            + setRollbackTransactionManually(Boolean rollback) : void
+            + {static} commandOnlyResult(Long commandId) : CommandProcessingResult
+            + {static} resourceResult(Long resourceId, Long commandId) : CommandProcessingResult
+            + {static} resourceResult(Long resourceId, Long commandId, Map<String, Object> changes) : CommandProcessingResult
+            + {static} subResourceResult(Long resourceId, Long subResourceId, Long commandId) : CommandProcessingResult
+            + {static} fromCommandSource(CommandSource commandSource) : CommandProcessingResult
+        }
+        
+        ' Command Processing Result Type
+        Enum CommandProcessingResultType {
+            PROCESSED
+            UNDER_PROCESSING
+            REJECTED
+            INVALID
+            ERROR
+            --
+            + {static} fromInt(Integer processingResultType) : CommandProcessingResultType
+            + getValue() : Integer
+            + isProcessed() : Boolean
+            + isUnderProcessing() : Boolean
+            + isRejected() : Boolean
+            + isInvalid() : Boolean
+            + isError() : Boolean
+        }
+        
+        ' Audit Entry
+        Class AuditEntry {
+            - Long id
+            - String actionName
+            - String entityName
+            - Long resourceId
+            - Long subresourceId
+            - String maker
+            - LocalDateTime madeOnDate
+            - String checker
+            - LocalDateTime checkedOnDate
+            - CommandProcessingResultType processingResult
+            - String commandAsJson
+            - String officeName
+            - String groupLevelName
+            - String groupName
+            - String clientName
+            - String loanAccountNo
+            - String savingsAccountNo
+            --
+            + getActionName() : String
+            + getEntityName() : String
+            + getResourceId() : Long
+            + getMaker() : String
+            + getChecker() : String
+            + getMadeOnDate() : LocalDateTime
+            + getCheckedOnDate() : LocalDateTime
+            + getProcessingResult() : CommandProcessingResultType
+            + getCommandAsJson() : String
+            + resourceDetails() : String
+        }
+    }
+    
+    ' Command Services
+    Package "service" {
+        
+        ' Command Source Write Platform Service
+        Interface CommandSourceWritePlatformService {
+            + logCommandSource(CommandWrapper wrapper) : CommandSource
+            + processCommand(CommandWrapper wrapper, String json, Boolean isApprovedByChecker, Boolean isRollback) : CommandProcessingResult
+            + executeCommandSource(CommandWrapper wrapper, Boolean isApprovedByChecker) : CommandProcessingResult
+            + approveEntry(Long auditId, JsonCommand command) : CommandProcessingResult
+            + rejectEntry(Long auditId, JsonCommand command) : CommandProcessingResult
+            + deleteEntry(Long auditId, JsonCommand command) : CommandProcessingResult
+        }
+        
+        ' Command Source Write Service Implementation
+        Class CommandSourceWritePlatformServiceImpl <<Service>> {
+            - CommandSourceRepository commandSourceRepository
+            - AuditRepository auditRepository
+            - CommandProcessorService commandProcessorService
+            - IdempotencyKeyGenerator idempotencyKeyGenerator
+            - IdempotencyKeyResolver idempotencyKeyResolver
+            - PlatformSecurityContext context
+            - ApplicationEventPublisher eventPublisher
+            - DataSourceTransactionManager transactionManager
+            --
+            + logCommandSource(CommandWrapper wrapper) : CommandSource
+            + processCommand(CommandWrapper wrapper, String json, Boolean isApprovedByChecker, Boolean isRollback) : CommandProcessingResult
+            + executeCommandSource(CommandWrapper wrapper, Boolean isApprovedByChecker) : CommandProcessingResult
+            + approveEntry(Long auditId, JsonCommand command) : CommandProcessingResult
+            + rejectEntry(Long auditId, JsonCommand command) : CommandProcessingResult
+            + deleteEntry(Long auditId, JsonCommand command) : CommandProcessingResult
+            - createCommandSource(CommandWrapper wrapper) : CommandSource
+            - checkForDuplicateCommand(CommandSource command) : void
+            - processCommandWithTransaction(CommandSource commandSource, Boolean isApprovedByChecker) : CommandProcessingResult
+            - handleCommandProcessingException(Exception exception, CommandSource commandSource) : CommandProcessingResult
+            - updateCommandSourceWithResult(CommandSource commandSource, CommandProcessingResult result) : void
+        }
+        
+        ' Command Processor Service
+        Interface CommandProcessorService {
+            + processCommand(JsonCommand command, String transactionId) : CommandProcessingResult
+            + findCommandHandler(CommandWrapper wrapper) : CommandHandler
+            + validateCommand(JsonCommand command) : void
+        }
+        
+        ' Command Processor Service Implementation
+        Class CommandProcessorServiceImpl <<Service>> {
+            - Map<String, CommandHandler> commandHandlers
+            - CommandValidationService validationService
+            - PlatformSecurityContext context
+            --
+            + processCommand(JsonCommand command, String transactionId) : CommandProcessingResult
+            + findCommandHandler(CommandWrapper wrapper) : CommandHandler
+            + validateCommand(JsonCommand command) : void
+            - registerCommandHandler(String commandName, CommandHandler handler) : void
+            - getCommandName(CommandWrapper wrapper) : String
+            - executeCommand(CommandHandler handler, JsonCommand command) : CommandProcessingResult
+        }
+        
+        ' Command Handler Interface
+        Interface CommandHandler {
+            + processCommand(JsonCommand command) : CommandProcessingResult
+            + getCommandName() : String
+            + getSupportedEntityType() : String
+            + getSupportedActions() : List<String>
+        }
+        
+        ' Abstract Command Handler
+        Abstract AbstractCommandHandler {
+            # PlatformSecurityContext context
+            # CommandValidationService validationService
+            --
+            + processCommand(JsonCommand command) : CommandProcessingResult
+            # validateCommand(JsonCommand command) : void
+            # preProcessCommand(JsonCommand command) : void
+            # postProcessCommand(JsonCommand command, CommandProcessingResult result) : void
+            # {abstract} executeCommand(JsonCommand command) : CommandProcessingResult
+            # {abstract} getEntityName() : String
+        }
+        
+        ' Command Validation Service
+        Interface CommandValidationService {
+            + validateCommand(JsonCommand command) : void
+            + validateCommandPermissions(JsonCommand command) : void
+            + validateCommandData(JsonCommand command) : void
+            + validateBusinessRules(JsonCommand command) : void
+        }
+        
+        ' Command Validation Service Implementation
+        Class CommandValidationServiceImpl <<Service>> {
+            - PlatformSecurityContext context
+            - FromJsonHelper fromJsonHelper
+            - Map<String, CommandValidator> validators
+            --
+            + validateCommand(JsonCommand command) : void
+            + validateCommandPermissions(JsonCommand command) : void
+            + validateCommandData(JsonCommand command) : void
+            + validateBusinessRules(JsonCommand command) : void
+            - getValidator(String commandName) : CommandValidator
+            - checkUserPermissions(JsonCommand command) : void
+        }
+        
+        ' Command Validator Interface
+        Interface CommandValidator {
+            + validateForCreate(String json) : void
+            + validateForUpdate(String json) : void
+            + validateForDelete(String json) : void
+            + validateForApproval(String json) : void
+            + getSupportedCommands() : List<String>
+        }
+        
+        ' Idempotency Key Generator
+        Interface IdempotencyKeyGenerator {
+            + generateKey(CommandWrapper wrapper) : String
+            + generateKey(String input) : String
+        }
+        
+        ' Idempotency Key Generator Implementation
+        Class IdempotencyKeyGeneratorImpl <<Service>> {
+            --
+            + generateKey(CommandWrapper wrapper) : String
+            + generateKey(String input) : String
+            - createHashKey(String input) : String
+            - combineCommandElements(CommandWrapper wrapper) : String
+        }
+        
+        ' Idempotency Key Resolver
+        Interface IdempotencyKeyResolver {
+            + findExistingCommand(String idempotencyKey) : Optional<CommandSource>
+            + isCommandProcessed(String idempotencyKey) : Boolean
+            + getDuplicateCommandResult(String idempotencyKey) : CommandProcessingResult
+        }
+        
+        ' Idempotency Key Resolver Implementation
+        Class IdempotencyKeyResolverImpl <<Service>> {
+            - CommandSourceRepository commandSourceRepository
+            --
+            + findExistingCommand(String idempotencyKey) : Optional<CommandSource>
+            + isCommandProcessed(String idempotencyKey) : Boolean
+            + getDuplicateCommandResult(String idempotencyKey) : CommandProcessingResult
+            - mapToProcessingResult(CommandSource commandSource) : CommandProcessingResult
+        }
+        
+        ' Command Read Platform Service
+        Interface CommandSourceReadPlatformService {
+            + retrieveAuditEntries(String actionName, String entityName, Long resourceId) : Collection<AuditData>
+            + retrieveAuditEntry(Long auditId) : AuditData
+            + retrieveAllAuditEntries(String extraCriteria, String orderBy, String sortOrder, Integer offset, Integer limit) : Page<AuditData>
+            + retrieveCommandTemplate(Long auditId) : CommandData
+        }
+        
+        ' Command Read Service Implementation
+        Class CommandSourceReadPlatformServiceImpl <<Service>> {
+            - JdbcTemplate jdbcTemplate
+            - PlatformSecurityContext context
+            - CommandSourceRepository commandSourceRepository
+            --
+            + retrieveAuditEntries(String actionName, String entityName, Long resourceId) : Collection<AuditData>
+            + retrieveAuditEntry(Long auditId) : AuditData
+            + retrieveAllAuditEntries(String extraCriteria, String orderBy, String sortOrder, Integer offset, Integer limit) : Page<AuditData>
+            + retrieveCommandTemplate(Long auditId) : CommandData
+            - mapRowToAuditData(ResultSet rs) : AuditData
+            - extractAuditSearchTemplate() : AuditSearchData
+        }
+    }
+    
+    ' Command Repositories
+    Package "repository" {
+        
+        ' Command Source Repository
+        Interface CommandSourceRepository <<Repository>> {
+            + findByTransactionId(String transactionId) : Optional<CommandSource>
+            + findByIdempotencyKey(String idempotencyKey) : Optional<CommandSource>
+            + findByActionNameAndEntityNameAndResourceId(String actionName, String entityName, Long resourceId) : List<CommandSource>
+            + findPendingCommands() : List<CommandSource>
+            + findFailedCommands() : List<CommandSource>
+            + findByMadeOnDateBetween(LocalDateTime startDate, LocalDateTime endDate) : List<CommandSource>
+            + findByMadeByUser(AppUser user) : List<CommandSource>
+            + countByStatus(Integer status) : Long
+        }
+        
+        ' Audit Repository
+        Interface AuditRepository <<Repository>> {
+            + findByActionNameAndEntityName(String actionName, String entityName) : List<AuditEntry>
+            + findByResourceId(Long resourceId) : List<AuditEntry>
+            + findByMaker(String maker) : List<AuditEntry>
+            + findByChecker(String checker) : List<AuditEntry>
+            + findByMadeOnDateBetween(LocalDateTime startDate, LocalDateTime endDate) : List<AuditEntry>
+            + findByProcessingResult(CommandProcessingResultType result) : List<AuditEntry>
+        }
+    }
+    
+    ' Command Data Transfer Objects
+    Package "data" {
+        
+        ' Command Data
+        Class CommandData {
+            - Long id
+            - String actionName
+            - String entityName
+            - Long entityId
+            - String href
+            - String json
+            - LocalDateTime madeOnDate
+            - String madeByUsername
+            - LocalDateTime checkedOnDate
+            - String checkedByUsername
+            - CommandProcessingResultType processingResult
+            --
+            + getId() : Long
+            + getActionName() : String
+            + getEntityName() : String
+            + getEntityId() : Long
+            + getHref() : String
+            + getJson() : String
+            + getMadeOnDate() : LocalDateTime
+            + getProcessingResult() : CommandProcessingResultType
+        }
+        
+        ' Audit Data
+        Class AuditData {
+            - Long id
+            - String actionName
+            - String entityName
+            - Long resourceId
+            - Long subresourceId
+            - String maker
+            - LocalDateTime madeOnDate
+            - String checker
+            - LocalDateTime checkedOnDate
+            - CommandProcessingResultType processingResult
+            - String commandAsJson
+            - String officeName
+            - String groupName
+            - String clientName
+            - String loanAccountNo
+            - String savingsAccountNo
+            --
+            + getId() : Long
+            + getActionName() : String
+            + getEntityName() : String
+            + getResourceId() : Long
+            + getMaker() : String
+            + getMadeOnDate() : LocalDateTime
+            + getProcessingResult() : CommandProcessingResultType
+        }
+        
+        ' Audit Search Data
+        Class AuditSearchData {
+            - List<String> actionNames
+            - List<String> entityNames
+            - List<ProcessingResultLookup> processingResults
+            --
+            + getActionNames() : List<String>
+            + getEntityNames() : List<String>
+            + getProcessingResults() : List<ProcessingResultLookup>
+        }
+        
+        ' Processing Result Lookup
+        Class ProcessingResultLookup {
+            - String id
+            - String value
+            --
+            + getId() : String
+            + getValue() : String
+        }
+    }
+    
+    ' Command Events
+    Package "events" {
+        
+        ' Command Processing Started Event
+        Class CommandProcessingStartedEvent {
+            - Long commandId
+            - String commandName
+            - String entityName
+            - Long entityId
+            - String json
+            - LocalDateTime startTime
+            - String userId
+            --
+            + getCommandId() : Long
+            + getCommandName() : String
+            + getEntityName() : String
+            + getEntityId() : Long
+            + getJson() : String
+            + getStartTime() : LocalDateTime
+            + getUserId() : String
+        }
+        
+        ' Command Processing Completed Event
+        Class CommandProcessingCompletedEvent {
+            - Long commandId
+            - String commandName
+            - CommandProcessingResult result
+            - LocalDateTime completionTime
+            - Long processingTimeMs
+            - Boolean successful
+            --
+            + getCommandId() : Long
+            + getCommandName() : String
+            + getResult() : CommandProcessingResult
+            + getCompletionTime() : LocalDateTime
+            + getProcessingTimeMs() : Long
+            + isSuccessful() : Boolean
+        }
+        
+        ' Command Processing Failed Event
+        Class CommandProcessingFailedEvent {
+            - Long commandId
+            - String commandName
+            - String errorMessage
+            - String stackTrace
+            - LocalDateTime failureTime
+            - Exception cause
+            --
+            + getCommandId() : Long
+            + getCommandName() : String
+            + getErrorMessage() : String
+            + getStackTrace() : String
+            + getFailureTime() : LocalDateTime
+            + getCause() : Exception
+        }
+    }
+}
+
+' Relationships
+CommandWrapper --> CommandSource : "creates"
+CommandSource --> CommandProcessingResult : "produces"
+CommandSource --> CommandProcessingResultType : "has status"
+AuditEntry --> CommandProcessingResultType : "has result"
+
+CommandSourceWritePlatformServiceImpl ..|> CommandSourceWritePlatformService : "implements"
+CommandProcessorServiceImpl ..|> CommandProcessorService : "implements"
+AbstractCommandHandler ..|> CommandHandler : "implements"
+CommandValidationServiceImpl ..|> CommandValidationService : "implements"
+IdempotencyKeyGeneratorImpl ..|> IdempotencyKeyGenerator : "implements"
+IdempotencyKeyResolverImpl ..|> IdempotencyKeyResolver : "implements"
+CommandSourceReadPlatformServiceImpl ..|> CommandSourceReadPlatformService : "implements"
+
+CommandSourceWritePlatformServiceImpl --> CommandSourceRepository : "uses"
+CommandSourceWritePlatformServiceImpl --> CommandProcessorService : "uses"
+CommandProcessorServiceImpl --> CommandHandler : "delegates to"
+CommandValidationServiceImpl --> CommandValidator : "uses"
+IdempotencyKeyResolverImpl --> CommandSourceRepository : "queries"
+
+SHOW_LEGEND()
+
+note top of CommandWrapper
+**Command Pattern Core**
+• Encapsulates requests as objects
+• Support for undo operations
+• Queuing and logging of requests
+• Audit trail generation
+• Idempotency support
+end note
+
+note right of CommandProcessorService
+**Command Orchestration**
+• Handler registration & discovery
+• Command validation & execution
+• Transaction management
+• Error handling & rollback
+• Event publishing
+end note
+
+note bottom of IdempotencyKeyResolver
+**Duplicate Prevention**
+• Idempotency key generation
+• Duplicate command detection
+• Consistent response handling
+• Race condition prevention
+• Performance optimization
+end note
+
+note left of CommandValidationService
+**Comprehensive Validation**
+• Permission checking
+• Data validation
+• Business rule enforcement
+• Cross-entity validation
+• Security validation
+end note
+
+@enduml

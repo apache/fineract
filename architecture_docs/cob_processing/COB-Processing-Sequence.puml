@@ -1,0 +1,300 @@
+@startuml COB-Processing-Sequence
+!include <C4/C4_Context>
+
+title Apache Fineract - COB (Close of Business) Processing Module Sequence Diagram
+
+' Actors and Systems
+participant "COBScheduler" as SCHEDULER
+participant "COBBatchJob" as BATCH_JOB
+participant "COBBusinessStepService" as CBSS
+participant "LoanCOBService" as LCS
+participant "SavingsCOBService" as SCS
+participant "AccountingCOBService" as ACS
+participant "LoanAccountLockService" as LALS
+participant "InterestCalculationStep" as ICS
+participant "AccrualActivityPostingStep" as AAPS
+participant "DelinquencyClassificationStep" as DCS
+participant "JobExecutionService" as JES
+participant "LoanRepository" as LOAN_REPO
+participant "SavingsRepository" as SAV_REPO
+participant "AccountingService" as ACC_SVC
+database "TenantDatabase" as DB
+
+note over SCHEDULER, DB
+**COB Processing Sequence Flows**
+1. Daily COB Job Scheduling and Execution
+2. Loan Interest Calculation and Accrual
+3. Savings Interest Calculation and Posting
+4. Delinquency Classification and Aging
+5. Financial Accounting Closure Activities
+end note
+
+== COB Job Initialization Flow ==
+
+SCHEDULER -> BATCH_JOB : executeCOBJob(businessDate)
+activate BATCH_JOB
+
+BATCH_JOB -> JES : initializeCOBExecution(businessDate)
+activate JES
+JES -> JES : validateBusinessDate()
+JES -> JES : checkPreviousCOBCompletion()
+JES -> DB : INSERT INTO job_execution_history
+JES --> BATCH_JOB : COBExecutionInitialized
+deactivate JES
+
+BATCH_JOB -> CBSS : getCOBBusinessSteps()
+activate CBSS
+CBSS -> DB : SELECT * FROM cob_business_step ORDER BY step_order
+CBSS --> BATCH_JOB : orderedBusinessSteps
+deactivate CBSS
+
+== Account Locking Flow ==
+
+BATCH_JOB -> LALS : lockLoanAccountsForCOB(businessDate)
+activate LALS
+
+LALS -> LOAN_REPO : findActiveLoansForCOB(businessDate)
+activate LOAN_REPO
+LOAN_REPO -> DB : SELECT * FROM m_loan WHERE loan_status_id = 300
+LOAN_REPO --> LALS : activeLoans
+deactivate LOAN_REPO
+
+loop For Each Active Loan
+    LALS -> LALS : acquireAccountLock(loanId)
+    LALS -> DB : UPDATE m_loan SET is_cob_locked = true WHERE id = ?
+end
+
+LALS --> BATCH_JOB : AccountsLocked
+deactivate LALS
+
+== Loan Interest Calculation Step ==
+
+BATCH_JOB -> ICS : processLoanInterestCalculation(businessDate)
+activate ICS
+
+ICS -> LOAN_REPO : findLoansForInterestCalculation(businessDate)
+activate LOAN_REPO
+LOAN_REPO -> DB : SELECT * FROM m_loan WHERE loan_status_id = 300 AND is_cob_locked = true
+LOAN_REPO --> ICS : loansForCalculation
+deactivate LOAN_REPO
+
+loop For Each Loan
+    ICS -> LCS : calculateDailyInterest(loanId, businessDate)
+    activate LCS
+    
+    LCS -> LCS : getCurrentLoanBalance()
+    LCS -> LCS : getApplicableInterestRate()
+    LCS -> LCS : calculateDailyInterestAmount()
+    
+    ' Check for overdue installments
+    LCS -> LCS : checkOverdueInstallments(businessDate)
+    
+    alt Loan Has Overdue Amount
+        LCS -> LCS : calculatePenaltyCharges()
+        LCS -> LCS : applyOverdueInterestRate()
+    end
+    
+    LCS -> LCS : updateLoanInterestAccrued()
+    LCS -> LOAN_REPO : updateLoanInterestFields(loanId)
+    activate LOAN_REPO
+    LOAN_REPO -> DB : UPDATE m_loan SET interest_accrued_derived = ?
+    LOAN_REPO --> LCS : interestUpdated
+    deactivate LOAN_REPO
+    
+    LCS --> ICS : InterestCalculationResult
+    deactivate LCS
+end
+
+ICS --> BATCH_JOB : InterestCalculationCompleted
+deactivate ICS
+
+== Accrual Activity Posting Step ==
+
+BATCH_JOB -> AAPS : processAccrualActivityPosting(businessDate)
+activate AAPS
+
+AAPS -> LOAN_REPO : findLoansWithAccruedInterest(businessDate)
+activate LOAN_REPO
+LOAN_REPO -> DB : SELECT * FROM m_loan WHERE interest_accrued_derived > 0
+LOAN_REPO --> AAPS : loansWithAccrual
+deactivate LOAN_REPO
+
+loop For Each Loan with Accrued Interest
+    AAPS -> LCS : createAccrualTransaction(loanId, accruedAmount)
+    activate LCS
+    
+    LCS -> LCS : buildAccrualTransaction()
+    LCS -> LOAN_REPO : saveLoanTransaction()
+    activate LOAN_REPO
+    LOAN_REPO -> DB : INSERT INTO m_loan_transaction
+    LOAN_REPO --> LCS : transactionSaved
+    deactivate LOAN_REPO
+    
+    ' Create accounting entries for accrual
+    LCS -> ACC_SVC : createAccrualAccountingEntries(loanId, accruedAmount)
+    activate ACC_SVC
+    ACC_SVC -> ACC_SVC : debitInterestReceivable()
+    ACC_SVC -> ACC_SVC : creditInterestIncome()
+    ACC_SVC -> DB : INSERT INTO acc_gl_journal_entry
+    deactivate ACC_SVC
+    
+    LCS --> AAPS : AccrualTransactionCreated
+    deactivate LCS
+end
+
+AAPS --> BATCH_JOB : AccrualPostingCompleted
+deactivate AAPS
+
+== Savings Interest Calculation and Posting ==
+
+BATCH_JOB -> SCS : processSavingsInterestCalculation(businessDate)
+activate SCS
+
+SCS -> SAV_REPO : findActiveSavingsAccounts(businessDate)
+activate SAV_REPO
+SAV_REPO -> DB : SELECT * FROM m_savings_account WHERE status_enum = 300
+SAV_REPO --> SCS : activeSavingsAccounts
+deactivate SAV_REPO
+
+loop For Each Savings Account
+    SCS -> SCS : calculateDailyInterest(accountId, businessDate)
+    SCS -> SCS : applyInterestCalculationMethod()
+    SCS -> SCS : handleMinimumBalanceRequirement()
+    
+    alt Interest Posting Date
+        SCS -> SCS : calculateInterestToPost()
+        SCS -> SCS : createInterestPostingTransaction()
+        
+        SCS -> SAV_REPO : saveInterestTransaction()
+        activate SAV_REPO
+        SAV_REPO -> DB : INSERT INTO m_savings_account_transaction
+        SAV_REPO -> DB : UPDATE m_savings_account SET account_balance_derived = ?
+        SAV_REPO --> SCS : interestPosted
+        deactivate SAV_REPO
+        
+        ' Create accounting entries
+        SCS -> ACC_SVC : createInterestPostingEntries(accountId, interestAmount)
+        activate ACC_SVC
+        ACC_SVC -> ACC_SVC : debitInterestExpense()
+        ACC_SVC -> ACC_SVC : creditSavingsControl()
+        ACC_SVC -> DB : INSERT INTO acc_gl_journal_entry
+        deactivate ACC_SVC
+    end
+end
+
+SCS --> BATCH_JOB : SavingsInterestProcessingCompleted
+deactivate SCS
+
+== Delinquency Classification Step ==
+
+BATCH_JOB -> DCS : processDelinquencyClassification(businessDate)
+activate DCS
+
+DCS -> LOAN_REPO : findLoansForDelinquencyCheck(businessDate)
+activate LOAN_REPO
+LOAN_REPO -> DB : SELECT l.*, rs.* FROM m_loan l JOIN m_loan_repayment_schedule rs WHERE rs.duedate <= ?
+LOAN_REPO --> DCS : loansWithDueInstallments
+deactivate LOAN_REPO
+
+loop For Each Loan
+    DCS -> DCS : calculateDaysInArrears(loanId, businessDate)
+    DCS -> DCS : determineDelinquencyBucket(daysInArrears)
+    DCS -> DCS : updateLoanDelinquencyClassification()
+    
+    DCS -> LOAN_REPO : updateLoanDelinquency(loanId)
+    activate LOAN_REPO
+    LOAN_REPO -> DB : UPDATE m_loan SET days_in_arrears_derived = ?, delinquency_range_id = ?
+    LOAN_REPO --> DCS : delinquencyUpdated
+    deactivate LOAN_REPO
+    
+    alt Loan Newly Delinquent
+        DCS -> DCS : publishDelinquencyEvent(loanId)
+        DCS -> DCS : triggerDelinquencyActions()
+    end
+end
+
+DCS --> BATCH_JOB : DelinquencyClassificationCompleted
+deactivate DCS
+
+== Accounting Closure Activities ==
+
+BATCH_JOB -> ACS : processAccountingClosure(businessDate)
+activate ACS
+
+ACS -> ACS : validateAccountingEntries(businessDate)
+ACS -> ACS : checkTrialBalanceIntegrity()
+ACS -> ACS : generateDailyAccountingSummary()
+
+' Create GL closure entries if required
+alt Period End Closure
+    ACS -> ACC_SVC : createPeriodEndEntries(businessDate)
+    activate ACC_SVC
+    ACC_SVC -> ACC_SVC : calculatePeriodTotals()
+    ACC_SVC -> ACC_SVC : createClosingEntries()
+    ACC_SVC -> DB : INSERT INTO acc_gl_journal_entry
+    deactivate ACC_SVC
+end
+
+ACS -> DB : INSERT INTO acc_accounting_closure
+ACS --> BATCH_JOB : AccountingClosureCompleted
+deactivate ACS
+
+== Account Unlocking and Finalization ==
+
+BATCH_JOB -> LALS : unlockLoanAccountsAfterCOB(businessDate)
+activate LALS
+
+LALS -> LOAN_REPO : unlockAllLoanAccounts()
+activate LOAN_REPO
+LOAN_REPO -> DB : UPDATE m_loan SET is_cob_locked = false
+LOAN_REPO --> LALS : accountsUnlocked
+deactivate LOAN_REPO
+
+LALS --> BATCH_JOB : AccountsUnlocked
+deactivate LALS
+
+BATCH_JOB -> JES : finalizeCOBExecution(businessDate)
+activate JES
+JES -> JES : updateJobStatus(SUCCESS)
+JES -> DB : UPDATE job_execution_history SET status = 'COMPLETED'
+JES --> BATCH_JOB : COBExecutionFinalized
+deactivate JES
+
+BATCH_JOB --> SCHEDULER : COBJobCompleted
+deactivate BATCH_JOB
+
+== Error Handling and Recovery ==
+
+alt COB Step Failure
+    BATCH_JOB -> JES : handleCOBStepFailure(stepName, error)
+    activate JES
+    
+    JES -> JES : logStepFailure()
+    JES -> JES : determineRecoveryAction()
+    
+    alt Retry Possible
+        JES -> JES : scheduleStepRetry()
+    else Manual Intervention Required
+        JES -> JES : markJobForManualIntervention()
+        JES -> JES : notifySystemAdministrators()
+    end
+    
+    ' Unlock accounts in case of failure
+    JES -> LALS : emergencyUnlockAccounts()
+    
+    JES --> BATCH_JOB : ErrorHandled
+    deactivate JES
+end
+
+note over SCHEDULER, DB
+**Key Design Patterns:**
+• Chain of Responsibility: Sequential COB step execution
+• Strategy Pattern: Different processing strategies per entity type
+• Template Method: Common COB processing with step-specific logic
+• Observer Pattern: Job progress monitoring and event publishing
+• Command Pattern: Each COB step as executable command
+• State Pattern: Account locking/unlocking state management
+• Batch Processing Pattern: Large volume data processing optimization
+end note
+
+@enduml

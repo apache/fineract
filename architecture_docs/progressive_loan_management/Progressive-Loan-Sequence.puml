@@ -1,0 +1,380 @@
+@startuml Progressive-Loan-Sequence
+!include <C4/C4_Context>
+
+title Apache Fineract - Progressive Loan Management Module Sequence Diagram
+
+' Actors and Systems
+actor "Loan Officer" as LO
+participant "ProgressiveLoanApiResource" as API
+participant "CommandSourceHandler" as CSH
+participant "ProgressiveLoanService" as PLS
+participant "LoanScheduleGeneratorService" as LSGS
+participant "ProgressiveLoanValidator" as VAL
+participant "FlexibleRepaymentService" as FRS
+participant "VariableInterestService" as VIS
+participant "LoanModificationService" as LMS
+participant "ProgressiveLoanRepository" as REPO
+participant "LoanCalculationService" as LCS
+participant "AccountingService" as ACC
+database "TenantDatabase" as DB
+
+note over LO, DB
+**Progressive Loan Sequence Flows**
+1. Variable Interest Rate Loan Creation
+2. Flexible Repayment Schedule Generation
+3. Loan Modification and Restructuring
+4. Dynamic Schedule Regeneration
+5. Advanced Payment Allocation
+end note
+
+== Progressive Loan Product Configuration ==
+
+LO -> API : POST /loanproducts/progressive\n{progressiveLoanProduct}
+activate API
+
+API -> CSH : processCommand(CREATE_PROGRESSIVE_LOAN_PRODUCT)
+activate CSH
+
+CSH -> VAL : validateProgressiveLoanProduct(productData)
+activate VAL
+VAL -> VAL : validateVariableInterestSettings()
+VAL -> VAL : validateFlexibleRepaymentOptions()
+VAL -> VAL : validateModificationRules()
+VAL -> VAL : validateCalculationMethod()
+VAL --> CSH : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CSH -> PLS : createProgressiveLoanProduct(productData)
+    activate PLS
+    
+    PLS -> PLS : buildProgressiveProductEntity()
+    PLS -> PLS : configureVariableInterestRules()
+    PLS -> PLS : setupFlexibleRepaymentOptions()
+    
+    PLS -> REPO : save(progressiveProductEntity)
+    activate REPO
+    REPO -> DB : INSERT INTO m_product_loan_progressive
+    REPO --> PLS : productSaved
+    deactivate REPO
+    
+    PLS --> CSH : ProductCreationResult
+    deactivate PLS
+    
+    CSH --> API : CommandProcessingResult
+    deactivate CSH
+    
+    API --> LO : HTTP 201 Created\n{productId}
+    deactivate API
+    
+else Validation Failure
+    CSH --> API : ValidationException
+    API --> LO : HTTP 400 Bad Request
+end
+
+== Progressive Loan Application Flow ==
+
+LO -> API : POST /loans/progressive\n{progressiveLoanApplication}
+activate API
+
+API -> CSH : processCommand(APPLY_PROGRESSIVE_LOAN)
+activate CSH
+
+CSH -> VAL : validateProgressiveLoanApplication(loanData)
+activate VAL
+VAL -> VAL : validateProgressiveProductCompatibility()
+VAL -> VAL : validateVariableTerms()
+VAL -> VAL : validateFlexibleScheduleOptions()
+VAL --> CSH : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CSH -> PLS : submitProgressiveLoanApplication(loanData)
+    activate PLS
+    
+    PLS -> PLS : buildProgressiveLoanEntity()
+    
+    ' Generate flexible repayment schedule
+    PLS -> LSGS : generateProgressiveSchedule(loanTerms)
+    activate LSGS
+    
+    LSGS -> LSGS : analyzeRepaymentCapacity()
+    LSGS -> LSGS : generateFlexibleInstallments()
+    LSGS -> LSGS : applyVariableInterestRates()
+    LSGS -> LSGS : optimizePaymentSchedule()
+    
+    LSGS --> PLS : ProgressiveRepaymentSchedule
+    deactivate LSGS
+    
+    PLS -> REPO : save(progressiveLoanEntity)
+    activate REPO
+    REPO -> DB : INSERT INTO m_loan_progressive
+    REPO -> DB : INSERT INTO m_loan_repayment_schedule_progressive
+    REPO --> PLS : progressiveLoanSaved
+    deactivate REPO
+    
+    PLS --> CSH : ProgressiveLoanApplicationResult
+    deactivate PLS
+    
+    CSH --> API : CommandProcessingResult
+    deactivate CSH
+    
+    API --> LO : HTTP 201 Created\n{progressiveLoanId}
+    deactivate API
+    
+else Validation Failure
+    CSH --> API : ValidationException
+    API --> LO : HTTP 400 Bad Request
+end
+
+== Variable Interest Rate Adjustment ==
+
+LO -> API : POST /loans/progressive/{loanId}/adjustinterest\n{interestAdjustment}
+activate API
+
+API -> CSH : processCommand(ADJUST_PROGRESSIVE_LOAN_INTEREST)
+activate CSH
+
+CSH -> VIS : adjustVariableInterestRate(loanId, adjustmentData)
+activate VIS
+
+VIS -> REPO : findProgressiveLoan(loanId)
+activate REPO
+REPO -> DB : SELECT * FROM m_loan_progressive WHERE loan_id = ?
+REPO --> VIS : progressiveLoan
+deactivate REPO
+
+VIS -> VIS : validateInterestAdjustment()
+VIS -> VIS : calculateNewInterestRate()
+VIS -> VIS : determineEffectiveDate()
+
+' Regenerate schedule with new interest rate
+VIS -> LSGS : regenerateScheduleWithNewRate(loanId, newRate, effectiveDate)
+activate LSGS
+
+LSGS -> LSGS : recalculateFromEffectiveDate()
+LSGS -> LSGS : adjustRemainingInstallments()
+LSGS -> LSGS : preserveFlexibilityOptions()
+
+LSGS --> VIS : UpdatedSchedule
+deactivate LSGS
+
+VIS -> REPO : updateProgressiveLoanSchedule()
+activate REPO
+REPO -> DB : UPDATE m_loan_repayment_schedule_progressive
+REPO -> DB : INSERT INTO m_loan_interest_rate_history
+REPO --> VIS : scheduleUpdated
+deactivate REPO
+
+VIS --> CSH : InterestAdjustmentResult
+deactivate VIS
+
+CSH --> API : CommandProcessingResult
+deactivate CSH
+
+API --> LO : HTTP 200 OK\n{adjustmentDetails}
+deactivate API
+
+== Flexible Repayment Modification ==
+
+LO -> API : POST /loans/progressive/{loanId}/modifyrepayment\n{repaymentModification}
+activate API
+
+API -> CSH : processCommand(MODIFY_PROGRESSIVE_REPAYMENT)
+activate CSH
+
+CSH -> FRS : modifyRepaymentSchedule(loanId, modificationData)
+activate FRS
+
+FRS -> REPO : findProgressiveLoan(loanId)
+activate REPO
+REPO -> DB : SELECT * FROM m_loan_progressive WHERE loan_id = ?
+REPO --> FRS : currentLoan
+deactivate REPO
+
+FRS -> VAL : validateRepaymentModification(modificationData)
+activate VAL
+VAL -> VAL : checkModificationLimits()
+VAL -> VAL : validateNewPaymentAmounts()
+VAL -> VAL : checkFlexibilityConstraints()
+VAL --> FRS : ModificationValid
+deactivate VAL
+
+alt Modification Valid
+    ' Apply different modification strategies
+    alt Payment Amount Change
+        FRS -> FRS : adjustPaymentAmounts()
+        FRS -> LSGS : recalculateScheduleWithNewAmounts()
+        
+    else Payment Frequency Change
+        FRS -> FRS : changePaymentFrequency()
+        FRS -> LSGS : regenerateWithNewFrequency()
+        
+    else Skip Payment
+        FRS -> FRS : configurePaymentSkip()
+        FRS -> LSGS : adjustScheduleForSkippedPayment()
+        
+    else Extend Term
+        FRS -> FRS : extendLoanTerm()
+        FRS -> LSGS : redistributeRemainingBalance()
+    end
+    
+    activate LSGS
+    LSGS -> LSGS : validateScheduleIntegrity()
+    LSGS -> LSGS : recalculateInterestAndCharges()
+    LSGS --> FRS : ModifiedSchedule
+    deactivate LSGS
+    
+    FRS -> REPO : saveModifiedSchedule()
+    activate REPO
+    REPO -> DB : UPDATE m_loan_repayment_schedule_progressive
+    REPO -> DB : INSERT INTO m_loan_modification_history
+    REPO --> FRS : modificationSaved
+    deactivate REPO
+    
+    FRS --> CSH : RepaymentModificationResult
+    deactivate FRS
+    
+    CSH --> API : CommandProcessingResult
+    deactivate CSH
+    
+    API --> LO : HTTP 200 OK\n{modificationSummary}
+    deactivate API
+    
+else Modification Invalid
+    FRS --> CSH : ValidationException
+    CSH --> API : ValidationException
+    API --> LO : HTTP 400 Bad Request
+end
+
+== Loan Restructuring Flow ==
+
+LO -> API : POST /loans/progressive/{loanId}/restructure\n{restructuringPlan}
+activate API
+
+API -> CSH : processCommand(RESTRUCTURE_PROGRESSIVE_LOAN)
+activate CSH
+
+CSH -> LMS : restructureProgressiveLoan(loanId, restructuringPlan)
+activate LMS
+
+LMS -> REPO : findProgressiveLoan(loanId)
+LMS -> VAL : validateRestructuringPlan(restructuringPlan)
+activate VAL
+VAL -> VAL : validateRestructuringEligibility()
+VAL -> VAL : checkOutstandingBalance()
+VAL -> VAL : validateNewTerms()
+VAL --> LMS : RestructuringValid
+deactivate VAL
+
+alt Restructuring Valid
+    LMS -> LMS : calculateRestructuredTerms()
+    LMS -> LMS : determineNewPrincipalAmount()
+    LMS -> LMS : setNewInterestRate()
+    LMS -> LMS : configureNewRepaymentTerms()
+    
+    ' Generate new progressive schedule
+    LMS -> LSGS : generateRestructuredSchedule(newTerms)
+    activate LSGS
+    LSGS -> LSGS : createFreshSchedule()
+    LSGS -> LSGS : applyRestructuringAdjustments()
+    LSGS --> LMS : RestructuredSchedule
+    deactivate LSGS
+    
+    ' Create restructuring transaction
+    LMS -> LMS : createRestructuringTransaction()
+    
+    LMS -> REPO : saveRestructuredLoan()
+    activate REPO
+    REPO -> DB : UPDATE m_loan_progressive SET restructured = true
+    REPO -> DB : INSERT INTO m_loan_restructuring_detail
+    REPO -> DB : REPLACE m_loan_repayment_schedule_progressive
+    REPO --> LMS : restructuringSaved
+    deactivate REPO
+    
+    ' Create accounting entries for restructuring
+    LMS -> ACC : createRestructuringAccountingEntries(loanId)
+    activate ACC
+    ACC -> ACC : handlePrincipalAdjustment()
+    ACC -> ACC : adjustInterestAccounts()
+    ACC -> DB : INSERT INTO acc_gl_journal_entry
+    deactivate ACC
+    
+    LMS --> CSH : LoanRestructuringResult
+    deactivate LMS
+    
+    CSH --> API : CommandProcessingResult
+    deactivate CSH
+    
+    API --> LO : HTTP 200 OK\n{restructuringDetails}
+    deactivate API
+    
+else Restructuring Invalid
+    LMS --> CSH : ValidationException
+    CSH --> API : ValidationException
+    API --> LO : HTTP 400 Bad Request
+end
+
+== Advanced Payment Allocation ==
+
+LO -> API : POST /loans/progressive/{loanId}/payments\n{paymentData}
+activate API
+
+API -> CSH : processCommand(PROGRESSIVE_LOAN_PAYMENT)
+activate CSH
+
+CSH -> PLS : processProgressiveLoanPayment(loanId, paymentData)
+activate PLS
+
+PLS -> REPO : findProgressiveLoan(loanId)
+PLS -> LCS : calculateAdvancedPaymentAllocation(loanId, paymentAmount)
+activate LCS
+
+LCS -> LCS : analyzeOutstandingComponents()
+LCS -> LCS : applyProgressiveAllocationRules()
+LCS -> LCS : handleOverpaymentScenarios()
+LCS -> LCS : adjustFutureInstallments()
+
+LCS --> PLS : PaymentAllocationResult
+deactivate LCS
+
+PLS -> PLS : updateProgressiveLoanBalance()
+PLS -> PLS : adjustRemainingSchedule()
+
+' Regenerate schedule if significant overpayment
+alt Significant Overpayment
+    PLS -> LSGS : regenerateScheduleAfterOverpayment(loanId)
+    activate LSGS
+    LSGS -> LSGS : shortenLoanTerm()
+    LSGS -> LSGS : reduceInstallmentAmounts()
+    LSGS --> PLS : AdjustedSchedule
+    deactivate LSGS
+end
+
+PLS -> REPO : savePaymentAndScheduleUpdate()
+activate REPO
+REPO -> DB : INSERT INTO m_loan_transaction
+REPO -> DB : UPDATE m_loan_repayment_schedule_progressive
+REPO --> PLS : paymentProcessed
+deactivate REPO
+
+PLS --> CSH : ProgressivePaymentResult
+deactivate PLS
+
+CSH --> API : CommandProcessingResult
+deactivate CSH
+
+API --> LO : HTTP 200 OK\n{paymentSummary}
+deactivate API
+
+note over LO, DB
+**Key Design Patterns:**
+• Strategy Pattern: Multiple progressive loan calculation strategies
+• Template Method: Common loan processing with progressive-specific steps
+• Builder Pattern: Complex progressive schedule generation
+• Command Pattern: Loan modifications as executable commands
+• State Pattern: Loan lifecycle with progressive-specific states
+• Observer Pattern: Schedule change notifications
+end note
+
+@enduml

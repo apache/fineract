@@ -1,0 +1,490 @@
+@startuml Fineract-Project-Setup-and-API-Access-Flow
+!include <C4/C4_Context>
+
+title Apache Fineract - Project Setup & API Access Flow Chart
+
+skinparam activity {
+    BackgroundColor LightBlue
+    BorderColor Navy
+}
+
+skinparam note {
+    BackgroundColor LightYellow
+    BorderColor Orange
+}
+
+' Start point
+start
+
+' Development Environment Setup
+:Development Environment Setup;
+note right
+**Prerequisites:**
+- Java 21+ (OpenJDK/Oracle)
+- Gradle 8.x
+- MySQL 8.0+ / PostgreSQL 14+
+- Git
+- IDE (IntelliJ IDEA/Eclipse/VS Code)
+end note
+
+:Clone Repository;
+note right
+**Command:**
+git clone https://github.com/apache/fineract.git
+cd fineract
+end note
+
+:Configure Database;
+note right
+**MySQL Setup:**
+- Create database: fineract_tenants
+- Create database: fineract_default
+- Update connection properties
+
+**PostgreSQL Setup:**
+- Create databases with UTF-8 encoding
+- Configure connection pools
+end note
+
+:Configure Application Properties;
+note right
+**Key Configuration Files:**
+- application.properties
+- application-dev.properties
+- gradle.properties
+
+**Database Connection:**
+- fineract.tenant.host=localhost
+- fineract.tenant.port=3306
+- fineract.tenant.username=root
+- fineract.tenant.password=mysql
+end note
+
+if (Development Mode?) then (yes)
+  :Verify Development Prerequisites;
+  note right
+  **System Requirements:**
+  - JDK 21+ (OpenJDK or Oracle JDK)
+  - Gradle 8.x+ (or use gradlew wrapper)
+  - Git 2.x+
+  - IDE with Java support
+  - 8GB+ RAM recommended
+  - 10GB+ free disk space
+
+  **Database Prerequisites:**
+  - MySQL 8.0+ OR PostgreSQL 14+ running
+  - Database server accessible on localhost
+  - Create databases:
+    • fineract_tenants (tenant metadata)
+    • fineract_default (default tenant data)
+  - Database user with full privileges
+  
+  **Required Database Setup:**
+  MySQL Commands:
+  CREATE DATABASE fineract_tenants;
+  CREATE DATABASE fineract_default;
+  GRANT ALL PRIVILEGES ON fineract_tenants.* TO 'root'@'localhost';
+  GRANT ALL PRIVILEGES ON fineract_default.* TO 'root'@'localhost';
+  FLUSH PRIVILEGES;
+
+  **Environment Configuration:**
+  - JAVA_HOME environment variable set
+  - Database connection parameters configured
+  - Network ports available (8080, 3306/5432)
+  - Internet connection for dependency downloads
+
+  **Initial Data Requirements:**
+  - Database schemas will be auto-created on first run
+  - Sample data loaded via Flyway migrations
+  - Default tenant configuration initialized
+  - Admin user credentials auto-generated
+
+  **Development Tools (Optional but Recommended):**
+  - Postman/Insomnia for API testing
+  - Database client (MySQL Workbench/pgAdmin)
+  - Git client or IDE integration
+  - Docker Desktop (for containerized dependencies)
+  end note
+
+  :Build for Development;
+  note right
+  **Pre-Build Verification:**
+  java -version (should show JDK 21+)
+  ./gradlew --version (verify Gradle setup)
+  mysql -u root -p -e "SHOW DATABASES;" (verify DB connection)
+  
+  **Clean Build Command:**
+  ./gradlew clean build -x test -x rat -x checkstyleMain -x checkstyleTest
+  
+  **Database Initialization (First Run Only):**
+  - Flyway migrations run automatically
+  - Creates all required tables and indexes
+  - Loads sample data and configurations
+  - Sets up default tenant and admin user
+  
+  **Run Development Server:**
+  ./gradlew bootRun --args='--spring.profiles.active=dev'
+  
+  **Alternative IDE Setup:**
+  - Import as Gradle project in IntelliJ/Eclipse
+  - Set JDK 21+ as project SDK
+  - Configure database connection in application-dev.properties
+  - Run FineractPlatformApplication.java main method
+  
+  **Common Build Issues:**
+  - OutOfMemoryError: Increase Gradle heap (-Xmx4g)
+  - Database connection failed: Verify MySQL/PostgreSQL running
+  - Port 8080 in use: Kill existing processes or change port
+  - Missing JDK: Ensure JAVA_HOME points to JDK 21+
+  end note
+  
+  :Access Development Server;
+  note right
+  **Development URLs:**
+  - Main API: http://localhost:8080/fineract-provider
+  - Community App: http://localhost:8080/community-app
+  - Swagger UI: http://localhost:8080/fineract-provider/api-docs/
+  - Health Check: http://localhost:8080/fineract-provider/actuator/health
+  
+  **Verify Server Status:**
+  1. Check console logs for "Started FineractPlatformApplication"
+  2. Health endpoint returns {"status":"UP"}
+  3. Database connections established (check logs)
+  4. No error messages in startup sequence
+  
+  **Default Login Credentials:**
+  - Username: mifos
+  - Password: password
+  - Tenant ID: default
+  
+  **First-Time Setup Verification:**
+  curl -X GET "http://localhost:8080/fineract-provider/api/v1/offices" \
+    -H "Authorization: Basic bWlmb3M6cGFzc3dvcmQ=" \
+    -H "Fineract-Platform-TenantId: default"
+  
+  **Development Mode Features:**
+  - Hot reload enabled (code changes auto-detected)
+  - Debug logging active
+  - H2 console available (if configured)
+  - Sample data pre-loaded
+  - Cross-origin requests enabled
+  
+  **Troubleshooting Development Issues:**
+  - Server won't start: Check database connectivity
+  - 404 errors: Verify context path configuration
+  - Authentication fails: Check default credentials
+  - Slow startup: Increase JVM memory allocation
+  - Port conflicts: Change server.port in application-dev.properties
+  end note
+  
+else (no)
+  if (Docker Deployment?) then (yes)
+    :Docker Setup;
+    note right
+    **Commands:**
+    docker-compose up -d
+    
+    **Services Started:**
+    - fineract-server (Port: 8080)
+    - mysql-server (Port: 3306)
+    - community-app (Port: 9090)
+    end note
+    
+  else (no)
+    :Production Deployment;
+    note right
+    **Build WAR:**
+    ./gradlew clean war
+    
+    **Deploy to:**
+    - Tomcat 9.x+
+    - Application Server
+    - Cloud Platform (AWS, Azure, GCP)
+    end note
+  endif
+endif
+
+:Server Started Successfully;
+
+' API Access Flow
+:API Authentication Setup;
+
+if (Authentication Method?) then (OAuth2)
+  :OAuth2 Authentication;
+  note right
+  **Steps:**
+  1. Register OAuth2 Client
+  2. Get Client Credentials
+  3. Request Access Token
+  4. Use Bearer Token in API calls
+  
+  **Token Endpoint:**
+  POST /fineract-provider/api/oauth/token
+  end note
+  
+else (Basic Auth)
+  :Basic Authentication;
+  note right
+  **Default Credentials:**
+  - Username: mifos
+  - Password: password
+  - Tenant: default
+  
+  **Header:**
+  Authorization: Basic bWlmb3M6cGFzc3dvcmQ=
+  Fineract-Platform-TenantId: default
+  end note
+endif
+
+:API Access Methods;
+
+' API Access Options
+partition "API Access Options" {
+  
+  :Web Browser Access;
+  note right
+  **Community Web App:**
+  http://localhost:8080/community-app
+  
+  **API Documentation:**
+  http://localhost:8080/fineract-provider/api-docs/
+  
+  **Interactive API Testing:**
+  Swagger UI interface
+  end note
+  
+  :Mobile Application;
+  note right
+  **Mobile SDK Integration:**
+  - Android Fineract Client
+  - iOS Fineract Client
+  - React Native
+  - Flutter
+  
+  **API Base URL:**
+  https://your-domain.com/fineract-provider/api/v1/
+  end note
+  
+  :API Testing Tools;
+  note right
+  **Tools:**
+  - Postman Collection
+  - cURL Commands
+  - Insomnia
+  - HTTPie
+  
+  **Sample Request:**
+  GET /fineract-provider/api/v1/clients
+  Headers:
+  - Authorization: Basic [encoded]
+  - Fineract-Platform-TenantId: default
+  - Content-Type: application/json
+  end note
+  
+  :Direct Integration;
+  note right
+  **Programming Languages:**
+  - Java (Fineract Client)
+  - Python (requests library)
+  - JavaScript/Node.js (axios)
+  - C# (.NET HttpClient)
+  - PHP (Guzzle)
+  
+  **Sample Code:**
+  RestTemplate restTemplate = new RestTemplate();
+  HttpHeaders headers = new HttpHeaders();
+  headers.set(Authorization, Basic + encodedCredentials);
+  headers.set(Fineract-Platform-TenantId, default);
+  end note
+}
+
+' API Workflow
+:Common API Workflows;
+
+partition "API Operation Flows" {
+  
+  :Client Management;
+  note right
+  **Typical Flow:**
+  1. POST /clients (Create Client)
+  2. GET /clients/{id} (Retrieve Client)
+  3. PUT /clients/{id} (Update Client)
+  4. POST /clients/{id}?command=activate (Activate)
+  
+  **Required Data:**
+  - firstname, lastname
+  - officeId
+  - dateFormat, locale
+  end note
+  
+  :Loan Management;
+  note right
+  **Loan Lifecycle:**
+  1. GET /loanproducts (Get Products)
+  2. POST /loans (Submit Application)
+  3. POST /loans/{id}?command=approve (Approve)
+  4. POST /loans/{id}?command=disburse (Disburse)
+  5. POST /loans/{id}/transactions (Repayment)
+  
+  **Accounting Integration:**
+  - Automatic journal entries
+  - GL account mappings
+  end note
+  
+  :Savings Management;
+  note right
+  **Savings Flow:**
+  1. GET /savingsproducts (Get Products)
+  2. POST /savingsaccounts (Create Account)
+  3. POST /savingsaccounts/{id}?command=approve
+  4. POST /savingsaccounts/{id}?command=activate
+  5. POST /savingsaccounts/{id}/transactions (Deposit/Withdrawal)
+  end note
+  
+  :Reporting & Analytics;
+  note right
+  **Reports Access:**
+  1. GET /reports (List Available Reports)
+  2. GET /reports/{id} (Generate Report)
+  3. GET /runreports/{reportName} (Run Report)
+  
+  **Data Export:**
+  - PDF, Excel, CSV formats
+  - Real-time data
+  - Scheduled reports
+  end note
+}
+
+' Error Handling and Monitoring
+:Error Handling & Monitoring;
+
+partition "Error Handling" {
+  
+  :Common API Errors;
+  note right
+  **HTTP Status Codes:**
+  - 400 - Bad Request (Validation errors)
+  - 401 - Unauthorized (Authentication failure)
+  - 403 - Forbidden (Authorization failure)
+  - 404 - Not Found (Resource not found)
+  - 500 - Internal Server Error
+  
+  **Error Response Format:**
+  {
+    developerMessage: Error details,
+    httpStatusCode: 400,
+    defaultUserMessage: User-friendly message,
+    userMessageGlobalisationCode: error.msg.code,
+    errors: [...]
+  }
+  end note
+  
+  :Monitoring & Logging;
+  note right
+  **Monitoring Tools:**
+  - Application logs (logback)
+  - JMX monitoring
+  - Micrometer metrics
+  - Custom health checks
+
+  **Log Locations:**
+  - logs/fineract.log
+  - Database audit tables
+  - Transaction logs
+  end note
+}
+
+' Performance and Security
+:Security & Performance;
+
+partition "Security Best Practices" {
+  
+  :Security Configuration;
+  note right
+  **Security Measures:**
+  - HTTPS/TLS encryption
+  - OAuth2 + JWT tokens
+  - Multi-tenancy isolation
+  - Role-based access control (RBAC)
+  - API rate limiting
+  - Input validation & sanitization
+
+  **Database Security:**
+  - Connection encryption
+  - Prepared statements
+  - Schema isolation per tenant
+  end note
+  
+  :Performance Optimization;
+  note right
+  **Performance Tips:**
+  - Database connection pooling
+  - Query optimization
+  - Caching strategies (Redis/Hazelcast)
+  - Pagination for large datasets
+  - Async processing for heavy operations
+
+  **Scaling Options:**
+  - Horizontal scaling (multiple instances)
+  - Load balancing
+  - Database read replicas
+  - CDN for static assets
+  end note
+}
+
+' Troubleshooting
+:Troubleshooting Guide;
+
+partition "Common Issues & Solutions" {
+  
+  :Startup Issues;
+  note right
+  **Database Connection Failed:**
+  - Check database server status
+  - Verify connection properties
+  - Ensure database schema exists
+
+  **Port Already in Use:**
+  - Change server.port in application.properties
+  - Kill existing processes on port 8080
+
+  **Memory Issues:**
+  - Increase JVM heap size (-Xmx)
+  - Check for memory leaks
+  end note
+  
+  :Runtime Issues;
+  note right
+  **API Response Slow:**
+  - Check database performance
+  - Review query execution plans
+  - Monitor connection pool
+
+  **Authentication Failures:**
+  - Verify credentials
+  - Check tenant configuration
+  - Review security settings
+
+  **Data Inconsistency:**
+  - Check transaction isolation
+  - Review concurrent operations
+  - Validate data integrity
+  end note
+}
+
+:Fineract System Ready for Production Use;
+
+stop
+
+note right
+Key Success Indicators:
+- Server Status: HTTP 200 on /actuator/health
+- Database: Connection pool active and responsive
+- API Access: Successful authentication and basic operations
+- Security: HTTPS configured, proper authentication
+- Performance: Response times under acceptable thresholds
+- Monitoring: Logging and metrics collection working
+- Backup: Database backup strategy implemented
+end note
+
+@enduml

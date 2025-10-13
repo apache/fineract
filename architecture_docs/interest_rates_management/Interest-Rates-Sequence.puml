@@ -1,0 +1,336 @@
+@startuml Interest-Rates-Sequence
+!include <C4/C4_Context>
+
+title Apache Fineract - Interest Rates Management Module Sequence Diagram
+
+' Actors and Systems
+actor "Rate Manager" as RM
+actor "System Administrator" as ADMIN
+participant "InterestRatesApiResource" as API
+participant "CommandSourceHandler" as CSH
+participant "InterestRateWritePlatformService" as IRWS
+participant "InterestRateReadPlatformService" as IRRS
+participant "InterestRateValidator" as VAL
+participant "RateCalculationService" as RCS
+participant "MarketRateIntegrationService" as MRIS
+participant "InterestRateRepository" as REPO
+participant "InterestRateHistoryService" as IRHS
+participant "RateNotificationService" as RNS
+database "TenantDatabase" as DB
+
+note over RM, DB
+**Interest Rates Management Sequence Flows**
+1. Interest Rate Definition and Configuration
+2. Market Rate Integration and Updates
+3. Rate Calculation and Application
+4. Interest Rate History and Tracking
+5. Automated Rate Adjustment Rules
+end note
+
+== Interest Rate Definition Creation ==
+
+RM -> API : POST /interestrates\n{interestRateDefinition}
+activate API
+
+API -> CSH : processCommand(CREATE_INTEREST_RATE)
+activate CSH
+
+CSH -> VAL : validateInterestRateDefinition(rateData)
+activate VAL
+VAL -> VAL : validateRateName()
+VAL -> VAL : validateRateType()
+VAL -> VAL : validateRateRange()
+VAL -> VAL : validateCalculationMethod()
+VAL -> VAL : validateEffectiveDates()
+VAL -> REPO : checkDuplicateRateName()
+activate REPO
+REPO -> DB : SELECT * FROM m_interest_rate WHERE name = ?
+REPO --> VAL : rateExists
+deactivate REPO
+VAL --> CSH : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CSH -> IRWS : createInterestRate(rateData)
+    activate IRWS
+    
+    IRWS -> IRWS : buildInterestRateEntity()
+    IRWS -> IRWS : configureCalculationParameters()
+    IRWS -> IRWS : setRateEffectiveDates()
+    
+    IRWS -> REPO : save(interestRateEntity)
+    activate REPO
+    REPO -> DB : INSERT INTO m_interest_rate
+    REPO --> IRWS : rateSaved
+    deactivate REPO
+    
+    ' Create initial rate history entry
+    IRWS -> IRHS : createInitialRateHistory(rateId, initialRate)
+    activate IRHS
+    IRHS -> REPO : saveRateHistory()
+    activate REPO
+    REPO -> DB : INSERT INTO m_interest_rate_history
+    REPO --> IRHS : historyCreated
+    deactivate REPO
+    IRHS --> IRWS : HistoryInitialized
+    deactivate IRHS
+    
+    IRWS --> CSH : InterestRateCreationResult
+    deactivate IRWS
+    
+    CSH --> API : CommandProcessingResult
+    deactivate CSH
+    
+    API --> RM : HTTP 201 Created\n{interestRateId}
+    deactivate API
+    
+else Validation Failure
+    CSH --> API : ValidationException
+    API --> RM : HTTP 400 Bad Request\n{validationErrors}
+end
+
+== Market Rate Integration Flow ==
+
+ADMIN -> API : POST /interestrates/{rateId}/marketintegration\n{marketRateConfig}
+activate API
+
+API -> CSH : processCommand(CONFIGURE_MARKET_RATE_INTEGRATION)
+activate CSH
+
+CSH -> VAL : validateMarketRateConfiguration(config)
+activate VAL
+VAL -> VAL : validateMarketDataSource()
+VAL -> VAL : validateUpdateFrequency()
+VAL -> VAL : validateRateMapping()
+VAL --> CSH : ConfigurationValid
+deactivate VAL
+
+alt Configuration Valid
+    CSH -> MRIS : configureMarketIntegration(rateId, config)
+    activate MRIS
+    
+    MRIS -> MRIS : setupMarketDataConnection()
+    MRIS -> MRIS : configureRateMapping()
+    MRIS -> MRIS : scheduleRateUpdates()
+    
+    MRIS -> REPO : saveMarketIntegrationConfig()
+    activate REPO
+    REPO -> DB : INSERT INTO m_interest_rate_market_config
+    REPO --> MRIS : configSaved
+    deactivate REPO
+    
+    MRIS --> CSH : MarketIntegrationConfigured
+    deactivate MRIS
+    
+    CSH --> API : CommandProcessingResult
+    deactivate CSH
+    
+    API --> ADMIN : HTTP 200 OK\n{configurationSummary}
+    deactivate API
+    
+else Configuration Invalid
+    CSH --> API : ValidationException
+    API --> ADMIN : HTTP 400 Bad Request
+end
+
+== Automated Market Rate Update ==
+
+participant "ScheduledRateUpdateJob" as SRUJ
+
+SRUJ -> MRIS : executeMarketRateUpdate()
+activate MRIS
+
+MRIS -> REPO : findActiveMarketIntegrations()
+activate REPO
+REPO -> DB : SELECT * FROM m_interest_rate_market_config WHERE active = true
+REPO --> MRIS : activeIntegrations
+deactivate REPO
+
+loop For Each Market Integration
+    MRIS -> MRIS : fetchCurrentMarketRate(dataSource)
+    MRIS -> MRIS : validateReceivedRate()
+    
+    alt Rate Changed Significantly
+        MRIS -> IRWS : updateInterestRate(rateId, newMarketRate)
+        activate IRWS
+        
+        IRWS -> REPO : findInterestRate(rateId)
+        activate REPO
+        REPO -> DB : SELECT * FROM m_interest_rate WHERE id = ?
+        REPO --> IRWS : currentRate
+        deactivate REPO
+        
+        IRWS -> IRWS : calculateRateChange()
+        IRWS -> IRWS : applyUpdateRules()
+        
+        ' Check if rate change requires approval
+        alt Rate Change Requires Approval
+            IRWS -> IRWS : createRateChangeRequest()
+            IRWS -> RNS : notifyRateManagers(rateChangeRequest)
+        else Auto-Update Allowed
+            IRWS -> IRWS : updateRateDirectly()
+            
+            IRWS -> REPO : updateInterestRate()
+            activate REPO
+            REPO -> DB : UPDATE m_interest_rate SET current_rate = ?
+            REPO --> IRWS : rateUpdated
+            deactivate REPO
+            
+            ' Record rate change in history
+            IRWS -> IRHS : recordRateChange(rateId, newRate, "MARKET_UPDATE")
+            activate IRHS
+            IRHS -> REPO : saveRateHistory()
+            IRHS --> IRWS : historyRecorded
+            deactivate IRHS
+            
+            ' Notify affected products/accounts
+            IRWS -> RNS : notifyRateChange(rateId, newRate)
+        end
+        
+        IRWS --> MRIS : RateUpdateResult
+        deactivate IRWS
+    end
+end
+
+MRIS --> SRUJ : MarketRateUpdateCompleted
+deactivate MRIS
+
+== Interest Rate Calculation Flow ==
+
+participant "LoanService" as LS
+
+LS -> RCS : calculateInterestForLoan(loanId, calculationDate)
+activate RCS
+
+RCS -> REPO : findApplicableInterestRates(loanProductId, calculationDate)
+activate REPO
+REPO -> DB : SELECT ir.* FROM m_interest_rate ir JOIN m_product_loan_interest_rate plir WHERE plir.loan_product_id = ?
+REPO --> RCS : applicableRates
+deactivate REPO
+
+loop For Each Applicable Rate
+    alt Fixed Interest Rate
+        RCS -> RCS : calculateFixedInterest()
+        
+    else Variable Interest Rate
+        RCS -> RCS : calculateVariableInterest()
+        RCS -> RCS : applyRateAdjustments()
+        
+    else Market-Linked Rate
+        RCS -> MRIS : getCurrentMarketRate(rateId)
+        activate MRIS
+        MRIS -> REPO : findLatestMarketRate()
+        MRIS --> RCS : currentMarketRate
+        deactivate MRIS
+        RCS -> RCS : calculateMarketLinkedInterest()
+        
+    else Tiered Interest Rate
+        RCS -> RCS : calculateTieredInterest()
+        RCS -> RCS : applyTierBrackets()
+    end
+end
+
+RCS -> RCS : aggregateInterestCalculations()
+RCS -> RCS : applyInterestCalculationRules()
+
+RCS --> LS : InterestCalculationResult
+deactivate RCS
+
+== Interest Rate History and Audit ==
+
+RM -> API : GET /interestrates/{rateId}/history?fromDate=X&toDate=Y
+activate API
+
+API -> IRRS : getInterestRateHistory(rateId, fromDate, toDate)
+activate IRRS
+
+IRRS -> REPO : findRateHistoryByDateRange(rateId, fromDate, toDate)
+activate REPO
+REPO -> DB : SELECT * FROM m_interest_rate_history WHERE interest_rate_id = ? AND effective_date BETWEEN ? AND ?
+REPO --> IRRS : rateHistory
+deactivate REPO
+
+IRRS -> IRRS : formatHistoryResponse()
+IRRS -> IRRS : calculateRateStatistics()
+
+IRRS --> API : InterestRateHistoryResponse
+deactivate IRRS
+
+API --> RM : HTTP 200 OK\n{rateHistory}
+deactivate API
+
+== Rate Change Approval Workflow ==
+
+RM -> API : POST /interestrates/{rateId}/changes/{changeId}?command=approve
+activate API
+
+API -> CSH : processCommand(APPROVE_RATE_CHANGE)
+activate CSH
+
+CSH -> VAL : validateRateChangeApproval(changeId)
+activate VAL
+VAL -> REPO : findRateChangeRequest(changeId)
+VAL -> VAL : validateApprovalAuthority()
+VAL -> VAL : checkChangeRequestStatus()
+VAL --> CSH : ApprovalValid
+deactivate VAL
+
+alt Approval Valid
+    CSH -> IRWS : approveRateChange(changeId)
+    activate IRWS
+    
+    IRWS -> REPO : findRateChangeRequest(changeId)
+    activate REPO
+    REPO -> DB : SELECT * FROM m_interest_rate_change_request WHERE id = ?
+    REPO --> IRWS : changeRequest
+    deactivate REPO
+    
+    ' Apply the approved rate change
+    IRWS -> IRWS : applyApprovedRateChange()
+    
+    IRWS -> REPO : updateInterestRate()
+    activate REPO
+    REPO -> DB : UPDATE m_interest_rate SET current_rate = ?
+    REPO -> DB : UPDATE m_interest_rate_change_request SET status = 'APPROVED'
+    REPO --> IRWS : changeApplied
+    deactivate REPO
+    
+    ' Record in history
+    IRWS -> IRHS : recordApprovedRateChange()
+    activate IRHS
+    IRHS -> REPO : saveRateHistory()
+    IRHS --> IRWS : historyRecorded
+    deactivate IRHS
+    
+    ' Notify stakeholders
+    IRWS -> RNS : notifyRateChangeApproved(rateId)
+    activate RNS
+    RNS -> RNS : sendApprovalNotifications()
+    RNS --> IRWS : notificationsSent
+    deactivate RNS
+    
+    IRWS --> CSH : RateChangeApprovalResult
+    deactivate IRWS
+    
+    CSH --> API : CommandProcessingResult
+    deactivate CSH
+    
+    API --> RM : HTTP 200 OK\n{approvalSummary}
+    deactivate API
+    
+else Approval Invalid
+    CSH --> API : ValidationException
+    API --> RM : HTTP 400 Bad Request
+end
+
+note over RM, DB
+**Key Design Patterns:**
+• Strategy Pattern: Different interest calculation strategies
+• Observer Pattern: Rate change notifications and updates
+• Template Method: Common rate processing with type-specific logic
+• Command Pattern: Rate operations as executable commands
+• Factory Pattern: Rate calculator creation based on rate type
+• Chain of Responsibility: Rate approval workflow
+end note
+
+@enduml

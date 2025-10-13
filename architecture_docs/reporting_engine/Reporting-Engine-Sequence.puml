@@ -1,0 +1,348 @@
+@startuml Reporting-Engine-Sequence
+!include <C4/C4_Context>
+
+title Apache Fineract - Reporting Engine Module Sequence Diagram
+
+' Actors and Systems
+actor "Report User" as USER
+actor "Report Admin" as ADMIN
+participant "ReportsApiResource" as API
+participant "CommandSourceHandler" as CSH
+participant "ReportingProcessService" as RPS
+parameter "ReportReadPlatformService" as RRS
+participant "ReportValidator" as VAL
+participant "ReportParameterService" as PARAM_SVC
+participant "ReportGenerationService" as RGS
+participant "ReportExportService" as RES
+participant "ReportRepository" as REPO
+participant "ReportDataService" as RDS
+participant "PentahoReportProcessor" as PRP
+participant "JasperReportProcessor" as JRP
+participant "DocumentService" as DOC_SVC
+database "TenantDatabase" as DB
+
+note over USER, DB
+**Reporting Engine Sequence Flows**
+1. Report Definition Creation and Management
+2. Dynamic Report Parameter Configuration
+3. Report Generation and Processing
+4. Multiple Format Export (PDF, Excel, CSV)
+5. Scheduled Report Execution
+end note
+
+== Report Definition Creation Flow ==
+
+ADMIN -> API : POST /reports\n{reportDefinition}
+activate API
+
+API -> CSH : processCommand(CREATE_REPORT)
+activate CSH
+
+CSH -> VAL : validateReportDefinition(reportData)
+activate VAL
+VAL -> VAL : validateReportName()
+VAL -> VAL : validateReportSQL()
+VAL -> VAL : validateReportType()
+VAL -> VAL : validateReportCategory()
+VAL -> REPO : checkDuplicateReportName()
+activate REPO
+REPO -> DB : SELECT * FROM stretchy_report WHERE report_name = ?
+REPO --> VAL : reportExists
+deactivate REPO
+VAL --> CSH : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CSH -> RPS : createReport(reportData)
+    activate RPS
+    
+    RPS -> RPS : buildReportEntity()
+    RPS -> RPS : parseReportParameters()
+    RPS -> RPS : validateSQLSecurity()
+    
+    RPS -> REPO : save(reportEntity)
+    activate REPO
+    REPO -> DB : INSERT INTO stretchy_report
+    REPO --> RPS : savedReport
+    deactivate REPO
+    
+    ' Create report parameters if defined
+    alt Report Has Parameters
+        loop For Each Parameter
+            RPS -> PARAM_SVC : createReportParameter(reportId, parameterData)
+            activate PARAM_SVC
+            PARAM_SVC -> REPO : saveReportParameter()
+            activate REPO
+            REPO -> DB : INSERT INTO stretchy_parameter
+            REPO --> PARAM_SVC : parameterSaved
+            deactivate REPO
+            PARAM_SVC --> RPS : ParameterCreated
+            deactivate PARAM_SVC
+        end
+    end
+    
+    RPS --> CSH : ReportCreationResult
+    deactivate RPS
+    
+    CSH --> API : CommandProcessingResult
+    deactivate CSH
+    
+    API --> ADMIN : HTTP 201 Created\n{reportId}
+    deactivate API
+    
+else Validation Failure
+    CSH --> API : ValidationException
+    API --> ADMIN : HTTP 400 Bad Request\n{validationErrors}
+end
+
+== Report Generation Flow ==
+
+USER -> API : GET /reports/{reportId}?R_param1=value1&R_param2=value2&output-type=PDF
+activate API
+
+API -> RRS : generateReport(reportId, parameters, outputType)
+activate RRS
+
+RRS -> REPO : findReportById(reportId)
+activate REPO
+REPO -> DB : SELECT * FROM stretchy_report WHERE id = ?
+REPO --> RRS : reportDefinition
+deactivate REPO
+
+RRS -> VAL : validateReportAccess(reportId, user)
+activate VAL
+VAL -> VAL : checkUserPermissions()
+VAL -> VAL : validateReportParameters()
+VAL --> RRS : AccessValidated
+deactivate VAL
+
+alt Access Granted
+    RRS -> PARAM_SVC : resolveReportParameters(reportId, userParameters)
+    activate PARAM_SVC
+    
+    PARAM_SVC -> REPO : getReportParameters(reportId)
+    activate REPO
+    REPO -> DB : SELECT * FROM stretchy_parameter WHERE report_id = ?
+    REPO --> PARAM_SVC : reportParameters
+    deactivate REPO
+    
+    loop For Each Parameter
+        PARAM_SVC -> PARAM_SVC : validateParameterValue()
+        PARAM_SVC -> PARAM_SVC : applyParameterDefaults()
+        PARAM_SVC -> PARAM_SVC : formatParameterForSQL()
+    end
+    
+    PARAM_SVC --> RRS : ResolvedParameters
+    deactivate PARAM_SVC
+    
+    RRS -> RGS : executeReport(reportDefinition, parameters)
+    activate RGS
+    
+    RGS -> RDS : executeReportQuery(sql, parameters)
+    activate RDS
+    
+    RDS -> RDS : prepareSQLStatement()
+    RDS -> RDS : bindParameters()
+    RDS -> DB : EXECUTE_REPORT_QUERY
+    DB --> RDS : queryResults
+    
+    RDS -> RDS : transformResultSet()
+    RDS --> RGS : ReportDataSet
+    deactivate RDS
+    
+    ' Choose report processor based on type
+    alt Pentaho Report
+        RGS -> PRP : processReport(reportDefinition, dataSet)
+        activate PRP
+        PRP -> PRP : loadReportTemplate()
+        PRP -> PRP : bindDataToTemplate()
+        PRP -> PRP : applyFormatting()
+        PRP --> RGS : ProcessedReport
+        deactivate PRP
+        
+    else Jasper Report
+        RGS -> JRP : processReport(reportDefinition, dataSet)
+        activate JRP
+        JRP -> JRP : compileReportTemplate()
+        JRP -> JRP : fillReportWithData()
+        JRP -> JRP : applyReportParameters()
+        JRP --> RGS : ProcessedReport
+        deactivate JRP
+        
+    else Simple Table Report
+        RGS -> RGS : createSimpleTableReport(dataSet)
+    end
+    
+    RGS --> RRS : GeneratedReport
+    deactivate RGS
+    
+    RRS -> RES : exportReport(generatedReport, outputType)
+    activate RES
+    
+    alt PDF Export
+        RES -> RES : generatePDFReport()
+    else Excel Export
+        RES -> RES : generateExcelReport()
+    else CSV Export
+        RES -> RES : generateCSVReport()
+    else HTML Export
+        RES -> RES : generateHTMLReport()
+    end
+    
+    RES --> RRS : ExportedReport
+    deactivate RES
+    
+    ' Store report if required
+    alt Store Report
+        RRS -> DOC_SVC : storeGeneratedReport(reportData)
+        activate DOC_SVC
+        DOC_SVC -> DB : INSERT INTO m_document
+        DOC_SVC --> RRS : reportStored
+        deactivate DOC_SVC
+    end
+    
+    RRS --> API : GeneratedReportResponse
+    deactivate RRS
+    
+    API --> USER : HTTP 200 OK\n{reportContent}
+    deactivate API
+    
+else Access Denied
+    RRS --> API : UnauthorizedAccessException
+    API --> USER : HTTP 403 Forbidden
+end
+
+== Scheduled Report Execution Flow ==
+
+participant "SchedulerService" as SCHEDULER
+participant "ReportJobService" as RJS
+
+SCHEDULER -> RJS : executeScheduledReport(jobId)
+activate RJS
+
+RJS -> REPO : findScheduledReportJob(jobId)
+activate REPO
+REPO -> DB : SELECT * FROM job_detail WHERE id = ?
+REPO --> RJS : reportJob
+deactivate REPO
+
+RJS -> RRS : generateReport(reportId, jobParameters, outputType)
+activate RRS
+
+' Same report generation flow as above
+RRS -> REPO : findReportById(reportId)
+RRS -> PARAM_SVC : resolveReportParameters()
+RRS -> RGS : executeReport()
+RRS -> RES : exportReport()
+
+RRS --> RJS : GeneratedReport
+deactivate RRS
+
+' Email report or store in document system
+alt Email Report
+    RJS -> RJS : emailReport(reportContent, recipients)
+    RJS -> RJS : sendEmailWithAttachment()
+    
+else Store Report
+    RJS -> DOC_SVC : storeScheduledReport(reportContent)
+    activate DOC_SVC
+    DOC_SVC -> DB : INSERT INTO m_document
+    DOC_SVC --> RJS : reportStored
+    deactivate DOC_SVC
+end
+
+' Update job execution status
+RJS -> REPO : updateJobExecution(jobId, status)
+activate REPO
+REPO -> DB : UPDATE job_run_history SET status = ?, end_time = ?
+REPO --> RJS : jobUpdated
+deactivate REPO
+
+RJS --> SCHEDULER : ReportJobCompleted
+deactivate RJS
+
+== Dynamic Report Parameter Flow ==
+
+USER -> API : GET /reports/{reportId}/template
+activate API
+
+API -> RRS : getReportTemplate(reportId)
+activate RRS
+
+RRS -> REPO : findReportById(reportId)
+activate REPO
+REPO -> DB : SELECT * FROM stretchy_report WHERE id = ?
+REPO --> RRS : reportDefinition
+deactivate REPO
+
+RRS -> PARAM_SVC : getReportParameters(reportId)
+activate PARAM_SVC
+
+PARAM_SVC -> REPO : findParametersByReportId(reportId)
+activate REPO
+REPO -> DB : SELECT * FROM stretchy_parameter WHERE report_id = ?
+REPO --> PARAM_SVC : parameters
+deactivate REPO
+
+loop For Each Parameter
+    alt Parameter Has Dropdown Values
+        PARAM_SVC -> RDS : getParameterSelectValues(parameterName)
+        activate RDS
+        RDS -> DB : EXECUTE_PARAMETER_QUERY
+        RDS --> PARAM_SVC : selectOptions
+        deactivate RDS
+    end
+    
+    PARAM_SVC -> PARAM_SVC : buildParameterDefinition()
+end
+
+PARAM_SVC --> RRS : ParameterTemplate
+deactivate PARAM_SVC
+
+RRS -> RRS : buildReportTemplate()
+RRS --> API : ReportTemplate
+deactivate RRS
+
+API --> USER : HTTP 200 OK\n{reportTemplate}
+deactivate API
+
+== Report Performance Monitoring Flow ==
+
+participant "ReportMetricsCollector" as RMC
+
+RGS -> RMC : startReportGeneration(reportId)
+activate RMC
+
+RDS -> RMC : recordQueryExecutionTime(queryTime)
+PRP -> RMC : recordReportProcessingTime(processingTime) 
+RES -> RMC : recordExportTime(exportTime)
+
+RMC -> RMC : calculateTotalReportTime()
+RMC -> RMC : updateReportMetrics()
+
+alt Report Generation Time Exceeds Threshold
+    RMC -> RMC : logPerformanceWarning()
+    RMC -> RMC : notifyReportAdministrators()
+end
+
+RMC -> REPO : updateReportStatistics(reportId, metrics)
+activate REPO
+REPO -> DB : UPDATE stretchy_report SET execution_count = ?, avg_execution_time = ?
+REPO --> RMC : statisticsUpdated
+deactivate REPO
+
+RMC --> RGS : MetricsRecorded
+deactivate RMC
+
+note over USER, DB
+**Key Design Patterns:**
+• Template Method: Common report generation flow with specific processors
+• Strategy Pattern: Different export strategies (PDF, Excel, CSV, HTML)
+• Factory Pattern: Report processor creation based on report type
+• Observer Pattern: Performance monitoring and metrics collection
+• Command Pattern: Report generation as executable commands
+• Builder Pattern: Complex report parameter and template building
+• Decorator Pattern: Report formatting and styling decorators
+end note
+
+@enduml

@@ -1,0 +1,818 @@
+@startuml Tax-Management-Module-Design
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Force top to bottom layout
+top to bottom direction
+
+title Apache Fineract - Tax Management Module (Class/Interface Level Design)
+
+' Tax Management Module
+Package "org.apache.fineract.portfolio.tax" {
+    
+    ' Tax Domain Model
+    Package "domain" {
+        
+        ' Tax Configuration Entity
+        Class TaxConfiguration {
+            - Long id
+            - String name
+            - String description
+            - TaxType taxType
+            - Boolean isActive
+            - LocalDate effectiveDate
+            - LocalDate expiryDate
+            - String taxCode
+            - TaxCalculationMethod calculationMethod
+            - Map<String, String> configurationParameters
+            - Set<TaxRule> taxRules
+            - String createdBy
+            - LocalDateTime createdOn
+            - String modifiedBy
+            - LocalDateTime modifiedOn
+            --
+            + getId() : Long
+            + getName() : String
+            + getDescription() : String
+            + getTaxType() : TaxType
+            + isActive() : Boolean
+            + getEffectiveDate() : LocalDate
+            + getExpiryDate() : LocalDate
+            + getTaxCode() : String
+            + getCalculationMethod() : TaxCalculationMethod
+            + getConfigurationParameters() : Map<String, String>
+            + getTaxRules() : Set<TaxRule>
+            + isEffective(LocalDate date) : Boolean
+            + addTaxRule(TaxRule rule) : void
+            + removeTaxRule(TaxRule rule) : void
+            + updateParameter(String key, String value) : void
+            + activate() : void
+            + deactivate() : void
+            + validateConfiguration() : Boolean
+        }
+        
+        ' Tax Rule
+        Class TaxRule {
+            - Long id
+            - TaxConfiguration taxConfiguration
+            - String ruleName
+            - String ruleDescription
+            - TaxRuleType ruleType
+            - BigDecimal taxRate
+            - BigDecimal minimumAmount
+            - BigDecimal maximumAmount
+            - TaxCalculationBasis calculationBasis
+            - String applicabilityConditions
+            - Integer priority
+            - Boolean isActive
+            --
+            + getId() : Long
+            + getTaxConfiguration() : TaxConfiguration
+            + getRuleName() : String
+            + getRuleDescription() : String
+            + getRuleType() : TaxRuleType
+            + getTaxRate() : BigDecimal
+            + getMinimumAmount() : BigDecimal
+            + getMaximumAmount() : BigDecimal
+            + getCalculationBasis() : TaxCalculationBasis
+            + getApplicabilityConditions() : String
+            + getPriority() : Integer
+            + isActive() : Boolean
+            + isApplicable(TaxCalculationContext context) : Boolean
+            + calculateTax(BigDecimal taxableAmount) : BigDecimal
+            + validateRule() : Boolean
+        }
+        
+        ' Tax Jurisdiction
+        Class TaxJurisdiction {
+            - Long id
+            - String name
+            - String code
+            - String description
+            - JurisdictionType jurisdictionType
+            - String parentJurisdiction
+            - String taxAuthority
+            - String registrationNumber
+            - Set<TaxConfiguration> taxConfigurations
+            - Map<String, String> jurisdictionMetadata
+            - Boolean isActive
+            --
+            + getId() : Long
+            + getName() : String
+            + getCode() : String
+            + getDescription() : String
+            + getJurisdictionType() : JurisdictionType
+            + getParentJurisdiction() : String
+            + getTaxAuthority() : String
+            + getRegistrationNumber() : String
+            + getTaxConfigurations() : Set<TaxConfiguration>
+            + getJurisdictionMetadata() : Map<String, String>
+            + isActive() : Boolean
+            + addTaxConfiguration(TaxConfiguration config) : void
+            + removeTaxConfiguration(TaxConfiguration config) : void
+            + getApplicableTaxes(TaxType taxType) : Set<TaxConfiguration>
+        }
+        
+        ' Tax Assessment
+        Class TaxAssessment {
+            - Long id
+            - String assessmentNumber
+            - Long entityId
+            - EntityType entityType
+            - TaxConfiguration taxConfiguration
+            - LocalDate assessmentDate
+            - LocalDate dueDate
+            - BigDecimal taxableAmount
+            - BigDecimal assessedTax
+            - BigDecimal paidAmount
+            - BigDecimal outstandingAmount
+            - TaxAssessmentStatus status
+            - String assessedBy
+            - LocalDateTime assessedOn
+            - Set<TaxPayment> payments
+            - Map<String, Object> assessmentDetails
+            --
+            + getId() : Long
+            + getAssessmentNumber() : String
+            + getEntityId() : Long
+            + getEntityType() : EntityType
+            + getTaxConfiguration() : TaxConfiguration
+            + getAssessmentDate() : LocalDate
+            + getDueDate() : LocalDate
+            + getTaxableAmount() : BigDecimal
+            + getAssessedTax() : BigDecimal
+            + getPaidAmount() : BigDecimal
+            + getOutstandingAmount() : BigDecimal
+            + getStatus() : TaxAssessmentStatus
+            + getAssessedBy() : String
+            + getAssessedOn() : LocalDateTime
+            + getPayments() : Set<TaxPayment>
+            + getAssessmentDetails() : Map<String, Object>
+            + addPayment(TaxPayment payment) : void
+            + calculateOutstandingAmount() : BigDecimal
+            + isOverdue() : Boolean
+            + markAsPaid() : void
+            + markAsPartiallyPaid(BigDecimal paidAmount) : void
+        }
+        
+        ' Tax Payment
+        Class TaxPayment {
+            - Long id
+            - TaxAssessment taxAssessment
+            - String paymentReference
+            - BigDecimal paymentAmount
+            - LocalDate paymentDate
+            - PaymentMethod paymentMethod
+            - PaymentStatus paymentStatus
+            - String paymentSource
+            - String receiptNumber
+            - String paidBy
+            - Map<String, String> paymentMetadata
+            --
+            + getId() : Long
+            + getTaxAssessment() : TaxAssessment
+            + getPaymentReference() : String
+            + getPaymentAmount() : BigDecimal
+            + getPaymentDate() : LocalDate
+            + getPaymentMethod() : PaymentMethod
+            + getPaymentStatus() : PaymentStatus
+            + getPaymentSource() : String
+            + getReceiptNumber() : String
+            + getPaidBy() : String
+            + getPaymentMetadata() : Map<String, String>
+            + confirm() : void
+            + reverse(String reason) : void
+            + isSuccessful() : Boolean
+        }
+        
+        ' Withholding Tax Configuration
+        Class WithholdingTaxConfiguration {
+            - Long id
+            - String name
+            - String description
+            - TaxJurisdiction jurisdiction
+            - BigDecimal withholdingRate
+            - BigDecimal thresholdAmount
+            - WithholdingTaxType withholdingType
+            - Set<String> applicableTransactionTypes
+            - Boolean isActive
+            - LocalDate effectiveDate
+            - LocalDate expiryDate
+            --
+            + getId() : Long
+            + getName() : String
+            + getDescription() : String
+            + getJurisdiction() : TaxJurisdiction
+            + getWithholdingRate() : BigDecimal
+            + getThresholdAmount() : BigDecimal
+            + getWithholdingType() : WithholdingTaxType
+            + getApplicableTransactionTypes() : Set<String>
+            + isActive() : Boolean
+            + getEffectiveDate() : LocalDate
+            + getExpiryDate() : LocalDate
+            + isApplicableForTransaction(String transactionType, BigDecimal amount) : Boolean
+            + calculateWithholdingTax(BigDecimal transactionAmount) : BigDecimal
+            + isEffective(LocalDate date) : Boolean
+        }
+        
+        ' Tax Return
+        Class TaxReturn {
+            - Long id
+            - String returnNumber
+            - TaxJurisdiction jurisdiction
+            - TaxReturnType returnType
+            - Integer taxPeriodYear
+            - Integer taxPeriodMonth
+            - LocalDate periodStartDate
+            - LocalDate periodEndDate
+            - LocalDate filingDueDate
+            - LocalDate filedDate
+            - TaxReturnStatus status
+            - BigDecimal totalTaxableAmount
+            - BigDecimal totalTaxLiability
+            - BigDecimal totalTaxPaid
+            - BigDecimal refundDue
+            - String filedBy
+            - Map<String, Object> returnData
+            - Set<TaxReturnLineItem> lineItems
+            --
+            + getId() : Long
+            + getReturnNumber() : String
+            + getJurisdiction() : TaxJurisdiction
+            + getReturnType() : TaxReturnType
+            + getTaxPeriodYear() : Integer
+            + getTaxPeriodMonth() : Integer
+            + getPeriodStartDate() : LocalDate
+            + getPeriodEndDate() : LocalDate
+            + getFilingDueDate() : LocalDate
+            + getFiledDate() : LocalDate
+            + getStatus() : TaxReturnStatus
+            + getTotalTaxableAmount() : BigDecimal
+            + getTotalTaxLiability() : BigDecimal
+            + getTotalTaxPaid() : BigDecimal
+            + getRefundDue() : BigDecimal
+            + getFiledBy() : String
+            + getReturnData() : Map<String, Object>
+            + getLineItems() : Set<TaxReturnLineItem>
+            + addLineItem(TaxReturnLineItem lineItem) : void
+            + calculateTotals() : void
+            + submit() : void
+            + approve() : void
+            + reject(String reason) : void
+            + isOverdue() : Boolean
+        }
+        
+        ' Tax Return Line Item
+        Class TaxReturnLineItem {
+            - Long id
+            - TaxReturn taxReturn
+            - String lineItemCode
+            - String description
+            - BigDecimal amount
+            - TaxConfiguration taxConfiguration
+            - String sourceReference
+            - Map<String, Object> lineItemDetails
+            --
+            + getId() : Long
+            + getTaxReturn() : TaxReturn
+            + getLineItemCode() : String
+            + getDescription() : String
+            + getAmount() : BigDecimal
+            + getTaxConfiguration() : TaxConfiguration
+            + getSourceReference() : String
+            + getLineItemDetails() : Map<String, Object>
+        }
+        
+        ' Tax Audit Trail
+        Class TaxAuditTrail {
+            - Long id
+            - Long entityId
+            - EntityType entityType
+            - TaxAuditAction action
+            - String actionDescription
+            - String performedBy
+            - LocalDateTime actionDate
+            - Map<String, Object> beforeState
+            - Map<String, Object> afterState
+            - String comments
+            --
+            + getId() : Long
+            + getEntityId() : Long
+            + getEntityType() : EntityType
+            + getAction() : TaxAuditAction
+            + getActionDescription() : String
+            + getPerformedBy() : String
+            + getActionDate() : LocalDateTime
+            + getBeforeState() : Map<String, Object>
+            + getAfterState() : Map<String, Object>
+            + getComments() : String
+        }
+        
+        ' Enumerations
+        Enum TaxType {
+            INCOME_TAX(1, "taxType.incomeTax")
+            WITHHOLDING_TAX(2, "taxType.withholdingTax")
+            VALUE_ADDED_TAX(3, "taxType.valueAddedTax")
+            SERVICE_TAX(4, "taxType.serviceTax")
+            STAMP_DUTY(5, "taxType.stampDuty")
+            TRANSACTION_TAX(6, "taxType.transactionTax")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum TaxCalculationMethod {
+            FIXED_RATE(1, "taxCalculationMethod.fixedRate")
+            PROGRESSIVE_RATE(2, "taxCalculationMethod.progressiveRate")
+            SLAB_BASED(3, "taxCalculationMethod.slabBased")
+            FLAT_AMOUNT(4, "taxCalculationMethod.flatAmount")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum TaxRuleType {
+            STANDARD(1, "taxRuleType.standard")
+            EXEMPTION(2, "taxRuleType.exemption")
+            DEDUCTION(3, "taxRuleType.deduction")
+            SURCHARGE(4, "taxRuleType.surcharge")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum TaxCalculationBasis {
+            GROSS_AMOUNT(1, "taxCalculationBasis.grossAmount")
+            NET_AMOUNT(2, "taxCalculationBasis.netAmount")
+            INTEREST_AMOUNT(3, "taxCalculationBasis.interestAmount")
+            PRINCIPAL_AMOUNT(4, "taxCalculationBasis.principalAmount")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum JurisdictionType {
+            FEDERAL(1, "jurisdictionType.federal")
+            STATE(2, "jurisdictionType.state")
+            CITY(3, "jurisdictionType.city")
+            COUNTY(4, "jurisdictionType.county")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum TaxAssessmentStatus {
+            DRAFT(1, "taxAssessmentStatus.draft")
+            ASSESSED(2, "taxAssessmentStatus.assessed")
+            PARTIALLY_PAID(3, "taxAssessmentStatus.partiallyPaid")
+            FULLY_PAID(4, "taxAssessmentStatus.fullyPaid")
+            OVERDUE(5, "taxAssessmentStatus.overdue")
+            CANCELLED(6, "taxAssessmentStatus.cancelled")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum WithholdingTaxType {
+            INTEREST_INCOME(1, "withholdingTaxType.interestIncome")
+            DIVIDEND_INCOME(2, "withholdingTaxType.dividendIncome")
+            SERVICE_PAYMENT(3, "withholdingTaxType.servicePayment")
+            PROFESSIONAL_FEES(4, "withholdingTaxType.professionalFees")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum TaxReturnType {
+            MONTHLY(1, "taxReturnType.monthly")
+            QUARTERLY(2, "taxReturnType.quarterly")
+            ANNUAL(3, "taxReturnType.annual")
+            SPECIAL(4, "taxReturnType.special")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum TaxReturnStatus {
+            DRAFT(1, "taxReturnStatus.draft")
+            SUBMITTED(2, "taxReturnStatus.submitted")
+            APPROVED(3, "taxReturnStatus.approved")
+            REJECTED(4, "taxReturnStatus.rejected")
+            FILED(5, "taxReturnStatus.filed")
+            --
+            - Integer value
+            - String code
+        }
+    }
+    
+    ' Tax Services
+    Package "service" {
+        
+        ' Tax Calculation Service
+        Interface TaxCalculationService {
+            + calculateTax(TaxCalculationContext context) : TaxCalculationResult
+            + calculateWithholdingTax(WithholdingTaxContext context) : WithholdingTaxResult
+            + assessTax(Long entityId, EntityType entityType, TaxAssessmentRequest request) : CommandProcessingResult
+            + simulateTaxCalculation(TaxSimulationRequest request) : TaxSimulationResult
+            + getApplicableTaxes(Long entityId, EntityType entityType, LocalDate assessmentDate) : List<TaxConfigurationData>
+        }
+        
+        ' Tax Calculation Service Implementation
+        Class TaxCalculationServiceImpl <<Service>> {
+            - TaxConfigurationRepository taxConfigRepository
+            - TaxRuleRepository taxRuleRepository
+            - TaxJurisdictionService jurisdictionService
+            - TaxRuleEngine ruleEngine
+            --
+            + calculateTax(TaxCalculationContext context) : TaxCalculationResult
+            + calculateWithholdingTax(WithholdingTaxContext context) : WithholdingTaxResult
+            + assessTax(Long entityId, EntityType entityType, TaxAssessmentRequest request) : CommandProcessingResult
+            + simulateTaxCalculation(TaxSimulationRequest request) : TaxSimulationResult
+            + getApplicableTaxes(Long entityId, EntityType entityType, LocalDate assessmentDate) : List<TaxConfigurationData>
+            - findApplicableTaxConfigurations(TaxCalculationContext context) : List<TaxConfiguration>
+            - applyTaxRules(List<TaxRule> rules, BigDecimal taxableAmount) : BigDecimal
+            - validateTaxCalculationContext(TaxCalculationContext context) : void
+        }
+        
+        ' Tax Assessment Service
+        Interface TaxAssessmentService {
+            + createTaxAssessment(CreateTaxAssessmentCommand command) : CommandProcessingResult
+            + updateTaxAssessment(Long assessmentId, UpdateTaxAssessmentCommand command) : CommandProcessingResult
+            + payTaxAssessment(Long assessmentId, PayTaxCommand command) : CommandProcessingResult
+            + retrieveTaxAssessment(Long assessmentId) : TaxAssessmentData
+            + retrieveTaxAssessments(TaxAssessmentSearchCriteria criteria) : Page<TaxAssessmentData>
+            + generateTaxCertificate(Long assessmentId) : TaxCertificateData
+        }
+        
+        ' Tax Assessment Service Implementation
+        Class TaxAssessmentServiceImpl <<Service>> {
+            - TaxAssessmentRepository assessmentRepository
+            - TaxPaymentRepository paymentRepository
+            - TaxCalculationService calculationService
+            - DocumentGenerationService documentService
+            --
+            + createTaxAssessment(CreateTaxAssessmentCommand command) : CommandProcessingResult
+            + updateTaxAssessment(Long assessmentId, UpdateTaxAssessmentCommand command) : CommandProcessingResult
+            + payTaxAssessment(Long assessmentId, PayTaxCommand command) : CommandProcessingResult
+            + retrieveTaxAssessment(Long assessmentId) : TaxAssessmentData
+            + retrieveTaxAssessments(TaxAssessmentSearchCriteria criteria) : Page<TaxAssessmentData>
+            + generateTaxCertificate(Long assessmentId) : TaxCertificateData
+            - generateAssessmentNumber() : String
+            - validatePayment(PayTaxCommand command, TaxAssessment assessment) : void
+            - processPayment(TaxAssessment assessment, TaxPayment payment) : void
+        }
+        
+        ' Withholding Tax Service
+        Interface WithholdingTaxService {
+            + calculateWithholdingTax(WithholdingTaxCalculationRequest request) : WithholdingTaxCalculationResult
+            + applyWithholdingTax(ApplyWithholdingTaxCommand command) : CommandProcessingResult
+            + createWithholdingTaxConfiguration(CreateWithholdingTaxConfigCommand command) : CommandProcessingResult
+            + retrieveWithholdingTaxConfigurations(Long jurisdictionId) : List<WithholdingTaxConfigurationData>
+            + generateWithholdingTaxCertificate(Long transactionId) : WithholdingTaxCertificateData
+        }
+        
+        ' Withholding Tax Service Implementation
+        Class WithholdingTaxServiceImpl <<Service>> {
+            - WithholdingTaxConfigurationRepository configRepository
+            - TaxJurisdictionRepository jurisdictionRepository
+            - TransactionService transactionService
+            --
+            + calculateWithholdingTax(WithholdingTaxCalculationRequest request) : WithholdingTaxCalculationResult
+            + applyWithholdingTax(ApplyWithholdingTaxCommand command) : CommandProcessingResult
+            + createWithholdingTaxConfiguration(CreateWithholdingTaxConfigCommand command) : CommandProcessingResult
+            + retrieveWithholdingTaxConfigurations(Long jurisdictionId) : List<WithholdingTaxConfigurationData>
+            + generateWithholdingTaxCertificate(Long transactionId) : WithholdingTaxCertificateData
+            - findApplicableWithholdingTaxConfig(WithholdingTaxCalculationRequest request) : WithholdingTaxConfiguration
+            - createWithholdingTaxTransaction(ApplyWithholdingTaxCommand command, BigDecimal taxAmount) : void
+        }
+        
+        ' Tax Return Service
+        Interface TaxReturnService {
+            + createTaxReturn(CreateTaxReturnCommand command) : CommandProcessingResult
+            + updateTaxReturn(Long returnId, UpdateTaxReturnCommand command) : CommandProcessingResult
+            + submitTaxReturn(Long returnId, SubmitTaxReturnCommand command) : CommandProcessingResult
+            + approveTaxReturn(Long returnId, ApproveTaxReturnCommand command) : CommandProcessingResult
+            + generateTaxReturnData(TaxReturnGenerationRequest request) : TaxReturnData
+            + retrieveTaxReturn(Long returnId) : TaxReturnData
+            + retrieveTaxReturns(TaxReturnSearchCriteria criteria) : Page<TaxReturnData>
+        }
+        
+        ' Tax Return Service Implementation
+        Class TaxReturnServiceImpl <<Service>> {
+            - TaxReturnRepository returnRepository
+            - TaxReturnLineItemRepository lineItemRepository
+            - TaxAssessmentRepository assessmentRepository
+            - TaxReturnGenerator returnGenerator
+            --
+            + createTaxReturn(CreateTaxReturnCommand command) : CommandProcessingResult
+            + updateTaxReturn(Long returnId, UpdateTaxReturnCommand command) : CommandProcessingResult
+            + submitTaxReturn(Long returnId, SubmitTaxReturnCommand command) : CommandProcessingResult
+            + approveTaxReturn(Long returnId, ApproveTaxReturnCommand command) : CommandProcessingResult
+            + generateTaxReturnData(TaxReturnGenerationRequest request) : TaxReturnData
+            + retrieveTaxReturn(Long returnId) : TaxReturnData
+            + retrieveTaxReturns(TaxReturnSearchCriteria criteria) : Page<TaxReturnData>
+            - generateReturnNumber() : String
+            - aggregateAssessmentData(TaxReturnGenerationRequest request) : List<TaxReturnLineItem>
+            - validateTaxReturnSubmission(TaxReturn taxReturn) : void
+        }
+        
+        ' Tax Jurisdiction Service
+        Interface TaxJurisdictionService {
+            + createTaxJurisdiction(CreateTaxJurisdictionCommand command) : CommandProcessingResult
+            + updateTaxJurisdiction(Long jurisdictionId, UpdateTaxJurisdictionCommand command) : CommandProcessingResult
+            + retrieveTaxJurisdiction(Long jurisdictionId) : TaxJurisdictionData
+            + retrieveAllTaxJurisdictions() : List<TaxJurisdictionData>
+            + getApplicableJurisdiction(Long entityId, EntityType entityType) : TaxJurisdictionData
+        }
+        
+        ' Tax Jurisdiction Service Implementation
+        Class TaxJurisdictionServiceImpl <<Service>> {
+            - TaxJurisdictionRepository jurisdictionRepository
+            - ClientRepository clientRepository
+            - OfficeRepository officeRepository
+            --
+            + createTaxJurisdiction(CreateTaxJurisdictionCommand command) : CommandProcessingResult
+            + updateTaxJurisdiction(Long jurisdictionId, UpdateTaxJurisdictionCommand command) : CommandProcessingResult
+            + retrieveTaxJurisdiction(Long jurisdictionId) : TaxJurisdictionData
+            + retrieveAllTaxJurisdictions() : List<TaxJurisdictionData>
+            + getApplicableJurisdiction(Long entityId, EntityType entityType) : TaxJurisdictionData
+            - determineJurisdictionByAddress(Address address) : TaxJurisdiction
+            - determineJurisdictionByOffice(Long officeId) : TaxJurisdiction
+        }
+        
+        ' Tax Compliance Service
+        Interface TaxComplianceService {
+            + generateComplianceReport(ComplianceReportRequest request) : ComplianceReportData
+            + checkTaxCompliance(Long entityId, EntityType entityType) : ComplianceStatusData
+            + scheduleComplianceCheck(ComplianceScheduleRequest request) : CommandProcessingResult
+            + retrieveComplianceAlerts() : List<ComplianceAlertData>
+            + resolveComplianceAlert(Long alertId, ResolveAlertCommand command) : CommandProcessingResult
+        }
+        
+        ' Tax Compliance Service Implementation
+        Class TaxComplianceServiceImpl <<Service>> {
+            - TaxAssessmentRepository assessmentRepository
+            - TaxReturnRepository returnRepository
+            - ComplianceRuleEngine complianceRuleEngine
+            - NotificationService notificationService
+            --
+            + generateComplianceReport(ComplianceReportRequest request) : ComplianceReportData
+            + checkTaxCompliance(Long entityId, EntityType entityType) : ComplianceStatusData
+            + scheduleComplianceCheck(ComplianceScheduleRequest request) : CommandProcessingResult
+            + retrieveComplianceAlerts() : List<ComplianceAlertData>
+            + resolveComplianceAlert(Long alertId, ResolveAlertCommand command) : CommandProcessingResult
+            - evaluateComplianceRules(ComplianceEvaluationContext context) : List<ComplianceViolation>
+            - generateComplianceAlert(ComplianceViolation violation) : void
+        }
+        
+        ' Tax Rule Engine
+        Interface TaxRuleEngine {
+            + evaluateRules(List<TaxRule> rules, TaxCalculationContext context) : TaxRuleEvaluationResult
+            + validateRule(TaxRule rule) : RuleValidationResult
+            + testRule(TaxRule rule, TaxCalculationContext context) : RuleTestResult
+        }
+        
+        ' Tax Rule Engine Implementation
+        Class TaxRuleEngineImpl <<Service>> {
+            - RuleEvaluator ruleEvaluator
+            - ExpressionParser expressionParser
+            --
+            + evaluateRules(List<TaxRule> rules, TaxCalculationContext context) : TaxRuleEvaluationResult
+            + validateRule(TaxRule rule) : RuleValidationResult
+            + testRule(TaxRule rule, TaxCalculationContext context) : RuleTestResult
+            - parseConditions(String conditions) : Expression
+            - evaluateCondition(Expression expression, TaxCalculationContext context) : Boolean
+            - applyRuleCalculation(TaxRule rule, BigDecimal baseAmount) : BigDecimal
+        }
+    }
+    
+    ' Tax Repositories
+    Package "repository" {
+        
+        ' Tax Configuration Repository
+        Interface TaxConfigurationRepository <<Repository>> {
+            + findByTaxType(TaxType taxType) : List<TaxConfiguration>
+            + findByIsActiveTrueAndEffectiveDateLessThanEqual(LocalDate date) : List<TaxConfiguration>
+            + findByTaxCode(String taxCode) : Optional<TaxConfiguration>
+        }
+        
+        ' Tax Assessment Repository
+        Interface TaxAssessmentRepository <<Repository>> {
+            + findByEntityIdAndEntityType(Long entityId, EntityType entityType) : List<TaxAssessment>
+            + findByStatus(TaxAssessmentStatus status) : List<TaxAssessment>
+            + findByDueDateBefore(LocalDate date) : List<TaxAssessment>
+            + findByAssessmentNumber(String assessmentNumber) : Optional<TaxAssessment>
+        }
+        
+        ' Tax Jurisdiction Repository
+        Interface TaxJurisdictionRepository <<Repository>> {
+            + findByCode(String code) : Optional<TaxJurisdiction>
+            + findByJurisdictionType(JurisdictionType type) : List<TaxJurisdiction>
+            + findByIsActiveTrue() : List<TaxJurisdiction>
+        }
+        
+        ' Withholding Tax Configuration Repository
+        Interface WithholdingTaxConfigurationRepository <<Repository>> {
+            + findByJurisdiction(TaxJurisdiction jurisdiction) : List<WithholdingTaxConfiguration>
+            + findByWithholdingType(WithholdingTaxType type) : List<WithholdingTaxConfiguration>
+            + findApplicableConfigurations(String transactionType, LocalDate effectiveDate) : List<WithholdingTaxConfiguration>
+        }
+        
+        ' Tax Return Repository
+        Interface TaxReturnRepository <<Repository>> {
+            + findByReturnNumber(String returnNumber) : Optional<TaxReturn>
+            + findByJurisdictionAndReturnType(TaxJurisdiction jurisdiction, TaxReturnType returnType) : List<TaxReturn>
+            + findByStatus(TaxReturnStatus status) : List<TaxReturn>
+            + findByFilingDueDateBefore(LocalDate date) : List<TaxReturn>
+        }
+    }
+    
+    ' Tax Data Objects
+    Package "data" {
+        
+        ' Tax Calculation Context
+        Class TaxCalculationContext {
+            - Long entityId
+            - EntityType entityType
+            - BigDecimal taxableAmount
+            - LocalDate calculationDate
+            - TaxJurisdiction jurisdiction
+            - Map<String, Object> additionalAttributes
+            --
+            + getEntityId() : Long
+            + getEntityType() : EntityType
+            + getTaxableAmount() : BigDecimal
+            + getCalculationDate() : LocalDate
+            + getJurisdiction() : TaxJurisdiction
+            + getAdditionalAttributes() : Map<String, Object>
+        }
+        
+        ' Tax Calculation Result
+        Class TaxCalculationResult {
+            - BigDecimal totalTaxAmount
+            - List<TaxCalculationDetail> taxDetails
+            - List<String> applicableExemptions
+            - Map<String, Object> calculationMetadata
+            --
+            + getTotalTaxAmount() : BigDecimal
+            + getTaxDetails() : List<TaxCalculationDetail>
+            + getApplicableExemptions() : List<String>
+            + getCalculationMetadata() : Map<String, Object>
+        }
+        
+        ' Tax Calculation Detail
+        Class TaxCalculationDetail {
+            - TaxConfiguration taxConfiguration
+            - BigDecimal taxableAmount
+            - BigDecimal taxRate
+            - BigDecimal taxAmount
+            - String calculationMethod
+            --
+            + getTaxConfiguration() : TaxConfiguration
+            + getTaxableAmount() : BigDecimal
+            + getTaxRate() : BigDecimal
+            + getTaxAmount() : BigDecimal
+            + getCalculationMethod() : String
+        }
+        
+        ' Tax Assessment Data
+        Class TaxAssessmentData {
+            - Long id
+            - String assessmentNumber
+            - Long entityId
+            - EntityType entityType
+            - LocalDate assessmentDate
+            - LocalDate dueDate
+            - BigDecimal taxableAmount
+            - BigDecimal assessedTax
+            - BigDecimal paidAmount
+            - BigDecimal outstandingAmount
+            - TaxAssessmentStatus status
+            --
+            + getId() : Long
+            + getAssessmentNumber() : String
+            + getEntityId() : Long
+            + getEntityType() : EntityType
+            + getAssessmentDate() : LocalDate
+            + getDueDate() : LocalDate
+            + getTaxableAmount() : BigDecimal
+            + getAssessedTax() : BigDecimal
+            + getPaidAmount() : BigDecimal
+            + getOutstandingAmount() : BigDecimal
+            + getStatus() : TaxAssessmentStatus
+        }
+        
+        ' Withholding Tax Context
+        Class WithholdingTaxContext {
+            - String transactionType
+            - BigDecimal transactionAmount
+            - LocalDate transactionDate
+            - TaxJurisdiction jurisdiction
+            - Map<String, Object> transactionAttributes
+            --
+            + getTransactionType() : String
+            + getTransactionAmount() : BigDecimal
+            + getTransactionDate() : LocalDate
+            + getJurisdiction() : TaxJurisdiction
+            + getTransactionAttributes() : Map<String, Object>
+        }
+        
+        ' Withholding Tax Result
+        Class WithholdingTaxResult {
+            - BigDecimal withholdingTaxAmount
+            - BigDecimal netAmount
+            - WithholdingTaxConfiguration applicableConfig
+            - String certificateNumber
+            --
+            + getWithholdingTaxAmount() : BigDecimal
+            + getNetAmount() : BigDecimal
+            + getApplicableConfig() : WithholdingTaxConfiguration
+            + getCertificateNumber() : String
+        }
+    }
+    
+    ' Tax Validation
+    Package "validation" {
+        
+        ' Tax Data Validator
+        Class TaxDataValidator {
+            - FromJsonHelper fromApiJsonHelper
+            --
+            + validateTaxConfigurationForCreate(String json) : void
+            + validateTaxAssessmentForCreate(String json) : void
+            + validateTaxPaymentForCreate(String json) : void
+            + validateTaxReturnForCreate(String json) : void
+            - validateTaxRate(JsonElement element) : void
+            - validateTaxableAmount(JsonElement element) : void
+            - validateJurisdiction(JsonElement element) : void
+        }
+    }
+}
+
+' Relationships
+TaxConfiguration --> TaxRule : "contains rules"
+TaxJurisdiction --> TaxConfiguration : "has configurations"
+TaxAssessment --> TaxConfiguration : "uses configuration"
+TaxAssessment --> TaxPayment : "has payments"
+WithholdingTaxConfiguration --> TaxJurisdiction : "belongs to"
+TaxReturn --> TaxReturnLineItem : "contains line items"
+TaxReturn --> TaxJurisdiction : "filed with"
+
+TaxCalculationServiceImpl ..|> TaxCalculationService : "implements"
+TaxAssessmentServiceImpl ..|> TaxAssessmentService : "implements"
+WithholdingTaxServiceImpl ..|> WithholdingTaxService : "implements"
+TaxReturnServiceImpl ..|> TaxReturnService : "implements"
+TaxJurisdictionServiceImpl ..|> TaxJurisdictionService : "implements"
+TaxComplianceServiceImpl ..|> TaxComplianceService : "implements"
+TaxRuleEngineImpl ..|> TaxRuleEngine : "implements"
+
+TaxCalculationServiceImpl --> TaxConfigurationRepository : "uses"
+TaxAssessmentServiceImpl --> TaxAssessmentRepository : "uses"
+WithholdingTaxServiceImpl --> WithholdingTaxConfigurationRepository : "uses"
+TaxReturnServiceImpl --> TaxReturnRepository : "uses"
+TaxJurisdictionServiceImpl --> TaxJurisdictionRepository : "uses"
+
+SHOW_LEGEND()
+
+note top of TaxConfiguration
+**Comprehensive Tax Management**
+• Multiple tax type support
+• Flexible rule engine
+• Jurisdiction-based configuration
+• Rate and calculation methods
+• Effective date management
+• Rule priority handling
+end note
+
+note right of TaxAssessment
+**Tax Assessment & Collection**
+• Automated tax assessment
+• Payment tracking
+• Outstanding management
+• Due date monitoring
+• Multi-payment support
+• Certificate generation
+end note
+
+note bottom of WithholdingTaxConfiguration
+**Withholding Tax Processing**
+• Transaction-based withholding
+• Threshold management
+• Multiple withholding types
+• Certificate generation
+• Compliance reporting
+• Rate configuration
+end note
+
+note left of TaxReturn
+**Tax Return Management**
+• Periodic return generation
+• Line item aggregation
+• Submission workflow
+• Approval process
+• Compliance tracking
+• Multi-jurisdiction support
+end note
+
+@enduml

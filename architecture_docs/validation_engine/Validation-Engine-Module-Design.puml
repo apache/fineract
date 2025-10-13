@@ -1,0 +1,864 @@
+@startuml Validation-Engine-Module-Design
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Force top to bottom layout
+top to bottom direction
+
+title Apache Fineract - Validation Engine Module (Class/Interface Level Design)
+
+' Validation Engine Module
+Package "org.apache.fineract.infrastructure.validation" {
+    
+    ' Validation Domain Model
+    Package "domain" {
+        
+        ' Validation Rule Entity
+        Class ValidationRule {
+            - Long id
+            - String ruleName
+            - String ruleDescription
+            - String entityName
+            - String fieldName
+            - ValidationType validationType
+            - ValidationSeverity severity
+            - String validationExpression
+            - String errorMessage
+            - String errorCode
+            - Boolean isActive
+            - Integer priority
+            - Map<String, Object> ruleParameters
+            - LocalDateTime createdOn
+            - String createdBy
+            - LocalDateTime modifiedOn
+            - String modifiedBy
+            --
+            + getId() : Long
+            + getRuleName() : String
+            + getRuleDescription() : String
+            + getEntityName() : String
+            + getFieldName() : String
+            + getValidationType() : ValidationType
+            + getSeverity() : ValidationSeverity
+            + getValidationExpression() : String
+            + getErrorMessage() : String
+            + getErrorCode() : String
+            + isActive() : Boolean
+            + getPriority() : Integer
+            + getRuleParameters() : Map<String, Object>
+            + evaluate(ValidationContext context) : ValidationResult
+            + isApplicable(ValidationContext context) : Boolean
+            + updateExpression(String newExpression) : void
+            + activate() : void
+            + deactivate() : void
+            + updateErrorMessage(String message) : void
+        }
+        
+        ' Business Rule Definition
+        Class BusinessRuleDefinition {
+            - Long id
+            - String ruleName
+            - String ruleDescription
+            - BusinessRuleCategory category
+            - BusinessRuleType ruleType
+            - String applicableEntity
+            - String ruleCondition
+            - String ruleAction
+            - String actionParameters
+            - Boolean isGlobal
+            - Boolean isActive
+            - Integer executionOrder
+            - Set<BusinessRuleParameter> parameters
+            - LocalDateTime effectiveFrom
+            - LocalDateTime effectiveTo
+            --
+            + getId() : Long
+            + getRuleName() : String
+            + getRuleDescription() : String
+            + getCategory() : BusinessRuleCategory
+            + getRuleType() : BusinessRuleType
+            + getApplicableEntity() : String
+            + getRuleCondition() : String
+            + getRuleAction() : String
+            + getActionParameters() : String
+            + isGlobal() : Boolean
+            + isActive() : Boolean
+            + getExecutionOrder() : Integer
+            + getParameters() : Set<BusinessRuleParameter>
+            + getEffectiveFrom() : LocalDateTime
+            + getEffectiveTo() : LocalDateTime
+            + isEffective(LocalDateTime dateTime) : Boolean
+            + execute(BusinessRuleContext context) : BusinessRuleResult
+            + addParameter(BusinessRuleParameter parameter) : void
+            + removeParameter(BusinessRuleParameter parameter) : void
+        }
+        
+        ' Business Rule Parameter
+        Class BusinessRuleParameter {
+            - Long id
+            - BusinessRuleDefinition businessRule
+            - String parameterName
+            - String parameterType
+            - String parameterValue
+            - Boolean isRequired
+            - String defaultValue
+            - String description
+            --
+            + getId() : Long
+            + getBusinessRule() : BusinessRuleDefinition
+            + getParameterName() : String
+            + getParameterType() : String
+            + getParameterValue() : String
+            + isRequired() : Boolean
+            + getDefaultValue() : String
+            + getDescription() : String
+            + getValue() : Object
+            + setValue(Object value) : void
+            + validate() : Boolean
+        }
+        
+        ' Data Integrity Constraint
+        Class DataIntegrityConstraint {
+            - Long id
+            - String constraintName
+            - String constraintDescription
+            - String targetTable
+            - String targetColumn
+            - ConstraintType constraintType
+            - String constraintExpression
+            - String violationMessage
+            - Boolean isEnforced
+            - ConstraintSeverity severity
+            - Set<String> dependentTables
+            - Map<String, String> constraintMetadata
+            --
+            + getId() : Long
+            + getConstraintName() : String
+            + getConstraintDescription() : String
+            + getTargetTable() : String
+            + getTargetColumn() : String
+            + getConstraintType() : ConstraintType
+            + getConstraintExpression() : String
+            + getViolationMessage() : String
+            + isEnforced() : Boolean
+            + getSeverity() : ConstraintSeverity
+            + getDependentTables() : Set<String>
+            + getConstraintMetadata() : Map<String, String>
+            + validate(Object value, ValidationContext context) : ConstraintValidationResult
+            + enforce() : void
+            + disable() : void
+        }
+        
+        ' Validation Constraint
+        Class ValidationConstraint {
+            - Long id
+            - String constraintName
+            - String fieldPath
+            - String entityClass
+            - ConstraintType type
+            - String constraintValue
+            - String message
+            - Boolean isRequired
+            - ValidationGroup validationGroup
+            - Map<String, Object> attributes
+            --
+            + getId() : Long
+            + getConstraintName() : String
+            + getFieldPath() : String
+            + getEntityClass() : String
+            + getType() : ConstraintType
+            + getConstraintValue() : String
+            + getMessage() : String
+            + isRequired() : Boolean
+            + getValidationGroup() : ValidationGroup
+            + getAttributes() : Map<String, Object>
+            + validate(Object value) : ConstraintViolation
+            + isApplicable(Object entity) : Boolean
+        }
+        
+        ' Validation Schema
+        Class ValidationSchema {
+            - Long id
+            - String schemaName
+            - String schemaVersion
+            - String entityName
+            - String schemaDefinition
+            - SchemaFormat format
+            - Boolean isActive
+            - Set<ValidationRule> validationRules
+            - Set<ValidationConstraint> constraints
+            - LocalDateTime createdOn
+            - String createdBy
+            --
+            + getId() : Long
+            + getSchemaName() : String
+            + getSchemaVersion() : String
+            + getEntityName() : String
+            + getSchemaDefinition() : String
+            + getFormat() : SchemaFormat
+            + isActive() : Boolean
+            + getValidationRules() : Set<ValidationRule>
+            + getConstraints() : Set<ValidationConstraint>
+            + getCreatedOn() : LocalDateTime
+            + getCreatedBy() : String
+            + validate(Object data) : SchemaValidationResult
+            + addValidationRule(ValidationRule rule) : void
+            + removeValidationRule(ValidationRule rule) : void
+            + addConstraint(ValidationConstraint constraint) : void
+        }
+        
+        ' Validation Error
+        Class ValidationError {
+            - Long id
+            - String errorCode
+            - String errorMessage
+            - String fieldName
+            - Object rejectedValue
+            - ValidationSeverity severity
+            - String entityName
+            - Long entityId
+            - ValidationRule violatedRule
+            - LocalDateTime occurredAt
+            - String context
+            --
+            + getId() : Long
+            + getErrorCode() : String
+            + getErrorMessage() : String
+            + getFieldName() : String
+            + getRejectedValue() : Object
+            + getSeverity() : ValidationSeverity
+            + getEntityName() : String
+            + getEntityId() : Long
+            + getViolatedRule() : ValidationRule
+            + getOccurredAt() : LocalDateTime
+            + getContext() : String
+            + isBlockingError() : Boolean
+            + isWarning() : Boolean
+        }
+        
+        ' Field Validation Configuration
+        Class FieldValidationConfiguration {
+            - Long id
+            - String entityName
+            - String fieldName
+            - DataType dataType
+            - Boolean isRequired
+            - Boolean isUnique
+            - Integer minLength
+            - Integer maxLength
+            - BigDecimal minValue
+            - BigDecimal maxValue
+            - String pattern
+            - String allowedValues
+            - String customValidationClass
+            - Map<String, Object> validationParameters
+            --
+            + getId() : Long
+            + getEntityName() : String
+            + getFieldName() : String
+            + getDataType() : DataType
+            + isRequired() : Boolean
+            + isUnique() : Boolean
+            + getMinLength() : Integer
+            + getMaxLength() : Integer
+            + getMinValue() : BigDecimal
+            + getMaxValue() : BigDecimal
+            + getPattern() : String
+            + getAllowedValues() : String
+            + getCustomValidationClass() : String
+            + getValidationParameters() : Map<String, Object>
+            + validateField(Object value) : List<ValidationError>
+            + updateValidationParameters(Map<String, Object> parameters) : void
+        }
+        
+        ' Validation Audit Log
+        Class ValidationAuditLog {
+            - Long id
+            - String entityName
+            - Long entityId
+            - ValidationAction action
+            - ValidationResult validationResult
+            - Integer errorCount
+            - Integer warningCount
+            - String performedBy
+            - LocalDateTime performedAt
+            - String validationContext
+            - Map<String, Object> auditMetadata
+            --
+            + getId() : Long
+            + getEntityName() : String
+            + getEntityId() : Long
+            + getAction() : ValidationAction
+            + getValidationResult() : ValidationResult
+            + getErrorCount() : Integer
+            + getWarningCount() : Integer
+            + getPerformedBy() : String
+            + getPerformedAt() : LocalDateTime
+            + getValidationContext() : String
+            + getAuditMetadata() : Map<String, Object>
+        }
+        
+        ' Enumerations
+        Enum ValidationType {
+            FIELD_VALIDATION(1, "validationType.fieldValidation")
+            CROSS_FIELD_VALIDATION(2, "validationType.crossFieldValidation")
+            BUSINESS_RULE_VALIDATION(3, "validationType.businessRuleValidation")
+            DATA_INTEGRITY_VALIDATION(4, "validationType.dataIntegrityValidation")
+            CUSTOM_VALIDATION(5, "validationType.customValidation")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum ValidationSeverity {
+            INFO(1, "validationSeverity.info")
+            WARNING(2, "validationSeverity.warning")
+            ERROR(3, "validationSeverity.error")
+            CRITICAL(4, "validationSeverity.critical")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum BusinessRuleCategory {
+            LOAN_ORIGINATION(1, "businessRuleCategory.loanOrigination")
+            SAVINGS_ACCOUNT(2, "businessRuleCategory.savingsAccount")
+            CLIENT_MANAGEMENT(3, "businessRuleCategory.clientManagement")
+            FINANCIAL_ACCOUNTING(4, "businessRuleCategory.financialAccounting")
+            SYSTEM_CONFIGURATION(5, "businessRuleCategory.systemConfiguration")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum BusinessRuleType {
+            VALIDATION_RULE(1, "businessRuleType.validationRule")
+            CALCULATION_RULE(2, "businessRuleType.calculationRule")
+            WORKFLOW_RULE(3, "businessRuleType.workflowRule")
+            NOTIFICATION_RULE(4, "businessRuleType.notificationRule")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum ConstraintType {
+            NOT_NULL("notNull")
+            UNIQUE("unique")
+            MIN_LENGTH("minLength")
+            MAX_LENGTH("maxLength")
+            MIN_VALUE("minValue")
+            MAX_VALUE("maxValue")
+            PATTERN("pattern")
+            CUSTOM("custom")
+            --
+            - String code
+        }
+        
+        Enum ConstraintSeverity {
+            LOW(1, "constraintSeverity.low")
+            MEDIUM(2, "constraintSeverity.medium")
+            HIGH(3, "constraintSeverity.high")
+            CRITICAL(4, "constraintSeverity.critical")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum DataType {
+            STRING("string")
+            INTEGER("integer")
+            DECIMAL("decimal")
+            DATE("date")
+            DATETIME("datetime")
+            BOOLEAN("boolean")
+            EMAIL("email")
+            URL("url")
+            --
+            - String code
+        }
+        
+        Enum SchemaFormat {
+            JSON_SCHEMA("jsonSchema")
+            XML_SCHEMA("xmlSchema")
+            CUSTOM_SCHEMA("customSchema")
+            --
+            - String code
+        }
+        
+        Enum ValidationAction {
+            CREATE("create")
+            UPDATE("update")
+            DELETE("delete")
+            BULK_OPERATION("bulkOperation")
+            --
+            - String code
+        }
+    }
+    
+    ' Validation Services
+    Package "service" {
+        
+        ' Validation Engine Service
+        Interface ValidationEngineService {
+            + validate(Object entity, ValidationContext context) : ValidationResult
+            + validateField(String entityName, String fieldName, Object value) : List<ValidationError>
+            + validateBatch(List<Object> entities, ValidationContext context) : BatchValidationResult
+            + executeBusinessRules(String entityName, BusinessRuleContext context) : BusinessRuleExecutionResult
+            + validateSchema(Object data, String schemaName) : SchemaValidationResult
+        }
+        
+        ' Validation Engine Service Implementation
+        Class ValidationEngineServiceImpl <<Service>> {
+            - ValidationRuleRepository ruleRepository
+            - BusinessRuleRepository businessRuleRepository
+            - ValidationSchemaRepository schemaRepository
+            - ValidationRuleEngine ruleEngine
+            - ValidationAuditService auditService
+            --
+            + validate(Object entity, ValidationContext context) : ValidationResult
+            + validateField(String entityName, String fieldName, Object value) : List<ValidationError>
+            + validateBatch(List<Object> entities, ValidationContext context) : BatchValidationResult
+            + executeBusinessRules(String entityName, BusinessRuleContext context) : BusinessRuleExecutionResult
+            + validateSchema(Object data, String schemaName) : SchemaValidationResult
+            - getApplicableRules(Object entity) : List<ValidationRule>
+            - executeValidationRule(ValidationRule rule, ValidationContext context) : ValidationResult
+            - logValidationResult(ValidationResult result, String context) : void
+        }
+        
+        ' Business Rule Engine Service
+        Interface BusinessRuleEngineService {
+            + executeRule(BusinessRuleDefinition rule, BusinessRuleContext context) : BusinessRuleResult
+            + executeRulesForEntity(String entityName, BusinessRuleContext context) : List<BusinessRuleResult>
+            + validateRuleCondition(String condition, BusinessRuleContext context) : Boolean
+            + compileRule(BusinessRuleDefinition rule) : CompiledRule
+            + testRule(BusinessRuleDefinition rule, BusinessRuleContext context) : RuleTestResult
+        }
+        
+        ' Business Rule Engine Implementation
+        Class BusinessRuleEngineServiceImpl <<Service>> {
+            - BusinessRuleRepository ruleRepository
+            - RuleCompiler ruleCompiler
+            - ExpressionEvaluator expressionEvaluator
+            - RuleExecutionContext executionContext
+            --
+            + executeRule(BusinessRuleDefinition rule, BusinessRuleContext context) : BusinessRuleResult
+            + executeRulesForEntity(String entityName, BusinessRuleContext context) : List<BusinessRuleResult>
+            + validateRuleCondition(String condition, BusinessRuleContext context) : Boolean
+            + compileRule(BusinessRuleDefinition rule) : CompiledRule
+            + testRule(BusinessRuleDefinition rule, BusinessRuleContext context) : RuleTestResult
+            - evaluateCondition(String condition, BusinessRuleContext context) : Boolean
+            - executeAction(String action, String parameters, BusinessRuleContext context) : void
+        }
+        
+        ' Data Integrity Service
+        Interface DataIntegrityService {
+            + validateConstraint(DataIntegrityConstraint constraint, Object value, ValidationContext context) : ConstraintValidationResult
+            + checkReferentialIntegrity(String tableName, Long recordId) : IntegrityCheckResult
+            + validateUniqueConstraint(String entityName, String fieldName, Object value, Long excludeId) : Boolean
+            + enforceForeignKeyConstraints(String tableName, Map<String, Object> values) : List<ConstraintViolation>
+        }
+        
+        ' Data Integrity Service Implementation
+        Class DataIntegrityServiceImpl <<Service>> {
+            - DataIntegrityConstraintRepository constraintRepository
+            - EntityManager entityManager
+            - DatabaseMetadataService metadataService
+            --
+            + validateConstraint(DataIntegrityConstraint constraint, Object value, ValidationContext context) : ConstraintValidationResult
+            + checkReferentialIntegrity(String tableName, Long recordId) : IntegrityCheckResult
+            + validateUniqueConstraint(String entityName, String fieldName, Object value, Long excludeId) : Boolean
+            + enforceForeignKeyConstraints(String tableName, Map<String, Object> values) : List<ConstraintViolation>
+            - executeConstraintQuery(String query, Map<String, Object> parameters) : Boolean
+            - buildConstraintQuery(DataIntegrityConstraint constraint) : String
+        }
+        
+        ' Field Validation Service
+        Interface FieldValidationService {
+            + validateField(FieldValidationConfiguration config, Object value) : List<ValidationError>
+            + validateFieldsForEntity(String entityName, Map<String, Object> fieldValues) : List<ValidationError>
+            + getFieldConfiguration(String entityName, String fieldName) : FieldValidationConfiguration
+            + createFieldConfiguration(CreateFieldConfigCommand command) : CommandProcessingResult
+            + updateFieldConfiguration(Long configId, UpdateFieldConfigCommand command) : CommandProcessingResult
+        }
+        
+        ' Field Validation Service Implementation
+        Class FieldValidationServiceImpl <<Service>> {
+            - FieldValidationConfigurationRepository configRepository
+            - FieldValidator fieldValidator
+            - ValidationErrorMapper errorMapper
+            --
+            + validateField(FieldValidationConfiguration config, Object value) : List<ValidationError>
+            + validateFieldsForEntity(String entityName, Map<String, Object> fieldValues) : List<ValidationError>
+            + getFieldConfiguration(String entityName, String fieldName) : FieldValidationConfiguration
+            + createFieldConfiguration(CreateFieldConfigCommand command) : CommandProcessingResult
+            + updateFieldConfiguration(Long configId, UpdateFieldConfigCommand command) : CommandProcessingResult
+            - performRequiredValidation(Object value) : ValidationError
+            - performLengthValidation(Object value, Integer minLength, Integer maxLength) : ValidationError
+            - performPatternValidation(Object value, String pattern) : ValidationError
+        }
+        
+        ' Schema Validation Service
+        Interface SchemaValidationService {
+            + validateAgainstSchema(Object data, ValidationSchema schema) : SchemaValidationResult
+            + createSchema(CreateSchemaCommand command) : CommandProcessingResult
+            + updateSchema(Long schemaId, UpdateSchemaCommand command) : CommandProcessingResult
+            + retrieveSchema(String schemaName) : ValidationSchemaData
+            + validateSchemaDefinition(String schemaDefinition, SchemaFormat format) : SchemaValidationResult
+        }
+        
+        ' Schema Validation Service Implementation
+        Class SchemaValidationServiceImpl <<Service>> {
+            - ValidationSchemaRepository schemaRepository
+            - JsonSchemaValidator jsonValidator
+            - XmlSchemaValidator xmlValidator
+            - SchemaCompiler schemaCompiler
+            --
+            + validateAgainstSchema(Object data, ValidationSchema schema) : SchemaValidationResult
+            + createSchema(CreateSchemaCommand command) : CommandProcessingResult
+            + updateSchema(Long schemaId, UpdateSchemaCommand command) : CommandProcessingResult
+            + retrieveSchema(String schemaName) : ValidationSchemaData
+            + validateSchemaDefinition(String schemaDefinition, SchemaFormat format) : SchemaValidationResult
+            - getSchemaValidator(SchemaFormat format) : SchemaValidator
+            - compileSchema(String schemaDefinition, SchemaFormat format) : CompiledSchema
+        }
+        
+        ' Validation Rule Management Service
+        Interface ValidationRuleManagementService {
+            + createValidationRule(CreateValidationRuleCommand command) : CommandProcessingResult
+            + updateValidationRule(Long ruleId, UpdateValidationRuleCommand command) : CommandProcessingResult
+            + deleteValidationRule(Long ruleId) : CommandProcessingResult
+            + retrieveValidationRule(Long ruleId) : ValidationRuleData
+            + retrieveValidationRules(String entityName) : List<ValidationRuleData>
+            + testValidationRule(Long ruleId, TestRuleCommand command) : RuleTestResult
+        }
+        
+        ' Validation Rule Management Implementation
+        Class ValidationRuleManagementServiceImpl <<Service>> {
+            - ValidationRuleRepository ruleRepository
+            - ValidationRuleAssembler ruleAssembler
+            - ValidationRuleEngine ruleEngine
+            --
+            + createValidationRule(CreateValidationRuleCommand command) : CommandProcessingResult
+            + updateValidationRule(Long ruleId, UpdateValidationRuleCommand command) : CommandProcessingResult
+            + deleteValidationRule(Long ruleId) : CommandProcessingResult
+            + retrieveValidationRule(Long ruleId) : ValidationRuleData
+            + retrieveValidationRules(String entityName) : List<ValidationRuleData>
+            + testValidationRule(Long ruleId, TestRuleCommand command) : RuleTestResult
+            - validateRuleExpression(String expression) : void
+            - compileRule(ValidationRule rule) : CompiledValidationRule
+        }
+        
+        ' Validation Audit Service
+        Interface ValidationAuditService {
+            + logValidation(ValidationAuditLog auditLog) : void
+            + retrieveValidationAuditTrail(String entityName, Long entityId) : List<ValidationAuditLogData>
+            + generateValidationReport(ValidationReportCriteria criteria) : ValidationReportData
+            + getValidationStatistics(StatisticsCriteria criteria) : ValidationStatisticsData
+        }
+        
+        ' Validation Audit Service Implementation
+        Class ValidationAuditServiceImpl <<Service>> {
+            - ValidationAuditLogRepository auditLogRepository
+            - ReportGenerationService reportService
+            --
+            + logValidation(ValidationAuditLog auditLog) : void
+            + retrieveValidationAuditTrail(String entityName, Long entityId) : List<ValidationAuditLogData>
+            + generateValidationReport(ValidationReportCriteria criteria) : ValidationReportData
+            + getValidationStatistics(StatisticsCriteria criteria) : ValidationStatisticsData
+            - aggregateValidationData(ValidationReportCriteria criteria) : Map<String, Object>
+            - calculateValidationMetrics(List<ValidationAuditLog> auditLogs) : ValidationMetrics
+        }
+        
+        ' Validation Rule Engine
+        Interface ValidationRuleEngine {
+            + executeRule(ValidationRule rule, ValidationContext context) : ValidationResult
+            + compileRule(ValidationRule rule) : CompiledValidationRule
+            + validateRuleExpression(String expression) : ExpressionValidationResult
+        }
+        
+        ' Validation Rule Engine Implementation
+        Class ValidationRuleEngineImpl <<Service>> {
+            - ExpressionParser expressionParser
+            - RuleCompiler ruleCompiler
+            - ValidationContextProvider contextProvider
+            --
+            + executeRule(ValidationRule rule, ValidationContext context) : ValidationResult
+            + compileRule(ValidationRule rule) : CompiledValidationRule
+            + validateRuleExpression(String expression) : ExpressionValidationResult
+            - parseExpression(String expression) : ParsedExpression
+            - evaluateExpression(ParsedExpression expression, ValidationContext context) : Object
+        }
+    }
+    
+    ' Validation Repositories
+    Package "repository" {
+        
+        ' Validation Rule Repository
+        Interface ValidationRuleRepository <<Repository>> {
+            + findByEntityName(String entityName) : List<ValidationRule>
+            + findByEntityNameAndFieldName(String entityName, String fieldName) : List<ValidationRule>
+            + findByValidationType(ValidationType validationType) : List<ValidationRule>
+            + findActiveRules() : List<ValidationRule>
+        }
+        
+        ' Business Rule Repository
+        Interface BusinessRuleRepository <<Repository>> {
+            + findByApplicableEntity(String entityName) : List<BusinessRuleDefinition>
+            + findByCategory(BusinessRuleCategory category) : List<BusinessRuleDefinition>
+            + findByRuleType(BusinessRuleType ruleType) : List<BusinessRuleDefinition>
+            + findActiveRules() : List<BusinessRuleDefinition>
+        }
+        
+        ' Data Integrity Constraint Repository
+        Interface DataIntegrityConstraintRepository <<Repository>> {
+            + findByTargetTable(String tableName) : List<DataIntegrityConstraint>
+            + findByConstraintType(ConstraintType constraintType) : List<DataIntegrityConstraint>
+            + findEnforcedConstraints() : List<DataIntegrityConstraint>
+        }
+        
+        ' Field Validation Configuration Repository
+        Interface FieldValidationConfigurationRepository <<Repository>> {
+            + findByEntityName(String entityName) : List<FieldValidationConfiguration>
+            + findByEntityNameAndFieldName(String entityName, String fieldName) : Optional<FieldValidationConfiguration>
+        }
+        
+        ' Validation Schema Repository
+        Interface ValidationSchemaRepository <<Repository>> {
+            + findBySchemaName(String schemaName) : Optional<ValidationSchema>
+            + findByEntityName(String entityName) : List<ValidationSchema>
+            + findActiveSchemas() : List<ValidationSchema>
+        }
+        
+        ' Validation Audit Log Repository
+        Interface ValidationAuditLogRepository <<Repository>> {
+            + findByEntityNameAndEntityId(String entityName, Long entityId) : List<ValidationAuditLog>
+            + findByPerformedAtBetween(LocalDateTime from, LocalDateTime to) : List<ValidationAuditLog>
+            + findByValidationResult(ValidationResult result) : List<ValidationAuditLog>
+        }
+    }
+    
+    ' Validation Data Objects
+    Package "data" {
+        
+        ' Validation Context
+        Class ValidationContext {
+            - Object entity
+            - String entityName
+            - ValidationAction action
+            - String userId
+            - Map<String, Object> contextAttributes
+            - ValidationGroup validationGroup
+            --
+            + getEntity() : Object
+            + getEntityName() : String
+            + getAction() : ValidationAction
+            + getUserId() : String
+            + getContextAttributes() : Map<String, Object>
+            + getValidationGroup() : ValidationGroup
+            + addAttribute(String key, Object value) : void
+            + getAttribute(String key) : Object
+        }
+        
+        ' Validation Result
+        Class ValidationResult {
+            - Boolean isValid
+            - List<ValidationError> errors
+            - List<ValidationError> warnings
+            - ValidationSeverity highestSeverity
+            - String validationSummary
+            - Map<String, Object> resultMetadata
+            --
+            + isValid() : Boolean
+            + getErrors() : List<ValidationError>
+            + getWarnings() : List<ValidationError>
+            + getHighestSeverity() : ValidationSeverity
+            + getValidationSummary() : String
+            + getResultMetadata() : Map<String, Object>
+            + hasErrors() : Boolean
+            + hasWarnings() : Boolean
+            + addError(ValidationError error) : void
+            + addWarning(ValidationError warning) : void
+        }
+        
+        ' Business Rule Context
+        Class BusinessRuleContext {
+            - Object entity
+            - String entityName
+            - String action
+            - Map<String, Object> parameters
+            - String userId
+            - LocalDateTime executionTime
+            --
+            + getEntity() : Object
+            + getEntityName() : String
+            + getAction() : String
+            + getParameters() : Map<String, Object>
+            + getUserId() : String
+            + getExecutionTime() : LocalDateTime
+        }
+        
+        ' Business Rule Result
+        Class BusinessRuleResult {
+            - Boolean success
+            - String message
+            - BusinessRuleAction actionTaken
+            - Map<String, Object> resultData
+            - List<String> notifications
+            --
+            + isSuccess() : Boolean
+            + getMessage() : String
+            + getActionTaken() : BusinessRuleAction
+            + getResultData() : Map<String, Object>
+            + getNotifications() : List<String>
+        }
+        
+        ' Schema Validation Result
+        Class SchemaValidationResult {
+            - Boolean isValid
+            - List<SchemaValidationError> schemaErrors
+            - String schemaName
+            - String schemaVersion
+            --
+            + isValid() : Boolean
+            + getSchemaErrors() : List<SchemaValidationError>
+            + getSchemaName() : String
+            + getSchemaVersion() : String
+        }
+        
+        ' Batch Validation Result
+        Class BatchValidationResult {
+            - Integer totalEntities
+            - Integer validEntities
+            - Integer invalidEntities
+            - Map<Object, ValidationResult> entityResults
+            - List<ValidationError> batchErrors
+            --
+            + getTotalEntities() : Integer
+            + getValidEntities() : Integer
+            + getInvalidEntities() : Integer
+            + getEntityResults() : Map<Object, ValidationResult>
+            + getBatchErrors() : List<ValidationError>
+        }
+        
+        ' Validation Rule Data
+        Class ValidationRuleData {
+            - Long id
+            - String ruleName
+            - String ruleDescription
+            - String entityName
+            - String fieldName
+            - ValidationType validationType
+            - ValidationSeverity severity
+            - String validationExpression
+            - String errorMessage
+            - Boolean isActive
+            --
+            + getId() : Long
+            + getRuleName() : String
+            + getRuleDescription() : String
+            + getEntityName() : String
+            + getFieldName() : String
+            + getValidationType() : ValidationType
+            + getSeverity() : ValidationSeverity
+            + getValidationExpression() : String
+            + getErrorMessage() : String
+            + isActive() : Boolean
+        }
+    }
+    
+    ' Validation Framework Components
+    Package "framework" {
+        
+        ' Field Validator
+        Interface FieldValidator {
+            + validateRequired(Object value) : ValidationError
+            + validateLength(Object value, Integer minLength, Integer maxLength) : ValidationError
+            + validateRange(Object value, BigDecimal minValue, BigDecimal maxValue) : ValidationError
+            + validatePattern(Object value, String pattern) : ValidationError
+            + validateCustom(Object value, String validatorClass) : ValidationError
+        }
+        
+        ' Expression Evaluator
+        Interface ExpressionEvaluator {
+            + evaluate(String expression, ValidationContext context) : Object
+            + validateExpression(String expression) : Boolean
+            + parseExpression(String expression) : ParsedExpression
+        }
+        
+        ' Rule Compiler
+        Interface RuleCompiler {
+            + compile(ValidationRule rule) : CompiledValidationRule
+            + compile(BusinessRuleDefinition rule) : CompiledBusinessRule
+            + validateCompilation(String ruleExpression) : CompilationResult
+        }
+    }
+}
+
+' Relationships
+ValidationRule --> ValidationType : "has type"
+ValidationRule --> ValidationSeverity : "has severity"
+BusinessRuleDefinition --> BusinessRuleParameter : "contains parameters"
+ValidationSchema --> ValidationRule : "contains rules"
+ValidationSchema --> ValidationConstraint : "has constraints"
+DataIntegrityConstraint --> ConstraintType : "has type"
+ValidationError --> ValidationRule : "violates rule"
+
+ValidationEngineServiceImpl ..|> ValidationEngineService : "implements"
+BusinessRuleEngineServiceImpl ..|> BusinessRuleEngineService : "implements"
+DataIntegrityServiceImpl ..|> DataIntegrityService : "implements"
+FieldValidationServiceImpl ..|> FieldValidationService : "implements"
+SchemaValidationServiceImpl ..|> SchemaValidationService : "implements"
+ValidationRuleManagementServiceImpl ..|> ValidationRuleManagementService : "implements"
+ValidationAuditServiceImpl ..|> ValidationAuditService : "implements"
+ValidationRuleEngineImpl ..|> ValidationRuleEngine : "implements"
+
+ValidationEngineServiceImpl --> ValidationRuleRepository : "uses"
+BusinessRuleEngineServiceImpl --> BusinessRuleRepository : "uses"
+DataIntegrityServiceImpl --> DataIntegrityConstraintRepository : "uses"
+FieldValidationServiceImpl --> FieldValidationConfigurationRepository : "uses"
+SchemaValidationServiceImpl --> ValidationSchemaRepository : "uses"
+
+SHOW_LEGEND()
+
+note top of ValidationRule
+**Comprehensive Validation Framework**
+• Multi-layered validation engine
+• Business rule processing
+• Data integrity enforcement
+• Schema validation support
+• Field-level validation
+• Audit trail maintenance
+end note
+
+note right of BusinessRuleDefinition
+**Business Rule Engine**
+• Dynamic rule configuration
+• Condition-based execution
+• Parameter-driven rules
+• Category-based organization
+• Temporal rule effectiveness
+• Action-oriented processing
+end note
+
+note bottom of DataIntegrityConstraint
+**Data Integrity Management**
+• Referential integrity checks
+• Unique constraint validation
+• Custom constraint support
+• Cross-table validation
+• Constraint violation tracking
+• Severity-based handling
+end note
+
+note left of ValidationSchema
+**Schema Validation**
+• JSON/XML schema support
+• Entity-specific schemas
+• Version management
+• Rule integration
+• Constraint enforcement
+• Format validation
+end note
+
+@enduml

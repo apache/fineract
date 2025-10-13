@@ -1,0 +1,353 @@
+@startuml Accounting-Management-Sequence
+!include <C4/C4_Context>
+
+title Apache Fineract - Financial Accounting Module Sequence Diagram
+
+' Actors and Systems
+actor "Accountant" as ACC_USER
+participant "GLAccountsApiResource" as GL_API
+participant "JournalEntriesApiResource" as JE_API
+participant "CommandSourceHandler" as CMD
+participant "GLAccountWritePlatformService" as GLWS
+participant "JournalEntryWritePlatformService" as JEWS
+participant "AccountingProcessorService" as APS
+participant "GLAccountValidator" as GLV
+participant "JournalEntryValidator" as JEV
+participant "GLAccountRepository" as GLREPO
+participant "JournalEntryRepository" as JEREPO
+participant "AccountingRuleService" as ARS
+participant "AuditService" as AUDIT
+database "TenantDatabase" as DB
+
+note over ACC_USER, DB
+**Financial Accounting Sequence Flows**
+1. Chart of Accounts Setup and Management
+2. Manual Journal Entry Creation and Posting
+3. Automated Journal Entry Generation
+4. Account Reconciliation and Closure
+5. Financial Reporting and Trial Balance
+end note
+
+== Chart of Accounts Setup Flow ==
+
+ACC_USER -> GL_API : POST /glaccounts\n{glAccountData}
+activate GL_API
+
+GL_API -> CMD : processCommand(CREATE_GLACCOUNT)
+activate CMD
+
+CMD -> GLV : validateGLAccountForCreate(accountData)
+activate GLV
+GLV -> GLV : validateAccountName()
+GLV -> GLV : validateGLCode()
+GLV -> GLV : validateAccountType()
+GLV -> GLV : validateParentAccount()
+GLV -> GLREPO : checkDuplicateGLCode()
+activate GLREPO
+GLREPO -> DB : SELECT * FROM acc_gl_account WHERE gl_code = ?
+GLREPO --> GLV : codeExists
+deactivate GLREPO
+GLV --> CMD : ValidationResult
+deactivate GLV
+
+alt Validation Success
+    CMD -> GLWS : createGLAccount(accountData)
+    activate GLWS
+    
+    GLWS -> GLWS : buildGLAccountEntity()
+    GLWS -> GLWS : setAccountHierarchy()
+    
+    ' Handle parent-child relationship
+    alt Has Parent Account
+        GLWS -> GLREPO : findParentAccount(parentId)
+        activate GLREPO
+        GLREPO -> DB : SELECT * FROM acc_gl_account WHERE id = ?
+        GLREPO --> GLWS : parentAccount
+        deactivate GLREPO
+        GLWS -> GLWS : setParentChildRelationship()
+    end
+    
+    GLWS -> GLREPO : save(glAccountEntity)
+    activate GLREPO
+    GLREPO -> DB : INSERT INTO acc_gl_account
+    GLREPO --> GLWS : savedGLAccount
+    deactivate GLREPO
+    
+    GLWS -> AUDIT : auditGLAccountCreation(accountId)
+    activate AUDIT
+    AUDIT -> DB : INSERT INTO m_portfolio_command_source
+    deactivate AUDIT
+    
+    GLWS --> CMD : GLAccountCreationResult
+    deactivate GLWS
+    
+    CMD --> GL_API : CommandProcessingResult
+    deactivate CMD
+    
+    GL_API --> ACC_USER : HTTP 201 Created\n{glAccountId}
+    deactivate GL_API
+    
+else Validation Failure
+    CMD --> GL_API : ValidationException
+    GL_API --> ACC_USER : HTTP 400 Bad Request\n{validationErrors}
+end
+
+== Manual Journal Entry Creation Flow ==
+
+ACC_USER -> JE_API : POST /journalentries\n{journalEntryData}
+activate JE_API
+
+JE_API -> CMD : processCommand(CREATE_JOURNAL_ENTRY)
+activate CMD
+
+CMD -> JEV : validateJournalEntry(entryData)
+activate JEV
+JEV -> JEV : validateMandatoryFields()
+JEV -> JEV : validateDebitCreditBalance()
+JEV -> JEV : validateTransactionDate()
+JEV -> JEV : validateGLAccounts()
+
+' Validate each GL account exists and is active
+loop For Each Credit/Debit Entry
+    JEV -> GLREPO : findByGLCode(glCode)
+    activate GLREPO
+    GLREPO -> DB : SELECT * FROM acc_gl_account WHERE gl_code = ?
+    GLREPO --> JEV : glAccount
+    deactivate GLREPO
+    JEV -> JEV : validateAccountIsActive()
+    JEV -> JEV : validateAccountUsage()
+end
+
+JEV --> CMD : ValidationResult
+deactivate JEV
+
+alt Validation Success
+    CMD -> JEWS : createJournalEntry(entryData)
+    activate JEWS
+    
+    JEWS -> JEWS : generateTransactionId()
+    JEWS -> JEWS : buildJournalEntryEntities()
+    
+    ' Create individual debit entries
+    loop For Each Debit Entry
+        JEWS -> JEWS : createDebitJournalEntry()
+        JEWS -> JEREPO : saveJournalEntry(debitEntry)
+        activate JEREPO
+        JEREPO -> DB : INSERT INTO acc_gl_journal_entry (entry_type = 1)
+        JEREPO --> JEWS : savedDebitEntry
+        deactivate JEREPO
+    end
+    
+    ' Create individual credit entries
+    loop For Each Credit Entry
+        JEWS -> JEWS : createCreditJournalEntry()
+        JEWS -> JEREPO : saveJournalEntry(creditEntry)
+        activate JEREPO
+        JEREPO -> DB : INSERT INTO acc_gl_journal_entry (entry_type = 2)
+        JEREPO --> JEWS : savedCreditEntry
+        deactivate JEREPO
+    end
+    
+    ' Update GL account running balances
+    JEWS -> APS : updateGLAccountBalances(journalEntries)
+    activate APS
+    
+    loop For Each Affected GL Account
+        APS -> APS : calculateNewBalance()
+        APS -> GLREPO : updateAccountBalance(accountId, newBalance)
+        activate GLREPO
+        GLREPO -> DB : UPDATE acc_gl_account SET organization_running_balance
+        GLREPO --> APS : balanceUpdated
+        deactivate GLREPO
+    end
+    
+    APS --> JEWS : BalancesUpdated
+    deactivate APS
+    
+    JEWS -> AUDIT : auditJournalEntryCreation(transactionId)
+    JEWS --> CMD : JournalEntryCreationResult
+    deactivate JEWS
+    
+    CMD --> JE_API : CommandProcessingResult
+    deactivate CMD
+    
+    JE_API --> ACC_USER : HTTP 201 Created\n{transactionId}
+    deactivate JE_API
+    
+else Validation Failure
+    CMD --> JE_API : ValidationException
+    JE_API --> ACC_USER : HTTP 400 Bad Request
+end
+
+== Automated Journal Entry Generation Flow ==
+
+participant "LoanDisbursementService" as LDS
+participant "AccountingIntegrationService" as AIS
+
+LDS -> AIS : createDisbursementAccountingEntries(loanId, amount)
+activate AIS
+
+AIS -> ARS : getAccountingRulesForLoanDisbursement()
+activate ARS
+ARS -> ARS : loadAccountingRules()
+ARS -> GLREPO : findLoanPortfolioAccount()
+ARS -> GLREPO : findFundSourceAccount()
+ARS --> AIS : AccountingRuleMappings
+deactivate ARS
+
+AIS -> AIS : buildAutomatedJournalEntries()
+
+' Create debit entry for loan portfolio
+AIS -> AIS : createDebitEntry(loanPortfolioAccount, amount)
+AIS -> JEREPO : saveJournalEntry(debitEntry)
+activate JEREPO
+JEREPO -> DB : INSERT INTO acc_gl_journal_entry
+JEREPO --> AIS : debitEntrySaved
+deactivate JEREPO
+
+' Create credit entry for fund source
+AIS -> AIS : createCreditEntry(fundSourceAccount, amount)
+AIS -> JEREPO : saveJournalEntry(creditEntry)
+activate JEREPO
+JEREPO -> DB : INSERT INTO acc_gl_journal_entry
+JEREPO --> AIS : creditEntrySaved
+deactivate JEREPO
+
+' Update account balances
+AIS -> APS : updateGLAccountBalances(journalEntries)
+activate APS
+APS -> APS : calculateBalanceChanges()
+APS -> GLREPO : updateMultipleAccountBalances()
+activate GLREPO
+GLREPO -> DB : UPDATE acc_gl_account SET organization_running_balance
+GLREPO --> APS : balancesUpdated
+deactivate GLREPO
+APS --> AIS : BalancesUpdated
+deactivate APS
+
+AIS -> AUDIT : auditAutomatedJournalEntry(loanId, transactionId)
+AIS --> LDS : AccountingEntriesCreated
+deactivate AIS
+
+== Account Reconciliation Flow ==
+
+ACC_USER -> GL_API : POST /glaccounts/{accountId}?command=reconcile\n{reconciliationData}
+activate GL_API
+
+GL_API -> CMD : processCommand(RECONCILE_GL_ACCOUNT)
+activate CMD
+
+CMD -> GLV : validateReconciliationData(accountId, reconciliationData)
+activate GLV
+GLV -> GLREPO : findById(accountId)
+GLV -> GLV : validateReconciliationDate()
+GLV -> GLV : validateReconciliationAmount()
+GLV --> CMD : ValidationResult
+deactivate GLV
+
+alt Validation Success
+    CMD -> GLWS : reconcileGLAccount(accountId, reconciliationData)
+    activate GLWS
+    
+    ' Get current account balance
+    GLWS -> GLREPO : findById(accountId)
+    activate GLREPO
+    GLREPO -> DB : SELECT * FROM acc_gl_account WHERE id = ?
+    GLREPO --> GLWS : currentAccount
+    deactivate GLREPO
+    
+    ' Calculate difference
+    GLWS -> GLWS : calculateReconciliationDifference()
+    
+    alt Difference Found
+        ' Create reconciliation journal entry
+        GLWS -> JEWS : createReconciliationJournalEntry(difference)
+        activate JEWS
+        
+        alt Positive Difference
+            JEWS -> JEWS : createDebitEntry(glAccount, difference)
+            JEWS -> JEWS : createCreditEntry(reconciliationAccount, difference)
+        else Negative Difference
+            JEWS -> JEWS : createCreditEntry(glAccount, difference)
+            JEWS -> JEWS : createDebitEntry(reconciliationAccount, difference)
+        end
+        
+        JEWS -> JEREPO : saveReconciliationEntries()
+        JEWS --> GLWS : reconciliationEntriesCreated
+        deactivate JEWS
+        
+        ' Update account balance
+        GLWS -> APS : updateReconciliationBalance(accountId)
+        activate APS
+        APS -> GLREPO : updateAccountBalance()
+        APS --> GLWS : balanceUpdated
+        deactivate APS
+    end
+    
+    ' Mark account as reconciled
+    GLWS -> GLWS : markAccountAsReconciled(reconciliationDate)
+    GLWS -> GLREPO : save(reconciledAccount)
+    activate GLREPO
+    GLREPO -> DB : UPDATE acc_gl_account SET last_reconciled_date
+    GLREPO --> GLWS : accountReconciled
+    deactivate GLREPO
+    
+    GLWS -> AUDIT : auditAccountReconciliation(accountId)
+    GLWS --> CMD : ReconciliationResult
+    deactivate GLWS
+    
+    CMD --> GL_API : CommandProcessingResult
+    deactivate CMD
+    
+    GL_API --> ACC_USER : HTTP 200 OK\n{reconciliationSummary}
+    deactivate GL_API
+    
+else Validation Failure
+    CMD --> GL_API : ValidationException
+    GL_API --> ACC_USER : HTTP 400 Bad Request
+end
+
+== Trial Balance Generation Flow ==
+
+ACC_USER -> JE_API : GET /journalentries/trialbalance?fromDate=X&toDate=Y
+activate JE_API
+
+JE_API -> APS : generateTrialBalance(fromDate, toDate)
+activate APS
+
+APS -> GLREPO : findAllActiveGLAccounts()
+activate GLREPO
+GLREPO -> DB : SELECT * FROM acc_gl_account WHERE disabled = 0
+GLREPO --> APS : allActiveAccounts
+deactivate GLREPO
+
+loop For Each GL Account
+    APS -> JEREPO : calculateAccountBalance(accountId, fromDate, toDate)
+    activate JEREPO
+    JEREPO -> DB : SELECT SUM(amount) FROM acc_gl_journal_entry WHERE gl_account_id = ? AND entry_date BETWEEN ? AND ?
+    JEREPO --> APS : accountBalance
+    deactivate JEREPO
+    
+    APS -> APS : addToTrialBalance(account, balance)
+end
+
+APS -> APS : validateTrialBalanceIntegrity()
+APS -> APS : formatTrialBalanceReport()
+
+APS --> JE_API : TrialBalanceReport
+deactivate APS
+
+JE_API --> ACC_USER : HTTP 200 OK\n{trialBalanceData}
+deactivate JE_API
+
+note over ACC_USER, DB
+**Key Design Patterns:**
+• Command Pattern: All accounting operations via command handlers
+• Double Entry Principle: Every transaction has balanced debits and credits
+• Chart of Accounts Hierarchy: Tree structure for account organization
+• Automated Integration: Business transactions create accounting entries
+• Audit Trail: Complete history of all financial transactions
+• Real-time Balance Updates: Account balances updated with each transaction
+end note
+
+@enduml

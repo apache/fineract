@@ -1,0 +1,396 @@
+@startuml Tax-Management-Sequence
+!include <C4/C4_Context>
+
+title Apache Fineract - Tax Management Module Sequence Diagram
+
+' Actors and Systems
+actor "Tax Administrator" as TA
+actor "Accountant" as ACC_USER
+participant "TaxApiResource" as API
+participant "CommandSourceHandler" as CSH
+participant "TaxWritePlatformService" as TWS
+participant "TaxReadPlatformService" as TRS
+participant "TaxValidator" as VAL
+participant "TaxCalculationService" as TCS
+participant "TaxComplianceService" as TCOMS
+participant "TaxRepository" as REPO
+participant "TaxReportingService" as TREPS
+participant "AccountingService" as ACC_SVC
+participant "AuditService" as AUDIT
+database "TenantDatabase" as DB
+
+note over TA, DB
+**Tax Management Sequence Flows**
+1. Tax Configuration and Rule Setup
+2. Transaction Tax Calculation
+3. Withholding Tax Processing
+4. Tax Compliance and Reporting
+5. Tax Adjustment and Correction
+end note
+
+== Tax Configuration Setup ==
+
+TA -> API : POST /taxcomponents\n{taxComponentData}
+activate API
+
+API -> CSH : processCommand(CREATE_TAX_COMPONENT)
+activate CSH
+
+CSH -> VAL : validateTaxComponent(taxData)
+activate VAL
+VAL -> VAL : validateTaxName()
+VAL -> VAL : validateTaxRate()
+VAL -> VAL : validateTaxType()
+VAL -> VAL : validateEffectiveDates()
+VAL -> VAL : validateApplicability()
+VAL -> REPO : checkDuplicateTaxComponent()
+activate REPO
+REPO -> DB : SELECT * FROM m_tax_component WHERE name = ?
+REPO --> VAL : taxExists
+deactivate REPO
+VAL --> CSH : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CSH -> TWS : createTaxComponent(taxData)
+    activate TWS
+    
+    TWS -> TWS : buildTaxComponentEntity()
+    TWS -> TWS : configureTaxCalculationRules()
+    TWS -> TWS : setupApplicabilityRules()
+    
+    TWS -> REPO : save(taxComponentEntity)
+    activate REPO
+    REPO -> DB : INSERT INTO m_tax_component
+    REPO --> TWS : taxComponentSaved
+    deactivate REPO
+    
+    TWS -> AUDIT : auditTaxComponentCreation(taxComponentId)
+    activate AUDIT
+    AUDIT -> DB : INSERT INTO m_portfolio_command_source
+    deactivate AUDIT
+    
+    TWS --> CSH : TaxComponentCreationResult
+    deactivate TWS
+    
+    CSH --> API : CommandProcessingResult
+    deactivate CSH
+    
+    API --> TA : HTTP 201 Created\n{taxComponentId}
+    deactivate API
+    
+else Validation Failure
+    CSH --> API : ValidationException
+    API --> TA : HTTP 400 Bad Request\n{validationErrors}
+end
+
+== Transaction Tax Calculation Flow ==
+
+participant "LoanTransactionService" as LTS
+
+LTS -> TCS : calculateTaxOnTransaction(transactionId, transactionType, amount)
+activate TCS
+
+TCS -> REPO : findApplicableTaxComponents(transactionType, clientId)
+activate REPO
+REPO -> DB : SELECT tc.* FROM m_tax_component tc JOIN m_tax_mapping tm WHERE tm.transaction_type = ?
+REPO --> TCS : applicableTaxes
+deactivate REPO
+
+loop For Each Applicable Tax
+    TCS -> TCS : evaluateTaxApplicability(taxComponent, transaction)
+    
+    alt Tax Applicable
+        alt Percentage Tax
+            TCS -> TCS : calculatePercentageTax(amount, taxRate)
+            
+        else Fixed Amount Tax
+            TCS -> TCS : calculateFixedAmountTax()
+            
+        else Tiered Tax
+            TCS -> TCS : calculateTieredTax(amount, tierStructure)
+            
+        else Withholding Tax
+            TCS -> TCS : calculateWithholdingTax(amount, clientTaxStatus)
+        end
+        
+        TCS -> TCS : addToTaxCalculation(taxAmount, taxComponent)
+    end
+end
+
+TCS -> TCS : aggregateTotalTax()
+TCS -> TCS : validateTaxCalculation()
+
+TCS --> LTS : TaxCalculationResult
+deactivate TCS
+
+== Withholding Tax Processing ==
+
+participant "InterestPostingService" as IPS
+
+IPS -> TCS : processWithholdingTax(clientId, interestAmount)
+activate TCS
+
+TCS -> REPO : findClientTaxStatus(clientId)
+activate REPO
+REPO -> DB : SELECT * FROM m_client_tax_details WHERE client_id = ?
+REPO --> TCS : clientTaxStatus
+deactivate REPO
+
+TCS -> TCS : determineWithholdingTaxRate(clientTaxStatus)
+
+alt Client Subject to Withholding Tax
+    TCS -> TCS : calculateWithholdingTaxAmount()
+    
+    ' Create withholding tax transaction
+    TCS -> TWS : createWithholdingTaxTransaction(clientId, taxAmount)
+    activate TWS
+    
+    TWS -> TWS : buildWithholdingTaxTransaction()
+    TWS -> REPO : saveTaxTransaction()
+    activate REPO
+    REPO -> DB : INSERT INTO m_tax_payment
+    REPO --> TWS : taxTransactionSaved
+    deactivate REPO
+    
+    ' Create accounting entries
+    TWS -> ACC_SVC : createWithholdingTaxAccountingEntries(taxAmount)
+    activate ACC_SVC
+    ACC_SVC -> ACC_SVC : debitTaxPayable()
+    ACC_SVC -> ACC_SVC : creditInterestExpense()
+    ACC_SVC -> DB : INSERT INTO acc_gl_journal_entry
+    deactivate ACC_SVC
+    
+    TWS --> TCS : WithholdingTaxProcessed
+    deactivate TWS
+    
+    TCS -> TCS : calculateNetInterestPayable()
+else Client Exempt from Withholding Tax
+    TCS -> TCS : processExemptClient()
+end
+
+TCS --> IPS : WithholdingTaxResult
+deactivate TCS
+
+== Tax Compliance Reporting ==
+
+ACC_USER -> API : GET /taxes/compliance-report?fromDate=X&toDate=Y&reportType=VAT
+activate API
+
+API -> TREPS : generateTaxComplianceReport(fromDate, toDate, reportType)
+activate TREPS
+
+TREPS -> VAL : validateReportParameters(fromDate, toDate, reportType)
+activate VAL
+VAL -> VAL : validateDateRange()
+VAL -> VAL : validateReportType()
+VAL --> TREPS : ParametersValid
+deactivate VAL
+
+alt Parameters Valid
+    TREPS -> REPO : findTaxTransactionsByDateRange(fromDate, toDate)
+    activate REPO
+    REPO -> DB : SELECT * FROM m_tax_payment WHERE payment_date BETWEEN ? AND ?
+    REPO --> TREPS : taxTransactions
+    deactivate REPO
+    
+    TREPS -> TREPS : aggregateTaxDataByType()
+    TREPS -> TREPS : calculateTaxLiabilities()
+    TREPS -> TREPS : generateComplianceSummary()
+    
+    alt VAT Report
+        TREPS -> TREPS : generateVATReport()
+        TREPS -> TREPS : calculateVATInput()
+        TREPS -> TREPS : calculateVATOutput()
+        
+    else Withholding Tax Report
+        TREPS -> TREPS : generateWithholdingTaxReport()
+        TREPS -> TREPS : groupByTaxType()
+        
+    else Income Tax Report
+        TREPS -> TREPS : generateIncomeTaxReport()
+        TREPS -> TREPS : calculateTaxableIncome()
+    end
+    
+    TREPS -> TREPS : formatComplianceReport()
+    TREPS --> API : TaxComplianceReport
+    deactivate TREPS
+    
+    API --> ACC_USER : HTTP 200 OK\n{complianceReport}
+    deactivate API
+    
+else Parameters Invalid
+    TREPS --> API : ValidationException
+    API --> ACC_USER : HTTP 400 Bad Request
+end
+
+== Tax Payment Processing ==
+
+ACC_USER -> API : POST /taxes/payments\n{taxPaymentData}
+activate API
+
+API -> CSH : processCommand(MAKE_TAX_PAYMENT)
+activate CSH
+
+CSH -> VAL : validateTaxPayment(paymentData)
+activate VAL
+VAL -> VAL : validatePaymentAmount()
+VAL -> VAL : validateTaxPeriod()
+VAL -> VAL : validatePaymentMethod()
+VAL --> CSH : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CSH -> TWS : processTaxPayment(paymentData)
+    activate TWS
+    
+    TWS -> REPO : findOutstandingTaxLiability(taxType, taxPeriod)
+    activate REPO
+    REPO -> DB : SELECT SUM(tax_amount) FROM m_tax_payment WHERE tax_type = ? AND payment_status = 'OUTSTANDING'
+    REPO --> TWS : outstandingAmount
+    deactivate REPO
+    
+    TWS -> TWS : validatePaymentAgainstLiability()
+    TWS -> TWS : createTaxPaymentTransaction()
+    
+    TWS -> REPO : saveTaxPayment()
+    activate REPO
+    REPO -> DB : INSERT INTO m_tax_payment
+    REPO -> DB : UPDATE m_tax_liability SET paid_amount = paid_amount + ?
+    REPO --> TWS : paymentSaved
+    deactivate REPO
+    
+    ' Create accounting entries for tax payment
+    TWS -> ACC_SVC : createTaxPaymentAccountingEntries(paymentAmount, taxType)
+    activate ACC_SVC
+    ACC_SVC -> ACC_SVC : creditCash()
+    ACC_SVC -> ACC_SVC : debitTaxPayable()
+    ACC_SVC -> DB : INSERT INTO acc_gl_journal_entry
+    deactivate ACC_SVC
+    
+    TWS -> AUDIT : auditTaxPayment(paymentId)
+    TWS --> CSH : TaxPaymentResult
+    deactivate TWS
+    
+    CSH --> API : CommandProcessingResult
+    deactivate CSH
+    
+    API --> ACC_USER : HTTP 201 Created\n{paymentId}
+    deactivate API
+    
+else Validation Failure
+    CSH --> API : ValidationException
+    API --> ACC_USER : HTTP 400 Bad Request
+end
+
+== Tax Adjustment Flow ==
+
+ACC_USER -> API : POST /taxes/{taxPaymentId}/adjust\n{adjustmentData}
+activate API
+
+API -> CSH : processCommand(ADJUST_TAX_PAYMENT)
+activate CSH
+
+CSH -> VAL : validateTaxAdjustment(taxPaymentId, adjustmentData)
+activate VAL
+VAL -> TRS : getTaxPayment(taxPaymentId)
+activate TRS
+TRS -> REPO : findTaxPaymentById(taxPaymentId)
+TRS --> VAL : taxPaymentDetails
+deactivate TRS
+VAL -> VAL : validateAdjustmentReason()
+VAL -> VAL : validateAdjustmentAmount()
+VAL --> CSH : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CSH -> TWS : adjustTaxPayment(taxPaymentId, adjustmentData)
+    activate TWS
+    
+    TWS -> REPO : findTaxPaymentById(taxPaymentId)
+    activate REPO
+    REPO -> DB : SELECT * FROM m_tax_payment WHERE id = ?
+    REPO --> TWS : originalTaxPayment
+    deactivate REPO
+    
+    TWS -> TWS : calculateAdjustmentImpact()
+    TWS -> TWS : createAdjustmentTransaction()
+    
+    TWS -> REPO : saveTaxAdjustment()
+    activate REPO
+    REPO -> DB : INSERT INTO m_tax_adjustment
+    REPO -> DB : UPDATE m_tax_payment SET adjusted_amount = ?
+    REPO --> TWS : adjustmentSaved
+    deactivate REPO
+    
+    ' Create adjustment accounting entries
+    TWS -> ACC_SVC : createTaxAdjustmentAccountingEntries(adjustmentAmount)
+    activate ACC_SVC
+    
+    alt Positive Adjustment (Additional Tax)
+        ACC_SVC -> ACC_SVC : debitTaxExpense()
+        ACC_SVC -> ACC_SVC : creditTaxPayable()
+    else Negative Adjustment (Tax Refund)
+        ACC_SVC -> ACC_SVC : debitTaxReceivable()
+        ACC_SVC -> ACC_SVC : creditTaxExpense()
+    end
+    
+    ACC_SVC -> DB : INSERT INTO acc_gl_journal_entry
+    deactivate ACC_SVC
+    
+    TWS -> AUDIT : auditTaxAdjustment(taxPaymentId)
+    TWS --> CSH : TaxAdjustmentResult
+    deactivate TWS
+    
+    CSH --> API : CommandProcessingResult
+    deactivate CSH
+    
+    API --> ACC_USER : HTTP 200 OK\n{adjustmentSummary}
+    deactivate API
+    
+else Validation Failure
+    CSH --> API : ValidationException
+    API --> ACC_USER : HTTP 400 Bad Request
+end
+
+== Automated Tax Compliance Check ==
+
+participant "TaxComplianceJob" as TCJ
+
+TCJ -> TCOMS : executeComplianceCheck(reportingPeriod)
+activate TCOMS
+
+TCOMS -> REPO : findTaxLiabilitiesForPeriod(reportingPeriod)
+activate REPO
+REPO -> DB : SELECT * FROM m_tax_liability WHERE reporting_period = ?
+REPO --> TCOMS : taxLiabilities
+deactivate REPO
+
+loop For Each Tax Liability
+    TCOMS -> TCOMS : checkPaymentStatus()
+    TCOMS -> TCOMS : validateComplianceRequirements()
+    
+    alt Non-Compliance Detected
+        TCOMS -> TCOMS : calculatePenalties()
+        TCOMS -> TCOMS : generateComplianceAlert()
+        TCOMS -> TWS : createCompliancePenalty()
+    end
+end
+
+TCOMS -> TCOMS : generateComplianceReport()
+TCOMS -> TCOMS : notifyTaxAdministrators()
+
+TCOMS --> TCJ : ComplianceCheckCompleted
+deactivate TCOMS
+
+note over TA, DB
+**Key Design Patterns:**
+• Strategy Pattern: Different tax calculation strategies by type
+• Template Method: Common tax processing with type-specific calculations
+• Factory Pattern: Tax calculator creation based on transaction type
+• Observer Pattern: Tax compliance monitoring and alerts
+• Command Pattern: All tax operations via command handlers
+• Repository Pattern: Tax data persistence abstraction
+end note
+
+@enduml

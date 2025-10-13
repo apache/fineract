@@ -1,0 +1,248 @@
+@startuml Fineract-LLD_Level-1
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Force top to bottom layout
+top to bottom direction
+
+title Apache Fineract - Low Level Design Level 1 (Component Architecture)
+
+' External Systems
+System_Ext(client_apps, "Client Applications", "Mobile & Web interfaces")
+System_Ext(external_integrations, "External Systems", "Payment gateways, SMS, etc.")
+
+' Main Fineract System
+System_Boundary(fineract_system, "Apache Fineract Platform") {
+    
+    ' API and Web Layer Components
+    Container_Boundary(web_api_layer, "fineract-provider: Web & API Layer") {
+        Component(rest_controllers, "REST Controllers", "Spring MVC", "• ClientApiResource\n• LoansApiResource\n• SavingsApiResource\n• AccountingApiResource")
+        Component(security_filter, "Security Filter Chain", "Spring Security", "• OAuth2Authentication\n• TenantAwareFilter\n• AuthorizationFilter\n• AuditInterceptor")
+        Component(exception_handlers, "Exception Handlers", "Spring MVC", "• GlobalExceptionHandler\n• ValidationExceptionHandler\n• PlatformApiDataValidationException")
+        Component(json_serialization, "JSON Serialization", "Jackson/GSon", "• Request/Response DTOs\n• Custom serializers\n• Date/Time handling")
+    }
+    
+    web_api_layer -[hidden]down-> command_layer
+    
+    ' Command Processing Layer
+    Container_Boundary(command_layer, "fineract-command: Command Processing") {
+        Component(command_source, "CommandSource", "Command Pattern", "• CommandWrapper\n• CommandProcessingService\n• CommandHandlerProvider")
+        Component(audit_service, "Audit Service", "Spring Service", "• CommandProcessingResultLookup\n• AuditRepository\n• CommandAuditTrail")
+        Component(transaction_manager, "Transaction Manager", "Spring TX", "• PlatformTransactionManager\n• TransactionTemplate\n• Rollback handling")
+    }
+    
+    command_layer -[hidden]down-> validation_engine
+    
+    ' Validation Engine Components
+    Container_Boundary(validation_engine, "fineract-validation: Validation Engine") {
+        Component(data_validators, "Data Validators", "Custom Validators", "• ApiDataValidation\n• BusinessRuleValidation\n• CrossFieldValidation")
+        Component(validation_context, "Validation Context", "Context Pattern", "• ValidationResult\n• ValidationErrorCollector\n• ValidationRuleEngine")
+    }
+    
+    validation_engine -[hidden]down-> core_foundation
+    
+    ' Core Foundation Components
+    Container_Boundary(core_foundation, "fineract-core: Foundation Components") {
+        Component(domain_entities, "Domain Entities", "JPA Entities", "• AbstractPersistableCustom\n• BaseEntity\n• AuditableFields")
+        Component(repositories, "Base Repositories", "Spring Data JPA", "• JpaRepository extensions\n• Custom query methods\n• Specification builders")
+        Component(configuration, "Configuration", "Spring Boot", "• DatabaseConfiguration\n• SecurityConfiguration\n• TenantConfiguration")
+        Component(utilities, "Common Utilities", "Java Libraries", "• DateUtils\n• MoneyUtil\n• ValidationUtil\n• ErrorMessageHelper")
+    }
+    
+    core_foundation -[hidden]down-> business_domain_layer
+    
+    ' Business Domain Layer - Arranged Vertically
+    Rectangle business_domain_layer as "Business Domain Layer" {
+        ' Client Management Domain
+        Container_Boundary(client_domain, "fineract-client: Client Management") {
+            Component(client_entities, "Client Entities", "JPA Domain", "• Client\n• ClientIdentifier\n• ClientImage\n• ClientNonPerson")
+            Component(client_services, "Client Services", "Business Logic", "• ClientReadPlatformService\n• ClientWritePlatformService\n• ClientIdentifierService")
+            Component(client_repositories, "Client Repositories", "Data Access", "• ClientRepository\n• ClientIdentifierRepository\n• ClientImageRepository")
+            Component(kyc_components, "KYC Components", "Compliance", "• KYCDocumentService\n• IdentityVerification\n• ComplianceChecker")
+        }
+        
+        client_domain -[hidden]down-> loan_domain
+        
+        ' Loan Management Domain
+        Container_Boundary(loan_domain, "fineract-loan: Loan Management") {
+            Component(loan_entities, "Loan Entities", "JPA Domain", "• Loan\n• LoanProduct\n• LoanTransaction\n• LoanRepaymentSchedule")
+            Component(loan_services, "Loan Services", "Business Logic", "• LoanReadPlatformService\n• LoanWritePlatformService\n• LoanApplicationService\n• LoanDisbursementService")
+            Component(loan_repositories, "Loan Repositories", "Data Access", "• LoanRepository\n• LoanProductRepository\n• LoanTransactionRepository")
+            Component(loan_calculators, "Loan Calculators", "Financial Logic", "• LoanRepaymentScheduleCalculator\n• InterestCalculator\n• EMICalculator")
+        }
+        
+        loan_domain -[hidden]down-> savings_domain
+        
+        ' Savings Management Domain  
+        Container_Boundary(savings_domain, "fineract-savings: Savings Management") {
+            Component(savings_entities, "Savings Entities", "JPA Domain", "• SavingsAccount\n• SavingsProduct\n• SavingsTransaction\n• InterestRate")
+            Component(savings_services, "Savings Services", "Business Logic", "• SavingsAccountReadService\n• SavingsAccountWriteService\n• InterestCalculationService")
+            Component(savings_repositories, "Savings Repositories", "Data Access", "• SavingsAccountRepository\n• SavingsProductRepository\n• SavingsTransactionRepository")
+            Component(interest_engine, "Interest Engine", "Financial Logic", "• InterestCalculationStrategy\n• CompoundingPeriodCalculator\n• PostingPeriodCalculator")
+        }
+        
+        savings_domain -[hidden]down-> accounting_domain
+        
+        ' Accounting Domain
+        Container_Boundary(accounting_domain, "fineract-accounting: Financial Accounting") {
+            Component(accounting_entities, "Accounting Entities", "JPA Domain", "• GLAccount\n• JournalEntry\n• AccountingRule\n• GLClosure")
+            Component(accounting_services, "Accounting Services", "Business Logic", "• JournalEntryWriteService\n• AccountingProcessorService\n• GLAccountReadService")
+            Component(accounting_repositories, "Accounting Repositories", "Data Access", "• GLAccountRepository\n• JournalEntryRepository\n• AccountingRuleRepository")
+            Component(posting_engine, "Posting Engine", "Accounting Logic", "• JournalEntryCreator\n• AccountingRuleProcessor\n• DoubleEntryValidator")
+        }
+        
+        accounting_domain -[hidden]down-> charge_domain
+        
+        ' Charge Management
+        Container_Boundary(charge_domain, "fineract-charge: Charge Management") {
+            Component(charge_entities, "Charge Entities", "JPA Domain", "• Charge\n• ChargeDefinition\n• ChargeCalculation")
+            Component(charge_services, "Charge Services", "Business Logic", "• ChargeReadPlatformService\n• ChargeCalculationService\n• ChargeApplicationService")
+            Component(charge_calculators, "Charge Calculators", "Financial Logic", "• FeeCalculator\n• PenaltyCalculator\n• ChargeAmountCalculator")
+        }
+    }
+    
+    business_domain_layer -[hidden]down-> operational_layer
+    
+    ' Operational Layer - Arranged Vertically
+    Rectangle operational_layer as "Operational Layer" {
+        ' Reporting Engine
+        Container_Boundary(reporting_domain, "fineract-report: Reporting Engine") {
+            Component(report_entities, "Report Entities", "JPA Domain", "• Report\n• ReportParameter\n• ReportTemplate")
+            Component(report_services, "Report Services", "Business Logic", "• ReportingProcessService\n• ReportParameterService\n• ReportExportService")
+            Component(report_generators, "Report Generators", "Report Logic", "• PentahoReportProcessor\n• JasperReportProcessor\n• CSVReportGenerator\n• PDFReportGenerator")
+        }
+        
+        reporting_domain -[hidden]down-> document_domain
+        
+        ' Document Management
+        Container_Boundary(document_domain, "fineract-document: Document Management") {
+            Component(document_entities, "Document Entities", "JPA Domain", "• Document\n• DocumentTemplate\n• DocumentStore")
+            Component(document_services, "Document Services", "Business Logic", "• DocumentReadService\n• DocumentWriteService\n• TemplateService")
+            Component(storage_providers, "Storage Providers", "Storage Logic", "• FileSystemStorageProvider\n• AmazonS3StorageProvider\n• DatabaseStorageProvider")
+        }
+        
+        document_domain -[hidden]down-> batch_domain
+        
+        ' Batch Processing (COB)
+        Container_Boundary(batch_domain, "fineract-cob: Close of Business") {
+            Component(batch_jobs, "Batch Jobs", "Spring Batch", "• LoanCOBJob\n• SavingsCOBJob\n• AccountingCOBJob")
+            Component(job_services, "Job Services", "Business Logic", "• COBBusinessStepService\n• LoanAccountLockService\n• BatchJobExecutionService")
+            Component(step_processors, "Step Processors", "Batch Logic", "• LoanInterestCalculationStep\n• AccrualActivityPostingStep\n• LoanDelinquencyClassification")
+        }
+    }
+    
+    operational_layer -[hidden]down-> data_layer
+    
+    ' Data and Schema Layer
+    Container_Boundary(data_layer, "fineract-db & avro-schemas: Data Layer") {
+        Component(tenant_resolver, "Tenant Resolver", "Multi-tenancy", "• TenantDetailsService\n• TenantAwareDataSource\n• SchemaResolver")
+        Component(migration_scripts, "Migration Scripts", "Database Evolution", "• Liquibase changesets\n• Tenant-specific migrations\n• Schema versioning")
+        Component(avro_schemas_comp, "Avro Schemas", "Event Schemas", "• LoanEventSchema\n• ClientEventSchema\n• TransactionEventSchema")
+        Component(event_publishers, "Event Publishers", "Event Sourcing", "• DomainEventPublisher\n• BusinessEventNotificationService")
+    }
+}
+
+' External Database
+ContainerDb(fineract_database, "Database Cluster", "MySQL/MariaDB/PostgreSQL", "• Multi-tenant schemas\n• Connection pooling\n• Read/Write splitting")
+
+' Relationships - External Integration
+Rel(client_apps, rest_controllers, "HTTP REST API")
+Rel(external_integrations, rest_controllers, "Integration APIs")
+
+' Internal Component Flow - Request Processing
+Rel(rest_controllers, security_filter, "Request filtering")
+Rel(rest_controllers, command_source, "Command execution")
+Rel(rest_controllers, json_serialization, "Response serialization")
+Rel(security_filter, tenant_resolver, "Tenant identification")
+
+' Command Processing Flow
+Rel(command_source, audit_service, "Audit logging")
+Rel(command_source, transaction_manager, "Transaction management")
+Rel(audit_service, fineract_database, "Audit persistence")
+
+' Domain Service Dependencies
+Rel(client_services, client_repositories, "Data access")
+Rel(loan_services, loan_repositories, "Data access")
+Rel(savings_services, savings_repositories, "Data access")
+Rel(accounting_services, accounting_repositories, "Data access")
+
+' Cross-Domain Dependencies
+Rel(loan_services, accounting_services, "Journal entries")
+Rel(savings_services, accounting_services, "Interest posting")
+Rel(loan_services, charge_services, "Fee calculation")
+Rel(savings_services, charge_services, "Fee application")
+
+' Validation Integration
+Rel(rest_controllers, data_validators, "Input validation")
+Rel(client_services, validation_context, "Business validation")
+Rel(loan_services, validation_context, "Loan validation")
+
+' Reporting Integration
+Rel(report_services, client_repositories, "Client data")
+Rel(report_services, loan_repositories, "Loan data")
+Rel(report_services, savings_repositories, "Savings data")
+Rel(report_generators, fineract_database, "Report queries")
+
+' Batch Processing Integration
+Rel(batch_jobs, loan_repositories, "Loan processing")
+Rel(batch_jobs, savings_repositories, "Savings processing")
+Rel(step_processors, posting_engine, "Accounting entries")
+
+' Foundation Layer Usage
+Rel(client_entities, domain_entities, "Inherits from")
+Rel(loan_entities, domain_entities, "Inherits from")
+Rel(savings_entities, domain_entities, "Inherits from")
+Rel(client_repositories, repositories, "Extends")
+Rel(loan_repositories, repositories, "Extends")
+Rel(savings_repositories, repositories, "Extends")
+
+' Data Layer Integration
+Rel(tenant_resolver, fineract_database, "Schema routing")
+Rel(migration_scripts, fineract_database, "Schema evolution")
+Rel(event_publishers, avro_schemas_comp, "Event serialization")
+
+' Storage Integration
+Rel(document_services, storage_providers, "File operations")
+Rel(report_generators, storage_providers, "Report storage")
+
+' Utilities Usage
+Rel(loan_calculators, utilities, "Common calculations")
+Rel(interest_engine, utilities, "Date/Money utils")
+Rel(charge_calculators, utilities, "Mathematical functions")
+
+SHOW_LEGEND()
+
+note top of web_api_layer
+**API Layer Architecture**
+• RESTful resource controllers per domain
+• Comprehensive security filter chain
+• Standardized exception handling
+• JSON request/response processing
+end note
+
+note right of command_layer
+**Command Pattern Implementation**
+• Centralized command processing
+• Complete audit trail
+• Transaction boundary management
+• Rollback & error handling
+end note
+
+note bottom of data_layer
+**Multi-Tenant Data Architecture**
+• Dynamic tenant resolution
+• Schema-per-tenant isolation
+• Event-driven architecture
+• Database migration management
+end note
+
+note left of batch_domain
+**Batch Processing Strategy**
+• Spring Batch framework
+• Configurable business steps
+• Parallel processing support
+• Failure recovery mechanisms
+end note
+
+@enduml

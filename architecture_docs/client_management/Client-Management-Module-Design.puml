@@ -1,0 +1,543 @@
+@startuml Client-Management-Module-Design
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Force top to bottom layout
+top to bottom direction
+
+title Apache Fineract - Client Management Module (Class/Interface Level Design)
+
+' Client Management Module
+Package "org.apache.fineract.portfolio.client" {
+    
+    ' Domain Entity Layer
+    Package "domain" {
+        
+        ' Core Client Entity with Rich Domain Logic
+        Class Client {
+            - Long id
+            - String accountNo
+            - ClientStatus status
+            - ClientType clientType
+            - String firstname
+            - String middlename  
+            - String lastname
+            - String fullname
+            - String displayName
+            - String mobileNo
+            - String emailAddress
+            - LocalDate dateOfBirth
+            - Gender gender
+            - Long imageId
+            - Staff staff
+            - Office office
+            - LocalDate activationDate
+            - LocalDate closureDate
+            - String closureReason
+            - Boolean active
+            --
+            + activate(LocalDate activationDate) : void
+            + close(LocalDate closureDate, String reason) : void
+            + assignStaff(Staff staff) : void
+            + transferToOffice(Office office) : void
+            + updatePersonalInfo(ClientPersonalInfo info) : void
+            + addIdentifier(ClientIdentifier identifier) : void
+            + removeIdentifier(Long identifierId) : void
+            + addFamilyMember(ClientFamilyMember member) : void
+            + updateImage(Long imageId) : void
+            + isActive() : Boolean
+            + isClosed() : Boolean
+            + canBeActivated() : Boolean
+            + canBeClosed() : Boolean
+            + validateForActivation() : void
+            + validateForClosure() : void
+        }
+        
+        ' Value Objects for Client
+        Class ClientPersonalInfo <<ValueObject>> {
+            - String firstname
+            - String middlename
+            - String lastname
+            - String mobileNo
+            - String emailAddress
+            - LocalDate dateOfBirth
+            - Gender gender
+            --
+            + validateEmail() : void
+            + validateMobileNumber() : void
+            + validateDateOfBirth() : void
+            + getFullName() : String
+        }
+        
+        ' Client Status Enumeration
+        Enum ClientStatus {
+            PENDING
+            ACTIVE
+            CLOSED
+            REJECTED
+            WITHDRAWN
+            --
+            + isPending() : Boolean
+            + isActive() : Boolean
+            + isClosed() : Boolean
+            + canTransitionTo(ClientStatus newStatus) : Boolean
+        }
+        
+        ' Client Type Classification
+        Enum ClientType {
+            INDIVIDUAL
+            ENTITY
+            --
+            + isIndividual() : Boolean
+            + isEntity() : Boolean
+        }
+        
+        ' Gender Enumeration
+        Enum Gender {
+            MALE
+            FEMALE
+            OTHER
+            --
+            + getDisplayName() : String
+        }
+        
+        ' Client Identifier Management
+        Class ClientIdentifier {
+            - Long id
+            - Client client
+            - CodeValue documentType
+            - String documentKey
+            - String description
+            - LocalDate expiryDate
+            - Boolean active
+            - Staff createdBy
+            - Staff updatedBy
+            --
+            + isExpired() : Boolean
+            + isActive() : Boolean
+            + activate() : void
+            + deactivate() : void
+            + updateExpiryDate(LocalDate expiryDate) : void
+            + validateDocumentKey() : void
+            + validateExpiryDate() : void
+        }
+        
+        ' Address Management
+        Class ClientAddress {
+            - Long id
+            - Client client
+            - AddressType addressType
+            - String street
+            - String addressLine1
+            - String addressLine2
+            - String townVillage
+            - String city
+            - String countyDistrict
+            - String stateProvince
+            - String countryName
+            - String postalCode
+            - BigDecimal latitude
+            - BigDecimal longitude
+            - Boolean isActive
+            --
+            + activate() : void
+            + deactivate() : void
+            + updateCoordinates(BigDecimal lat, BigDecimal lng) : void
+            + validateAddress() : void
+            + getFormattedAddress() : String
+        }
+        
+        ' Family Member Management  
+        Class ClientFamilyMember {
+            - Long id
+            - Client client
+            - String firstname
+            - String middlename
+            - String lastname
+            - String qualification
+            - RelationshipType relationshipType
+            - MaritalStatus maritalStatus
+            - Gender gender
+            - String profession
+            - String mobileNumber
+            - Integer age
+            - Boolean isDependent
+            --
+            + updatePersonalInfo(FamilyMemberInfo info) : void
+            + markAsDependent() : void
+            + markAsNonDependent() : void
+            + validateAge() : void
+            + validateRelationship() : void
+        }
+        
+        ' Client Image Management
+        Class ClientImage {
+            - Long id
+            - Client client
+            - String location
+            - StorageType storageType
+            --
+            + getImageUrl() : String
+            + updateLocation(String location) : void
+        }
+    }
+    
+    ' Repository Layer with Advanced Query Capabilities
+    Package "repository" {
+        
+        Interface ClientRepository <<Repository>> {
+            + findById(Long id) : Optional<Client>
+            + findByAccountNo(String accountNo) : Optional<Client>
+            + findByMobileNo(String mobileNo) : List<Client>
+            + findByEmailAddress(String email) : Optional<Client>
+            + findByOfficeId(Long officeId) : List<Client>
+            + findByStaffId(Long staffId) : List<Client>
+            + findByStatus(ClientStatus status) : List<Client>
+            + findActiveClientsInOffice(Long officeId) : List<Client>
+            + findClientsWithExpiredDocuments() : List<Client>
+            + findClientsByDateRange(LocalDate from, LocalDate to) : List<Client>
+            + countByOfficeId(Long officeId) : Long
+            + existsByAccountNo(String accountNo) : Boolean
+            + existsByMobileNo(String mobileNo) : Boolean
+        }
+        
+        Interface ClientIdentifierRepository <<Repository>> {
+            + findByClientId(Long clientId) : List<ClientIdentifier>
+            + findByDocumentTypeAndKey(Long documentTypeId, String key) : Optional<ClientIdentifier>
+            + findExpiredDocuments() : List<ClientIdentifier>
+            + findExpiringDocuments(LocalDate expiryDate) : List<ClientIdentifier>
+            + findByDocumentType(Long documentTypeId) : List<ClientIdentifier>
+        }
+        
+        Interface ClientAddressRepository <<Repository>> {
+            + findByClientId(Long clientId) : List<ClientAddress>
+            + findActiveAddressesByClientId(Long clientId) : List<ClientAddress>
+            + findByAddressType(AddressType type) : List<ClientAddress>
+            + findByCity(String city) : List<ClientAddress>
+            + findByPostalCode(String postalCode) : List<ClientAddress>
+        }
+        
+        Interface ClientFamilyMemberRepository <<Repository>> {
+            + findByClientId(Long clientId) : List<ClientFamilyMember>
+            + findDependentsByClientId(Long clientId) : List<ClientFamilyMember>
+            + findByRelationshipType(RelationshipType type) : List<ClientFamilyMember>
+            + countDependentsByClientId(Long clientId) : Long
+        }
+    }
+    
+    ' Service Layer with Business Logic
+    Package "service" {
+        
+        ' Read Operations Interface
+        Interface ClientReadPlatformService <<Service>> {
+            + retrieveClient(Long clientId) : ClientData
+            + retrieveAllClients(SearchParameters searchParams) : Page<ClientData>
+            + retrieveClientsByOffice(Long officeId) : List<ClientData>
+            + retrieveClientsByStaff(Long staffId) : List<ClientData>
+            + retrieveClientAccounts(Long clientId) : ClientAccountSummaryCollectionData
+            + retrieveClientIdentifiers(Long clientId) : List<ClientIdentifierData>
+            + retrieveClientAddresses(Long clientId) : List<ClientAddressData>
+            + retrieveClientFamilyMembers(Long clientId) : List<ClientFamilyMemberData>
+            + retrieveClientTemplate() : ClientData
+            + retrieveClientTransferTemplate() : ClientTransferData
+            + generateClientAccountNumber() : String
+            + validateClientData(JsonCommand command) : void
+        }
+        
+        ' Write Operations Interface  
+        Interface ClientWritePlatformService <<Service>> {
+            + createClient(JsonCommand command) : CommandProcessingResult
+            + updateClient(Long clientId, JsonCommand command) : CommandProcessingResult
+            + activateClient(Long clientId, JsonCommand command) : CommandProcessingResult
+            + closeClient(Long clientId, JsonCommand command) : CommandProcessingResult
+            + assignStaffToClient(Long clientId, JsonCommand command) : CommandProcessingResult
+            + unassignStaffFromClient(Long clientId, JsonCommand command) : CommandProcessingResult
+            + transferClientToOffice(Long clientId, JsonCommand command) : CommandProcessingResult
+            + addClientIdentifier(Long clientId, JsonCommand command) : CommandProcessingResult
+            + updateClientIdentifier(Long clientId, Long identifierId, JsonCommand command) : CommandProcessingResult
+            + deleteClientIdentifier(Long clientId, Long identifierId, JsonCommand command) : CommandProcessingResult
+            + addClientAddress(Long clientId, JsonCommand command) : CommandProcessingResult
+            + updateClientAddress(Long clientId, Long addressId, JsonCommand command) : CommandProcessingResult
+            + addClientFamilyMember(Long clientId, JsonCommand command) : CommandProcessingResult
+            + updateClientFamilyMember(Long clientId, Long memberId, JsonCommand command) : CommandProcessingResult
+            + uploadClientImage(Long clientId, InputStream inputStream, String fileName) : CommandProcessingResult
+        }
+        
+        ' Implementation Classes
+        Class ClientReadPlatformServiceImpl <<Service>> {
+            - JdbcTemplate jdbcTemplate
+            - ClientMapper clientMapper
+            - SecurityContext context
+            --
+            + retrieveClient(Long clientId) : ClientData
+            + retrieveAllClients(SearchParameters searchParams) : Page<ClientData>
+            - buildClientQuery(SearchParameters params) : String
+            - mapClientData(ResultSet rs) : ClientData
+            - validateUserPermissions(Long clientId) : void
+        }
+        
+        Class ClientWritePlatformServiceImpl <<Service>> {
+            - ClientRepository clientRepository
+            - ClientDataValidator validator
+            - ClientDomainService domainService
+            - ClientAssembler assembler
+            - SecurityContext context
+            - ApplicationEventPublisher eventPublisher
+            --
+            + createClient(JsonCommand command) : CommandProcessingResult
+            + updateClient(Long clientId, JsonCommand command) : CommandProcessingResult
+            - validateClientCreation(JsonCommand command) : void
+            - assembleClientForCreation(JsonCommand command) : Client
+            - publishClientCreatedEvent(Client client) : void
+        }
+    }
+    
+    ' Validation Layer
+    Package "validation" {
+        
+        Class ClientDataValidator <<Validator>> {
+            - ApiDataValidationErrorCollector dataValidationErrors
+            - FromJsonHelper fromApiJsonHelper
+            --
+            + validateForCreate(String json) : void
+            + validateForUpdate(String json) : void
+            + validateForActivation(String json) : void
+            + validateForClosure(String json) : void
+            + validateClientPersonalInfo(JsonElement element) : void
+            + validateClientIdentifier(JsonElement element) : void
+            + validateClientAddress(JsonElement element) : void
+            + validateClientFamilyMember(JsonElement element) : void
+            - validateMobileNumber(String mobileNo) : void
+            - validateEmailAddress(String email) : void
+            - validateDateOfBirth(LocalDate dateOfBirth) : void
+        }
+        
+        Class ClientBusinessRuleValidator <<Validator>> {
+            - ClientRepository clientRepository
+            - OfficeRepository officeRepository
+            - StaffRepository staffRepository
+            --
+            + validateClientForActivation(Client client) : void
+            + validateClientForClosure(Client client) : void
+            + validateStaffAssignment(Long staffId, Long officeId) : void
+            + validateOfficeTransfer(Long fromOfficeId, Long toOfficeId) : void
+            + validateAccountNumberUniqueness(String accountNo) : void
+            + validateMobileNumberUniqueness(String mobileNo) : void
+            + validateClientHasNoActiveLoans(Long clientId) : void
+            + validateClientHasNoActiveSavings(Long clientId) : void
+        }
+    }
+    
+    ' Domain Service Layer
+    Package "domain.service" {
+        
+        Interface ClientDomainService <<DomainService>> {
+            + assignDefaultStaff(Client client, Office office) : void
+            + generateAccountNumber(Office office) : String
+            + calculateClientRiskScore(Client client) : BigDecimal
+            + validateClientEligibility(Client client) : Boolean
+            + performKYCValidation(Client client) : KYCValidationResult
+            + checkForDuplicateClient(ClientPersonalInfo info) : List<Client>
+        }
+        
+        Class ClientDomainServiceImpl <<DomainService>> {
+            - ClientRepository clientRepository
+            - StaffRepository staffRepository
+            - KYCService kycService
+            - DuplicateDetectionService duplicateService
+            --
+            + assignDefaultStaff(Client client, Office office) : void
+            + generateAccountNumber(Office office) : String
+            - calculateRiskFactors(Client client) : Map<String, BigDecimal>
+            - performDuplicateCheck(ClientPersonalInfo info) : List<Client>
+        }
+    }
+    
+    ' KYC and Compliance Layer
+    Package "kyc" {
+        
+        Interface KYCService <<Service>> {
+            + performKYCValidation(Client client) : KYCValidationResult
+            + validateIdentityDocuments(List<ClientIdentifier> identifiers) : ValidationResult
+            + performAMLScreening(Client client) : AMLScreeningResult
+            + checkSanctionsList(ClientPersonalInfo info) : SanctionsCheckResult
+            + calculateComplianceScore(Client client) : BigDecimal
+            + generateComplianceReport(Long clientId) : ComplianceReport
+        }
+        
+        Class KYCValidationResult <<ValueObject>> {
+            - Boolean isValid
+            - List<ValidationError> errors
+            - List<ValidationWarning> warnings
+            - BigDecimal complianceScore
+            - KYCStatus status
+            --
+            + isCompliant() : Boolean
+            + hasErrors() : Boolean
+            + hasWarnings() : Boolean
+            + getOverallStatus() : KYCStatus
+        }
+        
+        Enum KYCStatus {
+            PENDING
+            IN_PROGRESS
+            COMPLETED
+            FAILED
+            REQUIRES_MANUAL_REVIEW
+            --
+            + isCompleted() : Boolean
+            + requiresAction() : Boolean
+        }
+    }
+    
+    ' Event Handling
+    Package "event" {
+        
+        Class ClientCreatedEvent <<DomainEvent>> {
+            - Long clientId
+            - String accountNo
+            - LocalDateTime occurredOn
+            --
+            + getClientId() : Long
+            + getAccountNo() : String
+        }
+        
+        Class ClientActivatedEvent <<DomainEvent>> {
+            - Long clientId
+            - LocalDate activationDate
+            - LocalDateTime occurredOn
+            --
+            + getClientId() : Long
+            + getActivationDate() : LocalDate
+        }
+        
+        Class ClientClosedEvent <<DomainEvent>> {
+            - Long clientId
+            - LocalDate closureDate
+            - String closureReason
+            - LocalDateTime occurredOn
+        }
+        
+        Interface ClientEventHandler <<EventHandler>> {
+            + handleClientCreated(ClientCreatedEvent event) : void
+            + handleClientActivated(ClientActivatedEvent event) : void
+            + handleClientClosed(ClientClosedEvent event) : void
+        }
+    }
+    
+    ' Data Transfer Objects
+    Package "data" {
+        
+        Class ClientData <<DTO>> {
+            - Long id
+            - String accountNo
+            - ClientStatus status
+            - String displayName
+            - Long officeId
+            - String officeName
+            - Long staffId
+            - String staffName
+            - LocalDate activationDate
+            - LocalDate dateOfBirth
+            - Gender gender
+            - String mobileNo
+            - String emailAddress
+            - Collection<ClientIdentifierData> identifiers
+            - Collection<ClientAddressData> addresses
+            - Collection<ClientFamilyMemberData> familyMembers
+            --
+            + isActive() : Boolean
+            + getFullName() : String
+            + getFormattedMobileNo() : String
+        }
+        
+        Class ClientIdentifierData <<DTO>> {
+            - Long id
+            - Long documentTypeId
+            - String documentTypeName
+            - String documentKey
+            - String description
+            - LocalDate expiryDate
+            - Boolean active
+            --
+            + isExpired() : Boolean
+            + isExpiringWithin(Integer days) : Boolean
+        }
+        
+        Class ClientAddressData <<DTO>> {
+            - Long id
+            - String addressType
+            - String formattedAddress
+            - String city
+            - String stateProvince
+            - String postalCode
+            - Boolean isActive
+        }
+        
+        Class ClientFamilyMemberData <<DTO>> {
+            - Long id
+            - String displayName
+            - String relationshipType
+            - String profession
+            - Integer age
+            - Boolean isDependent
+        }
+    }
+}
+
+' Relationships
+Client ||--o{ ClientIdentifier : "has identifiers"
+Client ||--o{ ClientAddress : "has addresses" 
+Client ||--o{ ClientFamilyMember : "has family members"
+Client ||--|| ClientImage : "has image"
+Client ||--|| ClientPersonalInfo : "contains"
+
+ClientRepository ||-- ClientRepositoryImpl : "implements"
+ClientReadPlatformService ||-- ClientReadPlatformServiceImpl : "implements"
+ClientWritePlatformService ||-- ClientWritePlatformServiceImpl : "implements"
+ClientDomainService ||-- ClientDomainServiceImpl : "implements"
+
+ClientWritePlatformServiceImpl --> ClientRepository : "uses"
+ClientWritePlatformServiceImpl --> ClientDataValidator : "uses"
+ClientWritePlatformServiceImpl --> ClientDomainService : "uses"
+ClientReadPlatformServiceImpl --> JdbcTemplate : "uses"
+
+ClientDomainServiceImpl --> ClientRepository : "uses"
+ClientDomainServiceImpl --> KYCService : "uses"
+
+SHOW_LEGEND()
+
+note top of Client
+**Rich Domain Model**
+• Encapsulates business rules and invariants
+• State transitions with validation
+• Domain events for integration
+• Value objects for data integrity
+end note
+
+note right of ClientRepository
+**Repository Pattern**
+• Data access abstraction
+• Rich query methods
+• Specification pattern support
+• Transaction boundary management
+end note
+
+note bottom of ClientWritePlatformService
+**CQRS Pattern**
+• Separate read/write operations
+• Command/Query responsibility segregation
+• Event-driven architecture
+• Optimized for different concerns
+end note
+
+note left of KYCService
+**Compliance & Regulatory**
+• KYC validation workflows
+• AML screening integration
+• Regulatory compliance tracking
+• Risk assessment automation
+end note
+
+@enduml

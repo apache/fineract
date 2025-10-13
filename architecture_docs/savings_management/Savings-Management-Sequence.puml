@@ -1,0 +1,416 @@
+@startuml Savings-Management-Sequence
+!include <C4/C4_Context>
+
+title Apache Fineract - Savings Management Module Sequence Diagram
+
+' Actors and Systems
+actor "Customer" as CUST
+actor "Teller" as TELL
+participant "SavingsAccountsApiResource" as API
+participant "CommandSourceHandler" as CMD
+participant "SavingsAccountWritePlatformService" as SWS
+participant "SavingsAccountReadPlatformService" as SRS
+participant "SavingsAccountValidator" as VAL
+participant "SavingsAccountInterestCalculationService" as ICS
+participant "SavingsAccountRepository" as REPO
+participant "AccountingService" as ACC
+participant "ChargeService" as CHG
+participant "AuditService" as AUDIT
+database "TenantDatabase" as DB
+
+note over CUST, DB
+**Savings Management Sequence Flows**
+1. Savings Account Application and Approval
+2. Account Activation and Initial Deposit
+3. Deposit and Withdrawal Transactions
+4. Interest Calculation and Posting
+5. Account Closure and Final Settlement
+end note
+
+== Savings Account Application Flow ==
+
+CUST -> API : POST /savingsaccounts\n{savingsAccountData}
+activate API
+
+API -> CMD : processCommand(SUBMIT_SAVINGS_APPLICATION)
+activate CMD
+
+CMD -> VAL : validateSavingsApplication(accountData)
+activate VAL
+VAL -> SRS : validateClient(clientId)
+VAL -> SRS : validateSavingsProduct(productId)
+VAL -> VAL : validateMinimumBalance()
+VAL -> VAL : validateNominalInterestRate()
+VAL -> VAL : validateCharges()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> SWS : submitSavingsAccountApplication(accountData)
+    activate SWS
+    
+    SWS -> SWS : buildSavingsAccountEntity()
+    SWS -> SWS : generateAccountNumber()
+    
+    ' Apply product charges if any
+    SWS -> CHG : calculateApplicationCharges(productId)
+    activate CHG
+    CHG -> CHG : getProductCharges()
+    CHG --> SWS : applicationCharges
+    deactivate CHG
+    
+    SWS -> REPO : save(savingsAccountEntity)
+    activate REPO
+    REPO -> DB : INSERT INTO m_savings_account
+    REPO -> DB : INSERT INTO m_savings_account_charge
+    REPO --> SWS : savedAccount
+    deactivate REPO
+    
+    SWS -> AUDIT : auditSavingsApplication(accountId)
+    activate AUDIT
+    AUDIT -> DB : INSERT INTO m_portfolio_command_source
+    deactivate AUDIT
+    
+    SWS --> CMD : SavingsApplicationResult
+    deactivate SWS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> CUST : HTTP 201 Created\n{savingsId, accountNo}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> CUST : HTTP 400 Bad Request\n{validationErrors}
+end
+
+== Savings Account Approval Flow ==
+
+TELL -> API : POST /savingsaccounts/{accountId}?command=approve\n{approvalData}
+activate API
+
+API -> CMD : processCommand(APPROVE_SAVINGS_APPLICATION)
+activate CMD
+
+CMD -> VAL : validateSavingsForApproval(accountId, approvalData)
+activate VAL
+VAL -> SRS : getSavingsAccount(accountId)
+VAL -> VAL : checkSubmittedStatus()
+VAL -> VAL : validateApprovalDate()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> SWS : approveSavingsAccount(accountId, approvalData)
+    activate SWS
+    
+    SWS -> REPO : findById(accountId)
+    activate REPO
+    REPO -> DB : SELECT * FROM m_savings_account
+    REPO --> SWS : savingsAccountEntity
+    deactivate REPO
+    
+    SWS -> SWS : savingsAccountEntity.approve(approvalData)
+    
+    SWS -> REPO : save(savingsAccountEntity)
+    activate REPO
+    REPO -> DB : UPDATE m_savings_account SET status_enum = 200
+    REPO --> SWS : approvedAccount
+    deactivate REPO
+    
+    SWS -> AUDIT : auditSavingsApproval(accountId)
+    SWS --> CMD : SavingsApprovalResult
+    deactivate SWS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> TELL : HTTP 200 OK\n{changes}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> TELL : HTTP 400 Bad Request
+end
+
+== Savings Account Activation Flow ==
+
+TELL -> API : POST /savingsaccounts/{accountId}?command=activate\n{activationData}
+activate API
+
+API -> CMD : processCommand(ACTIVATE_SAVINGS_ACCOUNT)
+activate CMD
+
+CMD -> VAL : validateSavingsForActivation(accountId, activationData)
+activate VAL
+VAL -> SRS : getSavingsAccount(accountId)
+VAL -> VAL : checkApprovedStatus()
+VAL -> VAL : validateActivationDate()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> SWS : activateSavingsAccount(accountId, activationData)
+    activate SWS
+    
+    SWS -> REPO : findById(accountId)
+    activate REPO
+    REPO -> DB : SELECT * FROM m_savings_account
+    REPO --> SWS : savingsAccountEntity
+    deactivate REPO
+    
+    SWS -> SWS : savingsAccountEntity.activate(activationData)
+    
+    ' Initialize account balance and interest calculation
+    SWS -> ICS : initializeInterestCalculation(accountId)
+    activate ICS
+    ICS -> ICS : setupInterestCalculationFields()
+    ICS --> SWS : interestInitialized
+    deactivate ICS
+    
+    SWS -> REPO : save(savingsAccountEntity)
+    activate REPO
+    REPO -> DB : UPDATE m_savings_account SET status_enum = 300
+    REPO --> SWS : activatedAccount
+    deactivate REPO
+    
+    SWS -> AUDIT : auditSavingsActivation(accountId)
+    SWS --> CMD : SavingsActivationResult
+    deactivate SWS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> TELL : HTTP 200 OK\n{changes}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> TELL : HTTP 400 Bad Request
+end
+
+== Deposit Transaction Flow ==
+
+CUST -> API : POST /savingsaccounts/{accountId}/transactions?command=deposit\n{depositData}
+activate API
+
+API -> CMD : processCommand(SAVINGS_DEPOSIT)
+activate CMD
+
+CMD -> VAL : validateSavingsDeposit(accountId, depositData)
+activate VAL
+VAL -> SRS : getSavingsAccount(accountId)
+VAL -> VAL : checkActiveStatus()
+VAL -> VAL : validateDepositAmount()
+VAL -> VAL : validateTransactionDate()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> SWS : deposit(accountId, depositData)
+    activate SWS
+    
+    SWS -> REPO : findById(accountId)
+    activate REPO
+    REPO -> DB : SELECT * FROM m_savings_account
+    REPO --> SWS : savingsAccountEntity
+    deactivate REPO
+    
+    ' Calculate any deposit charges
+    SWS -> CHG : calculateDepositCharges(accountId, amount)
+    activate CHG
+    CHG -> CHG : getApplicableCharges()
+    CHG -> CHG : calculateChargeAmounts()
+    CHG --> SWS : chargeCalculations
+    deactivate CHG
+    
+    ' Create deposit transaction
+    SWS -> SWS : createDepositTransaction(amount, charges)
+    SWS -> SWS : updateAccountBalance(amount - charges)
+    
+    SWS -> REPO : saveTransaction()
+    activate REPO
+    REPO -> DB : INSERT INTO m_savings_account_transaction
+    REPO -> DB : UPDATE m_savings_account SET account_balance_derived
+    REPO --> SWS : savedTransaction
+    deactivate REPO
+    
+    ' Create accounting entries
+    SWS -> ACC : createDepositAccountingEntries(accountId, amount)
+    activate ACC
+    ACC -> ACC : debitCash()
+    ACC -> ACC : creditSavingsControl()
+    ACC -> ACC : debitChargesIncome() 
+    ACC -> DB : INSERT INTO acc_gl_journal_entry
+    deactivate ACC
+    
+    ' Update interest calculation
+    SWS -> ICS : updateInterestCalculation(accountId, transactionDate)
+    activate ICS
+    ICS -> ICS : recalculateInterestFromDate()
+    ICS --> SWS : interestUpdated
+    deactivate ICS
+    
+    SWS -> AUDIT : auditSavingsDeposit(accountId)
+    SWS --> CMD : SavingsDepositResult
+    deactivate SWS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> CUST : HTTP 200 OK\n{transactionId, newBalance}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> CUST : HTTP 400 Bad Request
+end
+
+== Withdrawal Transaction Flow ==
+
+CUST -> API : POST /savingsaccounts/{accountId}/transactions?command=withdrawal\n{withdrawalData}
+activate API
+
+API -> CMD : processCommand(SAVINGS_WITHDRAWAL)
+activate CMD
+
+CMD -> VAL : validateSavingsWithdrawal(accountId, withdrawalData)
+activate VAL
+VAL -> SRS : getSavingsAccount(accountId)
+VAL -> VAL : checkActiveStatus()
+VAL -> VAL : validateWithdrawalAmount()
+VAL -> VAL : checkMinimumBalance()
+VAL -> VAL : checkWithdrawalLimits()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> SWS : withdraw(accountId, withdrawalData)
+    activate SWS
+    
+    SWS -> REPO : findById(accountId)
+    activate REPO
+    REPO -> DB : SELECT * FROM m_savings_account
+    REPO --> SWS : savingsAccountEntity
+    deactivate REPO
+    
+    ' Calculate withdrawal charges
+    SWS -> CHG : calculateWithdrawalCharges(accountId, amount)
+    activate CHG
+    CHG -> CHG : getApplicableCharges()
+    CHG -> CHG : calculateChargeAmounts()
+    CHG --> SWS : chargeCalculations
+    deactivate CHG
+    
+    ' Validate sufficient balance including charges
+    SWS -> SWS : validateSufficientBalance(amount + charges)
+    
+    ' Create withdrawal transaction
+    SWS -> SWS : createWithdrawalTransaction(amount, charges)
+    SWS -> SWS : updateAccountBalance(amount + charges)
+    
+    SWS -> REPO : saveTransaction()
+    activate REPO
+    REPO -> DB : INSERT INTO m_savings_account_transaction
+    REPO -> DB : UPDATE m_savings_account SET account_balance_derived
+    REPO --> SWS : savedTransaction
+    deactivate REPO
+    
+    ' Create accounting entries
+    SWS -> ACC : createWithdrawalAccountingEntries(accountId, amount)
+    activate ACC
+    ACC -> ACC : creditCash()
+    ACC -> ACC : debitSavingsControl()
+    ACC -> ACC : creditChargesIncome()
+    ACC -> DB : INSERT INTO acc_gl_journal_entry
+    deactivate ACC
+    
+    ' Update interest calculation
+    SWS -> ICS : updateInterestCalculation(accountId, transactionDate)
+    activate ICS
+    ICS -> ICS : recalculateInterestFromDate()
+    ICS --> SWS : interestUpdated
+    deactivate ICS
+    
+    SWS -> AUDIT : auditSavingsWithdrawal(accountId)
+    SWS --> CMD : SavingsWithdrawalResult
+    deactivate SWS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> CUST : HTTP 200 OK\n{transactionId, newBalance}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> CUST : HTTP 400 Bad Request
+end
+
+== Interest Calculation and Posting Flow (Batch Process) ==
+
+participant "COBBatchJob" as BATCH
+participant "SavingsInterestPostingService" as SIPS
+
+BATCH -> SIPS : processInterestPosting(businessDate)
+activate SIPS
+
+SIPS -> REPO : findActiveSavingsAccounts()
+activate REPO
+REPO -> DB : SELECT * FROM m_savings_account WHERE status_enum = 300
+REPO --> SIPS : activeSavingsAccountsList
+deactivate REPO
+
+loop For Each Active Account
+    SIPS -> ICS : calculateInterestForPosting(accountId, postingDate)
+    activate ICS
+    
+    ICS -> ICS : calculateCompoundInterest()
+    ICS -> ICS : applyInterestCalculationMethod()
+    ICS -> ICS : handleMinimumBalanceRequirement()
+    
+    ICS --> SIPS : InterestCalculation
+    deactivate ICS
+    
+    alt Interest to Post
+        SIPS -> SWS : postInterestAsTransaction(accountId, interestAmount)
+        activate SWS
+        
+        SWS -> SWS : createInterestPostingTransaction()
+        SWS -> SWS : updateAccountBalance(interestAmount)
+        
+        SWS -> REPO : saveTransaction()
+        activate REPO
+        REPO -> DB : INSERT INTO m_savings_account_transaction
+        REPO -> DB : UPDATE m_savings_account SET account_balance_derived
+        REPO --> SWS : interestPosted
+        deactivate REPO
+        
+        ' Create accounting entries for interest
+        SWS -> ACC : createInterestPostingAccountingEntries(accountId, interestAmount)
+        activate ACC
+        ACC -> ACC : debitInterestExpense()
+        ACC -> ACC : creditSavingsControl()
+        ACC -> DB : INSERT INTO acc_gl_journal_entry
+        deactivate ACC
+        
+        SWS --> SIPS : InterestPosted
+        deactivate SWS
+    end
+end
+
+SIPS --> BATCH : InterestPostingCompleted
+deactivate SIPS
+
+note over CUST, DB
+**Key Design Patterns:**
+• Command Pattern: All savings operations via command handlers
+• Strategy Pattern: Different interest calculation strategies
+• State Pattern: Account status transitions (Submitted → Approved → Active → Closed)
+• Observer Pattern: Events for accounting and interest calculations
+• Template Method: Transaction processing with different types
+• Repository Pattern: Multi-tenant data access abstraction
+end note
+
+@enduml

@@ -1,0 +1,485 @@
+@startuml Fineract-LLD_Level-2
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Force top to bottom layout
+top to bottom direction
+
+title Apache Fineract - Low Level Design Level 2 (Detailed Component Architecture)
+
+' External Systems
+System_Ext(client_apps, "Client Applications", "Mobile & Web interfaces")
+System_Ext(external_integrations, "External Systems", "Payment gateways, SMS, etc.")
+
+' Main Fineract System
+System_Boundary(fineract_system, "Apache Fineract Platform") {
+    
+    ' API and Web Layer - Detailed Components
+    Container_Boundary(web_api_layer, "fineract-provider: Web & API Layer") {
+        
+        ' REST API Controllers with detailed endpoints
+        Container_Boundary(rest_api_controllers, "REST API Controllers") {
+            Component(client_api, "ClientApiResource", "JAX-RS Controller", "• GET /clients\n• POST /clients\n• PUT /clients/{id}\n• DELETE /clients/{id}\n• GET /clients/{id}/accounts")
+            Component(loans_api, "LoansApiResource", "JAX-RS Controller", "• GET /loans\n• POST /loans\n• PUT /loans/{id}\n• POST /loans/{id}/transactions\n• GET /loans/{id}/schedule")
+            Component(savings_api, "SavingsApiResource", "JAX-RS Controller", "• GET /savingsaccounts\n• POST /savingsaccounts\n• PUT /savingsaccounts/{id}\n• POST /savingsaccounts/{id}/transactions")
+            Component(accounting_api, "AccountingApiResource", "JAX-RS Controller", "• GET /journalentries\n• POST /journalentries\n• GET /glaccounts\n• POST /glaccounts")
+            Component(reports_api, "ReportsApiResource", "JAX-RS Controller", "• GET /reports\n• POST /reports/run\n• GET /reports/{id}/template")
+        }
+        
+        ' Security Layer with detailed filters
+        Container_Boundary(security_layer, "Security & Authentication") {
+            Component(oauth2_filter, "OAuth2AuthenticationFilter", "Security Filter", "• Token validation\n• Scope verification\n• User authentication\n• Authority extraction")
+            Component(tenant_filter, "TenantAwareFilter", "Multi-tenant Filter", "• Tenant identification\n• Schema context setup\n• Tenant validation\n• Context cleanup")
+            Component(authorization_filter, "AuthorizationFilter", "Permission Filter", "• Role-based access\n• Resource permissions\n• Method-level security\n• Audit logging")
+            Component(cors_filter, "CorsFilter", "Cross-Origin Filter", "• CORS headers\n• Preflight handling\n• Origin validation")
+        }
+        
+        ' Exception Handling System
+        Container_Boundary(exception_handling, "Exception Management") {
+            Component(global_handler, "GlobalExceptionHandler", "Exception Handler", "• HTTP status mapping\n• Error response formatting\n• Stack trace handling\n• Logging integration")
+            Component(validation_handler, "ValidationExceptionHandler", "Validation Handler", "• Field validation errors\n• Business rule violations\n• Custom error messages\n• Error code mapping")
+            Component(platform_exceptions, "PlatformExceptions", "Custom Exceptions", "• PlatformApiDataValidationException\n• PlatformServiceUnavailableException\n• PlatformDataIntegrityException")
+        }
+        
+        ' Serialization and Data Transfer
+        Container_Boundary(serialization_layer, "Data Transfer Layer") {
+            Component(json_serializer, "JsonSerializer", "Jackson Serializer", "• Object to JSON conversion\n• Custom date formatting\n• Null value handling\n• Annotation processing")
+            Component(request_dtos, "Request DTOs", "Data Transfer Objects", "• CommandWrapper\n• ClientData\n• LoanApplicationRequest\n• SavingsAccountRequest")
+            Component(response_dtos, "Response DTOs", "Response Objects", "• ApiRequestJsonSerializationSettings\n• CommandProcessingResult\n• PagedResponse\n• ErrorResponse")
+            Component(api_constants, "ApiConstants", "API Configuration", "• URL patterns\n• Parameter names\n• Response codes\n• Content types")
+        }
+    }
+    
+    web_api_layer -[hidden]down-> command_processing_layer
+    
+    ' Command Processing Layer - Enhanced Details
+    Container_Boundary(command_processing_layer, "fineract-command: Command Processing Framework") {
+        
+        ' Command Pattern Implementation
+        Container_Boundary(command_pattern, "Command Pattern Core") {
+            Component(command_wrapper, "CommandWrapper", "Command Encapsulation", "• Command data\n• Entity type\n• Action type\n• Resource identifier\n• JSON payload")
+            Component(command_source, "CommandSource", "Command Factory", "• Command creation\n• Validation rules\n• Permission checks\n• Audit preparation")
+            Component(command_handler, "CommandHandler", "Command Executor", "• Command routing\n• Business logic invocation\n• Result processing\n• Error handling")
+            Component(command_strategy, "CommandStrategy", "Execution Strategy", "• Synchronous execution\n• Asynchronous processing\n• Batch command handling\n• Rollback strategies")
+        }
+        
+        ' Audit and Compliance System
+        Container_Boundary(audit_system, "Audit & Compliance") {
+            Component(audit_trail, "AuditTrail", "Audit Logger", "• Command tracking\n• User activity log\n• Data change history\n• Compliance reporting")
+            Component(command_audit, "CommandAudit", "Command Auditing", "• Before/after snapshots\n• Execution timeline\n• Success/failure tracking\n• Performance metrics")
+            Component(compliance_checker, "ComplianceChecker", "Regulatory Compliance", "• Regulatory rule validation\n• Policy enforcement\n• Risk assessment\n• Compliance reporting")
+        }
+        
+        ' Transaction Management
+        Container_Boundary(transaction_mgmt, "Transaction Management") {
+            Component(tx_manager, "PlatformTransactionManager", "Transaction Control", "• Transaction boundaries\n• Isolation levels\n• Rollback handling\n• Nested transactions")
+            Component(tx_template, "TransactionTemplate", "Transaction Template", "• Programmatic transactions\n• Transaction callbacks\n• Error recovery\n• Resource cleanup")
+            Component(tx_interceptor, "TransactionInterceptor", "Declarative TX", "• Method-level transactions\n• Annotation processing\n• Propagation rules\n• Timeout handling")
+        }
+    }
+    
+    command_processing_layer -[hidden]down-> validation_framework
+    
+    ' Validation Framework - Comprehensive Details
+    Container_Boundary(validation_framework, "fineract-validation: Validation Framework") {
+        
+        ' Data Validation Engine
+        Container_Boundary(data_validation, "Data Validation Engine") {
+            Component(api_validator, "ApiDataValidator", "API Validation", "• Request validation\n• Parameter checking\n• Format validation\n• Required field checks")
+            Component(business_validator, "BusinessRuleValidator", "Business Rules", "• Business logic validation\n• Domain rule enforcement\n• Constraint checking\n• Policy validation")
+            Component(cross_field_validator, "CrossFieldValidator", "Cross-Field Validation", "• Field interdependencies\n• Conditional validation\n• Relationship checks\n• Consistency validation")
+            Component(custom_validator, "CustomValidator", "Custom Rules", "• Domain-specific rules\n• Complex validations\n• External service checks\n• Dynamic rule engine")
+        }
+        
+        ' Validation Context and Results
+        Container_Boundary(validation_context, "Validation Context") {
+            Component(validation_result, "ValidationResult", "Result Container", "• Validation status\n• Error collection\n• Warning messages\n• Success indicators")
+            Component(error_collector, "ErrorCollector", "Error Management", "• Error aggregation\n• Error categorization\n• Error formatting\n• Error localization")
+            Component(rule_engine, "ValidationRuleEngine", "Rule Processing", "• Rule execution\n• Rule chaining\n• Conditional rules\n• Rule priority")
+        }
+    }
+    
+    validation_framework -[hidden]down-> core_foundation_layer
+    
+    ' Core Foundation Layer - Detailed Architecture
+    Container_Boundary(core_foundation_layer, "fineract-core: Foundation Architecture") {
+        
+        ' Domain Entity Framework
+        Container_Boundary(entity_framework, "Domain Entity Framework") {
+            Component(base_entity, "AbstractPersistableCustom", "Base Entity", "• Entity lifecycle\n• Audit fields\n• Optimistic locking\n• Identity management")
+            Component(auditable_entity, "AuditableFields", "Audit Support", "• Created date/user\n• Modified date/user\n• Version control\n• Soft delete support")
+            Component(entity_listeners, "EntityListeners", "JPA Listeners", "• Pre-persist callbacks\n• Post-load processing\n• Change tracking\n• Event publishing")
+            Component(domain_events, "DomainEvents", "Domain Events", "• Event creation\n• Event publishing\n• Event handling\n• Event sourcing")
+        }
+        
+        ' Repository Infrastructure
+        Container_Boundary(repository_infrastructure, "Repository Infrastructure") {
+            Component(base_repository, "BaseRepository", "Repository Base", "• CRUD operations\n• Query methods\n• Batch operations\n• Transaction support")
+            Component(specification_builder, "SpecificationBuilder", "Dynamic Queries", "• Criteria building\n• Dynamic filtering\n• Complex joins\n• Pagination support")
+            Component(query_optimizer, "QueryOptimizer", "Performance", "• Query optimization\n• Index hints\n• Batch loading\n• Cache integration")
+            Component(connection_pool, "ConnectionPoolManager", "Connection Management", "• Pool configuration\n• Connection lifecycle\n• Performance monitoring\n• Failover support")
+        }
+        
+        ' Configuration Management
+        Container_Boundary(config_management, "Configuration Management") {
+            Component(db_config, "DatabaseConfiguration", "Database Config", "• DataSource configuration\n• Connection pools\n• Transaction settings\n• Multi-tenant setup")
+            Component(security_config, "SecurityConfiguration", "Security Setup", "• Authentication providers\n• Authorization rules\n• CORS configuration\n• Session management")
+            Component(tenant_config, "TenantConfiguration", "Multi-tenancy", "• Tenant resolution\n• Schema routing\n• Tenant isolation\n• Configuration per tenant")
+            Component(cache_config, "CacheConfiguration", "Caching Setup", "• Cache providers\n• Eviction policies\n• Distributed caching\n• Performance tuning")
+        }
+        
+        ' Utility Services
+        Container_Boundary(utility_services, "Utility Services") {
+            Component(date_utils, "DateUtils", "Date/Time Utilities", "• Date formatting\n• Timezone handling\n• Business day calculations\n• Date range operations")
+            Component(money_util, "MoneyUtil", "Financial Calculations", "• Currency handling\n• Precision arithmetic\n• Rounding strategies\n• Exchange rates")
+            Component(validation_util, "ValidationUtil", "Validation Helpers", "• Common validators\n• Format checkers\n• Range validators\n• Pattern matching")
+            Component(security_util, "SecurityUtil", "Security Helpers", "• Password hashing\n• Token generation\n• Encryption/Decryption\n• Secure random generation")
+        }
+    }
+    
+    core_foundation_layer -[hidden]down-> business_domain_layer
+    
+    ' Business Domain Layer - Comprehensive Details
+    Rectangle business_domain_layer as "Business Domain Layer" {
+        
+        ' Client Management Domain - Detailed Architecture
+        Container_Boundary(client_management_domain, "fineract-client: Client Management Domain") {
+            
+            ' Client Entity Layer
+            Container_Boundary(client_entities, "Client Entity Layer") {
+                Component(client_entity, "Client", "Core Entity", "• Personal/Corporate data\n• Status lifecycle\n• Relationship management\n• Document references")
+                Component(client_identifier, "ClientIdentifier", "Identity Management", "• ID documents\n• Verification status\n• Document types\n• Expiry tracking")
+                Component(client_address, "ClientAddress", "Address Management", "• Multiple addresses\n• Address types\n• Geolocation data\n• Verification status")
+                Component(client_family, "ClientFamilyMember", "Family Relations", "• Family structure\n• Dependent information\n• Emergency contacts\n• Beneficiary details")
+            }
+            
+            ' Client Service Layer
+            Container_Boundary(client_services, "Client Service Layer") {
+                Component(client_read_service, "ClientReadPlatformService", "Query Operations", "• Client lookup\n• Search functionality\n• Reporting queries\n• Statistical data")
+                Component(client_write_service, "ClientWritePlatformService", "Command Operations", "• Client creation\n• Update operations\n• Status changes\n• Relationship management")
+                Component(client_validation_service, "ClientValidationService", "Business Validation", "• Data validation\n• Business rules\n• Duplicate detection\n• Compliance checks")
+                Component(client_notification_service, "ClientNotificationService", "Communication", "• SMS notifications\n• Email alerts\n• Document reminders\n• Status updates")
+            }
+            
+            ' KYC and Compliance
+            Container_Boundary(kyc_compliance, "KYC & Compliance") {
+                Component(kyc_service, "KYCDocumentService", "KYC Processing", "• Document verification\n• Identity validation\n• Risk assessment\n• Compliance scoring")
+                Component(identity_verification, "IdentityVerificationService", "Identity Checks", "• Biometric verification\n• Document authentication\n• External service integration\n• Fraud detection")
+                Component(compliance_checker_client, "ClientComplianceChecker", "Regulatory Compliance", "• AML screening\n• Sanctions checking\n• PEP verification\n• Risk categorization")
+            }
+        }
+        
+        client_management_domain -[hidden]down-> loan_management_domain
+        
+        ' Loan Management Domain - Advanced Architecture
+        Container_Boundary(loan_management_domain, "fineract-loan: Loan Management Domain") {
+            
+            ' Loan Entity Ecosystem
+            Container_Boundary(loan_entities, "Loan Entity Ecosystem") {
+                Component(loan_entity, "Loan", "Core Loan Entity", "• Loan details\n• Status management\n• Lifecycle tracking\n• Payment history")
+                Component(loan_product, "LoanProduct", "Product Definition", "• Product parameters\n• Interest rates\n• Fee structures\n• Eligibility criteria")
+                Component(loan_transaction, "LoanTransaction", "Transaction Records", "• Payment transactions\n• Disbursements\n• Adjustments\n• Reversals")
+                Component(loan_schedule, "LoanRepaymentSchedule", "Repayment Planning", "• Schedule generation\n• Interest calculations\n• Principal/interest split\n• Due date management")
+                Component(loan_collateral, "LoanCollateral", "Collateral Management", "• Collateral types\n• Valuation tracking\n• Risk assessment\n• Release conditions")
+            }
+            
+            ' Loan Processing Services
+            Container_Boundary(loan_processing, "Loan Processing Services") {
+                Component(loan_application_service, "LoanApplicationService", "Application Processing", "• Application workflow\n• Credit assessment\n• Approval process\n• Documentation management")
+                Component(loan_disbursement_service, "LoanDisbursementService", "Disbursement Management", "• Disbursement scheduling\n• Payment processing\n• Account integration\n• Notification handling")
+                Component(loan_repayment_service, "LoanRepaymentService", "Repayment Processing", "• Payment allocation\n• Schedule updates\n• Penalty calculations\n• Payment reversals")
+                Component(loan_closure_service, "LoanClosureService", "Loan Closure", "• Final settlement\n• Account closure\n• Document archival\n• Reporting updates")
+            }
+            
+            ' Financial Calculation Engine
+            Container_Boundary(loan_calculations, "Financial Calculation Engine") {
+                Component(schedule_calculator, "LoanRepaymentScheduleCalculator", "Schedule Engine", "• EMI calculations\n• Amortization tables\n• Variable rate handling\n• Custom schedules")
+                Component(interest_calculator, "InterestCalculator", "Interest Engine", "• Simple/compound interest\n• Daily/monthly calculations\n• Rate changes\n• Backdating support")
+                Component(penalty_calculator, "PenaltyCalculator", "Penalty Engine", "• Late payment penalties\n• Grace period handling\n• Penalty waivers\n• Custom penalty rules")
+                Component(provisioning_calculator, "ProvisioningCalculator", "Risk Provisioning", "• Provision calculations\n• Risk categorization\n• Regulatory compliance\n• Portfolio analysis")
+            }
+        }
+        
+        loan_management_domain -[hidden]down-> savings_management_domain
+        
+        ' Savings Management Domain - Complete Architecture
+        Container_Boundary(savings_management_domain, "fineract-savings: Savings Management Domain") {
+            
+            ' Savings Entity Framework
+            Container_Boundary(savings_entities, "Savings Entity Framework") {
+                Component(savings_account, "SavingsAccount", "Account Entity", "• Account details\n• Balance tracking\n• Status management\n• Transaction history")
+                Component(savings_product, "SavingsProduct", "Product Configuration", "• Interest rates\n• Fee structures\n• Withdrawal limits\n• Minimum balance requirements")
+                Component(savings_transaction, "SavingsTransaction", "Transaction Management", "• Deposits/Withdrawals\n• Interest postings\n• Fee deductions\n• Transfer operations")
+                Component(interest_rate, "InterestRate", "Rate Management", "• Rate definitions\n• Rate changes\n• Tiered rates\n• Promotional rates")
+            }
+            
+            ' Savings Operations
+            Container_Boundary(savings_operations, "Savings Operations") {
+                Component(savings_read_service, "SavingsAccountReadService", "Query Operations", "• Account inquiries\n• Balance calculations\n• Transaction history\n• Statement generation")
+                Component(savings_write_service, "SavingsAccountWriteService", "Command Operations", "• Account creation\n• Transaction processing\n• Status updates\n• Account closure")
+                Component(savings_transfer_service, "SavingsTransferService", "Transfer Operations", "• Inter-account transfers\n• Standing instructions\n• Bulk transfers\n• Transfer validation")
+            }
+            
+            ' Interest Calculation System
+            Container_Boundary(interest_system, "Interest Calculation System") {
+                Component(interest_calculation_service, "InterestCalculationService", "Interest Engine", "• Daily interest calculation\n• Compound interest\n• Interest posting\n• Backdated calculations")
+                Component(compounding_calculator, "CompoundingPeriodCalculator", "Compounding Logic", "• Daily compounding\n• Monthly compounding\n• Quarterly compounding\n• Annual compounding")
+                Component(posting_calculator, "PostingPeriodCalculator", "Posting Logic", "• Posting schedules\n• Posting rules\n• Tax calculations\n• Withholding management")
+            }
+        }
+        
+        savings_management_domain -[hidden]down-> accounting_domain
+        
+        ' Financial Accounting Domain - Advanced Implementation
+        Container_Boundary(accounting_domain, "fineract-accounting: Financial Accounting Domain") {
+            
+            ' General Ledger System
+            Container_Boundary(general_ledger, "General Ledger System") {
+                Component(gl_account, "GLAccount", "Chart of Accounts", "• Account hierarchy\n• Account types\n• Balance tracking\n• Account codes")
+                Component(journal_entry, "JournalEntry", "Transaction Recording", "• Double-entry bookkeeping\n• Transaction details\n• Reference tracking\n• Reversal support")
+                Component(accounting_rule, "AccountingRule", "Business Rules", "• Automatic postings\n• Rule definitions\n• Account mappings\n• Conditional logic")
+                Component(gl_closure, "GLClosure", "Period Closing", "• Period management\n• Closing procedures\n• Balance calculations\n• Audit trails")
+            }
+            
+            ' Accounting Processing
+            Container_Boundary(accounting_processing, "Accounting Processing") {
+                Component(journal_entry_service, "JournalEntryWriteService", "Entry Management", "• Entry creation\n• Entry validation\n• Entry posting\n• Entry reversal")
+                Component(accounting_processor, "AccountingProcessorService", "Processing Engine", "• Transaction processing\n• Rule application\n• Balance updates\n• Audit logging")
+                Component(gl_account_service, "GLAccountReadService", "Account Services", "• Account inquiries\n• Balance calculations\n• Account hierarchies\n• Reporting data")
+            }
+            
+            ' Posting and Validation Engine
+            Container_Boundary(posting_engine, "Posting & Validation Engine") {
+                Component(journal_creator, "JournalEntryCreator", "Entry Creation", "• Automated postings\n• Manual entries\n• Template-based entries\n• Batch processing")
+                Component(rule_processor, "AccountingRuleProcessor", "Rule Engine", "• Rule evaluation\n• Conditional processing\n• Rule chaining\n• Exception handling")
+                Component(double_entry_validator, "DoubleEntryValidator", "Validation Engine", "• Balance validation\n• Double-entry checks\n• Consistency verification\n• Error detection")
+            }
+        }
+        
+        accounting_domain -[hidden]down-> charge_management_domain
+        
+        ' Charge Management Domain - Complete System
+        Container_Boundary(charge_management_domain, "fineract-charge: Charge Management Domain") {
+            
+            ' Charge Definition System
+            Container_Boundary(charge_definitions, "Charge Definition System") {
+                Component(charge_entity, "Charge", "Charge Definition", "• Charge parameters\n• Calculation methods\n• Application rules\n• Due date logic")
+                Component(charge_definition, "ChargeDefinition", "Charge Templates", "• Charge templates\n• Default parameters\n• Product mappings\n• Approval workflows")
+                Component(charge_calculation, "ChargeCalculation", "Calculation Rules", "• Calculation formulas\n• Rate structures\n• Tiered charging\n• Conditional logic")
+            }
+            
+            ' Charge Processing
+            Container_Boundary(charge_processing, "Charge Processing Services") {
+                Component(charge_read_service, "ChargeReadPlatformService", "Query Operations", "• Charge inquiries\n• Calculation previews\n• Reporting data\n• Audit information")
+                Component(charge_calculation_service, "ChargeCalculationService", "Calculation Engine", "• Real-time calculations\n• Batch calculations\n• What-if scenarios\n• Historical calculations")
+                Component(charge_application_service, "ChargeApplicationService", "Application Logic", "• Charge application\n• Payment allocation\n• Waiver processing\n• Adjustment handling")
+            }
+            
+            ' Fee and Penalty Calculators
+            Container_Boundary(fee_penalty_system, "Fee & Penalty System") {
+                Component(fee_calculator, "FeeCalculator", "Fee Engine", "• Processing fees\n• Service charges\n• Maintenance fees\n• Transaction fees")
+                Component(penalty_calculator_charge, "PenaltyCalculator", "Penalty Engine", "• Late payment penalties\n• Overdraft charges\n• Violation penalties\n• Grace period handling")
+                Component(amount_calculator, "ChargeAmountCalculator", "Amount Engine", "• Percentage calculations\n• Fixed amount charges\n• Sliding scale fees\n• Minimum/maximum limits")
+            }
+        }
+    }
+    
+    business_domain_layer -[hidden]down-> operational_layer
+    
+    ' Operational Layer - Advanced Implementation
+    Rectangle operational_layer as "Operational Layer" {
+        
+        ' Reporting Engine - Complete Architecture
+        Container_Boundary(reporting_engine, "fineract-report: Reporting Engine") {
+            
+            ' Report Definition System
+            Container_Boundary(report_definitions, "Report Definition System") {
+                Component(report_entity, "Report", "Report Metadata", "• Report definitions\n• Parameter specifications\n• Output formats\n• Security settings")
+                Component(report_parameter, "ReportParameter", "Parameter Management", "• Parameter types\n• Validation rules\n• Default values\n• Dynamic parameters")
+                Component(report_template, "ReportTemplate", "Template Management", "• Report templates\n• Layout definitions\n• Styling information\n• Version control")
+            }
+            
+            ' Report Processing Engine
+            Container_Boundary(report_processing, "Report Processing Engine") {
+                Component(report_process_service, "ReportingProcessService", "Processing Coordinator", "• Report execution\n• Parameter injection\n• Data retrieval\n• Format conversion")
+                Component(report_parameter_service, "ReportParameterService", "Parameter Handling", "• Parameter validation\n• Dynamic parameter loading\n• Parameter substitution\n• Context management")
+                Component(report_export_service, "ReportExportService", "Export Management", "• Format conversion\n• File generation\n• Delivery mechanisms\n• Archive management")
+            }
+            
+            ' Report Generation System
+            Container_Boundary(report_generators, "Report Generation System") {
+                Component(pentaho_processor, "PentahoReportProcessor", "Pentaho Engine", "• Pentaho report execution\n• Data source integration\n• Custom formatting\n• Advanced analytics")
+                Component(jasper_processor, "JasperReportProcessor", "JasperReports Engine", "• JasperReports execution\n• Template compilation\n• Subreport handling\n• Chart generation")
+                Component(csv_generator, "CSVReportGenerator", "CSV Export", "• CSV formatting\n• Data streaming\n• Large dataset handling\n• Custom delimiters")
+                Component(pdf_generator, "PDFReportGenerator", "PDF Generation", "• PDF formatting\n• Layout management\n• Digital signatures\n• Compression optimization")
+            }
+        }
+        
+        reporting_engine -[hidden]down-> document_management
+        
+        ' Document Management - Complete System
+        Container_Boundary(document_management, "fineract-document: Document Management System") {
+            
+            ' Document Entity Framework
+            Container_Boundary(document_entities, "Document Entity Framework") {
+                Component(document_entity, "Document", "Document Metadata", "• Document information\n• Version tracking\n• Access permissions\n• Lifecycle status")
+                Component(document_template, "DocumentTemplate", "Template Management", "• Template definitions\n• Merge fields\n• Format specifications\n• Approval workflows")
+                Component(document_store, "DocumentStore", "Storage Metadata", "• Storage location\n• Storage type\n• Access URLs\n• Backup information")
+            }
+            
+            ' Document Services
+            Container_Boundary(document_services, "Document Services") {
+                Component(document_read_service, "DocumentReadService", "Document Retrieval", "• Document lookup\n• Content streaming\n• Access control\n• Audit logging")
+                Component(document_write_service, "DocumentWriteService", "Document Management", "• Document upload\n• Version management\n• Metadata updates\n• Deletion handling")
+                Component(template_service, "TemplateService", "Template Processing", "• Template rendering\n• Data merging\n• Format conversion\n• Bulk processing")
+            }
+            
+            ' Storage Provider System
+            Container_Boundary(storage_providers, "Storage Provider System") {
+                Component(filesystem_provider, "FileSystemStorageProvider", "File System Storage", "• Local file storage\n• Directory management\n• File operations\n• Security permissions")
+                Component(s3_provider, "AmazonS3StorageProvider", "Cloud Storage", "• S3 integration\n• Bucket management\n• Access control\n• CDN integration")
+                Component(database_provider, "DatabaseStorageProvider", "Database Storage", "• BLOB storage\n• Metadata indexing\n• Query optimization\n• Backup integration")
+            }
+        }
+        
+        document_management -[hidden]down-> batch_processing
+        
+        ' Batch Processing - Advanced COB System
+        Container_Boundary(batch_processing, "fineract-cob: Close of Business System") {
+            
+            ' Spring Batch Job Framework
+            Container_Boundary(batch_jobs, "Spring Batch Job Framework") {
+                Component(loan_cob_job, "LoanCOBJob", "Loan Processing Job", "• Interest calculations\n• Payment processing\n• Status updates\n• Delinquency marking")
+                Component(savings_cob_job, "SavingsCOBJob", "Savings Processing Job", "• Interest calculations\n• Fee processing\n• Balance updates\n• Statement generation")
+                Component(accounting_cob_job, "AccountingCOBJob", "Accounting Job", "• Journal entries\n• Balance calculations\n• Period closing\n• Reconciliation")
+                Component(reporting_cob_job, "ReportingCOBJob", "Reporting Job", "• Report generation\n• Data aggregation\n• KPI calculations\n• Dashboard updates")
+            }
+            
+            ' Job Management Services
+            Container_Boundary(job_services, "Job Management Services") {
+                Component(cob_business_step, "COBBusinessStepService", "Business Step Coordinator", "• Step orchestration\n• Dependency management\n• Error handling\n• Recovery procedures")
+                Component(account_lock_service, "LoanAccountLockService", "Account Locking", "• Account locking\n• Lock management\n• Deadlock prevention\n• Lock monitoring")
+                Component(job_execution_service, "BatchJobExecutionService", "Execution Management", "• Job scheduling\n• Parallel execution\n• Performance monitoring\n• Resource management")
+            }
+            
+            ' Batch Step Processors
+            Container_Boundary(step_processors, "Batch Step Processors") {
+                Component(interest_calculation_step, "LoanInterestCalculationStep", "Interest Processing", "• Interest accrual\n• Compound calculations\n• Rate changes\n• Backdated processing")
+                Component(accrual_posting_step, "AccrualActivityPostingStep", "Accrual Posting", "• Accrual entries\n• Reversal handling\n• Balance updates\n• Audit trails")
+                Component(delinquency_step, "LoanDelinquencyClassificationStep", "Delinquency Processing", "• Delinquency calculation\n• Aging analysis\n• Classification updates\n• Risk assessment")
+            }
+        }
+    }
+    
+    operational_layer -[hidden]down-> data_integration_layer
+    
+    ' Data and Integration Layer - Advanced Architecture
+    Container_Boundary(data_integration_layer, "fineract-db & avro-schemas: Data Integration Layer") {
+        
+        ' Multi-tenancy Management
+        Container_Boundary(multi_tenancy, "Multi-tenancy Management") {
+            Component(tenant_details_service, "TenantDetailsService", "Tenant Management", "• Tenant resolution\n• Tenant validation\n• Configuration loading\n• Cache management")
+            Component(tenant_aware_datasource, "TenantAwareDataSource", "Data Source Routing", "• Schema routing\n• Connection management\n• Pool optimization\n• Failover handling")
+            Component(schema_resolver, "SchemaResolver", "Schema Management", "• Dynamic schema selection\n• Schema validation\n• Migration tracking\n• Performance optimization")
+        }
+        
+        ' Database Evolution System
+        Container_Boundary(database_evolution, "Database Evolution System") {
+            Component(liquibase_migration, "LiquibaseMigration", "Schema Migration", "• Version control\n• Migration execution\n• Rollback support\n• Multi-tenant migrations")
+            Component(tenant_migration, "TenantMigrationService", "Tenant-specific Migration", "• Tenant schema updates\n• Data migration\n• Validation checks\n• Recovery procedures")
+            Component(schema_versioning, "SchemaVersioning", "Version Management", "• Version tracking\n• Compatibility checks\n• Upgrade paths\n• Dependency management")
+        }
+        
+        ' Event Sourcing System
+        Container_Boundary(event_sourcing, "Event Sourcing System") {
+            Component(loan_event_schema, "LoanEventSchema", "Loan Events", "• Loan lifecycle events\n• Payment events\n• Status change events\n• Amendment events")
+            Component(client_event_schema, "ClientEventSchema", "Client Events", "• Registration events\n• Update events\n• Status changes\n• Relationship events")
+            Component(transaction_event_schema, "TransactionEventSchema", "Transaction Events", "• Payment events\n• Transfer events\n• Adjustment events\n• Reversal events")
+            Component(domain_event_publisher, "DomainEventPublisher", "Event Publishing", "• Event creation\n• Event serialization\n• Event routing\n• Delivery guarantees")
+            Component(business_event_notification, "BusinessEventNotificationService", "Event Notification", "• Event subscriptions\n• Notification delivery\n• Retry mechanisms\n• Dead letter handling")
+        }
+    }
+}
+
+' External Database Cluster
+ContainerDb(fineract_database, "Database Cluster", "MySQL/MariaDB/PostgreSQL", "• Multi-tenant schemas\n• Connection pooling\n• Read/Write splitting\n• Backup & Recovery\n• Performance monitoring\n• Query optimization")
+
+' Key Relationships - Request Flow
+Rel(client_apps, client_api, "Client Management")
+Rel(client_apps, loans_api, "Loan Operations")
+Rel(client_apps, savings_api, "Savings Management")
+Rel(external_integrations, rest_api_controllers, "Integration APIs")
+
+' Security Flow
+Rel(rest_api_controllers, oauth2_filter, "Authentication")
+Rel(oauth2_filter, tenant_filter, "Multi-tenant Context")
+Rel(tenant_filter, authorization_filter, "Authorization")
+
+' Command Processing Flow
+Rel(rest_api_controllers, command_wrapper, "Command Creation")
+Rel(command_wrapper, command_handler, "Command Execution")
+Rel(command_handler, audit_trail, "Audit Logging")
+
+' Validation Integration
+Rel(rest_api_controllers, api_validator, "Request Validation")
+Rel(command_handler, business_validator, "Business Validation")
+
+' Business Domain Integration
+Rel(command_handler, client_write_service, "Client Operations")
+Rel(command_handler, loan_application_service, "Loan Processing")
+Rel(command_handler, savings_write_service, "Savings Operations")
+
+' Cross-Domain Dependencies
+Rel(loan_repayment_service, journal_entry_service, "Accounting Entries")
+Rel(savings_write_service, accounting_processor, "Interest Posting")
+Rel(charge_application_service, gl_account_service, "Fee Accounting")
+
+' Operational Integration
+Rel(report_process_service, fineract_database, "Report Data")
+Rel(batch_jobs, loan_cob_job, "Loan Processing")
+Rel(interest_calculation_step, interest_calculator, "Interest Calculations")
+
+' Data Layer Integration
+Rel(tenant_aware_datasource, fineract_database, "Schema Routing")
+Rel(domain_event_publisher, loan_event_schema, "Event Serialization")
+
+' Storage Integration
+Rel(document_write_service, filesystem_provider, "File Storage")
+Rel(document_write_service, s3_provider, "Cloud Storage")
+
+SHOW_LEGEND()
+
+note top of web_api_layer
+**Advanced API Architecture**
+• JAX-RS RESTful endpoints with detailed resource mappings
+• Comprehensive security filter chain with OAuth2 & multi-tenancy
+• Advanced exception handling with custom error responses
+• Sophisticated JSON serialization with custom formatters
+end note
+
+note right of command_processing_layer
+**Enterprise Command Pattern**
+• Full command pattern implementation with audit trails
+• Comprehensive transaction management with nested support
+• Advanced compliance and regulatory tracking
+• Sophisticated error handling and recovery mechanisms
+end note
+
+note bottom of business_domain_layer
+**Domain-Driven Design**
+• Rich domain entities with complex business logic
+• Comprehensive service layers with clear boundaries
+• Advanced financial calculation engines
+• Complete audit and compliance frameworks
+end note
+
+note left of operational_layer
+**Operational Excellence**
+• Enterprise reporting with multiple format support
+• Advanced document management with multiple storage providers
+• Sophisticated batch processing with Spring Batch
+• Complete monitoring and observability
+end note
+
+@enduml

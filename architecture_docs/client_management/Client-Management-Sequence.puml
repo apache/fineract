@@ -1,0 +1,288 @@
+@startuml Client-Management-Sequence
+!include <C4/C4_Context>
+
+title Apache Fineract - Client Management Module Sequence Diagram
+
+' Actors and Systems
+actor "Loan Officer" as LO
+participant "ClientApiResource" as API
+participant "CommandsourceHandler" as CMD
+participant "ClientWritePlatformService" as CWS
+participant "ClientReadPlatformService" as CRS
+participant "ClientValidator" as VAL
+participant "ClientRepository" as REPO
+participant "ClientIdentifierService" as CIS
+participant "AuditService" as AUDIT
+database "TenantDatabase" as DB
+
+note over LO, DB
+**Client Management Sequence Flows**
+1. Client Registration and Onboarding
+2. KYC Document Management
+3. Client Status Updates (Activation/Closure)
+4. Client Information Updates
+end note
+
+== Client Registration Flow ==
+
+LO -> API : POST /clients\n{clientData}
+activate API
+
+API -> CMD : processCommand(CREATE_CLIENT)
+activate CMD
+
+CMD -> VAL : validateClientForCreate(clientData)
+activate VAL
+VAL -> VAL : validateMandatoryFields()
+VAL -> VAL : validateBusinessRules()
+VAL -> REPO : checkDuplicateAccountNo()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> CWS : createClient(clientData)
+    activate CWS
+    
+    CWS -> CWS : buildClientEntity()
+    CWS -> REPO : save(clientEntity)
+    activate REPO
+    REPO -> DB : INSERT INTO m_client
+    REPO --> CWS : savedClient
+    deactivate REPO
+    
+    ' Generate account number if not provided
+    alt Auto Account Number
+        CWS -> CWS : generateAccountNumber()
+        CWS -> REPO : updateAccountNumber()
+    end
+    
+    CWS -> AUDIT : auditClientCreation(clientId)
+    activate AUDIT
+    AUDIT -> DB : INSERT INTO m_portfolio_command_source
+    deactivate AUDIT
+    
+    CWS --> CMD : ClientCreationResult
+    deactivate CWS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> LO : HTTP 201 Created\n{clientId, resourceId}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> LO : HTTP 400 Bad Request\n{validationErrors}
+end
+
+== KYC Document Upload Flow ==
+
+LO -> API : POST /clients/{clientId}/identifiers\n{identifierData, document}
+activate API
+
+API -> CMD : processCommand(CREATE_CLIENT_IDENTIFIER)
+activate CMD
+
+CMD -> VAL : validateClientIdentifier(identifierData)
+activate VAL
+VAL -> CRS : getClientById(clientId)
+activate CRS
+CRS -> REPO : findById(clientId)
+CRS --> VAL : clientExists
+deactivate CRS
+VAL -> VAL : validateIdentifierType()
+VAL -> VAL : validateDocumentNumber()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> CIS : createClientIdentifier(clientId, identifierData)
+    activate CIS
+    
+    CIS -> CIS : buildIdentifierEntity()
+    CIS -> REPO : saveClientIdentifier()
+    activate REPO
+    REPO -> DB : INSERT INTO m_client_identifier
+    REPO --> CIS : savedIdentifier
+    deactivate REPO
+    
+    ' Handle document attachment
+    alt Document Provided
+        CIS -> CIS : processDocumentAttachment()
+        CIS -> DB : INSERT INTO m_document
+    end
+    
+    CIS -> AUDIT : auditIdentifierCreation()
+    CIS --> CMD : IdentifierCreationResult
+    deactivate CIS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> LO : HTTP 201 Created\n{identifierId}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> LO : HTTP 400 Bad Request
+end
+
+== Client Activation Flow ==
+
+LO -> API : POST /clients/{clientId}?command=activate\n{activationDate}
+activate API
+
+API -> CMD : processCommand(ACTIVATE_CLIENT)
+activate CMD
+
+CMD -> VAL : validateClientForActivation(clientId, activationDate)
+activate VAL
+VAL -> CRS : getClientById(clientId)
+VAL -> VAL : checkClientStatus()
+VAL -> VAL : validateActivationDate()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> CWS : activateClient(clientId, activationDate)
+    activate CWS
+    
+    CWS -> REPO : findById(clientId)
+    activate REPO
+    REPO -> DB : SELECT * FROM m_client
+    REPO --> CWS : clientEntity
+    deactivate REPO
+    
+    CWS -> CWS : clientEntity.activate(activationDate)
+    CWS -> REPO : save(clientEntity)
+    activate REPO
+    REPO -> DB : UPDATE m_client SET status_enum = 300
+    REPO --> CWS : updatedClient
+    deactivate REPO
+    
+    ' Generate account number if pending
+    alt Account Number Generation
+        CWS -> CWS : generateAndAssignAccountNumber()
+    end
+    
+    CWS -> AUDIT : auditClientActivation(clientId)
+    CWS --> CMD : ClientActivationResult
+    deactivate CWS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> LO : HTTP 200 OK\n{changes}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException  
+    API --> LO : HTTP 400 Bad Request
+end
+
+== Client Information Update Flow ==
+
+LO -> API : PUT /clients/{clientId}\n{updatedClientData}
+activate API
+
+API -> CMD : processCommand(UPDATE_CLIENT)
+activate CMD
+
+CMD -> VAL : validateClientForUpdate(clientId, updateData)
+activate VAL
+VAL -> CRS : getClientById(clientId)
+VAL -> VAL : validateUpdatePermissions()
+VAL -> VAL : validateDataChanges()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> CWS : updateClient(clientId, updateData)
+    activate CWS
+    
+    CWS -> REPO : findById(clientId)
+    activate REPO
+    REPO -> DB : SELECT * FROM m_client
+    REPO --> CWS : existingClient
+    deactivate REPO
+    
+    CWS -> CWS : mapChangesToEntity(existingClient, updateData)
+    CWS -> CWS : validateBusinessInvariants()
+    
+    CWS -> REPO : save(updatedClient)
+    activate REPO
+    REPO -> DB : UPDATE m_client
+    REPO --> CWS : savedClient
+    deactivate REPO
+    
+    CWS -> AUDIT : auditClientUpdate(clientId, changes)
+    CWS --> CMD : ClientUpdateResult
+    deactivate CWS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> LO : HTTP 200 OK\n{changes}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> LO : HTTP 400 Bad Request
+end
+
+== Client Closure Flow ==
+
+LO -> API : POST /clients/{clientId}?command=close\n{closureDate, closureReason}
+activate API
+
+API -> CMD : processCommand(CLOSE_CLIENT)
+activate CMD
+
+CMD -> VAL : validateClientForClosure(clientId, closureData)
+activate VAL
+VAL -> CRS : getClientById(clientId)
+VAL -> CRS : getActiveLoans(clientId)
+VAL -> CRS : getActiveSavings(clientId)
+VAL -> VAL : checkNoActiveAccounts()
+VAL -> VAL : validateClosureDate()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> CWS : closeClient(clientId, closureData)
+    activate CWS
+    
+    CWS -> REPO : findById(clientId)
+    CWS -> CWS : clientEntity.close(closureDate, reason)
+    CWS -> REPO : save(clientEntity)
+    activate REPO
+    REPO -> DB : UPDATE m_client SET status_enum = 600
+    REPO --> CWS : closedClient
+    deactivate REPO
+    
+    CWS -> AUDIT : auditClientClosure(clientId)
+    CWS --> CMD : ClientClosureResult
+    deactivate CWS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> LO : HTTP 200 OK\n{changes}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> LO : HTTP 400 Bad Request
+end
+
+note over LO, DB
+**Key Design Patterns:**
+• Command Pattern: All write operations go through CommandHandler
+• Repository Pattern: Data access abstraction
+• Validation Chain: Multi-layer validation (API, Business, Data)
+• Audit Trail: Complete operation history
+• Domain Events: Client lifecycle events published
+• Multi-tenancy: Tenant-aware database operations
+end note
+
+@enduml

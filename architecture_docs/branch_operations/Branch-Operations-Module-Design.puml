@@ -1,0 +1,993 @@
+@startuml Branch-Operations-Module-Design
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Force top to bottom layout
+top to bottom direction
+
+title Apache Fineract - Branch Operations Module (Class/Interface Level Design)
+
+' Branch Operations Module
+Package "org.apache.fineract.organisation" {
+    
+    ' Organization Domain Model
+    Package "domain" {
+        
+        ' Office Entity (Branch/Head Office)
+        Class Office {
+            - Long id
+            - String name
+            - String nameDecorated
+            - String externalId
+            - LocalDate openingDate
+            - Office parent
+            - String hierarchy
+            - OfficeType officeType
+            - OfficeStatus status
+            - Set<Office> children
+            - Address address
+            - Set<Contact> contacts
+            - Set<Staff> staffMembers
+            - Map<String, String> officeMetadata
+            - String createdBy
+            - LocalDateTime createdOn
+            - String modifiedBy
+            - LocalDateTime modifiedOn
+            --
+            + getId() : Long
+            + getName() : String
+            + getNameDecorated() : String
+            + getExternalId() : String
+            + getOpeningDate() : LocalDate
+            + getParent() : Office
+            + getHierarchy() : String
+            + getOfficeType() : OfficeType
+            + getStatus() : OfficeStatus
+            + getChildren() : Set<Office>
+            + getAddress() : Address
+            + getContacts() : Set<Contact>
+            + getStaffMembers() : Set<Staff>
+            + getOfficeMetadata() : Map<String, String>
+            + addChild(Office child) : void
+            + removeChild(Office child) : void
+            + updateHierarchy() : void
+            + assignStaff(Staff staff) : void
+            + removeStaff(Staff staff) : void
+            + isHeadOffice() : Boolean
+            + isBranch() : Boolean
+            + isActive() : Boolean
+            + activate() : void
+            + deactivate() : void
+            + updateAddress(Address newAddress) : void
+            + addContact(Contact contact) : void
+        }
+        
+        ' Staff Entity
+        Class Staff {
+            - Long id
+            - String firstName
+            - String lastName
+            - String displayName
+            - String mobileNo
+            - String emailAddress
+            - String externalId
+            - Boolean isLoanOfficer
+            - Boolean isActive
+            - LocalDate joiningDate
+            - LocalDate relievingDate
+            - Office office
+            - Set<Role> roles
+            - Set<Client> clients
+            - StaffType staffType
+            - EmploymentStatus employmentStatus
+            - String employeeNumber
+            - Map<String, String> staffAttributes
+            --
+            + getId() : Long
+            + getFirstName() : String
+            + getLastName() : String
+            + getDisplayName() : String
+            + getMobileNo() : String
+            + getEmailAddress() : String
+            + getExternalId() : String
+            + isLoanOfficer() : Boolean
+            + isActive() : Boolean
+            + getJoiningDate() : LocalDate
+            + getRelievingDate() : LocalDate
+            + getOffice() : Office
+            + getRoles() : Set<Role>
+            + getClients() : Set<Client>
+            + getStaffType() : StaffType
+            + getEmploymentStatus() : EmploymentStatus
+            + getEmployeeNumber() : String
+            + getStaffAttributes() : Map<String, String>
+            + assignToOffice(Office office) : void
+            + addRole(Role role) : void
+            + removeRole(Role role) : void
+            + assignClient(Client client) : void
+            + unassignClient(Client client) : void
+            + activate() : void
+            + deactivate(LocalDate relievingDate) : void
+            + updateContactDetails(String mobileNo, String email) : void
+            + hasRole(String roleName) : Boolean
+        }
+        
+        ' Role Entity
+        Class Role {
+            - Long id
+            - String name
+            - String description
+            - Boolean isDisabled
+            - Set<Permission> permissions
+            - Set<Staff> staffMembers
+            --
+            + getId() : Long
+            + getName() : String
+            + getDescription() : String
+            + isDisabled() : Boolean
+            + getPermissions() : Set<Permission>
+            + getStaffMembers() : Set<Staff>
+            + addPermission(Permission permission) : void
+            + removePermission(Permission permission) : void
+            + assignToStaff(Staff staff) : void
+            + unassignFromStaff(Staff staff) : void
+            + enable() : void
+            + disable() : void
+            + hasPermission(String permissionCode) : Boolean
+        }
+        
+        ' Permission Entity
+        Class Permission {
+            - Long id
+            - String grouping
+            - String code
+            - String entityName
+            - String actionName
+            - Boolean canRead
+            - Boolean canCreate
+            - Boolean canUpdate
+            - Boolean canDelete
+            - Boolean canChecker
+            - Boolean canMaker
+            - Set<Role> roles
+            --
+            + getId() : Long
+            + getGrouping() : String
+            + getCode() : String
+            + getEntityName() : String
+            + getActionName() : String
+            + canRead() : Boolean
+            + canCreate() : Boolean
+            + canUpdate() : Boolean
+            + canDelete() : Boolean
+            + canChecker() : Boolean
+            + canMaker() : Boolean
+            + getRoles() : Set<Role>
+            + grantToRole(Role role) : void
+            + revokeFromRole(Role role) : void
+            + updatePermissions(Boolean read, Boolean create, Boolean update, Boolean delete) : void
+        }
+        
+        ' Holiday Entity
+        Class Holiday {
+            - Long id
+            - String name
+            - String description
+            - LocalDate fromDate
+            - LocalDate toDate
+            - LocalDate repaymentRescheduledToDate
+            - HolidayStatusType status
+            - Boolean processed
+            - Set<Office> offices
+            - HolidayType holidayType
+            - Integer reschedulingType
+            --
+            + getId() : Long
+            + getName() : String
+            + getDescription() : String
+            + getFromDate() : LocalDate
+            + getToDate() : LocalDate
+            + getRepaymentRescheduledToDate() : LocalDate
+            + getStatus() : HolidayStatusType
+            + isProcessed() : Boolean
+            + getOffices() : Set<Office>
+            + getHolidayType() : HolidayType
+            + getReschedulingType() : Integer
+            + addOffice(Office office) : void
+            + removeOffice(Office office) : void
+            + activate() : void
+            + delete() : void
+            + process() : void
+            + isApplicableToOffice(Office office) : Boolean
+            + isInPeriod(LocalDate date) : Boolean
+        }
+        
+        ' Working Days Configuration
+        Class WorkingDays {
+            - Long id
+            - Boolean monday
+            - Boolean tuesday
+            - Boolean wednesday
+            - Boolean thursday
+            - Boolean friday
+            - Boolean saturday
+            - Boolean sunday
+            - Integer repaymentReschedulingRule
+            - String extendTermForDailyRepayments
+            - Office office
+            --
+            + getId() : Long
+            + isMonday() : Boolean
+            + isTuesday() : Boolean
+            + isWednesday() : Boolean
+            + isThursday() : Boolean
+            + isFriday() : Boolean
+            + isSaturday() : Boolean
+            + isSunday() : Boolean
+            + getRepaymentReschedulingRule() : Integer
+            + getExtendTermForDailyRepayments() : String
+            + getOffice() : Office
+            + isWorkingDay(DayOfWeek dayOfWeek) : Boolean
+            + updateWorkingDay(DayOfWeek day, Boolean isWorking) : void
+            + getWorkingDays() : Set<DayOfWeek>
+        }
+        
+        ' Office Transaction Entity
+        Class OfficeTransaction {
+            - Long id
+            - Office fromOffice
+            - Office toOffice
+            - MonetaryCurrency currency
+            - BigDecimal transactionAmount
+            - LocalDate transactionDate
+            - String description
+            - OfficeTransactionType transactionType
+            - String transactionReference
+            - OfficeTransactionStatus status
+            - String comments
+            --
+            + getId() : Long
+            + getFromOffice() : Office
+            + getToOffice() : Office
+            + getCurrency() : MonetaryCurrency
+            + getTransactionAmount() : BigDecimal
+            + getTransactionDate() : LocalDate
+            + getDescription() : String
+            + getTransactionType() : OfficeTransactionType
+            + getTransactionReference() : String
+            + getStatus() : OfficeTransactionStatus
+            + getComments() : String
+            + approve() : void
+            + reject(String reason) : void
+            + reverse(String reason) : void
+            + validateTransaction() : Boolean
+        }
+        
+        ' Teller Configuration
+        Class Teller {
+            - Long id
+            - Office office
+            - String name
+            - String description
+            - LocalDate validFrom
+            - LocalDate validTo
+            - TellerStatus status
+            - BigDecimal debitAccountId
+            - BigDecimal creditAccountId
+            - LocalDateTime startTime
+            - LocalDateTime endTime
+            - Set<CashierAllocation> cashierAllocations
+            --
+            + getId() : Long
+            + getOffice() : Office
+            + getName() : String
+            + getDescription() : String
+            + getValidFrom() : LocalDate
+            + getValidTo() : LocalDate
+            + getStatus() : TellerStatus
+            + getDebitAccountId() : BigDecimal
+            + getCreditAccountId() : BigDecimal
+            + getStartTime() : LocalDateTime
+            + getEndTime() : LocalDateTime
+            + getCashierAllocations() : Set<CashierAllocation>
+            + activate() : void
+            + deactivate() : void
+            + allocateCashier(Staff staff, LocalDate allocationDate) : void
+            + deallocateCashier(Staff staff) : void
+            + isActive() : Boolean
+            + isOperational(LocalDateTime currentTime) : Boolean
+        }
+        
+        ' Cashier Allocation
+        Class CashierAllocation {
+            - Long id
+            - Teller teller
+            - Staff staff
+            - LocalDate allocationDate
+            - LocalDate deallocationDate
+            - BigDecimal startOfDayCash
+            - BigDecimal endOfDayCash
+            - CashierAllocationStatus status
+            --
+            + getId() : Long
+            + getTeller() : Teller
+            + getStaff() : Staff
+            + getAllocationDate() : LocalDate
+            + getDeallocationDate() : LocalDate
+            + getStartOfDayCash() : BigDecimal
+            + getEndOfDayCash() : BigDecimal
+            + getStatus() : CashierAllocationStatus
+            + deallocate(LocalDate deallocationDate, BigDecimal endCash) : void
+            + updateCashPosition(BigDecimal newAmount) : void
+            + isActive() : Boolean
+        }
+        
+        ' Address Entity
+        Class Address {
+            - Long id
+            - AddressType addressType
+            - String street
+            - String addressLine1
+            - String addressLine2
+            - String addressLine3
+            - String townVillage
+            - String city
+            - String countyDistrict
+            - String stateProvinceId
+            - String countryId
+            - String postalCode
+            - BigDecimal latitude
+            - BigDecimal longitude
+            - String createdBy
+            - LocalDateTime createdOn
+            - String modifiedBy
+            - LocalDateTime modifiedOn
+            --
+            + getId() : Long
+            + getAddressType() : AddressType
+            + getStreet() : String
+            + getAddressLine1() : String
+            + getAddressLine2() : String
+            + getAddressLine3() : String
+            + getTownVillage() : String
+            + getCity() : String
+            + getCountyDistrict() : String
+            + getStateProvinceId() : String
+            + getCountryId() : String
+            + getPostalCode() : String
+            + getLatitude() : BigDecimal
+            + getLongitude() : BigDecimal
+            + getFullAddress() : String
+            + updateCoordinates(BigDecimal lat, BigDecimal lng) : void
+        }
+        
+        ' Enumerations
+        Enum OfficeType {
+            HEAD_OFFICE(1, "officeType.headOffice")
+            REGIONAL_OFFICE(2, "officeType.regionalOffice")
+            SUB_REGIONAL_OFFICE(3, "officeType.subRegionalOffice")
+            BRANCH_OFFICE(4, "officeType.branchOffice")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum OfficeStatus {
+            ACTIVE(1, "officeStatus.active")
+            INACTIVE(2, "officeStatus.inactive")
+            PENDING(3, "officeStatus.pending")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum StaffType {
+            EMPLOYEE(1, "staffType.employee")
+            CONSULTANT(2, "staffType.consultant")
+            CONTRACTOR(3, "staffType.contractor")
+            INTERN(4, "staffType.intern")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum EmploymentStatus {
+            ACTIVE(1, "employmentStatus.active")
+            INACTIVE(2, "employmentStatus.inactive")
+            ON_LEAVE(3, "employmentStatus.onLeave")
+            TERMINATED(4, "employmentStatus.terminated")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum HolidayStatusType {
+            PENDING_FOR_ACTIVATION(100, "holidayStatusType.pendingForActivation")
+            ACTIVE(300, "holidayStatusType.active")
+            DELETED(600, "holidayStatusType.deleted")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum HolidayType {
+            SPECIFIC_DATE(1, "holidayType.specificDate")
+            RECURRING(2, "holidayType.recurring")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum OfficeTransactionType {
+            CASH_TRANSFER(1, "officeTransactionType.cashTransfer")
+            FUND_TRANSFER(2, "officeTransactionType.fundTransfer")
+            ADJUSTMENT(3, "officeTransactionType.adjustment")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum OfficeTransactionStatus {
+            PENDING(1, "officeTransactionStatus.pending")
+            APPROVED(2, "officeTransactionStatus.approved")
+            REJECTED(3, "officeTransactionStatus.rejected")
+            REVERSED(4, "officeTransactionStatus.reversed")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum TellerStatus {
+            ACTIVE(1, "tellerStatus.active")
+            INACTIVE(2, "tellerStatus.inactive")
+            CLOSED(3, "tellerStatus.closed")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum CashierAllocationStatus {
+            ALLOCATED(1, "cashierAllocationStatus.allocated")
+            DEALLOCATED(2, "cashierAllocationStatus.deallocated")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum AddressType {
+            OFFICE_ADDRESS(1, "addressType.officeAddress")
+            MAILING_ADDRESS(2, "addressType.mailingAddress")
+            RESIDENTIAL_ADDRESS(3, "addressType.residentialAddress")
+            BUSINESS_ADDRESS(4, "addressType.businessAddress")
+            --
+            - Integer value
+            - String code
+        }
+    }
+    
+    ' Organization Services
+    Package "service" {
+        
+        ' Office Management Service
+        Interface OfficeManagementService {
+            + createOffice(CreateOfficeCommand command) : CommandProcessingResult
+            + updateOffice(Long officeId, UpdateOfficeCommand command) : CommandProcessingResult
+            + retrieveOffice(Long officeId) : OfficeData
+            + retrieveAllOffices() : Collection<OfficeData>
+            + retrieveOfficeTemplate() : OfficeData
+            + activateOffice(Long officeId, ActivateOfficeCommand command) : CommandProcessingResult
+        }
+        
+        ' Office Management Service Implementation
+        Class OfficeManagementServiceImpl <<Service>> {
+            - OfficeRepository officeRepository
+            - OfficeAssembler officeAssembler
+            - PlatformSecurityContext context
+            - OfficeDataValidator dataValidator
+            --
+            + createOffice(CreateOfficeCommand command) : CommandProcessingResult
+            + updateOffice(Long officeId, UpdateOfficeCommand command) : CommandProcessingResult
+            + retrieveOffice(Long officeId) : OfficeData
+            + retrieveAllOffices() : Collection<OfficeData>
+            + retrieveOfficeTemplate() : OfficeData
+            + activateOffice(Long officeId, ActivateOfficeCommand command) : CommandProcessingResult
+            - validateOfficeForCreate(Office office) : void
+            - updateHierarchy(Office office) : void
+        }
+        
+        ' Staff Management Service
+        Interface StaffManagementService {
+            + createStaff(CreateStaffCommand command) : CommandProcessingResult
+            + updateStaff(Long staffId, UpdateStaffCommand command) : CommandProcessingResult
+            + retrieveStaff(Long staffId) : StaffData
+            + retrieveAllStaff(Long officeId, Boolean loanOfficersOnly) : Collection<StaffData>
+            + assignStaffToOffice(Long staffId, AssignStaffCommand command) : CommandProcessingResult
+            + assignRoleToStaff(Long staffId, AssignRoleCommand command) : CommandProcessingResult
+        }
+        
+        ' Staff Management Service Implementation
+        Class StaffManagementServiceImpl <<Service>> {
+            - StaffRepository staffRepository
+            - OfficeRepository officeRepository
+            - RoleRepository roleRepository
+            - StaffAssembler staffAssembler
+            --
+            + createStaff(CreateStaffCommand command) : CommandProcessingResult
+            + updateStaff(Long staffId, UpdateStaffCommand command) : CommandProcessingResult
+            + retrieveStaff(Long staffId) : StaffData
+            + retrieveAllStaff(Long officeId, Boolean loanOfficersOnly) : Collection<StaffData>
+            + assignStaffToOffice(Long staffId, AssignStaffCommand command) : CommandProcessingResult
+            + assignRoleToStaff(Long staffId, AssignRoleCommand command) : CommandProcessingResult
+            - validateStaffAssignment(Staff staff, Office office) : void
+            - updateStaffHierarchy(Staff staff) : void
+        }
+        
+        ' Role Management Service
+        Interface RoleManagementService {
+            + createRole(CreateRoleCommand command) : CommandProcessingResult
+            + updateRole(Long roleId, UpdateRoleCommand command) : CommandProcessingResult
+            + retrieveRole(Long roleId) : RoleData
+            + retrieveAllRoles() : Collection<RoleData>
+            + updateRolePermissions(Long roleId, UpdateRolePermissionsCommand command) : CommandProcessingResult
+            + deleteRole(Long roleId) : CommandProcessingResult
+        }
+        
+        ' Role Management Service Implementation
+        Class RoleManagementServiceImpl <<Service>> {
+            - RoleRepository roleRepository
+            - PermissionRepository permissionRepository
+            - RoleAssembler roleAssembler
+            --
+            + createRole(CreateRoleCommand command) : CommandProcessingResult
+            + updateRole(Long roleId, UpdateRoleCommand command) : CommandProcessingResult
+            + retrieveRole(Long roleId) : RoleData
+            + retrieveAllRoles() : Collection<RoleData>
+            + updateRolePermissions(Long roleId, UpdateRolePermissionsCommand command) : CommandProcessingResult
+            + deleteRole(Long roleId) : CommandProcessingResult
+            - validateRolePermissions(Set<Permission> permissions) : void
+        }
+        
+        ' Holiday Management Service
+        Interface HolidayManagementService {
+            + createHoliday(CreateHolidayCommand command) : CommandProcessingResult
+            + updateHoliday(Long holidayId, UpdateHolidayCommand command) : CommandProcessingResult
+            + retrieveHoliday(Long holidayId) : HolidayData
+            + retrieveAllHolidays(Long officeId) : Collection<HolidayData>
+            + activateHoliday(Long holidayId, ActivateHolidayCommand command) : CommandProcessingResult
+            + deleteHoliday(Long holidayId) : CommandProcessingResult
+        }
+        
+        ' Holiday Management Service Implementation
+        Class HolidayManagementServiceImpl <<Service>> {
+            - HolidayRepository holidayRepository
+            - OfficeRepository officeRepository
+            - HolidayAssembler holidayAssembler
+            --
+            + createHoliday(CreateHolidayCommand command) : CommandProcessingResult
+            + updateHoliday(Long holidayId, UpdateHolidayCommand command) : CommandProcessingResult
+            + retrieveHoliday(Long holidayId) : HolidayData
+            + retrieveAllHolidays(Long officeId) : Collection<HolidayData>
+            + activateHoliday(Long holidayId, ActivateHolidayCommand command) : CommandProcessingResult
+            + deleteHoliday(Long holidayId) : CommandProcessingResult
+            - validateHolidayDates(Holiday holiday) : void
+            - processHolidayActivation(Holiday holiday) : void
+        }
+        
+        ' Working Days Service
+        Interface WorkingDaysService {
+            + updateWorkingDays(UpdateWorkingDaysCommand command) : CommandProcessingResult
+            + retrieveWorkingDays() : WorkingDaysData
+            + isWorkingDay(LocalDate date) : Boolean
+            + getNextWorkingDay(LocalDate fromDate) : LocalDate
+            + getPreviousWorkingDay(LocalDate fromDate) : LocalDate
+        }
+        
+        ' Working Days Service Implementation
+        Class WorkingDaysServiceImpl <<Service>> {
+            - WorkingDaysRepository workingDaysRepository
+            - HolidayRepository holidayRepository
+            - WorkingDaysAssembler workingDaysAssembler
+            --
+            + updateWorkingDays(UpdateWorkingDaysCommand command) : CommandProcessingResult
+            + retrieveWorkingDays() : WorkingDaysData
+            + isWorkingDay(LocalDate date) : Boolean
+            + getNextWorkingDay(LocalDate fromDate) : LocalDate
+            + getPreviousWorkingDay(LocalDate fromDate) : LocalDate
+            - calculateWorkingDay(LocalDate date, Integer direction) : LocalDate
+        }
+        
+        ' Teller Management Service
+        Interface TellerManagementService {
+            + createTeller(CreateTellerCommand command) : CommandProcessingResult
+            + updateTeller(Long tellerId, UpdateTellerCommand command) : CommandProcessingResult
+            + retrieveTeller(Long tellerId) : TellerData
+            + retrieveAllTellers(Long officeId) : Collection<TellerData>
+            + allocateCashier(Long tellerId, AllocateCashierCommand command) : CommandProcessingResult
+            + deallocateCashier(Long tellerId, Long cashierId, DeallocateCashierCommand command) : CommandProcessingResult
+        }
+        
+        ' Teller Management Service Implementation
+        Class TellerManagementServiceImpl <<Service>> {
+            - TellerRepository tellerRepository
+            - CashierAllocationRepository cashierRepository
+            - StaffRepository staffRepository
+            - TellerAssembler tellerAssembler
+            --
+            + createTeller(CreateTellerCommand command) : CommandProcessingResult
+            + updateTeller(Long tellerId, UpdateTellerCommand command) : CommandProcessingResult
+            + retrieveTeller(Long tellerId) : TellerData
+            + retrieveAllTellers(Long officeId) : Collection<TellerData>
+            + allocateCashier(Long tellerId, AllocateCashierCommand command) : CommandProcessingResult
+            + deallocateCashier(Long tellerId, Long cashierId, DeallocateCashierCommand command) : CommandProcessingResult
+            - validateCashierAllocation(Teller teller, Staff staff) : void
+        }
+        
+        ' Office Transaction Service
+        Interface OfficeTransactionService {
+            + createOfficeTransaction(CreateOfficeTransactionCommand command) : CommandProcessingResult
+            + updateOfficeTransaction(Long transactionId, UpdateOfficeTransactionCommand command) : CommandProcessingResult
+            + retrieveOfficeTransaction(Long transactionId) : OfficeTransactionData
+            + retrieveOfficeTransactions(Long officeId) : Collection<OfficeTransactionData>
+            + approveOfficeTransaction(Long transactionId, ApproveTransactionCommand command) : CommandProcessingResult
+            + rejectOfficeTransaction(Long transactionId, RejectTransactionCommand command) : CommandProcessingResult
+        }
+        
+        ' Office Transaction Service Implementation
+        Class OfficeTransactionServiceImpl <<Service>> {
+            - OfficeTransactionRepository transactionRepository
+            - OfficeRepository officeRepository
+            - OfficeTransactionAssembler transactionAssembler
+            --
+            + createOfficeTransaction(CreateOfficeTransactionCommand command) : CommandProcessingResult
+            + updateOfficeTransaction(Long transactionId, UpdateOfficeTransactionCommand command) : CommandProcessingResult
+            + retrieveOfficeTransaction(Long transactionId) : OfficeTransactionData
+            + retrieveOfficeTransactions(Long officeId) : Collection<OfficeTransactionData>
+            + approveOfficeTransaction(Long transactionId, ApproveTransactionCommand command) : CommandProcessingResult
+            + rejectOfficeTransaction(Long transactionId, RejectTransactionCommand command) : CommandProcessingResult
+            - validateOfficeTransaction(OfficeTransaction transaction) : void
+            - processTransactionApproval(OfficeTransaction transaction) : void
+        }
+        
+        ' Address Management Service
+        Interface AddressManagementService {
+            + createAddress(CreateAddressCommand command) : CommandProcessingResult
+            + updateAddress(Long addressId, UpdateAddressCommand command) : CommandProcessingResult
+            + retrieveAddress(Long addressId) : AddressData
+            + retrieveAddresses(Long entityId, String entityType) : Collection<AddressData>
+            + deleteAddress(Long addressId) : CommandProcessingResult
+        }
+        
+        ' Address Management Service Implementation
+        Class AddressManagementServiceImpl <<Service>> {
+            - AddressRepository addressRepository
+            - AddressAssembler addressAssembler
+            --
+            + createAddress(CreateAddressCommand command) : CommandProcessingResult
+            + updateAddress(Long addressId, UpdateAddressCommand command) : CommandProcessingResult
+            + retrieveAddress(Long addressId) : AddressData
+            + retrieveAddresses(Long entityId, String entityType) : Collection<AddressData>
+            + deleteAddress(Long addressId) : CommandProcessingResult
+            - validateAddress(Address address) : void
+        }
+    }
+    
+    ' Organization Repositories
+    Package "repository" {
+        
+        ' Office Repository
+        Interface OfficeRepository <<Repository>> {
+            + findByNameAndParentId(String name, Long parentId) : Optional<Office>
+            + findByHierarchyLike(String hierarchy) : List<Office>
+            + findByOfficeType(OfficeType officeType) : List<Office>
+            + findActiveOffices() : List<Office>
+        }
+        
+        ' Staff Repository
+        Interface StaffRepository <<Repository>> {
+            + findByOfficeId(Long officeId) : List<Staff>
+            + findByIsLoanOfficerTrue() : List<Staff>
+            + findByDisplayName(String displayName) : Optional<Staff>
+            + findActiveStaffByOffice(Long officeId) : List<Staff>
+        }
+        
+        ' Role Repository
+        Interface RoleRepository <<Repository>> {
+            + findByName(String name) : Optional<Role>
+            + findByIsDisabledFalse() : List<Role>
+        }
+        
+        ' Permission Repository
+        Interface PermissionRepository <<Repository>> {
+            + findByCode(String code) : Optional<Permission>
+            + findByGrouping(String grouping) : List<Permission>
+            + findByEntityName(String entityName) : List<Permission>
+        }
+        
+        ' Holiday Repository
+        Interface HolidayRepository <<Repository>> {
+            + findByOfficesContaining(Office office) : List<Holiday>
+            + findByFromDateLessThanEqualAndToDateGreaterThanEqual(LocalDate fromDate, LocalDate toDate) : List<Holiday>
+            + findByStatus(HolidayStatusType status) : List<Holiday>
+        }
+        
+        ' Working Days Repository
+        Interface WorkingDaysRepository <<Repository>> {
+            + findByOffice(Office office) : Optional<WorkingDays>
+        }
+        
+        ' Teller Repository
+        Interface TellerRepository <<Repository>> {
+            + findByOfficeId(Long officeId) : List<Teller>
+            + findByNameAndOffice(String name, Office office) : Optional<Teller>
+            + findActiveByOffice(Office office) : List<Teller>
+        }
+        
+        ' Cashier Allocation Repository
+        Interface CashierAllocationRepository <<Repository>> {
+            + findByTellerId(Long tellerId) : List<CashierAllocation>
+            + findByStaffId(Long staffId) : List<CashierAllocation>
+            + findActiveByCashier(Long staffId) : Optional<CashierAllocation>
+        }
+        
+        ' Office Transaction Repository
+        Interface OfficeTransactionRepository <<Repository>> {
+            + findByFromOfficeIdOrToOfficeId(Long fromOfficeId, Long toOfficeId) : List<OfficeTransaction>
+            + findByStatus(OfficeTransactionStatus status) : List<OfficeTransaction>
+            + findByTransactionDateBetween(LocalDate fromDate, LocalDate toDate) : List<OfficeTransaction>
+        }
+        
+        ' Address Repository
+        Interface AddressRepository <<Repository>> {
+            + findByEntityIdAndEntityType(Long entityId, String entityType) : List<Address>
+            + findByAddressType(AddressType addressType) : List<Address>
+        }
+    }
+    
+    ' Organization Data Objects
+    Package "data" {
+        
+        ' Office Data
+        Class OfficeData {
+            - Long id
+            - String name
+            - String nameDecorated
+            - String externalId
+            - LocalDate openingDate
+            - String hierarchy
+            - OfficeType officeType
+            - Long parentId
+            - String parentName
+            - Collection<OfficeData> allowedParents
+            --
+            + getId() : Long
+            + getName() : String
+            + getNameDecorated() : String
+            + getExternalId() : String
+            + getOpeningDate() : LocalDate
+            + getHierarchy() : String
+            + getOfficeType() : OfficeType
+            + getParentId() : Long
+            + getParentName() : String
+            + getAllowedParents() : Collection<OfficeData>
+        }
+        
+        ' Staff Data
+        Class StaffData {
+            - Long id
+            - String firstName
+            - String lastName
+            - String displayName
+            - Long officeId
+            - String officeName
+            - Boolean isLoanOfficer
+            - String externalId
+            - String mobileNo
+            - Boolean isActive
+            - LocalDate joiningDate
+            --
+            + getId() : Long
+            + getFirstName() : String
+            + getLastName() : String
+            + getDisplayName() : String
+            + getOfficeId() : Long
+            + getOfficeName() : String
+            + isLoanOfficer() : Boolean
+            + getExternalId() : String
+            + getMobileNo() : String
+            + isActive() : Boolean
+            + getJoiningDate() : LocalDate
+        }
+        
+        ' Role Data
+        Class RoleData {
+            - Long id
+            - String name
+            - String description
+            - Boolean disabled
+            - Collection<PermissionData> availablePermissions
+            - Collection<PermissionData> selectedPermissions
+            --
+            + getId() : Long
+            + getName() : String
+            + getDescription() : String
+            + isDisabled() : Boolean
+            + getAvailablePermissions() : Collection<PermissionData>
+            + getSelectedPermissions() : Collection<PermissionData>
+        }
+        
+        ' Permission Data
+        Class PermissionData {
+            - String grouping
+            - String code
+            - String entityName
+            - String actionName
+            - Boolean selected
+            --
+            + getGrouping() : String
+            + getCode() : String
+            + getEntityName() : String
+            + getActionName() : String
+            + isSelected() : Boolean
+        }
+        
+        ' Holiday Data
+        Class HolidayData {
+            - Long id
+            - String name
+            - String description
+            - LocalDate fromDate
+            - LocalDate toDate
+            - LocalDate repaymentRescheduledToDate
+            - Collection<OfficeData> offices
+            - HolidayStatusType status
+            --
+            + getId() : Long
+            + getName() : String
+            + getDescription() : String
+            + getFromDate() : LocalDate
+            + getToDate() : LocalDate
+            + getRepaymentRescheduledToDate() : LocalDate
+            + getOffices() : Collection<OfficeData>
+            + getStatus() : HolidayStatusType
+        }
+        
+        ' Working Days Data
+        Class WorkingDaysData {
+            - Long id
+            - Boolean monday
+            - Boolean tuesday
+            - Boolean wednesday
+            - Boolean thursday
+            - Boolean friday
+            - Boolean saturday
+            - Boolean sunday
+            - Integer repaymentReschedulingRule
+            --
+            + getId() : Long
+            + isMonday() : Boolean
+            + isTuesday() : Boolean
+            + isWednesday() : Boolean
+            + isThursday() : Boolean
+            + isFriday() : Boolean
+            + isSaturday() : Boolean
+            + isSunday() : Boolean
+            + getRepaymentReschedulingRule() : Integer
+        }
+        
+        ' Teller Data
+        Class TellerData {
+            - Long id
+            - Long officeId
+            - String name
+            - String description
+            - LocalDate validFrom
+            - LocalDate validTo
+            - TellerStatus status
+            - Collection<CashierData> cashiers
+            --
+            + getId() : Long
+            + getOfficeId() : Long
+            + getName() : String
+            + getDescription() : String
+            + getValidFrom() : LocalDate
+            + getValidTo() : LocalDate
+            + getStatus() : TellerStatus
+            + getCashiers() : Collection<CashierData>
+        }
+        
+        ' Cashier Data
+        Class CashierData {
+            - Long id
+            - Long tellerId
+            - Long staffId
+            - String staffName
+            - LocalDate allocationDate
+            - LocalDate deallocationDate
+            - BigDecimal startOfDayCash
+            - BigDecimal endOfDayCash
+            --
+            + getId() : Long
+            + getTellerId() : Long
+            + getStaffId() : Long
+            + getStaffName() : String
+            + getAllocationDate() : LocalDate
+            + getDeallocationDate() : LocalDate
+            + getStartOfDayCash() : BigDecimal
+            + getEndOfDayCash() : BigDecimal
+        }
+    }
+}
+
+' Relationships
+Office --> Office : "parent/children"
+Office --> Staff : "has staff members"
+Office --> Address : "has address"
+Staff --> Office : "belongs to office"
+Staff --> Role : "has roles"
+Role --> Permission : "contains permissions"
+Holiday --> Office : "applies to offices"
+WorkingDays --> Office : "configured for office"
+Teller --> Office : "located at office"
+Teller --> CashierAllocation : "has cashier allocations"
+CashierAllocation --> Staff : "allocated to staff"
+OfficeTransaction --> Office : "from/to offices"
+
+OfficeManagementServiceImpl ..|> OfficeManagementService : "implements"
+StaffManagementServiceImpl ..|> StaffManagementService : "implements"
+RoleManagementServiceImpl ..|> RoleManagementService : "implements"
+HolidayManagementServiceImpl ..|> HolidayManagementService : "implements"
+WorkingDaysServiceImpl ..|> WorkingDaysService : "implements"
+TellerManagementServiceImpl ..|> TellerManagementService : "implements"
+OfficeTransactionServiceImpl ..|> OfficeTransactionService : "implements"
+AddressManagementServiceImpl ..|> AddressManagementService : "implements"
+
+OfficeManagementServiceImpl --> OfficeRepository : "uses"
+StaffManagementServiceImpl --> StaffRepository : "uses"
+RoleManagementServiceImpl --> RoleRepository : "uses"
+HolidayManagementServiceImpl --> HolidayRepository : "uses"
+TellerManagementServiceImpl --> TellerRepository : "uses"
+
+SHOW_LEGEND()
+
+note top of Office
+**Organizational Structure**
+• Hierarchical office management
+• Multi-level organization support
+• Branch and regional offices
+• Staff assignment and management
+• Address and contact management
+• Operational status tracking
+end note
+
+note right of Staff
+**Staff Management**
+• Employee lifecycle management
+• Role-based access control
+• Office assignment
+• Client assignment tracking
+• Loan officer designation
+• Performance tracking
+end note
+
+note bottom of Role
+**Access Control**
+• Role-based permissions
+• Granular permission system
+• CRUD operation control
+• Maker-checker permissions
+• Security group management
+• Permission inheritance
+end note
+
+note left of Teller
+**Teller Operations**
+• Cash management system
+• Cashier allocation tracking
+• Daily cash reconciliation
+• Multi-teller support
+• Operational time management
+• Transaction processing
+end note
+
+@enduml

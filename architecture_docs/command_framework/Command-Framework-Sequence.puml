@@ -1,0 +1,299 @@
+@startuml Command-Framework-Sequence
+!include <C4/C4_Context>
+
+title Apache Fineract - Command Framework Module Sequence Diagram
+
+' Actors and Systems
+actor "API Client" as CLIENT
+participant "REST Controller" as CTRL
+participant "PlatformSecurityContext" as SEC
+participant "CommandSourceHandler" as CSH
+participant "CommandHandlerProvider" as CHP
+participant "CommandValidator" as VAL
+participant "BusinessCommandHandler" as BCH
+participant "CommandAuditService" as CAS
+participant "CommandRepository" as REPO
+participant "TransactionManager" as TXM
+participant "TenantAwareDataSource" as DS
+database "TenantDatabase" as DB
+
+note over CLIENT, DB
+**Command Framework Sequence Flows**
+1. Command Creation and Validation
+2. Security Context and Authorization
+3. Command Handler Resolution and Execution
+4. Transaction Management and Rollback
+5. Audit Trail and Compliance Logging
+end note
+
+== Command Processing Flow ==
+
+CLIENT -> CTRL : HTTP Request\n{commandData}
+activate CTRL
+
+CTRL -> SEC : authenticateAndAuthorize(request)
+activate SEC
+SEC -> SEC : validateOAuth2Token()
+SEC -> SEC : resolveTenantContext()
+SEC -> SEC : checkUserPermissions()
+SEC --> CTRL : SecurityContext
+deactivate SEC
+
+alt Security Validation Success
+    CTRL -> CSH : handleCommand(commandWrapper)
+    activate CSH
+    
+    ' Create command audit entry
+    CSH -> CSH : buildCommandWrapper()
+    CSH -> CAS : createCommandAuditEntry(commandWrapper)
+    activate CAS
+    CAS -> CAS : generateTransactionId()
+    CAS -> CAS : captureCommandMetadata()
+    CAS -> REPO : save(commandSourceEntity)
+    activate REPO
+    REPO -> DS : routeToTenantSchema()
+    activate DS
+    DS -> DB : INSERT INTO m_portfolio_command_source
+    DS --> REPO : commandSaved
+    deactivate DS
+    REPO --> CAS : auditEntryCreated
+    deactivate REPO
+    CAS --> CSH : CommandAuditId
+    deactivate CAS
+    
+    ' Resolve command handler
+    CSH -> CHP : findCommandHandler(entityName, actionName)
+    activate CHP
+    CHP -> CHP : lookupHandlerRegistry()
+    CHP --> CSH : CommandHandler
+    deactivate CHP
+    
+    alt Command Handler Found
+        ' Start database transaction
+        CSH -> TXM : beginTransaction()
+        activate TXM
+        
+        ' Validate command data
+        CSH -> VAL : validateCommand(commandWrapper)
+        activate VAL
+        VAL -> VAL : validateMandatoryFields()
+        VAL -> VAL : validateDataTypes()
+        VAL -> VAL : validateBusinessRules()
+        VAL --> CSH : ValidationResult
+        deactivate VAL
+        
+        alt Validation Success
+            ' Execute business logic
+            CSH -> BCH : processCommand(commandWrapper)
+            activate BCH
+            
+            BCH -> BCH : executeBusinessLogic()
+            BCH -> BCH : updateEntityState()
+            BCH -> BCH : publishDomainEvents()
+            
+            BCH --> CSH : CommandProcessingResult
+            deactivate BCH
+            
+            ' Commit transaction
+            CSH -> TXM : commitTransaction()
+            TXM --> CSH : TransactionCommitted
+            deactivate TXM
+            
+            ' Update audit with success
+            CSH -> CAS : updateCommandSuccess(auditId, result)
+            activate CAS
+            CAS -> REPO : updateCommandStatus(SUCCESS)
+            activate REPO
+            REPO -> DS : routeToTenantSchema()
+            activate DS
+            DS -> DB : UPDATE m_portfolio_command_source SET processing_result_enum = 1
+            DS --> REPO : statusUpdated
+            deactivate DS
+            REPO --> CAS : auditUpdated
+            deactivate REPO
+            CAS --> CSH : AuditUpdated
+            deactivate CAS
+            
+            CSH --> CTRL : CommandProcessingResult
+            deactivate CSH
+            
+            CTRL --> CLIENT : HTTP 200/201 Success\n{result}
+            deactivate CTRL
+            
+        else Validation Failure
+            ' Rollback transaction
+            CSH -> TXM : rollbackTransaction()
+            TXM --> CSH : TransactionRolledBack
+            deactivate TXM
+            
+            ' Update audit with validation error
+            CSH -> CAS : updateCommandFailure(auditId, validationErrors)
+            activate CAS
+            CAS -> REPO : updateCommandStatus(VALIDATION_ERROR)
+            activate REPO
+            REPO -> DS : routeToTenantSchema()
+            DS -> DB : UPDATE m_portfolio_command_source SET processing_result_enum = 2
+            REPO --> CAS : errorLogged
+            deactivate REPO
+            CAS --> CSH : AuditUpdated
+            deactivate CAS
+            
+            CSH --> CTRL : ValidationException
+            CTRL --> CLIENT : HTTP 400 Bad Request\n{validationErrors}
+        end
+        
+    else Handler Not Found
+        CSH -> CAS : updateCommandFailure(auditId, "Handler not found")
+        CSH --> CTRL : UnsupportedCommandException
+        CTRL --> CLIENT : HTTP 400 Bad Request\n{error}
+    end
+    
+else Security Failure
+    CTRL --> CLIENT : HTTP 401/403 Unauthorized\n{securityError}
+end
+
+== Batch Command Processing Flow ==
+
+participant "BatchApiResource" as BATCH_API
+participant "BatchCommandHandler" as BATCH_CMD
+
+CLIENT -> BATCH_API : POST /batches\n{batchCommands[]}
+activate BATCH_API
+
+BATCH_API -> BATCH_CMD : processBatchCommands(batchRequest)
+activate BATCH_CMD
+
+BATCH_CMD -> BATCH_CMD : validateBatchRequest()
+
+loop For Each Command in Batch
+    BATCH_CMD -> CSH : handleCommand(individualCommand)
+    activate CSH
+    
+    ' Individual command processing (same as above)
+    CSH -> CAS : createCommandAuditEntry()
+    CSH -> CHP : findCommandHandler()
+    CSH -> TXM : beginTransaction()
+    CSH -> VAL : validateCommand()
+    
+    alt Command Success
+        CSH -> BCH : processCommand()
+        CSH -> TXM : commitTransaction()
+        CSH -> CAS : updateCommandSuccess()
+        CSH --> BATCH_CMD : CommandResult
+    else Command Failure
+        CSH -> TXM : rollbackTransaction()
+        CSH -> CAS : updateCommandFailure()
+        CSH --> BATCH_CMD : CommandError
+    end
+    
+    deactivate CSH
+end
+
+BATCH_CMD -> BATCH_CMD : compileBatchResults()
+BATCH_CMD --> BATCH_API : BatchProcessingResult
+deactivate BATCH_CMD
+
+BATCH_API --> CLIENT : HTTP 200 OK\n{batchResults}
+deactivate BATCH_API
+
+== Command Retry Mechanism Flow ==
+
+participant "CommandRetryService" as RETRY
+
+CSH -> RETRY : handleCommandFailure(commandWrapper, exception)
+activate RETRY
+
+RETRY -> RETRY : determineRetryability(exception)
+
+alt Retryable Error
+    RETRY -> RETRY : calculateBackoffDelay()
+    RETRY -> CAS : logRetryAttempt(auditId)
+    activate CAS
+    CAS -> REPO : updateRetryCount()
+    CAS --> RETRY : retryLogged
+    deactivate CAS
+    
+    alt Max Retries Not Exceeded
+        RETRY -> RETRY : scheduleRetry(delay)
+        RETRY --> CSH : CommandScheduledForRetry
+    else Max Retries Exceeded
+        RETRY -> CAS : markCommandAsFailed(auditId)
+        RETRY --> CSH : CommandFinallyFailed
+    end
+    
+else Non-Retryable Error
+    RETRY -> CAS : markCommandAsFailed(auditId)
+    RETRY --> CSH : CommandFailed
+end
+
+deactivate RETRY
+
+== Command History and Audit Query Flow ==
+
+CLIENT -> CTRL : GET /commands/history?entityId=X&fromDate=Y&toDate=Z
+activate CTRL
+
+CTRL -> SEC : authenticateAndAuthorize()
+CTRL -> CAS : getCommandHistory(filters)
+activate CAS
+
+CAS -> REPO : findCommandsByFilters(entityId, dateRange)
+activate REPO
+REPO -> DS : routeToTenantSchema()
+activate DS
+DS -> DB : SELECT * FROM m_portfolio_command_source WHERE entity_id = ? AND made_on_date BETWEEN ? AND ?
+DS --> REPO : commandHistory
+deactivate DS
+REPO --> CAS : commandAuditList
+deactivate REPO
+
+CAS -> CAS : formatAuditResponse()
+CAS --> CTRL : CommandHistoryResponse
+deactivate CAS
+
+CTRL --> CLIENT : HTTP 200 OK\n{commandHistory}
+deactivate CTRL
+
+== Error Handling and Recovery Flow ==
+
+CSH -> CSH : handleUnexpectedException(exception)
+activate CSH
+
+CSH -> TXM : rollbackTransaction()
+activate TXM
+TXM --> CSH : TransactionRolledBack
+deactivate TXM
+
+CSH -> CAS : logSystemError(auditId, exception)
+activate CAS
+CAS -> CAS : captureStackTrace()
+CAS -> CAS : logErrorDetails()
+CAS -> REPO : updateCommandStatus(SYSTEM_ERROR)
+activate REPO
+REPO -> DS : routeToTenantSchema()
+DS -> DB : UPDATE m_portfolio_command_source SET processing_result_enum = 3
+REPO --> CAS : errorLogged
+deactivate REPO
+CAS --> CSH : ErrorLogged
+deactivate CAS
+
+' Notify system administrators
+CSH -> CSH : notifySystemAdministrators(exception)
+
+CSH --> CTRL : SystemException
+deactivate CSH
+
+CTRL --> CLIENT : HTTP 500 Internal Server Error\n{errorDetails}
+
+note over CLIENT, DB
+**Key Design Patterns:**
+• Command Pattern: Encapsulates all business operations as commands
+• Chain of Responsibility: Security, validation, and execution pipeline
+• Template Method: Common command processing with specific handlers
+• Strategy Pattern: Different validation and execution strategies
+• Observer Pattern: Event publishing for cross-module communication
+• Decorator Pattern: Transaction and audit decorators around commands
+• Factory Pattern: Command handler creation and registration
+end note
+
+@enduml

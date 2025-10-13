@@ -1,0 +1,90 @@
+@startuml Fineract-Bird-Eye-View
+!include <C4/C4_Context>
+
+title Apache Fineract Project - Bird's Eye View
+
+' Primary Stakeholders
+Person(microfinance_institutions, "Microfinance Institutions", "Primary users: MFIs, Credit Unions, Digital Banks")
+Person(end_customers, "End Customers", "3+ Billion Underbanked/Unbanked Population")
+Person(developers_community, "Developer Community", "Open Source Contributors & Integrators")
+Person(implementers, "Implementation Partners", "System Integrators, Consultants")
+
+' Core Fineract System
+System(fineract_platform, "Apache Fineract Platform", "Open Source Core Banking & Microfinance Platform\n• Multi-tenant SaaS Architecture\n• RESTful API-First Design\n• Java/Spring Boot Based\n• Modular & Extensible")
+
+' External Integration Ecosystem
+System_Ext(mobile_banking, "Mobile Banking Apps", "Android/iOS Applications")
+System_Ext(web_interfaces, "Web Interfaces", "Community App, Admin Portals, Custom UIs")
+System_Ext(payment_systems, "Payment Ecosystems", "Mobile Money, Banks, Payment Gateways")
+System_Ext(regulatory_systems, "Regulatory & Compliance", "Central Banks, Credit Bureaus, Tax Systems")
+System_Ext(third_party_services, "Third-Party Services", "SMS, Email, Document Storage, Analytics")
+
+' Data Layer
+SystemDb(database_layer, "Multi-Tenant Database Layer", "MySQL/MariaDB/PostgreSQL\n• Tenant Isolation\n• Configurable Schemas\n• Audit & Compliance")
+
+' Development & Operations Ecosystem
+System_Boundary(devops_ecosystem, "Development & Operations Ecosystem") {
+    System(source_code, "Source Code Repository", "GitHub: apache/fineract\n• 15+ Gradle Modules\n• Comprehensive Test Suite")
+    System(ci_cd, "CI/CD Pipeline", "GitHub Actions\n• Multi-DB Testing\n• Docker Publishing")
+    System(deployment_options, "Deployment Options", "• Docker Containers\n• Kubernetes\n• Traditional WAR\n• Cloud-Native JAR")
+}
+
+' Value Flow Relationships
+Rel(microfinance_institutions, fineract_platform, "Operates Core Banking")
+Rel(end_customers, mobile_banking, "Access Financial Services")
+Rel(end_customers, web_interfaces, "Self-Service & Transactions")
+
+Rel(mobile_banking, fineract_platform, "REST APIs")
+Rel(web_interfaces, fineract_platform, "REST APIs")
+Rel(implementers, fineract_platform, "Deploy & Customize")
+
+Rel(fineract_platform, database_layer, "Multi-Tenant Data Operations")
+Rel(fineract_platform, payment_systems, "Payment Processing")
+Rel(fineract_platform, regulatory_systems, "Compliance Reporting")
+Rel(fineract_platform, third_party_services, "Notifications & Integration")
+
+Rel(developers_community, source_code, "Contribute & Maintain")
+Rel(source_code, ci_cd, "Automated Testing & Build")
+Rel(ci_cd, deployment_options, "Package & Distribute")
+Rel(deployment_options, fineract_platform, "Deploy & Run")
+
+' Key Metrics & Impact
+note top of fineract_platform
+**Global Impact & Adoption**
+• Serves 3+ Billion Underbanked Users
+• 100+ Countries Deployment Ready
+• Apache Top-Level Project
+• Enterprise-Grade Reliability
+• Open Source Community Driven
+end note
+
+note right of database_layer
+**Multi-Tenancy Model**
+• Shared Application Layer
+• Isolated Tenant Data
+• Configurable Features per Tenant
+• Horizontal & Vertical Scaling
+end note
+
+note bottom of devops_ecosystem
+**Project Maturity**
+• 10+ Years in Development
+• Active Apache Community
+• Continuous Integration
+• Docker Hub: 1M+ Downloads
+• Production-Ready Releases
+end note
+
+' Business Domains Covered
+note left of fineract_platform
+**Core Banking Capabilities**
+• Client & Group Management
+• Loan Products & Lifecycle
+• Savings & Deposit Accounts
+• Accounting & Financial Reporting
+• Branch & Staff Management
+• Investor Fund Management
+• Progressive Lending Features
+end note
+
+@enduml

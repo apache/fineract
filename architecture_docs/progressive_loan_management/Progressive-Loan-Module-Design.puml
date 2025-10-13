@@ -1,0 +1,597 @@
+@startuml Progressive-Loan-Module-Design
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Force top to bottom layout
+top to bottom direction
+
+title Apache Fineract - Progressive Loan Module (Class/Interface Level Design)
+
+' Progressive Loan Module
+Package "org.apache.fineract.portfolio.loanaccount.progressive" {
+    
+    ' Progressive Loan Domain Model
+    Package "domain" {
+        
+        ' Progressive Loan Configuration
+        Class ProgressiveLoanProduct {
+            - Long id
+            - LoanProduct baseLoanProduct
+            - Boolean enableProgressiveSchedule
+            - Boolean enableVariableInstallments
+            - Boolean enableVariableInterestRates
+            - ProgressiveScheduleType scheduleType
+            - InterestRecalculationDetails recalculationDetails
+            - AdvancedPaymentAllocation paymentAllocation
+            - FloatingRateConfiguration floatingRateConfig
+            - Set<ProgressiveLoanProductVariation> variations
+            --
+            + isProgressiveScheduleEnabled() : Boolean
+            + isVariableInstallmentsEnabled() : Boolean
+            + isVariableInterestRatesEnabled() : Boolean
+            + getScheduleType() : ProgressiveScheduleType
+            + getRecalculationDetails() : InterestRecalculationDetails
+            + getPaymentAllocation() : AdvancedPaymentAllocation
+            + getFloatingRateConfig() : FloatingRateConfiguration
+            + getVariations() : Set<ProgressiveLoanProductVariation>
+            + validateProgressiveConfiguration() : void
+            + createProgressiveLoan(LoanApplicationTerms terms) : ProgressiveLoan
+        }
+        
+        ' Progressive Loan Entity
+        Class ProgressiveLoan {
+            - Long id
+            - Loan baseLoan
+            - ProgressiveLoanProduct progressiveProduct
+            - ProgressiveScheduleModel scheduleModel
+            - InterestRecalculationModel recalculationModel
+            - VariableInstallmentModel installmentModel
+            - FloatingInterestRateModel floatingRateModel
+            - Set<ProgressiveLoanInstallment> installments
+            - Set<ProgressiveLoanTransaction> transactions
+            - LocalDate lastRecalculationDate
+            - Boolean recalculationRequired
+            --
+            + getProgressiveProduct() : ProgressiveLoanProduct
+            + getScheduleModel() : ProgressiveScheduleModel
+            + getRecalculationModel() : InterestRecalculationModel
+            + getInstallmentModel() : VariableInstallmentModel
+            + getFloatingRateModel() : FloatingInterestRateModel
+            + isRecalculationRequired() : Boolean
+            + markForRecalculation() : void
+            + recalculateSchedule(LocalDate effectiveDate) : void
+            + adjustInstallmentAmount(Integer installmentNumber, Money newAmount) : void
+            + applyInterestRateChange(BigDecimal newRate, LocalDate effectiveDate) : void
+            + processVariableInstallment(VariableInstallmentRequest request) : void
+            + generateProgressiveSchedule() : List<ProgressiveLoanInstallment>
+            + validateProgressiveLoanState() : void
+        }
+        
+        ' Progressive Schedule Model
+        Class ProgressiveScheduleModel {
+            - Long id
+            - ProgressiveLoan loan
+            - ProgressiveScheduleType type
+            - RecalculationFrequencyType recalculationFrequency
+            - LocalDate recalculationRestFrequencyDate
+            - LocalDate compoundingFrequencyDate
+            - Boolean allowCompoundingOnEod
+            - RestCalendarInstance restCalendarInstance
+            - CompoundingCalendarInstance compoundingCalendarInstance
+            - LoanRescheduleStrategyMethod rescheduleStrategyMethod
+            - InterestRecalculationCompoundingMethod compoundingMethod
+            --
+            + getType() : ProgressiveScheduleType
+            + getRecalculationFrequency() : RecalculationFrequencyType
+            + isCompoundingOnEodAllowed() : Boolean
+            + getRestCalendarInstance() : RestCalendarInstance
+            + getCompoundingCalendarInstance() : CompoundingCalendarInstance
+            + getRescheduleStrategyMethod() : LoanRescheduleStrategyMethod
+            + getCompoundingMethod() : InterestRecalculationCompoundingMethod
+            + calculateNextRecalculationDate(LocalDate fromDate) : LocalDate
+            + shouldRecalculateOn(LocalDate date) : Boolean
+        }
+        
+        ' Interest Recalculation Model
+        Class InterestRecalculationModel {
+            - Long id
+            - ProgressiveLoan loan
+            - InterestRecalculationCompoundingMethod compoundingMethod
+            - LoanRescheduleStrategyMethod rescheduleStrategyMethod
+            - PreClosureInterestCalculationStrategy preClosureInterestCalculationStrategy
+            - Boolean isCompoundingToBePostedAsTransaction
+            - CalendarInstance restCalendarInstance
+            - RecalculationFrequencyType restFrequencyType
+            - Integer restFrequencyInterval
+            - LocalDate restFrequencyNthDayType
+            - LocalDate restFrequencyWeekdayType
+            - LocalDate restFrequencyOnDay
+            --
+            + getCompoundingMethod() : InterestRecalculationCompoundingMethod
+            + getRescheduleStrategyMethod() : LoanRescheduleStrategyMethod
+            + getPreClosureInterestCalculationStrategy() : PreClosureInterestCalculationStrategy
+            + shouldPostCompoundingAsTransaction() : Boolean
+            + getRestCalendarInstance() : CalendarInstance
+            + calculateRecalculationDates(LocalDate fromDate, LocalDate toDate) : List<LocalDate>
+            + isRecalculationDue(LocalDate date) : Boolean
+        }
+        
+        ' Variable Installment Model
+        Class VariableInstallmentModel {
+            - Long id
+            - ProgressiveLoan loan
+            - Boolean variableInstallmentsAllowed
+            - Integer minimumGap
+            - Integer maximumGap
+            - Boolean canDefineInstallmentAmount
+            - Integer installmentAmountInMultiplesOf
+            - Set<VariableInstallmentConfiguration> configurations
+            --
+            + isVariableInstallmentsAllowed() : Boolean
+            + getMinimumGap() : Integer
+            + getMaximumGap() : Integer
+            + canDefineInstallmentAmount() : Boolean
+            + getInstallmentAmountInMultiplesOf() : Integer
+            + validateInstallmentGap(Integer gap) : void
+            + validateInstallmentAmount(Money amount) : void
+            + applyVariableInstallment(Integer installmentNumber, Money newAmount, LocalDate newDueDate) : void
+        }
+        
+        ' Floating Interest Rate Model
+        Class FloatingInterestRateModel {
+            - Long id
+            - ProgressiveLoan loan
+            - FloatingRate floatingRate
+            - BigDecimal interestRateDifferential
+            - Boolean isFloatingInterestRate
+            - LocalDate interestRateFromDate
+            - Set<FloatingRateHistory> rateHistory
+            --
+            + getFloatingRate() : FloatingRate
+            + getInterestRateDifferential() : BigDecimal
+            + isFloatingInterestRate() : Boolean
+            + getInterestRateFromDate() : LocalDate
+            + getCurrentInterestRate(LocalDate asOfDate) : BigDecimal
+            + applyRateChange(BigDecimal newRate, LocalDate effectiveDate) : void
+            + calculateEffectiveRate(LocalDate calculationDate) : BigDecimal
+            + getRateHistory() : Set<FloatingRateHistory>
+        }
+        
+        ' Progressive Loan Installment
+        Class ProgressiveLoanInstallment {
+            - Long id
+            - ProgressiveLoan loan
+            - Integer installmentNumber
+            - LocalDate fromDate
+            - LocalDate dueDate
+            - LocalDate obligationsMetOnDate
+            - Money principalAmount
+            - Money interestAmount
+            - Money feeChargesAmount
+            - Money penaltyChargesAmount
+            - Money totalAmount
+            - Money principalCompleted
+            - Money interestCompleted
+            - Money feeChargesCompleted
+            - Money penaltyChargesCompleted
+            - Boolean recalculatedInterestComponent
+            - BigDecimal interestRate
+            - Boolean variableInstallment
+            --
+            + getInstallmentNumber() : Integer
+            + getFromDate() : LocalDate
+            + getDueDate() : LocalDate
+            + getPrincipalAmount() : Money
+            + getInterestAmount() : Money
+            + getTotalAmount() : Money
+            + isCompleted() : Boolean
+            + isVariableInstallment() : Boolean
+            + getInterestRate() : BigDecimal
+            + updateInterestRate(BigDecimal newRate) : void
+            + recalculateInterest(BigDecimal newRate, LocalDate calculationDate) : void
+            + adjustInstallmentAmount(Money newAmount) : void
+            + processPayment(Money paymentAmount, LocalDate paymentDate) : ProgressivePaymentAllocation
+        }
+        
+        ' Progressive Loan Transaction
+        Class ProgressiveLoanTransaction {
+            - Long id
+            - ProgressiveLoan loan
+            - LoanTransaction baseTransaction
+            - ProgressivePaymentAllocation paymentAllocation
+            - LocalDate recalculationDate
+            - Boolean triggersRecalculation
+            - Map<String, Money> allocationBreakdown
+            --
+            + getBaseTransaction() : LoanTransaction
+            + getPaymentAllocation() : ProgressivePaymentAllocation
+            + getRecalculationDate() : LocalDate
+            + triggersRecalculation() : Boolean
+            + getAllocationBreakdown() : Map<String, Money>
+            + processProgressiveAllocation() : void
+            + updateAllocationBreakdown(Map<String, Money> breakdown) : void
+        }
+        
+        ' Progressive Payment Allocation
+        Class ProgressivePaymentAllocation {
+            - Long id
+            - ProgressiveLoanTransaction transaction
+            - PaymentAllocationStrategy strategy
+            - Map<Integer, InstallmentAllocation> installmentAllocations
+            - Money totalAllocatedAmount
+            - Money unallocatedAmount
+            --
+            + getStrategy() : PaymentAllocationStrategy
+            + getInstallmentAllocations() : Map<Integer, InstallmentAllocation>
+            + getTotalAllocatedAmount() : Money
+            + getUnallocatedAmount() : Money
+            + allocatePayment(Money paymentAmount, List<ProgressiveLoanInstallment> installments) : void
+            + reverseAllocation() : void
+        }
+        
+        ' Progressive Schedule Type
+        Enum ProgressiveScheduleType {
+            PROGRESSIVE_SCHEDULE(1, "progressiveScheduleType.progressive")
+            VERTICAL_SCHEDULE(2, "progressiveScheduleType.vertical")
+            HORIZONTAL_SCHEDULE(3, "progressiveScheduleType.horizontal")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer scheduleType) : ProgressiveScheduleType
+        }
+        
+        ' Recalculation Frequency Type
+        Enum RecalculationFrequencyType {
+            INVALID(0, "recalculationFrequencyType.invalid")
+            SAME_AS_REPAYMENT_PERIOD(1, "recalculationFrequencyType.same.as.repayment.period")
+            DAILY(2, "recalculationFrequencyType.daily")
+            WEEKLY(3, "recalculationFrequencyType.weekly")
+            MONTHLY(4, "recalculationFrequencyType.monthly")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer frequencyType) : RecalculationFrequencyType
+        }
+    }
+    
+    ' Progressive Loan Services
+    Package "service" {
+        
+        ' Progressive Loan Application Service
+        Interface ProgressiveLoanApplicationService {
+            + createProgressiveLoanApplication(JsonCommand command) : CommandProcessingResult
+            + modifyProgressiveLoanApplication(Long loanId, JsonCommand command) : CommandProcessingResult
+            + approveProgressiveLoanApplication(Long loanId, JsonCommand command) : CommandProcessingResult
+            + disburseProgressiveLoan(Long loanId, JsonCommand command) : CommandProcessingResult
+        }
+        
+        ' Progressive Loan Application Service Implementation
+        Class ProgressiveLoanApplicationServiceImpl <<Service>> {
+            - ProgressiveLoanRepository progressiveLoanRepository
+            - LoanApplicationWritePlatformService baseLoanApplicationService
+            - ProgressiveScheduleGeneratorService scheduleGeneratorService
+            - ProgressiveLoanDataValidator dataValidator
+            - PlatformSecurityContext context
+            --
+            + createProgressiveLoanApplication(JsonCommand command) : CommandProcessingResult
+            + modifyProgressiveLoanApplication(Long loanId, JsonCommand command) : CommandProcessingResult
+            + approveProgressiveLoanApplication(Long loanId, JsonCommand command) : CommandProcessingResult
+            + disburseProgressiveLoan(Long loanId, JsonCommand command) : CommandProcessingResult
+            - assembleProgressiveLoan(JsonCommand command, LoanProduct loanProduct) : ProgressiveLoan
+            - validateProgressiveLoanApplication(ProgressiveLoan loan) : void
+        }
+        
+        ' Progressive Schedule Generator Service
+        Interface ProgressiveScheduleGeneratorService {
+            + generateProgressiveSchedule(ProgressiveLoan loan) : List<ProgressiveLoanInstallment>
+            + recalculateSchedule(ProgressiveLoan loan, LocalDate recalculationDate) : List<ProgressiveLoanInstallment>
+            + generateVariableInstallmentSchedule(ProgressiveLoan loan, List<VariableInstallmentData> variations) : List<ProgressiveLoanInstallment>
+            + applyFloatingRateChanges(ProgressiveLoan loan, List<FloatingRateChange> rateChanges) : List<ProgressiveLoanInstallment>
+        }
+        
+        ' Progressive Schedule Generator Implementation
+        Class ProgressiveScheduleGeneratorServiceImpl <<Service>> {
+            - ProgressiveInterestCalculatorService interestCalculatorService
+            - VariableInstallmentCalculatorService variableInstallmentService
+            - FloatingRateService floatingRateService
+            - LoanScheduleGeneratorFactory scheduleGeneratorFactory
+            --
+            + generateProgressiveSchedule(ProgressiveLoan loan) : List<ProgressiveLoanInstallment>
+            + recalculateSchedule(ProgressiveLoan loan, LocalDate recalculationDate) : List<ProgressiveLoanInstallment>
+            + generateVariableInstallmentSchedule(ProgressiveLoan loan, List<VariableInstallmentData> variations) : List<ProgressiveLoanInstallment>
+            + applyFloatingRateChanges(ProgressiveLoan loan, List<FloatingRateChange> rateChanges) : List<ProgressiveLoanInstallment>
+            - calculateProgressiveInterest(ProgressiveLoan loan, LocalDate fromDate, LocalDate toDate) : Money
+            - applyRecalculationStrategy(ProgressiveLoan loan, LocalDate recalculationDate) : void
+            - generateHorizontalSchedule(ProgressiveLoan loan) : List<ProgressiveLoanInstallment>
+            - generateVerticalSchedule(ProgressiveLoan loan) : List<ProgressiveLoanInstallment>
+        }
+        
+        ' Progressive Interest Calculator Service
+        Interface ProgressiveInterestCalculatorService {
+            + calculateInterest(ProgressiveLoan loan, LocalDate fromDate, LocalDate toDate) : Money
+            + calculateDailyInterest(ProgressiveLoan loan, LocalDate calculationDate) : Money
+            + calculateCompoundInterest(ProgressiveLoan loan, LocalDate fromDate, LocalDate toDate) : Money
+            + recalculateInterestForInstallment(ProgressiveLoanInstallment installment, BigDecimal newRate) : Money
+        }
+        
+        ' Progressive Interest Calculator Implementation
+        Class ProgressiveInterestCalculatorServiceImpl <<Service>> {
+            - CompoundInterestHelper compoundInterestHelper
+            - InterestRecalculationHelper recalculationHelper
+            --
+            + calculateInterest(ProgressiveLoan loan, LocalDate fromDate, LocalDate toDate) : Money
+            + calculateDailyInterest(ProgressiveLoan loan, LocalDate calculationDate) : Money
+            + calculateCompoundInterest(ProgressiveLoan loan, LocalDate fromDate, LocalDate toDate) : Money
+            + recalculateInterestForInstallment(ProgressiveLoanInstallment installment, BigDecimal newRate) : Money
+            - applyCompoundingMethod(Money interest, InterestRecalculationCompoundingMethod method) : Money
+            - calculateReducingBalanceInterest(Money principal, BigDecimal rate, Integer days) : Money
+            - calculateFlatInterest(Money principal, BigDecimal rate, Integer days) : Money
+        }
+        
+        ' Variable Installment Calculator Service
+        Interface VariableInstallmentCalculatorService {
+            + calculateVariableInstallments(ProgressiveLoan loan, List<VariableInstallmentData> variations) : List<ProgressiveLoanInstallment>
+            + validateInstallmentVariations(ProgressiveLoan loan, List<VariableInstallmentData> variations) : void
+            + adjustScheduleForVariableInstallments(ProgressiveLoan loan, VariableInstallmentData variation) : void
+        }
+        
+        ' Variable Installment Calculator Implementation
+        Class VariableInstallmentCalculatorServiceImpl <<Service>> {
+            - ProgressiveInterestCalculatorService interestCalculatorService
+            --
+            + calculateVariableInstallments(ProgressiveLoan loan, List<VariableInstallmentData> variations) : List<ProgressiveLoanInstallment>
+            + validateInstallmentVariations(ProgressiveLoan loan, List<VariableInstallmentData> variations) : void
+            + adjustScheduleForVariableInstallments(ProgressiveLoan loan, VariableInstallmentData variation) : void
+            - recalculateSubsequentInstallments(ProgressiveLoan loan, Integer fromInstallment) : void
+            - validateGapConstraints(ProgressiveLoan loan, VariableInstallmentData variation) : void
+        }
+        
+        ' Progressive Transaction Processing Service
+        Interface ProgressiveTransactionProcessingService {
+            + processRepayment(ProgressiveLoan loan, RepaymentData repaymentData) : ProgressiveLoanTransaction
+            + processAdvancePayment(ProgressiveLoan loan, AdvancePaymentData advancePaymentData) : ProgressiveLoanTransaction
+            + reverseTransaction(ProgressiveLoan loan, Long transactionId) : void
+            + recalculateAfterTransaction(ProgressiveLoan loan, ProgressiveLoanTransaction transaction) : void
+        }
+        
+        ' Progressive Transaction Processing Implementation
+        Class ProgressiveTransactionProcessingServiceImpl <<Service>> {
+            - ProgressivePaymentAllocationService paymentAllocationService
+            - ProgressiveScheduleGeneratorService scheduleGeneratorService
+            - LoanTransactionWritePlatformService baseLoanTransactionService
+            --
+            + processRepayment(ProgressiveLoan loan, RepaymentData repaymentData) : ProgressiveLoanTransaction
+            + processAdvancePayment(ProgressiveLoan loan, AdvancePaymentData advancePaymentData) : ProgressiveLoanTransaction
+            + reverseTransaction(ProgressiveLoan loan, Long transactionId) : void
+            + recalculateAfterTransaction(ProgressiveLoan loan, ProgressiveLoanTransaction transaction) : void
+            - createProgressiveTransaction(ProgressiveLoan loan, LoanTransaction baseTransaction) : ProgressiveLoanTransaction
+            - determineRecalculationRequirement(ProgressiveLoan loan, ProgressiveLoanTransaction transaction) : Boolean
+        }
+        
+        ' Progressive Payment Allocation Service
+        Interface ProgressivePaymentAllocationService {
+            + allocatePayment(ProgressiveLoan loan, Money paymentAmount, LocalDate paymentDate) : ProgressivePaymentAllocation
+            + reversePaymentAllocation(ProgressivePaymentAllocation allocation) : void
+            + reallocatePayment(ProgressivePaymentAllocation allocation, PaymentAllocationStrategy newStrategy) : void
+        }
+        
+        ' Progressive Payment Allocation Implementation
+        Class ProgressivePaymentAllocationServiceImpl <<Service>> {
+            - PaymentAllocationStrategyFactory strategyFactory
+            --
+            + allocatePayment(ProgressiveLoan loan, Money paymentAmount, LocalDate paymentDate) : ProgressivePaymentAllocation
+            + reversePaymentAllocation(ProgressivePaymentAllocation allocation) : void
+            + reallocatePayment(ProgressivePaymentAllocation allocation, PaymentAllocationStrategy newStrategy) : void
+            - getPaymentAllocationStrategy(ProgressiveLoan loan) : PaymentAllocationStrategy
+            - allocateToInstallments(Money paymentAmount, List<ProgressiveLoanInstallment> installments, PaymentAllocationStrategy strategy) : Map<Integer, InstallmentAllocation>
+        }
+        
+        ' Floating Rate Management Service
+        Interface FloatingRateManagementService {
+            + applyFloatingRateChange(ProgressiveLoan loan, FloatingRateChangeData rateChangeData) : void
+            + calculateFloatingRate(ProgressiveLoan loan, LocalDate calculationDate) : BigDecimal
+            + getEffectiveFloatingRate(ProgressiveLoan loan, LocalDate asOfDate) : BigDecimal
+            + scheduleFloatingRateReview(ProgressiveLoan loan) : void
+        }
+        
+        ' Floating Rate Management Implementation
+        Class FloatingRateManagementServiceImpl <<Service>> {
+            - FloatingRateRepository floatingRateRepository
+            - ProgressiveScheduleGeneratorService scheduleGeneratorService
+            --
+            + applyFloatingRateChange(ProgressiveLoan loan, FloatingRateChangeData rateChangeData) : void
+            + calculateFloatingRate(ProgressiveLoan loan, LocalDate calculationDate) : BigDecimal
+            + getEffectiveFloatingRate(ProgressiveLoan loan, LocalDate asOfDate) : BigDecimal
+            + scheduleFloatingRateReview(ProgressiveLoan loan) : void
+            - updateLoanInterestRate(ProgressiveLoan loan, BigDecimal newRate, LocalDate effectiveDate) : void
+            - triggerScheduleRecalculation(ProgressiveLoan loan, LocalDate recalculationDate) : void
+        }
+    }
+    
+    ' Progressive Loan Repositories
+    Package "repository" {
+        
+        ' Progressive Loan Repository
+        Interface ProgressiveLoanRepository <<Repository>> {
+            + findByBaseLoan(Loan baseLoan) : Optional<ProgressiveLoan>
+            + findLoansRequiringRecalculation(LocalDate asOfDate) : List<ProgressiveLoan>
+            + findByProgressiveProduct(ProgressiveLoanProduct product) : List<ProgressiveLoan>
+            + findFloatingRateLoans() : List<ProgressiveLoan>
+            + findVariableInstallmentLoans() : List<ProgressiveLoan>
+        }
+        
+        ' Progressive Loan Installment Repository
+        Interface ProgressiveLoanInstallmentRepository <<Repository>> {
+            + findByProgressiveLoan(ProgressiveLoan loan) : List<ProgressiveLoanInstallment>
+            + findPendingInstallments(ProgressiveLoan loan, LocalDate asOfDate) : List<ProgressiveLoanInstallment>
+            + findOverdueInstallments(ProgressiveLoan loan, LocalDate asOfDate) : List<ProgressiveLoanInstallment>
+        }
+        
+        ' Progressive Loan Transaction Repository
+        Interface ProgressiveLoanTransactionRepository <<Repository>> {
+            + findByProgressiveLoan(ProgressiveLoan loan) : List<ProgressiveLoanTransaction>
+            + findTransactionsTriggeringRecalculation(ProgressiveLoan loan) : List<ProgressiveLoanTransaction>
+        }
+    }
+    
+    ' Progressive Loan Data Objects
+    Package "data" {
+        
+        ' Variable Installment Data
+        Class VariableInstallmentData {
+            - Integer installmentNumber
+            - LocalDate dueDate
+            - Money installmentAmount
+            - LocalDate effectiveDate
+            --
+            + getInstallmentNumber() : Integer
+            + getDueDate() : LocalDate
+            + getInstallmentAmount() : Money
+            + getEffectiveDate() : LocalDate
+        }
+        
+        ' Floating Rate Change Data
+        Class FloatingRateChangeData {
+            - BigDecimal newRate
+            - LocalDate effectiveDate
+            - String reason
+            - Boolean isManualChange
+            --
+            + getNewRate() : BigDecimal
+            + getEffectiveDate() : LocalDate
+            + getReason() : String
+            + isManualChange() : Boolean
+        }
+        
+        ' Repayment Data
+        Class RepaymentData {
+            - Money repaymentAmount
+            - LocalDate repaymentDate
+            - PaymentDetail paymentDetail
+            - String note
+            --
+            + getRepaymentAmount() : Money
+            + getRepaymentDate() : LocalDate
+            + getPaymentDetail() : PaymentDetail
+            + getNote() : String
+        }
+        
+        ' Advance Payment Data
+        Class AdvancePaymentData {
+            - Money advanceAmount
+            - LocalDate paymentDate
+            - Integer targetInstallmentNumber
+            - PaymentAllocationStrategy allocationStrategy
+            --
+            + getAdvanceAmount() : Money
+            + getPaymentDate() : LocalDate
+            + getTargetInstallmentNumber() : Integer
+            + getAllocationStrategy() : PaymentAllocationStrategy
+        }
+        
+        ' Installment Allocation
+        Class InstallmentAllocation {
+            - Integer installmentNumber
+            - Money principalAllocation
+            - Money interestAllocation
+            - Money feeAllocation
+            - Money penaltyAllocation
+            - Money totalAllocation
+            --
+            + getInstallmentNumber() : Integer
+            + getPrincipalAllocation() : Money
+            + getInterestAllocation() : Money
+            + getFeeAllocation() : Money
+            + getPenaltyAllocation() : Money
+            + getTotalAllocation() : Money
+        }
+    }
+    
+    ' Progressive Loan Validation
+    Package "validation" {
+        
+        ' Progressive Loan Data Validator
+        Class ProgressiveLoanDataValidator {
+            - FromJsonHelper fromApiJsonHelper
+            - ProgressiveLoanProductRepository productRepository
+            --
+            + validateForCreate(String json) : void
+            + validateForUpdate(String json, ProgressiveLoan existingLoan) : void
+            + validateVariableInstallmentData(List<VariableInstallmentData> variations, ProgressiveLoan loan) : void
+            + validateFloatingRateChange(FloatingRateChangeData rateChangeData, ProgressiveLoan loan) : void
+            + validateRecalculationConfiguration(InterestRecalculationModel recalculationModel) : void
+            - validateProgressiveScheduleConfiguration(JsonElement element) : void
+            - validateVariableInstallmentConfiguration(JsonElement element) : void
+            - validateFloatingRateConfiguration(JsonElement element) : void
+        }
+    }
+}
+
+' Relationships
+ProgressiveLoan --> ProgressiveLoanProduct : "configured by"
+ProgressiveLoan --> ProgressiveScheduleModel : "has schedule model"
+ProgressiveLoan --> InterestRecalculationModel : "has recalculation"
+ProgressiveLoan --> VariableInstallmentModel : "supports variable installments"
+ProgressiveLoan --> FloatingInterestRateModel : "has floating rates"
+ProgressiveLoan --> ProgressiveLoanInstallment : "has installments"
+ProgressiveLoan --> ProgressiveLoanTransaction : "has transactions"
+
+ProgressiveLoanApplicationServiceImpl ..|> ProgressiveLoanApplicationService : "implements"
+ProgressiveScheduleGeneratorServiceImpl ..|> ProgressiveScheduleGeneratorService : "implements"
+ProgressiveInterestCalculatorServiceImpl ..|> ProgressiveInterestCalculatorService : "implements"
+VariableInstallmentCalculatorServiceImpl ..|> VariableInstallmentCalculatorService : "implements"
+ProgressiveTransactionProcessingServiceImpl ..|> ProgressiveTransactionProcessingService : "implements"
+ProgressivePaymentAllocationServiceImpl ..|> ProgressivePaymentAllocationService : "implements"
+FloatingRateManagementServiceImpl ..|> FloatingRateManagementService : "implements"
+
+ProgressiveLoanApplicationServiceImpl --> ProgressiveLoanRepository : "uses"
+ProgressiveScheduleGeneratorServiceImpl --> ProgressiveInterestCalculatorService : "uses"
+ProgressiveTransactionProcessingServiceImpl --> ProgressivePaymentAllocationService : "uses"
+FloatingRateManagementServiceImpl --> ProgressiveScheduleGeneratorService : "uses"
+
+SHOW_LEGEND()
+
+note top of ProgressiveLoan
+**Advanced Loan Product**
+• Variable interest rates with floating rate support
+• Flexible repayment schedules (horizontal/vertical)
+• Interest recalculation capabilities
+• Variable installment amounts
+• Progressive payment allocation
+end note
+
+note right of ProgressiveScheduleGeneratorService
+**Dynamic Schedule Generation**
+• Progressive schedule algorithms
+• Interest recalculation strategies
+• Variable installment handling
+• Floating rate integration
+• Real-time schedule adjustments
+end note
+
+note bottom of ProgressiveInterestCalculatorService
+**Advanced Interest Calculations**
+• Compound interest support
+• Daily interest calculations
+• Multiple calculation methods
+• Recalculation strategies
+• Floating rate integration
+end note
+
+note left of ProgressivePaymentAllocationService
+**Intelligent Payment Processing**
+• Advanced payment allocation strategies
+• Multi-installment allocation
+• Priority-based allocation
+• Reverse allocation support
+• Strategic reallocation
+end note
+
+@enduml

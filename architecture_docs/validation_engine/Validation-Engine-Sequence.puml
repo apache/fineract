@@ -1,0 +1,319 @@
+@startuml Validation-Engine-Sequence
+!include <C4/C4_Context>
+
+title Apache Fineract - Validation Engine Module Sequence Diagram
+
+' Actors and Systems
+participant "REST Controller" as CTRL
+participant "CommandSourceHandler" as CSH
+participant "ValidationOrchestrator" as VO
+participant "ApiDataValidator" as ADV
+participant "BusinessRuleValidator" as BRV
+participant "CrossFieldValidator" as CFV
+participant "DatabaseConstraintValidator" as DCV
+participant "ValidationErrorCollector" as VEC
+participant "ValidationRuleEngine" as VRE
+participant "ValidationRepository" as VREPO
+participant "BusinessRuleRepository" as BRREPO
+database "TenantDatabase" as DB
+
+note over CTRL, DB
+**Validation Engine Sequence Flows**
+1. Multi-Layer Validation Pipeline
+2. API Data Format and Structure Validation
+3. Business Rule Engine Execution
+4. Cross-Field and Constraint Validation
+5. Error Collection and Response Generation
+end note
+
+== API Data Validation Flow ==
+
+CTRL -> CSH : processCommand(commandWrapper)
+activate CSH
+
+CSH -> VO : validateCommand(commandWrapper)
+activate VO
+
+' Layer 1: API Data Structure Validation
+VO -> ADV : validateApiData(requestData)
+activate ADV
+
+ADV -> ADV : validateMandatoryFields()
+note right: Check required fields are present
+
+ADV -> ADV : validateDataTypes()
+note right: Validate field types (String, Number, Date, etc.)
+
+ADV -> ADV : validateFieldLengths()
+note right: Check string length constraints
+
+ADV -> ADV : validateDateFormats()
+note right: Validate date format and ranges
+
+ADV -> ADV : validateNumericRanges()
+note right: Check numeric bounds and precision
+
+ADV -> ADV : validateEnumerations()
+note right: Check enum values are valid
+
+ADV -> VEC : collectValidationErrors(errors)
+activate VEC
+VEC -> VEC : addFieldErrors(fieldName, errorCode, message)
+VEC --> ADV : errorsCollected
+deactivate VEC
+
+ADV --> VO : ApiValidationResult
+deactivate ADV
+
+alt API Validation Success
+    ' Layer 2: Business Rule Validation
+    VO -> BRV : validateBusinessRules(commandWrapper)
+    activate BRV
+    
+    BRV -> VRE : executeValidationRules(entityType, action)
+    activate VRE
+    
+    VRE -> BRREPO : findApplicableRules(entityType, action)
+    activate BRREPO
+    BRREPO -> DB : SELECT * FROM m_business_rule WHERE entity_type = ? AND action_name = ?
+    BRREPO --> VRE : businessRules
+    deactivate BRREPO
+    
+    loop For Each Business Rule
+        VRE -> VRE : evaluateRuleCondition(rule, commandData)
+        
+        alt Rule Condition Met
+            VRE -> VRE : executeRuleLogic()
+            
+            alt Rule Violated
+                VRE -> VEC : collectRuleViolation(ruleId, violation)
+                activate VEC
+                VEC -> VEC : addBusinessRuleError(ruleId, errorMessage)
+                VEC --> VRE : errorCollected
+                deactivate VEC
+            end
+        end
+    end
+    
+    VRE --> BRV : BusinessRuleValidationResult
+    deactivate VRE
+    
+    BRV --> VO : BusinessValidationResult
+    deactivate BRV
+    
+    alt Business Rules Pass
+        ' Layer 3: Cross-Field Validation
+        VO -> CFV : validateCrossFieldConstraints(commandWrapper)
+        activate CFV
+        
+        CFV -> CFV : validateFieldRelationships()
+        note right: Check interdependent field logic
+        
+        CFV -> CFV : validateConditionalFields()
+        note right: Validate fields based on other field values
+        
+        CFV -> CFV : validateBusinessLogicConstraints()
+        note right: Complex business logic validation
+        
+        alt Cross-Field Validation Errors
+            CFV -> VEC : collectCrossFieldErrors(errors)
+            activate VEC
+            VEC -> VEC : addCrossFieldErrors(errorDetails)
+            VEC --> CFV : errorsCollected
+            deactivate VEC
+        end
+        
+        CFV --> VO : CrossFieldValidationResult
+        deactivate CFV
+        
+        alt Cross-Field Rules Pass
+            ' Layer 4: Database Constraint Validation
+            VO -> DCV : validateDatabaseConstraints(commandWrapper)
+            activate DCV
+            
+            DCV -> DCV : validateUniqueConstraints()
+            note right: Check unique field constraints
+            
+            DCV -> VREPO : checkUniqueFieldValue(fieldName, value)
+            activate VREPO
+            VREPO -> DB : SELECT COUNT(*) FROM entity_table WHERE field = ?
+            VREPO --> DCV : constraintCheckResult
+            deactivate VREPO
+            
+            DCV -> DCV : validateForeignKeyConstraints()
+            note right: Check referenced entities exist
+            
+            DCV -> VREPO : validateEntityReferences(references)
+            activate VREPO
+            VREPO -> DB : SELECT id FROM referenced_table WHERE id IN (?)
+            VREPO --> DCV : referenceValidationResult
+            deactivate VREPO
+            
+            DCV -> DCV : validateBusinessKeyConstraints()
+            note right: Check business-specific constraints
+            
+            alt Database Constraint Violations
+                DCV -> VEC : collectConstraintViolations(violations)
+                activate VEC
+                VEC -> VEC : addConstraintErrors(errorDetails)
+                VEC --> DCV : errorsCollected
+                deactivate VEC
+            end
+            
+            DCV --> VO : DatabaseValidationResult
+            deactivate DCV
+            
+        else Cross-Field Validation Failure
+            VO -> VEC : finalizeValidationErrors()
+        end
+        
+    else Business Rule Validation Failure
+        VO -> VEC : finalizeValidationErrors()
+    end
+    
+else API Validation Failure
+    VO -> VEC : finalizeValidationErrors()
+end
+
+' Finalize validation results
+VO -> VEC : getValidationSummary()
+activate VEC
+VEC -> VEC : categorizeErrors()
+VEC -> VEC : formatErrorMessages()
+VEC --> VO : ValidationSummary
+deactivate VEC
+
+alt All Validations Pass
+    VO --> CSH : ValidationSuccess
+    deactivate VO
+    CSH -> CSH : proceedWithCommandExecution()
+else Validation Failures
+    VO --> CSH : ValidationException(errorSummary)
+    deactivate VO
+    CSH --> CTRL : ValidationException
+    CTRL --> CTRL : formatValidationErrorResponse()
+end
+
+== Dynamic Business Rule Creation Flow ==
+
+participant "Admin User" as ADMIN
+participant "BusinessRulesApiResource" as BR_API
+
+ADMIN -> BR_API : POST /businessrules\n{ruleDefinition}
+activate BR_API
+
+BR_API -> CSH : processCommand(CREATE_BUSINESS_RULE)
+BR_API -> VO : validateBusinessRuleDefinition(ruleData)
+activate VO
+
+VO -> ADV : validateRuleStructure(ruleData)
+activate ADV
+ADV -> ADV : validateRuleName()
+ADV -> ADV : validateEntityType()
+ADV -> ADV : validateRuleCondition()
+ADV -> ADV : validateRuleAction()
+ADV --> VO : RuleStructureValid
+deactivate ADV
+
+VO -> BRV : validateRuleLogic(ruleCondition)
+activate BRV
+BRV -> BRV : parseRuleExpression()
+BRV -> BRV : validateRuleSyntax()
+BRV -> BRV : testRuleCompilation()
+BRV --> VO : RuleLogicValid
+deactivate BRV
+
+VO --> CSH : RuleValidationResult
+deactivate VO
+
+alt Rule Validation Success
+    CSH -> BRREPO : save(businessRuleEntity)
+    activate BRREPO
+    BRREPO -> DB : INSERT INTO m_business_rule
+    BRREPO --> CSH : ruleSaved
+    deactivate BRREPO
+    
+    ' Refresh rule cache
+    CSH -> VRE : refreshRuleCache()
+    activate VRE
+    VRE -> VRE : reloadBusinessRules()
+    VRE --> CSH : cacheRefreshed
+    deactivate VRE
+    
+    CSH --> BR_API : RuleCreationSuccess
+else Rule Validation Failure
+    CSH --> BR_API : ValidationException
+end
+
+BR_API --> ADMIN : HTTP Response
+deactivate BR_API
+
+== Custom Validation Rule Execution Flow ==
+
+VO -> VRE : executeCustomValidation(entityType, customRules)
+activate VRE
+
+loop For Each Custom Rule
+    VRE -> VRE : loadRuleDefinition(ruleId)
+    VRE -> VRE : prepareRuleContext(commandData)
+    
+    alt JavaScript Rule
+        VRE -> VRE : executeJavaScriptRule()
+    else Groovy Rule
+        VRE -> VRE : executeGroovyRule()
+    else SQL Rule
+        VRE -> VREPO : executeSqlRule(query, parameters)
+        activate VREPO
+        VREPO -> DB : EXECUTE_DYNAMIC_QUERY
+        VREPO --> VRE : sqlResult
+        deactivate VREPO
+    else Java Rule
+        VRE -> VRE : executeJavaRule()
+    end
+    
+    alt Rule Execution Error
+        VRE -> VEC : collectRuleExecutionError(ruleId, error)
+    else Rule Violation
+        VRE -> VEC : collectRuleViolation(ruleId, violation)
+    end
+end
+
+VRE --> VO : CustomValidationResult
+deactivate VRE
+
+== Validation Performance Monitoring Flow ==
+
+participant "ValidationMetricsCollector" as VMC
+
+VO -> VMC : startValidationTimer(commandType)
+activate VMC
+
+' Record validation step timings
+ADV -> VMC : recordApiValidationTime(duration)
+BRV -> VMC : recordBusinessRuleValidationTime(duration)
+CFV -> VMC : recordCrossFieldValidationTime(duration)
+DCV -> VMC : recordDatabaseValidationTime(duration)
+
+VMC -> VMC : calculateTotalValidationTime()
+VMC -> VMC : updateValidationMetrics()
+
+alt Validation Time Exceeds Threshold
+    VMC -> VMC : logPerformanceWarning()
+    VMC -> VMC : notifyPerformanceMonitoring()
+end
+
+VMC --> VO : ValidationMetricsRecorded
+deactivate VMC
+
+note over CTRL, DB
+**Key Design Patterns:**
+• Chain of Responsibility: Multi-layer validation pipeline
+• Strategy Pattern: Different validation strategies per entity type
+• Template Method: Common validation flow with specific implementations
+• Composite Pattern: Complex validation rules composed of simpler rules
+• Observer Pattern: Validation result collection and error aggregation
+• Factory Pattern: Validator creation based on entity and action type
+• Command Pattern: Validation rules as executable commands
+end note
+
+@enduml

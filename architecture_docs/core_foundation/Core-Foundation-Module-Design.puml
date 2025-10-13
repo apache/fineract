@@ -1,0 +1,597 @@
+@startuml Core-Foundation-Module-Design
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Force top to bottom layout
+top to bottom direction
+
+title Apache Fineract - Core Foundation Module (Class/Interface Level Design)
+
+' Core Foundation Module
+Package "org.apache.fineract.infrastructure" {
+    
+    ' Base Entity Framework
+    Package "core.domain" {
+        
+        ' Abstract Base Entity with Audit Support
+        Abstract AbstractPersistableCustom {
+            # Long id
+            # Integer version
+            # LocalDateTime createdDate
+            # LocalDateTime lastModifiedDate
+            # String createdBy
+            # String lastModifiedBy
+            --
+            + getId() : Long
+            + getVersion() : Integer
+            + isNew() : Boolean
+            + equals(Object obj) : Boolean
+            + hashCode() : Integer
+            # prePersist() : void
+            # preUpdate() : void
+        }
+        
+        ' Auditable Fields Mixin
+        Abstract AuditableFields {
+            # LocalDateTime createdDate
+            # LocalDateTime lastModifiedDate
+            # String createdBy
+            # String lastModifiedBy
+            --
+            + getCreatedDate() : LocalDateTime
+            + getLastModifiedDate() : LocalDateTime
+            + getCreatedBy() : String
+            + getLastModifiedBy() : String
+            + updateAuditFields(String user) : void
+        }
+        
+        ' Soft Deletable Entity Support
+        Interface SoftDeletable {
+            + isDeleted() : Boolean
+            + markDeleted() : void
+            + restore() : void
+            + getDeletedDate() : LocalDateTime
+        }
+        
+        ' Domain Event Support
+        Abstract DomainEventProducer {
+            - List<DomainEvent> domainEvents
+            --
+            + registerEvent(DomainEvent event) : void
+            + markEventsAsHandled() : void
+            + getUnhandledEvents() : List<DomainEvent>
+            # addDomainEvent(DomainEvent event) : void
+        }
+        
+        ' Base Domain Event
+        Abstract DomainEvent {
+            - String aggregateRootId
+            - LocalDateTime occurredOn
+            - String eventType
+            - String tenantId
+            --
+            + getAggregateRootId() : String
+            + getOccurredOn() : LocalDateTime
+            + getEventType() : String
+            + getTenantId() : String
+        }
+        
+        ' Entity State Management
+        Enum EntityState {
+            CREATED
+            ACTIVE
+            INACTIVE
+            DELETED
+            ARCHIVED
+            --
+            + canTransitionTo(EntityState newState) : Boolean
+            + getValidTransitions() : Set<EntityState>
+        }
+    }
+    
+    ' Repository Infrastructure
+    Package "core.repository" {
+        
+        ' Base Repository Interface
+        Interface BaseRepository<T, ID> <<Repository>> {
+            + save(T entity) : T
+            + saveAll(Iterable<T> entities) : List<T>
+            + findById(ID id) : Optional<T>
+            + existsById(ID id) : Boolean
+            + findAll() : List<T>
+            + findAll(Sort sort) : List<T>
+            + findAll(Pageable pageable) : Page<T>
+            + count() : Long
+            + delete(T entity) : void
+            + deleteById(ID id) : void
+            + deleteAll() : void
+            + flush() : void
+            + saveAndFlush(T entity) : T
+        }
+        
+        ' Specification Repository
+        Interface SpecificationRepository<T> <<Repository>> {
+            + findAll(Specification<T> spec) : List<T>
+            + findAll(Specification<T> spec, Sort sort) : List<T>
+            + findAll(Specification<T> spec, Pageable pageable) : Page<T>
+            + findOne(Specification<T> spec) : Optional<T>
+            + count(Specification<T> spec) : Long
+            + exists(Specification<T> spec) : Boolean
+        }
+        
+        ' Custom Repository Support
+        Interface CustomRepository<T, ID> <<Repository>> {
+            + findByField(String field, Object value) : List<T>
+            + findByFields(Map<String, Object> criteria) : List<T>
+            + executeNativeQuery(String query, Class<T> resultClass) : List<T>
+            + bulkUpdate(String updateQuery, Map<String, Object> params) : Integer
+            + bulkDelete(Specification<T> spec) : Integer
+        }
+        
+        ' Repository Implementation Base
+        Abstract BaseRepositoryImpl<T, ID> <<Repository>> {
+            # EntityManager entityManager
+            # Class<T> domainClass
+            --
+            + save(T entity) : T
+            + findById(ID id) : Optional<T>
+            # getEntityManager() : EntityManager
+            # getDomainClass() : Class<T>
+            # createQuery(String query) : Query
+            # createNativeQuery(String query) : Query
+        }
+        
+        ' Specification Builder
+        Class SpecificationBuilder<T> {
+            - List<SearchCriteria> params
+            - Class<T> entityClass
+            --
+            + with(String key, String operation, Object value) : SpecificationBuilder<T>
+            + and(Specification<T> spec) : SpecificationBuilder<T>
+            + or(Specification<T> spec) : SpecificationBuilder<T>
+            + build() : Specification<T>
+            + reset() : SpecificationBuilder<T>
+        }
+        
+        ' Search Criteria
+        Class SearchCriteria {
+            - String key
+            - String operation
+            - Object value
+            - String prefix
+            - String suffix
+            --
+            + getKey() : String
+            + getOperation() : String
+            + getValue() : Object
+            + isOrPredicate() : Boolean
+        }
+    }
+    
+    ' Configuration Management
+    Package "configuration" {
+        
+        ' Database Configuration
+        Class DatabaseConfiguration {
+            - DataSourceProperties properties
+            - HikariConfig hikariConfig
+            --
+            @Bean dataSource() : DataSource
+            @Bean entityManagerFactory() : EntityManagerFactory
+            @Bean transactionManager() : PlatformTransactionManager
+            - configureHikariPool() : HikariDataSource
+            - configureJpaProperties() : Properties
+        }
+        
+        ' Multi-tenant Database Configuration
+        Class MultiTenantDatabaseConfiguration {
+            - TenantDataSourceProperties tenantProperties
+            - Map<String, DataSource> tenantDataSources
+            --
+            @Bean tenantAwareDataSource() : DataSource
+            @Bean tenantEntityManagerFactory() : EntityManagerFactory
+            + registerTenant(String tenantId, DataSourceProperties props) : void
+            + removeTenant(String tenantId) : void
+            - createTenantDataSource(DataSourceProperties props) : DataSource
+        }
+        
+        ' Security Configuration
+        Class SecurityConfiguration {
+            - SecurityProperties securityProperties
+            - OAuth2Properties oauth2Properties
+            --
+            @Bean passwordEncoder() : PasswordEncoder
+            @Bean authenticationManager() : AuthenticationManager
+            @Bean jwtTokenProvider() : JwtTokenProvider
+            @Bean corsConfigurationSource() : CorsConfigurationSource
+            - configureHttpSecurity(HttpSecurity http) : void
+            - configureOAuth2(OAuth2Properties props) : void
+        }
+        
+        ' Cache Configuration
+        Class CacheConfiguration {
+            - CacheProperties cacheProperties
+            --
+            @Bean cacheManager() : CacheManager
+            @Bean redisTemplate() : RedisTemplate
+            @Bean cacheResolver() : CacheResolver
+            - configureCacheDefaults() : RedisCacheConfiguration
+            - setupCacheKeyGenerator() : KeyGenerator
+        }
+        
+        ' Application Configuration Properties
+        Class FineractProperties {
+            - DatabaseProperties database
+            - SecurityProperties security
+            - CacheProperties cache
+            - IntegrationProperties integration
+            - ReportingProperties reporting
+            --
+            + getDatabase() : DatabaseProperties
+            + getSecurity() : SecurityProperties
+            + getCache() : CacheProperties
+            - validateConfiguration() : void
+        }
+    }
+    
+    ' Utility Services
+    Package "core.service" {
+        
+        ' Date and Time Utilities
+        Class DateUtils {
+            - Clock clock
+            - ZoneId defaultZone
+            --
+            + {static} now() : LocalDateTime
+            + {static} today() : LocalDate
+            + {static} parseDate(String dateStr, String pattern) : LocalDate
+            + {static} formatDate(LocalDate date, String pattern) : String
+            + {static} addBusinessDays(LocalDate date, Integer days) : LocalDate
+            + {static} isBusinessDay(LocalDate date) : Boolean
+            + {static} getDateRange(LocalDate start, LocalDate end) : List<LocalDate>
+            + {static} calculateAge(LocalDate birthDate) : Integer
+            + {static} getFirstDayOfMonth(LocalDate date) : LocalDate
+            + {static} getLastDayOfMonth(LocalDate date) : LocalDate
+            + {static} isWeekend(LocalDate date) : Boolean
+            + {static} convertToUserTimezone(LocalDateTime utc, String timezone) : LocalDateTime
+        }
+        
+        ' Money and Currency Utilities
+        Class MoneyUtil {
+            - MathContext mathContext
+            - RoundingMode defaultRounding
+            --
+            + {static} money(BigDecimal amount, String currencyCode) : Money
+            + {static} zero(String currencyCode) : Money
+            + {static} add(Money... amounts) : Money
+            + {static} subtract(Money minuend, Money subtrahend) : Money
+            + {static} multiply(Money money, BigDecimal multiplier) : Money
+            + {static} divide(Money money, BigDecimal divisor) : Money
+            + {static} percentage(Money principal, BigDecimal rate) : Money
+            + {static} round(Money money, RoundingMode mode) : Money
+            + {static} isEqual(Money first, Money second) : Boolean
+            + {static} isGreaterThan(Money first, Money second) : Boolean
+            + {static} isLessThan(Money first, Money second) : Boolean
+            + {static} convertCurrency(Money source, String targetCurrency, BigDecimal rate) : Money
+        }
+        
+        ' Validation Utilities
+        Class ValidationUtil {
+            - Pattern emailPattern
+            - Pattern mobilePattern
+            --
+            + {static} isValidEmail(String email) : Boolean
+            + {static} isValidMobileNumber(String mobile) : Boolean
+            + {static} isValidUrl(String url) : Boolean
+            + {static} isValidAccountNumber(String accountNo) : Boolean
+            + {static} validateNotNull(Object obj, String fieldName) : void
+            + {static} validateNotEmpty(String str, String fieldName) : void
+            + {static} validateStringLength(String str, Integer min, Integer max, String fieldName) : void
+            + {static} validateRange(Number value, Number min, Number max, String fieldName) : void
+            + {static} validatePositive(Number value, String fieldName) : void
+            + {static} validateDateRange(LocalDate start, LocalDate end) : void
+            + {static} sanitizeString(String input) : String
+        }
+        
+        ' Security Utilities
+        Class SecurityUtil {
+            - PasswordEncoder passwordEncoder
+            - SecureRandom secureRandom
+            --
+            + {static} generateRandomPassword(Integer length) : String
+            + {static} generateSecureToken() : String
+            + {static} hashPassword(String plainPassword) : String
+            + {static} verifyPassword(String plain, String hashed) : Boolean
+            + {static} encrypt(String data, String key) : String
+            + {static} decrypt(String encryptedData, String key) : String
+            + {static} generateSalt() : String
+            + {static} generateApiKey() : String
+            + {static} maskSensitiveData(String data, Integer visibleChars) : String
+            + {static} isStrongPassword(String password) : Boolean
+        }
+        
+        ' File and I/O Utilities
+        Class FileUtil {
+            - String tempDirectory
+            - Long maxFileSize
+            --
+            + {static} readFile(String filePath) : String
+            + {static} writeFile(String filePath, String content) : void
+            + {static} deleteFile(String filePath) : Boolean
+            + {static} createDirectory(String dirPath) : Boolean
+            + {static} getFileExtension(String fileName) : String
+            + {static} validateFileType(String fileName, List<String> allowedTypes) : Boolean
+            + {static} generateUniqueFileName(String originalName) : String
+            + {static} getFileSize(String filePath) : Long
+            + {static} compressFile(String sourcePath, String targetPath) : void
+            + {static} decompressFile(String sourcePath, String targetPath) : void
+        }
+    }
+    
+    ' Exception Framework
+    Package "core.exception" {
+        
+        ' Base Platform Exception
+        Abstract PlatformException {
+            - String errorCode
+            - String defaultUserMessage
+            - Object[] defaultUserMessageArgs
+            - Throwable cause
+            --
+            + getErrorCode() : String
+            + getDefaultUserMessage() : String
+            + getDefaultUserMessageArgs() : Object[]
+            + getUserMessage() : String
+            + getHttpStatusCode() : Integer
+        }
+        
+        ' Data Validation Exception
+        Class PlatformApiDataValidationException {
+            - List<ApiParameterError> errors
+            --
+            + PlatformApiDataValidationException(List<ApiParameterError> errors)
+            + getErrors() : List<ApiParameterError>
+            + hasErrors() : Boolean
+            + getFirstError() : ApiParameterError
+        }
+        
+        ' Resource Not Found Exception
+        Class AbstractPlatformResourceNotFoundException {
+            - String resourceType
+            - String resourceId
+            --
+            + AbstractPlatformResourceNotFoundException(String resourceType, String resourceId)
+            + getResourceType() : String
+            + getResourceId() : String
+        }
+        
+        ' Domain Rule Exception
+        Class AbstractPlatformDomainRuleException {
+            - String ruleCode
+            - String[] messageArgs
+            --
+            + AbstractPlatformDomainRuleException(String ruleCode, String... args)
+            + getRuleCode() : String
+            + getMessageArgs() : String[]
+        }
+        
+        ' Service Unavailable Exception
+        Class PlatformServiceUnavailableException {
+            - String serviceName
+            - String reason
+            --
+            + PlatformServiceUnavailableException(String serviceName, String reason)
+            + getServiceName() : String
+            + getReason() : String
+        }
+        
+        ' Data Integrity Exception
+        Class PlatformDataIntegrityException {
+            - String constraintName
+            - String tableName
+            --
+            + PlatformDataIntegrityException(String constraint, String table, Throwable cause)
+            + getConstraintName() : String
+            + getTableName() : String
+        }
+    }
+    
+    ' Event Framework
+    Package "core.event" {
+        
+        ' Event Publisher Interface
+        Interface PlatformEventPublisher {
+            + publishEvent(DomainEvent event) : void
+            + publishEvents(List<DomainEvent> events) : void
+            + publishAsync(DomainEvent event) : CompletableFuture<Void>
+        }
+        
+        ' Event Publisher Implementation
+        Class SpringEventPublisher <<Service>> {
+            - ApplicationEventPublisher applicationEventPublisher
+            - TaskExecutor taskExecutor
+            --
+            + publishEvent(DomainEvent event) : void
+            + publishEvents(List<DomainEvent> events) : void
+            + publishAsync(DomainEvent event) : CompletableFuture<Void>
+            - wrapDomainEvent(DomainEvent event) : ApplicationEvent
+        }
+        
+        ' Event Handler Registry
+        Class EventHandlerRegistry {
+            - Map<String, List<EventHandler>> handlerMappings
+            --
+            + registerHandler(String eventType, EventHandler handler) : void
+            + unregisterHandler(String eventType, EventHandler handler) : void
+            + getHandlers(String eventType) : List<EventHandler>
+            + hasHandlers(String eventType) : Boolean
+        }
+        
+        ' Generic Event Handler Interface
+        Interface EventHandler<T extends DomainEvent> {
+            + handle(T event) : void
+            + canHandle(String eventType) : Boolean
+            + getHandledEventTypes() : Set<String>
+        }
+    }
+    
+    ' Multi-tenant Support
+    Package "multitenancy" {
+        
+        ' Tenant Context
+        Class TenantContext {
+            - {static} ThreadLocal<String> tenantId
+            --
+            + {static} setTenantId(String tenantId) : void
+            + {static} getTenantId() : String
+            + {static} clearTenantId() : void
+            + {static} hasTenantId() : Boolean
+            + {static} executeInTenantContext(String tenantId, Runnable task) : void
+            + {static} executeInTenantContext(String tenantId, Supplier<T> task) : T
+        }
+        
+        ' Tenant Resolver
+        Interface TenantResolver {
+            + resolveTenantId(HttpServletRequest request) : String
+            + validateTenant(String tenantId) : Boolean
+            + getDefaultTenant() : String
+        }
+        
+        ' Tenant-Aware DataSource
+        Class TenantAwareDataSource {
+            - Map<String, DataSource> tenantDataSources
+            - DataSource defaultDataSource
+            --
+            + getConnection() : Connection
+            + getConnection(String username, String password) : Connection
+            - determineCurrentLookupKey() : String
+            - resolveSpecifiedDataSource(String tenantId) : DataSource
+        }
+        
+        ' Tenant Details Service
+        Interface TenantDetailsService {
+            + findByTenantId(String tenantId) : TenantDetails
+            + findAllActiveTenants() : List<TenantDetails>
+            + createTenant(TenantCreationRequest request) : TenantDetails
+            + updateTenant(String tenantId, TenantUpdateRequest request) : TenantDetails
+            + deactivateTenant(String tenantId) : void
+        }
+        
+        ' Tenant Details
+        Class TenantDetails {
+            - String tenantId
+            - String name
+            - String description
+            - String schemaName
+            - String connectionUrl
+            - Boolean active
+            - LocalDateTime createdDate
+            - Map<String, Object> properties
+            --
+            + isActive() : Boolean
+            + getSchemaName() : String
+            + getProperty(String key) : Object
+            + setProperty(String key, Object value) : void
+        }
+    }
+    
+    ' Audit Framework
+    Package "audit" {
+        
+        ' Audit Event
+        Class AuditEvent {
+            - Long id
+            - String entityType
+            - String entityId
+            - String action
+            - String userId
+            - String tenantId
+            - LocalDateTime timestamp
+            - String beforeData
+            - String afterData
+            - String clientIp
+            - String userAgent
+            --
+            + getEntityType() : String
+            + getAction() : String
+            + hasDataChanges() : Boolean
+        }
+        
+        ' Audit Service
+        Interface AuditService {
+            + recordAuditEvent(AuditEvent event) : void
+            + findAuditEvents(AuditSearchCriteria criteria) : Page<AuditEvent>
+            + findAuditEventsForEntity(String entityType, String entityId) : List<AuditEvent>
+            + findAuditEventsForUser(String userId) : List<AuditEvent>
+            + generateAuditReport(AuditReportCriteria criteria) : AuditReport
+        }
+        
+        ' JPA Audit Listener
+        Class JpaAuditListener {
+            - AuditService auditService
+            --
+            @PostPersist handlePostPersist(Object entity) : void
+            @PostUpdate handlePostUpdate(Object entity) : void
+            @PostRemove handlePostRemove(Object entity) : void
+            - createAuditEvent(Object entity, String action) : AuditEvent
+            - extractEntityData(Object entity) : String
+        }
+    }
+}
+
+' Relationships
+AbstractPersistableCustom --|> AuditableFields : "extends"
+DomainEventProducer --> DomainEvent : "produces"
+BaseRepository <|-- SpecificationRepository : "extends"
+BaseRepository <|-- CustomRepository : "extends"
+BaseRepositoryImpl ..|> BaseRepository : "implements"
+SpecificationBuilder --> SearchCriteria : "uses"
+
+DatabaseConfiguration --> DataSource : "creates"
+MultiTenantDatabaseConfiguration --> TenantAwareDataSource : "creates"
+SecurityConfiguration --> PasswordEncoder : "creates"
+
+PlatformEventPublisher <|.. SpringEventPublisher : "implements"
+EventHandlerRegistry --> EventHandler : "manages"
+TenantResolver <|.. TenantDetailsService : "implements"
+TenantAwareDataSource --> TenantContext : "uses"
+
+AuditService --> AuditEvent : "manages"
+JpaAuditListener --> AuditService : "uses"
+
+SHOW_LEGEND()
+
+note top of AbstractPersistableCustom
+**Rich Base Entity**
+• Audit trail support
+• Optimistic locking
+• Domain event production
+• Lifecycle callbacks
+end note
+
+note right of BaseRepository
+**Repository Abstraction**
+• Generic CRUD operations
+• Specification pattern support
+• Batch operations
+• Custom query support
+end note
+
+note bottom of TenantContext
+**Multi-tenancy Support**
+• Thread-safe tenant isolation
+• Schema-per-tenant model
+• Tenant-aware data access
+• Context propagation
+end note
+
+note left of AuditService
+**Comprehensive Auditing**
+• Entity change tracking
+• User activity logging
+• Compliance support
+• Audit reporting
+end note
+
+@enduml

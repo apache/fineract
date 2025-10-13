@@ -1,0 +1,834 @@
+@startuml Loan-Management-Module-Design
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Force top to bottom layout
+top to bottom direction
+
+title Apache Fineract - Loan Management Module (Class/Interface Level Design)
+
+' Loan Management Module
+Package "org.apache.fineract.portfolio.loanaccount" {
+    
+    ' Loan Domain Model
+    Package "domain" {
+        
+        ' Core Loan Entity
+        Class Loan {
+            - Long id
+            - String accountNo
+            - Client client
+            - Group group
+            - LoanProduct loanProduct
+            - Fund fund
+            - Staff loanOfficer
+            - LoanStatus status
+            - Money principal
+            - Money approvedPrincipal
+            - Money disbursedAmount
+            - Money totalOutstanding
+            - Money totalRepaid
+            - Money totalOverpaid
+            - LocalDate submittedOnDate
+            - LocalDate approvedOnDate
+            - LocalDate expectedDisbursementDate
+            - LocalDate actualDisbursementDate
+            - LocalDate expectedMaturityDate
+            - LocalDate actualMaturityDate
+            - LocalDate closedOnDate
+            - Integer termFrequency
+            - PeriodFrequencyType termPeriodFrequencyType
+            - Integer numberOfRepayments
+            - Integer repaymentEvery
+            - PeriodFrequencyType repaymentFrequencyType
+            - BigDecimal nominalInterestRatePerPeriod
+            - InterestRateFrequencyType interestRateFrequencyType
+            - BigDecimal annualNominalInterestRate
+            - InterestMethod interestMethod
+            - InterestCalculationPeriodMethod interestCalculationPeriodMethod
+            - AmortizationMethod amortizationMethod
+            - Boolean allowPartialPeriodInterestCalculation
+            - LoanSchedule loanSchedule
+            - Collection<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments
+            - Collection<LoanTransaction> loanTransactions
+            - Collection<LoanCharge> charges
+            - Collection<LoanCollateral> collateral
+            - LoanSummary summary
+            --
+            + getLoanProductRelatedDetail() : LoanProductRelatedDetail
+            + updateLoanProduct(LoanProduct loanProduct) : void
+            + changeToSubmittedForApprovalStatus() : void
+            + approve(ApproveLoanCommand command) : void
+            + undoApproval() : void
+            + reject(RejectLoanCommand command) : void
+            + withdrawApplication(WithdrawLoanCommand command) : void
+            + disburse(DisburseLoanCommand command) : LoanTransaction
+            + makeRepayment(RepaymentCommand command) : LoanTransaction
+            + waiveInterest(WaiveInterestCommand command) : LoanTransaction
+            + makeRefund(RefundCommand command) : LoanTransaction
+            + adjustTransaction(AdjustTransactionCommand command) : void
+            + addCharge(LoanCharge charge) : void
+            + updateCharge(LoanChargeCommand command) : void
+            + waiveCharge(Long chargeId, Money amount) : LoanTransaction
+            + payCharge(Long chargeId, Money amount) : LoanTransaction
+            + reschedule(RescheduleLoansCommand command) : void
+            + foreclose(ForeclosureCommand command) : LoanTransaction
+            + writeOff(WriteOffCommand command) : LoanTransaction
+            + recoverFromGuarantor(GuarantorRecoveryCommand command) : LoanTransaction
+            + isSubmittedAndPendingApproval() : Boolean
+            + isApproved() : Boolean
+            + isDisbursed() : Boolean
+            + isClosed() : Boolean
+            + isActive() : Boolean
+            + isOverdueOn(LocalDate date) : Boolean
+            + hasIdentifyOf(Long loanId) : Boolean
+            + getTotalOutstanding() : Money
+            + getTotalPaidInRepayments() : Money
+            + getTotalInterestCharged() : Money
+            + getTotalFeeChargesCharged() : Money
+            + getTotalPenaltyChargesCharged() : Money
+            + getTotalChargesCharged() : Money
+            + getTotalOverpaid() : Money
+            + recalculateSchedule() : void
+            + regenerateRepaymentSchedule() : void
+            + validateAccountNumberIsNotDuplicated(String accountNumber) : void
+            + validateLoanIsNotClosed() : void
+            + validateLoanIsActive() : void
+            + validateRepaymentDateIsOnNonWorkingDay(LocalDate repaymentDate) : void
+            + validateRepaymentDateIsOnHoliday(LocalDate repaymentDate) : void
+            + getExpectedMaturityDate() : LocalDate
+            + deriveTheoreticalRepaymentSchedule() : LoanApplicationTerms
+            + getRepaymentScheduleInstallment(Integer installmentNumber) : LoanRepaymentScheduleInstallment
+            + fetchPrepaymentDetail(LocalDate prepaymentDate) : PrepaymentDetail
+        }
+        
+        ' Loan Product Configuration
+        Class LoanProduct {
+            - Long id
+            - String name
+            - String shortName
+            - String description
+            - Fund fund
+            - Money minPrincipal
+            - Money maxPrincipal
+            - Money defaultPrincipal
+            - Integer minNumberOfRepayments
+            - Integer maxNumberOfRepayments
+            - Integer defaultNumberOfRepayments
+            - Integer minRepaymentPeriod
+            - Integer maxRepaymentPeriod
+            - Integer defaultRepaymentPeriod
+            - PeriodFrequencyType repaymentPeriodFrequencyType
+            - BigDecimal minNominalInterestRatePerPeriod
+            - BigDecimal maxNominalInterestRatePerPeriod
+            - BigDecimal defaultNominalInterestRatePerPeriod
+            - InterestRateFrequencyType interestRateFrequencyType
+            - InterestMethod interestMethod
+            - InterestCalculationPeriodMethod interestCalculationPeriodMethod
+            - AmortizationMethod amortizationMethod
+            - Boolean allowPartialPeriodInterestCalculation
+            - Boolean includeInBorrowerCycle
+            - Boolean useBorrowerCycle
+            - Collection<LoanProductBorrowerCycleVariations> borrowerCycleVariations
+            - Collection<ProductToGLAccountMapping> accountMappings
+            - Collection<Charge> charges
+            - LoanProductConfigurableAttributes configurableAttributes
+            - LoanProductGuaranteeDetails guaranteeDetails
+            - LoanProductFloatingRates floatingRates
+            - Boolean isLinkedToFloatingInterestRate
+            - FloatingRate floatingRate
+            - BigDecimal interestRateDifferential
+            - Boolean allowVariableInstallments
+            - Integer minimumGap
+            - Integer maximumGap
+            - Boolean syncExpectedWithDisbursementDate
+            - Boolean canDefineInstallmentAmount
+            - Integer installmentAmountInMultiplesOf
+            - LoanProductRelatedDetail loanProductRelatedDetail
+            --
+            + hasMinimumPrincipalAmountOf(Money principalAmount) : Boolean
+            + hasMaximumPrincipalAmountOf(Money principalAmount) : Boolean
+            + hasPrincipalAmountOutsideRange(Money principalAmount) : Boolean
+            + hasMinimumNumberOfRepayments(Integer numberOfRepayments) : Boolean
+            + hasMaximumNumberOfRepayments(Integer numberOfRepayments) : Boolean
+            + hasRepaymentFrequency(Integer repaymentEvery, PeriodFrequencyType frequency) : Boolean
+            + hasMinimumNominalInterestRate(BigDecimal interestRate) : Boolean
+            + hasMaximumNominalInterestRate(BigDecimal interestRate) : Boolean
+            + hasNominalInterestRateOutsideRange(BigDecimal interestRate) : Boolean
+            + allowsVariableInstallments() : Boolean
+            + isLinkedToFloatingInterestRate() : Boolean
+            + getFloatingRate() : FloatingRate
+            + deriveVariations(Integer cycleNumber) : LoanProductBorrowerCycleVariations
+            + charges() : Collection<Charge>
+            + validateDisbursementDetails() : void
+            + validateRepaymentDetails() : void
+            + validateInterestDetails() : void
+            + validateCharges() : void
+            + copy() : LoanProduct
+        }
+        
+        ' Loan Application Terms
+        Class LoanApplicationTerms {
+            - LoanProduct loanProduct
+            - Money principal
+            - Integer numberOfRepayments
+            - Integer repaymentEvery
+            - PeriodFrequencyType repaymentPeriodFrequencyType
+            - BigDecimal nominalInterestRatePerPeriod
+            - InterestRateFrequencyType interestRateFrequencyType
+            - BigDecimal annualNominalInterestRate
+            - InterestMethod interestMethod
+            - InterestCalculationPeriodMethod interestCalculationPeriodMethod
+            - AmortizationMethod amortizationMethod
+            - LocalDate expectedDisbursementDate
+            - LocalDate repaymentsStartingFromDate
+            - LocalDate calculatedRepaymentsStartingFromDate
+            - Integer graceOnPrincipalPayment
+            - Integer graceOnInterestPayment
+            - Integer graceOnInterestCharged
+            - LocalDate interestChargedFromDate
+            - Money inArrearsTolerance
+            - List<DisbursementData> disbursementDatas
+            - List<LoanTermVariationsData> loanTermVariations
+            - Boolean multiDisburseLoan
+            - BigDecimal fixedEmiAmount
+            - Money totalDisbursementAmount
+            - HolidayDetailDTO holidayDetailDTO
+            - Boolean allowCompoundingOnEod
+            - List<CalendarInstance> compoundingCalendarInstances
+            - List<CalendarInstance> restCalendarInstances
+            - RecalculationFrequencyType recalculationFrequencyType
+            - RestCalendarInstance restCalendarInstance
+            - CompoundingCalendarInstance compoundingCalendarInstance
+            - BigDecimal principalThresholdForLastInstallment
+            - Integer installmentAmountInMultiplesOf
+            - LoanPreClosureInterestCalculationStrategy preClosureInterestCalculationStrategy
+            - BigDecimal rescheduleInterestRate
+            --
+            + calculatePeriodsBetweenDates(LocalDate startDate, LocalDate endDate) : Integer
+            + adjustNumberOfRepaymentsBasedOnGracePeriods() : Integer
+            + getExpectedDisbursementDate() : LocalDate
+            + getRepaymentsStartingFromDate() : LocalDate
+            + getCalculatedRepaymentsStartingFromDate() : LocalDate
+            + getInterestChargedFromDate() : LocalDate
+            + getGraceOnPrincipalPayment() : Integer
+            + getGraceOnInterestPayment() : Integer
+            + getGraceOnInterestCharged() : Integer
+            + getInArrearsTolerance() : Money
+            + getTotalDisbursementAmount() : Money
+            + getFixedEmiAmount() : BigDecimal
+            + isMultiDisburseLoan() : Boolean
+            + getAllowCompoundingOnEod() : Boolean
+            + getRecalculationFrequencyType() : RecalculationFrequencyType
+            + getPrincipalThresholdForLastInstallment() : BigDecimal
+            + getInstallmentAmountInMultiplesOf() : Integer
+            + toData() : LoanApplicationTermsData
+        }
+        
+        ' Loan Repayment Schedule
+        Class LoanRepaymentScheduleInstallment {
+            - Long id
+            - Loan loan
+            - Integer installmentNumber
+            - LocalDate fromDate
+            - LocalDate dueDate
+            - Money principal
+            - Money interest
+            - Money feeCharges
+            - Money penaltyCharges
+            - Money principalCompleted
+            - Money interestCompleted
+            - Money feeChargesCompleted
+            - Money penaltyChargesCompleted
+            - Money principalWrittenOff
+            - Money interestWrittenOff
+            - Money feeChargesWrittenOff
+            - Money penaltyChargesWrittenOff
+            - Money total
+            - Money totalPaid
+            - Money totalWaived
+            - Money totalWrittenOff
+            - Money totalOutstanding
+            - Boolean completed
+            - Boolean recalculatedInterestComponent
+            - LocalDate obligationsMetOnDate
+            --
+            + payPrincipalComponent(LocalDate transactionDate, Money transactionAmount) : Money
+            + payInterestComponent(LocalDate transactionDate, Money transactionAmount) : Money
+            + payFeeChargesComponent(LocalDate transactionDate, Money transactionAmount) : Money
+            + payPenaltyChargesComponent(LocalDate transactionDate, Money transactionAmount) : Money
+            + waivePrincipalComponent(LocalDate transactionDate, Money transactionAmount) : Money
+            + waiveInterestComponent(LocalDate transactionDate, Money transactionAmount) : Money
+            + waiveFeeChargesComponent(LocalDate transactionDate, Money transactionAmount) : Money
+            + waivePenaltyChargesComponent(LocalDate transactionDate, Money transactionAmount) : Money
+            + writeOffPrincipalComponent(LocalDate transactionDate, Money transactionAmount) : Money
+            + writeOffInterestComponent(LocalDate transactionDate, Money transactionAmount) : Money
+            + writeOffFeeChargesComponent(LocalDate transactionDate, Money transactionAmount) : Money
+            + writeOffPenaltyChargesComponent(LocalDate transactionDate, Money transactionAmount) : Money
+            + getTotalOutstanding() : Money
+            + getTotalPaid() : Money
+            + isCompleted() : Boolean
+            + isNotCompleted() : Boolean
+            + isPrincipalNotCompleted() : Boolean
+            + isInterestDue() : Boolean
+            + isPrincipalDue() : Boolean
+            + isFeeChargesDue() : Boolean
+            + isPenaltyChargesDue() : Boolean
+            + isOverdueOn(LocalDate date) : Boolean
+            + resetDerivedComponents() : void
+            + updateDerivedComponents() : void
+            + copyOf() : LoanRepaymentScheduleInstallment
+        }
+        
+        ' Loan Transaction
+        Class LoanTransaction {
+            - Long id
+            - Loan loan
+            - Office office
+            - PaymentDetail paymentDetail
+            - LoanTransactionType typeOf
+            - LocalDate dateOf
+            - Money amount
+            - Money principalPortion
+            - Money interestPortion
+            - Money feeChargesPortion
+            - Money penaltyChargesPortion
+            - Money overpaymentPortion
+            - Boolean reversed
+            - String externalId
+            - LocalDate submittedOnDate
+            - Boolean manuallyAdjustedOrReversed
+            - Money outstandingLoanBalance
+            - Boolean possibleNextRepaymentDate
+            - CodeValue reasonForWrite
+            --
+            + isRepayment() : Boolean
+            + isDisbursement() : Boolean
+            + isWriteOff() : Boolean
+            + isChargePayment() : Boolean
+            + isWaiveInterest() : Boolean
+            + isWaiveCharges() : Boolean
+            + isAccrual() : Boolean
+            + isInitiateTransfer() : Boolean
+            + isApproveTransfer() : Boolean
+            + isWithdrawTransfer() : Boolean
+            + isRejectTransfer() : Boolean
+            + isRefund() : Boolean
+            + isNotReversed() : Boolean
+            + isReversed() : Boolean
+            + isNotZero() : Boolean
+            + isGreaterThanZero() : Boolean
+            + isNotRepayment() : Boolean
+            + isNotWaiver() : Boolean
+            + isNotRecoveryRepayment() : Boolean
+            + reverse() : void
+            + updateLoan(Loan loan) : void
+            + resetDerivedComponents() : void
+            + updateComponents(Money principalPortion, Money interestPortion, Money feeChargesPortion, Money penaltyChargesPortion) : void
+            + adjustInterestComponent(Money newInterestPortion) : void
+            + getTransactionDate() : LocalDate
+            + isOn(LocalDate transactionDate) : Boolean
+            + isNotOn(LocalDate transactionDate) : Boolean
+            + isBefore(LocalDate transactionDate) : Boolean
+            + isAfter(LocalDate transactionDate) : Boolean
+            + isOnOrBefore(LocalDate transactionDate) : Boolean
+            + isOnOrAfter(LocalDate transactionDate) : Boolean
+            + hasPaymentDetail() : Boolean
+            + copyTransactionProperties() : LoanTransaction
+        }
+        
+        ' Loan Charge
+        Class LoanCharge {
+            - Long id
+            - Loan loan
+            - Charge charge
+            - LoanChargeCalculationType chargeCalculation
+            - BigDecimal percentage
+            - Money amountOrPercentage
+            - Money amount
+            - Money amountPaid
+            - Money amountWaived
+            - Money amountWrittenOff
+            - Money amountOutstanding
+            - Boolean paid
+            - Boolean waived
+            - LocalDate dueDate
+            - LoanRepaymentScheduleInstallment loanInstallmentCharge
+            - Boolean penalty
+            - LocalDate submittedOnDate
+            --
+            + waive(Money amountToWaive, LocalDate transactionDate) : LoanTransaction
+            + pay(Money amountToPay, LocalDate transactionDate) : LoanTransaction
+            + markAsFullyPaid() : void
+            + markAsWaived() : void
+            + isWaived() : Boolean
+            + isPaid() : Boolean
+            + isNotPaid() : Boolean
+            + isActive() : Boolean
+            + isNotActive() : Boolean
+            + isPenalty() : Boolean
+            + isNotPenalty() : Boolean
+            + isSpecifiedDueDate() : Boolean
+            + isDueAtDisbursement() : Boolean
+            + isDueForCollection(LocalDate fromDate, LocalDate toDate) : Boolean
+            + getAmountOutstanding() : Money
+            + getAmount() : Money
+            + getAmountPercentageAppliedTo() : Money
+            + getPercentage() : BigDecimal
+            + updateAmount(Money newAmount) : void
+            + update(BigDecimal newAmount, LocalDate newDueDate, BigDecimal newPercentage) : void
+            + deriveChargeAmount(Money principalAmount) : Money
+            + isInstalmentFee() : Boolean
+            + isOverdueInstallmentCharge() : Boolean
+            + copyOf() : LoanCharge
+        }
+        
+        ' Loan Status Enumeration
+        Enum LoanStatus {
+            INVALID(0, "loanStatusType.invalid")
+            SUBMITTED_AND_PENDING_APPROVAL(100, "loanStatusType.submitted.and.pending.approval")
+            APPROVED(200, "loanStatusType.approved")
+            ACTIVE(300, "loanStatusType.active")
+            WITHDRAWN_BY_CLIENT(400, "loanStatusType.withdrawn.by.client")
+            REJECTED(500, "loanStatusType.rejected")
+            CLOSED_OBLIGATIONS_MET(600, "loanStatusType.closed.obligations.met")
+            CLOSED_WRITTEN_OFF(601, "loanStatusType.closed.written.off")
+            CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT(602, "loanStatusType.closed.reschedule.outstanding.amount")
+            OVERPAID(700, "loanStatusType.overpaid")
+            TRANSFER_IN_PROGRESS(303, "loanStatusType.transfer.in.progress")
+            TRANSFER_ON_HOLD(304, "loanStatusType.transfer.on.hold")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer statusValue) : LoanStatus
+            + isSubmittedAndPendingApproval() : Boolean
+            + isApproved() : Boolean
+            + isActive() : Boolean
+            + isClosed() : Boolean
+            + isWithdrawnByClient() : Boolean
+            + isRejected() : Boolean
+            + isClosedObligationsMet() : Boolean
+            + isClosedWrittenOff() : Boolean
+            + isOverpaid() : Boolean
+            + isTransferInProgress() : Boolean
+            + isTransferOnHold() : Boolean
+            + isActiveOrAwaitingApprovalOrDisbursal() : Boolean
+        }
+        
+        ' Loan Transaction Type
+        Enum LoanTransactionType {
+            INVALID(0, "loanTransactionType.invalid")
+            DISBURSEMENT(1, "loanTransactionType.disbursement")
+            REPAYMENT(2, "loanTransactionType.repayment")
+            CONTRA(3, "loanTransactionType.contra")
+            WAIVE_INTEREST(4, "loanTransactionType.waiver")
+            REPAYMENT_AT_DISBURSEMENT(5, "loanTransactionType.repaymentAtDisbursement")
+            WRITE_OFF(6, "loanTransactionType.writeOff")
+            MARKED_FOR_RESCHEDULING(7, "loanTransactionType.marked.for.rescheduling")
+            RECOVERY_REPAYMENT(8, "loanTransactionType.recoveryRepayment")
+            WAIVE_CHARGES(9, "loanTransactionType.waiveCharges")
+            ACCRUAL(10, "loanTransactionType.accrual")
+            APPROVE_TRANSFER(12, "loanTransactionType.approveTransfer")
+            WITHDRAW_TRANSFER(13, "loanTransactionType.withdrawTransfer")
+            REJECT_TRANSFER(14, "loanTransactionType.rejectTransfer")
+            REFUND(15, "loanTransactionType.refund")
+            CHARGE_PAYMENT(16, "loanTransactionType.chargePayment")
+            REFUND_FOR_ACTIVE_LOAN(17, "loanTransactionType.refund.for.active.loan")
+            INCOME_POSTING(18, "loanTransactionType.incomePosting")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer transactionType) : LoanTransactionType
+            + isRepayment() : Boolean
+            + isDisbursement() : Boolean
+            + isWriteOff() : Boolean
+            + isWaiveInterest() : Boolean
+            + isWaiveCharges() : Boolean
+            + isChargePayment() : Boolean
+            + isAccrual() : Boolean
+            + isRefund() : Boolean
+            + isTransfer() : Boolean
+        }
+    }
+    
+    ' Loan Services
+    Package "service" {
+        
+        ' Loan Application Service
+        Interface LoanApplicationWritePlatformService {
+            + submitApplication(JsonCommand command) : CommandProcessingResult
+            + modifyApplication(Long loanId, JsonCommand command) : CommandProcessingResult
+            + deleteApplication(Long loanId) : CommandProcessingResult
+            + approveApplication(Long loanId, JsonCommand command) : CommandProcessingResult
+            + undoApplicationApproval(Long loanId, JsonCommand command) : CommandProcessingResult
+            + rejectApplication(Long loanId, JsonCommand command) : CommandProcessingResult
+            + applicantWithdrawsFromApplication(Long loanId, JsonCommand command) : CommandProcessingResult
+        }
+        
+        ' Loan Application Service Implementation
+        Class LoanApplicationWritePlatformServiceImpl <<Service>> {
+            - LoanRepository loanRepository
+            - LoanProductRepository loanProductRepository
+            - ClientRepository clientRepository
+            - GroupRepository groupRepository
+            - StaffRepository staffRepository
+            - FundRepository fundRepository
+            - LoanAssembler loanAssembler
+            - LoanScheduleCalculationPlatformService loanScheduleCalculationPlatformService
+            - LoanSummaryWrapper loanSummaryWrapper
+            - PlatformSecurityContext context
+            - ApplicationEventPublisher eventPublisher
+            - LoanLifecycleStateMachine loanLifecycleStateMachine
+            - LoanDataValidator loanDataValidator
+            --
+            + submitApplication(JsonCommand command) : CommandProcessingResult
+            + modifyApplication(Long loanId, JsonCommand command) : CommandProcessingResult
+            + deleteApplication(Long loanId) : CommandProcessingResult
+            + approveApplication(Long loanId, JsonCommand command) : CommandProcessingResult
+            + undoApplicationApproval(Long loanId, JsonCommand command) : CommandProcessingResult
+            + rejectApplication(Long loanId, JsonCommand command) : CommandProcessingResult
+            + applicantWithdrawsFromApplication(Long loanId, JsonCommand command) : CommandProcessingResult
+            - validateLoanMultiDisbursementdate(JsonCommand command, LoanApplicationTerms loanApplicationTerms, LocalDate expectedDisbursement) : void
+            - checkClientOrGroupActive(Loan loan) : void
+            - validateSubmittedOnDate(Loan loan) : void
+            - checkForProductMixRestrictions(Loan loan) : void
+            - validateLoanTermAndRepaidEveryValues(Loan loan, LoanProduct loanProduct) : void
+        }
+        
+        ' Loan Transaction Service
+        Interface LoanWritePlatformService {
+            + makeRepayment(Long loanId, JsonCommand command) : CommandProcessingResult
+            + adjustLoanTransaction(Long loanId, Long transactionId, JsonCommand command) : CommandProcessingResult
+            + waiveInterestOnLoan(Long loanId, JsonCommand command) : CommandProcessingResult
+            + writeOff(Long loanId, JsonCommand command) : CommandProcessingResult
+            + closeLoan(Long loanId, JsonCommand command) : CommandProcessingResult
+            + closeAsRescheduled(Long loanId, JsonCommand command) : CommandProcessingResult
+            + addLoanCharge(Long loanId, JsonCommand command) : CommandProcessingResult
+            + updateLoanCharge(Long loanId, Long chargeId, JsonCommand command) : CommandProcessingResult
+            + waiveLoanCharge(Long loanId, Long chargeId, JsonCommand command) : CommandProcessingResult
+            + payLoanCharge(Long loanId, Long chargeId, JsonCommand command) : CommandProcessingResult
+            + undoWaiveLoanCharge(Long loanId, Long chargeId, JsonCommand command) : CommandProcessingResult
+            + makeLoanRefund(Long loanId, JsonCommand command) : CommandProcessingResult
+            + forecloseLoan(Long loanId, JsonCommand command) : CommandProcessingResult
+        }
+        
+        ' Loan Transaction Service Implementation
+        Class LoanWritePlatformServiceImpl <<Service>> {
+            - LoanRepository loanRepository
+            - LoanTransactionRepository loanTransactionRepository
+            - LoanChargeRepository loanChargeRepository
+            - ChargeRepository chargeRepository
+            - LoanAssembler loanAssembler
+            - LoanTransactionAssembler loanTransactionAssembler
+            - LoanChargeAssembler loanChargeAssembler
+            - LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor
+            - LoanSummaryWrapper loanSummaryWrapper
+            - PlatformSecurityContext context
+            - ApplicationEventPublisher eventPublisher
+            - LoanLifecycleStateMachine loanLifecycleStateMachine
+            - AccountTransfersWritePlatformService accountTransfersWritePlatformService
+            - BusinessEventNotifierService businessEventNotifierService
+            --
+            + makeRepayment(Long loanId, JsonCommand command) : CommandProcessingResult
+            + adjustLoanTransaction(Long loanId, Long transactionId, JsonCommand command) : CommandProcessingResult
+            + waiveInterestOnLoan(Long loanId, JsonCommand command) : CommandProcessingResult
+            + writeOff(Long loanId, JsonCommand command) : CommandProcessingResult
+            + closeLoan(Long loanId, JsonCommand command) : CommandProcessingResult
+            + closeAsRescheduled(Long loanId, JsonCommand command) : CommandProcessingResult
+            + addLoanCharge(Long loanId, JsonCommand command) : CommandProcessingResult
+            + updateLoanCharge(Long loanId, Long chargeId, JsonCommand command) : CommandProcessingResult
+            + waiveLoanCharge(Long loanId, Long chargeId, JsonCommand command) : CommandProcessingResult
+            + payLoanCharge(Long loanId, Long chargeId, JsonCommand command) : CommandProcessingResult
+            + undoWaiveLoanCharge(Long loanId, Long chargeId, JsonCommand command) : CommandProcessingResult
+            + makeLoanRefund(Long loanId, JsonCommand command) : CommandProcessingResult
+            + forecloseLoan(Long loanId, JsonCommand command) : CommandProcessingResult
+            - processLoanTransaction(Long loanId, LoanTransaction loanTransaction, JsonCommand command) : CommandProcessingResult
+            - updateLoanTransaction(Long loanId, Long transactionId, LoanTransaction newLoanTransaction) : LoanTransaction
+            - handleTransactionThatRepaymentsLoan(Loan loan, LoanTransaction loanTransaction, Set<LoanCharge> charges) : void
+            - createLoanTransaction(Loan loan, LoanTransactionType type, LocalDate transactionDate, Money transactionAmount) : LoanTransaction
+        }
+        
+        ' Loan Schedule Calculation Service
+        Interface LoanScheduleCalculationPlatformService {
+            + calculateRepaymentSchedule(LoanApplicationTerms loanApplicationTerms, Boolean isHolidayEnabled, List<Holiday> holidays, WorkingDays workingDays) : LoanScheduleModel
+            + generateLoanSchedule(LoanApplicationTerms loanApplicationTerms, Boolean isHolidayEnabled, List<Holiday> holidays, WorkingDays workingDays) : LoanScheduleData
+            + calculatePrepaymentAmount(LoanApplicationTerms loanApplicationTerms, LocalDate onDate, LocalDate interestCalculatedFrom) : PrepaymentDetail
+            + rescheduleNextRepayments(RescheduleLoansCommand rescheduleLoansCommand, Loan loan, Holiday holiday, WorkingDays workingDays) : void
+        }
+        
+        ' Loan Schedule Calculator Implementation
+        Class LoanScheduleCalculationPlatformServiceImpl <<Service>> {
+            - LoanScheduleGeneratorFactory loanScheduleGeneratorFactory
+            - LoanProductRelatedDetailAssembler loanProductRelatedDetailAssembler
+            - CalendarInstanceRepository calendarInstanceRepository
+            - HolidayRepository holidayRepository
+            - WorkingDaysRepository workingDaysRepository
+            - LoanChargeReadPlatformService loanChargeReadPlatformService
+            - LoanProductChargeReadPlatformService loanProductChargeReadPlatformService
+            --
+            + calculateRepaymentSchedule(LoanApplicationTerms loanApplicationTerms, Boolean isHolidayEnabled, List<Holiday> holidays, WorkingDays workingDays) : LoanScheduleModel
+            + generateLoanSchedule(LoanApplicationTerms loanApplicationTerms, Boolean isHolidayEnabled, List<Holiday> holidays, WorkingDays workingDays) : LoanScheduleData
+            + calculatePrepaymentAmount(LoanApplicationTerms loanApplicationTerms, LocalDate onDate, LocalDate interestCalculatedFrom) : PrepaymentDetail
+            + rescheduleNextRepayments(RescheduleLoansCommand rescheduleLoansCommand, Loan loan, Holiday holiday, WorkingDays workingDays) : void
+            - generateLoanScheduleFrom(LoanApplicationTerms loanApplicationTerms, Boolean isHolidayEnabled, List<Holiday> holidays, WorkingDays workingDays) : LoanScheduleModel
+            - retrieveLoanCharges(Long loanId, String currencyCode) : Set<LoanCharge>
+        }
+        
+        ' Loan Repayment Schedule Processor
+        Interface LoanRepaymentScheduleTransactionProcessor {
+            + handleTransaction(LoanTransaction loanTransaction, MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges) : void
+            + handleRepaymentSchedule(List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency, List<LoanTransaction> loanTransactions, Set<LoanCharge> charges) : void
+        }
+        
+        ' Default Loan Repayment Processor
+        Class LoanRepaymentScheduleTransactionProcessorImpl <<Service>> {
+            - MoneyHelper moneyHelper
+            --
+            + handleTransaction(LoanTransaction loanTransaction, MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges) : void
+            + handleRepaymentSchedule(List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency, List<LoanTransaction> loanTransactions, Set<LoanCharge> charges) : void
+            - handleTransactionThatIsALateRepaymentOfLoan(LoanRepaymentScheduleInstallment currentInstallment, List<LoanRepaymentScheduleInstallment> installments, LoanTransaction loanTransaction, Money transactionAmountUnprocessed, Set<LoanCharge> charges) : Money
+            - handleTransactionThatIsPaymentInAdvanceOfInstallment(LoanRepaymentScheduleInstallment currentInstallment, List<LoanRepaymentScheduleInstallment> installments, LoanTransaction loanTransaction, LocalDate transactionDate, Money paymentInAdvance, Set<LoanCharge> charges) : Money
+            - handleTransactionThatIsOnTimePaymentOfInstallment(LoanRepaymentScheduleInstallment currentInstallment, LoanTransaction loanTransaction, Money transactionAmountUnprocessed, Set<LoanCharge> charges) : Money
+        }
+        
+        ' Loan Summary Wrapper
+        Class LoanSummaryWrapper {
+            --
+            + updateSummary(MonetaryCurrency currency, Loan loan, List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, LoanSummary loanSummary) : void
+            - getTotalPrincipalExpected(List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, MonetaryCurrency currency) : Money
+            - getTotalPrincipalPaid(List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, MonetaryCurrency currency) : Money
+            - getTotalInterestExpected(List<LoanRepaymentScheduleInstallments> repaymentScheduleInstallments, MonetaryCurrency currency) : Money
+            - getTotalInterestPaid(List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, MonetaryCurrency currency) : Money
+            - getTotalFeeChargesExpected(List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, MonetaryCurrency currency) : Money
+            - getTotalFeeChargesPaid(List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, MonetaryCurrency currency) : Money
+        }
+    }
+    
+    ' Loan Repositories
+    Package "repository" {
+        
+        ' Loan Repository
+        Interface LoanRepository <<Repository>> {
+            + findByAccountNumber(String accountNumber) : Optional<Loan>
+            + findByAccountNumberAndStatus(String accountNumber, Integer status) : List<Loan>
+            + findByClient(Client client) : List<Loan>
+            + findByGroup(Group group) : List<Loan>
+            + findByLoanOfficer(Staff loanOfficer) : List<Loan>
+            + findByStatus(Integer status) : List<Loan>
+            + findByStatusAndBranch(Integer status, Office branch) : List<Loan>
+            + findOverdueLoans(LocalDate businessDate) : List<Loan>
+            + findLoansForMaturity(LocalDate businessDate) : List<Loan>
+            + findActiveLoansPassedMaturity(LocalDate businessDate) : List<Loan>
+            + findLoansForRescheduling() : List<Loan>
+            + countByClientAndStatus(Client client, Integer status) : Integer
+            + countByGroupAndStatus(Group group, Integer status) : Integer
+            + findByLoanProductAndStatus(LoanProduct loanProduct, Integer status) : List<Loan>
+        }
+        
+        ' Loan Transaction Repository
+        Interface LoanTransactionRepository <<Repository>> {
+            + findByLoan(Loan loan) : List<LoanTransaction>
+            + findByLoanAndNotReversed(Loan loan) : List<LoanTransaction>
+            + findByLoanOrderByCreatedDateDesc(Loan loan) : List<LoanTransaction>
+            + findByTypeOfAndDateOfAndLoan(LoanTransactionType type, LocalDate date, Loan loan) : List<LoanTransaction>
+            + findLatestTransactionByLoan(Loan loan) : Optional<LoanTransaction>
+            + findRepaymentTransactionsByLoan(Loan loan) : List<LoanTransaction>
+            + findDisbursementTransactionsByLoan(Loan loan) : List<LoanTransaction>
+        }
+        
+        ' Loan Charge Repository
+        Interface LoanChargeRepository <<Repository>> {
+            + findByLoan(Loan loan) : List<LoanCharge>
+            + findByLoanAndActive(Loan loan, Boolean active) : List<LoanCharge>
+            + findByLoanAndCharge(Loan loan, Charge charge) : List<LoanCharge>
+            + findPendingChargesByLoan(Loan loan) : List<LoanCharge>
+            + findOverdueChargesByLoan(Loan loan, LocalDate businessDate) : List<LoanCharge>
+        }
+        
+        ' Loan Product Repository
+        Interface LoanProductRepository <<Repository>> {
+            + findByName(String name) : Optional<LoanProduct>
+            + findActiveProducts() : List<LoanProduct>
+            + findByFund(Fund fund) : List<LoanProduct>
+            + findByIncludeInBorrowerCycle(Boolean includeInBorrowerCycle) : List<LoanProduct>
+        }
+    }
+    
+    ' Loan Validation
+    Package "validation" {
+        
+        ' Loan Data Validator
+        Class LoanDataValidator {
+            - FromJsonHelper fromApiJsonHelper
+            - LoanProductRepository loanProductRepository
+            - ClientRepository clientRepository
+            - GroupRepository groupRepository
+            --
+            + validateForCreate(String json, Boolean isMeetingMandatoryForJLGLoans) : void
+            + validateForModify(String json, LoanProduct loanProduct, Boolean isMeetingMandatoryForJLGLoans) : void
+            + validateForApproval(String json, LoanProduct loanProduct) : void
+            + validateForDisbursal(String json, LoanProduct loanProduct) : void
+            + validateForRepayment(String json) : void
+            + validateChargeParameters(JsonElement element, LoanProduct loanProduct) : void
+            + validateLoanTermAndRepaidEveryValues(Integer loanTermFrequency, Integer numberOfRepayments, Integer repaidEvery, LoanProduct loanProduct) : void
+            - validateForCreateParameters(JsonElement element, LoanProduct loanProduct, Boolean isMeetingMandatoryForJLGLoans) : void
+            - validateLoanMultiDisbursementDate(JsonElement element, LocalDate expectedDisbursement, LoanProduct loanProduct) : void
+            - performDataIntegrityChecks(JsonElement element) : void
+        }
+        
+        ' Loan Transaction Validator
+        Class LoanTransactionValidator {
+            - FromJsonHelper fromApiJsonHelper
+            --
+            + validateRepayment(String json) : void
+            + validateWriteOff(String json) : void
+            + validateWaiveCharge(String json) : void
+            + validatePayCharge(String json) : void
+            + validateAdjustTransaction(String json) : void
+            + validateRefund(String json) : void
+            + validateForeclosure(String json) : void
+            - validateCommonTransactionParameters(JsonElement element) : void
+            - validateDateFormat(JsonElement element, String parameterName) : void
+            - validateAmountParameter(JsonElement element) : void
+        }
+    }
+    
+    ' Loan Events
+    Package "events" {
+        
+        ' Loan Application Submitted Event
+        Class LoanApplicationSubmittedEvent {
+            - Long loanId
+            - String accountNumber
+            - Long clientId
+            - Long productId
+            - Money principal
+            - LocalDate submittedDate
+            --
+            + getLoanId() : Long
+            + getAccountNumber() : String
+            + getClientId() : Long
+            + getProductId() : Long
+            + getPrincipal() : Money
+            + getSubmittedDate() : LocalDate
+        }
+        
+        ' Loan Approved Event
+        Class LoanApprovedEvent {
+            - Long loanId
+            - String accountNumber
+            - Long clientId
+            - Money approvedPrincipal
+            - LocalDate approvedDate
+            - String approvedBy
+            --
+            + getLoanId() : Long
+            + getAccountNumber() : String
+            + getClientId() : Long
+            + getApprovedPrincipal() : Money
+            + getApprovedDate() : LocalDate
+            + getApprovedBy() : String
+        }
+        
+        ' Loan Disbursed Event
+        Class LoanDisbursedEvent {
+            - Long loanId
+            - String accountNumber
+            - Long clientId
+            - Money disbursedAmount
+            - LocalDate disbursedDate
+            - String disbursedBy
+            --
+            + getLoanId() : Long
+            + getAccountNumber() : String
+            + getClientId() : Long
+            + getDisbursedAmount() : Money
+            + getDisbursedDate() : LocalDate
+            + getDisbursedBy() : String
+        }
+        
+        ' Loan Repayment Made Event
+        Class LoanRepaymentMadeEvent {
+            - Long loanId
+            - String accountNumber
+            - Long clientId
+            - Long transactionId
+            - Money repaymentAmount
+            - LocalDate repaymentDate
+            - Money outstandingBalance
+            --
+            + getLoanId() : Long
+            + getAccountNumber() : String
+            + getClientId() : Long
+            + getTransactionId() : Long
+            + getRepaymentAmount() : Money
+            + getRepaymentDate() : LocalDate
+            + getOutstandingBalance() : Money
+        }
+    }
+}
+
+' Relationships
+Loan --> LoanProduct : "configured by"
+Loan --> LoanStatus : "has status"
+Loan --> LoanRepaymentScheduleInstallment : "has installments"
+Loan --> LoanTransaction : "has transactions"
+Loan --> LoanCharge : "has charges"
+LoanTransaction --> LoanTransactionType : "has type"
+LoanApplicationTerms --> LoanProduct : "derived from"
+
+LoanApplicationWritePlatformServiceImpl ..|> LoanApplicationWritePlatformService : "implements"
+LoanWritePlatformServiceImpl ..|> LoanWritePlatformService : "implements"
+LoanScheduleCalculationPlatformServiceImpl ..|> LoanScheduleCalculationPlatformService : "implements"
+LoanRepaymentScheduleTransactionProcessorImpl ..|> LoanRepaymentScheduleTransactionProcessor : "implements"
+
+LoanApplicationWritePlatformServiceImpl --> LoanRepository : "uses"
+LoanWritePlatformServiceImpl --> LoanTransactionRepository : "uses"
+LoanScheduleCalculationPlatformServiceImpl --> LoanRepository : "uses"
+
+LoanDataValidator --> LoanProductRepository : "validates against"
+LoanTransactionValidator --> LoanRepository : "validates against"
+
+SHOW_LEGEND()
+
+note top of Loan
+**Rich Loan Aggregate**
+• Complete loan lifecycle management
+• Financial calculations & scheduling
+• Transaction processing
+• State machine enforcement
+• Event-driven updates
+end note
+
+note right of LoanApplicationWritePlatformService
+**Application Processing**
+• Loan application lifecycle
+• Business rule enforcement
+• Multi-step approval workflow
+• Integration with external systems
+end note
+
+note bottom of LoanRepaymentScheduleTransactionProcessor
+**Payment Processing**
+• Advanced payment allocation
+• Multiple payment strategies
+• Overdue handling
+• Prepayment calculations
+end note
+
+note left of LoanDataValidator
+**Comprehensive Validation**
+• Business rule validation
+• Data integrity checks
+• Product configuration validation
+• Multi-disbursement support
+end note
+
+@enduml

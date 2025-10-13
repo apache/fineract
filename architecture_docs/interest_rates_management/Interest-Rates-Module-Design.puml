@@ -1,0 +1,667 @@
+@startuml Interest-Rates-Module-Design
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Force top to bottom layout
+top to bottom direction
+
+title Apache Fineract - Interest Rates Module (Class/Interface Level Design)
+
+' Interest Rates Module
+Package "org.apache.fineract.portfolio.interestrate" {
+    
+    ' Interest Rate Domain Model
+    Package "domain" {
+        
+        ' Core Floating Rate Entity
+        Class FloatingRate {
+            - Long id
+            - String name
+            - Boolean isBaseLendingRate
+            - Boolean isActive
+            - String createdBy
+            - LocalDateTime createdOn
+            - String modifiedBy
+            - LocalDateTime modifiedOn
+            - Set<FloatingRatePeriod> floatingRatePeriods
+            --
+            + getName() : String
+            + isBaseLendingRate() : Boolean
+            + isActive() : Boolean
+            + getFloatingRatePeriods() : Set<FloatingRatePeriod>
+            + getCurrentRate(LocalDate asOfDate) : FloatingRatePeriod
+            + getInterestRateForDate(LocalDate date) : BigDecimal
+            + addRatePeriod(FloatingRatePeriod period) : void
+            + updateRate(BigDecimal newRate, LocalDate effectiveDate, Boolean isDifferentialToBaseLendingRate, Boolean isActive) : void
+            + deactivate(LocalDate deactivationDate) : void
+            + activate(LocalDate activationDate) : void
+            + validateRatePeriodOverlap(FloatingRatePeriod newPeriod) : void
+            + calculateEffectiveRate(LocalDate calculationDate, BigDecimal differential) : BigDecimal
+        }
+        
+        ' Floating Rate Period
+        Class FloatingRatePeriod {
+            - Long id
+            - FloatingRate floatingRate
+            - LocalDate fromDate
+            - BigDecimal interestRate
+            - Boolean isDifferentialToBaseLendingRate
+            - Boolean isActive
+            - String createdBy
+            - LocalDateTime createdOn
+            - String modifiedBy
+            - LocalDateTime modifiedOn
+            --
+            + getFloatingRate() : FloatingRate
+            + getFromDate() : LocalDate
+            + getInterestRate() : BigDecimal
+            + isDifferentialToBaseLendingRate() : Boolean
+            + isActive() : Boolean
+            + isApplicableFor(LocalDate date) : Boolean
+            + calculateEffectiveRate(BigDecimal baseLendingRate) : BigDecimal
+            + update(BigDecimal newRate, Boolean isDifferential, Boolean isActive) : void
+            + deactivate() : void
+            + activate() : void
+            + validateFromDate(LocalDate date) : void
+        }
+        
+        ' Interest Rate Chart
+        Class InterestRateChart {
+            - Long id
+            - String name
+            - String description
+            - LocalDate fromDate
+            - LocalDate endDate
+            - Boolean isPrimaryGroupingByAmount
+            - Set<InterestRateChartSlab> chartSlabs
+            - Set<InterestIncentive> incentives
+            --
+            + getName() : String
+            + getDescription() : String
+            + getFromDate() : LocalDate
+            + getEndDate() : LocalDate
+            + isPrimaryGroupingByAmount() : Boolean
+            + getChartSlabs() : Set<InterestRateChartSlab>
+            + getIncentives() : Set<InterestIncentive>
+            + findInterestRate(BigDecimal depositAmount, LocalDate depositPeriod, Integer depositPeriodFrequency) : BigDecimal
+            + addChartSlab(InterestRateChartSlab slab) : void
+            + removeChartSlab(InterestRateChartSlab slab) : void
+            + addIncentive(InterestIncentive incentive) : void
+            + removeIncentive(InterestIncentive incentive) : void
+            + validateChartPeriod(LocalDate fromDate, LocalDate endDate) : void
+            + isApplicableFor(LocalDate date) : Boolean
+            + calculateInterestRate(InterestRateCalculationContext context) : BigDecimal
+        }
+        
+        ' Interest Rate Chart Slab
+        Class InterestRateChartSlab {
+            - Long id
+            - InterestRateChart interestRateChart
+            - String description
+            - PeriodFrequencyType periodType
+            - Integer fromPeriod
+            - Integer toPeriod
+            - BigDecimal amountRangeFrom
+            - BigDecimal amountRangeTo
+            - BigDecimal annualInterestRate
+            - MonetaryCurrency currency
+            - Set<InterestIncentive> incentives
+            --
+            + getInterestRateChart() : InterestRateChart
+            + getDescription() : String
+            + getPeriodType() : PeriodFrequencyType
+            + getFromPeriod() : Integer
+            + getToPeriod() : Integer
+            + getAmountRangeFrom() : BigDecimal
+            + getAmountRangeTo() : BigDecimal
+            + getAnnualInterestRate() : BigDecimal
+            + getCurrency() : MonetaryCurrency
+            + getIncentives() : Set<InterestIncentive>
+            + isApplicableForAmount(BigDecimal amount) : Boolean
+            + isApplicableForPeriod(Integer period, PeriodFrequencyType periodType) : Boolean
+            + calculateApplicableRate(InterestRateCalculationContext context) : BigDecimal
+            + validateSlabRanges() : void
+        }
+        
+        ' Interest Incentive
+        Class InterestIncentive {
+            - Long id
+            - InterestRateChart interestRateChart
+            - InterestRateChartSlab interestRateChartSlab
+            - InterestIncentiveType incentiveType
+            - InterestIncentiveAttributeName attributeName
+            - InterestIncentiveAttributeValue attributeValue
+            - InterestIncentiveAttributeValueType attributeValueType
+            - BigDecimal amount
+            --
+            + getInterestRateChart() : InterestRateChart
+            + getInterestRateChartSlab() : InterestRateChartSlab
+            + getIncentiveType() : InterestIncentiveType
+            + getAttributeName() : InterestIncentiveAttributeName
+            + getAttributeValue() : InterestIncentiveAttributeValue
+            + getAttributeValueType() : InterestIncentiveAttributeValueType
+            + getAmount() : BigDecimal
+            + isApplicable(InterestRateCalculationContext context) : Boolean
+            + calculateIncentiveAmount(BigDecimal baseRate) : BigDecimal
+        }
+        
+        ' Interest Rate Configuration
+        Class InterestRateConfiguration {
+            - Long id
+            - String name
+            - InterestCalculationMethod calculationMethod
+            - InterestCalculationDaysInYear daysInYear
+            - InterestPostingPeriodType postingPeriodType
+            - Boolean compoundingEnabled
+            - CompoundingFrequency compoundingFrequency
+            - Boolean allowPartialInterestCalculation
+            - BigDecimal minimumInterestRate
+            - BigDecimal maximumInterestRate
+            - BigDecimal defaultInterestRate
+            --
+            + getName() : String
+            + getCalculationMethod() : InterestCalculationMethod
+            + getDaysInYear() : InterestCalculationDaysInYear
+            + getPostingPeriodType() : InterestPostingPeriodType
+            + isCompoundingEnabled() : Boolean
+            + getCompoundingFrequency() : CompoundingFrequency
+            + allowPartialInterestCalculation() : Boolean
+            + getMinimumInterestRate() : BigDecimal
+            + getMaximumInterestRate() : BigDecimal
+            + getDefaultInterestRate() : BigDecimal
+            + validateInterestRate(BigDecimal rate) : void
+            + calculateInterest(InterestRateCalculationContext context) : Money
+        }
+        
+        ' Interest Calculation Method
+        Enum InterestCalculationMethod {
+            DAILY_BALANCE(1, "interestCalculationMethod.dailyBalance")
+            AVERAGE_DAILY_BALANCE(2, "interestCalculationMethod.averageDailyBalance")
+            MINIMUM_BALANCE(3, "interestCalculationMethod.minimumBalance")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer method) : InterestCalculationMethod
+        }
+        
+        ' Interest Calculation Days In Year
+        Enum InterestCalculationDaysInYear {
+            DAYS_360(360, "interestCalculationDaysInYear.days360")
+            DAYS_365(365, "interestCalculationDaysInYear.days365")
+            ACTUAL(0, "interestCalculationDaysInYear.actual")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer daysInYear) : InterestCalculationDaysInYear
+        }
+        
+        ' Interest Posting Period Type
+        Enum InterestPostingPeriodType {
+            MONTHLY(1, "interestPostingPeriodType.monthly")
+            QUARTERLY(2, "interestPostingPeriodType.quarterly")
+            BIANNUAL(3, "interestPostingPeriodType.biAnnual")
+            ANNUAL(4, "interestPostingPeriodType.annual")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer periodType) : InterestPostingPeriodType
+        }
+        
+        ' Compounding Frequency
+        Enum CompoundingFrequency {
+            DAILY(1, "compoundingFrequency.daily")
+            MONTHLY(2, "compoundingFrequency.monthly")
+            QUARTERLY(3, "compoundingFrequency.quarterly")
+            SEMI_ANNUAL(4, "compoundingFrequency.semiAnnual")
+            ANNUAL(5, "compoundingFrequency.annual")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer frequency) : CompoundingFrequency
+        }
+        
+        ' Interest Incentive Type
+        Enum InterestIncentiveType {
+            FIXED(1, "interestIncentiveType.fixed")
+            INCENTIVE(2, "interestIncentiveType.incentive")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer incentiveType) : InterestIncentiveType
+        }
+    }
+    
+    ' Interest Rate Services
+    Package "service" {
+        
+        ' Floating Rate Service
+        Interface FloatingRateService {
+            + createFloatingRate(JsonCommand command) : CommandProcessingResult
+            + updateFloatingRate(Long rateId, JsonCommand command) : CommandProcessingResult
+            + retrieveFloatingRate(Long rateId) : FloatingRateData
+            + retrieveAllFloatingRates() : Collection<FloatingRateData>
+            + retrieveFloatingRatePeriods(Long rateId) : Collection<FloatingRatePeriodData>
+            + createFloatingRatePeriod(Long rateId, JsonCommand command) : CommandProcessingResult
+            + updateFloatingRatePeriod(Long rateId, Long periodId, JsonCommand command) : CommandProcessingResult
+        }
+        
+        ' Floating Rate Service Implementation
+        Class FloatingRateServiceImpl <<Service>> {
+            - FloatingRateRepository floatingRateRepository
+            - FloatingRatePeriodRepository floatingRatePeriodRepository
+            - PlatformSecurityContext context
+            - FloatingRateDataValidator dataValidator
+            - FloatingRateAssembler floatingRateAssembler
+            --
+            + createFloatingRate(JsonCommand command) : CommandProcessingResult
+            + updateFloatingRate(Long rateId, JsonCommand command) : CommandProcessingResult
+            + retrieveFloatingRate(Long rateId) : FloatingRateData
+            + retrieveAllFloatingRates() : Collection<FloatingRateData>
+            + retrieveFloatingRatePeriods(Long rateId) : Collection<FloatingRatePeriodData>
+            + createFloatingRatePeriod(Long rateId, JsonCommand command) : CommandProcessingResult
+            + updateFloatingRatePeriod(Long rateId, Long periodId, JsonCommand command) : CommandProcessingResult
+            - validateFloatingRateForCreate(FloatingRate floatingRate) : void
+            - validateFloatingRatePeriod(FloatingRatePeriod period) : void
+        }
+        
+        ' Interest Rate Chart Service
+        Interface InterestRateChartService {
+            + createInterestRateChart(JsonCommand command) : CommandProcessingResult
+            + updateInterestRateChart(Long chartId, JsonCommand command) : CommandProcessingResult
+            + deleteInterestRateChart(Long chartId) : CommandProcessingResult
+            + retrieveInterestRateChart(Long chartId) : InterestRateChartData
+            + retrieveAllInterestRateCharts() : Collection<InterestRateChartData>
+            + createInterestRateChartSlab(Long chartId, JsonCommand command) : CommandProcessingResult
+            + updateInterestRateChartSlab(Long chartId, Long slabId, JsonCommand command) : CommandProcessingResult
+            + deleteInterestRateChartSlab(Long chartId, Long slabId) : CommandProcessingResult
+        }
+        
+        ' Interest Rate Chart Service Implementation
+        Class InterestRateChartServiceImpl <<Service>> {
+            - InterestRateChartRepository interestRateChartRepository
+            - InterestRateChartSlabRepository chartSlabRepository
+            - InterestIncentiveRepository incentiveRepository
+            - PlatformSecurityContext context
+            - InterestRateChartDataValidator dataValidator
+            --
+            + createInterestRateChart(JsonCommand command) : CommandProcessingResult
+            + updateInterestRateChart(Long chartId, JsonCommand command) : CommandProcessingResult
+            + deleteInterestRateChart(Long chartId) : CommandProcessingResult
+            + retrieveInterestRateChart(Long chartId) : InterestRateChartData
+            + retrieveAllInterestRateCharts() : Collection<InterestRateChartData>
+            + createInterestRateChartSlab(Long chartId, JsonCommand command) : CommandProcessingResult
+            + updateInterestRateChartSlab(Long chartId, Long slabId, JsonCommand command) : CommandProcessingResult
+            + deleteInterestRateChartSlab(Long chartId, Long slabId) : CommandProcessingResult
+            - validateInterestRateChartForCreate(InterestRateChart chart) : void
+            - validateChartSlabForCreate(InterestRateChartSlab slab) : void
+        }
+        
+        ' Interest Rate Calculation Service
+        Interface InterestRateCalculationService {
+            + calculateInterestRate(InterestRateCalculationContext context) : BigDecimal
+            + calculateCompoundInterest(CompoundInterestCalculationContext context) : Money
+            + calculateSimpleInterest(SimpleInterestCalculationContext context) : Money
+            + calculateDailyInterest(DailyInterestCalculationContext context) : Money
+            + findApplicableInterestRate(InterestRateChart chart, InterestRateCalculationContext context) : BigDecimal
+        }
+        
+        ' Interest Rate Calculation Service Implementation
+        Class InterestRateCalculationServiceImpl <<Service>> {
+            - InterestRateConfigurationRepository configurationRepository
+            - FloatingRateService floatingRateService
+            --
+            + calculateInterestRate(InterestRateCalculationContext context) : BigDecimal
+            + calculateCompoundInterest(CompoundInterestCalculationContext context) : Money
+            + calculateSimpleInterest(SimpleInterestCalculationContext context) : Money
+            + calculateDailyInterest(DailyInterestCalculationContext context) : Money
+            + findApplicableInterestRate(InterestRateChart chart, InterestRateCalculationContext context) : BigDecimal
+            - applyIncentives(BigDecimal baseRate, Set<InterestIncentive> incentives, InterestRateCalculationContext context) : BigDecimal
+            - calculateCompoundAmount(Money principal, BigDecimal rate, Integer periods, CompoundingFrequency frequency) : Money
+            - calculateDailyCompoundInterest(Money principal, BigDecimal rate, Integer days) : Money
+        }
+        
+        ' Market Rate Integration Service
+        Interface MarketRateIntegrationService {
+            + syncMarketRates() : void
+            + updateFloatingRatesFromMarket(MarketRateData marketData) : void
+            + scheduleMarketRateSync(MarketRateSyncConfiguration config) : void
+            + getMarketRateProvider(MarketRateProviderType providerType) : MarketRateProvider
+        }
+        
+        ' Market Rate Integration Implementation
+        Class MarketRateIntegrationServiceImpl <<Service>> {
+            - Map<MarketRateProviderType, MarketRateProvider> marketRateProviders
+            - FloatingRateService floatingRateService
+            - MarketRateSyncConfigurationRepository configRepository
+            --
+            + syncMarketRates() : void
+            + updateFloatingRatesFromMarket(MarketRateData marketData) : void
+            + scheduleMarketRateSync(MarketRateSyncConfiguration config) : void
+            + getMarketRateProvider(MarketRateProviderType providerType) : MarketRateProvider
+            - processMarketRateUpdate(MarketRateData marketData) : void
+            - validateMarketRateData(MarketRateData marketData) : void
+        }
+        
+        ' Market Rate Provider Interface
+        Interface MarketRateProvider {
+            + fetchCurrentRates() : List<MarketRateData>
+            + fetchHistoricalRates(LocalDate fromDate, LocalDate toDate) : List<MarketRateData>
+            + isSupported(MarketRateType rateType) : Boolean
+            + getProviderType() : MarketRateProviderType
+        }
+        
+        ' Central Bank Rate Provider
+        Class CentralBankRateProvider <<Service>> {
+            - RestTemplate restTemplate
+            - String apiEndpoint
+            - String apiKey
+            --
+            + fetchCurrentRates() : List<MarketRateData>
+            + fetchHistoricalRates(LocalDate fromDate, LocalDate toDate) : List<MarketRateData>
+            + isSupported(MarketRateType rateType) : Boolean
+            + getProviderType() : MarketRateProviderType
+            - parseRateResponse(String response) : List<MarketRateData>
+            - buildApiRequest(LocalDate fromDate, LocalDate toDate) : HttpEntity
+        }
+        
+        ' Interest Rate History Service
+        Interface InterestRateHistoryService {
+            + recordRateChange(FloatingRate floatingRate, FloatingRatePeriod period) : void
+            + getInterestRateHistory(Long rateId, LocalDate fromDate, LocalDate toDate) : List<InterestRateHistoryData>
+            + calculateAverageRate(Long rateId, LocalDate fromDate, LocalDate toDate) : BigDecimal
+            + generateRateMovementReport(ReportCriteria criteria) : InterestRateMovementReport
+        }
+        
+        ' Interest Rate History Implementation
+        Class InterestRateHistoryServiceImpl <<Service>> {
+            - InterestRateHistoryRepository historyRepository
+            - FloatingRateRepository floatingRateRepository
+            --
+            + recordRateChange(FloatingRate floatingRate, FloatingRatePeriod period) : void
+            + getInterestRateHistory(Long rateId, LocalDate fromDate, LocalDate toDate) : List<InterestRateHistoryData>
+            + calculateAverageRate(Long rateId, LocalDate fromDate, LocalDate toDate) : BigDecimal
+            + generateRateMovementReport(ReportCriteria criteria) : InterestRateMovementReport
+            - aggregateRateData(List<InterestRateHistoryData> historyData) : InterestRateStatistics
+            - calculateVolatility(List<BigDecimal> rates) : BigDecimal
+        }
+    }
+    
+    ' Interest Rate Repositories
+    Package "repository" {
+        
+        ' Floating Rate Repository
+        Interface FloatingRateRepository <<Repository>> {
+            + findByName(String name) : Optional<FloatingRate>
+            + findByIsBaseLendingRateTrue() : Optional<FloatingRate>
+            + findActiveRates() : List<FloatingRate>
+            + findRatesRequiringUpdate() : List<FloatingRate>
+        }
+        
+        ' Floating Rate Period Repository
+        Interface FloatingRatePeriodRepository <<Repository>> {
+            + findByFloatingRate(FloatingRate floatingRate) : List<FloatingRatePeriod>
+            + findByFloatingRateAndFromDateLessThanEqualAndIsActiveTrue(FloatingRate floatingRate, LocalDate asOfDate) : Optional<FloatingRatePeriod>
+        }
+        
+        ' Interest Rate Chart Repository
+        Interface InterestRateChartRepository <<Repository>> {
+            + findByName(String name) : Optional<InterestRateChart>
+            + findActiveCharts(LocalDate asOfDate) : List<InterestRateChart>
+            + findChartsForProduct(Long productId) : List<InterestRateChart>
+        }
+        
+        ' Interest Rate Chart Slab Repository
+        Interface InterestRateChartSlabRepository <<Repository>> {
+            + findByInterestRateChart(InterestRateChart chart) : List<InterestRateChartSlab>
+            + findApplicableSlabs(InterestRateChart chart, BigDecimal amount, Integer period) : List<InterestRateChartSlab>
+        }
+        
+        ' Interest Rate Configuration Repository
+        Interface InterestRateConfigurationRepository <<Repository>> {
+            + findByName(String name) : Optional<InterestRateConfiguration>
+            + findDefaultConfiguration() : Optional<InterestRateConfiguration>
+        }
+        
+        ' Interest Rate History Repository
+        Interface InterestRateHistoryRepository <<Repository>> {
+            + findByFloatingRateAndDateRange(FloatingRate floatingRate, LocalDate fromDate, LocalDate toDate) : List<InterestRateHistory>
+            + findRecentChanges(Integer limit) : List<InterestRateHistory>
+        }
+    }
+    
+    ' Interest Rate Data Objects
+    Package "data" {
+        
+        ' Interest Rate Calculation Context
+        Class InterestRateCalculationContext {
+            - BigDecimal principalAmount
+            - LocalDate calculationDate
+            - Integer depositPeriod
+            - PeriodFrequencyType periodFrequencyType
+            - InterestCalculationMethod calculationMethod
+            - InterestCalculationDaysInYear daysInYear
+            - Map<String, Object> clientAttributes
+            --
+            + getPrincipalAmount() : BigDecimal
+            + getCalculationDate() : LocalDate
+            + getDepositPeriod() : Integer
+            + getPeriodFrequencyType() : PeriodFrequencyType
+            + getCalculationMethod() : InterestCalculationMethod
+            + getDaysInYear() : InterestCalculationDaysInYear
+            + getClientAttributes() : Map<String, Object>
+        }
+        
+        ' Market Rate Data
+        Class MarketRateData {
+            - String rateCode
+            - String rateName
+            - BigDecimal rateValue
+            - LocalDate effectiveDate
+            - MarketRateType rateType
+            - String source
+            - LocalDateTime lastUpdated
+            --
+            + getRateCode() : String
+            + getRateName() : String
+            + getRateValue() : BigDecimal
+            + getEffectiveDate() : LocalDate
+            + getRateType() : MarketRateType
+            + getSource() : String
+            + getLastUpdated() : LocalDateTime
+        }
+        
+        ' Market Rate Type
+        Enum MarketRateType {
+            BASE_LENDING_RATE("BLR", "Base Lending Rate")
+            TREASURY_BILL_RATE("TBR", "Treasury Bill Rate")
+            LIBOR("LIBOR", "London Interbank Offered Rate")
+            FEDERAL_FUNDS_RATE("FFR", "Federal Funds Rate")
+            PRIME_RATE("PRIME", "Prime Rate")
+            --
+            - String code
+            - String displayName
+            --
+            + getCode() : String
+            + getDisplayName() : String
+            + {static} fromCode(String code) : MarketRateType
+        }
+        
+        ' Floating Rate Data
+        Class FloatingRateData {
+            - Long id
+            - String name
+            - Boolean isBaseLendingRate
+            - Boolean isActive
+            - List<FloatingRatePeriodData> ratePeriods
+            - BigDecimal currentRate
+            --
+            + getId() : Long
+            + getName() : String
+            + isBaseLendingRate() : Boolean
+            + isActive() : Boolean
+            + getRatePeriods() : List<FloatingRatePeriodData>
+            + getCurrentRate() : BigDecimal
+        }
+        
+        ' Floating Rate Period Data
+        Class FloatingRatePeriodData {
+            - Long id
+            - LocalDate fromDate
+            - BigDecimal interestRate
+            - Boolean isDifferentialToBaseLendingRate
+            - Boolean isActive
+            --
+            + getId() : Long
+            + getFromDate() : LocalDate
+            + getInterestRate() : BigDecimal
+            + isDifferentialToBaseLendingRate() : Boolean
+            + isActive() : Boolean
+        }
+        
+        ' Interest Rate Chart Data
+        Class InterestRateChartData {
+            - Long id
+            - String name
+            - String description
+            - LocalDate fromDate
+            - LocalDate endDate
+            - Boolean isPrimaryGroupingByAmount
+            - List<InterestRateChartSlabData> chartSlabs
+            --
+            + getId() : Long
+            + getName() : String
+            + getDescription() : String
+            + getFromDate() : LocalDate
+            + getEndDate() : LocalDate
+            + isPrimaryGroupingByAmount() : Boolean
+            + getChartSlabs() : List<InterestRateChartSlabData>
+        }
+        
+        ' Interest Rate Chart Slab Data
+        Class InterestRateChartSlabData {
+            - Long id
+            - String description
+            - PeriodFrequencyType periodType
+            - Integer fromPeriod
+            - Integer toPeriod
+            - BigDecimal amountRangeFrom
+            - BigDecimal amountRangeTo
+            - BigDecimal annualInterestRate
+            --
+            + getId() : Long
+            + getDescription() : String
+            + getPeriodType() : PeriodFrequencyType
+            + getFromPeriod() : Integer
+            + getToPeriod() : Integer
+            + getAmountRangeFrom() : BigDecimal
+            + getAmountRangeTo() : BigDecimal
+            + getAnnualInterestRate() : BigDecimal
+        }
+    }
+    
+    ' Interest Rate Validation
+    Package "validation" {
+        
+        ' Floating Rate Data Validator
+        Class FloatingRateDataValidator {
+            - FromJsonHelper fromApiJsonHelper
+            --
+            + validateForCreate(String json) : void
+            + validateForUpdate(String json, FloatingRate existingRate) : void
+            + validateRatePeriodForCreate(String json) : void
+            + validateRatePeriodForUpdate(String json, FloatingRatePeriod existingPeriod) : void
+            - validateFloatingRateName(JsonElement element) : void
+            - validateInterestRate(JsonElement element) : void
+            - validateFromDate(JsonElement element) : void
+        }
+        
+        ' Interest Rate Chart Data Validator
+        Class InterestRateChartDataValidator {
+            - FromJsonHelper fromApiJsonHelper
+            --
+            + validateForCreate(String json) : void
+            + validateForUpdate(String json, InterestRateChart existingChart) : void
+            + validateChartSlabForCreate(String json) : void
+            + validateChartSlabForUpdate(String json, InterestRateChartSlab existingSlab) : void
+            - validateChartPeriod(JsonElement element) : void
+            - validateSlabRanges(JsonElement element) : void
+            - validateInterestRate(JsonElement element) : void
+        }
+    }
+}
+
+' Relationships
+FloatingRate --> FloatingRatePeriod : "has periods"
+InterestRateChart --> InterestRateChartSlab : "contains slabs"
+InterestRateChart --> InterestIncentive : "has incentives"
+InterestRateChartSlab --> InterestIncentive : "may have incentives"
+InterestRateConfiguration --> InterestCalculationMethod : "uses method"
+InterestRateConfiguration --> CompoundingFrequency : "has frequency"
+
+FloatingRateServiceImpl ..|> FloatingRateService : "implements"
+InterestRateChartServiceImpl ..|> InterestRateChartService : "implements"
+InterestRateCalculationServiceImpl ..|> InterestRateCalculationService : "implements"
+MarketRateIntegrationServiceImpl ..|> MarketRateIntegrationService : "implements"
+CentralBankRateProvider ..|> MarketRateProvider : "implements"
+InterestRateHistoryServiceImpl ..|> InterestRateHistoryService : "implements"
+
+FloatingRateServiceImpl --> FloatingRateRepository : "uses"
+InterestRateChartServiceImpl --> InterestRateChartRepository : "uses"
+InterestRateCalculationServiceImpl --> InterestRateConfigurationRepository : "uses"
+MarketRateIntegrationServiceImpl --> MarketRateProvider : "uses"
+
+SHOW_LEGEND()
+
+note top of FloatingRate
+**Dynamic Rate Management**
+• Market-linked interest rates
+• Historical rate tracking
+• Base lending rate support
+• Differential rate calculations
+• Real-time rate updates
+end note
+
+note right of InterestRateChart
+**Flexible Rate Structure**
+• Slab-based rate determination
+• Amount and period-based rates
+• Incentive system integration
+• Multi-dimensional rate matrix
+• Business rule engine
+end note
+
+note bottom of MarketRateIntegrationService
+**Market Integration**
+• Real-time market data feeds
+• Multiple rate provider support
+• Automated rate synchronization
+• Historical data management
+• Rate volatility analysis
+end note
+
+note left of InterestRateCalculationService
+**Advanced Calculations**
+• Multiple calculation methods
+• Compound interest support
+• Daily interest calculations
+• Incentive processing
+• Configuration-driven logic
+end note
+
+@enduml

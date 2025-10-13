@@ -1,0 +1,397 @@
+@startuml Charge-Management-Sequence
+!include <C4/C4_Context>
+
+title Apache Fineract - Charge Management Module Sequence Diagram
+
+' Actors and Systems
+actor "Product Manager" as PM
+actor "Loan Officer" as LO
+participant "ChargesApiResource" as API
+participant "CommandSourceHandler" as CMD
+participant "ChargeWritePlatformService" as CWS
+participant "ChargeReadPlatformService" as CRS
+participant "ChargeValidator" as VAL
+participant "ChargeCalculationService" as CCS
+participant "ChargeRepository" as REPO
+participant "LoanChargeService" as LCS
+participant "SavingsChargeService" as SCS
+participant "AccountingService" as ACC
+participant "AuditService" as AUDIT
+database "TenantDatabase" as DB
+
+note over PM, DB
+**Charge Management Sequence Flows**
+1. Charge Definition Creation and Configuration
+2. Loan Product Charge Association
+3. Charge Application and Calculation
+4. Fee Collection and Accounting Integration
+5. Penalty Assessment and Waiver Processing
+end note
+
+== Charge Definition Creation Flow ==
+
+PM -> API : POST /charges\n{chargeDefinitionData}
+activate API
+
+API -> CMD : processCommand(CREATE_CHARGE)
+activate CMD
+
+CMD -> VAL : validateChargeDefinition(chargeData)
+activate VAL
+VAL -> VAL : validateChargeName()
+VAL -> VAL : validateChargeType()
+VAL -> VAL : validateCalculationType()
+VAL -> VAL : validateAmount()
+VAL -> VAL : validateCurrency()
+VAL -> REPO : checkDuplicateChargeName()
+activate REPO
+REPO -> DB : SELECT * FROM m_charge WHERE name = ?
+REPO --> VAL : chargeExists
+deactivate REPO
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> CWS : createCharge(chargeData)
+    activate CWS
+    
+    CWS -> CWS : buildChargeEntity()
+    CWS -> CWS : setChargeCalculationParameters()
+    CWS -> CWS : configureChargeTimeType()
+    
+    CWS -> REPO : save(chargeEntity)
+    activate REPO
+    REPO -> DB : INSERT INTO m_charge
+    REPO --> CWS : savedCharge
+    deactivate REPO
+    
+    CWS -> AUDIT : auditChargeCreation(chargeId)
+    activate AUDIT
+    AUDIT -> DB : INSERT INTO m_portfolio_command_source
+    deactivate AUDIT
+    
+    CWS --> CMD : ChargeCreationResult
+    deactivate CWS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> PM : HTTP 201 Created\n{chargeId}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> PM : HTTP 400 Bad Request\n{validationErrors}
+end
+
+== Loan Product Charge Association Flow ==
+
+PM -> API : POST /loanproducts/{productId}/charges/{chargeId}
+activate API
+
+API -> CMD : processCommand(ASSOCIATE_CHARGE_TO_LOAN_PRODUCT)
+activate CMD
+
+CMD -> VAL : validateChargeProductAssociation(productId, chargeId)
+activate VAL
+VAL -> CRS : getCharge(chargeId)
+activate CRS
+REPO -> DB : SELECT * FROM m_charge WHERE id = ?
+CRS --> VAL : chargeDefinition
+deactivate CRS
+VAL -> VAL : validateChargeApplicability()
+VAL -> VAL : checkExistingAssociation()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> CWS : associateChargeToLoanProduct(productId, chargeId)
+    activate CWS
+    
+    CWS -> CWS : createProductChargeAssociation()
+    CWS -> REPO : saveProductChargeMapping()
+    activate REPO
+    REPO -> DB : INSERT INTO m_product_loan_charge
+    REPO --> CWS : associationCreated
+    deactivate REPO
+    
+    CWS -> AUDIT : auditChargeProductAssociation(productId, chargeId)
+    CWS --> CMD : AssociationResult
+    deactivate CWS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> PM : HTTP 200 OK
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> PM : HTTP 400 Bad Request
+end
+
+== Loan Charge Application Flow ==
+
+LO -> API : POST /loans/{loanId}/charges\n{loanChargeData}
+activate API
+
+API -> CMD : processCommand(CREATE_LOAN_CHARGE)
+activate CMD
+
+CMD -> VAL : validateLoanCharge(loanId, chargeData)
+activate VAL
+VAL -> CRS : getCharge(chargeId)
+VAL -> VAL : validateChargeApplicability()
+VAL -> VAL : validateLoanStatus()
+VAL -> VAL : validateChargeDate()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> LCS : createLoanCharge(loanId, chargeData)
+    activate LCS
+    
+    ' Calculate charge amount based on charge type
+    LCS -> CCS : calculateChargeAmount(loanId, chargeDefinition)
+    activate CCS
+    
+    alt Percentage Charge
+        CCS -> CCS : calculatePercentageOfLoanAmount()
+    else Fixed Amount Charge
+        CCS -> CCS : useFixedChargeAmount()
+    else Percentage of Interest
+        CCS -> CCS : calculatePercentageOfInterest()
+    else Percentage of Disbursement
+        CCS -> CCS : calculatePercentageOfDisbursementAmount()
+    end
+    
+    CCS --> LCS : CalculatedChargeAmount
+    deactivate CCS
+    
+    LCS -> LCS : buildLoanChargeEntity()
+    LCS -> LCS : setChargeCalculationFields()
+    
+    LCS -> REPO : saveLoanCharge()
+    activate REPO
+    REPO -> DB : INSERT INTO m_loan_charge
+    REPO --> LCS : savedLoanCharge
+    deactivate REPO
+    
+    ' Update loan summary if required
+    alt Charge Affects Loan Amount
+        LCS -> LCS : updateLoanSummary()
+        LCS -> REPO : updateLoanAmountDetails()
+    end
+    
+    LCS -> AUDIT : auditLoanChargeCreation(loanId, chargeId)
+    LCS --> CMD : LoanChargeCreationResult
+    deactivate LCS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> LO : HTTP 201 Created\n{loanChargeId}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> LO : HTTP 400 Bad Request
+end
+
+== Charge Collection Flow ==
+
+LO -> API : POST /loans/{loanId}/charges/{chargeId}?command=pay\n{paymentData}
+activate API
+
+API -> CMD : processCommand(PAY_LOAN_CHARGE)
+activate CMD
+
+CMD -> VAL : validateChargePayment(loanId, chargeId, paymentData)
+activate VAL
+VAL -> LCS : getLoanCharge(loanId, chargeId)
+activate LCS
+LCS -> REPO : findLoanChargeById()
+LCS --> VAL : loanChargeDetails
+deactivate LCS
+VAL -> VAL : validateOutstandingAmount()
+VAL -> VAL : validatePaymentAmount()
+VAL -> VAL : validatePaymentDate()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> LCS : payLoanCharge(loanId, chargeId, paymentData)
+    activate LCS
+    
+    LCS -> REPO : findLoanChargeById()
+    activate REPO
+    REPO -> DB : SELECT * FROM m_loan_charge WHERE id = ?
+    REPO --> LCS : loanChargeEntity
+    deactivate REPO
+    
+    LCS -> LCS : processChargePayment(paymentAmount)
+    LCS -> LCS : updateChargeOutstandingAmount()
+    
+    ' Create charge payment transaction
+    LCS -> LCS : createChargePaymentTransaction()
+    LCS -> REPO : saveLoanTransaction()
+    activate REPO
+    REPO -> DB : INSERT INTO m_loan_transaction
+    REPO -> DB : UPDATE m_loan_charge SET amount_paid_derived
+    REPO --> LCS : paymentProcessed
+    deactivate REPO
+    
+    ' Create accounting entries for charge collection
+    LCS -> ACC : createChargeCollectionAccountingEntries(loanId, chargeAmount)
+    activate ACC
+    ACC -> ACC : debitCash()
+    ACC -> ACC : creditFeeIncome()
+    ACC -> DB : INSERT INTO acc_gl_journal_entry
+    deactivate ACC
+    
+    ' Update loan summary
+    LCS -> LCS : updateLoanOutstandingBalances()
+    LCS -> REPO : updateLoanSummary()
+    
+    LCS -> AUDIT : auditChargePayment(loanId, chargeId)
+    LCS --> CMD : ChargePaymentResult
+    deactivate LCS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> LO : HTTP 200 OK\n{transactionId}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> LO : HTTP 400 Bad Request
+end
+
+== Penalty Assessment Flow ==
+
+participant "COBBatchJob" as BATCH
+participant "PenaltyAssessmentService" as PAS
+
+BATCH -> PAS : assessOverduePenalties(businessDate)
+activate PAS
+
+PAS -> REPO : findLoansWithOverdueInstallments(businessDate)
+activate REPO
+REPO -> DB : SELECT * FROM m_loan l JOIN m_loan_repayment_schedule s WHERE s.duedate < ? AND s.completed_derived = 0
+REPO --> PAS : overdueLoans
+deactivate REPO
+
+loop For Each Overdue Loan
+    PAS -> CCS : calculatePenaltyCharges(loanId, overdueDays)
+    activate CCS
+    
+    CCS -> CRS : getApplicablePenaltyCharges(loanId)
+    activate CRS
+    CRS -> REPO : findPenaltyChargesForLoan()
+    CRS --> CCS : penaltyChargeDefinitions
+    deactivate CRS
+    
+    loop For Each Penalty Charge
+        alt Daily Penalty
+            CCS -> CCS : calculateDailyPenalty(overdueDays)
+        else Flat Penalty
+            CCS -> CCS : calculateFlatPenalty()
+        else Percentage Penalty
+            CCS -> CCS : calculatePercentagePenalty()
+        end
+    end
+    
+    CCS --> PAS : PenaltyCalculations
+    deactivate CCS
+    
+    alt Penalty Applicable
+        PAS -> LCS : createAutomaticPenaltyCharge(loanId, penaltyAmount)
+        activate LCS
+        LCS -> LCS : buildPenaltyChargeEntity()
+        LCS -> REPO : saveLoanCharge()
+        activate REPO
+        REPO -> DB : INSERT INTO m_loan_charge
+        REPO --> LCS : penaltyChargeCreated
+        deactivate REPO
+        LCS --> PAS : PenaltyAssessed
+        deactivate LCS
+    end
+end
+
+PAS --> BATCH : PenaltyAssessmentCompleted
+deactivate PAS
+
+== Charge Waiver Flow ==
+
+LO -> API : POST /loans/{loanId}/charges/{chargeId}?command=waive\n{waiverData}
+activate API
+
+API -> CMD : processCommand(WAIVE_LOAN_CHARGE)
+activate CMD
+
+CMD -> VAL : validateChargeWaiver(loanId, chargeId, waiverData)
+activate VAL
+VAL -> LCS : getLoanCharge(loanId, chargeId)
+VAL -> VAL : validateOutstandingAmount()
+VAL -> VAL : validateWaiverAmount()
+VAL -> VAL : validateWaiverReason()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> LCS : waiveLoanCharge(loanId, chargeId, waiverData)
+    activate LCS
+    
+    LCS -> REPO : findLoanChargeById()
+    activate REPO
+    REPO -> DB : SELECT * FROM m_loan_charge WHERE id = ?
+    REPO --> LCS : loanChargeEntity
+    deactivate REPO
+    
+    LCS -> LCS : processChargeWaiver(waiverAmount)
+    LCS -> LCS : updateChargeWaivedAmount()
+    
+    ' Create waiver transaction
+    LCS -> LCS : createChargeWaiverTransaction()
+    LCS -> REPO : saveLoanTransaction()
+    activate REPO
+    REPO -> DB : INSERT INTO m_loan_transaction
+    REPO -> DB : UPDATE m_loan_charge SET amount_waived_derived
+    REPO --> LCS : waiverProcessed
+    deactivate REPO
+    
+    ' Create accounting entries for charge waiver
+    LCS -> ACC : createChargeWaiverAccountingEntries(loanId, waiverAmount)
+    activate ACC
+    ACC -> ACC : debitFeeIncomeWaived()
+    ACC -> ACC : creditFeeIncome()
+    ACC -> DB : INSERT INTO acc_gl_journal_entry
+    deactivate ACC
+    
+    LCS -> AUDIT : auditChargeWaiver(loanId, chargeId)
+    LCS --> CMD : ChargeWaiverResult
+    deactivate LCS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> LO : HTTP 200 OK\n{changes}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> LO : HTTP 400 Bad Request
+end
+
+note over PM, DB
+**Key Design Patterns:**
+• Strategy Pattern: Different charge calculation strategies
+• Factory Pattern: Charge creation based on type and context
+• Command Pattern: All charge operations via command handlers
+• Observer Pattern: Automatic penalty assessment via batch jobs
+• Template Method: Common charge processing with specific implementations
+• Repository Pattern: Multi-tenant data access for charge entities
+end note
+
+@enduml

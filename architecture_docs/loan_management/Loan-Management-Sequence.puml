@@ -1,0 +1,358 @@
+@startuml Loan-Management-Sequence
+!include <C4/C4_Context>
+
+title Apache Fineract - Loan Management Module Sequence Diagram
+
+' Actors and Systems
+actor "Loan Officer" as LO
+participant "LoansApiResource" as API
+participant "CommandSourceHandler" as CMD
+participant "LoanWritePlatformService" as LWS
+participant "LoanReadPlatformService" as LRS
+participant "LoanValidator" as VAL
+participant "LoanCalculationService" as CALC
+participant "LoanRepository" as REPO
+participant "AccountingService" as ACC
+participant "ChargeService" as CHG
+participant "AuditService" as AUDIT
+database "TenantDatabase" as DB
+
+note over LO, DB
+**Loan Management Sequence Flows**
+1. Loan Application and Approval
+2. Loan Disbursement and Schedule Generation
+3. Repayment Processing and Schedule Updates
+4. Interest Calculation and Accrual
+5. Loan Closure and Write-off
+end note
+
+== Loan Application Flow ==
+
+LO -> API : POST /loans\n{loanApplicationData}
+activate API
+
+API -> CMD : processCommand(APPLY_LOAN)
+activate CMD
+
+CMD -> VAL : validateLoanApplication(loanData)
+activate VAL
+VAL -> LRS : validateClient(clientId)
+VAL -> LRS : validateLoanProduct(productId)
+VAL -> VAL : validateLoanAmount()
+VAL -> VAL : validateLoanTerms()
+VAL -> VAL : validateCollateral()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> LWS : submitLoanApplication(loanData)
+    activate LWS
+    
+    LWS -> LWS : buildLoanEntity()
+    LWS -> CALC : calculateRepaymentSchedule(loanTerms)
+    activate CALC
+    CALC -> CALC : generateScheduleInstallments()
+    CALC -> CALC : calculateInterestAndPrincipal()
+    CALC --> LWS : RepaymentSchedule
+    deactivate CALC
+    
+    LWS -> REPO : save(loanEntity)
+    activate REPO
+    REPO -> DB : INSERT INTO m_loan
+    REPO -> DB : INSERT INTO m_loan_repayment_schedule
+    REPO --> LWS : savedLoan
+    deactivate REPO
+    
+    LWS -> AUDIT : auditLoanApplication(loanId)
+    activate AUDIT
+    AUDIT -> DB : INSERT INTO m_portfolio_command_source
+    deactivate AUDIT
+    
+    LWS --> CMD : LoanApplicationResult
+    deactivate LWS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> LO : HTTP 201 Created\n{loanId, accountNo}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> LO : HTTP 400 Bad Request\n{validationErrors}
+end
+
+== Loan Approval Flow ==
+
+LO -> API : POST /loans/{loanId}?command=approve\n{approvalData}
+activate API
+
+API -> CMD : processCommand(APPROVE_LOAN)
+activate CMD
+
+CMD -> VAL : validateLoanForApproval(loanId, approvalData)
+activate VAL
+VAL -> LRS : getLoan(loanId)
+VAL -> VAL : checkLoanStatus()
+VAL -> VAL : validateApprovalAmount()
+VAL -> VAL : validateApprovalDate()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> LWS : approveLoan(loanId, approvalData)
+    activate LWS
+    
+    LWS -> REPO : findById(loanId)
+    activate REPO
+    REPO -> DB : SELECT * FROM m_loan
+    REPO --> LWS : loanEntity
+    deactivate REPO
+    
+    LWS -> LWS : loanEntity.approve(approvalData)
+    
+    ' Recalculate schedule if terms changed
+    alt Terms Modified
+        LWS -> CALC : recalculateRepaymentSchedule()
+        activate CALC
+        CALC --> LWS : updatedSchedule
+        deactivate CALC
+        
+        LWS -> REPO : updateRepaymentSchedule()
+    end
+    
+    LWS -> REPO : save(loanEntity)
+    activate REPO
+    REPO -> DB : UPDATE m_loan SET loan_status_id = 200
+    REPO --> LWS : approvedLoan
+    deactivate REPO
+    
+    LWS -> AUDIT : auditLoanApproval(loanId)
+    LWS --> CMD : LoanApprovalResult
+    deactivate LWS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> LO : HTTP 200 OK\n{changes}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> LO : HTTP 400 Bad Request
+end
+
+== Loan Disbursement Flow ==
+
+LO -> API : POST /loans/{loanId}?command=disburse\n{disbursementData}
+activate API
+
+API -> CMD : processCommand(DISBURSE_LOAN)
+activate CMD
+
+CMD -> VAL : validateLoanForDisbursement(loanId, disbursementData)
+activate VAL
+VAL -> LRS : getLoan(loanId)
+VAL -> VAL : checkApprovedStatus()
+VAL -> VAL : validateDisbursementAmount()
+VAL -> VAL : validateDisbursementDate()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> LWS : disburseLoan(loanId, disbursementData)
+    activate LWS
+    
+    LWS -> REPO : findById(loanId)
+    activate REPO
+    REPO -> DB : SELECT * FROM m_loan
+    REPO --> LWS : loanEntity
+    deactivate REPO
+    
+    LWS -> LWS : loanEntity.disburse(disbursementData)
+    
+    ' Process disbursement charges
+    LWS -> CHG : calculateDisbursementCharges(loanId)
+    activate CHG
+    CHG -> CHG : applyCharges()
+    CHG --> LWS : chargesApplied
+    deactivate CHG
+    
+    ' Create loan transaction
+    LWS -> LWS : createDisbursementTransaction()
+    LWS -> REPO : saveLoanTransaction()
+    
+    ' Update repayment schedule with actual disbursement
+    LWS -> CALC : updateScheduleForDisbursement(disbursementAmount)
+    activate CALC
+    CALC --> LWS : updatedSchedule
+    deactivate CALC
+    
+    LWS -> REPO : save(loanEntity)
+    activate REPO
+    REPO -> DB : UPDATE m_loan SET loan_status_id = 300
+    REPO -> DB : INSERT INTO m_loan_transaction
+    REPO --> LWS : disbursedLoan
+    deactivate REPO
+    
+    ' Create accounting entries
+    LWS -> ACC : createDisbursementAccountingEntries(loanId, amount)
+    activate ACC
+    ACC -> ACC : debitLoanPortfolio()
+    ACC -> ACC : creditFundSource()
+    ACC -> DB : INSERT INTO acc_gl_journal_entry
+    deactivate ACC
+    
+    LWS -> AUDIT : auditLoanDisbursement(loanId)
+    LWS --> CMD : LoanDisbursementResult
+    deactivate LWS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> LO : HTTP 200 OK\n{changes}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> LO : HTTP 400 Bad Request
+end
+
+== Loan Repayment Flow ==
+
+LO -> API : POST /loans/{loanId}/transactions?command=repayment\n{repaymentData}
+activate API
+
+API -> CMD : processCommand(MAKE_REPAYMENT)
+activate CMD
+
+CMD -> VAL : validateLoanRepayment(loanId, repaymentData)
+activate VAL
+VAL -> LRS : getLoan(loanId)
+VAL -> VAL : checkActiveStatus()
+VAL -> VAL : validateRepaymentAmount()
+VAL -> VAL : validateRepaymentDate()
+VAL --> CMD : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CMD -> LWS : makeLoanRepayment(loanId, repaymentData)
+    activate LWS
+    
+    LWS -> REPO : findById(loanId)
+    activate REPO
+    REPO -> DB : SELECT * FROM m_loan
+    REPO --> LWS : loanEntity
+    deactivate REPO
+    
+    ' Calculate repayment allocation
+    LWS -> CALC : calculateRepaymentAllocation(repaymentAmount)
+    activate CALC
+    CALC -> CALC : allocateToInterest()
+    CALC -> CALC : allocateToPrincipal()  
+    CALC -> CALC : allocateToFees()
+    CALC -> CALC : allocateToPenalties()
+    CALC --> LWS : RepaymentAllocation
+    deactivate CALC
+    
+    ' Create repayment transaction
+    LWS -> LWS : createRepaymentTransaction(allocation)
+    LWS -> REPO : saveLoanTransaction()
+    
+    ' Update loan balance and schedule
+    LWS -> LWS : loanEntity.processRepayment(allocation)
+    LWS -> CALC : updateRepaymentSchedule(allocation)
+    activate CALC
+    CALC --> LWS : updatedSchedule
+    deactivate CALC
+    
+    ' Check if loan is fully paid
+    alt Loan Fully Paid
+        LWS -> LWS : loanEntity.markAsClosed()
+        LWS -> LWS : calculateFinalBalances()
+    end
+    
+    LWS -> REPO : save(loanEntity)
+    activate REPO
+    REPO -> DB : UPDATE m_loan
+    REPO -> DB : INSERT INTO m_loan_transaction
+    REPO -> DB : UPDATE m_loan_repayment_schedule
+    REPO --> LWS : updatedLoan
+    deactivate REPO
+    
+    ' Create accounting entries
+    LWS -> ACC : createRepaymentAccountingEntries(allocation)
+    activate ACC
+    ACC -> ACC : debitCash()
+    ACC -> ACC : creditLoanPortfolio()
+    ACC -> ACC : creditInterestIncome()
+    ACC -> ACC : creditFeeIncome()
+    ACC -> DB : INSERT INTO acc_gl_journal_entry
+    deactivate ACC
+    
+    LWS -> AUDIT : auditLoanRepayment(loanId)
+    LWS --> CMD : LoanRepaymentResult
+    deactivate LWS
+    
+    CMD --> API : CommandProcessingResult
+    deactivate CMD
+    
+    API --> LO : HTTP 200 OK\n{changes}
+    deactivate API
+    
+else Validation Failure
+    CMD --> API : ValidationException
+    API --> LO : HTTP 400 Bad Request
+end
+
+== Interest Accrual Flow (Batch Process) ==
+
+participant "COBBatchJob" as BATCH
+participant "LoanInterestAccrualService" as IAS
+
+BATCH -> IAS : processInterestAccrual(businessDate)
+activate IAS
+
+IAS -> REPO : findActiveLoans()
+activate REPO
+REPO -> DB : SELECT * FROM m_loan WHERE loan_status_id = 300
+REPO --> IAS : activeLoansList
+deactivate REPO
+
+loop For Each Active Loan
+    IAS -> CALC : calculateDailyAccrual(loanId, businessDate)
+    activate CALC
+    CALC -> CALC : calculateInterestForPeriod()
+    CALC -> CALC : checkForOverdueCharges()
+    CALC --> IAS : AccrualCalculation
+    deactivate CALC
+    
+    alt Accrual Required
+        IAS -> LWS : createAccrualTransaction(loanId, accrualAmount)
+        activate LWS
+        LWS -> REPO : saveLoanTransaction()
+        LWS -> ACC : createAccrualAccountingEntries()
+        activate ACC
+        ACC -> ACC : debitInterestReceivable()
+        ACC -> ACC : creditInterestIncome()
+        ACC -> DB : INSERT INTO acc_gl_journal_entry
+        deactivate ACC
+        LWS --> IAS : AccrualProcessed
+        deactivate LWS
+    end
+end
+
+IAS --> BATCH : InterestAccrualCompleted
+deactivate IAS
+
+note over LO, DB
+**Key Design Patterns:**
+• Command Pattern: All loan operations via command handlers
+• Strategy Pattern: Different calculation strategies for loan types
+• State Pattern: Loan status transitions (Submitted → Approved → Active → Closed)
+• Observer Pattern: Events published for accounting integration
+• Factory Pattern: Loan transaction creation based on type
+• Repository Pattern: Data access abstraction with tenant awareness
+end note
+
+@enduml

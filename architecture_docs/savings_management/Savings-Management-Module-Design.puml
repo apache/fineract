@@ -1,0 +1,776 @@
+@startuml Savings-Management-Module-Design
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Force top to bottom layout
+top to bottom direction
+
+title Apache Fineract - Savings Management Module (Class/Interface Level Design)
+
+' Savings Management Module
+Package "org.apache.fineract.portfolio.savings" {
+    
+    ' Savings Domain Model
+    Package "domain" {
+        
+        ' Core Savings Account Entity
+        Class SavingsAccount {
+            - Long id
+            - String accountNo
+            - String externalId
+            - Client client
+            - Group group
+            - SavingsProduct product
+            - Staff fieldOfficer
+            - SavingsAccountStatusType status
+            - SavingsAccountSubStatusType subStatus
+            - Office depositOffice
+            - LocalDate submittedOnDate
+            - AppUser submittedBy
+            - LocalDate rejectedOnDate
+            - AppUser rejectedBy
+            - LocalDate withdrawnOnDate
+            - AppUser withdrawnBy
+            - LocalDate approvedOnDate
+            - AppUser approvedBy
+            - LocalDate activatedOnDate
+            - AppUser activatedBy
+            - LocalDate closedOnDate
+            - AppUser closedBy
+            - SavingsAccountClosureReason closureReason
+            - LocalDate lockedInUntilDate
+            - Boolean withdrawalFeeApplicableForTransfer
+            - Boolean allowOverdraft
+            - Money overdraftLimit
+            - BigDecimal nominalAnnualInterestRate
+            - SavingsInterestCalculationType interestCalculationType
+            - SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType
+            - Integer minRequiredOpeningBalance
+            - LocalDate lockinPeriodFrequency
+            - PeriodFrequencyType lockinPeriodFrequencyType
+            - Boolean withdrawalFeeForTransfers
+            - SavingsAccountSummary summary
+            - Set<SavingsAccountTransaction> transactions
+            - Set<SavingsAccountCharge> charges
+            --
+            + activate(AppUser activatedBy, LocalDate activationDate) : void
+            + close(AppUser closedBy, LocalDate closureDate, SavingsAccountClosureReason closureReason) : void
+            + deposit(SavingsAccountTransactionData transactionData) : SavingsAccountTransaction
+            + withdraw(SavingsAccountTransactionData transactionData, Boolean applyWithdrawalFee) : SavingsAccountTransaction
+            + holdAmount(Money amount, LocalDate date) : SavingsAccountTransaction
+            + releaseAmount(Money amount, LocalDate date) : SavingsAccountTransaction
+            + calculateInterestEarned(LocalDate interestPostingUpToDate) : Money
+            + postInterest(LocalDate interestPostingDate) : SavingsAccountTransaction
+            + addCharge(SavingsAccountChargeData chargeData) : SavingsAccountCharge
+            + payCharge(Long chargeId, LocalDate transactionDate, Money amount) : SavingsAccountTransaction
+            + waiveCharge(Long chargeId, LocalDate transactionDate) : SavingsAccountTransaction
+            + inactivateCharge(Long chargeId, LocalDate inactivationDate) : void
+            + transferFunds(SavingsAccount toAccount, Money amount, LocalDate transferDate) : List<SavingsAccountTransaction>
+            + applyAnnualFee(LocalDate feeDate) : SavingsAccountTransaction
+            + block(LocalDate blockDate, String reason) : void
+            + unblock(LocalDate unblockDate) : void
+            + dormant(LocalDate dormancyDate) : void
+            + undoDormancy(LocalDate reactivationDate) : void
+            + escheat(LocalDate escheatDate) : void
+            + getAccountBalance() : Money
+            + getAvailableBalance() : Money
+            + getTotalDeposits() : Money
+            + getTotalWithdrawals() : Money
+            + getTotalInterestEarned() : Money
+            + getTotalInterestPosted() : Money
+            + getTotalFees() : Money
+            + getTotalPenalties() : Money
+            + isActive() : Boolean
+            + isClosed() : Boolean
+            + isDormant() : Boolean
+            + isBlocked() : Boolean
+            + allowDeposit() : Boolean
+            + allowWithdrawal() : Boolean
+            + isOverdraftAllowed() : Boolean
+            + getOverdraftLimit() : Money
+            + isWithdrawalFeeApplicableForTransfer() : Boolean
+            + enforceMinRequiredBalance() : Boolean
+            + isLockedIn(LocalDate transactionDate) : Boolean
+            + validateTransaction(SavingsAccountTransaction transaction) : void
+            + validateSufficientBalance(Money withdrawalAmount) : void
+            + validateWithdrawalAmountAgainstOverdraft(Money withdrawalAmount) : void
+            + deriveAccountBalance() : Money
+            + updateSummary() : void
+        }
+        
+        ' Savings Product Configuration
+        Class SavingsProduct {
+            - Long id
+            - String name
+            - String shortName
+            - String description
+            - MonetaryCurrency currency
+            - BigDecimal nominalAnnualInterestRate
+            - SavingsInterestCalculationType interestCalculationType
+            - SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType
+            - BigDecimal minRequiredOpeningBalance
+            - Integer lockinPeriodFrequency
+            - PeriodFrequencyType lockinPeriodFrequencyType
+            - SavingsWithdrawalFeesType withdrawalFeeType
+            - Boolean withdrawalFeeForTransfers
+            - Boolean allowOverdraft
+            - Money overdraftLimit
+            - BigDecimal minBalanceForInterestCalculation
+            - Boolean enforceMinRequiredBalance
+            - BigDecimal minRequiredBalance
+            - Boolean lienAllowed
+            - BigDecimal maxAllowedLienLimit
+            - Boolean isDormancyTrackingActive
+            - Integer daysToInactive
+            - Integer daysToDormancy
+            - Integer daysToEscheat
+            - Set<Charge> charges
+            - Set<SavingsProductBorrowerCycleVariations> borrowerCycleVariations
+            - AccountingRuleType accountingRule
+            - Map<SavingsProductAccountingParams, GLAccount> accountMappings
+            - Set<SavingsProductPaymentChannelToFundSourceMapping> paymentChannelToFundSourceMappings
+            - Set<SavingsProductFeeToIncomeAccountMapping> feeToIncomeAccountMappings
+            - Set<SavingsProductPenaltyToIncomeAccountMapping> penaltyToIncomeAccountMappings
+            --
+            + validateMinimumBalance(Money balance) : Boolean
+            + validateOverdraftLimit(Money requestedOverdraft) : Boolean
+            + validateInterestCalculation(LocalDate fromDate, LocalDate toDate) : Boolean
+            + isWithdrawalFeeApplicableForTransfer() : Boolean
+            + isOverdraftAllowed() : Boolean
+            + getOverdraftLimit() : Money
+            + isEnforceMinRequiredBalance() : Boolean
+            + getMinRequiredBalance() : BigDecimal
+            + isDormancyTrackingActive() : Boolean
+            + getDaysToInactive() : Integer
+            + getDaysToDormancy() : Integer
+            + getDaysToEscheat() : Integer
+            + charges() : Set<Charge>
+            + getApplicableCharges(SavingsAccountChargeTimeType timeType) : Set<Charge>
+            + copy() : SavingsProduct
+            + update(SavingsProductCommand command) : Map<String, Object>
+        }
+        
+        ' Savings Account Transaction
+        Class SavingsAccountTransaction {
+            - Long id
+            - SavingsAccount savingsAccount
+            - Office office
+            - PaymentDetail paymentDetail
+            - SavingsAccountTransactionType typeOf
+            - LocalDate dateOf
+            - Money amount
+            - Money runningBalance
+            - Boolean reversed
+            - LocalDate submittedOnDate
+            - AppUser appUser
+            - Boolean releaseIdHold
+            - String reasonForBlock
+            - LocalDate createdDate
+            - AppUser createdBy
+            - LocalDate lastModifiedDate
+            - AppUser lastModifiedBy
+            - Boolean isManualTransaction
+            - SavingsAccountCharge savingsAccountCharge
+            - Boolean isReversalTransaction
+            - Long originalTxnId
+            --
+            + isDeposit() : Boolean
+            + isWithdrawal() : Boolean
+            + isDividendPayout() : Boolean
+            + isInterestPosting() : Boolean
+            + isWithdrawalFee() : Boolean
+            + isAnnualFee() : Boolean
+            + isWaiveCharge() : Boolean
+            + isPayCharge() : Boolean
+            + isAmountHold() : Boolean
+            + isAmountRelease() : Boolean
+            + isOverdraftInterest() : Boolean
+            + isWrittenoff() : Boolean
+            + isEscheat() : Boolean
+            + isActive() : Boolean
+            + isReversed() : Boolean
+            + isChargeTransaction() : Boolean
+            + isCredit() : Boolean
+            + isDebit() : Boolean
+            + reverse() : void
+            + zeroBalanceFields() : void
+            + updateRunningBalance(Money runningBalance) : void
+            + getTransactionLocalDate() : LocalDate
+            + isAfter(LocalDate transactionDate) : Boolean
+            + isBefore(LocalDate transactionDate) : Boolean
+            + isOn(LocalDate transactionDate) : Boolean
+            + copyTransaction() : SavingsAccountTransaction
+        }
+        
+        ' Savings Account Charge
+        Class SavingsAccountCharge {
+            - Long id
+            - SavingsAccount savingsAccount
+            - Charge charge
+            - BigDecimal amount
+            - BigDecimal amountPaid
+            - BigDecimal amountWaived
+            - BigDecimal amountWrittenOff
+            - BigDecimal amountOutstanding
+            - SavingsAccountChargeCalculationType chargeCalculationType
+            - BigDecimal percentage
+            - LocalDate dueDate
+            - SavingsAccountChargePaidBy paidBy
+            - Boolean waived
+            - Boolean paid
+            - Boolean inactivated
+            - LocalDate inactivatedOnDate
+            --
+            + waive(LocalDate transactionDate) : SavingsAccountTransaction
+            + pay(LocalDate transactionDate, Money amountPaid) : SavingsAccountTransaction
+            + inactivate(LocalDate inactivationDate) : void
+            + isActive() : Boolean
+            + isPaid() : Boolean
+            + isWaived() : Boolean
+            + isNotPaid() : Boolean
+            + isAnnualFee() : Boolean
+            + isWithdrawalFee() : Boolean
+            + isOverdraftFee() : Boolean
+            + getAmountOutstanding() : Money
+            + getAmountOrPercentage() : BigDecimal
+            + getAmount(Money amountPercentageAppliedTo) : Money
+            + updateAmount(BigDecimal amount) : void
+            + updatePercentage(BigDecimal percentage) : void
+            + updateAmountPaid(Money amountPaid) : void
+            + updateAmountWaived(Money amountWaived) : void
+            + resetToOriginal(MonetaryCurrency currency) : void
+            + copyOf() : SavingsAccountCharge
+        }
+        
+        ' Savings Account Summary
+        Class SavingsAccountSummary {
+            - Money totalDeposits
+            - Money totalWithdrawals
+            - Money totalWithdrawalFees
+            - Money totalAnnualFees
+            - Money totalInterestEarned
+            - Money totalInterestPosted
+            - Money accountBalance
+            - Money totalFeeCharge
+            - Money totalPenaltyCharge
+            - Money totalOverdraftInterestDerived
+            - Money totalWithholdTax
+            - LocalDate lastInterestCalculationDate
+            - LocalDate interestPostedTillDate
+            --
+            + updateSummary(MonetaryCurrency currency, SavingsAccountSummaryData summaryData) : void
+            + zeroBalanceFields(MonetaryCurrency currency) : void
+            + getTotalDeposits() : Money
+            + getTotalWithdrawals() : Money
+            + getTotalInterestEarned() : Money
+            + getTotalInterestPosted() : Money
+            + getAccountBalance() : Money
+            + getTotalFeeCharge() : Money
+            + getTotalPenaltyCharge() : Money
+            + updateBalance(Money balance) : void
+            + addToTotalDeposits(Money depositAmount) : void
+            + addToTotalWithdrawals(Money withdrawalAmount) : void
+            + addToTotalInterestEarned(Money interestEarned) : void
+            + addToTotalInterestPosted(Money interestPosted) : void
+            + addToTotalFeeCharge(Money feeCharge) : void
+            + addToTotalPenaltyCharge(Money penaltyCharge) : void
+        }
+        
+        ' Savings Account Status
+        Enum SavingsAccountStatusType {
+            INVALID(0, "savingsAccountStatusType.invalid")
+            SUBMITTED_AND_PENDING_APPROVAL(100, "savingsAccountStatusType.submitted.and.pending.approval")
+            APPROVED(200, "savingsAccountStatusType.approved")
+            ACTIVE(300, "savingsAccountStatusType.active")
+            TRANSFER_IN_PROGRESS(303, "savingsAccountStatusType.transfer.in.progress")
+            TRANSFER_ON_HOLD(304, "savingsAccountStatusType.transfer.on.hold")
+            WITHDRAWN_BY_APPLICANT(400, "savingsAccountStatusType.withdrawn.by.applicant")
+            REJECTED(500, "savingsAccountStatusType.rejected")
+            CLOSED(600, "savingsAccountStatusType.closed")
+            PRE_MATURE_CLOSURE(700, "savingsAccountStatusType.pre.mature.closure")
+            MATURED(800, "savingsAccountStatusType.matured")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer statusValue) : SavingsAccountStatusType
+            + isSubmittedAndPendingApproval() : Boolean
+            + isApproved() : Boolean
+            + isActive() : Boolean
+            + isClosed() : Boolean
+            + isWithdrawnByApplicant() : Boolean
+            + isRejected() : Boolean
+            + isTransferInProgress() : Boolean
+            + isTransferOnHold() : Boolean
+            + isMatured() : Boolean
+            + isPreMatureClosure() : Boolean
+        }
+        
+        ' Savings Account Transaction Type
+        Enum SavingsAccountTransactionType {
+            INVALID(0, "savingsAccountTransactionType.invalid")
+            DEPOSIT(1, "savingsAccountTransactionType.deposit")
+            WITHDRAWAL(2, "savingsAccountTransactionType.withdrawal")
+            INTEREST_POSTING(3, "savingsAccountTransactionType.interestPosting")
+            WITHDRAWAL_FEE(4, "savingsAccountTransactionType.withdrawalFee")
+            ANNUAL_FEE(5, "savingsAccountTransactionType.annualFee")
+            WAIVE_CHARGES(6, "savingsAccountTransactionType.waiveCharge")
+            PAY_CHARGE(7, "savingsAccountTransactionType.payCharge")
+            DIVIDEND_PAYOUT(8, "savingsAccountTransactionType.dividendPayout")
+            INITIATE_TRANSFER(12, "savingsAccountTransactionType.initiateTransfer")
+            APPROVE_TRANSFER(13, "savingsAccountTransactionType.approveTransfer")
+            WITHDRAW_TRANSFER(14, "savingsAccountTransactionType.withdrawTransfer")
+            REJECT_TRANSFER(15, "savingsAccountTransactionType.rejectTransfer")
+            WRITTEN_OFF(16, "savingsAccountTransactionType.writtenoff")
+            OVERDRAFT_INTEREST(17, "savingsAccountTransactionType.overdraftInterest")
+            WITHHOLD_TAX(18, "savingsAccountTransactionType.withholdTax")
+            ESCHEAT(19, "savingsAccountTransactionType.escheat")
+            AMOUNT_HOLD(20, "savingsAccountTransactionType.amountHold")
+            AMOUNT_RELEASE(21, "savingsAccountTransactionType.amountRelease")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer transactionType) : SavingsAccountTransactionType
+            + isDeposit() : Boolean
+            + isWithdrawal() : Boolean
+            + isInterestPosting() : Boolean
+            + isWithdrawalFee() : Boolean
+            + isAnnualFee() : Boolean
+            + isWaiveCharge() : Boolean
+            + isPayCharge() : Boolean
+            + isChargeTransaction() : Boolean
+            + isCredit() : Boolean
+            + isDebit() : Boolean
+        }
+        
+        ' Interest Calculation Types
+        Enum SavingsInterestCalculationType {
+            DAILY_BALANCE(1, "savingsInterestCalculationType.dailybalance")
+            AVERAGE_DAILY_BALANCE(2, "savingsInterestCalculationType.averagedailybalance")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer type) : SavingsInterestCalculationType
+            + isDailyBalance() : Boolean
+            + isAverageDailyBalance() : Boolean
+        }
+        
+        ' Interest Calculation Days In Year
+        Enum SavingsInterestCalculationDaysInYearType {
+            DAYS_360(360, "savingsInterestCalculationDaysInYearType.days360")
+            DAYS_365(365, "savingsInterestCalculationDaysInYearType.days365")
+            --
+            - Integer value
+            - String code
+            --
+            + getValue() : Integer
+            + getCode() : String
+            + {static} fromInt(Integer daysInYear) : SavingsInterestCalculationDaysInYearType
+            + isDays360() : Boolean
+            + isDays365() : Boolean
+        }
+    }
+    
+    ' Savings Services
+    Package "service" {
+        
+        ' Savings Account Application Service
+        Interface SavingsAccountApplicationService {
+            + submitApplication(JsonCommand command) : CommandProcessingResult
+            + modifyApplication(Long accountId, JsonCommand command) : CommandProcessingResult
+            + deleteApplication(Long accountId) : CommandProcessingResult
+            + approveApplication(Long accountId, JsonCommand command) : CommandProcessingResult
+            + undoApplicationApproval(Long accountId, JsonCommand command) : CommandProcessingResult
+            + rejectApplication(Long accountId, JsonCommand command) : CommandProcessingResult
+            + applicantWithdrawsFromApplication(Long accountId, JsonCommand command) : CommandProcessingResult
+            + activateAccount(Long accountId, JsonCommand command) : CommandProcessingResult
+            + closeAccount(Long accountId, JsonCommand command) : CommandProcessingResult
+        }
+        
+        ' Savings Account Application Service Implementation
+        Class SavingsAccountApplicationServiceImpl <<Service>> {
+            - SavingsAccountRepository savingsAccountRepository
+            - SavingsProductRepository savingsProductRepository
+            - ClientRepository clientRepository
+            - GroupRepository groupRepository
+            - StaffRepository staffRepository
+            - SavingsAccountAssembler savingsAccountAssembler
+            - SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper
+            - PlatformSecurityContext context
+            - ApplicationEventPublisher eventPublisher
+            - AccountNumberGenerator accountNumberGenerator
+            - SavingsAccountDataValidator savingsAccountDataValidator
+            --
+            + submitApplication(JsonCommand command) : CommandProcessingResult
+            + modifyApplication(Long accountId, JsonCommand command) : CommandProcessingResult
+            + deleteApplication(Long accountId) : CommandProcessingResult
+            + approveApplication(Long accountId, JsonCommand command) : CommandProcessingResult
+            + undoApplicationApproval(Long accountId, JsonCommand command) : CommandProcessingResult
+            + rejectApplication(Long accountId, JsonCommand command) : CommandProcessingResult
+            + applicantWithdrawsFromApplication(Long accountId, JsonCommand command) : CommandProcessingResult
+            + activateAccount(Long accountId, JsonCommand command) : CommandProcessingResult
+            + closeAccount(Long accountId, JsonCommand command) : CommandProcessingResult
+            - validateSubmittedOnDate(SavingsAccount account) : void
+            - checkClientOrGroupActive(SavingsAccount account) : void
+            - generateAccountNumber(SavingsAccount account) : void
+        }
+        
+        ' Savings Account Transaction Service
+        Interface SavingsAccountTransactionService {
+            + deposit(Long accountId, JsonCommand command) : CommandProcessingResult
+            + withdrawal(Long accountId, JsonCommand command, Boolean applyWithdrawalFee) : CommandProcessingResult
+            + calculateInterest(Long accountId) : CommandProcessingResult
+            + postInterest(Long accountId) : CommandProcessingResult
+            + addSavingsAccountCharge(Long accountId, JsonCommand command) : CommandProcessingResult
+            + updateSavingsAccountCharge(Long accountId, Long chargeId, JsonCommand command) : CommandProcessingResult
+            + waiveCharge(Long accountId, Long chargeId) : CommandProcessingResult
+            + payCharge(Long accountId, Long chargeId, JsonCommand command) : CommandProcessingResult
+            + inactivateCharge(Long accountId, Long chargeId) : CommandProcessingResult
+            + blockAccount(Long accountId, JsonCommand command) : CommandProcessingResult
+            + unblockAccount(Long accountId, JsonCommand command) : CommandProcessingResult
+            + holdAmount(Long accountId, JsonCommand command) : CommandProcessingResult
+            + releaseAmount(Long accountId, Long holdTransactionId) : CommandProcessingResult
+        }
+        
+        ' Savings Account Transaction Service Implementation
+        Class SavingsAccountTransactionServiceImpl <<Service>> {
+            - SavingsAccountRepository savingsAccountRepository
+            - SavingsAccountTransactionRepository savingsAccountTransactionRepository
+            - SavingsAccountChargeRepository savingsAccountChargeRepository
+            - ChargeRepository chargeRepository
+            - SavingsAccountAssembler savingsAccountAssembler
+            - SavingsAccountTransactionAssembler savingsAccountTransactionAssembler
+            - SavingsAccountChargeAssembler savingsAccountChargeAssembler
+            - PlatformSecurityContext context
+            - ApplicationEventPublisher eventPublisher
+            - AccountTransfersWritePlatformService accountTransfersWritePlatformService
+            - SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper
+            - SavingsInterestCalculationService savingsInterestCalculationService
+            --
+            + deposit(Long accountId, JsonCommand command) : CommandProcessingResult
+            + withdrawal(Long accountId, JsonCommand command, Boolean applyWithdrawalFee) : CommandProcessingResult
+            + calculateInterest(Long accountId) : CommandProcessingResult
+            + postInterest(Long accountId) : CommandProcessingResult
+            + addSavingsAccountCharge(Long accountId, JsonCommand command) : CommandProcessingResult
+            + updateSavingsAccountCharge(Long accountId, Long chargeId, JsonCommand command) : CommandProcessingResult
+            + waiveCharge(Long accountId, Long chargeId) : CommandProcessingResult
+            + payCharge(Long accountId, Long chargeId, JsonCommand command) : CommandProcessingResult
+            + inactivateCharge(Long accountId, Long chargeId) : CommandProcessingResult
+            + blockAccount(Long accountId, JsonCommand command) : CommandProcessingResult
+            + unblockAccount(Long accountId, JsonCommand command) : CommandProcessingResult
+            + holdAmount(Long accountId, JsonCommand command) : CommandProcessingResult
+            + releaseAmount(Long accountId, Long holdTransactionId) : CommandProcessingResult
+            - handleTransaction(SavingsAccount account, SavingsAccountTransaction transaction) : void
+            - updateBalanceAndSummary(SavingsAccount account) : void
+            - validateTransactionAmounts(SavingsAccount account, Money transactionAmount, String operation) : void
+        }
+        
+        ' Savings Interest Calculation Service
+        Interface SavingsInterestCalculationService {
+            + calculateInterest(SavingsAccount savingsAccount, LocalDate asOnDate) : SavingsAccountInterest
+            + calculateInterestForPosting(SavingsAccount savingsAccount, LocalDate postingDate) : Money
+            + calculateDailyBalanceDetails(SavingsAccount savingsAccount, LocalDate fromDate, LocalDate toDate) : List<LocalDateInterval>
+            + calculateCompoundInterest(SavingsAccount savingsAccount, LocalDate fromDate, LocalDate toDate) : Money
+            + determineInterestPostingPeriods(SavingsAccount savingsAccount, LocalDate fromDate, LocalDate toDate) : List<PostingPeriod>
+        }
+        
+        ' Savings Interest Calculation Implementation
+        Class SavingsInterestCalculationServiceImpl <<Service>> {
+            - SavingsAccountTransactionRepository savingsAccountTransactionRepository
+            - SavingsHelper savingsHelper
+            --
+            + calculateInterest(SavingsAccount savingsAccount, LocalDate asOnDate) : SavingsAccountInterest
+            + calculateInterestForPosting(SavingsAccount savingsAccount, LocalDate postingDate) : Money
+            + calculateDailyBalanceDetails(SavingsAccount savingsAccount, LocalDate fromDate, LocalDate toDate) : List<LocalDateInterval>
+            + calculateCompoundInterest(SavingsAccount savingsAccount, LocalDate fromDate, LocalDate toDate) : Money
+            + determineInterestPostingPeriods(SavingsAccount savingsAccount, LocalDate fromDate, LocalDate toDate) : List<PostingPeriod>
+            - calculateDailyBalance(List<SavingsAccountTransaction> transactions, LocalDate fromDate, LocalDate toDate) : List<EndOfDayBalance>
+            - calculateAverageDailyBalance(List<SavingsAccountTransaction> transactions, LocalDate fromDate, LocalDate toDate) : Money
+            - applyCompoundingFrequency(Money interestEarned, SavingsCompoundingInterestPeriodType compoundingType) : Money
+        }
+        
+        ' Account Transfer Service
+        Interface AccountTransferService {
+            + transferFunds(AccountTransferCommand command) : CommandProcessingResult
+            + approveTransfer(Long transferId) : CommandProcessingResult
+            + rejectTransfer(Long transferId) : CommandProcessingResult
+            + withdrawTransfer(Long transferId) : CommandProcessingResult
+            + reverseTransfer(Long transferId) : CommandProcessingResult
+        }
+        
+        ' Savings Account Dormancy Service
+        Interface SavingsAccountDormancyService {
+            + trackDormancy() : void
+            + markAccountsInactive(LocalDate businessDate) : List<Long>
+            + markAccountsDormant(LocalDate businessDate) : List<Long>
+            + escheatDormantAccounts(LocalDate businessDate) : List<Long>
+            + reactivateAccount(Long accountId, JsonCommand command) : CommandProcessingResult
+        }
+        
+        ' Savings Account Summary Wrapper
+        Class SavingsAccountTransactionSummaryWrapper {
+            --
+            + updateSummary(SavingsAccount savingsAccount) : void
+            + calculateRunningBalanceForTransactions(List<SavingsAccountTransaction> transactions) : void
+            + recalculateBalances(SavingsAccount savingsAccount, LocalDate fromDate) : void
+            - getTotalDeposits(List<SavingsAccountTransaction> transactions, MonetaryCurrency currency) : Money
+            - getTotalWithdrawals(List<SavingsAccountTransaction> transactions, MonetaryCurrency currency) : Money
+            - getTotalInterestEarned(List<SavingsAccountTransaction> transactions, MonetaryCurrency currency) : Money
+            - getTotalFees(List<SavingsAccountTransaction> transactions, MonetaryCurrency currency) : Money
+            - getTotalPenalties(List<SavingsAccountTransaction> transactions, MonetaryCurrency currency) : Money
+            - getRunningBalance(List<SavingsAccountTransaction> transactions, MonetaryCurrency currency) : Money
+        }
+    }
+    
+    ' Savings Repositories
+    Package "repository" {
+        
+        ' Savings Account Repository
+        Interface SavingsAccountRepository <<Repository>> {
+            + findByAccountNumber(String accountNumber) : Optional<SavingsAccount>
+            + findByClient(Client client) : List<SavingsAccount>
+            + findByGroup(Group group) : List<SavingsAccount>
+            + findByStatus(Integer status) : List<SavingsAccount>
+            + findByProduct(SavingsProduct product) : List<SavingsAccount>
+            + findByOfficer(Staff officer) : List<SavingsAccount>
+            + findActiveAccounts() : List<SavingsAccount>
+            + findInactiveAccounts(LocalDate businessDate) : List<SavingsAccount>
+            + findDormantAccounts(LocalDate businessDate) : List<SavingsAccount>
+            + findAccountsForEscheatment(LocalDate businessDate) : List<SavingsAccount>
+            + findAccountsForInterestPosting(LocalDate businessDate) : List<SavingsAccount>
+            + countByClientAndStatus(Client client, Integer status) : Integer
+            + countByProductAndStatus(SavingsProduct product, Integer status) : Integer
+        }
+        
+        ' Savings Account Transaction Repository  
+        Interface SavingsAccountTransactionRepository <<Repository>> {
+            + findByAccount(SavingsAccount account) : List<SavingsAccountTransaction>
+            + findByAccountAndNotReversed(SavingsAccount account) : List<SavingsAccountTransaction>
+            + findByAccountOrderByCreatedDateDesc(SavingsAccount account) : List<SavingsAccountTransaction>
+            + findByAccountAndDateRange(SavingsAccount account, LocalDate fromDate, LocalDate toDate) : List<SavingsAccountTransaction>
+            + findByAccountAndTransactionType(SavingsAccount account, SavingsAccountTransactionType type) : List<SavingsAccountTransaction>
+            + findLastTransactionByAccount(SavingsAccount account) : Optional<SavingsAccountTransaction>
+            + findLastInterestPostingByAccount(SavingsAccount account) : Optional<SavingsAccountTransaction>
+        }
+        
+        ' Savings Account Charge Repository
+        Interface SavingsAccountChargeRepository <<Repository>> {
+            + findByAccount(SavingsAccount account) : List<SavingsAccountCharge>
+            + findByAccountAndActive(SavingsAccount account) : List<SavingsAccountCharge>
+            + findByAccountAndCharge(SavingsAccount account, Charge charge) : List<SavingsAccountCharge>
+            + findPendingCharges(SavingsAccount account) : List<SavingsAccountCharge>
+            + findOverdueCharges(SavingsAccount account, LocalDate businessDate) : List<SavingsAccountCharge>
+            + findAnnualFeeCharges(SavingsAccount account) : List<SavingsAccountCharge>
+        }
+        
+        ' Savings Product Repository
+        Interface SavingsProductRepository <<Repository>> {
+            + findByName(String name) : Optional<SavingsProduct>
+            + findActiveProducts() : List<SavingsProduct>
+            + findByCurrency(String currencyCode) : List<SavingsProduct>
+            + findByAccountingRule(AccountingRuleType accountingRule) : List<SavingsProduct>
+        }
+    }
+    
+    ' Savings Validation
+    Package "validation" {
+        
+        ' Savings Account Data Validator
+        Class SavingsAccountDataValidator {
+            - FromJsonHelper fromApiJsonHelper
+            - SavingsProductRepository savingsProductRepository
+            - ClientRepository clientRepository
+            - GroupRepository groupRepository
+            --
+            + validateForCreate(String json) : void
+            + validateForUpdate(String json, SavingsProduct product) : void
+            + validateForActivation(String json) : void
+            + validateForClosure(String json) : void
+            + validateForTransaction(String json, String transactionType) : void
+            + validateChargeParameters(JsonElement element, SavingsProduct product) : void
+            + validateForBlock(String json) : void
+            + validateForUnblock(String json) : void
+            + validateForHoldAmount(String json) : void
+            - validateSubmittedOnDate(JsonElement element) : void
+            - validateNominalAnnualInterestRate(JsonElement element, SavingsProduct product) : void
+            - validateMinimumBalance(JsonElement element, SavingsProduct product) : void
+            - performDataIntegrityChecks(JsonElement element) : void
+        }
+        
+        ' Savings Transaction Validator
+        Class SavingsTransactionValidator {
+            - FromJsonHelper fromApiJsonHelper
+            --
+            + validateDeposit(String json) : void
+            + validateWithdrawal(String json) : void
+            + validateInterestCalculation(String json) : void
+            + validateChargePayment(String json) : void
+            + validateTransfer(String json) : void
+            - validateCommonTransactionParameters(JsonElement element) : void
+            - validateTransactionDate(JsonElement element) : void
+            - validateTransactionAmount(JsonElement element) : void
+            - validatePaymentTypeId(JsonElement element) : void
+        }
+    }
+    
+    ' Savings Events
+    Package "events" {
+        
+        ' Savings Account Submitted Event
+        Class SavingsAccountSubmittedEvent {
+            - Long accountId
+            - String accountNumber
+            - Long clientId
+            - Long productId
+            - LocalDate submittedDate
+            - BigDecimal nominalAnnualInterestRate
+            --
+            + getAccountId() : Long
+            + getAccountNumber() : String
+            + getClientId() : Long
+            + getProductId() : Long
+            + getSubmittedDate() : LocalDate
+            + getNominalAnnualInterestRate() : BigDecimal
+        }
+        
+        ' Savings Account Activated Event
+        Class SavingsAccountActivatedEvent {
+            - Long accountId
+            - String accountNumber
+            - Long clientId
+            - LocalDate activatedDate
+            - String activatedBy
+            --
+            + getAccountId() : Long
+            + getAccountNumber() : String
+            + getClientId() : Long
+            + getActivatedDate() : LocalDate
+            + getActivatedBy() : String
+        }
+        
+        ' Savings Deposit Made Event
+        Class SavingsDepositMadeEvent {
+            - Long accountId
+            - String accountNumber
+            - Long clientId
+            - Long transactionId
+            - Money depositAmount
+            - LocalDate depositDate
+            - Money accountBalance
+            --
+            + getAccountId() : Long
+            + getAccountNumber() : String
+            + getClientId() : Long
+            + getTransactionId() : Long
+            + getDepositAmount() : Money
+            + getDepositDate() : LocalDate
+            + getAccountBalance() : Money
+        }
+        
+        ' Savings Withdrawal Made Event
+        Class SavingsWithdrawalMadeEvent {
+            - Long accountId
+            - String accountNumber
+            - Long clientId
+            - Long transactionId
+            - Money withdrawalAmount
+            - LocalDate withdrawalDate
+            - Money accountBalance
+            --
+            + getAccountId() : Long
+            + getAccountNumber() : String
+            + getClientId() : Long
+            + getTransactionId() : Long
+            + getWithdrawalAmount() : Money
+            + getWithdrawalDate() : LocalDate
+            + getAccountBalance() : Money
+        }
+        
+        ' Interest Posted Event
+        Class SavingsInterestPostedEvent {
+            - Long accountId
+            - String accountNumber
+            - Long clientId
+            - Long transactionId
+            - Money interestAmount
+            - LocalDate postingDate
+            - LocalDate periodStartDate
+            - LocalDate periodEndDate
+            --
+            + getAccountId() : Long
+            + getAccountNumber() : String
+            + getClientId() : Long
+            + getTransactionId() : Long
+            + getInterestAmount() : Money
+            + getPostingDate() : LocalDate
+            + getPeriodStartDate() : LocalDate
+            + getPeriodEndDate() : LocalDate
+        }
+    }
+}
+
+' Relationships
+SavingsAccount --> SavingsProduct : "configured by"
+SavingsAccount --> SavingsAccountStatusType : "has status"
+SavingsAccount --> SavingsAccountTransaction : "has transactions"
+SavingsAccount --> SavingsAccountCharge : "has charges"
+SavingsAccount --> SavingsAccountSummary : "has summary"
+SavingsAccountTransaction --> SavingsAccountTransactionType : "has type"
+SavingsAccountCharge --> SavingsAccountChargeCalculationType : "calculated by"
+
+SavingsAccountApplicationServiceImpl ..|> SavingsAccountApplicationService : "implements"
+SavingsAccountTransactionServiceImpl ..|> SavingsAccountTransactionService : "implements"
+SavingsInterestCalculationServiceImpl ..|> SavingsInterestCalculationService : "implements"
+
+SavingsAccountApplicationServiceImpl --> SavingsAccountRepository : "uses"
+SavingsAccountTransactionServiceImpl --> SavingsAccountTransactionRepository : "uses"
+SavingsInterestCalculationServiceImpl --> SavingsAccountTransactionRepository : "uses"
+
+SavingsAccountDataValidator --> SavingsProductRepository : "validates against"
+SavingsTransactionValidator --> SavingsAccountRepository : "validates against"
+
+SHOW_LEGEND()
+
+note top of SavingsAccount
+**Rich Savings Aggregate**
+• Complete account lifecycle
+• Interest calculation & posting  
+• Transaction processing
+• Balance management
+• Dormancy tracking
+end note
+
+note right of SavingsAccountApplicationService
+**Account Lifecycle Management**
+• Application processing
+• Approval workflow
+• Account activation
+• Closure handling
+end note
+
+note bottom of SavingsInterestCalculationService
+**Interest Management**
+• Daily balance calculation
+• Compound interest support
+• Multiple calculation methods
+• Automated posting
+end note
+
+note left of SavingsAccountDormancyService
+**Dormancy Management**
+• Automated tracking
+• Status transitions
+• Escheatment processing
+• Compliance support
+end note
+
+@enduml

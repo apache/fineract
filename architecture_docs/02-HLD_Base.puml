@@ -1,0 +1,155 @@
+@startuml Fineract-Bird-Eye-View
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+title Apache Fineract - Bird's Eye View Architecture
+
+' External Systems
+Person(client_users, "Financial Institution Users", "Loan officers, managers, customers")
+Person(developers, "Developers", "API consumers, mobile app developers")
+System_Ext(mobile_apps, "Mobile Applications", "Android/iOS apps using Fineract APIs")
+System_Ext(web_clients, "Web Clients", "Community App, Custom UIs")
+System_Ext(external_systems, "External Systems", "Payment gateways, SMS providers, etc.")
+
+' Main Fineract System Boundary
+System_Boundary(fineract_system, "Apache Fineract Platform") {
+
+    ' API Gateway / Entry Point
+    Container(api_gateway, "REST API Gateway", "Spring Boot", "Provides RESTful APIs for all operations")
+
+    ' Core Application Modules
+    Container_Boundary(core_modules, "Core Application Modules") {
+        Container(fineract_provider, "Fineract Provider", "Spring Boot Application", "Main application with REST controllers")
+        Container(fineract_core, "Core Module", "Java Library", "Common utilities, base classes")
+        Container(fineract_command, "Command Module", "Java Library", "Command processing framework")
+        Container(fineract_validation, "Validation Module", "Java Library", "Input validation logic")
+    }
+
+    ' Business Domain Modules
+    Container_Boundary(business_modules, "Business Domain Modules") {
+        Container(fineract_loan, "Loan Module", "Java Library", "Loan products, accounts, transactions")
+        Container(fineract_savings, "Savings Module", "Java Library", "Savings accounts and operations")
+        Container(fineract_accounting, "Accounting Module", "Java Library", "Chart of accounts, journal entries")
+        Container(fineract_client, "Client Module", "Java Library", "Client management and KYC")
+        Container(fineract_portfolio, "Portfolio Module", "Java Library", "Groups, centers, staff management")
+    }
+
+    ' Supporting Modules
+    Container_Boundary(support_modules, "Supporting Modules") {
+        Container(fineract_charge, "Charge Module", "Java Library", "Fee and penalty management")
+        Container(fineract_rates, "Rates Module", "Java Library", "Interest rate calculations")
+        Container(fineract_tax, "Tax Module", "Java Library", "Tax calculations and reporting")
+        Container(fineract_report, "Report Module", "Java Library", "Report generation")
+        Container(fineract_document, "Document Module", "Java Library", "Document management")
+        Container(fineract_branch, "Branch Module", "Java Library", "Branch and organization management")
+        Container(fineract_investor, "Investor Module", "Java Library", "External fund management")
+    }
+
+    ' Advanced Features
+    Container_Boundary(advanced_modules, "Advanced Features") {
+        Container(fineract_progressive_loan, "Progressive Loan", "Java Library", "Advanced loan products")
+        Container(fineract_cob, "Close of Business", "Spring Batch", "End-of-day batch processing")
+        Container(fineract_notification, "Notification System", "Java Library", "SMS, Email notifications")
+    }
+
+    ' Infrastructure & Integration
+    Container_Boundary(infrastructure, "Infrastructure & Integration") {
+        Container(batch_processing, "Batch Processing", "Spring Batch", "Background job processing")
+        Container(message_broker, "Message Broker", "ActiveMQ/Kafka", "Async messaging and events")
+        Container(security_module, "Security & Auth", "Spring Security", "Authentication, authorization, OAuth2")
+        Container(cache_layer, "Caching Layer", "Spring Cache", "Performance optimization")
+    }
+
+    ' Data & Integration Layer
+    Container_Boundary(data_layer, "Data & Integration") {
+        Container(avro_schemas, "Avro Schemas", "Apache Avro", "Data serialization schemas")
+        Container(data_migration, "Data Migration", "Liquibase", "Database schema versioning")
+        Container(api_client, "API Client SDK", "Java Library", "Generated client libraries")
+    }
+}
+
+' External Data Storage
+ContainerDb(tenant_db, "Tenant Databases", "MySQL/MariaDB/PostgreSQL", "Multi-tenant data storage")
+ContainerDb(system_db, "System Database", "MySQL/MariaDB/PostgreSQL", "System configuration and metadata")
+
+' External Services
+System_Ext(file_storage, "File Storage", "Local/Cloud storage for documents")
+System_Ext(sms_gateway, "SMS Gateway", "External SMS service providers")
+System_Ext(email_service, "Email Service", "SMTP servers for notifications")
+
+' Deployment & Operations
+Container_Boundary(deployment, "Deployment & Operations") {
+    Container(docker_container, "Docker Container", "Docker", "Containerized deployment")
+    Container(kubernetes_cluster, "Kubernetes", "K8s", "Container orchestration")
+    Container(monitoring, "Monitoring", "Actuator/Prometheus", "Health checks and metrics")
+}
+
+' Testing & Quality
+Container_Boundary(testing, "Testing & Quality Assurance") {
+    Container(unit_tests, "Unit Tests", "JUnit", "Component testing")
+    Container(integration_tests, "Integration Tests", "Spring Boot Test", "API and database testing")
+    Container(e2e_tests, "E2E Tests", "Cucumber", "Business scenario testing")
+}
+
+' Development Tools
+Container_Boundary(dev_tools, "Development Tools") {
+    Container(gradle_build, "Build System", "Gradle", "Project build and dependency management")
+    Container(code_quality, "Code Quality", "SpotBugs/Checkstyle", "Static analysis and formatting")
+    Container(documentation, "Documentation", "AsciiDoc", "Technical documentation")
+}
+
+' Relationships
+Rel(client_users, web_clients, "Uses")
+Rel(developers, mobile_apps, "Develops")
+Rel(web_clients, api_gateway, "HTTP/HTTPS API calls")
+Rel(mobile_apps, api_gateway, "HTTP/HTTPS API calls")
+Rel(external_systems, api_gateway, "Integration APIs")
+
+Rel(api_gateway, fineract_provider, "Routes requests")
+Rel(fineract_provider, core_modules, "Uses")
+Rel(fineract_provider, business_modules, "Orchestrates")
+Rel(fineract_provider, support_modules, "Utilizes")
+Rel(fineract_provider, advanced_modules, "Manages")
+
+Rel(business_modules, infrastructure, "Uses")
+Rel(fineract_provider, data_layer, "Integrates")
+Rel(fineract_provider, tenant_db, "Multi-tenant queries")
+Rel(fineract_provider, system_db, "System queries")
+
+Rel(infrastructure, message_broker, "Async processing")
+Rel(batch_processing, tenant_db, "Batch operations")
+Rel(fineract_provider, file_storage, "Document storage")
+Rel(fineract_notification, sms_gateway, "SMS notifications")
+Rel(fineract_notification, email_service, "Email notifications")
+
+Rel(docker_container, kubernetes_cluster, "Deployed on")
+Rel(monitoring, fineract_provider, "Monitors")
+
+' Build and Quality Relationships
+Rel(gradle_build, fineract_provider, "Builds")
+Rel(code_quality, fineract_provider, "Analyzes")
+Rel(testing, fineract_provider, "Tests")
+
+SHOW_LEGEND()
+
+note top of fineract_system
+**Apache Fineract - Open Source Core Banking Platform**
+- Multi-tenant SaaS architecture
+- RESTful API-first design
+- Microfinance and digital banking focus
+- 3+ billion underbanked/unbanked users target
+- Modular, extensible architecture
+- Docker & Kubernetes ready
+- Multiple database support
+end note
+
+note bottom of tenant_db
+**Multi-Tenant Data Architecture**
+- Each tenant has isolated schema
+- Shared application, separated data
+- Configurable per-tenant features
+- Scalable tenant onboarding
+end note
+
+@enduml

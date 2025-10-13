@@ -1,0 +1,544 @@
+@startuml Fineract-Master-Sequence-Diagram
+!include <C4/C4_Context>
+
+title Apache Fineract - Master High Level Sequence Diagram\n(Client & Server Perspective with All Module Integration)
+
+' External Actors
+actor "Mobile App User" as MOBILE_USER
+actor "Web App User" as WEB_USER
+actor "Loan Officer" as LOAN_OFFICER
+actor "Branch Manager" as BRANCH_MGR
+actor "System Administrator" as SYS_ADMIN
+
+' Client Side Applications
+participant "Mobile Banking App" as MOBILE_APP
+participant "Community Web App" as WEB_APP
+participant "Admin Portal" as ADMIN_APP
+
+' API Gateway & Load Balancer
+participant "API Gateway/\nLoad Balancer" as API_GATEWAY
+
+' Fineract Server - API Layer
+box "Fineract Server - API Layer" #LightBlue
+participant "ClientsApiResource" as CLIENT_API
+participant "LoansApiResource" as LOAN_API
+participant "SavingsAccountsApiResource" as SAVINGS_API
+participant "UsersApiResource" as USER_API
+participant "GLAccountsApiResource" as GL_API
+participant "ReportsApiResource" as REPORT_API
+end box
+
+' Fineract Server - Security Layer
+box "Security & Command Layer" #LightGreen
+participant "OAuth2AuthenticationFilter" as OAUTH_FILTER
+participant "TenantAwareBasicAuthenticationFilter" as TENANT_FILTER
+participant "PlatformSecurityContext" as SECURITY_CTX
+participant "CommandSourceHandler" as CMD_HANDLER
+participant "DefaultCommandSourceService" as CMD_SERVICE
+end box
+
+' Fineract Server - Service Layer
+box "Business Service Layer" #LightYellow
+participant "ClientWritePlatformService" as CLIENT_WRITE_SVC
+participant "ClientReadPlatformService" as CLIENT_READ_SVC
+participant "LoanApplicationWritePlatformService" as LOAN_WRITE_SVC
+participant "LoanReadPlatformService" as LOAN_READ_SVC
+participant "SavingsAccountWritePlatformService" as SAVINGS_WRITE_SVC
+participant "JournalEntryWritePlatformService" as JE_WRITE_SVC
+participant "ReportWritePlatformService" as REPORT_SVC
+end box
+
+' Fineract Server - Validation Layer
+box "Validation Layer" #LightPink
+participant "ClientValidator" as CLIENT_VALIDATOR
+participant "LoanApplicationValidator" as LOAN_VALIDATOR
+participant "SavingsAccountValidator" as SAVINGS_VALIDATOR
+participant "DataValidatorBuilder" as DATA_VALIDATOR
+end box
+
+' Fineract Server - Domain Layer
+box "Domain Model Layer" #LightCyan
+participant "Client" as CLIENT_ENTITY
+participant "Loan" as LOAN_ENTITY
+participant "SavingsAccount" as SAVINGS_ENTITY
+participant "LoanRepaymentSchedule" as LOAN_SCHEDULE
+participant "JournalEntry" as JOURNAL_ENTRY
+end box
+
+' Fineract Server - Repository Layer
+box "Repository/Data Access Layer" #LightGray
+participant "ClientRepository" as CLIENT_REPO
+participant "LoanRepository" as LOAN_REPO
+participant "SavingsAccountRepository" as SAVINGS_REPO
+participant "GLAccountRepository" as GL_REPO
+participant "JournalEntryRepository" as JE_REPO
+end box
+
+' External Systems
+box "External Systems" #LightSalmon
+participant "SMS Gateway Service" as SMS_SVC
+participant "Email Service" as EMAIL_SVC
+participant "Payment Gateway" as PAYMENT_GW
+participant "Document Storage" as DOC_STORAGE
+end box
+
+' Database
+database "Multi-Tenant Database\n(MySQL/PostgreSQL)" as DATABASE
+
+note over MOBILE_USER, DATABASE
+**Master Sequence Covering Key Business Flows:**
+1. **Client Onboarding & KYC**
+2. **Loan Application & Approval**
+3. **Loan Disbursement & Repayment**
+4. **Savings Account Operations**
+5. **Financial Reporting & Analytics**
+6. **System Administration**
+end note
+
+== 1. Client Onboarding Flow (Mobile & Web) ==
+
+MOBILE_USER -> MOBILE_APP : registerNewClient(personalInfo)
+activate MOBILE_APP
+
+MOBILE_APP -> API_GATEWAY : POST /fineract-provider/api/v1/clients\n{Authorization: Bearer token}
+activate API_GATEWAY
+
+API_GATEWAY -> CLIENT_API : createClient(clientData)
+activate CLIENT_API
+
+CLIENT_API -> OAUTH_FILTER : authenticateRequest(bearerToken)
+activate OAUTH_FILTER
+OAUTH_FILTER -> TENANT_FILTER : validateTenant(tenantIdentifier)
+activate TENANT_FILTER
+TENANT_FILTER -> SECURITY_CTX : setAuthenticatedUser(userDetails)
+activate SECURITY_CTX
+SECURITY_CTX --> TENANT_FILTER : authenticationSuccess
+deactivate SECURITY_CTX
+TENANT_FILTER --> OAUTH_FILTER : tenantValidated
+deactivate TENANT_FILTER
+OAUTH_FILTER --> CLIENT_API : requestAuthenticated
+deactivate OAUTH_FILTER
+
+CLIENT_API -> CMD_HANDLER : processCommand("CREATE", "CLIENT", clientData)
+activate CMD_HANDLER
+
+CMD_HANDLER -> CMD_SERVICE : processCommand(commandWrapper)
+activate CMD_SERVICE
+
+CMD_SERVICE -> CLIENT_VALIDATOR : validateForCreate(clientData)
+activate CLIENT_VALIDATOR
+CLIENT_VALIDATOR -> DATA_VALIDATOR : validateMandatoryFields()
+activate DATA_VALIDATOR
+DATA_VALIDATOR -> CLIENT_VALIDATOR : validationResult
+deactivate DATA_VALIDATOR
+CLIENT_VALIDATOR -> CLIENT_REPO : findByAccountNumber(accountNo)
+activate CLIENT_REPO
+CLIENT_REPO -> DATABASE : SELECT * FROM m_client WHERE account_no = ?
+activate DATABASE
+DATABASE --> CLIENT_REPO : queryResult
+deactivate DATABASE
+CLIENT_REPO --> CLIENT_VALIDATOR : duplicateCheck
+deactivate CLIENT_REPO
+CLIENT_VALIDATOR --> CMD_SERVICE : validationPassed
+deactivate CLIENT_VALIDATOR
+
+CMD_SERVICE -> CLIENT_WRITE_SVC : createClient(clientData)
+activate CLIENT_WRITE_SVC
+
+CLIENT_WRITE_SVC -> CLIENT_ENTITY : new Client(personalInfo, office, staff)
+activate CLIENT_ENTITY
+CLIENT_ENTITY -> CLIENT_ENTITY : generateAccountNumber()
+CLIENT_ENTITY -> CLIENT_ENTITY : setStatus(PENDING)
+CLIENT_ENTITY --> CLIENT_WRITE_SVC : clientEntity
+deactivate CLIENT_ENTITY
+
+CLIENT_WRITE_SVC -> CLIENT_REPO : save(clientEntity)
+activate CLIENT_REPO
+CLIENT_REPO -> DATABASE : INSERT INTO m_client (account_no, firstname, lastname, ...)
+activate DATABASE
+DATABASE --> CLIENT_REPO : clientId
+deactivate DATABASE
+CLIENT_REPO --> CLIENT_WRITE_SVC : savedClient
+deactivate CLIENT_REPO
+
+CLIENT_WRITE_SVC -> SMS_SVC : sendWelcomeSMS(mobileNumber, clientDetails)
+activate SMS_SVC
+SMS_SVC --> CLIENT_WRITE_SVC : smsDeliveryStatus
+deactivate SMS_SVC
+
+CLIENT_WRITE_SVC --> CMD_SERVICE : clientCreated(clientId)
+deactivate CLIENT_WRITE_SVC
+
+CMD_SERVICE --> CMD_HANDLER : commandExecuted
+deactivate CMD_SERVICE
+
+CMD_HANDLER --> CLIENT_API : clientCreationResponse
+deactivate CMD_HANDLER
+
+CLIENT_API --> API_GATEWAY : HTTP 201 Created {clientId, accountNumber}
+deactivate CLIENT_API
+
+API_GATEWAY --> MOBILE_APP : clientRegistrationSuccess
+deactivate API_GATEWAY
+
+MOBILE_APP --> MOBILE_USER : "Registration Successful!\nAccount: 000000001"
+deactivate MOBILE_APP
+
+== 2. Loan Application Flow (Web Interface) ==
+
+LOAN_OFFICER -> WEB_APP : createLoanApplication(clientId, loanProductId)
+activate WEB_APP
+
+WEB_APP -> API_GATEWAY : POST /fineract-provider/api/v1/loans\n{loanApplicationData}
+activate API_GATEWAY
+
+API_GATEWAY -> LOAN_API : calculateLoanSchedule(loanApplicationData)
+activate LOAN_API
+
+LOAN_API -> CMD_HANDLER : processCommand("CREATE", "LOAN", loanData)
+activate CMD_HANDLER
+
+CMD_HANDLER -> CMD_SERVICE : processCommand(commandWrapper)
+activate CMD_SERVICE
+
+CMD_SERVICE -> LOAN_VALIDATOR : validateForCreate(loanApplicationData)
+activate LOAN_VALIDATOR
+LOAN_VALIDATOR -> CLIENT_READ_SVC : retrieveClient(clientId)
+activate CLIENT_READ_SVC
+CLIENT_READ_SVC -> CLIENT_REPO : findById(clientId)
+activate CLIENT_REPO
+CLIENT_REPO -> DATABASE : SELECT * FROM m_client WHERE id = ?
+activate DATABASE
+DATABASE --> CLIENT_REPO : clientData
+deactivate DATABASE
+CLIENT_REPO --> CLIENT_READ_SVC : clientEntity
+deactivate CLIENT_REPO
+CLIENT_READ_SVC --> LOAN_VALIDATOR : clientExists
+deactivate CLIENT_READ_SVC
+LOAN_VALIDATOR --> CMD_SERVICE : validationPassed
+deactivate LOAN_VALIDATOR
+
+CMD_SERVICE -> LOAN_WRITE_SVC : submitLoanApplication(loanApplicationData)
+activate LOAN_WRITE_SVC
+
+LOAN_WRITE_SVC -> LOAN_ENTITY : new Loan(client, loanProduct, principal, terms)
+activate LOAN_ENTITY
+LOAN_ENTITY -> LOAN_ENTITY : generateAccountNumber()
+LOAN_ENTITY -> LOAN_ENTITY : calculateSchedule()
+LOAN_ENTITY -> LOAN_SCHEDULE : generateRepaymentSchedule(principal, interestRate, termFrequency)
+activate LOAN_SCHEDULE
+LOAN_SCHEDULE -> LOAN_SCHEDULE : calculateInstallments()
+LOAN_SCHEDULE --> LOAN_ENTITY : repaymentSchedule
+deactivate LOAN_SCHEDULE
+LOAN_ENTITY --> LOAN_WRITE_SVC : loanEntity
+deactivate LOAN_ENTITY
+
+LOAN_WRITE_SVC -> LOAN_REPO : save(loanEntity)
+activate LOAN_REPO
+LOAN_REPO -> DATABASE : INSERT INTO m_loan (account_no, client_id, principal_amount, ...)
+activate DATABASE
+DATABASE --> LOAN_REPO : loanId
+deactivate DATABASE
+LOAN_REPO --> LOAN_WRITE_SVC : savedLoan
+deactivate LOAN_REPO
+
+LOAN_WRITE_SVC --> CMD_SERVICE : loanApplicationSubmitted
+deactivate LOAN_WRITE_SVC
+
+CMD_SERVICE --> CMD_HANDLER : commandExecuted
+deactivate CMD_SERVICE
+
+CMD_HANDLER --> LOAN_API : loanApplicationResponse
+deactivate CMD_HANDLER
+
+LOAN_API --> API_GATEWAY : HTTP 201 Created {loanId, accountNumber, schedule}
+deactivate LOAN_API
+
+API_GATEWAY --> WEB_APP : loanApplicationSuccess
+deactivate API_GATEWAY
+
+WEB_APP --> LOAN_OFFICER : "Loan Application Created!\nLoan Account: 000000001\nAwating Approval"
+deactivate WEB_APP
+
+== 3. Loan Disbursement & Accounting Integration ==
+
+BRANCH_MGR -> WEB_APP : approveLoan(loanId)
+activate WEB_APP
+
+WEB_APP -> API_GATEWAY : POST /fineract-provider/api/v1/loans/{loanId}?command=approve
+activate API_GATEWAY
+
+API_GATEWAY -> LOAN_API : approveLoan(loanId, approvalData)
+activate LOAN_API
+
+LOAN_API -> CMD_HANDLER : processCommand("APPROVE", "LOAN", approvalData)
+activate CMD_HANDLER
+
+CMD_HANDLER -> LOAN_WRITE_SVC : approveLoan(loanId, approvalData)
+activate LOAN_WRITE_SVC
+
+LOAN_WRITE_SVC -> LOAN_REPO : findById(loanId)
+activate LOAN_REPO
+LOAN_REPO -> DATABASE : SELECT * FROM m_loan WHERE id = ?
+activate DATABASE
+DATABASE --> LOAN_REPO : loanData
+deactivate DATABASE
+LOAN_REPO --> LOAN_WRITE_SVC : loanEntity
+deactivate LOAN_REPO
+
+LOAN_WRITE_SVC -> LOAN_ENTITY : approve(approvedBy, approvalDate, approvedAmount)
+activate LOAN_ENTITY
+LOAN_ENTITY -> LOAN_ENTITY : setStatus(APPROVED)
+LOAN_ENTITY -> LOAN_ENTITY : setApprovedPrincipal(approvedAmount)
+LOAN_ENTITY --> LOAN_WRITE_SVC : loanApproved
+deactivate LOAN_ENTITY
+
+' Accounting Integration for Loan Approval
+LOAN_WRITE_SVC -> JE_WRITE_SVC : createJournalEntriesForLoanApproval(loanId, amount)
+activate JE_WRITE_SVC
+
+JE_WRITE_SVC -> JOURNAL_ENTRY : new JournalEntry(DEBIT, "Loan Portfolio", amount)
+activate JOURNAL_ENTRY
+JOURNAL_ENTRY --> JE_WRITE_SVC : debitEntry
+deactivate JOURNAL_ENTRY
+
+JE_WRITE_SVC -> JOURNAL_ENTRY : new JournalEntry(CREDIT, "Fund Source", amount)
+activate JOURNAL_ENTRY
+JOURNAL_ENTRY --> JE_WRITE_SVC : creditEntry
+deactivate JOURNAL_ENTRY
+
+JE_WRITE_SVC -> JE_REPO : save(journalEntries)
+activate JE_REPO
+JE_REPO -> DATABASE : INSERT INTO acc_gl_journal_entry (...)
+activate DATABASE
+DATABASE --> JE_REPO : entriesCreated
+deactivate DATABASE
+JE_REPO --> JE_WRITE_SVC : journalEntriesPosted
+deactivate JE_REPO
+
+JE_WRITE_SVC --> LOAN_WRITE_SVC : accountingEntriesCreated
+deactivate JE_WRITE_SVC
+
+LOAN_WRITE_SVC -> LOAN_REPO : save(loanEntity)
+activate LOAN_REPO
+LOAN_REPO -> DATABASE : UPDATE m_loan SET loan_status_id = 200, approved_principal = ?
+activate DATABASE
+DATABASE --> LOAN_REPO : loanUpdated
+deactivate DATABASE
+LOAN_REPO --> LOAN_WRITE_SVC : loanApprovalSaved
+deactivate LOAN_REPO
+
+' Notification Service Integration
+LOAN_WRITE_SVC -> SMS_SVC : sendLoanApprovalSMS(clientMobile, loanDetails)
+activate SMS_SVC
+SMS_SVC --> LOAN_WRITE_SVC : notificationSent
+deactivate SMS_SVC
+
+LOAN_WRITE_SVC --> CMD_HANDLER : loanApprovalCompleted
+deactivate LOAN_WRITE_SVC
+
+CMD_HANDLER --> LOAN_API : approvalResponse
+deactivate CMD_HANDLER
+
+LOAN_API --> API_GATEWAY : HTTP 200 OK {loanApproved: true}
+deactivate LOAN_API
+
+API_GATEWAY --> WEB_APP : loanApprovalSuccess
+deactivate API_GATEWAY
+
+WEB_APP --> BRANCH_MGR : "Loan Approved Successfully!\nReady for Disbursement"
+deactivate WEB_APP
+
+== 4. Savings Account Operations ==
+
+MOBILE_USER -> MOBILE_APP : createSavingsAccount(clientId, productId)
+activate MOBILE_APP
+
+MOBILE_APP -> API_GATEWAY : POST /fineract-provider/api/v1/savingsaccounts
+activate API_GATEWAY
+
+API_GATEWAY -> SAVINGS_API : createSavingsAccount(savingsData)
+activate SAVINGS_API
+
+SAVINGS_API -> CMD_HANDLER : processCommand("CREATE", "SAVINGSACCOUNT", savingsData)
+activate CMD_HANDLER
+
+CMD_HANDLER -> SAVINGS_VALIDATOR : validateForCreate(savingsData)
+activate SAVINGS_VALIDATOR
+SAVINGS_VALIDATOR --> CMD_HANDLER : validationPassed
+deactivate SAVINGS_VALIDATOR
+
+CMD_HANDLER -> SAVINGS_WRITE_SVC : createSavingsAccount(savingsData)
+activate SAVINGS_WRITE_SVC
+
+SAVINGS_WRITE_SVC -> SAVINGS_ENTITY : new SavingsAccount(client, product, nominalInterestRate)
+activate SAVINGS_ENTITY
+SAVINGS_ENTITY -> SAVINGS_ENTITY : generateAccountNumber()
+SAVINGS_ENTITY -> SAVINGS_ENTITY : setStatus(SUBMITTED_AND_PENDING_APPROVAL)
+SAVINGS_ENTITY --> SAVINGS_WRITE_SVC : savingsEntity
+deactivate SAVINGS_ENTITY
+
+SAVINGS_WRITE_SVC -> SAVINGS_REPO : save(savingsEntity)
+activate SAVINGS_REPO
+SAVINGS_REPO -> DATABASE : INSERT INTO m_savings_account (...)
+activate DATABASE
+DATABASE --> SAVINGS_REPO : savingsAccountId
+deactivate DATABASE
+SAVINGS_REPO --> SAVINGS_WRITE_SVC : savedAccount
+deactivate SAVINGS_REPO
+
+SAVINGS_WRITE_SVC --> CMD_HANDLER : savingsAccountCreated
+deactivate SAVINGS_WRITE_SVC
+
+CMD_HANDLER --> SAVINGS_API : creationResponse
+deactivate CMD_HANDLER
+
+SAVINGS_API --> API_GATEWAY : HTTP 201 Created {savingsAccountId}
+deactivate SAVINGS_API
+
+API_GATEWAY --> MOBILE_APP : accountCreationSuccess
+deactivate API_GATEWAY
+
+MOBILE_APP --> MOBILE_USER : "Savings Account Created!\nAccount: SAV000000001"
+deactivate MOBILE_APP
+
+== 5. Financial Reporting Flow ==
+
+SYS_ADMIN -> ADMIN_APP : generateFinancialReport(reportType, parameters)
+activate ADMIN_APP
+
+ADMIN_APP -> API_GATEWAY : GET /fineract-provider/api/v1/reports/{reportId}?tenantIdentifier=default
+activate API_GATEWAY
+
+API_GATEWAY -> REPORT_API : retrieveReport(reportId, parameters)
+activate REPORT_API
+
+REPORT_API -> REPORT_SVC : generateReport(reportId, parameters)
+activate REPORT_SVC
+
+REPORT_SVC -> CLIENT_READ_SVC : retrieveAllClients(officeId)
+activate CLIENT_READ_SVC
+CLIENT_READ_SVC -> CLIENT_REPO : findByOfficeId(officeId)
+activate CLIENT_REPO
+CLIENT_REPO -> DATABASE : SELECT * FROM m_client WHERE office_id = ?
+activate DATABASE
+DATABASE --> CLIENT_REPO : clientData
+deactivate DATABASE
+CLIENT_REPO --> CLIENT_READ_SVC : clients
+deactivate CLIENT_REPO
+CLIENT_READ_SVC --> REPORT_SVC : clientsList
+deactivate CLIENT_READ_SVC
+
+REPORT_SVC -> LOAN_READ_SVC : retrieveAllLoans(officeId)
+activate LOAN_READ_SVC
+LOAN_READ_SVC -> LOAN_REPO : findByOfficeId(officeId)
+activate LOAN_REPO
+LOAN_REPO -> DATABASE : SELECT * FROM m_loan WHERE office_id = ?
+activate DATABASE
+DATABASE --> LOAN_REPO : loanData
+deactivate DATABASE
+LOAN_REPO --> LOAN_READ_SVC : loans
+deactivate LOAN_REPO
+LOAN_READ_SVC --> REPORT_SVC : loansList
+deactivate LOAN_READ_SVC
+
+REPORT_SVC -> GL_API : retrieveTrialBalance(fromDate, toDate)
+activate GL_API
+GL_API -> JE_REPO : findJournalEntries(fromDate, toDate)
+activate JE_REPO
+JE_REPO -> DATABASE : SELECT * FROM acc_gl_journal_entry WHERE entry_date BETWEEN ? AND ?
+activate DATABASE
+DATABASE --> JE_REPO : journalEntries
+deactivate DATABASE
+JE_REPO --> GL_API : trialBalanceData
+deactivate JE_REPO
+GL_API --> REPORT_SVC : financialData
+deactivate GL_API
+
+REPORT_SVC -> REPORT_SVC : compileReportData(clients, loans, financials)
+REPORT_SVC -> DOC_STORAGE : saveReportDocument(reportContent)
+activate DOC_STORAGE
+DOC_STORAGE --> REPORT_SVC : documentId
+deactivate DOC_STORAGE
+
+REPORT_SVC --> REPORT_API : reportGenerated(reportDocument)
+deactivate REPORT_SVC
+
+REPORT_API --> API_GATEWAY : HTTP 200 OK {reportData}
+deactivate REPORT_API
+
+API_GATEWAY --> ADMIN_APP : reportResponse
+deactivate API_GATEWAY
+
+ADMIN_APP --> SYS_ADMIN : "Financial Report Generated Successfully"
+deactivate ADMIN_APP
+
+== 6. Payment Integration Flow ==
+
+MOBILE_USER -> MOBILE_APP : makePayment(loanAccountId, amount)
+activate MOBILE_APP
+
+MOBILE_APP -> PAYMENT_GW : initiatePayment(amount, merchantId)
+activate PAYMENT_GW
+
+PAYMENT_GW -> MOBILE_APP : paymentConfirmation(transactionId)
+deactivate PAYMENT_GW
+
+MOBILE_APP -> API_GATEWAY : POST /fineract-provider/api/v1/loans/{loanId}/transactions\n{repayment data}
+activate API_GATEWAY
+
+API_GATEWAY -> LOAN_API : makeRepayment(loanId, repaymentData)
+activate LOAN_API
+
+LOAN_API -> LOAN_WRITE_SVC : makeRepayment(loanId, transactionData)
+activate LOAN_WRITE_SVC
+
+LOAN_WRITE_SVC -> JE_WRITE_SVC : createJournalEntriesForRepayment(loanId, amount)
+activate JE_WRITE_SVC
+JE_WRITE_SVC -> JE_REPO : save(repaymentJournalEntries)
+activate JE_REPO
+JE_REPO -> DATABASE : INSERT INTO acc_gl_journal_entry (...)
+activate DATABASE
+DATABASE --> JE_REPO : entriesCreated
+deactivate DATABASE
+JE_REPO --> JE_WRITE_SVC : accountingCompleted
+deactivate JE_REPO
+JE_WRITE_SVC --> LOAN_WRITE_SVC : accountingEntriesPosted
+deactivate JE_WRITE_SVC
+
+LOAN_WRITE_SVC -> LOAN_REPO : updateLoanBalance(loanId, newBalance)
+activate LOAN_REPO
+LOAN_REPO -> DATABASE : UPDATE m_loan SET principal_outstanding = ?
+activate DATABASE
+DATABASE --> LOAN_REPO : loanUpdated
+deactivate DATABASE
+LOAN_REPO --> LOAN_WRITE_SVC : repaymentProcessed
+deactivate LOAN_REPO
+
+LOAN_WRITE_SVC --> LOAN_API : repaymentCompleted
+deactivate LOAN_WRITE_SVC
+
+LOAN_API --> API_GATEWAY : HTTP 200 OK {transactionId}
+deactivate LOAN_API
+
+API_GATEWAY --> MOBILE_APP : paymentProcessed
+deactivate API_GATEWAY
+
+MOBILE_APP --> MOBILE_USER : "Payment Successful!\nNew Balance: $X,XXX"
+deactivate MOBILE_APP
+
+note over MOBILE_USER, DATABASE
+**Key Integration Points Covered:**
+✅ **Multi-Channel Access** (Mobile, Web, Admin)
+✅ **Complete Security Flow** (OAuth2, Multi-tenancy)
+✅ **Command Pattern Implementation** 
+✅ **Cross-Module Integration** (Client → Loan → Savings → Accounting)
+✅ **External System Integration** (SMS, Email, Payments)
+✅ **Data Persistence** (Multi-tenant database operations)
+✅ **Real-time Notifications** 
+✅ **Financial Accounting Integration**
+✅ **Comprehensive Error Handling** 
+✅ **Audit Trail & Compliance**
+end note
+
+@enduml

@@ -1,0 +1,776 @@
+@startuml Document-Management-Module-Design
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Force top to bottom layout
+top to bottom direction
+
+title Apache Fineract - Document Management Module (Class/Interface Level Design)
+
+' Document Management Module
+Package "org.apache.fineract.infrastructure.documentmanagement" {
+    
+    ' Document Domain Model
+    Package "domain" {
+        
+        ' Core Document Entity
+        Class Document {
+            - Long id
+            - String name
+            - String fileName
+            - Long size
+            - String type
+            - String description
+            - String location
+            - String storageType
+            - Long parentEntityType
+            - Long parentEntityId
+            - String createdBy
+            - LocalDateTime createdOn
+            - String modifiedBy
+            - LocalDateTime modifiedOn
+            - DocumentStatus status
+            - DocumentCategory category
+            - Set<DocumentVersion> versions
+            - Set<DocumentPermission> permissions
+            - Map<String, String> metadata
+            --
+            + getName() : String
+            + getFileName() : String
+            + getSize() : Long
+            + getType() : String
+            + getDescription() : String
+            + getLocation() : String
+            + getStorageType() : String
+            + getParentEntityType() : Long
+            + getParentEntityId() : Long
+            + getStatus() : DocumentStatus
+            + getCategory() : DocumentCategory
+            + getVersions() : Set<DocumentVersion>
+            + getPermissions() : Set<DocumentPermission>
+            + getMetadata() : Map<String, String>
+            + getCurrentVersion() : DocumentVersion
+            + addVersion(DocumentVersion version) : void
+            + updateMetadata(String key, String value) : void
+            + archive() : void
+            + restore() : void
+            + delete() : void
+            + grantPermission(DocumentPermission permission) : void
+            + revokePermission(String userId, DocumentPermissionType type) : void
+            + hasPermission(String userId, DocumentPermissionType type) : Boolean
+            + generateChecksum() : String
+            + validateFileIntegrity() : Boolean
+        }
+        
+        ' Document Version
+        Class DocumentVersion {
+            - Long id
+            - Document document
+            - Integer versionNumber
+            - String fileName
+            - Long size
+            - String checksum
+            - String location
+            - String createdBy
+            - LocalDateTime createdOn
+            - String comment
+            - Boolean isCurrentVersion
+            - VersionStatus status
+            --
+            + getDocument() : Document
+            + getVersionNumber() : Integer
+            + getFileName() : String
+            + getSize() : Long
+            + getChecksum() : String
+            + getLocation() : String
+            + getCreatedBy() : String
+            + getCreatedOn() : LocalDateTime
+            + getComment() : String
+            + isCurrentVersion() : Boolean
+            + getStatus() : VersionStatus
+            + setAsCurrentVersion() : void
+            + archive() : void
+            + calculateChecksum() : String
+            + validateIntegrity() : Boolean
+        }
+        
+        ' Document Template
+        Class DocumentTemplate {
+            - Long id
+            - String name
+            - String description
+            - DocumentTemplateType templateType
+            - String templateContent
+            - String templateEngine
+            - Map<String, Object> templateVariables
+            - DocumentCategory category
+            - Boolean isActive
+            - String createdBy
+            - LocalDateTime createdOn
+            - String modifiedBy
+            - LocalDateTime modifiedOn
+            --
+            + getName() : String
+            + getDescription() : String
+            + getTemplateType() : DocumentTemplateType
+            + getTemplateContent() : String
+            + getTemplateEngine() : String
+            + getTemplateVariables() : Map<String, Object>
+            + getCategory() : DocumentCategory
+            + isActive() : Boolean
+            + processTemplate(Map<String, Object> variables) : String
+            + addVariable(String key, Object value) : void
+            + removeVariable(String key) : void
+            + validateTemplate() : Boolean
+            + clone() : DocumentTemplate
+        }
+        
+        ' Document Permission
+        Class DocumentPermission {
+            - Long id
+            - Document document
+            - String userId
+            - DocumentPermissionType permissionType
+            - LocalDateTime grantedDate
+            - String grantedBy
+            - LocalDateTime expiryDate
+            - Boolean isActive
+            --
+            + getDocument() : Document
+            + getUserId() : String
+            + getPermissionType() : DocumentPermissionType
+            + getGrantedDate() : LocalDateTime
+            + getGrantedBy() : String
+            + getExpiryDate() : LocalDateTime
+            + isActive() : Boolean
+            + isExpired() : Boolean
+            + extend(LocalDateTime newExpiryDate) : void
+            + revoke() : void
+        }
+        
+        ' Document Signature
+        Class DocumentSignature {
+            - Long id
+            - Document document
+            - String signerId
+            - String signerName
+            - SignatureType signatureType
+            - String signatureData
+            - String certificate
+            - LocalDateTime signedDate
+            - SignatureStatus status
+            - String signatureHash
+            - Map<String, String> signatureMetadata
+            --
+            + getDocument() : Document
+            + getSignerId() : String
+            + getSignerName() : String
+            + getSignatureType() : SignatureType
+            + getSignatureData() : String
+            + getCertificate() : String
+            + getSignedDate() : LocalDateTime
+            + getStatus() : SignatureStatus
+            + getSignatureHash() : String
+            + getSignatureMetadata() : Map<String, String>
+            + validateSignature() : Boolean
+            + verifyIntegrity() : Boolean
+            + invalidate() : void
+        }
+        
+        ' Document Workflow
+        Class DocumentWorkflow {
+            - Long id
+            - String name
+            - String description
+            - DocumentCategory applicableCategory
+            - Set<DocumentWorkflowStep> steps
+            - Boolean isActive
+            - String createdBy
+            - LocalDateTime createdOn
+            --
+            + getName() : String
+            + getDescription() : String
+            + getApplicableCategory() : DocumentCategory
+            + getSteps() : Set<DocumentWorkflowStep>
+            + isActive() : Boolean
+            + addStep(DocumentWorkflowStep step) : void
+            + removeStep(DocumentWorkflowStep step) : void
+            + getNextStep(DocumentWorkflowStep currentStep) : DocumentWorkflowStep
+            + isComplete(Document document) : Boolean
+            + initiate(Document document) : DocumentWorkflowInstance
+        }
+        
+        ' Document Workflow Step
+        Class DocumentWorkflowStep {
+            - Long id
+            - DocumentWorkflow workflow
+            - String name
+            - String description
+            - Integer stepOrder
+            - WorkflowStepType stepType
+            - String assigneeRole
+            - String assigneeUser
+            - Boolean isRequired
+            - Integer timeoutDays
+            - String conditions
+            --
+            + getWorkflow() : DocumentWorkflow
+            + getName() : String
+            + getDescription() : String
+            + getStepOrder() : Integer
+            + getStepType() : WorkflowStepType
+            + getAssigneeRole() : String
+            + getAssigneeUser() : String
+            + isRequired() : Boolean
+            + getTimeoutDays() : Integer
+            + getConditions() : String
+            + isApplicable(Document document) : Boolean
+            + canExecute(String userId) : Boolean
+        }
+        
+        ' Document Workflow Instance
+        Class DocumentWorkflowInstance {
+            - Long id
+            - Document document
+            - DocumentWorkflow workflow
+            - DocumentWorkflowStep currentStep
+            - WorkflowInstanceStatus status
+            - LocalDateTime startedDate
+            - LocalDateTime completedDate
+            - String initiatedBy
+            - Set<DocumentWorkflowStepExecution> stepExecutions
+            --
+            + getDocument() : Document
+            + getWorkflow() : DocumentWorkflow
+            + getCurrentStep() : DocumentWorkflowStep
+            + getStatus() : WorkflowInstanceStatus
+            + getStartedDate() : LocalDateTime
+            + getCompletedDate() : LocalDateTime
+            + getInitiatedBy() : String
+            + getStepExecutions() : Set<DocumentWorkflowStepExecution>
+            + executeStep(String userId, String action, String comment) : void
+            + moveToNextStep() : void
+            + complete() : void
+            + cancel(String reason) : void
+        }
+        
+        ' Document Audit Trail
+        Class DocumentAuditTrail {
+            - Long id
+            - Document document
+            - DocumentAction action
+            - String userId
+            - String userName
+            - LocalDateTime actionDate
+            - String ipAddress
+            - String userAgent
+            - Map<String, String> actionDetails
+            - String comment
+            --
+            + getDocument() : Document
+            + getAction() : DocumentAction
+            + getUserId() : String
+            + getUserName() : String
+            + getActionDate() : LocalDateTime
+            + getIpAddress() : String
+            + getUserAgent() : String
+            + getActionDetails() : Map<String, String>
+            + getComment() : String
+        }
+        
+        ' Enumerations
+        Enum DocumentStatus {
+            ACTIVE(1, "documentStatus.active")
+            ARCHIVED(2, "documentStatus.archived")
+            DELETED(3, "documentStatus.deleted")
+            DRAFT(4, "documentStatus.draft")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum DocumentCategory {
+            CLIENT_DOCUMENTS(1, "documentCategory.clientDocuments")
+            LOAN_DOCUMENTS(2, "documentCategory.loanDocuments")
+            SAVINGS_DOCUMENTS(3, "documentCategory.savingsDocuments")
+            LEGAL_DOCUMENTS(4, "documentCategory.legalDocuments")
+            FINANCIAL_STATEMENTS(5, "documentCategory.financialStatements")
+            COMPLIANCE_DOCUMENTS(6, "documentCategory.complianceDocuments")
+            REPORTS(7, "documentCategory.reports")
+            TEMPLATES(8, "documentCategory.templates")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum DocumentPermissionType {
+            READ(1, "documentPermission.read")
+            WRITE(2, "documentPermission.write")
+            DELETE(3, "documentPermission.delete")
+            SHARE(4, "documentPermission.share")
+            SIGN(5, "documentPermission.sign")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum SignatureType {
+            DIGITAL(1, "signatureType.digital")
+            ELECTRONIC(2, "signatureType.electronic")
+            BIOMETRIC(3, "signatureType.biometric")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum SignatureStatus {
+            VALID(1, "signatureStatus.valid")
+            INVALID(2, "signatureStatus.invalid")
+            EXPIRED(3, "signatureStatus.expired")
+            REVOKED(4, "signatureStatus.revoked")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum DocumentAction {
+            UPLOAD("upload")
+            DOWNLOAD("download")
+            VIEW("view")
+            UPDATE("update")
+            DELETE("delete")
+            SHARE("share")
+            SIGN("sign")
+            ARCHIVE("archive")
+            RESTORE("restore")
+            VERSION_CREATE("versionCreate")
+            --
+            - String code
+        }
+    }
+    
+    ' Document Services
+    Package "service" {
+        
+        ' Document Management Service
+        Interface DocumentManagementService {
+            + uploadDocument(UploadDocumentCommand command) : CommandProcessingResult
+            + updateDocument(Long documentId, UpdateDocumentCommand command) : CommandProcessingResult
+            + deleteDocument(Long documentId) : CommandProcessingResult
+            + downloadDocument(Long documentId) : DocumentContent
+            + retrieveDocument(Long documentId) : DocumentData
+            + retrieveDocuments(DocumentSearchCriteria criteria) : Page<DocumentData>
+            + shareDocument(Long documentId, ShareDocumentCommand command) : CommandProcessingResult
+            + createDocumentVersion(Long documentId, CreateVersionCommand command) : CommandProcessingResult
+        }
+        
+        ' Document Management Service Implementation
+        Class DocumentManagementServiceImpl <<Service>> {
+            - DocumentRepository documentRepository
+            - DocumentStorageService storageService
+            - DocumentPermissionService permissionService
+            - DocumentAuditService auditService
+            - DocumentWorkflowService workflowService
+            - PlatformSecurityContext context
+            --
+            + uploadDocument(UploadDocumentCommand command) : CommandProcessingResult
+            + updateDocument(Long documentId, UpdateDocumentCommand command) : CommandProcessingResult
+            + deleteDocument(Long documentId) : CommandProcessingResult
+            + downloadDocument(Long documentId) : DocumentContent
+            + retrieveDocument(Long documentId) : DocumentData
+            + retrieveDocuments(DocumentSearchCriteria criteria) : Page<DocumentData>
+            + shareDocument(Long documentId, ShareDocumentCommand command) : CommandProcessingResult
+            + createDocumentVersion(Long documentId, CreateVersionCommand command) : CommandProcessingResult
+            - validateUploadRequest(UploadDocumentCommand command) : void
+            - processDocument(Document document, InputStream content) : void
+            - generateThumbnail(Document document) : void
+            - extractMetadata(Document document, InputStream content) : Map<String, String>
+        }
+        
+        ' Document Storage Service
+        Interface DocumentStorageService {
+            + store(String key, InputStream content, DocumentStorageMetadata metadata) : DocumentStorageResult
+            + retrieve(String key) : InputStream
+            + delete(String key) : void
+            + exists(String key) : Boolean
+            + getMetadata(String key) : DocumentStorageMetadata
+            + generateDownloadUrl(String key, Duration expiry) : String
+            + copy(String sourceKey, String destinationKey) : void
+        }
+        
+        ' File System Storage Implementation
+        Class FileSystemStorageService <<Service>> {
+            - String rootDirectory
+            - DocumentStorageConfiguration config
+            --
+            + store(String key, InputStream content, DocumentStorageMetadata metadata) : DocumentStorageResult
+            + retrieve(String key) : InputStream
+            + delete(String key) : void
+            + exists(String key) : Boolean
+            + getMetadata(String key) : DocumentStorageMetadata
+            + generateDownloadUrl(String key, Duration expiry) : String
+            + copy(String sourceKey, String destinationKey) : void
+            - ensureDirectoryExists(Path directory) : void
+            - calculateChecksum(InputStream content) : String
+            - sanitizeFileName(String fileName) : String
+        }
+        
+        ' Cloud Storage Implementation
+        Class CloudStorageService <<Service>> {
+            - AmazonS3Client s3Client
+            - String bucketName
+            - DocumentStorageConfiguration config
+            --
+            + store(String key, InputStream content, DocumentStorageMetadata metadata) : DocumentStorageResult
+            + retrieve(String key) : InputStream
+            + delete(String key) : void
+            + exists(String key) : Boolean
+            + getMetadata(String key) : DocumentStorageMetadata
+            + generateDownloadUrl(String key, Duration expiry) : String
+            + copy(String sourceKey, String destinationKey) : void
+            - buildObjectMetadata(DocumentStorageMetadata metadata) : ObjectMetadata
+            - handleS3Exception(AmazonS3Exception e) : DocumentStorageException
+        }
+        
+        ' Document Template Service
+        Interface DocumentTemplateService {
+            + createTemplate(CreateTemplateCommand command) : CommandProcessingResult
+            + updateTemplate(Long templateId, UpdateTemplateCommand command) : CommandProcessingResult
+            + deleteTemplate(Long templateId) : CommandProcessingResult
+            + generateDocument(Long templateId, Map<String, Object> variables) : DocumentGenerationResult
+            + retrieveTemplate(Long templateId) : DocumentTemplateData
+            + retrieveTemplates(DocumentCategory category) : List<DocumentTemplateData>
+        }
+        
+        ' Document Template Service Implementation
+        Class DocumentTemplateServiceImpl <<Service>> {
+            - DocumentTemplateRepository templateRepository
+            - TemplateProcessingEngine templateEngine
+            - DocumentManagementService documentService
+            --
+            + createTemplate(CreateTemplateCommand command) : CommandProcessingResult
+            + updateTemplate(Long templateId, UpdateTemplateCommand command) : CommandProcessingResult
+            + deleteTemplate(Long templateId) : CommandProcessingResult
+            + generateDocument(Long templateId, Map<String, Object> variables) : DocumentGenerationResult
+            + retrieveTemplate(Long templateId) : DocumentTemplateData
+            + retrieveTemplates(DocumentCategory category) : List<DocumentTemplateData>
+            - validateTemplate(DocumentTemplate template) : void
+            - processVariables(Map<String, Object> variables) : Map<String, Object>
+        }
+        
+        ' Document Signature Service
+        Interface DocumentSignatureService {
+            + initiateDigitalSigning(Long documentId, SigningRequest request) : SigningSessionResult
+            + completeDigitalSigning(String sessionId, String signature, String certificate) : CommandProcessingResult
+            + validateSignature(Long signatureId) : SignatureValidationResult
+            + retrieveDocumentSignatures(Long documentId) : List<DocumentSignatureData>
+            + revokeSignature(Long signatureId, String reason) : CommandProcessingResult
+        }
+        
+        ' Document Signature Service Implementation
+        Class DocumentSignatureServiceImpl <<Service>> {
+            - DocumentSignatureRepository signatureRepository
+            - DigitalSignatureProvider signatureProvider
+            - CertificateValidationService certificateService
+            - DocumentRepository documentRepository
+            --
+            + initiateDigitalSigning(Long documentId, SigningRequest request) : SigningSessionResult
+            + completeDigitalSigning(String sessionId, String signature, String certificate) : CommandProcessingResult
+            + validateSignature(Long signatureId) : SignatureValidationResult
+            + retrieveDocumentSignatures(Long documentId) : List<DocumentSignatureData>
+            + revokeSignature(Long signatureId, String reason) : CommandProcessingResult
+            - validateSigningRequest(SigningRequest request) : void
+            - verifyDocumentIntegrity(Document document, String signature) : Boolean
+        }
+        
+        ' Document Workflow Service
+        Interface DocumentWorkflowService {
+            + createWorkflow(CreateWorkflowCommand command) : CommandProcessingResult
+            + updateWorkflow(Long workflowId, UpdateWorkflowCommand command) : CommandProcessingResult
+            + initiateWorkflow(Long documentId, Long workflowId) : CommandProcessingResult
+            + executeWorkflowStep(Long instanceId, ExecuteStepCommand command) : CommandProcessingResult
+            + retrieveWorkflowInstance(Long instanceId) : DocumentWorkflowInstanceData
+            + retrievePendingTasks(String userId) : List<WorkflowTaskData>
+        }
+        
+        ' Document Workflow Service Implementation
+        Class DocumentWorkflowServiceImpl <<Service>> {
+            - DocumentWorkflowRepository workflowRepository
+            - DocumentWorkflowInstanceRepository instanceRepository
+            - NotificationService notificationService
+            - TaskSchedulingService schedulingService
+            --
+            + createWorkflow(CreateWorkflowCommand command) : CommandProcessingResult
+            + updateWorkflow(Long workflowId, UpdateWorkflowCommand command) : CommandProcessingResult
+            + initiateWorkflow(Long documentId, Long workflowId) : CommandProcessingResult
+            + executeWorkflowStep(Long instanceId, ExecuteStepCommand command) : CommandProcessingResult
+            + retrieveWorkflowInstance(Long instanceId) : DocumentWorkflowInstanceData
+            + retrievePendingTasks(String userId) : List<WorkflowTaskData>
+            - validateWorkflowStep(DocumentWorkflowStep step, String userId) : void
+            - notifyStakeholders(DocumentWorkflowInstance instance) : void
+            - scheduleTimeoutHandler(DocumentWorkflowInstance instance) : void
+        }
+        
+        ' Document Permission Service
+        Interface DocumentPermissionService {
+            + grantPermission(Long documentId, GrantPermissionCommand command) : CommandProcessingResult
+            + revokePermission(Long documentId, RevokePermissionCommand command) : CommandProcessingResult
+            + checkPermission(Long documentId, String userId, DocumentPermissionType type) : Boolean
+            + retrieveDocumentPermissions(Long documentId) : List<DocumentPermissionData>
+            + retrieveUserPermissions(String userId) : List<DocumentPermissionData>
+        }
+        
+        ' Document Permission Service Implementation
+        Class DocumentPermissionServiceImpl <<Service>> {
+            - DocumentPermissionRepository permissionRepository
+            - RolePermissionService rolePermissionService
+            - PlatformSecurityContext context
+            --
+            + grantPermission(Long documentId, GrantPermissionCommand command) : CommandProcessingResult
+            + revokePermission(Long documentId, RevokePermissionCommand command) : CommandProcessingResult
+            + checkPermission(Long documentId, String userId, DocumentPermissionType type) : Boolean
+            + retrieveDocumentPermissions(Long documentId) : List<DocumentPermissionData>
+            + retrieveUserPermissions(String userId) : List<DocumentPermissionData>
+            - validatePermissionGrant(GrantPermissionCommand command) : void
+            - checkInheritedPermissions(String userId, Document document) : Boolean
+        }
+        
+        ' Document Audit Service
+        Interface DocumentAuditService {
+            + recordAction(Long documentId, DocumentAction action, AuditContext context) : void
+            + retrieveAuditTrail(Long documentId, AuditSearchCriteria criteria) : Page<DocumentAuditTrailData>
+            + generateComplianceReport(ComplianceReportCriteria criteria) : ComplianceReportData
+        }
+        
+        ' Document Audit Service Implementation
+        Class DocumentAuditServiceImpl <<Service>> {
+            - DocumentAuditTrailRepository auditRepository
+            - AuditContextProvider contextProvider
+            --
+            + recordAction(Long documentId, DocumentAction action, AuditContext context) : void
+            + retrieveAuditTrail(Long documentId, AuditSearchCriteria criteria) : Page<DocumentAuditTrailData>
+            + generateComplianceReport(ComplianceReportCriteria criteria) : ComplianceReportData
+            - enrichAuditContext(AuditContext context) : AuditContext
+            - anonymizeAuditData(DocumentAuditTrailData data) : DocumentAuditTrailData
+        }
+    }
+    
+    ' Document Repositories
+    Package "repository" {
+        
+        ' Document Repository
+        Interface DocumentRepository <<Repository>> {
+            + findByParentEntityTypeAndParentEntityId(Long entityType, Long entityId) : List<Document>
+            + findByNameContainingIgnoreCase(String name) : List<Document>
+            + findByCategory(DocumentCategory category) : List<Document>
+            + findByStatus(DocumentStatus status) : List<Document>
+            + findByCreatedByAndCreatedOnBetween(String userId, LocalDateTime from, LocalDateTime to) : List<Document>
+        }
+        
+        ' Document Template Repository
+        Interface DocumentTemplateRepository <<Repository>> {
+            + findByName(String name) : Optional<DocumentTemplate>
+            + findByCategory(DocumentCategory category) : List<DocumentTemplate>
+            + findByIsActiveTrue() : List<DocumentTemplate>
+        }
+        
+        ' Document Signature Repository
+        Interface DocumentSignatureRepository <<Repository>> {
+            + findByDocumentId(Long documentId) : List<DocumentSignature>
+            + findBySignerIdAndStatus(String signerId, SignatureStatus status) : List<DocumentSignature>
+        }
+        
+        ' Document Workflow Repository
+        Interface DocumentWorkflowRepository <<Repository>> {
+            + findByApplicableCategory(DocumentCategory category) : List<DocumentWorkflow>
+            + findByIsActiveTrue() : List<DocumentWorkflow>
+        }
+        
+        ' Document Permission Repository
+        Interface DocumentPermissionRepository <<Repository>> {
+            + findByDocumentId(Long documentId) : List<DocumentPermission>
+            + findByUserIdAndIsActiveTrue(String userId) : List<DocumentPermission>
+            + findByDocumentIdAndUserIdAndPermissionType(Long documentId, String userId, DocumentPermissionType type) : Optional<DocumentPermission>
+        }
+        
+        ' Document Audit Trail Repository
+        Interface DocumentAuditTrailRepository <<Repository>> {
+            + findByDocumentIdOrderByActionDateDesc(Long documentId) : List<DocumentAuditTrail>
+            + findByUserIdAndActionDateBetween(String userId, LocalDateTime from, LocalDateTime to) : List<DocumentAuditTrail>
+            + countByActionAndActionDateBetween(DocumentAction action, LocalDateTime from, LocalDateTime to) : Long
+        }
+    }
+    
+    ' Document Data Objects
+    Package "data" {
+        
+        ' Document Data
+        Class DocumentData {
+            - Long id
+            - String name
+            - String fileName
+            - Long size
+            - String type
+            - String description
+            - DocumentStatus status
+            - DocumentCategory category
+            - LocalDateTime createdOn
+            - String createdBy
+            - List<DocumentVersionData> versions
+            --
+            + getId() : Long
+            + getName() : String
+            + getFileName() : String
+            + getSize() : Long
+            + getType() : String
+            + getDescription() : String
+            + getStatus() : DocumentStatus
+            + getCategory() : DocumentCategory
+            + getCreatedOn() : LocalDateTime
+            + getCreatedBy() : String
+            + getVersions() : List<DocumentVersionData>
+        }
+        
+        ' Document Storage Metadata
+        Class DocumentStorageMetadata {
+            - String fileName
+            - String contentType
+            - Long size
+            - String checksum
+            - Map<String, String> customMetadata
+            --
+            + getFileName() : String
+            + getContentType() : String
+            + getSize() : Long
+            + getChecksum() : String
+            + getCustomMetadata() : Map<String, String>
+        }
+        
+        ' Document Content
+        Class DocumentContent {
+            - InputStream content
+            - DocumentStorageMetadata metadata
+            - String downloadUrl
+            --
+            + getContent() : InputStream
+            + getMetadata() : DocumentStorageMetadata
+            + getDownloadUrl() : String
+        }
+        
+        ' Document Search Criteria
+        Class DocumentSearchCriteria {
+            - String name
+            - DocumentCategory category
+            - DocumentStatus status
+            - Long parentEntityId
+            - String createdBy
+            - LocalDateTime createdFrom
+            - LocalDateTime createdTo
+            - Integer page
+            - Integer size
+            - String sortBy
+            - String sortDirection
+            --
+            + getName() : String
+            + getCategory() : DocumentCategory
+            + getStatus() : DocumentStatus
+            + getParentEntityId() : Long
+            + getCreatedBy() : String
+            + getCreatedFrom() : LocalDateTime
+            + getCreatedTo() : LocalDateTime
+            + getPage() : Integer
+            + getSize() : Integer
+            + getSortBy() : String
+            + getSortDirection() : String
+        }
+    }
+    
+    ' Document Validation
+    Package "validation" {
+        
+        ' Document Data Validator
+        Class DocumentDataValidator {
+            - FromJsonHelper fromApiJsonHelper
+            - Set<String> supportedParameters
+            --
+            + validateForUpload(String json) : void
+            + validateForUpdate(String json, Document existingDocument) : void
+            + validateTemplateForCreate(String json) : void
+            + validateWorkflowForCreate(String json) : void
+            - validateFileName(JsonElement element) : void
+            - validateFileSize(JsonElement element) : void
+            - validateFileType(JsonElement element) : void
+            - validatePermissions(JsonElement element) : void
+        }
+    }
+}
+
+' Relationships
+Document --> DocumentVersion : "has versions"
+Document --> DocumentPermission : "has permissions"
+DocumentTemplate --> DocumentCategory : "belongs to"
+DocumentSignature --> Document : "signs"
+DocumentWorkflow --> DocumentWorkflowStep : "contains steps"
+DocumentWorkflowInstance --> DocumentWorkflow : "executes"
+DocumentWorkflowInstance --> Document : "processes"
+DocumentAuditTrail --> Document : "tracks changes"
+
+DocumentManagementServiceImpl ..|> DocumentManagementService : "implements"
+FileSystemStorageService ..|> DocumentStorageService : "implements"
+CloudStorageService ..|> DocumentStorageService : "implements"
+DocumentTemplateServiceImpl ..|> DocumentTemplateService : "implements"
+DocumentSignatureServiceImpl ..|> DocumentSignatureService : "implements"
+DocumentWorkflowServiceImpl ..|> DocumentWorkflowService : "implements"
+DocumentPermissionServiceImpl ..|> DocumentPermissionService : "implements"
+DocumentAuditServiceImpl ..|> DocumentAuditService : "implements"
+
+DocumentManagementServiceImpl --> DocumentRepository : "uses"
+DocumentManagementServiceImpl --> DocumentStorageService : "uses"
+DocumentTemplateServiceImpl --> DocumentTemplateRepository : "uses"
+DocumentSignatureServiceImpl --> DocumentSignatureRepository : "uses"
+DocumentWorkflowServiceImpl --> DocumentWorkflowRepository : "uses"
+
+SHOW_LEGEND()
+
+note top of Document
+**Comprehensive Document Management**
+• Version control system
+• Multi-storage backend support
+• Permission-based access control
+• Metadata management
+• File integrity validation
+• Audit trail tracking
+end note
+
+note right of DocumentWorkflow
+**Workflow Automation**
+• Configurable approval processes
+• Step-based execution
+• Role-based assignments
+• Timeout handling
+• Notification integration
+• Process tracking
+end note
+
+note bottom of DocumentSignature
+**Digital Signature Support**
+• Multiple signature types
+• Certificate validation
+• Integrity verification
+• Signature status tracking
+• Legal compliance
+• Revocation management
+end note
+
+note left of DocumentStorageService
+**Flexible Storage**
+• File system storage
+• Cloud storage (S3)
+• Storage abstraction
+• Download URL generation
+• Metadata preservation
+• Cross-storage operations
+end note
+
+@enduml

@@ -1,0 +1,377 @@
+@startuml Branch-Operations-Sequence
+!include <C4/C4_Context>
+
+title Apache Fineract - Branch Operations Module Sequence Diagram
+
+' Actors and Systems
+actor "System Administrator" as ADMIN
+actor "Branch Manager" as BM
+actor "HR Manager" as HRM
+participant "OfficesApiResource" as OFFICE_API
+participant "StaffApiResource" as STAFF_API
+participant "CommandSourceHandler" as CSH
+participant "OfficeWritePlatformService" as OWS
+participant "StaffWritePlatformService" as SWS
+participant "OfficeReadPlatformService" as ORS
+participant "StaffReadPlatformService" as SRS
+participant "OrganizationValidator" as VAL
+participant "OfficeRepository" as OFFICE_REPO
+participant "StaffRepository" as STAFF_REPO
+participant "HierarchyService" as HS
+participant "AuditService" as AUDIT
+database "TenantDatabase" as DB
+
+note over ADMIN, DB
+**Branch Operations Sequence Flows**
+1. Office/Branch Creation and Management
+2. Staff Management and Assignment
+3. Organizational Hierarchy Maintenance
+4. Branch Performance Monitoring
+5. Staff Role and Permission Management
+end note
+
+== Office/Branch Creation Flow ==
+
+ADMIN -> OFFICE_API : POST /offices\n{officeData}
+activate OFFICE_API
+
+OFFICE_API -> CSH : processCommand(CREATE_OFFICE)
+activate CSH
+
+CSH -> VAL : validateOfficeCreation(officeData)
+activate VAL
+VAL -> VAL : validateOfficeName()
+VAL -> VAL : validateOfficeType()
+VAL -> VAL : validateParentOffice()
+VAL -> VAL : validateOpeningDate()
+VAL -> OFFICE_REPO : checkDuplicateOfficeName()
+activate OFFICE_REPO
+OFFICE_REPO -> DB : SELECT * FROM m_office WHERE name = ?
+OFFICE_REPO --> VAL : officeExists
+deactivate OFFICE_REPO
+VAL --> CSH : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CSH -> OWS : createOffice(officeData)
+    activate OWS
+    
+    OWS -> OWS : buildOfficeEntity()
+    OWS -> OWS : generateOfficeHierarchy()
+    
+    ' Handle parent-child relationship
+    alt Has Parent Office
+        OWS -> OFFICE_REPO : findParentOffice(parentId)
+        activate OFFICE_REPO
+        OFFICE_REPO -> DB : SELECT * FROM m_office WHERE id = ?
+        OFFICE_REPO --> OWS : parentOffice
+        deactivate OFFICE_REPO
+        
+        OWS -> HS : updateOfficeHierarchy(parentOffice, newOffice)
+        activate HS
+        HS -> HS : calculateHierarchyPath()
+        HS -> HS : updateHierarchyLevels()
+        HS --> OWS : hierarchyUpdated
+        deactivate HS
+    end
+    
+    OWS -> OFFICE_REPO : save(officeEntity)
+    activate OFFICE_REPO
+    OFFICE_REPO -> DB : INSERT INTO m_office
+    OFFICE_REPO --> OWS : officeSaved
+    deactivate OFFICE_REPO
+    
+    OWS -> AUDIT : auditOfficeCreation(officeId)
+    activate AUDIT
+    AUDIT -> DB : INSERT INTO m_portfolio_command_source
+    deactivate AUDIT
+    
+    OWS --> CSH : OfficeCreationResult
+    deactivate OWS
+    
+    CSH --> OFFICE_API : CommandProcessingResult
+    deactivate CSH
+    
+    OFFICE_API --> ADMIN : HTTP 201 Created\n{officeId}
+    deactivate OFFICE_API
+    
+else Validation Failure
+    CSH --> OFFICE_API : ValidationException
+    OFFICE_API --> ADMIN : HTTP 400 Bad Request\n{validationErrors}
+end
+
+== Staff Creation and Assignment ==
+
+HRM -> STAFF_API : POST /staff\n{staffData}
+activate STAFF_API
+
+STAFF_API -> CSH : processCommand(CREATE_STAFF)
+activate CSH
+
+CSH -> VAL : validateStaffCreation(staffData)
+activate VAL
+VAL -> VAL : validateStaffName()
+VAL -> VAL : validateOfficeAssignment()
+VAL -> VAL : validateJobTitle()
+VAL -> VAL : validateJoiningDate()
+VAL -> VAL : validateContactDetails()
+VAL --> CSH : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CSH -> SWS : createStaff(staffData)
+    activate SWS
+    
+    SWS -> SWS : buildStaffEntity()
+    SWS -> SWS : assignToOffice(officeId)
+    
+    ' Validate office assignment
+    SWS -> OFFICE_REPO : findOfficeById(officeId)
+    activate OFFICE_REPO
+    OFFICE_REPO -> DB : SELECT * FROM m_office WHERE id = ?
+    OFFICE_REPO --> SWS : assignedOffice
+    deactivate OFFICE_REPO
+    
+    SWS -> STAFF_REPO : save(staffEntity)
+    activate STAFF_REPO
+    STAFF_REPO -> DB : INSERT INTO m_staff
+    STAFF_REPO --> SWS : staffSaved
+    deactivate STAFF_REPO
+    
+    ' Create user account if requested
+    alt Create User Account
+        SWS -> SWS : createStaffUserAccount()
+        SWS -> DB : INSERT INTO m_appuser
+    end
+    
+    SWS -> AUDIT : auditStaffCreation(staffId)
+    activate AUDIT
+    AUDIT -> DB : INSERT INTO m_portfolio_command_source
+    deactivate AUDIT
+    
+    SWS --> CSH : StaffCreationResult
+    deactivate SWS
+    
+    CSH --> STAFF_API : CommandProcessingResult
+    deactivate CSH
+    
+    STAFF_API --> HRM : HTTP 201 Created\n{staffId}
+    deactivate STAFF_API
+    
+else Validation Failure
+    CSH --> STAFF_API : ValidationException
+    STAFF_API --> HRM : HTTP 400 Bad Request
+end
+
+== Staff Transfer Between Offices ==
+
+BM -> STAFF_API : POST /staff/{staffId}?command=transfer\n{transferData}
+activate STAFF_API
+
+STAFF_API -> CSH : processCommand(TRANSFER_STAFF)
+activate CSH
+
+CSH -> VAL : validateStaffTransfer(staffId, transferData)
+activate VAL
+VAL -> SRS : getStaff(staffId)
+activate SRS
+SRS -> STAFF_REPO : findStaffById(staffId)
+SRS --> VAL : currentStaffDetails
+deactivate SRS
+VAL -> VAL : validateTransferEligibility()
+VAL -> VAL : validateDestinationOffice()
+VAL -> VAL : validateTransferDate()
+VAL --> CSH : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CSH -> SWS : transferStaff(staffId, transferData)
+    activate SWS
+    
+    SWS -> STAFF_REPO : findStaffById(staffId)
+    activate STAFF_REPO
+    STAFF_REPO -> DB : SELECT * FROM m_staff WHERE id = ?
+    STAFF_REPO --> SWS : currentStaff
+    deactivate STAFF_REPO
+    
+    ' Check for active client assignments
+    SWS -> SWS : checkActiveClientAssignments(staffId)
+    
+    alt Has Active Assignments
+        SWS -> SWS : handleClientReassignment()
+        SWS -> SWS : notifyClientsOfTransfer()
+    end
+    
+    ' Update staff office assignment
+    SWS -> SWS : updateStaffOfficeAssignment(transferData)
+    
+    SWS -> STAFF_REPO : updateStaffTransfer()
+    activate STAFF_REPO
+    STAFF_REPO -> DB : UPDATE m_staff SET office_id = ?, transfer_date = ?
+    STAFF_REPO -> DB : INSERT INTO m_staff_assignment_history
+    STAFF_REPO --> SWS : transferCompleted
+    deactivate STAFF_REPO
+    
+    SWS -> AUDIT : auditStaffTransfer(staffId)
+    SWS --> CSH : StaffTransferResult
+    deactivate SWS
+    
+    CSH --> STAFF_API : CommandProcessingResult
+    deactivate CSH
+    
+    STAFF_API --> BM : HTTP 200 OK\n{transferSummary}
+    deactivate STAFF_API
+    
+else Validation Failure
+    CSH --> STAFF_API : ValidationException
+    STAFF_API --> BM : HTTP 400 Bad Request
+end
+
+== Office Hierarchy Management ==
+
+ADMIN -> OFFICE_API : GET /offices/{officeId}/hierarchy
+activate OFFICE_API
+
+OFFICE_API -> ORS : getOfficeHierarchy(officeId)
+activate ORS
+
+ORS -> OFFICE_REPO : findOfficeById(officeId)
+activate OFFICE_REPO
+OFFICE_REPO -> DB : SELECT * FROM m_office WHERE id = ?
+OFFICE_REPO --> ORS : rootOffice
+deactivate OFFICE_REPO
+
+ORS -> HS : buildHierarchyTree(rootOffice)
+activate HS
+
+HS -> OFFICE_REPO : findChildOffices(officeId)
+activate OFFICE_REPO
+OFFICE_REPO -> DB : SELECT * FROM m_office WHERE parent_id = ?
+OFFICE_REPO --> HS : childOffices
+deactivate OFFICE_REPO
+
+' Recursively build hierarchy
+loop For Each Child Office
+    HS -> HS : buildChildHierarchy(childOffice)
+    HS -> OFFICE_REPO : findChildOffices(childOfficeId)
+    ' Continue recursively
+end
+
+HS -> HS : calculateHierarchyStatistics()
+HS --> ORS : HierarchyTree
+deactivate HS
+
+ORS -> ORS : formatHierarchyResponse()
+ORS --> OFFICE_API : OfficeHierarchyResponse
+deactivate ORS
+
+OFFICE_API --> ADMIN : HTTP 200 OK\n{hierarchyData}
+deactivate OFFICE_API
+
+== Staff Performance Monitoring ==
+
+BM -> STAFF_API : GET /staff/{staffId}/performance?fromDate=X&toDate=Y
+activate STAFF_API
+
+STAFF_API -> SRS : getStaffPerformance(staffId, fromDate, toDate)
+activate SRS
+
+SRS -> STAFF_REPO : findStaffById(staffId)
+activate STAFF_REPO
+STAFF_REPO -> DB : SELECT * FROM m_staff WHERE id = ?
+STAFF_REPO --> SRS : staffDetails
+deactivate STAFF_REPO
+
+' Gather performance metrics
+SRS -> SRS : calculateClientAcquisition(staffId, dateRange)
+SRS -> SRS : calculateLoanPortfolioPerformance(staffId, dateRange)
+SRS -> SRS : calculateCollectionEfficiency(staffId, dateRange)
+SRS -> SRS : calculateTargetAchievement(staffId, dateRange)
+
+SRS -> STAFF_REPO : getStaffPerformanceMetrics(staffId, dateRange)
+activate STAFF_REPO
+STAFF_REPO -> DB : SELECT COUNT(*) as client_count, SUM(loan_amount) as portfolio_size FROM m_client c JOIN m_loan l WHERE c.staff_id = ? AND c.activation_date BETWEEN ? AND ?
+STAFF_REPO --> SRS : performanceData
+deactivate STAFF_REPO
+
+SRS -> SRS : calculatePerformanceScore()
+SRS -> SRS : generatePerformanceReport()
+
+SRS --> STAFF_API : StaffPerformanceReport
+deactivate SRS
+
+STAFF_API --> BM : HTTP 200 OK\n{performanceReport}
+deactivate STAFF_API
+
+== Office Closure Process ==
+
+ADMIN -> OFFICE_API : POST /offices/{officeId}?command=close\n{closureData}
+activate OFFICE_API
+
+OFFICE_API -> CSH : processCommand(CLOSE_OFFICE)
+activate CSH
+
+CSH -> VAL : validateOfficeClosure(officeId, closureData)
+activate VAL
+VAL -> ORS : getOffice(officeId)
+activate ORS
+ORS -> OFFICE_REPO : findOfficeById(officeId)
+ORS --> VAL : officeDetails
+deactivate ORS
+VAL -> VAL : checkActiveClients(officeId)
+VAL -> VAL : checkActiveStaff(officeId)
+VAL -> VAL : checkChildOffices(officeId)
+VAL -> VAL : validateClosureDate()
+VAL --> CSH : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CSH -> OWS : closeOffice(officeId, closureData)
+    activate OWS
+    
+    ' Transfer or reassign active entities
+    OWS -> OWS : handleActiveClientTransfer()
+    OWS -> OWS : handleStaffReassignment()
+    
+    ' Update office status
+    OWS -> OWS : updateOfficeStatus(CLOSED)
+    
+    OWS -> OFFICE_REPO : saveOfficeClosure()
+    activate OFFICE_REPO
+    OFFICE_REPO -> DB : UPDATE m_office SET closedon_date = ?, status_enum = ?
+    OFFICE_REPO --> OWS : closureSaved
+    deactivate OFFICE_REPO
+    
+    ' Update hierarchy
+    OWS -> HS : updateHierarchyAfterClosure(officeId)
+    activate HS
+    HS -> HS : recalculateHierarchyPaths()
+    HS --> OWS : hierarchyUpdated
+    deactivate HS
+    
+    OWS -> AUDIT : auditOfficeClosure(officeId)
+    OWS --> CSH : OfficeClosureResult
+    deactivate OWS
+    
+    CSH --> OFFICE_API : CommandProcessingResult
+    deactivate CSH
+    
+    OFFICE_API --> ADMIN : HTTP 200 OK\n{closureSummary}
+    deactivate OFFICE_API
+    
+else Validation Failure
+    CSH --> OFFICE_API : ValidationException
+    OFFICE_API --> ADMIN : HTTP 400 Bad Request
+end
+
+note over ADMIN, DB
+**Key Design Patterns:**
+• Composite Pattern: Office hierarchy tree structure
+• Command Pattern: All organizational operations via commands
+• Observer Pattern: Hierarchy change notifications
+• Strategy Pattern: Different performance calculation strategies
+• Template Method: Common staff operations with role-specific logic
+• Repository Pattern: Organizational data persistence abstraction
+end note
+
+@enduml

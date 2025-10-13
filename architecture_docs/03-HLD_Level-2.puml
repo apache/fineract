@@ -1,0 +1,175 @@
+@startuml HLD_Level2
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+title Apache Fineract - High Level Design Level 2 (Repository Module View)
+
+' External Actors
+Person(loan_officers, "Loan Officers", "Create and manage loans, clients")
+Person(branch_managers, "Branch Managers", "Oversee operations, reports")
+Person(clients, "End Clients", "Access accounts, make transactions")
+Person(system_admins, "System Admins", "Configure system, manage tenants")
+Person(developers, "API Developers", "Build integrations, mobile apps")
+
+' External Systems
+System_Ext(mobile_channels, "Mobile Banking", "Customer mobile applications")
+System_Ext(web_portals, "Web Portals", "Community web app, admin interfaces")
+System_Ext(payment_gateways, "Payment Systems", "Mobile money, bank transfers")
+System_Ext(external_services, "External Services", "SMS, Email, Document storage")
+System_Ext(regulatory_reports, "Regulatory Systems", "Central bank reporting")
+
+' Main Fineract Application Boundary
+System_Boundary(fineract_application, "Apache Fineract Application") {
+
+    ' Entry Point and API Layer
+    Container_Boundary(api_layer, "API & Web Layer") {
+        Container(fineract_provider, "fineract-provider", "Spring Boot WAR/JAR", "Main application with REST controllers\n• Authentication & Authorization\n• Request routing & validation\n• Response formatting")
+        Container(fineract_war, "fineract-war", "WAR Packaging", "Traditional servlet container deployment\n• Tomcat deployment configuration")
+    }
+
+    ' Core Foundation Modules
+    Container_Boundary(foundation_layer, "Foundation Layer") {
+        Container(fineract_core, "fineract-core", "Core Library", "Common utilities & base classes\n• Domain entities\n• Shared configurations\n• Base repositories")
+        Container(fineract_command, "fineract-command", "Command Framework", "Command processing pattern\n• Audit trail\n• Transaction management\n• Event sourcing")
+        Container(fineract_validation, "fineract-validation", "Validation Engine", "Input validation framework\n• Business rules engine\n• Data integrity checks")
+    }
+
+    ' Business Domain Modules
+    Container_Boundary(business_domains, "Business Domain Layer") {
+        Container(fineract_client, "fineract-client", "Client Management", "Individual & corporate clients\n• KYC management\n• Client onboarding\n• Identity verification")
+
+        Container(fineract_loan, "fineract-loan", "Loan Management", "Core lending operations\n• Loan products & accounts\n• Repayment schedules\n• Loan lifecycle management")
+
+        Container(fineract_progressive_loan, "fineract-progressive-loan", "Progressive Lending", "Advanced loan products\n• Variable interest rates\n• Flexible repayment terms")
+
+        Container(fineract_savings, "fineract-savings", "Savings Management", "Deposit accounts & operations\n• Savings products\n• Interest calculations\n• Account transactions")
+
+        Container(fineract_accounting, "fineract-accounting", "Financial Accounting", "Double-entry bookkeeping\n• Chart of accounts\n• Journal entries\n• Financial reporting")
+    }
+
+    ' Supporting Business Modules
+    Container_Boundary(support_domains, "Supporting Domain Layer") {
+        Container(fineract_charge, "fineract-charge", "Fee Management", "Charges & penalties\n• Fee structures\n• Penalty calculations\n• Revenue tracking")
+
+        Container(fineract_rates, "fineract-rates", "Interest Rates", "Rate management\n• Interest calculations\n• Rate configurations\n• Market rate integration")
+
+        Container(fineract_tax, "fineract-tax", "Tax Management", "Tax calculations & reporting\n• Tax compliance\n• Withholding taxes\n• Tax reporting")
+
+        Container(fineract_branch, "fineract-branch", "Branch Operations", "Organizational structure\n• Branch management\n• Staff assignments\n• Operational hierarchy")
+
+        Container(fineract_investor, "fineract-investor", "Investor Relations", "External fund management\n• Investment tracking\n• Investor reporting\n• Fund allocation")
+    }
+
+    ' Operational & Infrastructure Modules
+    Container_Boundary(operational_layer, "Operational Layer") {
+        Container(fineract_report, "fineract-report", "Reporting Engine", "Business intelligence\n• Standard reports\n• Ad-hoc reporting\n• Data export")
+
+        Container(fineract_document, "fineract-document", "Document Management", "File handling system\n• Document upload/storage\n• Template management\n• Digital signatures")
+
+        Container(fineract_cob, "fineract-cob", "Close of Business", "End-of-day processing\n• Batch operations\n• Interest calculations\n• Account maintenance")
+    }
+
+    ' Integration & Data Layer
+    Container_Boundary(integration_layer, "Integration & Data Layer") {
+        Container(fineract_avro_schemas, "fineract-avro-schemas", "Data Schemas", "Event data contracts\n• Schema evolution\n• Data serialization\n• API contracts")
+
+        Container(fineract_db, "fineract-db", "Database Layer", "Data persistence\n• Multi-tenant schemas\n• Migration scripts\n• Data integrity")
+    }
+
+    ' Testing & Quality Infrastructure
+    Container_Boundary(testing_layer, "Testing & Quality Layer") {
+        Container(fineract_e2e_tests_core, "fineract-e2e-tests-core", "E2E Test Framework", "End-to-end testing\n• Business scenario tests\n• Integration validation")
+
+        Container(integration_tests, "integration-tests", "Integration Tests", "API & database testing\n• Multi-tenant testing\n• Performance validation")
+
+        Container(oauth2_tests, "oauth2-tests", "Security Tests", "OAuth2 authentication testing\n• Security validation\n• Authorization testing")
+
+        Container(twofactor_tests, "twofactor-tests", "2FA Tests", "Two-factor authentication\n• Security enhancement testing")
+    }
+}
+
+' External Data Storage
+ContainerDb(tenant_databases, "Tenant Databases", "MySQL/MariaDB/PostgreSQL", "Multi-tenant data isolation\n• fineract_default schema\n• Custom tenant schemas\n• Audit & compliance data")
+
+ContainerDb(system_database, "System Database", "MySQL/MariaDB/PostgreSQL", "System configuration\n• fineract_tenants metadata\n• Global configurations\n• System parameters")
+
+' Build & Deployment Infrastructure
+Container_Boundary(build_deploy, "Build & Deployment") {
+    Container(gradle_build, "Gradle Build System", "Multi-module build", "• Root build.gradle\n• Module dependencies\n• Build automation")
+    Container(docker_deployment, "Docker Containers", "Containerization", "• Official Docker images\n• Multi-environment support\n• Kubernetes ready")
+}
+
+' Key Relationships - External to Internal
+Rel(loan_officers, web_portals, "Manage operations")
+Rel(clients, mobile_channels, "Access services")
+Rel(developers, fineract_provider, "API integration")
+Rel(mobile_channels, fineract_provider, "REST API calls")
+Rel(web_portals, fineract_provider, "HTTP requests")
+
+' Core Application Flow
+Rel(fineract_provider, foundation_layer, "Uses core services")
+Rel(fineract_provider, business_domains, "Orchestrates business logic")
+Rel(fineract_provider, support_domains, "Utilizes supporting services")
+Rel(fineract_provider, operational_layer, "Manages operations")
+
+' Inter-module Dependencies
+Rel(business_domains, foundation_layer, "Depends on")
+Rel(support_domains, foundation_layer, "Built upon")
+Rel(operational_layer, business_domains, "Processes data from")
+Rel(fineract_progressive_loan, fineract_loan, "Extends")
+
+' Data Layer Interactions
+Rel(business_domains, tenant_databases, "CRUD operations")
+Rel(fineract_provider, system_database, "Configuration queries")
+Rel(fineract_cob, tenant_databases, "Batch processing")
+
+' Integration Points
+Rel(fineract_provider, payment_gateways, "Payment processing")
+Rel(fineract_report, regulatory_reports, "Compliance reporting")
+Rel(fineract_document, external_services, "Document storage")
+
+' Build & Test Relationships
+Rel(gradle_build, fineract_application, "Builds & packages")
+Rel(testing_layer, fineract_application, "Validates quality")
+Rel(docker_deployment, fineract_provider, "Deploys")
+
+SHOW_LEGEND()
+
+note top of fineract_application
+**Modular Architecture Principles**
+• 15+ Independent Gradle Modules
+• Clean Dependency Management
+• Domain-Driven Design
+• Multi-Tenant by Design
+• API-First Architecture
+end note
+
+note right of tenant_databases
+**Multi-Tenant Data Strategy**
+• Shared Application Layer
+• Isolated Tenant Schemas
+• Configurable Feature Sets
+• Horizontal Scaling Support
+• Audit Trail per Tenant
+end note
+
+note bottom of testing_layer
+**Quality Assurance Strategy**
+• Comprehensive Test Coverage
+• Multi-Database Testing
+• Security Validation
+• Performance Testing
+• Continuous Integration
+end note
+
+note left of build_deploy
+**Deployment Flexibility**
+• JAR (Self-contained)
+• WAR (Traditional Servlet)
+• Docker Containers
+• Kubernetes Orchestration
+• Cloud-Native Ready
+end note
+
+@enduml

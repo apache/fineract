@@ -1,0 +1,447 @@
+@startuml Fineract-Master-Sequence-Diagram
+!include <C4/C4_Context>
+
+title Apache Fineract - Master High Level Sequence Diagram\n(Client & Server Perspective with All Module Integration)
+
+' External Actors
+actor "User" as USER
+
+' Client Side Applications
+participant "App/Web Interface" as APP_INTERFACE
+
+' API Gateway & Load Balancer
+participant "API Gateway/\nLoad Balancer" as API_GATEWAY
+
+' Fineract Server - API Layer
+box "org.apache.fineract.portfolio.* (API Layer)" #LightBlue
+participant "*ApiResource\n(ClientsApi, LoansApi, SavingsApi)" as API_RESOURCES
+end box
+
+' Fineract Server - Security & Command Layer
+box "org.apache.fineract.infrastructure.security.*\norg.apache.fineract.commands.*" #LightGreen
+participant "SecurityFilters & Context\n(OAuth2Filter, TenantFilter)" as SECURITY_LAYER
+participant "CommandSourceHandler" as CMD_HANDLER
+end box
+
+' Fineract Server - Service Layer
+box "org.apache.fineract.portfolio.*.service.*" #LightYellow
+participant "*WritePlatformService\n(*WriteService)" as WRITE_SERVICES
+participant "*ReadPlatformService\n(*ReadService)" as READ_SERVICES
+end box
+
+' Fineract Server - Validation Layer
+box "org.apache.fineract.infrastructure.core.data.*" #LightPink
+participant "*Validator\n(DataValidatorBuilder)" as VALIDATORS
+end box
+
+' Fineract Server - Domain Layer
+box "org.apache.fineract.portfolio.*.domain.*" #LightCyan
+participant "Domain Entities\n(Client, Loan, SavingsAccount)" as DOMAIN_ENTITIES
+end box
+
+' Fineract Server - Repository Layer
+box "org.apache.fineract.portfolio.*.domain.*Repository" #LightGray
+participant "*Repository\n(JpaRepository)" as REPOSITORIES
+end box
+
+' External Systems
+box "External Systems" #LightSalmon
+participant "External Services\n(SMS, Email, Payment, Storage)" as EXTERNAL_SERVICES
+end box
+
+' Database
+database "Multi-Tenant Database\n(MySQL/PostgreSQL)" as DATABASE
+
+note over MOBILE_USER, DATABASE
+**Master Sequence Covering Key Business Flows:**
+1. **Client Onboarding & KYC**
+2. **Loan Application & Approval**
+3. **Loan Disbursement & Repayment**
+4. **Savings Account Operations**
+5. **Financial Reporting & Analytics**
+6. **System Administration**
+end note
+
+== 1. Client Onboarding Flow ==
+
+USER -> APP_INTERFACE : registerNewClient(personalInfo)
+activate APP_INTERFACE
+
+APP_INTERFACE -> API_GATEWAY : POST /fineract-provider/api/v1/clients\n{Authorization: Bearer token}
+activate API_GATEWAY
+
+API_GATEWAY -> API_RESOURCES : createClient(clientData)
+activate API_RESOURCES
+
+API_RESOURCES -> SECURITY_LAYER : authenticateRequest(bearerToken)
+activate SECURITY_LAYER
+SECURITY_LAYER -> SECURITY_LAYER : validateTenant(tenantIdentifier)
+SECURITY_LAYER -> SECURITY_LAYER : setAuthenticatedUser(userDetails)
+SECURITY_LAYER --> API_RESOURCES : requestAuthenticated
+deactivate SECURITY_LAYER
+
+API_RESOURCES -> CMD_HANDLER : processCommand("CREATE", "CLIENT", clientData)
+activate CMD_HANDLER
+
+CMD_HANDLER -> VALIDATORS : validateForCreate(clientData)
+activate VALIDATORS
+VALIDATORS -> REPOSITORIES : findByAccountNumber(accountNo)
+activate REPOSITORIES
+REPOSITORIES -> DATABASE : SELECT * FROM m_client WHERE account_no = ?
+activate DATABASE
+DATABASE --> REPOSITORIES : queryResult
+deactivate DATABASE
+REPOSITORIES --> VALIDATORS : duplicateCheck
+deactivate REPOSITORIES
+VALIDATORS --> CMD_HANDLER : validationPassed
+deactivate VALIDATORS
+
+CMD_HANDLER -> WRITE_SERVICES : createClient(clientData)
+activate WRITE_SERVICES
+
+WRITE_SERVICES -> DOMAIN_ENTITIES : new Client(personalInfo, office, staff)
+activate DOMAIN_ENTITIES
+DOMAIN_ENTITIES -> DOMAIN_ENTITIES : generateAccountNumber()
+DOMAIN_ENTITIES -> DOMAIN_ENTITIES : setStatus(PENDING)
+DOMAIN_ENTITIES --> WRITE_SERVICES : clientEntity
+deactivate DOMAIN_ENTITIES
+
+WRITE_SERVICES -> REPOSITORIES : save(clientEntity)
+activate REPOSITORIES
+REPOSITORIES -> DATABASE : INSERT INTO m_client (account_no, firstname, lastname, ...)
+activate DATABASE
+DATABASE --> REPOSITORIES : clientId
+deactivate DATABASE
+REPOSITORIES --> WRITE_SERVICES : savedClient
+deactivate REPOSITORIES
+
+WRITE_SERVICES -> EXTERNAL_SERVICES : sendWelcomeSMS(mobileNumber, clientDetails)
+activate EXTERNAL_SERVICES
+EXTERNAL_SERVICES --> WRITE_SERVICES : smsDeliveryStatus
+deactivate EXTERNAL_SERVICES
+
+WRITE_SERVICES --> CMD_HANDLER : clientCreated(clientId)
+deactivate WRITE_SERVICES
+
+CMD_HANDLER --> API_RESOURCES : clientCreationResponse
+deactivate CMD_HANDLER
+
+API_RESOURCES --> API_GATEWAY : HTTP 201 Created {clientId, accountNumber}
+deactivate API_RESOURCES
+
+API_GATEWAY --> APP_INTERFACE : clientRegistrationSuccess
+deactivate API_GATEWAY
+
+APP_INTERFACE --> USER : "Registration Successful!\nAccount: 000000001"
+deactivate APP_INTERFACE
+
+== 2. Loan Application Flow ==
+
+USER -> APP_INTERFACE : createLoanApplication(clientId, loanProductId)
+activate APP_INTERFACE
+
+APP_INTERFACE -> API_GATEWAY : POST /fineract-provider/api/v1/loans\n{loanApplicationData}
+activate API_GATEWAY
+
+API_GATEWAY -> API_RESOURCES : calculateLoanSchedule(loanApplicationData)
+activate API_RESOURCES
+
+API_RESOURCES -> CMD_HANDLER : processCommand("CREATE", "LOAN", loanData)
+activate CMD_HANDLER
+
+CMD_HANDLER -> VALIDATORS : validateForCreate(loanApplicationData)
+activate VALIDATORS
+VALIDATORS -> READ_SERVICES : retrieveClient(clientId)
+activate READ_SERVICES
+read_SERVICES -> REPOSITORIES : findById(clientId)
+activate REPOSITORIES
+REPOSITORIES -> DATABASE : SELECT * FROM m_client WHERE id = ?
+activate DATABASE
+DATABASE --> REPOSITORIES : clientData
+deactivate DATABASE
+REPOSITORIES --> read_SERVICES : clientEntity
+deactivate REPOSITORIES
+read_SERVICES --> VALIDATORS : clientExists
+deactivate read_SERVICES
+VALIDATORS --> CMD_HANDLER : validationPassed
+deactivate VALIDATORS
+
+CMD_HANDLER -> WRITE_SERVICES : submitLoanApplication(loanApplicationData)
+activate WRITE_SERVICES
+
+WRITE_SERVICES -> DOMAIN_ENTITIES : new Loan(client, loanProduct, principal, terms)
+activate DOMAIN_ENTITIES
+DOMAIN_ENTITIES -> DOMAIN_ENTITIES : generateAccountNumber()
+DOMAIN_ENTITIES -> DOMAIN_ENTITIES : calculateSchedule()
+DOMAIN_ENTITIES -> DOMAIN_ENTITIES : generateRepaymentSchedule(principal, interestRate, termFrequency)
+DOMAIN_ENTITIES --> WRITE_SERVICES : loanEntity
+deactivate DOMAIN_ENTITIES
+
+WRITE_SERVICES -> REPOSITORIES : save(loanEntity)
+activate REPOSITORIES
+REPOSITORIES -> DATABASE : INSERT INTO m_loan (account_no, client_id, principal_amount, ...)
+activate DATABASE
+DATABASE --> REPOSITORIES : loanId
+deactivate DATABASE
+REPOSITORIES --> WRITE_SERVICES : savedLoan
+deactivate REPOSITORIES
+
+WRITE_SERVICES --> CMD_HANDLER : loanApplicationSubmitted
+deactivate WRITE_SERVICES
+
+CMD_HANDLER --> API_RESOURCES : loanApplicationResponse
+deactivate CMD_HANDLER
+
+API_RESOURCES --> API_GATEWAY : HTTP 201 Created {loanId, accountNumber, schedule}
+deactivate API_RESOURCES
+
+API_GATEWAY --> APP_INTERFACE : loanApplicationSuccess
+deactivate API_GATEWAY
+
+APP_INTERFACE --> USER : "Loan Application Created!\nLoan Account: 000000001\nAwating Approval"
+deactivate APP_INTERFACE
+
+== 3. Loan Disbursement & Accounting Integration ==
+
+USER -> APP_INTERFACE : approveLoan(loanId)
+activate APP_INTERFACE
+
+APP_INTERFACE -> API_GATEWAY : POST /fineract-provider/api/v1/loans/{loanId}?command=approve
+activate API_GATEWAY
+
+API_GATEWAY -> API_RESOURCES : approveLoan(loanId, approvalData)
+activate API_RESOURCES
+
+API_RESOURCES -> CMD_HANDLER : processCommand("APPROVE", "LOAN", approvalData)
+activate CMD_HANDLER
+
+CMD_HANDLER -> WRITE_SERVICES : approveLoan(loanId, approvalData)
+activate WRITE_SERVICES
+
+WRITE_SERVICES -> REPOSITORIES : findById(loanId)
+activate REPOSITORIES
+REPOSITORIES -> DATABASE : SELECT * FROM m_loan WHERE id = ?
+activate DATABASE
+DATABASE --> REPOSITORIES : loanData
+deactivate DATABASE
+REPOSITORIES --> WRITE_SERVICES : loanEntity
+deactivate REPOSITORIES
+
+WRITE_SERVICES -> DOMAIN_ENTITIES : approve(approvedBy, approvalDate, approvedAmount)
+activate DOMAIN_ENTITIES
+DOMAIN_ENTITIES -> DOMAIN_ENTITIES : setStatus(APPROVED)
+DOMAIN_ENTITIES -> DOMAIN_ENTITIES : setApprovedPrincipal(approvedAmount)
+DOMAIN_ENTITIES --> WRITE_SERVICES : loanApproved
+deactivate DOMAIN_ENTITIES
+
+' Accounting Integration for Loan Approval
+WRITE_SERVICES -> WRITE_SERVICES : createJournalEntriesForLoanApproval(loanId, amount)
+WRITE_SERVICES -> DOMAIN_ENTITIES : new JournalEntry(DEBIT, "Loan Portfolio", amount)
+activate DOMAIN_ENTITIES
+DOMAIN_ENTITIES -> DOMAIN_ENTITIES : new JournalEntry(CREDIT, "Fund Source", amount)
+DOMAIN_ENTITIES --> WRITE_SERVICES : journalEntries
+deactivate DOMAIN_ENTITIES
+
+WRITE_SERVICES -> REPOSITORIES : save(journalEntries)
+activate REPOSITORIES
+REPOSITORIES -> DATABASE : INSERT INTO acc_gl_journal_entry (...)
+activate DATABASE
+DATABASE --> REPOSITORIES : entriesCreated
+deactivate DATABASE
+REPOSITORIES --> WRITE_SERVICES : journalEntriesPosted
+deactivate REPOSITORIES
+
+WRITE_SERVICES -> REPOSITORIES : save(loanEntity)
+activate REPOSITORIES
+REPOSITORIES -> DATABASE : UPDATE m_loan SET loan_status_id = 200, approved_principal = ?
+activate DATABASE
+DATABASE --> REPOSITORIES : loanUpdated
+deactivate DATABASE
+REPOSITORIES --> WRITE_SERVICES : loanApprovalSaved
+deactivate REPOSITORIES
+
+' Notification Service Integration
+WRITE_SERVICES -> EXTERNAL_SERVICES : sendLoanApprovalSMS(clientMobile, loanDetails)
+activate EXTERNAL_SERVICES
+EXTERNAL_SERVICES --> WRITE_SERVICES : notificationSent
+deactivate EXTERNAL_SERVICES
+
+WRITE_SERVICES --> CMD_HANDLER : loanApprovalCompleted
+deactivate WRITE_SERVICES
+
+CMD_HANDLER --> API_RESOURCES : approvalResponse
+deactivate CMD_HANDLER
+
+API_RESOURCES --> API_GATEWAY : HTTP 200 OK {loanApproved: true}
+deactivate API_RESOURCES
+
+API_GATEWAY --> APP_INTERFACE : loanApprovalSuccess
+deactivate API_GATEWAY
+
+APP_INTERFACE --> USER : "Loan Approved Successfully!\nReady for Disbursement"
+deactivate APP_INTERFACE
+
+== 4. Savings Account Operations ==
+
+USER -> APP_INTERFACE : createSavingsAccount(clientId, productId)
+activate APP_INTERFACE
+
+APP_INTERFACE -> API_GATEWAY : POST /fineract-provider/api/v1/savingsaccounts
+activate API_GATEWAY
+
+API_GATEWAY -> API_RESOURCES : createSavingsAccount(savingsData)
+activate API_RESOURCES
+
+API_RESOURCES -> CMD_HANDLER : processCommand("CREATE", "SAVINGSACCOUNT", savingsData)
+activate CMD_HANDLER
+
+CMD_HANDLER -> VALIDATORS : validateForCreate(savingsData)
+activate VALIDATORS
+VALIDATORS --> CMD_HANDLER : validationPassed
+deactivate VALIDATORS
+
+CMD_HANDLER -> WRITE_SERVICES : createSavingsAccount(savingsData)
+activate WRITE_SERVICES
+
+WRITE_SERVICES -> DOMAIN_ENTITIES : new SavingsAccount(client, product, nominalInterestRate)
+activate DOMAIN_ENTITIES
+DOMAIN_ENTITIES -> DOMAIN_ENTITIES : generateAccountNumber()
+DOMAIN_ENTITIES -> DOMAIN_ENTITIES : setStatus(SUBMITTED_AND_PENDING_APPROVAL)
+DOMAIN_ENTITIES --> WRITE_SERVICES : savingsEntity
+deactivate DOMAIN_ENTITIES
+
+WRITE_SERVICES -> REPOSITORIES : save(savingsEntity)
+activate REPOSITORIES
+REPOSITORIES -> DATABASE : INSERT INTO m_savings_account (...)
+activate DATABASE
+DATABASE --> REPOSITORIES : savingsAccountId
+deactivate DATABASE
+REPOSITORIES --> WRITE_SERVICES : savedAccount
+deactivate REPOSITORIES
+
+WRITE_SERVICES --> CMD_HANDLER : savingsAccountCreated
+deactivate WRITE_SERVICES
+
+CMD_HANDLER --> API_RESOURCES : creationResponse
+deactivate CMD_HANDLER
+
+API_RESOURCES --> API_GATEWAY : HTTP 201 Created {savingsAccountId}
+deactivate API_RESOURCES
+
+API_GATEWAY --> APP_INTERFACE : accountCreationSuccess
+deactivate API_GATEWAY
+
+APP_INTERFACE --> USER : "Savings Account Created!\nAccount: SAV000000001"
+deactivate APP_INTERFACE
+
+== 5. Financial Reporting Flow ==
+
+USER -> APP_INTERFACE : generateFinancialReport(reportType, parameters)
+activate APP_INTERFACE
+
+APP_INTERFACE -> API_GATEWAY : GET /fineract-provider/api/v1/reports/{reportId}?tenantIdentifier=default
+activate API_GATEWAY
+
+API_GATEWAY -> API_RESOURCES : retrieveReport(reportId, parameters)
+activate API_RESOURCES
+
+API_RESOURCES -> read_SERVICES : generateReport(reportId, parameters)
+activate read_SERVICES
+
+read_SERVICES -> REPOSITORIES : retrieveAllClients(officeId)
+activate REPOSITORIES
+REPOSITORIES -> DATABASE : SELECT * FROM m_client WHERE office_id = ?
+activate DATABASE
+DATABASE --> REPOSITORIES : clientData
+deactivate DATABASE
+REPOSITORIES --> read_SERVICES : clientsList
+deactivate REPOSITORIES
+
+read_SERVICES -> REPOSITORIES : retrieveAllLoans(officeId)
+activate REPOSITORIES
+REPOSITORIES -> DATABASE : SELECT * FROM m_loan WHERE office_id = ?
+activate DATABASE
+DATABASE --> REPOSITORIES : loanData
+deactivate DATABASE
+REPOSITORIES --> read_SERVICES : loansList
+deactivate REPOSITORIES
+
+read_SERVICES -> REPOSITORIES : findJournalEntries(fromDate, toDate)
+activate REPOSITORIES
+REPOSITORIES -> DATABASE : SELECT * FROM acc_gl_journal_entry WHERE entry_date BETWEEN ? AND ?
+activate DATABASE
+DATABASE --> REPOSITORIES : journalEntries
+deactivate DATABASE
+REPOSITORIES --> read_SERVICES : trialBalanceData
+deactivate REPOSITORIES
+
+read_SERVICES -> read_SERVICES : compileReportData(clients, loans, financials)
+read_SERVICES -> EXTERNAL_SERVICES : saveReportDocument(reportContent)
+activate EXTERNAL_SERVICES
+EXTERNAL_SERVICES --> read_SERVICES : documentId
+deactivate EXTERNAL_SERVICES
+
+read_SERVICES --> API_RESOURCES : reportGenerated(reportDocument)
+deactivate read_SERVICES
+
+API_RESOURCES --> API_GATEWAY : HTTP 200 OK {reportData}
+deactivate API_RESOURCES
+
+API_GATEWAY --> APP_INTERFACE : reportResponse
+deactivate API_GATEWAY
+
+APP_INTERFACE --> USER : "Financial Report Generated Successfully"
+deactivate APP_INTERFACE
+
+== 6. Payment Integration Flow ==
+
+USER -> APP_INTERFACE : makePayment(loanAccountId, amount)
+activate APP_INTERFACE
+
+APP_INTERFACE -> EXTERNAL_SERVICES : initiatePayment(amount, merchantId)
+activate EXTERNAL_SERVICES
+
+EXTERNAL_SERVICES -> APP_INTERFACE : paymentConfirmation(transactionId)
+deactivate EXTERNAL_SERVICES
+
+APP_INTERFACE -> API_GATEWAY : POST /fineract-provider/api/v1/loans/{loanId}/transactions\n{repayment data}
+activate API_GATEWAY
+
+API_GATEWAY -> API_RESOURCES : makeRepayment(loanId, repaymentData)
+activate API_RESOURCES
+
+API_RESOURCES -> WRITE_SERVICES : makeRepayment(loanId, transactionData)
+activate WRITE_SERVICES
+
+WRITE_SERVICES -> WRITE_SERVICES : createJournalEntriesForRepayment(loanId, amount)
+WRITE_SERVICES -> REPOSITORIES : save(repaymentJournalEntries)
+activate REPOSITORIES
+REPOSITORIES -> DATABASE : INSERT INTO acc_gl_journal_entry (...)
+activate DATABASE
+DATABASE --> REPOSITORIES : entriesCreated
+deactivate DATABASE
+REPOSITORIES --> WRITE_SERVICES : accountingCompleted
+deactivate REPOSITORIES
+
+WRITE_SERVICES -> REPOSITORIES : updateLoanBalance(loanId, newBalance)
+activate REPOSITORIES
+REPOSITORIES -> DATABASE : UPDATE m_loan SET principal_outstanding = ?
+activate DATABASE
+DATABASE --> REPOSITORIES : loanUpdated
+deactivate DATABASE
+REPOSITORIES --> WRITE_SERVICES : repaymentProcessed
+deactivate REPOSITORIES
+
+WRITE_SERVICES --> API_RESOURCES : repaymentCompleted
+deactivate WRITE_SERVICES
+
+API_RESOURCES --> API_GATEWAY : HTTP 200 OK {transactionId}
+deactivate API_RESOURCES
+
+API_GATEWAY --> APP_INTERFACE : paymentProcessed
+deactivate API_GATEWAY
+
+APP_INTERFACE --> USER : "Payment Successful!\nNew Balance: $X,XXX"
+deactivate APP_INTERFACE
+
+@enduml

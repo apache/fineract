@@ -1,0 +1,574 @@
+@startuml Reporting-Engine-Module-Design
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Force top to bottom layout
+top to bottom direction
+
+title Apache Fineract - Reporting Engine Module (Class/Interface Level Design)
+
+' Reporting Engine Module
+Package "org.apache.fineract.infrastructure.report" {
+    
+    ' Report Domain Model
+    Package "domain" {
+        
+        ' Core Report Entity
+        Class Report {
+            - Long id
+            - String reportName
+            - String reportType
+            - String reportSubType
+            - String reportCategory
+            - String description
+            - String reportSql
+            - Boolean coreReport
+            - Boolean useReport
+            - Set<ReportParameterUsage> reportParameterUsages
+            - Set<ReportSchedule> reportSchedules
+            --
+            + isActiveReport() : Boolean
+            + isCoreReport() : Boolean
+            + hasParameters() : Boolean
+            + getParameterUsages() : Set<ReportParameterUsage>
+            + addParameterUsage(ReportParameterUsage parameterUsage) : void
+            + removeParameterUsage(ReportParameterUsage parameterUsage) : void
+            + validateReportSql(String sql) : void
+            + generateReport(Map<String, Object> parameters) : ReportData
+            + getReportColumns() : List<ResultsetColumnHeaderData>
+            + executeReportQuery(Map<String, Object> parameters) : List<ReportRowData>
+            + validateParameters(Map<String, Object> providedParameters) : void
+            + update(ReportCommand command) : Map<String, Object>
+        }
+        
+        ' Report Parameter Usage
+        Class ReportParameterUsage {
+            - Long id
+            - Report report
+            - ReportParameter reportParameter
+            - Integer sortOrder
+            --
+            + getReport() : Report
+            + getReportParameter() : ReportParameter
+            + getSortOrder() : Integer
+            + updateSortOrder(Integer newOrder) : void
+        }
+        
+        ' Report Parameter
+        Class ReportParameter {
+            - Long id
+            - String parameterName
+            - String parameterVariable
+            - String parameterLabel
+            - String parameterDisplayType
+            - String parameterFormatType
+            - String defaultVal
+            - String selectOne
+            - String selectAll
+            - String parentParameterName
+            - String special
+            - String displaySize
+            - Boolean mandatory
+            --
+            + getParameterName() : String
+            + getParameterVariable() : String
+            + isMandatory() : Boolean
+            + isSelectParameter() : Boolean
+            + isDateParameter() : Boolean
+            + isNumberParameter() : Boolean
+            + isTextParameter() : Boolean
+            + validateParameterValue(Object value) : void
+            + formatParameterValue(Object value) : String
+            + getDefaultValue() : String
+        }
+        
+        ' Report Schedule
+        Class ReportSchedule {
+            - Long id
+            - Report report
+            - String jobName
+            - String cronExpression
+            - LocalDateTime startDateTime
+            - LocalDateTime nextRunTime
+            - Boolean active
+            - String emailRecipients
+            - ReportFormat reportFormat
+            - Map<String, Object> reportParameters
+            --
+            + isActive() : Boolean
+            + getNextRunTime() : LocalDateTime
+            + updateNextRunTime(LocalDateTime nextRun) : void
+            + shouldRunAt(LocalDateTime dateTime) : Boolean
+            + activate() : void
+            + deactivate() : void
+            + updateSchedule(String cronExpression, LocalDateTime startDate) : void
+        }
+        
+        ' Report Format Enumeration
+        Enum ReportFormat {
+            PDF("PDF", "application/pdf")
+            XLS("XLS", "application/vnd.ms-excel")  
+            XLSX("XLSX", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            CSV("CSV", "text/csv")
+            HTML("HTML", "text/html")
+            JSON("JSON", "application/json")
+            XML("XML", "application/xml")
+            --
+            - String code
+            - String mimeType
+            --
+            + getCode() : String
+            + getMimeType() : String
+            + {static} fromString(String format) : ReportFormat
+            + isPdf() : Boolean
+            + isExcel() : Boolean
+            + isCsv() : Boolean
+            + isHtml() : Boolean
+            + isJson() : Boolean
+        }
+    }
+    
+    ' Report Services
+    Package "service" {
+        
+        ' Report Write Platform Service
+        Interface ReportWritePlatformService {
+            + createReport(JsonCommand command) : CommandProcessingResult
+            + updateReport(Long reportId, JsonCommand command) : CommandProcessingResult
+            + deleteReport(Long reportId) : CommandProcessingResult
+            + createReportParameter(JsonCommand command) : CommandProcessingResult
+            + updateReportParameter(Long parameterId, JsonCommand command) : CommandProcessingResult
+            + deleteReportParameter(Long parameterId) : CommandProcessingResult
+            + scheduleReport(Long reportId, JsonCommand command) : CommandProcessingResult
+            + updateReportSchedule(Long scheduleId, JsonCommand command) : CommandProcessingResult
+            + deleteReportSchedule(Long scheduleId) : CommandProcessingResult
+        }
+        
+        ' Report Write Service Implementation
+        Class ReportWritePlatformServiceImpl <<Service>> {
+            - ReportRepository reportRepository
+            - ReportParameterRepository reportParameterRepository
+            - ReportScheduleRepository reportScheduleRepository
+            - PlatformSecurityContext context
+            - ReportDataValidator dataValidator
+            - SchedulerService schedulerService
+            --
+            + createReport(JsonCommand command) : CommandProcessingResult
+            + updateReport(Long reportId, JsonCommand command) : CommandProcessingResult
+            + deleteReport(Long reportId) : CommandProcessingResult
+            + createReportParameter(JsonCommand command) : CommandProcessingResult
+            + updateReportParameter(Long parameterId, JsonCommand command) : CommandProcessingResult
+            + deleteReportParameter(Long parameterId) : CommandProcessingResult
+            + scheduleReport(Long reportId, JsonCommand command) : CommandProcessingResult
+            + updateReportSchedule(Long scheduleId, JsonCommand command) : CommandProcessingResult
+            + deleteReportSchedule(Long scheduleId) : CommandProcessingResult
+            - validateReportSql(String sql) : void
+            - scheduleReportJob(ReportSchedule schedule) : void
+        }
+        
+        ' Report Read Platform Service
+        Interface ReportReadPlatformService {
+            + retrieveReportList() : Collection<ReportData>
+            + retrieveReport(Long reportId) : ReportData
+            + retrieveReportTemplate() : ReportData
+            + retrieveParameterDetails(String parameterName) : Collection<ParameterVariableData>
+            + generateReport(String reportName, ReportFormat format, Map<String, Object> parameters) : ReportResult
+            + generatePentahoReport(String reportName, String outputType, Map<String, Object> parameters) : ReportResult
+        }
+        
+        ' Report Read Service Implementation  
+        Class ReportReadPlatformServiceImpl <<Service>> {
+            - JdbcTemplate jdbcTemplate
+            - PlatformSecurityContext context
+            - ReportRepository reportRepository
+            - ReportParameterRepository reportParameterRepository
+            - ReportGenerationService reportGenerationService
+            --
+            + retrieveReportList() : Collection<ReportData>
+            + retrieveReport(Long reportId) : ReportData
+            + retrieveReportTemplate() : ReportData
+            + retrieveParameterDetails(String parameterName) : Collection<ParameterVariableData>
+            + generateReport(String reportName, ReportFormat format, Map<String, Object> parameters) : ReportResult
+            + generatePentahoReport(String reportName, String outputType, Map<String, Object> parameters) : ReportResult
+            - mapRowToReportData(ResultSet rs) : ReportData
+            - extractReportParameters(Long reportId) : List<ReportParameterData>
+        }
+        
+        ' Report Generation Service
+        Interface ReportGenerationService {
+            + generateReport(Report report, ReportFormat format, Map<String, Object> parameters) : ReportResult
+            + generatePdfReport(Report report, Map<String, Object> parameters) : byte[]
+            + generateExcelReport(Report report, Map<String, Object> parameters) : byte[]
+            + generateCsvReport(Report report, Map<String, Object> parameters) : byte[]
+            + generateHtmlReport(Report report, Map<String, Object> parameters) : String
+            + generateJsonReport(Report report, Map<String, Object> parameters) : String
+        }
+        
+        ' Report Generation Service Implementation
+        Class ReportGenerationServiceImpl <<Service>> {
+            - JdbcTemplate jdbcTemplate
+            - ReportTemplateEngine templateEngine
+            - PdfReportGenerator pdfGenerator
+            - ExcelReportGenerator excelGenerator
+            - CsvReportGenerator csvGenerator
+            --
+            + generateReport(Report report, ReportFormat format, Map<String, Object> parameters) : ReportResult
+            + generatePdfReport(Report report, Map<String, Object> parameters) : byte[]
+            + generateExcelReport(Report report, Map<String, Object> parameters) : byte[]
+            + generateCsvReport(Report report, Map<String, Object> parameters) : byte[]
+            + generateHtmlReport(Report report, Map<String, Object> parameters) : String
+            + generateJsonReport(Report report, Map<String, Object> parameters) : String
+            - executeReportQuery(Report report, Map<String, Object> parameters) : ResultSet
+            - processQueryParameters(String sql, Map<String, Object> parameters) : String
+        }
+        
+        ' PDF Report Generator
+        Interface PdfReportGenerator {
+            + generatePdf(ReportData reportData, Report report) : byte[]
+            + generatePdfFromTemplate(String templatePath, Map<String, Object> data) : byte[]
+        }
+        
+        ' PDF Generator Implementation
+        Class PdfReportGeneratorImpl <<Service>> {
+            - ReportTemplateEngine templateEngine
+            --
+            + generatePdf(ReportData reportData, Report report) : byte[]
+            + generatePdfFromTemplate(String templatePath, Map<String, Object> data) : byte[]
+            - createPdfDocument(ReportData data) : byte[]
+            - applyReportStyling(Document document, Report report) : void
+            - addReportHeader(Document document, Report report) : void
+            - addReportData(Document document, ReportData data) : void
+            - addReportFooter(Document document) : void
+        }
+        
+        ' Excel Report Generator
+        Interface ExcelReportGenerator {
+            + generateExcel(ReportData reportData, Report report) : byte[]
+            + generateExcelFromTemplate(String templatePath, Map<String, Object> data) : byte[]
+        }
+        
+        ' Excel Generator Implementation
+        Class ExcelReportGeneratorImpl <<Service>> {
+            --
+            + generateExcel(ReportData reportData, Report report) : byte[]
+            + generateExcelFromTemplate(String templatePath, Map<String, Object> data) : byte[]
+            - createWorkbook(ReportData data) : Workbook
+            - createHeaderRow(Sheet sheet, List<String> headers) : void
+            - populateDataRows(Sheet sheet, List<ReportRowData> rows) : void
+            - applyExcelStyling(Workbook workbook, Report report) : void
+        }
+        
+        ' CSV Report Generator
+        Interface CsvReportGenerator {
+            + generateCsv(ReportData reportData, Report report) : byte[]
+        }
+        
+        ' CSV Generator Implementation
+        Class CsvReportGeneratorImpl <<Service>> {
+            --
+            + generateCsv(ReportData reportData, Report report) : byte[]
+            - writeCsvHeader(StringBuilder csv, List<String> headers) : void
+            - writeCsvRows(StringBuilder csv, List<ReportRowData> rows) : void
+            - escapeCsvValue(String value) : String
+        }
+        
+        ' Report Template Engine
+        Interface ReportTemplateEngine {
+            + processTemplate(String templateName, Map<String, Object> data) : String
+            + processInlineTemplate(String template, Map<String, Object> data) : String
+            + registerCustomFunction(String name, Function<Object[], Object> function) : void
+        }
+        
+        ' Template Engine Implementation (using Freemarker)
+        Class FreemarkerTemplateEngine <<Service>> {
+            - Configuration freemarkerConfig
+            --
+            + processTemplate(String templateName, Map<String, Object> data) : String
+            + processInlineTemplate(String template, Map<String, Object> data) : String
+            + registerCustomFunction(String name, Function<Object[], Object> function) : void
+            - setupFreemarkerConfiguration() : Configuration
+            - createDataModel(Map<String, Object> data) : Object
+        }
+        
+        ' Scheduled Report Service
+        Interface ScheduledReportService {
+            + executeScheduledReports() : void
+            + executeScheduledReport(ReportSchedule schedule) : void
+            + emailReport(ReportSchedule schedule, ReportResult reportResult) : void
+            + getActiveSchedules() : List<ReportSchedule>
+        }
+        
+        ' Scheduled Report Service Implementation
+        Class ScheduledReportServiceImpl <<Service>> {
+            - ReportScheduleRepository scheduleRepository
+            - ReportGenerationService reportGenerationService
+            - EmailService emailService
+            - FileStorageService fileStorageService
+            --
+            + executeScheduledReports() : void
+            + executeScheduledReport(ReportSchedule schedule) : void
+            + emailReport(ReportSchedule schedule, ReportResult reportResult) : void
+            + getActiveSchedules() : List<ReportSchedule>
+            - updateScheduleNextRunTime(ReportSchedule schedule) : void
+            - saveReportResult(ReportSchedule schedule, ReportResult result) : String
+        }
+    }
+    
+    ' Report Repositories
+    Package "repository" {
+        
+        ' Report Repository
+        Interface ReportRepository <<Repository>> {
+            + findByReportName(String reportName) : Optional<Report>
+            + findCoreReports() : List<Report>
+            + findActiveReports() : List<Report>
+            + findByReportCategory(String category) : List<Report>
+            + findByReportType(String type) : List<Report>
+        }
+        
+        ' Report Parameter Repository
+        Interface ReportParameterRepository <<Repository>> {
+            + findByParameterName(String parameterName) : Optional<ReportParameter>
+            + findByReport(Report report) : List<ReportParameterUsage>
+            + findActiveParameters() : List<ReportParameter>
+        }
+        
+        ' Report Schedule Repository
+        Interface ReportScheduleRepository <<Repository>> {
+            + findByReport(Report report) : List<ReportSchedule>
+            + findActiveSchedules() : List<ReportSchedule>
+            + findSchedulesDueForExecution(LocalDateTime currentTime) : List<ReportSchedule>
+            + findByJobName(String jobName) : Optional<ReportSchedule>
+        }
+    }
+    
+    ' Report Data Transfer Objects
+    Package "data" {
+        
+        ' Report Data
+        Class ReportData {
+            - Long reportId
+            - String reportName
+            - String reportType
+            - String reportCategory
+            - String description
+            - List<ResultsetColumnHeaderData> columnHeaders
+            - List<ResultsetRowData> data
+            - List<ReportParameterData> reportParameters
+            --
+            + getReportId() : Long
+            + getReportName() : String
+            + getColumnHeaders() : List<ResultsetColumnHeaderData>
+            + getData() : List<ResultsetRowData>
+            + getReportParameters() : List<ReportParameterData>
+            + hasData() : Boolean
+            + getRowCount() : Integer
+        }
+        
+        ' Report Parameter Data
+        Class ReportParameterData {
+            - Long parameterId
+            - String parameterName
+            - String parameterVariable
+            - String parameterLabel
+            - String displayType
+            - String formatType
+            - String defaultValue
+            - Boolean mandatory
+            - List<ParameterVariableData> selectOptions
+            --
+            + getParameterId() : Long
+            + getParameterName() : String
+            + getParameterVariable() : String
+            + isMandatory() : Boolean
+            + getSelectOptions() : List<ParameterVariableData>
+        }
+        
+        ' Parameter Variable Data
+        Class ParameterVariableData {
+            - String id
+            - String value
+            - String codeValue
+            --
+            + getId() : String
+            + getValue() : String
+            + getCodeValue() : String
+        }
+        
+        ' Report Result
+        Class ReportResult {
+            - String reportName
+            - ReportFormat format
+            - byte[] content
+            - String fileName
+            - String contentType
+            - Long contentLength
+            - LocalDateTime generatedDate
+            --
+            + getReportName() : String
+            + getFormat() : ReportFormat
+            + getContent() : byte[]
+            + getFileName() : String
+            + getContentType() : String
+            + getContentLength() : Long
+            + getGeneratedDate() : LocalDateTime
+        }
+        
+        ' Resultset Column Header Data
+        Class ResultsetColumnHeaderData {
+            - String columnName
+            - String columnType
+            - String columnDisplayType
+            - Boolean isColumnNullable
+            - Boolean isColumnPrimaryKey
+            - List<ResultsetColumnValueData> columnValues
+            --
+            + getColumnName() : String
+            + getColumnType() : String
+            + isColumnNullable() : Boolean
+            + getColumnValues() : List<ResultsetColumnValueData>
+        }
+        
+        ' Resultset Row Data
+        Class ResultsetRowData {
+            - List<String> row
+            --
+            + getRow() : List<String>
+            + getValue(Integer index) : String
+            + setValue(Integer index, String value) : void
+        }
+    }
+    
+    ' Report Validation
+    Package "validation" {
+        
+        ' Report Data Validator
+        Class ReportDataValidator {
+            - FromJsonHelper fromApiJsonHelper
+            --
+            + validateForCreate(String json) : void
+            + validateForUpdate(String json, Report existingReport) : void
+            + validateReportSql(String sql) : void
+            + validateParameterName(String parameterName) : void
+            + validateParameterType(String parameterType) : void
+            + validateCronExpression(String cronExpression) : void
+            + validateEmailRecipients(String emailRecipients) : void
+            - validateCommonParameters(JsonElement element) : void
+            - validateSqlSyntax(String sql) : void
+            - performDataIntegrityChecks(JsonElement element) : void
+        }
+        
+        ' Report Parameter Validator
+        Class ReportParameterValidator {
+            - ReportParameterRepository parameterRepository
+            --
+            + validateParameterValue(ReportParameter parameter, Object value) : void
+            + validateMandatoryParameters(List<ReportParameter> parameters, Map<String, Object> providedValues) : void
+            + validateParameterDataType(ReportParameter parameter, Object value) : void
+            + validateSelectParameterValue(ReportParameter parameter, Object value) : void
+            + validateDateParameterValue(ReportParameter parameter, Object value) : void
+            + validateNumberParameterValue(ReportParameter parameter, Object value) : void
+        }
+    }
+    
+    ' Report Events
+    Package "events" {
+        
+        ' Report Generated Event
+        Class ReportGeneratedEvent {
+            - String reportName
+            - ReportFormat format
+            - String fileName
+            - Long fileSizeBytes
+            - LocalDateTime generatedDate
+            - String generatedBy
+            --
+            + getReportName() : String
+            + getFormat() : ReportFormat
+            + getFileName() : String
+            + getFileSizeBytes() : Long
+            + getGeneratedDate() : LocalDateTime
+            + getGeneratedBy() : String
+        }
+        
+        ' Scheduled Report Executed Event
+        Class ScheduledReportExecutedEvent {
+            - Long scheduleId
+            - String reportName
+            - LocalDateTime executionTime
+            - Boolean successful
+            - String errorMessage
+            - String recipients
+            --
+            + getScheduleId() : Long
+            + getReportName() : String
+            + getExecutionTime() : LocalDateTime
+            + isSuccessful() : Boolean
+            + getErrorMessage() : String
+            + getRecipients() : String
+        }
+    }
+}
+
+' Relationships
+Report --> ReportParameterUsage : "has parameters"
+ReportParameterUsage --> ReportParameter : "uses parameter"
+Report --> ReportSchedule : "has schedules"
+ReportSchedule --> ReportFormat : "outputs in"
+
+ReportWritePlatformServiceImpl ..|> ReportWritePlatformService : "implements"
+ReportReadPlatformServiceImpl ..|> ReportReadPlatformService : "implements"
+ReportGenerationServiceImpl ..|> ReportGenerationService : "implements"
+PdfReportGeneratorImpl ..|> PdfReportGenerator : "implements"
+ExcelReportGeneratorImpl ..|> ExcelReportGenerator : "implements"
+CsvReportGeneratorImpl ..|> CsvReportGenerator : "implements"
+FreemarkerTemplateEngine ..|> ReportTemplateEngine : "implements"
+ScheduledReportServiceImpl ..|> ScheduledReportService : "implements"
+
+ReportWritePlatformServiceImpl --> ReportRepository : "uses"
+ReportReadPlatformServiceImpl --> ReportGenerationService : "uses"
+ReportGenerationServiceImpl --> PdfReportGenerator : "uses"
+ReportGenerationServiceImpl --> ExcelReportGenerator : "uses"
+ReportGenerationServiceImpl --> CsvReportGenerator : "uses"
+ScheduledReportServiceImpl --> ReportGenerationService : "uses"
+
+SHOW_LEGEND()
+
+note top of Report
+**Flexible Report Definition**
+• SQL-based report configuration
+• Parameter-driven queries  
+• Multiple output formats
+• Scheduled execution
+• Template-based generation
+end note
+
+note right of ReportGenerationService
+**Multi-Format Output**
+• PDF with styling support
+• Excel with formatting
+• CSV for data export
+• HTML for web display
+• JSON for API integration
+end note
+
+note bottom of ScheduledReportService
+**Automated Reporting**
+• Cron-based scheduling
+• Email distribution
+• Batch report generation
+• Error handling & notifications
+• Performance optimization
+end note
+
+note left of ReportTemplateEngine
+**Template Processing**
+• Freemarker integration
+• Custom function support
+• Dynamic content generation
+• Conditional logic
+• Loop processing
+end note
+
+@enduml

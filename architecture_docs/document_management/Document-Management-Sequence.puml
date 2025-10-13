@@ -1,0 +1,320 @@
+@startuml Document-Management-Sequence
+!include <C4/C4_Context>
+
+title Apache Fineract - Document Management Module Sequence Diagram
+
+' Actors and Systems
+actor "User" as USER
+participant "DocumentsApiResource" as API
+participant "CommandSourceHandler" as CSH
+participant "DocumentWritePlatformService" as DWS
+participant "DocumentReadPlatformService" as DRS
+participant "DocumentValidator" as VAL
+participant "DocumentRepository" as REPO
+participant "FileSystemStorageProvider" as FSP
+participant "S3StorageProvider" as S3P
+participant "DatabaseStorageProvider" as DSP
+participant "DocumentTemplateService" as DTS
+participant "AuditService" as AUDIT
+database "TenantDatabase" as DB
+
+note over USER, DB
+**Document Management Sequence Flows**
+1. Document Upload and Storage
+2. Document Template Management
+3. Document Retrieval and Download
+4. Document Version Control
+5. Bulk Document Operations
+end note
+
+== Document Upload Flow ==
+
+USER -> API : POST /clients/{clientId}/documents\n{documentData, file}
+activate API
+
+API -> CSH : processCommand(CREATE_DOCUMENT)
+activate CSH
+
+CSH -> VAL : validateDocumentUpload(documentData, file)
+activate VAL
+VAL -> VAL : validateFileType()
+VAL -> VAL : validateFileSize()
+VAL -> VAL : validateFileName()
+VAL -> VAL : validateEntityAssociation()
+VAL --> CSH : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CSH -> DWS : uploadDocument(entityType, entityId, documentData, file)
+    activate DWS
+    
+    DWS -> DWS : generateDocumentId()
+    DWS -> DWS : extractFileMetadata()
+    
+    ' Choose storage provider based on configuration
+    alt File System Storage
+        DWS -> FSP : storeFile(documentId, fileContent)
+        activate FSP
+        FSP -> FSP : createDirectoryStructure()
+        FSP -> FSP : writeFileToSystem()
+        FSP --> DWS : FileStorageResult
+        deactivate FSP
+        
+    else S3 Cloud Storage
+        DWS -> S3P : storeFile(documentId, fileContent)
+        activate S3P
+        S3P -> S3P : uploadToS3Bucket()
+        S3P -> S3P : setFilePermissions()
+        S3P --> DWS : S3StorageResult
+        deactivate S3P
+        
+    else Database Storage
+        DWS -> DSP : storeFile(documentId, fileContent)
+        activate DSP
+        DSP -> DSP : encodeFileContent()
+        DSP -> DB : INSERT INTO m_document_store
+        DSP --> DWS : DatabaseStorageResult
+        deactivate DSP
+    end
+    
+    ' Create document metadata record
+    DWS -> DWS : buildDocumentEntity()
+    DWS -> REPO : save(documentEntity)
+    activate REPO
+    REPO -> DB : INSERT INTO m_document
+    REPO --> DWS : savedDocument
+    deactivate REPO
+    
+    DWS -> AUDIT : auditDocumentCreation(documentId)
+    activate AUDIT
+    AUDIT -> DB : INSERT INTO m_portfolio_command_source
+    deactivate AUDIT
+    
+    DWS --> CSH : DocumentUploadResult
+    deactivate DWS
+    
+    CSH --> API : CommandProcessingResult
+    deactivate CSH
+    
+    API --> USER : HTTP 201 Created\n{documentId}
+    deactivate API
+    
+else Validation Failure
+    CSH --> API : ValidationException
+    API --> USER : HTTP 400 Bad Request\n{validationErrors}
+end
+
+== Document Download Flow ==
+
+USER -> API : GET /clients/{clientId}/documents/{documentId}/attachment
+activate API
+
+API -> DRS : downloadDocument(entityType, entityId, documentId)
+activate DRS
+
+DRS -> REPO : findDocument(documentId)
+activate REPO
+REPO -> DB : SELECT * FROM m_document WHERE id = ?
+REPO --> DRS : documentMetadata
+deactivate REPO
+
+DRS -> VAL : validateDocumentAccess(documentId, user)
+activate VAL
+VAL -> VAL : checkEntityAssociation()
+VAL -> VAL : validateUserPermissions()
+VAL --> DRS : AccessValidated
+deactivate VAL
+
+alt Access Granted
+    ' Retrieve file content based on storage type
+    alt File System Storage
+        DRS -> FSP : retrieveFile(documentId)
+        activate FSP
+        FSP -> FSP : locateFile()
+        FSP -> FSP : readFileContent()
+        FSP --> DRS : FileContent
+        deactivate FSP
+        
+    else S3 Cloud Storage
+        DRS -> S3P : retrieveFile(documentId)
+        activate S3P
+        S3P -> S3P : downloadFromS3()
+        S3P --> DRS : FileContent
+        deactivate S3P
+        
+    else Database Storage
+        DRS -> DSP : retrieveFile(documentId)
+        activate DSP
+        DSP -> DB : SELECT file_content FROM m_document_store
+        DSP -> DSP : decodeFileContent()
+        DSP --> DRS : FileContent
+        deactivate DSP
+    end
+    
+    DRS -> DRS : prepareFileResponse()
+    DRS --> API : DocumentDownloadResponse
+    deactivate DRS
+    
+    API --> USER : HTTP 200 OK\n{fileContent}
+    deactivate API
+    
+else Access Denied
+    DRS --> API : UnauthorizedAccessException
+    API --> USER : HTTP 403 Forbidden
+end
+
+== Document Template Management Flow ==
+
+USER -> API : POST /documenttemplates\n{templateData}
+activate API
+
+API -> CSH : processCommand(CREATE_DOCUMENT_TEMPLATE)
+activate CSH
+
+CSH -> VAL : validateDocumentTemplate(templateData)
+activate VAL
+VAL -> VAL : validateTemplateName()
+VAL -> VAL : validateTemplateType()
+VAL -> VAL : validateTemplateContent()
+VAL --> CSH : ValidationResult
+deactivate VAL
+
+alt Validation Success
+    CSH -> DTS : createDocumentTemplate(templateData)
+    activate DTS
+    
+    DTS -> DTS : buildTemplateEntity()
+    DTS -> DTS : processTemplateVariables()
+    DTS -> DTS : validateTemplateStructure()
+    
+    DTS -> REPO : saveTemplate(templateEntity)
+    activate REPO
+    REPO -> DB : INSERT INTO m_document_template
+    REPO --> DTS : savedTemplate
+    deactivate REPO
+    
+    DTS -> AUDIT : auditTemplateCreation(templateId)
+    DTS --> CSH : TemplateCreationResult
+    deactivate DTS
+    
+    CSH --> API : CommandProcessingResult
+    deactivate CSH
+    
+    API --> USER : HTTP 201 Created\n{templateId}
+    deactivate API
+    
+else Validation Failure
+    CSH --> API : ValidationException
+    API --> USER : HTTP 400 Bad Request
+end
+
+== Document Generation from Template Flow ==
+
+USER -> API : POST /clients/{clientId}/documents/generate?templateId={templateId}
+activate API
+
+API -> DTS : generateDocumentFromTemplate(templateId, entityId, entityType)
+activate DTS
+
+DTS -> REPO : findTemplate(templateId)
+activate REPO
+REPO -> DB : SELECT * FROM m_document_template WHERE id = ?
+REPO --> DTS : templateDefinition
+deactivate REPO
+
+DTS -> DTS : gatherTemplateData(entityId, entityType)
+DTS -> DTS : populateTemplateVariables()
+DTS -> DTS : renderDocument()
+
+alt PDF Generation
+    DTS -> DTS : generatePDFDocument()
+else Word Generation
+    DTS -> DTS : generateWordDocument()
+else HTML Generation
+    DTS -> DTS : generateHTMLDocument()
+end
+
+' Store generated document
+DTS -> DWS : storeGeneratedDocument(documentContent)
+activate DWS
+DWS -> FSP : storeFile(documentContent)
+DWS -> REPO : saveDocument()
+DWS --> DTS : DocumentStored
+deactivate DWS
+
+DTS --> API : GeneratedDocumentResult
+deactivate DTS
+
+API --> USER : HTTP 200 OK\n{generatedDocumentId}
+deactivate API
+
+== Bulk Document Operation Flow ==
+
+USER -> API : POST /documents/bulk?operation=delete&documentIds=[1,2,3]
+activate API
+
+API -> CSH : processCommand(BULK_DOCUMENT_OPERATION)
+activate CSH
+
+loop For Each Document ID
+    CSH -> DWS : deleteDocument(documentId)
+    activate DWS
+    
+    DWS -> REPO : findDocument(documentId)
+    activate REPO
+    REPO -> DB : SELECT * FROM m_document WHERE id = ?
+    REPO --> DWS : documentMetadata
+    deactivate REPO
+    
+    ' Delete from storage
+    alt File System Storage
+        DWS -> FSP : deleteFile(documentId)
+        activate FSP
+        FSP -> FSP : removeFileFromSystem()
+        FSP --> DWS : FileDeleted
+        deactivate FSP
+        
+    else S3 Cloud Storage
+        DWS -> S3P : deleteFile(documentId)
+        activate S3P
+        S3P -> S3P : deleteFromS3Bucket()
+        S3P --> DWS : FileDeleted
+        deactivate S3P
+        
+    else Database Storage
+        DWS -> DSP : deleteFile(documentId)
+        activate DSP
+        DSP -> DB : DELETE FROM m_document_store WHERE document_id = ?
+        DSP --> DWS : FileDeleted
+        deactivate DSP
+    end
+    
+    ' Delete document metadata
+    DWS -> REPO : delete(documentId)
+    activate REPO
+    REPO -> DB : DELETE FROM m_document WHERE id = ?
+    REPO --> DWS : DocumentDeleted
+    deactivate REPO
+    
+    DWS -> AUDIT : auditDocumentDeletion(documentId)
+    DWS --> CSH : DocumentDeletionResult
+    deactivate DWS
+end
+
+CSH --> API : BulkOperationResult
+deactivate CSH
+
+API --> USER : HTTP 200 OK\n{operationSummary}
+deactivate API
+
+note over USER, DB
+**Key Design Patterns:**
+• Strategy Pattern: Multiple storage providers (FileSystem, S3, Database)
+• Template Method: Common document operations with provider-specific implementations
+• Factory Pattern: Storage provider selection based on configuration
+• Repository Pattern: Document metadata persistence abstraction
+• Command Pattern: All document operations via command handlers
+• Observer Pattern: Document lifecycle event publishing
+end note
+
+@enduml

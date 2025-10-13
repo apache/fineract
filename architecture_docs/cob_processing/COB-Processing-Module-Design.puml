@@ -1,0 +1,773 @@
+@startuml COB-Processing-Module-Design
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+' Force top to bottom layout
+top to bottom direction
+
+title Apache Fineract - COB (Close of Business) Processing Module (Class/Interface Level Design)
+
+' COB Processing Module
+Package "org.apache.fineract.infrastructure.jobs.cob" {
+    
+    ' COB Domain Model
+    Package "domain" {
+        
+        ' COB Business Date Entity
+        Class COBBusinessDate {
+            - Long id
+            - LocalDate businessDate
+            - COBStatus status
+            - LocalDateTime cobStartTime
+            - LocalDateTime cobEndTime
+            - String initiatedBy
+            - String completedBy
+            - Map<String, Object> processingSummary
+            - Set<COBJobExecution> jobExecutions
+            - String errorDetails
+            --
+            + getId() : Long
+            + getBusinessDate() : LocalDate
+            + getStatus() : COBStatus
+            + getCobStartTime() : LocalDateTime
+            + getCobEndTime() : LocalDateTime
+            + getInitiatedBy() : String
+            + getCompletedBy() : String
+            + getProcessingSummary() : Map<String, Object>
+            + getJobExecutions() : Set<COBJobExecution>
+            + getErrorDetails() : String
+            + initiate(String initiatedBy) : void
+            + complete(String completedBy) : void
+            + fail(String errorDetails) : void
+            + addJobExecution(COBJobExecution jobExecution) : void
+            + updateProcessingSummary(String key, Object value) : void
+            + getDuration() : Duration
+            + isInProgress() : Boolean
+            + canAdvance() : Boolean
+        }
+        
+        ' COB Job Configuration
+        Class COBJobConfiguration {
+            - Long id
+            - String jobName
+            - String jobDescription
+            - COBJobType jobType
+            - Integer executionOrder
+            - Boolean isEnabled
+            - Boolean isCritical
+            - String jobClass
+            - Map<String, String> jobParameters
+            - Set<COBJobDependency> dependencies
+            - Integer maxRetryAttempts
+            - Duration timeoutDuration
+            --
+            + getId() : Long
+            + getJobName() : String
+            + getJobDescription() : String
+            + getJobType() : COBJobType
+            + getExecutionOrder() : Integer
+            + isEnabled() : Boolean
+            + isCritical() : Boolean
+            + getJobClass() : String
+            + getJobParameters() : Map<String, String>
+            + getDependencies() : Set<COBJobDependency>
+            + getMaxRetryAttempts() : Integer
+            + getTimeoutDuration() : Duration
+            + enable() : void
+            + disable() : void
+            + updateParameters(Map<String, String> parameters) : void
+            + addDependency(COBJobDependency dependency) : void
+            + canExecute(Set<String> completedJobs) : Boolean
+        }
+        
+        ' COB Job Execution
+        Class COBJobExecution {
+            - Long id
+            - COBBusinessDate cobBusinessDate
+            - COBJobConfiguration jobConfiguration
+            - JobExecutionStatus status
+            - LocalDateTime startTime
+            - LocalDateTime endTime
+            - Integer recordsProcessed
+            - Integer recordsSuccessful
+            - Integer recordsFailed
+            - String errorMessage
+            - String stackTrace
+            - Map<String, Object> executionMetrics
+            - Integer retryAttempt
+            --
+            + getId() : Long
+            + getCobBusinessDate() : COBBusinessDate
+            + getJobConfiguration() : COBJobConfiguration
+            + getStatus() : JobExecutionStatus
+            + getStartTime() : LocalDateTime
+            + getEndTime() : LocalDateTime
+            + getRecordsProcessed() : Integer
+            + getRecordsSuccessful() : Integer
+            + getRecordsFailed() : Integer
+            + getErrorMessage() : String
+            + getStackTrace() : String
+            + getExecutionMetrics() : Map<String, Object>
+            + getRetryAttempt() : Integer
+            + start() : void
+            + complete(ExecutionSummary summary) : void
+            + fail(String errorMessage, String stackTrace) : void
+            + incrementRetry() : void
+            + updateProgress(Integer processed, Integer successful, Integer failed) : void
+            + getDuration() : Duration
+            + getSuccessRate() : BigDecimal
+        }
+        
+        ' Account COB Tracker
+        Class AccountCOBTracker {
+            - Long id
+            - Long accountId
+            - AccountType accountType
+            - LocalDate lastCOBDate
+            - LocalDate nextCOBDate
+            - COBAccountStatus status
+            - Boolean isLocked
+            - LocalDateTime lockTime
+            - String lockReason
+            - Map<String, LocalDateTime> lastProcessedTasks
+            --
+            + getId() : Long
+            + getAccountId() : Long
+            + getAccountType() : AccountType
+            + getLastCOBDate() : LocalDate
+            + getNextCOBDate() : LocalDate
+            + getStatus() : COBAccountStatus
+            + isLocked() : Boolean
+            + getLockTime() : LocalDateTime
+            + getLockReason() : String
+            + getLastProcessedTasks() : Map<String, LocalDateTime>
+            + lock(String reason) : void
+            + unlock() : void
+            + updateCOBDate(LocalDate cobDate) : void
+            + markTaskProcessed(String taskName, LocalDateTime processedTime) : void
+            + isReadyForCOB() : Boolean
+            + requiresProcessing(LocalDate businessDate) : Boolean
+        }
+        
+        ' Interest Calculation Job
+        Class InterestCalculationJob {
+            - Long id
+            - Long accountId
+            - AccountType accountType
+            - LocalDate calculationDate
+            - BigDecimal openingBalance
+            - BigDecimal closingBalance
+            - BigDecimal interestEarned
+            - BigDecimal interestRate
+            - InterestCalculationMethod calculationMethod
+            - JobExecutionStatus status
+            - String errorDetails
+            - LocalDateTime processedTime
+            --
+            + getId() : Long
+            + getAccountId() : Long
+            + getAccountType() : AccountType
+            + getCalculationDate() : LocalDate
+            + getOpeningBalance() : BigDecimal
+            + getClosingBalance() : BigDecimal
+            + getInterestEarned() : BigDecimal
+            + getInterestRate() : BigDecimal
+            + getCalculationMethod() : InterestCalculationMethod
+            + getStatus() : JobExecutionStatus
+            + getErrorDetails() : String
+            + getProcessedTime() : LocalDateTime
+            + calculateInterest() : BigDecimal
+            + validateBalances() : Boolean
+            + complete() : void
+            + fail(String errorDetails) : void
+        }
+        
+        ' Account Balance Reconciliation
+        Class AccountBalanceReconciliation {
+            - Long id
+            - Long accountId
+            - AccountType accountType
+            - LocalDate reconciliationDate
+            - BigDecimal systemBalance
+            - BigDecimal calculatedBalance
+            - BigDecimal variance
+            - ReconciliationStatus status
+            - String varianceReason
+            - Boolean requiresAdjustment
+            - LocalDateTime processedTime
+            --
+            + getId() : Long
+            + getAccountId() : Long
+            + getAccountType() : AccountType
+            + getReconciliationDate() : LocalDate
+            + getSystemBalance() : BigDecimal
+            + getCalculatedBalance() : BigDecimal
+            + getVariance() : BigDecimal
+            + getStatus() : ReconciliationStatus
+            + getVarianceReason() : String
+            + requiresAdjustment() : Boolean
+            + getProcessedTime() : LocalDateTime
+            + reconcile() : void
+            + calculateVariance() : BigDecimal
+            + isWithinTolerance(BigDecimal tolerance) : Boolean
+            + createAdjustmentEntry() : JournalEntry
+        }
+        
+        ' COB Processing Lock
+        Class COBProcessingLock {
+            - Long id
+            - String lockKey
+            - LockType lockType
+            - String lockedBy
+            - LocalDateTime lockTime
+            - LocalDateTime expiryTime
+            - Boolean isActive
+            - String lockReason
+            - Map<String, String> lockMetadata
+            --
+            + getId() : Long
+            + getLockKey() : String
+            + getLockType() : LockType
+            + getLockedBy() : String
+            + getLockTime() : LocalDateTime
+            + getExpiryTime() : LocalDateTime
+            + isActive() : Boolean
+            + getLockReason() : String
+            + getLockMetadata() : Map<String, String>
+            + acquire(String lockedBy, Duration duration, String reason) : Boolean
+            + release() : void
+            + extend(Duration additionalTime) : void
+            + isExpired() : Boolean
+            + canAcquire() : Boolean
+        }
+        
+        ' COB Error Handler
+        Class COBErrorHandler {
+            - Long id
+            - String jobName
+            - String errorType
+            - ErrorSeverity severity
+            - String errorMessage
+            - String stackTrace
+            - LocalDateTime errorTime
+            - ErrorHandlingAction action
+            - Boolean isResolved
+            - String resolution
+            - LocalDateTime resolvedTime
+            --
+            + getId() : Long
+            + getJobName() : String
+            + getErrorType() : String
+            + getSeverity() : ErrorSeverity
+            + getErrorMessage() : String
+            + getStackTrace() : String
+            + getErrorTime() : LocalDateTime
+            + getAction() : ErrorHandlingAction
+            + isResolved() : Boolean
+            + getResolution() : String
+            + getResolvedTime() : LocalDateTime
+            + handle() : void
+            + retry() : void
+            + skip() : void
+            + escalate() : void
+            + resolve(String resolution) : void
+        }
+        
+        ' Enumerations
+        Enum COBStatus {
+            NOT_STARTED(1, "cobStatus.notStarted")
+            IN_PROGRESS(2, "cobStatus.inProgress")
+            COMPLETED(3, "cobStatus.completed")
+            FAILED(4, "cobStatus.failed")
+            CANCELLED(5, "cobStatus.cancelled")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum COBJobType {
+            INTEREST_CALCULATION(1, "cobJobType.interestCalculation")
+            BALANCE_RECONCILIATION(2, "cobJobType.balanceReconciliation")
+            ACCOUNT_MAINTENANCE(3, "cobJobType.accountMaintenance")
+            REPORTING(4, "cobJobType.reporting")
+            ARCHIVAL(5, "cobJobType.archival")
+            CLEANUP(6, "cobJobType.cleanup")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum JobExecutionStatus {
+            SCHEDULED(1, "jobStatus.scheduled")
+            RUNNING(2, "jobStatus.running")
+            COMPLETED(3, "jobStatus.completed")
+            FAILED(4, "jobStatus.failed")
+            CANCELLED(5, "jobStatus.cancelled")
+            TIMEOUT(6, "jobStatus.timeout")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum COBAccountStatus {
+            READY(1, "cobAccountStatus.ready")
+            PROCESSING(2, "cobAccountStatus.processing")
+            COMPLETED(3, "cobAccountStatus.completed")
+            ERROR(4, "cobAccountStatus.error")
+            LOCKED(5, "cobAccountStatus.locked")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum ReconciliationStatus {
+            PENDING(1, "reconciliationStatus.pending")
+            MATCHED(2, "reconciliationStatus.matched")
+            VARIANCE_FOUND(3, "reconciliationStatus.varianceFound")
+            ADJUSTED(4, "reconciliationStatus.adjusted")
+            EXCEPTION(5, "reconciliationStatus.exception")
+            --
+            - Integer value
+            - String code
+        }
+        
+        Enum LockType {
+            ACCOUNT_LEVEL("ACCOUNT", "Account Level Lock")
+            PRODUCT_LEVEL("PRODUCT", "Product Level Lock")
+            SYSTEM_LEVEL("SYSTEM", "System Level Lock")
+            TENANT_LEVEL("TENANT", "Tenant Level Lock")
+            --
+            - String code
+            - String description
+        }
+        
+        Enum ErrorSeverity {
+            LOW(1, "errorSeverity.low")
+            MEDIUM(2, "errorSeverity.medium")
+            HIGH(3, "errorSeverity.high")
+            CRITICAL(4, "errorSeverity.critical")
+            --
+            - Integer value
+            - String code
+        }
+    }
+    
+    ' COB Services
+    Package "service" {
+        
+        ' COB Orchestration Service
+        Interface COBOrchestrationService {
+            + initiateCOB(LocalDate businessDate) : CommandProcessingResult
+            + resumeCOB(Long cobId) : CommandProcessingResult
+            + cancelCOB(Long cobId, String reason) : CommandProcessingResult
+            + getCOBStatus(LocalDate businessDate) : COBStatusData
+            + getActiveCOBProcesses() : List<COBStatusData>
+            + advanceBusinessDate(LocalDate newBusinessDate) : CommandProcessingResult
+        }
+        
+        ' COB Orchestration Service Implementation
+        Class COBOrchestrationServiceImpl <<Service>> {
+            - COBBusinessDateRepository cobRepository
+            - COBJobConfigurationRepository jobConfigRepository
+            - COBJobExecutor jobExecutor
+            - BusinessDateService businessDateService
+            - COBLockManager lockManager
+            - COBNotificationService notificationService
+            --
+            + initiateCOB(LocalDate businessDate) : CommandProcessingResult
+            + resumeCOB(Long cobId) : CommandProcessingResult
+            + cancelCOB(Long cobId, String reason) : CommandProcessingResult
+            + getCOBStatus(LocalDate businessDate) : COBStatusData
+            + getActiveCOBProcesses() : List<COBStatusData>
+            + advanceBusinessDate(LocalDate newBusinessDate) : CommandProcessingResult
+            - validateCOBInitiation(LocalDate businessDate) : void
+            - createExecutionPlan(LocalDate businessDate) : COBExecutionPlan
+            - monitorCOBProgress(Long cobId) : void
+        }
+        
+        ' COB Job Executor
+        Interface COBJobExecutor {
+            + executeJob(COBJobConfiguration jobConfig, COBBusinessDate cobDate) : COBJobExecution
+            + executeJobAsync(COBJobConfiguration jobConfig, COBBusinessDate cobDate) : Future<COBJobExecution>
+            + retryJob(COBJobExecution failedExecution) : COBJobExecution
+            + cancelJob(COBJobExecution execution) : void
+            + getJobExecutionStatus(Long executionId) : JobExecutionStatus
+        }
+        
+        ' COB Job Executor Implementation
+        Class COBJobExecutorImpl <<Service>> {
+            - TaskExecutor taskExecutor
+            - COBJobExecutionRepository executionRepository
+            - COBErrorHandler errorHandler
+            - JobPerformanceMonitor performanceMonitor
+            --
+            + executeJob(COBJobConfiguration jobConfig, COBBusinessDate cobDate) : COBJobExecution
+            + executeJobAsync(COBJobConfiguration jobConfig, COBBusinessDate cobDate) : Future<COBJobExecution>
+            + retryJob(COBJobExecution failedExecution) : COBJobExecution
+            + cancelJob(COBJobExecution execution) : void
+            + getJobExecutionStatus(Long executionId) : JobExecutionStatus
+            - createJobInstance(COBJobConfiguration jobConfig) : Runnable
+            - handleJobException(COBJobExecution execution, Exception e) : void
+            - updateExecutionMetrics(COBJobExecution execution, JobMetrics metrics) : void
+        }
+        
+        ' Interest Calculation Service
+        Interface InterestCalculationService {
+            + calculateAccountInterest(Long accountId, LocalDate calculationDate) : InterestCalculationResult
+            + batchCalculateInterest(List<Long> accountIds, LocalDate calculationDate) : BatchProcessingResult
+            + recalculateInterest(Long accountId, LocalDate fromDate, LocalDate toDate) : InterestCalculationResult
+            + validateInterestCalculation(Long accountId, LocalDate calculationDate) : ValidationResult
+        }
+        
+        ' Interest Calculation Service Implementation
+        Class InterestCalculationServiceImpl <<Service>> {
+            - SavingsAccountRepository savingsRepository
+            - LoanAccountRepository loanRepository
+            - InterestRateService interestRateService
+            - InterestPostingService postingService
+            --
+            + calculateAccountInterest(Long accountId, LocalDate calculationDate) : InterestCalculationResult
+            + batchCalculateInterest(List<Long> accountIds, LocalDate calculationDate) : BatchProcessingResult
+            + recalculateInterest(Long accountId, LocalDate fromDate, LocalDate toDate) : InterestCalculationResult
+            + validateInterestCalculation(Long accountId, LocalDate calculationDate) : ValidationResult
+            - calculateSavingsInterest(SavingsAccount account, LocalDate calculationDate) : BigDecimal
+            - calculateLoanInterest(LoanAccount account, LocalDate calculationDate) : BigDecimal
+            - postInterestTransaction(Long accountId, BigDecimal interestAmount, LocalDate postingDate) : void
+        }
+        
+        ' Balance Reconciliation Service
+        Interface BalanceReconciliationService {
+            + reconcileAccount(Long accountId, LocalDate reconciliationDate) : ReconciliationResult
+            + batchReconcileAccounts(List<Long> accountIds, LocalDate reconciliationDate) : BatchReconciliationResult
+            + generateReconciliationReport(LocalDate reconciliationDate) : ReconciliationReportData
+            + resolveVariance(Long reconciliationId, VarianceResolution resolution) : CommandProcessingResult
+        }
+        
+        ' Balance Reconciliation Service Implementation
+        Class BalanceReconciliationServiceImpl <<Service>> {
+            - AccountBalanceReconciliationRepository reconciliationRepository
+            - AccountRepository accountRepository
+            - TransactionService transactionService
+            - JournalEntryService journalEntryService
+            --
+            + reconcileAccount(Long accountId, LocalDate reconciliationDate) : ReconciliationResult
+            + batchReconcileAccounts(List<Long> accountIds, LocalDate reconciliationDate) : BatchReconciliationResult
+            + generateReconciliationReport(LocalDate reconciliationDate) : ReconciliationReportData
+            + resolveVariance(Long reconciliationId, VarianceResolution resolution) : CommandProcessingResult
+            - calculateSystemBalance(Long accountId, LocalDate asOfDate) : BigDecimal
+            - calculateTransactionBasedBalance(Long accountId, LocalDate asOfDate) : BigDecimal
+            - createVarianceAdjustment(AccountBalanceReconciliation reconciliation) : JournalEntry
+        }
+        
+        ' Account Maintenance Service
+        Interface AccountMaintenanceService {
+            + performAccountMaintenance(Long accountId, LocalDate maintenanceDate) : MaintenanceResult
+            + batchAccountMaintenance(List<Long> accountIds, LocalDate maintenanceDate) : BatchMaintenanceResult
+            + scheduleAccountClosure(Long accountId, LocalDate closureDate) : CommandProcessingResult
+            + processMaturedAccounts(LocalDate maturityDate) : BatchProcessingResult
+        }
+        
+        ' Account Maintenance Service Implementation
+        Class AccountMaintenanceServiceImpl <<Service>> {
+            - AccountCOBTrackerRepository trackerRepository
+            - SavingsAccountService savingsService
+            - LoanAccountService loanService
+            - ChargeService chargeService
+            --
+            + performAccountMaintenance(Long accountId, LocalDate maintenanceDate) : MaintenanceResult
+            + batchAccountMaintenance(List<Long> accountIds, LocalDate maintenanceDate) : BatchMaintenanceResult
+            + scheduleAccountClosure(Long accountId, LocalDate closureDate) : CommandProcessingResult
+            + processMaturedAccounts(LocalDate maturityDate) : BatchProcessingResult
+            - processAccountCharges(Long accountId, LocalDate processingDate) : void
+            - updateAccountStatus(Long accountId, LocalDate statusDate) : void
+            - handleDormantAccounts(Long accountId, LocalDate checkDate) : void
+        }
+        
+        ' COB Lock Manager
+        Interface COBLockManager {
+            + acquireSystemLock(String lockKey, Duration duration, String reason) : Boolean
+            + acquireAccountLock(Long accountId, Duration duration, String reason) : Boolean
+            + releaseLock(String lockKey) : void
+            + releaseAllLocks(String lockedBy) : void
+            + isLocked(String lockKey) : Boolean
+            + extendLock(String lockKey, Duration additionalTime) : Boolean
+        }
+        
+        ' COB Lock Manager Implementation
+        Class COBLockManagerImpl <<Service>> {
+            - COBProcessingLockRepository lockRepository
+            - RedisTemplate redisTemplate
+            - COBLockConfiguration lockConfig
+            --
+            + acquireSystemLock(String lockKey, Duration duration, String reason) : Boolean
+            + acquireAccountLock(Long accountId, Duration duration, String reason) : Boolean
+            + releaseLock(String lockKey) : void
+            + releaseAllLocks(String lockedBy) : void
+            + isLocked(String lockKey) : Boolean
+            + extendLock(String lockKey, Duration additionalTime) : Boolean
+            - buildLockKey(LockType type, String identifier) : String
+            - cleanupExpiredLocks() : void
+        }
+        
+        ' COB Notification Service
+        Interface COBNotificationService {
+            + sendCOBStartNotification(COBBusinessDate cobDate) : void
+            + sendCOBCompletionNotification(COBBusinessDate cobDate) : void
+            + sendCOBFailureNotification(COBBusinessDate cobDate, String errorDetails) : void
+            + sendJobFailureAlert(COBJobExecution execution) : void
+            + generateCOBSummaryReport(COBBusinessDate cobDate) : COBSummaryReport
+        }
+        
+        ' COB Notification Service Implementation
+        Class COBNotificationServiceImpl <<Service>> {
+            - NotificationService notificationService
+            - EmailService emailService
+            - SMSService smsService
+            - ReportGenerationService reportService
+            --
+            + sendCOBStartNotification(COBBusinessDate cobDate) : void
+            + sendCOBCompletionNotification(COBBusinessDate cobDate) : void
+            + sendCOBFailureNotification(COBBusinessDate cobDate, String errorDetails) : void
+            + sendJobFailureAlert(COBJobExecution execution) : void
+            + generateCOBSummaryReport(COBBusinessDate cobDate) : COBSummaryReport
+            - buildNotificationContext(COBBusinessDate cobDate) : NotificationContext
+            - formatCOBSummary(COBBusinessDate cobDate) : String
+        }
+        
+        ' Business Date Service
+        Interface BusinessDateService {
+            + getCurrentBusinessDate() : LocalDate
+            + getNextBusinessDate() : LocalDate
+            + isBusinessDay(LocalDate date) : Boolean
+            + advanceBusinessDate(LocalDate newDate) : void
+            + canAdvanceBusinessDate(LocalDate newDate) : Boolean
+            + getBusinessDateHistory() : List<BusinessDateHistory>
+        }
+        
+        ' Business Date Service Implementation
+        Class BusinessDateServiceImpl <<Service>> {
+            - BusinessDateRepository businessDateRepository
+            - HolidayRepository holidayRepository
+            - WorkingDaysRepository workingDaysRepository
+            --
+            + getCurrentBusinessDate() : LocalDate
+            + getNextBusinessDate() : LocalDate
+            + isBusinessDay(LocalDate date) : Boolean
+            + advanceBusinessDate(LocalDate newDate) : void
+            + canAdvanceBusinessDate(LocalDate newDate) : Boolean
+            + getBusinessDateHistory() : List<BusinessDateHistory>
+            - validateDateAdvancement(LocalDate currentDate, LocalDate newDate) : void
+            - calculateNextWorkingDay(LocalDate fromDate) : LocalDate
+        }
+    }
+    
+    ' COB Repositories
+    Package "repository" {
+        
+        ' COB Business Date Repository
+        Interface COBBusinessDateRepository <<Repository>> {
+            + findByBusinessDate(LocalDate businessDate) : Optional<COBBusinessDate>
+            + findByStatus(COBStatus status) : List<COBBusinessDate>
+            + findActiveProcesses() : List<COBBusinessDate>
+            + findLastCompletedCOB() : Optional<COBBusinessDate>
+        }
+        
+        ' COB Job Configuration Repository
+        Interface COBJobConfigurationRepository <<Repository>> {
+            + findByIsEnabledTrue() : List<COBJobConfiguration>
+            + findByJobType(COBJobType jobType) : List<COBJobConfiguration>
+            + findByJobName(String jobName) : Optional<COBJobConfiguration>
+            + findOrderedJobs() : List<COBJobConfiguration>
+        }
+        
+        ' COB Job Execution Repository
+        Interface COBJobExecutionRepository <<Repository>> {
+            + findByCobBusinessDate(COBBusinessDate cobDate) : List<COBJobExecution>
+            + findByStatus(JobExecutionStatus status) : List<COBJobExecution>
+            + findFailedExecutions(LocalDate fromDate) : List<COBJobExecution>
+        }
+        
+        ' Account COB Tracker Repository
+        Interface AccountCOBTrackerRepository <<Repository>> {
+            + findByAccountId(Long accountId) : Optional<AccountCOBTracker>
+            + findAccountsRequiringCOB(LocalDate businessDate) : List<AccountCOBTracker>
+            + findLockedAccounts() : List<AccountCOBTracker>
+        }
+        
+        ' Account Balance Reconciliation Repository
+        Interface AccountBalanceReconciliationRepository <<Repository>> {
+            + findByAccountIdAndReconciliationDate(Long accountId, LocalDate date) : Optional<AccountBalanceReconciliation>
+            + findVariances(LocalDate reconciliationDate) : List<AccountBalanceReconciliation>
+            + findUnresolvedVariances() : List<AccountBalanceReconciliation>
+        }
+        
+        ' COB Processing Lock Repository
+        Interface COBProcessingLockRepository <<Repository>> {
+            + findByLockKeyAndIsActiveTrue(String lockKey) : Optional<COBProcessingLock>
+            + findByLockedBy(String lockedBy) : List<COBProcessingLock>
+            + findExpiredLocks() : List<COBProcessingLock>
+        }
+    }
+    
+    ' COB Data Objects
+    Package "data" {
+        
+        ' COB Status Data
+        Class COBStatusData {
+            - Long id
+            - LocalDate businessDate
+            - COBStatus status
+            - LocalDateTime startTime
+            - LocalDateTime endTime
+            - Integer totalJobs
+            - Integer completedJobs
+            - Integer failedJobs
+            - BigDecimal progressPercentage
+            --
+            + getId() : Long
+            + getBusinessDate() : LocalDate
+            + getStatus() : COBStatus
+            + getStartTime() : LocalDateTime
+            + getEndTime() : LocalDateTime
+            + getTotalJobs() : Integer
+            + getCompletedJobs() : Integer
+            + getFailedJobs() : Integer
+            + getProgressPercentage() : BigDecimal
+        }
+        
+        ' COB Execution Plan
+        Class COBExecutionPlan {
+            - LocalDate businessDate
+            - List<COBJobConfiguration> orderedJobs
+            - Map<String, Set<String>> jobDependencies
+            - Duration estimatedDuration
+            --
+            + getBusinessDate() : LocalDate
+            + getOrderedJobs() : List<COBJobConfiguration>
+            + getJobDependencies() : Map<String, Set<String>>
+            + getEstimatedDuration() : Duration
+        }
+        
+        ' Batch Processing Result
+        Class BatchProcessingResult {
+            - Integer totalRecords
+            - Integer successfulRecords
+            - Integer failedRecords
+            - List<ProcessingError> errors
+            - Duration processingTime
+            --
+            + getTotalRecords() : Integer
+            + getSuccessfulRecords() : Integer
+            + getFailedRecords() : Integer
+            + getErrors() : List<ProcessingError>
+            + getProcessingTime() : Duration
+        }
+        
+        ' Interest Calculation Result
+        Class InterestCalculationResult {
+            - Long accountId
+            - LocalDate calculationDate
+            - BigDecimal interestAmount
+            - BigDecimal interestRate
+            - InterestCalculationMethod method
+            - Boolean isSuccessful
+            - String errorMessage
+            --
+            + getAccountId() : Long
+            + getCalculationDate() : LocalDate
+            + getInterestAmount() : BigDecimal
+            + getInterestRate() : BigDecimal
+            + getMethod() : InterestCalculationMethod
+            + isSuccessful() : Boolean
+            + getErrorMessage() : String
+        }
+        
+        ' Reconciliation Result
+        Class ReconciliationResult {
+            - Long accountId
+            - LocalDate reconciliationDate
+            - BigDecimal systemBalance
+            - BigDecimal calculatedBalance
+            - BigDecimal variance
+            - Boolean isMatched
+            - String varianceReason
+            --
+            + getAccountId() : Long
+            + getReconciliationDate() : LocalDate
+            + getSystemBalance() : BigDecimal
+            + getCalculatedBalance() : BigDecimal
+            + getVariance() : BigDecimal
+            + isMatched() : Boolean
+            + getVarianceReason() : String
+        }
+    }
+}
+
+' Relationships
+COBBusinessDate --> COBJobExecution : "has executions"
+COBJobConfiguration --> COBJobExecution : "executed as"
+COBJobExecution --> COBJobConfiguration : "executes"
+AccountCOBTracker --> AccountType : "tracks account"
+InterestCalculationJob --> AccountType : "calculates for"
+AccountBalanceReconciliation --> AccountType : "reconciles"
+COBProcessingLock --> LockType : "has type"
+
+COBOrchestrationServiceImpl ..|> COBOrchestrationService : "implements"
+COBJobExecutorImpl ..|> COBJobExecutor : "implements"
+InterestCalculationServiceImpl ..|> InterestCalculationService : "implements"
+BalanceReconciliationServiceImpl ..|> BalanceReconciliationService : "implements"
+AccountMaintenanceServiceImpl ..|> AccountMaintenanceService : "implements"
+COBLockManagerImpl ..|> COBLockManager : "implements"
+COBNotificationServiceImpl ..|> COBNotificationService : "implements"
+BusinessDateServiceImpl ..|> BusinessDateService : "implements"
+
+COBOrchestrationServiceImpl --> COBBusinessDateRepository : "uses"
+COBJobExecutorImpl --> COBJobExecutionRepository : "uses"
+InterestCalculationServiceImpl --> InterestCalculationJob : "creates"
+BalanceReconciliationServiceImpl --> AccountBalanceReconciliationRepository : "uses"
+COBLockManagerImpl --> COBProcessingLockRepository : "uses"
+
+SHOW_LEGEND()
+
+note top of COBBusinessDate
+**End-of-Day Processing**
+• Comprehensive COB orchestration
+• Job dependency management
+• Progress tracking and monitoring
+• Error handling and recovery
+• Business date advancement
+• Audit trail maintenance
+end note
+
+note right of InterestCalculationService
+**Interest Processing**
+• Daily interest calculations
+• Compound interest support
+• Batch processing capability
+• Rate variation handling
+• Posting automation
+• Validation and reconciliation
+end note
+
+note bottom of BalanceReconciliationService
+**Balance Reconciliation**
+• System vs calculated balance
+• Variance detection and analysis
+• Automatic adjustment creation
+• Tolerance-based matching
+• Exception reporting
+• Audit trail generation
+end note
+
+note left of COBLockManager
+**Concurrency Control**
+• Distributed locking mechanism
+• Account-level locks
+• System-level locks
+• Lock expiry management
+• Deadlock prevention
+• Performance optimization
+end note
+
+@enduml

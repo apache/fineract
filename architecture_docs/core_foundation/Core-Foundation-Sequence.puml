@@ -1,0 +1,355 @@
+@startuml Core-Foundation-Sequence
+!include <C4/C4_Context>
+
+title Apache Fineract - Core Foundation Module Sequence Diagram
+
+' Actors and Systems
+participant "Business Service" as BSVC
+participant "PlatformSecurityContext" as PSC
+participant "TenantAwareDataSource" as TADS
+participant "ConfigurationDomainService" as CDS
+participant "DateUtils" as DU
+participant "MoneyUtil" as MU
+participant "ValidationUtil" as VU
+participant "ErrorMessageHelper" as EMH
+participant "BaseRepository" as BASE_REPO
+participant "AbstractPersistableCustom" as APC
+participant "AuditableEntity" as AE
+participant "CacheService" as CACHE
+participant "EventPublisher" as EP
+database "TenantDatabase" as DB
+
+note over BSVC, DB
+**Core Foundation Sequence Flows**
+1. Multi-Tenant Data Source Resolution
+2. Security Context and User Authentication
+3. Common Utility Functions (Date, Money, Validation)
+4. Base Entity and Repository Operations
+5. Configuration Management and Caching
+end note
+
+== Multi-Tenant Data Source Resolution ==
+
+BSVC -> TADS : getDataSource()
+activate TADS
+
+TADS -> PSC : getCurrentTenant()
+activate PSC
+PSC -> PSC : extractTenantFromContext()
+PSC --> TADS : TenantContext
+deactivate PSC
+
+TADS -> TADS : resolveTenantDataSource(tenantIdentifier)
+
+alt Tenant Data Source Exists
+    TADS -> TADS : getTenantDataSource(tenantIdentifier)
+    TADS -> TADS : validateDataSourceHealth()
+    
+else Tenant Data Source Not Found
+    TADS -> TADS : createTenantDataSource(tenantIdentifier)
+    TADS -> TADS : initializeTenantSchema()
+end
+
+TADS -> TADS : setTenantContext(dataSource)
+TADS --> BSVC : TenantAwareDataSource
+deactivate TADS
+
+== Security Context Authentication ==
+
+BSVC -> PSC : authenticateUser()
+activate PSC
+
+PSC -> PSC : validateSecurityToken()
+PSC -> PSC : extractUserFromToken()
+
+alt Valid Authentication
+    PSC -> PSC : loadUserDetails(userId)
+    PSC -> PSC : loadUserPermissions(userId)
+    PSC -> PSC : setSecurityContext(user, permissions)
+    
+    ' Cache user context for performance
+    PSC -> CACHE : cacheUserContext(userId, userContext)
+    activate CACHE
+    CACHE -> CACHE : storeInCache(key, value, ttl)
+    CACHE --> PSC : contextCached
+    deactivate CACHE
+    
+    PSC --> BSVC : AuthenticatedUser
+    
+else Invalid Authentication
+    PSC -> PSC : logAuthenticationFailure()
+    PSC --> BSVC : AuthenticationException
+end
+
+deactivate PSC
+
+== Configuration Service Usage ==
+
+BSVC -> CDS : getGlobalConfiguration(configName)
+activate CDS
+
+CDS -> CACHE : getFromCache(configName)
+activate CACHE
+CACHE --> CDS : cachedConfig
+deactivate CACHE
+
+alt Configuration Not Cached
+    CDS -> BASE_REPO : findConfigurationByName(configName)
+    activate BASE_REPO
+    BASE_REPO -> TADS : getConnection()
+    BASE_REPO -> DB : SELECT * FROM c_configuration WHERE name = ?
+    BASE_REPO --> CDS : configurationData
+    deactivate BASE_REPO
+    
+    CDS -> CDS : parseConfigurationValue()
+    
+    ' Cache for future use
+    CDS -> CACHE : cacheConfiguration(configName, configValue)
+    activate CACHE
+    CACHE --> CDS : configCached
+    deactivate CACHE
+end
+
+CDS -> CDS : validateConfigurationValue()
+CDS --> BSVC : ConfigurationValue
+deactivate CDS
+
+== Date Utility Operations ==
+
+BSVC -> DU : getBusinessDate()
+activate DU
+
+DU -> CDS : getGlobalConfiguration("business-date")
+activate CDS
+CDS --> DU : businessDateConfig
+deactivate CDS
+
+DU -> DU : parseBusinessDate()
+DU -> DU : validateBusinessDate()
+
+alt Business Date Override
+    DU -> DU : getOverriddenBusinessDate()
+else Use System Date
+    DU -> DU : getCurrentSystemDate()
+end
+
+DU --> BSVC : BusinessDate
+deactivate DU
+
+BSVC -> DU : calculatePeriodBetween(startDate, endDate)
+activate DU
+DU -> DU : validateDateRange()
+DU -> DU : calculateDaysDifference()
+DU -> DU : handleWeekends()
+DU -> DU : handleHolidays()
+DU --> BSVC : PeriodCalculation
+deactivate DU
+
+== Money Utility Operations ==
+
+BSVC -> MU : calculateInterest(principal, rate, period)
+activate MU
+
+MU -> VU : validateMonetaryAmount(principal)
+activate VU
+VU -> VU : checkPositiveAmount()
+VU -> VU : validatePrecision()
+VU --> MU : amountValid
+deactivate VU
+
+MU -> MU : applyInterestFormula()
+MU -> MU : roundToMonetaryPrecision()
+MU -> MU : validateCalculationResult()
+
+MU --> BSVC : InterestAmount
+deactivate MU
+
+BSVC -> MU : convertCurrency(amount, fromCurrency, toCurrency)
+activate MU
+MU -> CDS : getExchangeRate(fromCurrency, toCurrency)
+activate CDS
+CDS --> MU : exchangeRate
+deactivate CDS
+MU -> MU : performCurrencyConversion()
+MU --> BSVC : ConvertedAmount
+deactivate MU
+
+== Base Entity Operations ==
+
+BSVC -> APC : createNewEntity()
+activate APC
+
+APC -> AE : initializeAuditFields()
+activate AE
+AE -> PSC : getCurrentUser()
+activate PSC
+PSC --> AE : currentUser
+deactivate PSC
+AE -> DU : getCurrentTimestamp()
+activate DU
+DU --> AE : currentTimestamp
+deactivate DU
+AE -> AE : setCreatedBy(currentUser)
+AE -> AE : setCreatedDate(currentTimestamp)
+AE --> APC : auditFieldsSet
+deactivate AE
+
+APC -> APC : generateEntityId()
+APC -> APC : setEntityDefaults()
+APC --> BSVC : NewEntity
+deactivate APC
+
+== Base Repository Operations ==
+
+BSVC -> BASE_REPO : save(entity)
+activate BASE_REPO
+
+BASE_REPO -> AE : updateAuditFields(entity)
+activate AE
+AE -> PSC : getCurrentUser()
+AE -> DU : getCurrentTimestamp()
+AE -> AE : setLastModifiedBy(currentUser)
+AE -> AE : setLastModifiedDate(currentTimestamp)
+AE --> BASE_REPO : auditFieldsUpdated
+deactivate AE
+
+BASE_REPO -> TADS : getConnection()
+activate TADS
+TADS --> BASE_REPO : connection
+deactivate TADS
+
+BASE_REPO -> BASE_REPO : generateSQL(entity)
+BASE_REPO -> DB : EXECUTE_PERSISTENCE_OPERATION
+DB --> BASE_REPO : operationResult
+
+' Publish domain event
+BASE_REPO -> EP : publishEntityEvent(entity, eventType)
+activate EP
+EP -> EP : buildDomainEvent()
+EP -> EP : publishToEventBus()
+EP --> BASE_REPO : eventPublished
+deactivate EP
+
+BASE_REPO --> BSVC : SavedEntity
+deactivate BASE_REPO
+
+== Validation Utility Usage ==
+
+BSVC -> VU : validateRequiredField(fieldValue, fieldName)
+activate VU
+
+VU -> VU : checkNullOrEmpty(fieldValue)
+
+alt Field Invalid
+    VU -> EMH : buildValidationError(fieldName, "required")
+    activate EMH
+    EMH -> EMH : getErrorMessage("validation.msg.required", fieldName)
+    EMH --> VU : validationError
+    deactivate EMH
+    VU --> BSVC : ValidationException
+    
+else Field Valid
+    VU --> BSVC : ValidationSuccess
+end
+
+deactivate VU
+
+BSVC -> VU : validateNumericRange(value, min, max, fieldName)
+activate VU
+VU -> VU : checkNumericValue(value)
+VU -> VU : checkRange(value, min, max)
+
+alt Out of Range
+    VU -> EMH : buildRangeValidationError(fieldName, min, max)
+    activate EMH
+    EMH --> VU : rangeError
+    deactivate EMH
+    VU --> BSVC : ValidationException
+else In Range
+    VU --> BSVC : ValidationSuccess
+end
+deactivate VU
+
+== Error Message Handling ==
+
+BSVC -> EMH : getLocalizedErrorMessage(errorCode, params)
+activate EMH
+
+EMH -> PSC : getCurrentUserLocale()
+activate PSC
+PSC --> EMH : userLocale
+deactivate PSC
+
+EMH -> CDS : getMessageBundle(locale)
+activate CDS
+CDS --> EMH : messageBundle
+deactivate CDS
+
+EMH -> EMH : formatMessage(errorCode, params)
+EMH -> EMH : applyLocalization()
+
+EMH --> BSVC : LocalizedErrorMessage
+deactivate EMH
+
+== Cache Service Operations ==
+
+BSVC -> CACHE : getFromCache(key)
+activate CACHE
+
+CACHE -> CACHE : checkCacheHit(key)
+
+alt Cache Hit
+    CACHE -> CACHE : retrieveCachedValue(key)
+    CACHE -> CACHE : updateAccessTime(key)
+    CACHE --> BSVC : CachedValue
+    
+else Cache Miss
+    CACHE --> BSVC : CacheMiss
+end
+
+deactivate CACHE
+
+BSVC -> CACHE : putInCache(key, value, ttl)
+activate CACHE
+CACHE -> CACHE : validateCacheEntry(key, value)
+CACHE -> CACHE : storeCacheEntry(key, value, ttl)
+CACHE -> CACHE : scheduleEviction(key, ttl)
+CACHE --> BSVC : CacheStored
+deactivate CACHE
+
+== Event Publishing ==
+
+BSVC -> EP : publishDomainEvent(event)
+activate EP
+
+EP -> EP : validateEvent(event)
+EP -> EP : enrichEventMetadata()
+
+EP -> PSC : getCurrentTenant()
+activate PSC
+PSC --> EP : tenantContext
+deactivate PSC
+
+EP -> EP : addTenantContext(event, tenantContext)
+EP -> EP : publishToEventBus(event)
+
+' Notify event listeners
+loop For Each Event Listener
+    EP -> EP : notifyEventListener(listener, event)
+end
+
+EP --> BSVC : EventPublished
+deactivate EP
+
+note over BSVC, DB
+**Key Design Patterns:**
+• Template Method: Base entity and repository operations
+• Strategy Pattern: Different utility calculation strategies
+• Singleton Pattern: Configuration and utility services
+• Factory Pattern: Data source and entity creation
+• Observer Pattern: Domain event publishing and subscription
+• Decorator Pattern: Auditable entity field management
+• Proxy Pattern: Tenant-aware data source routing
+end note
+
+@enduml
