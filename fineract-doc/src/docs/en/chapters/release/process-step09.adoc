@@ -37,13 +37,30 @@ gpg --verify $bin.asc
 gpg --print-md SHA512 $bin | diff - $bin.sha512
 ----
 
-For folks new to https://www.gnupg.org/[GnuPG], there are a couple things to note. First, if it says the source or binary tarball detached signature is correct, that's great! That's the most important part.
+Look for `Good signature` in the `gpg` output:
 
-Second, if you've imported `KEYS` but gpg warns you the key used for signing is not trusted, you can tell gpg you trust the key to squelch the warning. Ideally you meet the alleged key owner in person and check their ID first. Once you trust their identity matches, you then indicate your trust for their key.
+[source,text,subs="attributes+"]
+----
+$ gpg --verify $src.asc
+gpg: assuming signed data in 'apache-fineract-bin-{revnumber}.tar.gz'
+gpg: Signature made Sat 11 Oct 2025 05:46:42 PM PDT
+gpg:                using EDDSA key 250775BDB5FE7D53E4AF95C00E895A1A7A090CFC
+gpg: Good signature from "Adam Monsen <haircut@gmail.com>" [unknown]
+----
 
-Start with `gpg --edit-key KEYID`, substituting the signing key id for `KEYID`. At the `gpg>` prompt, run the `trust` command and choose `4` (I trust fully). You could also choose `3` (marginal), but do _not_ choose `5` (ultimate).
+That's the most important part.
 
-TIP: Consider also https://en.wikipedia.org/wiki/Key_signing_party[signing] and https://en.wikipedia.org/wiki/Web_of_trust[uploading] each other's keys.
+You may see this warning:
+
+[source,text]
+----
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+----
+
+You may choose to ignore it. To squelch this warning, you must extend your https://en.wikipedia.org/wiki/Web_of_trust[web of trust], by, for example, https://en.wikipedia.org/wiki/Key_signing_party[signing the release manager's key].
+
+Now it's time to build and run the release candidate.
 
 === Build from source
 
