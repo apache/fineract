@@ -42,7 +42,7 @@ Please indicate if you are a binding vote (member of the PMC). Note: PMC members
 
 Please also indicate with "Tested: YES/NO/PARTIAL" if you have locally built and/or tested these artifacts and/or a clone of the code checked out to the release commit, following the form:
 
-Tested: YES ... Verified integrity and signatures of release artifacts locally, built from source, ran jar/war: Did everything mentioned in the current release candidate verification guidance ( https://lists.apache.org/thread/hym94pdy3nk9gjspkz4qonv2v15n5dpo ). If you did more than that, please specify.
+Tested: YES ... Verified integrity and signatures of release artifacts locally, built from source, ran jar/war: Did everything mentioned in the current release candidate verification guidance ( https://fineract.apache.org/docs/rc/#_artifact_verification ). If you did more than that, please specify.
 
 Tested: NO ... No testing performed on release candidate, e.g. relying on testing performed by other contributors and/or output of GitHub Actions, while exercising my right to vote.
 
