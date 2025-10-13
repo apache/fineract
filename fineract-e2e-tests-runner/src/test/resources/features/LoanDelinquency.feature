@@ -610,6 +610,7 @@ Feature: LoanDelinquency
 #    --- Grace period applied only on Loan level, not on installment level ---
     Then Loan has the following INSTALLMENT level delinquency data:
       | rangeId | Range   | Amount |
+      | 1       | RANGE_1 | 250.00 |
       | 2       | RANGE_3 | 250.00 |
 
   @TestRailId:C3000
@@ -728,8 +729,7 @@ Feature: LoanDelinquency
       | RANGE_3        | 750.0            | 04 October 2023 | 30             | 43          |
     Then Loan has the following INSTALLMENT level delinquency data:
       | rangeId | Range    | Amount |
-      | 1       | RANGE_1  | 250.00 |
-      | 2       | RANGE_3  | 250.00 |
+      | 2       | RANGE_3  | 500.00 |
       | 3       | RANGE_30 | 250.00 |
 #    --- Second delinquency pause ---
     When Admin sets the business date to "14 November 2023"
@@ -749,8 +749,7 @@ Feature: LoanDelinquency
       | RANGE_3        | 750.0            | 04 October 2023 | 31             | 44          |
     Then Loan has the following INSTALLMENT level delinquency data:
       | rangeId | Range    | Amount |
-      | 1       | RANGE_1  | 250.00 |
-      | 2       | RANGE_3  | 250.00 |
+      | 2       | RANGE_3  | 500.00 |
       | 3       | RANGE_30 | 250.00 |
     Then Installment level delinquency event has correct data
 #    --- Second delinquency ends ---
@@ -770,8 +769,7 @@ Feature: LoanDelinquency
       | RANGE_3       | 1000.0           | 04 October 2023 | 31             | 60          |
     Then Loan has the following INSTALLMENT level delinquency data:
       | rangeId | Range    | Amount |
-      | 1       | RANGE_1  | 250.00 |
-      | 2       | RANGE_3  | 250.00 |
+      | 2       | RANGE_3  | 500.00 |
       | 3       | RANGE_30 | 250.00 |
 #    --- Delinquency runs again ---
     When Admin sets the business date to "01 December 2023"
@@ -790,6 +788,7 @@ Feature: LoanDelinquency
       | RANGE_30       | 1000.0           | 04 October 2023 | 32             | 61          |
     Then Loan has the following INSTALLMENT level delinquency data:
       | rangeId | Range    | Amount |
+      | 1       | RANGE_1  | 250.00 |
       | 2       | RANGE_3  | 500.00 |
       | 3       | RANGE_30 | 250.00 |
     Then Installment level delinquency event has correct data
@@ -995,11 +994,11 @@ Feature: LoanDelinquency
       | RESUME | 25 October 2023 |                 |
     Then Loan has the following LOAN level delinquency data:
       | classification | delinquentAmount | delinquentDate  | delinquentDays | pastDueDays |
-      | RANGE_3        | 500.0            | 19 October 2023 | 8              | 30          |
+      | RANGE_3        | 500.0            | 19 October 2023 | 18             | 30          |
 #    --- Grace period applied only on Loan level, not on installment level ---
     Then Loan has the following INSTALLMENT level delinquency data:
       | rangeId | Range   | Amount |
-      | 2       | RANGE_3 | 250.00 |
+      | 2       | RANGE_3 | 500.00 |
     Then Installment level delinquency event has correct data
 
   @TestRailId:C3013

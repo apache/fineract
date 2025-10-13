@@ -27,8 +27,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -49,6 +47,7 @@ import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistor
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistoryRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquencyTagRepository;
 import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
+import org.apache.fineract.portfolio.delinquency.helper.InstallmentDelinquencyAggregator;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyBucketMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyRangeMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.LoanDelinquencyTagMapper;
@@ -260,34 +259,10 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
         Collection<LoanInstallmentDelinquencyTagData> loanInstallmentDelinquencyTagData = retrieveLoanInstallmentsCurrentDelinquencyTag(
                 loanId);
         if (loanInstallmentDelinquencyTagData != null && !loanInstallmentDelinquencyTagData.isEmpty()) {
-
-            // installment level delinquency grouped by rangeId, and summed up the delinquent amount
-            Collection<InstallmentLevelDelinquency> installmentLevelDelinquencies = loanInstallmentDelinquencyTagData.stream()
-                    .map(InstallmentLevelDelinquency::from)
-                    .collect(Collectors.groupingBy(InstallmentLevelDelinquency::getRangeId, delinquentAmountSummingCollector())).values();
-
-            // sort this based on minimum days, so ranges will be delivered in ascending order
-            List<InstallmentLevelDelinquency> sorted = installmentLevelDelinquencies.stream().sorted((o1, o2) -> {
-                Integer first = Optional.ofNullable(o1.getMinimumAgeDays()).orElse(0);
-                Integer second = Optional.ofNullable(o2.getMinimumAgeDays()).orElse(0);
-                return first.compareTo(second);
-            }).toList();
-
-            collectionData.setInstallmentLevelDelinquency(sorted);
+            List<InstallmentLevelDelinquency> aggregated = InstallmentDelinquencyAggregator
+                    .aggregateAndSort(loanInstallmentDelinquencyTagData);
+            collectionData.setInstallmentLevelDelinquency(aggregated);
         }
-    }
-
-    @NonNull
-    private static Collector<InstallmentLevelDelinquency, ?, InstallmentLevelDelinquency> delinquentAmountSummingCollector() {
-        return Collectors.reducing(new InstallmentLevelDelinquency(), (item1, item2) -> {
-            final InstallmentLevelDelinquency result = new InstallmentLevelDelinquency();
-            result.setRangeId(Optional.ofNullable(item1.getRangeId()).orElse(item2.getRangeId()));
-            result.setClassification(Optional.ofNullable(item1.getClassification()).orElse(item2.getClassification()));
-            result.setMaximumAgeDays(Optional.ofNullable(item1.getMaximumAgeDays()).orElse(item2.getMaximumAgeDays()));
-            result.setMinimumAgeDays(Optional.ofNullable(item1.getMinimumAgeDays()).orElse(item2.getMinimumAgeDays()));
-            result.setDelinquentAmount(MathUtil.add(item1.getDelinquentAmount(), item2.getDelinquentAmount()));
-            return result;
-        });
     }
 
     void enrichWithDelinquencyPausePeriodInfo(CollectionData collectionData, Collection<LoanDelinquencyActionData> effectiveDelinquencyList,

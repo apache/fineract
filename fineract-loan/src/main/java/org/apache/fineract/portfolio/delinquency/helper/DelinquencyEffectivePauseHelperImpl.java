@@ -66,6 +66,30 @@ public class DelinquencyEffectivePauseHelperImpl implements DelinquencyEffective
         return Long.sum(pausedDaysClosedPausePeriods, pausedDaysRunningPausePeriods);
     }
 
+    @Override
+    public Long getPausedDaysWithinRange(List<LoanDelinquencyActionData> effectiveDelinquencyList, LocalDate startInclusive,
+            LocalDate endExclusive) {
+        if (startInclusive == null || endExclusive == null || !startInclusive.isBefore(endExclusive)) {
+            return 0L;
+        }
+        return effectiveDelinquencyList.stream().map(pausePeriod -> {
+            LocalDate pauseStart = pausePeriod.getStartDate();
+            LocalDate pauseEnd = Optional.ofNullable(pausePeriod.getEndDate()).orElse(endExclusive);
+            if (pauseStart == null || !pauseStart.isBefore(endExclusive)) {
+                return 0L;
+            }
+            if (!pauseEnd.isAfter(startInclusive)) {
+                return 0L;
+            }
+            LocalDate overlapStart = pauseStart.isAfter(startInclusive) ? pauseStart : startInclusive;
+            LocalDate overlapEnd = pauseEnd.isBefore(endExclusive) ? pauseEnd : endExclusive;
+            if (!overlapStart.isBefore(overlapEnd)) {
+                return 0L;
+            }
+            return DateUtils.getDifferenceInDays(overlapStart, overlapEnd);
+        }).reduce(0L, Long::sum);
+    }
+
     private Optional<LoanDelinquencyAction> findMatchingResume(LoanDelinquencyAction pause, List<LoanDelinquencyAction> resumes) {
         if (resumes != null && resumes.size() > 0) {
             for (LoanDelinquencyAction resume : resumes) {

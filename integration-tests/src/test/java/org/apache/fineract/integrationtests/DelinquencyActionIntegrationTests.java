@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.PAUSE;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.RESUME;
@@ -27,9 +28,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +44,7 @@ import org.apache.fineract.client.models.GetDelinquencyActionsResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdDelinquencyPausePeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdLoanInstallmentLevelDelinquency;
+import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
@@ -48,6 +54,7 @@ import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.inlinecob.InlineLoanCOBHelper;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -462,12 +469,501 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
 
     }
 
+    private Long createLoanProductWithDelinquencyBucketNoDownPayment(boolean multiDisburseEnabled,
+            boolean installmentLevelDelinquencyEnabled, Integer graceOnArrearsAging) {
+        Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec, List.of(//
+                Pair.of(1, 3), //
+                Pair.of(4, 10), //
+                Pair.of(11, 60), //
+                Pair.of(61, null)//
+        ));
+        PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct();
+        product.setDelinquencyBucketId(delinquencyBucketId.longValue());
+        product.setMultiDisburseLoan(multiDisburseEnabled);
+        product.setEnableDownPayment(false);
+        product.setGraceOnArrearsAgeing(graceOnArrearsAging);
+        product.setEnableInstallmentLevelDelinquency(installmentLevelDelinquencyEnabled);
+
+        PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+        return loanProductResponse.getResourceId();
+    }
+
+    @Test
+    public void testDelinquentDaysAndDateAfterPastDelinquencyPause() {
+        final Long[] loanIdHolder = new Long[1];
+
+        runAt("01 January 2022", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long loanProductId = createLoanProductWith25PctDownPaymentAndDelinquencyBucket(true, true, false, 0);
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2022", 1000.0, 2, req -> {
+                req.setLoanTermFrequency(30);
+                req.setRepaymentEvery(15);
+                req.setGraceOnArrearsAgeing(0);
+            });
+            disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 January 2022");
+            loanIdHolder[0] = loanId;
+
+            loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "20 January 2022", "30 January 2022");
+        });
+
+        runAt("02 February 2022", () -> {
+            final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+            Long loanId = loanIdHolder[0];
+
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+
+            assertNotNull(loanDetails.getDelinquent(), "Delinquent data should not be null");
+
+            Integer pastDueDays = loanDetails.getDelinquent().getPastDueDays();
+            assertNotNull(pastDueDays, "Past due days should not be null");
+            assertEquals(17, pastDueDays, "Past due days should be 17 (16 Jan due date to 02 Feb business date)");
+
+            Integer delinquentDays = loanDetails.getDelinquent().getDelinquentDays();
+            assertNotNull(delinquentDays, "Delinquent days should not be null");
+            assertEquals(7, delinquentDays, "Delinquent days should be 7 (17 past due days - 10 paused days = 7)");
+
+            LocalDate delinquentDate = loanDetails.getDelinquent().getDelinquentDate();
+            assertNotNull(delinquentDate, "Delinquent date should not be null");
+            assertEquals(LocalDate.parse("16 January 2022", dateTimeFormatter), delinquentDate,
+                    "Delinquent date should be 16 Jan 2022 (first installment due date, NOT adjusted for pause)");
+
+            List<GetLoansLoanIdDelinquencyPausePeriod> pausePeriods = loanDetails.getDelinquent().getDelinquencyPausePeriods();
+            assertNotNull(pausePeriods);
+            assertEquals(1, pausePeriods.size());
+            assertEquals(LocalDate.parse("20 January 2022", dateTimeFormatter), pausePeriods.get(0).getPausePeriodStart());
+            assertEquals(LocalDate.parse("30 January 2022", dateTimeFormatter), pausePeriods.get(0).getPausePeriodEnd());
+            assertEquals(FALSE, pausePeriods.get(0).getActive());
+        });
+    }
+
+    @Test
+    public void testInstallmentLevelDelinquencyWithMultipleOverdueInstallments() {
+        final Long[] loanIdHolder = new Long[1];
+
+        runAt("01 January 2022", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long loanProductId = createLoanProductWith25PctDownPaymentAndDelinquencyBucket(true, true, true, 0);
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2022", 1000.0, 3, req -> {
+                req.setLoanTermFrequency(45);
+                req.setRepaymentEvery(15);
+                req.setGraceOnArrearsAgeing(0);
+            });
+            disburseLoan(loanId, BigDecimal.valueOf(100.00), "01 January 2022");
+            loanIdHolder[0] = loanId;
+
+            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
+                    .date("05 January 2022").dateFormat(DATETIME_PATTERN).locale("en"));
+
+            loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "20 January 2022", "30 January 2022");
+        });
+
+        runAt("02 March 2022", () -> {
+            final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+            Long loanId = loanIdHolder[0];
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+
+            assertNotNull(loanDetails.getDelinquent(), "Loan delinquent data should not be null");
+
+            Integer loanLevelPastDueDays = loanDetails.getDelinquent().getPastDueDays();
+            assertEquals(45, loanLevelPastDueDays, "Loan level past due days should be 45 (16 Jan to 02 Mar)");
+
+            Integer loanLevelDelinquentDays = loanDetails.getDelinquent().getDelinquentDays();
+            assertEquals(35, loanLevelDelinquentDays, "Loan level delinquent days should be 35 (45 past due days - 10 paused days = 35)");
+
+            LocalDate loanLevelDelinquentDate = loanDetails.getDelinquent().getDelinquentDate();
+            assertEquals(LocalDate.parse("16 January 2022", dateTimeFormatter), loanLevelDelinquentDate,
+                    "Loan level delinquent date should be 16 Jan 2022 (first installment due date)");
+
+            Map<String, BigDecimal> expectedTotals = calculateExpectedBucketTotals(loanDetails,
+                    LocalDate.parse("02 March 2022", dateTimeFormatter));
+            assertTrue(expectedTotals.containsKey("11-60"), "Expected 11-60 bucket to contain delinquent installments");
+            assertInstallmentDelinquencyBuckets(loanDetails, LocalDate.parse("02 March 2022", dateTimeFormatter), expectedTotals);
+        });
+    }
+
+    @Test
+    public void testInstallmentDelinquencyWithSinglePauseAffectingMultipleInstallments() {
+        final Long[] loanIdHolder = new Long[1];
+
+        runAt("10 January 2022", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long loanProductId = createLoanProductWith25PctDownPaymentAndDelinquencyBucket(true, true, true, 0);
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "10 January 2022", 1000.0, 3, req -> {
+                req.setLoanTermFrequency(30);
+                req.setRepaymentEvery(10);
+                req.setGraceOnArrearsAgeing(0);
+            });
+            disburseLoan(loanId, BigDecimal.valueOf(100.00), "10 January 2022");
+            loanIdHolder[0] = loanId;
+
+            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
+                    .date("14 January 2022").dateFormat(DATETIME_PATTERN).locale("en"));
+
+            loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "15 January 2022", "25 January 2022");
+        });
+
+        runAt("05 February 2022", () -> {
+            final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+            Long loanId = loanIdHolder[0];
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertNotNull(loanDetails.getDelinquent(), "Loan delinquent data should not be null");
+
+            List<GetLoansLoanIdLoanInstallmentLevelDelinquency> delinquencies = loanDetails.getDelinquent()
+                    .getInstallmentLevelDelinquency();
+            assertNotNull(delinquencies, "Installment level delinquency should not be null");
+
+            Map<String, BigDecimal> actualTotals = new HashMap<>();
+            for (GetLoansLoanIdLoanInstallmentLevelDelinquency delinquency : delinquencies) {
+                String bucketKey = formatBucketKey(delinquency.getMinimumAgeDays(), delinquency.getMaximumAgeDays());
+                actualTotals.merge(bucketKey, delinquency.getDelinquentAmount(), BigDecimal::add);
+            }
+
+            assertEquals(2, actualTotals.size(), "Should have 2 delinquency buckets");
+            assertTrue(actualTotals.containsKey("4-10"), "Should have 4-10 bucket");
+            assertTrue(actualTotals.containsKey("11-60"), "Should have 11-60 bucket");
+            assertEquals(0, BigDecimal.valueOf(25.0).compareTo(actualTotals.get("4-10")), "4-10 bucket should have 25.0");
+            assertEquals(0, BigDecimal.valueOf(25.0).compareTo(actualTotals.get("11-60")), "11-60 bucket should have 25.0");
+        });
+    }
+
+    @Test
+    public void testInstallmentDelinquencyWithMultiplePausesAffectingSameInstallment() {
+        final Long[] loanIdHolder = new Long[1];
+
+        runAt("01 January 2022", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long loanProductId = createLoanProductWith25PctDownPaymentAndDelinquencyBucket(true, true, true, 0);
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2022", 1000.0, 1, req -> {
+                req.setLoanTermFrequency(30);
+                req.setRepaymentEvery(30);
+                req.setGraceOnArrearsAgeing(0);
+            });
+            disburseLoan(loanId, BigDecimal.valueOf(100.00), "01 January 2022");
+            loanIdHolder[0] = loanId;
+        });
+
+        runAt("04 February 2022", () -> {
+            Long loanId = loanIdHolder[0];
+            loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "04 February 2022", "09 February 2022");
+        });
+
+        runAt("15 February 2022", () -> {
+            Long loanId = loanIdHolder[0];
+            loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "15 February 2022", "20 February 2022");
+        });
+
+        runAt("01 March 2022", () -> {
+            final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+            Long loanId = loanIdHolder[0];
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertNotNull(loanDetails.getDelinquent(), "Loan delinquent data should not be null");
+
+            LocalDate businessDate = LocalDate.parse("01 March 2022", dateTimeFormatter);
+            LocalDate installmentDueDate = loanDetails.getDelinquent().getDelinquentDate();
+
+            Integer loanLevelPastDueDays = loanDetails.getDelinquent().getPastDueDays();
+            long expectedPastDueDays = ChronoUnit.DAYS.between(installmentDueDate, businessDate);
+            assertEquals((int) expectedPastDueDays, loanLevelPastDueDays,
+                    "Loan level past due days should match the business date minus the first installment due date");
+
+            Integer loanLevelDelinquentDays = loanDetails.getDelinquent().getDelinquentDays();
+            long expectedDelinquentDays = Math.max(expectedPastDueDays - 10, 0);
+            assertEquals((int) expectedDelinquentDays, loanLevelDelinquentDays,
+                    "Loan level delinquent days should subtract both five-day pause periods from the past due days");
+
+            LocalDate loanLevelDelinquentDate = loanDetails.getDelinquent().getDelinquentDate();
+            assertEquals(installmentDueDate, loanLevelDelinquentDate, "Loan level delinquent date should equal the installment due date");
+
+            List<GetLoansLoanIdLoanInstallmentLevelDelinquency> delinquencies = loanDetails.getDelinquent()
+                    .getInstallmentLevelDelinquency();
+            assertNotNull(delinquencies, "Installment level delinquency should not be null");
+
+            Map<String, BigDecimal> actualTotals = new HashMap<>();
+            for (GetLoansLoanIdLoanInstallmentLevelDelinquency delinquency : delinquencies) {
+                String bucketKey = formatBucketKey(delinquency.getMinimumAgeDays(), delinquency.getMaximumAgeDays());
+                actualTotals.merge(bucketKey, delinquency.getDelinquentAmount(), BigDecimal::add);
+            }
+
+            assertEquals(1, actualTotals.size(), "Should have 1 delinquency bucket");
+            assertTrue(actualTotals.containsKey("11-60"), "Should have 11-60 bucket");
+            assertEquals(0, BigDecimal.valueOf(75.0).compareTo(actualTotals.get("11-60")), "11-60 bucket should have 75.0");
+        });
+    }
+
+    @Test
+    public void testInstallmentDelinquencyWithPauseBetweenSequentialInstallments() {
+        final Long[] loanIdHolder = new Long[1];
+
+        runAt("01 January 2022", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long loanProductId = createLoanProductWith25PctDownPaymentAndDelinquencyBucket(true, true, true, 0);
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2022", 1000.0, 2, req -> {
+                req.setLoanTermFrequency(20);
+                req.setRepaymentEvery(10);
+                req.setGraceOnArrearsAgeing(0);
+            });
+            disburseLoan(loanId, BigDecimal.valueOf(100.00), "01 January 2022");
+            loanIdHolder[0] = loanId;
+
+            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
+                    .date("02 January 2022").dateFormat(DATETIME_PATTERN).locale("en"));
+
+            loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "03 January 2022", "10 January 2022");
+        });
+
+        runAt("12 January 2022", () -> {
+            final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+            Long loanId = loanIdHolder[0];
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertNotNull(loanDetails.getDelinquent(), "Loan delinquent data should not be null");
+
+            Map<String, BigDecimal> expectedTotals = calculateExpectedBucketTotals(loanDetails,
+                    LocalDate.parse("12 January 2022", dateTimeFormatter));
+            assertInstallmentDelinquencyBuckets(loanDetails, LocalDate.parse("12 January 2022", dateTimeFormatter), expectedTotals);
+        });
+    }
+
+    @Test
+    public void testInstallmentDelinquencyWithFourInstallmentsAndPausePeriod() {
+        final Long[] loanIdHolder = new Long[1];
+
+        runAt("01 January 2022", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long loanProductId = createLoanProductWith25PctDownPaymentAndDelinquencyBucket(true, true, true, 0);
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2022", 1000.0, 4, req -> {
+                req.setLoanTermFrequency(60);
+                req.setRepaymentEvery(15);
+                req.setGraceOnArrearsAgeing(0);
+            });
+            disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 January 2022");
+            loanIdHolder[0] = loanId;
+
+            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
+                    .date("01 January 2022").dateFormat(DATETIME_PATTERN).locale("en"));
+
+            loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "02 January 2022", "20 January 2022");
+        });
+
+        runAt("01 March 2022", () -> {
+            final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+            Long loanId = loanIdHolder[0];
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertNotNull(loanDetails.getDelinquent(), "Loan delinquent data should not be null");
+
+            Map<String, BigDecimal> expectedTotals = calculateExpectedBucketTotals(loanDetails,
+                    LocalDate.parse("01 March 2022", dateTimeFormatter));
+            assertInstallmentDelinquencyBuckets(loanDetails, LocalDate.parse("01 March 2022", dateTimeFormatter), expectedTotals);
+        });
+    }
+
+    @Test
+    public void testPauseUsesBusinessDateNotCOBDate() {
+        final Long[] loanIdHolder = new Long[1];
+
+        runAt("28 May 2025", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long loanProductId = createLoanProductWithDelinquencyBucketNoDownPayment(true, true, 3);
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "28 May 2025", 1000.0, 7, req -> {
+                req.setLoanTermFrequency(210);
+                req.setRepaymentEvery(30);
+                req.setGraceOnArrearsAgeing(3);
+            });
+            disburseLoan(loanId, BigDecimal.valueOf(1000.00), "28 May 2025");
+            loanIdHolder[0] = loanId;
+        });
+
+        runAt("15 June 2025", () -> {
+            final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+            Long loanId = loanIdHolder[0];
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+
+            loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "17 June 2025", "19 August 2025");
+        });
+
+        runAt("01 July 2025", () -> {
+            final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+            Long loanId = loanIdHolder[0];
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+        });
+
+        runAt("01 August 2025", () -> {
+            final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+            Long loanId = loanIdHolder[0];
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+        });
+
+        runAt("01 September 2025", () -> {
+            final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+            Long loanId = loanIdHolder[0];
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+        });
+
+        runAt("01 October 2025", () -> {
+            final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+            Long loanId = loanIdHolder[0];
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+        });
+
+        runAt("31 October 2025", () -> {
+            final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+            Long loanId = loanIdHolder[0];
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertNotNull(loanDetails.getDelinquent(), "Loan delinquent data should not be null");
+
+            Integer loanLevelPastDueDays = loanDetails.getDelinquent().getPastDueDays();
+            assertEquals(126, loanLevelPastDueDays,
+                    "Loan level past due days should be 126 (June 27 to Oct 31) - First installment due June 27 (30 days after May 28)");
+
+            Integer loanLevelDelinquentDays = loanDetails.getDelinquent().getDelinquentDays();
+            assertEquals(70, loanLevelDelinquentDays,
+                    "Loan level delinquent days should be 70 (125 overdue days from June 28 to Oct 31, minus 52 paused days from June 28 to Aug 19, minus 3 grace)");
+
+            LocalDate loanLevelDelinquentDate = loanDetails.getDelinquent().getDelinquentDate();
+            assertEquals(LocalDate.parse("30 June 2025", dateTimeFormatter), loanLevelDelinquentDate,
+                    "Loan level delinquent date should be June 30, 2025 (first installment due June 27 + 3 days grace)");
+
+            Map<String, BigDecimal> expectedTotals = calculateExpectedBucketTotals(loanDetails,
+                    LocalDate.parse("31 October 2025", dateTimeFormatter));
+            assertInstallmentDelinquencyBuckets(loanDetails, LocalDate.parse("31 October 2025", dateTimeFormatter), expectedTotals);
+        });
+    }
+
     @AllArgsConstructor
     public static class InstallmentDelinquencyData {
 
         Integer minAgeDays;
         Integer maxAgeDays;
         BigDecimal delinquentAmount;
+    }
+
+    private void assertInstallmentDelinquencyBuckets(GetLoansLoanIdResponse loanDetails, LocalDate businessDate,
+            Map<String, BigDecimal> expectedBucketTotals) {
+        SoftAssertions softly = new SoftAssertions();
+
+        List<GetLoansLoanIdLoanInstallmentLevelDelinquency> delinquencies = loanDetails.getDelinquent().getInstallmentLevelDelinquency();
+        softly.assertThat(delinquencies).as("Installment level delinquency should not be null").isNotNull();
+
+        Map<String, BigDecimal> calculatedTotals = calculateExpectedBucketTotals(loanDetails, businessDate);
+        Map<String, BigDecimal> actualTotals = new HashMap<>();
+        for (GetLoansLoanIdLoanInstallmentLevelDelinquency delinquency : delinquencies) {
+            String bucketKey = formatBucketKey(delinquency.getMinimumAgeDays(), delinquency.getMaximumAgeDays());
+            actualTotals.merge(bucketKey, delinquency.getDelinquentAmount(), BigDecimal::add);
+        }
+
+        softly.assertThat(actualTotals.keySet()).as("Unexpected delinquency bucket set").isEqualTo(calculatedTotals.keySet());
+
+        calculatedTotals.forEach((bucket, expectedAmount) -> {
+            BigDecimal actualAmount = actualTotals.get(bucket);
+            softly.assertThat(actualAmount).as("Missing delinquency bucket " + bucket).isNotNull();
+            softly.assertThat(actualAmount.setScale(2, RoundingMode.HALF_DOWN)).as("Unexpected delinquent amount for bucket " + bucket)
+                    .isEqualByComparingTo(expectedAmount.setScale(2, RoundingMode.HALF_DOWN));
+        });
+
+        if (expectedBucketTotals != null) {
+            expectedBucketTotals.forEach((bucket, amount) -> {
+                BigDecimal calculated = calculatedTotals.get(bucket);
+                softly.assertThat(calculated).as("Expected bucket " + bucket + " not present in calculated totals").isNotNull();
+                softly.assertThat(calculated.setScale(2, RoundingMode.HALF_DOWN))
+                        .as("Calculated delinquent amount did not match expectation for bucket " + bucket)
+                        .isEqualByComparingTo(amount.setScale(2, RoundingMode.HALF_DOWN));
+            });
+        }
+
+        BigDecimal loanLevelAmount = loanDetails.getDelinquent().getDelinquentAmount();
+        if (loanLevelAmount != null) {
+            BigDecimal actualSum = actualTotals.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+            softly.assertThat(actualSum.setScale(2, RoundingMode.HALF_DOWN))
+                    .as("Installment bucket totals should sum to the loan level delinquent amount")
+                    .isEqualByComparingTo(loanLevelAmount.setScale(2, RoundingMode.HALF_DOWN));
+        }
+
+        softly.assertAll();
+    }
+
+    private Map<String, BigDecimal> calculateExpectedBucketTotals(GetLoansLoanIdResponse loanDetails, LocalDate businessDate) {
+        Map<String, BigDecimal> totals = new HashMap<>();
+        List<GetLoansLoanIdDelinquencyPausePeriod> pauses = loanDetails.getDelinquent().getDelinquencyPausePeriods();
+
+        for (GetLoansLoanIdRepaymentPeriod period : loanDetails.getRepaymentSchedule().getPeriods()) {
+            if (Boolean.TRUE.equals(period.getDownPaymentPeriod())) {
+                continue;
+            }
+            LocalDate dueDate = period.getDueDate();
+            if (dueDate == null || !dueDate.isBefore(businessDate)) {
+                continue;
+            }
+            BigDecimal outstanding = period.getTotalOutstandingForPeriod();
+            if (outstanding == null || outstanding.compareTo(BigDecimal.ZERO) <= 0) {
+                continue;
+            }
+
+            long pastDueDays = ChronoUnit.DAYS.between(dueDate, businessDate);
+            if (pastDueDays <= 0) {
+                continue;
+            }
+
+            long pausedDays = 0L;
+            if (pauses != null) {
+                for (GetLoansLoanIdDelinquencyPausePeriod pause : pauses) {
+                    LocalDate pauseStart = pause.getPausePeriodStart();
+                    LocalDate pauseEnd = pause.getPausePeriodEnd() != null ? pause.getPausePeriodEnd() : businessDate;
+                    if (pauseStart == null || !pauseEnd.isAfter(pauseStart)) {
+                        continue;
+                    }
+                    LocalDate overlapStart = pauseStart.isAfter(dueDate) ? pauseStart : dueDate;
+                    LocalDate overlapEnd = pauseEnd.isBefore(businessDate) ? pauseEnd : businessDate;
+                    if (overlapEnd.isAfter(overlapStart)) {
+                        pausedDays += ChronoUnit.DAYS.between(overlapStart, overlapEnd);
+                    }
+                }
+            }
+
+            long delinquentDays = pastDueDays - pausedDays;
+            if (delinquentDays <= 0) {
+                continue;
+            }
+
+            String bucket = formatBucketKeyForDays(delinquentDays);
+            totals.merge(bucket, outstanding, BigDecimal::add);
+        }
+        return totals;
+    }
+
+    private String formatBucketKey(Integer minAgeDays, Integer maxAgeDays) {
+        if (minAgeDays == null) {
+            return "0";
+        }
+        if (maxAgeDays == null) {
+            return minAgeDays + "+";
+        }
+        return minAgeDays + "-" + maxAgeDays;
+    }
+
+    private String formatBucketKeyForDays(long delinquentDays) {
+        if (delinquentDays >= 1 && delinquentDays <= 3) {
+            return "1-3";
+        } else if (delinquentDays >= 4 && delinquentDays <= 10) {
+            return "4-10";
+        } else if (delinquentDays >= 11 && delinquentDays <= 60) {
+            return "11-60";
+        } else if (delinquentDays >= 61) {
+            return "61+";
+        }
+        return "0";
     }
 
 }
