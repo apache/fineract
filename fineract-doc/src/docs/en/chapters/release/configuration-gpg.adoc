@@ -151,7 +151,7 @@ sub cv25519/4FGHIJ56 2022-04-16 [E] [expires: 2024-04-16] <6>
 +
 <2> GPG created a revocation certificate and its directory. If your private key is compromised, you need to use your revocation certificate to revoke your key.
 +
-<3> The public key uses the Ed25519 ECC (Elliptic Curve Cryptography) algorithm and shows the expiration date of 16 Apr 2024. The public key ID `0x7890ABCD` matches the last 8 characters of key fingerprint. The `[SC]` indicates this key is used to sign (prove authorship) and certify (issue subkeys for encryption, signature and authentication operations).
+<3> The public key uses the Ed25519 ECC (Elliptic Curve Cryptography) algorithm and shows the expiration date of 16 Apr 2024. The public key ID `7890ABCD` matches the last 8 characters of key fingerprint. The `[SC]` indicates this key is used to sign (prove authorship) and certify (issue subkeys for encryption, signature and authentication operations).
 <4> The key fingerprint (`ABCD EFGH IJKL MNOP QRST UVWX YZ12 3456 7890 ABCD`) is a hash of your public key.
 +
 <5> Your name and your email address are shown with information about the subkey.
@@ -186,7 +186,7 @@ IMPORTANT: Please contact a PMC member to add your GPG public key in Fineract's 
 +
 [source,bash]
 ----
-gpg --send-keys ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD
+gpg --send-keys 0xYZ1234567890ABCD
 ----
 +
 Before doing this, make sure that your default keyserver is hkp://keyserver.ubuntu.com/. You can do this by changing the default keyserver in ~/.gnupg/dirmngr.conf:
@@ -200,9 +200,7 @@ Alternatively you can provide the keyserver with the send command:
 +
 [source,bash]
 ----
-gpg \
-  --keyserver 'hkp://keyserver.ubuntu.com:11371' \
-  --send-keys ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD
+gpg --keyserver keyserver.ubuntu.com --send-keys 0xYZ1234567890ABCD
 ----
 +
 Another option to publish your key is to submit an armored public key directly at https://keyserver.ubuntu.com/. You can create the necessary data with this command by providing the email address that you used when you created your key pair:
