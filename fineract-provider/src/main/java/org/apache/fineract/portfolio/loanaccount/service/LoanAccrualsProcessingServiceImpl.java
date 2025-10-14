@@ -821,7 +821,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                     }
                     final LoanTransaction interestAccrualTransaction = LoanTransaction.accrueInterest(loan.getOffice(), loan,
                             interestApplied, loan.getDisbursementDate(), externalId);
-                    LoanTransaction savedInterestAccrualTransaction = loanTransactionRepository.save(interestAccrualTransaction);
+                    LoanTransaction savedInterestAccrualTransaction = loanTransactionRepository.saveAndFlush(interestAccrualTransaction);
                     loan.addLoanTransaction(savedInterestAccrualTransaction);
                     if (addEvent) {
                         journalEntryPoster.postJournalEntriesForLoanTransaction(savedInterestAccrualTransaction, false, false);
