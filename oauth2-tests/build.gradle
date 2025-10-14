@@ -35,9 +35,9 @@ configurations {
 }
 dependencies {
     driver 'com.mysql:mysql-connector-j'
-    testImplementation 'org.seleniumhq.selenium:selenium-java:4.21.0'
-    testImplementation 'io.github.bonigarcia:webdrivermanager:5.5.1'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.seleniumhq.selenium:selenium-java:4.36.0'
+    testImplementation 'io.github.bonigarcia:webdrivermanager:5.9.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.14.0'
 }
 
 cargo {
