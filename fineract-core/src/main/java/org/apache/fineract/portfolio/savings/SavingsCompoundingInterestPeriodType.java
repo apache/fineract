@@ -34,9 +34,8 @@ public enum SavingsCompoundingInterestPeriodType {
     MONTHLY(4, "savingsCompoundingInterestPeriodType.monthly"), //
     QUATERLY(5, "savingsCompoundingInterestPeriodType.quarterly"), //
     BI_ANNUAL(6, "savingsCompoundingInterestPeriodType.biannual"), //
-    ANNUAL(7, "savingsCompoundingInterestPeriodType.annual"); //
-
-    // NO_COMPOUNDING_SIMPLE_INTEREST(8, "savingsCompoundingInterestPeriodType.nocompounding");
+    ANNUAL(7, "savingsCompoundingInterestPeriodType.annual"), //
+    NONE(8, "savingsCompoundingInterestPeriodType.nocompounding");
 
     private final Integer value;
     private final String code;
@@ -79,8 +78,8 @@ public enum SavingsCompoundingInterestPeriodType {
                 return BI_ANNUAL;
             case 7:
                 return ANNUAL;
-            // case 8:
-            // return NO_COMPOUNDING_SIMPLE_INTEREST;
+            case 8:
+                return NONE;
             default:
                 return INVALID;
         }

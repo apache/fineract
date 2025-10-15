@@ -440,13 +440,10 @@ public final class SavingsEnumerations {
                 optionData = new EnumOptionData(SavingsCompoundingInterestPeriodType.ANNUAL.getValue().longValue(),
                         codePrefix + SavingsCompoundingInterestPeriodType.ANNUAL.getCode(), "Annually");
             break;
-            // case NO_COMPOUNDING_SIMPLE_INTEREST:
-            // optionData = new
-            // EnumOptionData(SavingsCompoundingInterestPeriodType.NO_COMPOUNDING_SIMPLE_INTEREST.getValue().longValue(),
-            // codePrefix +
-            // SavingsCompoundingInterestPeriodType.NO_COMPOUNDING_SIMPLE_INTEREST.getCode(),
-            // "No Compounding - Simple Interest");
-            // break;
+            case NONE:
+                optionData = new EnumOptionData(SavingsCompoundingInterestPeriodType.NONE.getValue().longValue(),
+                        codePrefix + SavingsCompoundingInterestPeriodType.NONE.getCode(), "None");
+            break;
         }
 
         return optionData;

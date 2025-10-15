@@ -556,6 +556,15 @@ public class FixedDepositAccountHelper {
         return FIXED_DEPOSIT_ACCOUNT_URL + "/" + fixedDepositAccountID + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
     }
 
+    @Deprecated(forRemoval = true)
+    public List<HashMap> getFixedDepositTransactions(final Integer accountID) {
+        LOG.info("---------------- RETRIEVING TRANSACTIONS FOR FIXED DEPOSIT ACCOUNT {} -----------------", accountID);
+        final String GET_FIXED_DEPOSIT_BY_ID_URL = FIXED_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?associations=transactions&"
+                + Utils.TENANT_IDENTIFIER;
+        final HashMap response = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_FIXED_DEPOSIT_BY_ID_URL, "");
+        return (List<HashMap>) response.get("transactions");
+    }
+
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)

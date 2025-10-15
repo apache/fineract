@@ -64,6 +64,7 @@ public class FixedDepositProductHelper {
     private static final String QUARTERLY = "5";
     private static final String BI_ANNUALLY = "6";
     private static final String ANNUALLY = "7";
+    private static final String None = "8";
     private static final String INTEREST_CALCULATION_USING_DAILY_BALANCE = "1";
     private static final String INTEREST_CALCULATION_USING_AVERAGE_DAILY_BALANCE = "2";
     private static final String DAYS_360 = "360";
@@ -93,14 +94,25 @@ public class FixedDepositProductHelper {
     private String inMultiplesOfDepositTermTypeId = MONTHS;
     private String preClosurePenalInterest = "2";
     private String preClosurePenalInterestOnTypeId = WHOLE_TERM;
-    private final boolean preClosurePenalApplicable = true;
-    private final String currencyCode = USD;
-    private final String interestCalculationDaysInYearType = DAYS_365;
+    private boolean preClosurePenalApplicable = true;
+    private String overdraftLimit = null;
+    private String currencyCode = USD;
+    private String interestCalculationDaysInYearType = DAYS_365;
     private Account[] accountList = null;
     private List<HashMap<String, String>> chartSlabs = null;
     private boolean isPrimaryGroupingByAmount = false;
     private Boolean withHoldTax = false;
     private String taxGroupId = null;
+    private String interestPayableAccountId;
+    private String feesReceivableAccountId = null;
+    private String penaltiesReceivableAccountId = null;
+    private String interestOnSavingsAccountId = null;
+    private String savingsControlAccountId = null;
+    private String nominalAnnualInterestRateOverdraft = null;
+    private String digitsAfterDecimal = "4";
+    private String inMultiplesOf = null;
+    private String minDepositAmount = null;
+    private String maxDepositAmount = null;
 
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
@@ -136,37 +148,51 @@ public class FixedDepositProductHelper {
         map.put("currencyCode", this.currencyCode);
         map.put("interestCalculationDaysInYearType", this.interestCalculationDaysInYearType);
         map.put("locale", LOCALE);
-        map.put("digitsAfterDecimal", DIGITS_AFTER_DECIMAL);
-        map.put("inMultiplesOf", IN_MULTIPLES_OF);
+        map.put("digitsAfterDecimal", this.digitsAfterDecimal);
+        map.put("inMultiplesOf", this.inMultiplesOf);
         map.put("interestCalculationType", this.interestCalculationType);
         map.put("interestCompoundingPeriodType", this.interestCompoundingPeriodType);
         map.put("interestPostingPeriodType", this.interestPostingPeriodType);
         map.put("accountingRule", this.accountingRule);
+        map.put("interestOnSavingsAccountId", this.interestOnSavingsAccountId);
         map.put("lockinPeriodFrequency", this.lockinPeriodFrequency);
         map.put("lockinPeriodFrequencyType", this.lockingPeriodFrequencyType);
         map.put("preClosurePenalApplicable", "true");
+        map.put("overdraftLimit", this.overdraftLimit);
         map.put("minDepositTermTypeId", this.minDepositTermTypeId);
+        map.put("feesReceivableAccountId", this.feesReceivableAccountId);
+        map.put("penaltiesReceivableAccountId", this.penaltiesReceivableAccountId);
         map.put("minDepositTerm", this.minDepositTerm);
         map.put("maxDepositTermTypeId", this.maxDepositTermTypeId);
         map.put("maxDepositTerm", this.maxDepositTerm);
         map.put("depositAmount", this.depositAmount);
+        map.put("minDepositAmount", this.minDepositAmount);
+        map.put("maxDepositAmount", this.maxDepositAmount);
+        map.put("savingsControlAccountId", this.savingsControlAccountId);
         map.put("preClosurePenalApplicable", this.preClosurePenalApplicable);
         map.put("inMultiplesOfDepositTerm", this.inMultiplesOfDepositTerm);
         map.put("inMultiplesOfDepositTermTypeId", this.inMultiplesOfDepositTermTypeId);
         map.put("preClosurePenalInterest", this.preClosurePenalInterest);
         map.put("preClosurePenalInterestOnTypeId", this.preClosurePenalInterestOnTypeId);
+        map.put("nominalAnnualInterestRateOverdraft", this.nominalAnnualInterestRateOverdraft);
         map.put("withHoldTax", this.withHoldTax.toString());
         if (withHoldTax) {
             map.put("taxGroupId", taxGroupId);
         }
-
         if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());
         }
-        if (this.accountingRule.equals(ACCRUAL_PERIODIC)) {
-            map.putAll(getAccountMappingForAccrualBased());
+        if (this.inMultiplesOf == null) {
+            map.put("inMultiplesOf", IN_MULTIPLES_OF);
         }
-
+        if (this.digitsAfterDecimal.equals("")) {
+            map.put("digitsAfterDecimal", DIGITS_AFTER_DECIMAL);
+        }
+        if (this.accountingRule.equals(ACCRUAL_PERIODIC)) {
+            if (this.savingsControlAccountId != null) {
+                map.putAll(getAccountMappingForAccrualBased());
+            }
+        }
         String FixedDepositProductCreateJson = new Gson().toJson(map);
         LOG.info("{}", FixedDepositProductCreateJson);
         return FixedDepositProductCreateJson;
@@ -389,6 +415,56 @@ public class FixedDepositProductHelper {
         return chartSlabs;
     }
 
+    public List<HashMap<String, String>> withRegularFixedDepositChart() {
+        this.isPrimaryGroupingByAmount = false;
+        List<HashMap<String, String>> chartSlabs = new ArrayList<>();
+
+        HashMap<String, String> slab1 = new HashMap<>();
+        slab1.put("description", "1 to 360");
+        slab1.put("periodType", DAYS);
+        slab1.put("fromPeriod", "0");
+        slab1.put("toPeriod", "360");
+        slab1.put("amountRangeFrom", "1");
+        slab1.put("amountRangeTo", "10000000");
+        slab1.put("annualInterestRate", "15");
+        slab1.put("locale", LOCALE);
+        chartSlabs.add(slab1);
+
+        // Slab 2: 0-360 Días, 10,000,001+
+        HashMap<String, String> slab2 = new HashMap<>();
+        slab2.put("description", "Above1");
+        slab2.put("periodType", DAYS);
+        slab2.put("fromPeriod", "0");
+        slab2.put("toPeriod", "360");
+        slab2.put("amountRangeFrom", "10000001");
+        slab2.put("annualInterestRate", "15");
+        slab2.put("locale", LOCALE);
+        chartSlabs.add(slab2);
+
+        // Slab 3: 361+ Días, 1 - 10,000,000
+        HashMap<String, String> slab3 = new HashMap<>();
+        slab3.put("description", "Above 360 days");
+        slab3.put("periodType", DAYS);
+        slab3.put("fromPeriod", "361");
+        slab3.put("amountRangeFrom", "1");
+        slab3.put("amountRangeTo", "10000000");
+        slab3.put("annualInterestRate", "15");
+        slab3.put("locale", LOCALE);
+        chartSlabs.add(slab3);
+
+        // Slab 4: 361+ Días, 10,000,001+
+        HashMap<String, String> slab4 = new HashMap<>();
+        slab4.put("description", "Above2");
+        slab4.put("periodType", DAYS);
+        slab4.put("fromPeriod", "361");
+        slab4.put("amountRangeFrom", "10000001");
+        slab4.put("annualInterestRate", "15");
+        slab4.put("locale", LOCALE);
+        chartSlabs.add(slab4);
+
+        return chartSlabs;
+    }
+
     public FixedDepositProductHelper withAccountingRuleAsNone() {
         this.accountingRule = NONE;
         return this;
@@ -400,9 +476,109 @@ public class FixedDepositProductHelper {
         return this;
     }
 
-    public FixedDepositProductHelper withAccountingRuleAsAccrual(final Account[] account_list) {
+    public FixedDepositProductHelper withAccountingRuleAsAccrualBased(final Account[] account_list) {
         this.accountingRule = ACCRUAL_PERIODIC;
         this.accountList = account_list;
+        return this;
+    }
+
+    public FixedDepositProductHelper withInterestCompoundingPeriodTypeAsNone() {
+        this.interestCompoundingPeriodType = None;
+        return this;
+    }
+
+    public FixedDepositProductHelper withInterestPostingPeriodTypeAsMonthly() {
+        this.interestPostingPeriodType = MONTHLY;
+        return this;
+    }
+
+    public FixedDepositProductHelper withInterestCalculationPeriodTypeAsDailyBalance() {
+        this.interestCalculationType = INTEREST_CALCULATION_USING_DAILY_BALANCE;
+        return this;
+    }
+
+    public FixedDepositProductHelper withInterestPayableAccountId(final String interestPayableAccountId) {
+        this.interestPayableAccountId = interestPayableAccountId;
+        return this;
+    }
+
+    public FixedDepositProductHelper withSavingsReferenceAccountId(final String feesReceivableAccountId) {
+        this.feesReceivableAccountId = feesReceivableAccountId;
+        return this;
+    }
+
+    public FixedDepositProductHelper withFixedpenaltiesReceivableAccountId(final String penaltiesReceivableAccountId) {
+        this.penaltiesReceivableAccountId = penaltiesReceivableAccountId;
+        return this;
+    }
+
+    public FixedDepositProductHelper withInterestOnSavingsAccountId(final String interestOnSavingsAccountId) {
+        this.interestOnSavingsAccountId = interestOnSavingsAccountId;
+        return this;
+    }
+
+    public FixedDepositProductHelper withSavingsControlAccountId(final String savingsControlAccountId) {
+        this.savingsControlAccountId = savingsControlAccountId;
+        return this;
+    }
+
+    public FixedDepositProductHelper withInterestCalculationDaysInYearType_360() {
+        this.interestCalculationDaysInYearType = DAYS_360;
+        return this;
+    }
+
+    public FixedDepositProductHelper withDigitsAfterDecimal(final String digitsAfterDecimal) {
+        this.digitsAfterDecimal = digitsAfterDecimal;
+        return this;
+    }
+
+    public FixedDepositProductHelper withInMultiplesOf(final String inMultiplesOf) {
+        this.inMultiplesOf = inMultiplesOf;
+        return this;
+    }
+
+    public FixedDepositProductHelper withMinDepositAmount(final String minDepositAmount) {
+        this.minDepositAmount = minDepositAmount;
+        return this;
+    }
+
+    public FixedDepositProductHelper withMaxDepositAmount(final String maxDepositAmount) {
+        this.maxDepositAmount = maxDepositAmount;
+        return this;
+    }
+
+    public FixedDepositProductHelper withPreClosurePenalApplicable(final boolean preClosurePenalApplicable) {
+        this.preClosurePenalApplicable = preClosurePenalApplicable;
+        return this;
+    }
+
+    public FixedDepositProductHelper withCurrencyCode(final String currencyCode) {
+        this.currencyCode = currencyCode;
+        return this;
+    }
+
+    public FixedDepositProductHelper withMinDepositTerm(final String minDepositTerm) {
+        this.minDepositTerm = minDepositTerm;
+        return this;
+    }
+
+    public FixedDepositProductHelper withLockinPeriodFrequency(final String lockinPeriodFrequency) {
+        this.lockinPeriodFrequency = lockinPeriodFrequency;
+        return this;
+    }
+
+    public FixedDepositProductHelper withLockingPeriodFrequencyType(final String lockingPeriodFrequencyType) {
+        this.lockingPeriodFrequencyType = lockingPeriodFrequencyType;
+        return this;
+    }
+
+    public FixedDepositProductHelper withMaxDepositTerm(final String maxDepositTerm) {
+        this.maxDepositTerm = maxDepositTerm;
+        return this;
+    }
+
+    public FixedDepositProductHelper withInMultiplesOfDepositTerm(final String inMultiplesOfDepositTerm) {
+        this.inMultiplesOfDepositTerm = inMultiplesOfDepositTerm;
         return this;
     }
 
@@ -421,6 +597,11 @@ public class FixedDepositProductHelper {
         return this;
     }
 
+    public FixedDepositProductHelper withPeriodFixed() {
+        this.chartSlabs = withRegularFixedDepositChart();
+        return this;
+    }
+
     public FixedDepositProductHelper withAmountAndPeriodRangeChart() {
         this.chartSlabs = constructChartSlabWithAmountAndPeriodRange();
         return this;
@@ -431,6 +612,11 @@ public class FixedDepositProductHelper {
             this.withHoldTax = true;
             this.taxGroupId = taxGroupId;
         }
+        return this;
+    }
+
+    public FixedDepositProductHelper with_minDepositTermTypeIdAsYears() {
+        this.minDepositTermTypeId = YEARS;
         return this;
     }
 
@@ -445,6 +631,8 @@ public class FixedDepositProductHelper {
                 if (this.accountList[i].getAccountType().equals(Account.AccountType.ASSET)) {
                     final String ID = this.accountList[i].getAccountID().toString();
                     map.put("savingsReferenceAccountId", ID);
+                    map.put("overdraftPortfolioControlId", ID);
+                    map.put("penaltiesReceivableAccountId", ID);
                 }
                 if (this.accountList[i].getAccountType().equals(Account.AccountType.LIABILITY)) {
                     final String ID = this.accountList[i].getAccountID().toString();
@@ -454,20 +642,20 @@ public class FixedDepositProductHelper {
                 if (this.accountList[i].getAccountType().equals(Account.AccountType.EXPENSE)) {
                     final String ID = this.accountList[i].getAccountID().toString();
                     map.put("interestOnSavingsAccountId", ID);
+                    map.put("writeOffAccountId", ID);
                 }
                 if (this.accountList[i].getAccountType().equals(Account.AccountType.INCOME)) {
                     final String ID = this.accountList[i].getAccountID().toString();
                     map.put("incomeFromFeeAccountId", ID);
                     map.put("incomeFromPenaltyAccountId", ID);
+                    map.put("incomeFromInterestId", ID);
+                    map.put("incomeFromSavingsAccountId", ID);
                 }
             }
         }
         return map;
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     private Map<String, String> getAccountMappingForAccrualBased() {
         final Map<String, String> map = new HashMap<>();
@@ -477,10 +665,8 @@ public class FixedDepositProductHelper {
                     final String ID = this.accountList[i].getAccountID().toString();
                     map.put("savingsReferenceAccountId", ID);
                     map.put("feesReceivableAccountId", ID);
-                    map.put("penaltiesReceivableAccountId", ID);
                 }
                 if (this.accountList[i].getAccountType().equals(Account.AccountType.LIABILITY)) {
-
                     final String ID = this.accountList[i].getAccountID().toString();
                     map.put("savingsControlAccountId", ID);
                     map.put("transfersInSuspenseAccountId", ID);

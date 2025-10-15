@@ -292,6 +292,10 @@ public final class PostingPeriod {
         // to be applied to the balanced for interest calculation
         for (final CompoundingPeriod compoundingPeriod : this.compoundingPeriods) {
 
+            if (SavingsCompoundingInterestPeriodType.NONE.equals(this.interestCompoundingType)) {
+                compoundInterestValues.setCompoundedInterest(BigDecimal.ZERO);
+            }
+
             final BigDecimal interestUnrounded = compoundingPeriod.calculateInterest(this.interestCompoundingType,
                     this.interestCalculationType, compoundInterestValues.getcompoundedInterest(), this.interestRateAsFraction,
                     this.daysInYear, this.minBalanceForInterestCalculation.getAmount(), this.overdraftInterestRateAsFraction,
@@ -444,8 +448,31 @@ public final class PostingPeriod {
                     periodStartDate = periodEndDate.plusDays(1);
                 }
             break;
-            // case NO_COMPOUNDING_SIMPLE_INTEREST:
-            // break;
+            case NONE:
+                final LocalDate postingPeriodEndDateNONE = postingPeriodInterval.endDate();
+
+                periodStartDate = postingPeriodInterval.startDate();
+                periodEndDate = periodStartDate;
+
+                while (!DateUtils.isAfter(periodStartDate, postingPeriodEndDateNONE)
+                        && !DateUtils.isAfter(periodEndDate, postingPeriodEndDateNONE)) {
+                    periodEndDate = determineInterestPeriodEndDateFrom(periodStartDate, interestPeriodType, upToInterestCalculationDate,
+                            financialYearBeginningMonth);
+                    if (DateUtils.isAfter(periodEndDate, postingPeriodEndDateNONE)) {
+                        periodEndDate = postingPeriodEndDateNONE;
+                    }
+
+                    final LocalDateInterval compoundingPeriodInterval = LocalDateInterval.create(periodStartDate, periodEndDate);
+                    if (postingPeriodInterval.contains(compoundingPeriodInterval)) {
+                        compoundingPeriod = MonthlyCompoundingPeriod.create(compoundingPeriodInterval, allEndOfDayBalances,
+                                upToInterestCalculationDate);
+                        compoundingPeriods.add(compoundingPeriod);
+                    }
+
+                    // move periodStartDate forward to day after this period
+                    periodStartDate = periodEndDate.plusDays(1);
+                }
+            break;
         }
 
         return compoundingPeriods;
@@ -496,10 +523,9 @@ public final class PostingPeriod {
                 }
             break;
 
-            // case NO_COMPOUNDING_SIMPLE_INTEREST:
-            // periodEndDate = periodStartDate.monthOfYear().withMaximumValue();
-            // periodEndDate = periodEndDate.with(TemporalAdjusters.lastDayOfMonth());
-            // break;
+            case NONE:
+                periodEndDate = periodEndDate.with(TemporalAdjusters.lastDayOfMonth());
+            break;
         }
 
         return periodEndDate;

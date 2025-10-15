@@ -114,7 +114,7 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
                 .fromInt(savingsAccount.getInterestCalculationType());
 
         final SavingsCompoundingInterestPeriodType compoundingPeriodType = SavingsCompoundingInterestPeriodType
-                .fromInt(savingsAccount.getInterestPostingPeriodType());
+                .fromInt(savingsAccount.getInterestCompoundingPeriodType());
 
         final SavingsInterestCalculationDaysInYearType daysInYearType = SavingsInterestCalculationDaysInYearType
                 .fromInt(savingsAccount.getInterestCalculationDaysInYearType());
