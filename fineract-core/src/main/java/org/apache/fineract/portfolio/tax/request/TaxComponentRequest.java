@@ -38,7 +38,7 @@ public class TaxComponentRequest implements Serializable {
     private String name;
     private BigDecimal percentage;
     private Integer debitAccountType;
-    private Long debitAccountId;
+    private Long debitAcountId;
     private Integer creditAccountType;
     private Long creditAcountId;
     private String startDate;

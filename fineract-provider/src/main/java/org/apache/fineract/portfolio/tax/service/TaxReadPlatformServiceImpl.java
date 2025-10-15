@@ -198,7 +198,7 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
             StringBuilder sb = new StringBuilder();
             sb.append("tg.id as id, tg.name as name,");
             sb.append("tgm.id as mappingId,");
-            sb.append("tc.id as taxComponentId, tc.name as taxComponentName,");
+            sb.append("tc.id as taxComponentId, tc.name as taxComponentName, tc.percentage as percentage,");
             sb.append("tgm.start_date as startDate, tgm.end_date as endDate ");
             sb.append(" from m_tax_group tg ");
             sb.append(" inner join m_tax_group_mappings tgm on tgm.tax_group_id = tg.id ");
@@ -236,7 +236,8 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
             final Long mappingId = rs.getLong("mappingId");
             final Long id = rs.getLong("taxComponentId");
             final String name = rs.getString("taxComponentName");
-            TaxComponentData componentData = TaxComponentData.lookup(id, name);
+            final BigDecimal percentage = rs.getBigDecimal("percentage");
+            TaxComponentData componentData = TaxComponentData.lookup(id, name, percentage);
 
             final LocalDate startDate = JdbcSupport.getLocalDate(rs, "startDate");
             final LocalDate endDate = JdbcSupport.getLocalDate(rs, "endDate");
@@ -251,7 +252,7 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
 
         TaxComponentLookUpMapper() {
             StringBuilder sb = new StringBuilder();
-            sb.append("tc.id as id, tc.name as name ");
+            sb.append("tc.id as id, tc.name as name, tc.percentage as percentage ");
             sb.append(" from m_tax_component tc ");
             this.schema = sb.toString();
         }
@@ -264,7 +265,8 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
         public TaxComponentData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
             final String name = rs.getString("name");
-            return TaxComponentData.lookup(id, name);
+            final BigDecimal percentage = rs.getBigDecimal("percentage");
+            return TaxComponentData.lookup(id, name, percentage);
         }
 
     }

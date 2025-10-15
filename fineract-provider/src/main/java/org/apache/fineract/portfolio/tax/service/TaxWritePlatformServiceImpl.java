@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepository;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepositoryWrapper;
@@ -42,6 +43,7 @@ public class TaxWritePlatformServiceImpl implements TaxWritePlatformService {
     private final TaxComponentRepositoryWrapper taxComponentRepositoryWrapper;
     private final TaxGroupRepository taxGroupRepository;
     private final TaxGroupRepositoryWrapper taxGroupRepositoryWrapper;
+    private final PlatformSecurityContext platformSecurityContext;
 
     @Override
     public CommandProcessingResult createTaxComponent(final JsonCommand command) {
@@ -86,7 +88,7 @@ public class TaxWritePlatformServiceImpl implements TaxWritePlatformService {
         final boolean isUpdate = true;
         Set<TaxGroupMappings> groupMappings = this.taxAssembler.assembleTaxGroupMappingsFrom(command, isUpdate);
         this.validator.validateTaxGroupEndDateAndTaxComponent(taxGroup, groupMappings);
-        Map<String, Object> changes = taxGroup.update(command, groupMappings);
+        Map<String, Object> changes = taxGroup.update(command, groupMappings, platformSecurityContext.authenticatedUser());
         this.validator.validateTaxGroup(taxGroup);
         this.taxGroupRepository.saveAndFlush(taxGroup);
         return new CommandProcessingResultBuilder() //

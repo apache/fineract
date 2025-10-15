@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.tax.starter;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepository;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepositoryWrapper;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepository;
@@ -57,8 +58,9 @@ public class TaxConfiguration {
     @ConditionalOnMissingBean(TaxWritePlatformService.class)
     public TaxWritePlatformService taxWritePlatformService(TaxValidator validator, TaxAssembler taxAssembler,
             TaxComponentRepository taxComponentRepository, TaxGroupRepository taxGroupRepository,
-            TaxComponentRepositoryWrapper taxComponentRepositoryWrapper, TaxGroupRepositoryWrapper taxGroupRepositoryWrapper) {
+            TaxComponentRepositoryWrapper taxComponentRepositoryWrapper, TaxGroupRepositoryWrapper taxGroupRepositoryWrapper,
+            PlatformSecurityContext platformSecurityContext) {
         return new TaxWritePlatformServiceImpl(validator, taxAssembler, taxComponentRepository, taxComponentRepositoryWrapper,
-                taxGroupRepository, taxGroupRepositoryWrapper);
+                taxGroupRepository, taxGroupRepositoryWrapper, platformSecurityContext);
     }
 }

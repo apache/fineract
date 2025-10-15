@@ -973,5 +973,4 @@ public final class SavingsAccountData implements Serializable {
     public boolean isIsDormancyTrackingActive() {
         return this.isDormancyTrackingActive;
     }
-
 }

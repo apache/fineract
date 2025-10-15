@@ -141,6 +141,7 @@ import org.apache.fineract.portfolio.savings.service.SavingsSchedularInterestPos
 import org.apache.fineract.portfolio.savings.service.search.SavingsAccountTransactionSearchService;
 import org.apache.fineract.portfolio.savings.service.search.SavingsAccountTransactionsSearchServiceImpl;
 import org.apache.fineract.portfolio.search.service.SearchUtil;
+import org.apache.fineract.portfolio.tax.service.TaxReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -338,9 +339,10 @@ public class SavingsConfiguration {
     @ConditionalOnMissingBean(SavingsAccountReadPlatformService.class)
     public SavingsAccountReadPlatformService savingsAccountReadPlatformService(PlatformSecurityContext context, JdbcTemplate jdbcTemplate,
             SavingsAccountAssembler savingAccountAssembler, PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator,
-            SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper, ColumnValidator columnValidator) {
+            SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper, TaxReadPlatformService taxReadPlatformService,
+            ColumnValidator columnValidator) {
         return new SavingsAccountReadPlatformServiceImpl(context, jdbcTemplate, savingAccountAssembler, paginationHelper, columnValidator,
-                sqlGenerator, savingsAccountRepositoryWrapper);
+                sqlGenerator, savingsAccountRepositoryWrapper, taxReadPlatformService);
     }
 
     @Bean
