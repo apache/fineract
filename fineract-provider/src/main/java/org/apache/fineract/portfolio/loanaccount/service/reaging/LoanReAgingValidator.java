@@ -56,6 +56,7 @@ public class LoanReAgingValidator {
     public void validateReAge(Loan loan, JsonCommand command) {
         validateReAgeRequest(loan, command);
         validateReAgeBusinessRules(loan);
+        validateReAgeOutstandingBalance(loan, command);
     }
 
     private void validateReAgeRequest(Loan loan, JsonCommand command) {
@@ -180,4 +181,20 @@ public class LoanReAgingValidator {
     private boolean transactionHappenedAfterOther(LoanTransaction transaction, LoanTransaction otherTransaction) {
         return new ChangeOperation(transaction).compareTo(new ChangeOperation(otherTransaction)) > 0;
     }
+
+    private void validateReAgeOutstandingBalance(final Loan loan, final JsonCommand command) {
+        final LocalDate businessDate = getBusinessLocalDate();
+        final LocalDate startDate = command.dateValueOfParameterNamed(LoanReAgingApiConstants.startDate);
+
+        final boolean isBackdated = businessDate.isAfter(startDate);
+        if (isBackdated) {
+            return;
+        }
+
+        if (loan.getSummary().getTotalPrincipalOutstanding().compareTo(java.math.BigDecimal.ZERO) == 0) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.no.outstanding.balance.to.reage",
+                    "Loan cannot be re-aged as there are no outstanding balances to be re-aged", loan.getId());
+        }
+    }
+
 }

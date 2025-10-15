@@ -537,15 +537,15 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
             long loanId = createdLoanId.get();
             PostLoansLoanIdTransactionsResponse repaymentResponse = loanTransactionHelper.makeLoanRepayment(loanId,
                     new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("02 February 2023").locale("en")
-                            .transactionAmount(250.0));
+                            .transactionAmount(200.0));
 
             // verify transactions
             verifyTransactions(loanId, //
                     transaction(500.0, "Disbursement", "01 January 2023"), //
                     transaction(125.0, "Down Payment", "01 January 2023"), //
                     transaction(125.0, "Repayment", "01 February 2023"), //
-                    transaction(250.0, "Repayment", "02 February 2023"), //
-                    transaction(0.0, "Re-age", "27 February 2023") //
+                    transaction(200.0, "Repayment", "02 February 2023"), //
+                    transaction(50.0, "Re-age", "27 February 2023") //
             );
 
             verifyRepaymentSchedule(loanId, //
@@ -553,17 +553,17 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
                     installment(125.0, true, "01 January 2023"), //
                     installment(125.0, true, "16 January 2023"), //
                     installment(125.0, true, "31 January 2023"), //
-                    installment(125.0, true, "15 February 2023"), //
-                    installment(0.0, true, "01 March 2023"), //
-                    installment(0.0, true, "01 April 2023"), //
-                    installment(0.0, true, "01 May 2023"), //
-                    installment(0.0, true, "01 June 2023"), //
-                    installment(0.0, true, "01 July 2023"), //
-                    installment(0.0, true, "01 August 2023") //
+                    installment(75.00, true, "15 February 2023"), //
+                    installment(8.33, false, "01 March 2023"), //
+                    installment(8.33, false, "01 April 2023"), //
+                    installment(8.33, false, "01 May 2023"), //
+                    installment(8.33, false, "01 June 2023"), //
+                    installment(8.33, false, "01 July 2023"), //
+                    installment(8.35, false, "01 August 2023") //
             );
-            checkMaturityDates(loanId, LocalDate.of(2023, 8, 1), LocalDate.of(2023, 2, 2));
+            checkMaturityDates(loanId, LocalDate.of(2023, 8, 1), LocalDate.of(2023, 8, 1));
 
-            verifyLoanStatus(loanId, LoanStatus.CLOSED_OBLIGATIONS_MET);
+            verifyLoanStatus(loanId, LoanStatus.ACTIVE);
 
             loanTransactionHelper.reverseLoanTransaction(loanId, repaymentResponse.getResourceId(),
                     new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("28 February 2023")
@@ -574,7 +574,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
                     transaction(500.0, "Disbursement", "01 January 2023"), //
                     transaction(125.0, "Down Payment", "01 January 2023"), //
                     transaction(125.0, "Repayment", "01 February 2023"), //
-                    reversedTransaction(250.0, "Repayment", "02 February 2023"), //
+                    reversedTransaction(200.0, "Repayment", "02 February 2023"), //
                     transaction(250.0, "Re-age", "27 February 2023") //
             );
 
@@ -607,7 +607,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
                     transaction(500.0, "Disbursement", "01 January 2023"), //
                     transaction(125.0, "Down Payment", "01 January 2023"), //
                     transaction(125.0, "Repayment", "01 February 2023"), //
-                    reversedTransaction(250.0, "Repayment", "02 February 2023"), //
+                    reversedTransaction(200.0, "Repayment", "02 February 2023"), //
                     reversedTransaction(250.0, "Re-age", "27 February 2023") //
             );
 

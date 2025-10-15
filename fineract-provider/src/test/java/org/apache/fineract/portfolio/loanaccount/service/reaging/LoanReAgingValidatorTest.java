@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
@@ -516,6 +517,9 @@ class LoanReAgingValidatorTest {
         given(loanProductRelatedDetail.getLoanScheduleType()).willReturn(LoanScheduleType.PROGRESSIVE);
         given(loan.isInterestBearing()).willReturn(false);
         given(loan.getLoanTransactions()).willReturn(List.of());
+        LoanSummary loanSummary = mock(LoanSummary.class);
+        given(loan.getSummary()).willReturn(loanSummary);
+        given(loanSummary.getTotalPrincipalOutstanding()).willReturn(java.math.BigDecimal.valueOf(1000));
         return loan;
     }
 
