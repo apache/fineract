@@ -18,12 +18,15 @@
  */
 package org.apache.fineract.test.stepdef.loan;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.io.IOException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.ResponseBody;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
@@ -34,6 +37,7 @@ import org.apache.fineract.test.messaging.EventAssertion;
 import org.apache.fineract.test.messaging.event.loan.LoanReAgeEvent;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import retrofit2.Response;
 
@@ -112,4 +116,34 @@ public class LoanReAgingStepDef extends AbstractStepDef {
 
         eventAssertion.assertEventRaised(LoanReAgeEvent.class, loanId);
     }
+
+    @When("Admin fails to create a Loan re-aging transaction with error {string} and with the following data:")
+    public void adminFailsToCreateReAgingTransactionWithError(final String expectedError, final DataTable table) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+
+        final List<String> data = table.asLists().get(1);
+        final int frequencyNumber = Integer.parseInt(data.get(0));
+        final String frequencyType = data.get(1);
+        final String startDate = data.get(2);
+        final int numberOfInstallments = Integer.parseInt(data.get(3));
+
+        final PostLoansLoanIdTransactionsRequest reAgingRequest = LoanRequestFactory//
+                .defaultReAgingRequest()//
+                .frequencyNumber(frequencyNumber)//
+                .frequencyType(frequencyType)//
+                .startDate(startDate)//
+                .numberOfInstallments(numberOfInstallments);//
+
+        final Response<PostLoansLoanIdTransactionsResponse> response = loanTransactionsApi
+                .executeLoanTransaction(loanId, reAgingRequest, "reAge").execute();
+
+        try (ResponseBody errorBody = response.errorBody()) {
+            Assertions.assertNotNull(errorBody);
+            assertThat(errorBody.string()).contains(expectedError);
+        }
+
+        ErrorHelper.checkFailedApiCall(response, 403);
+    }
+
 }
