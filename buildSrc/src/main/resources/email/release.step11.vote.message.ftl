@@ -38,7 +38,7 @@ Here are the detailed results:
 <#list project['fineract.vote'].approve.binding>
 Binding +1s:
     <#items as item>
-- ${item.name} (${item.email})
+- ${item.name}
     </#items>
 </#list>
 
@@ -46,7 +46,7 @@ Binding +1s:
 <#list project['fineract.vote'].approve.nonBinding>
 Non binding +1s:
     <#items as item>
-- ${item.name} (${item.email})
+- ${item.name}
     </#items>
 </#list>
 
@@ -54,14 +54,14 @@ Non binding +1s:
 <#list project['fineract.vote'].disapprove.binding>
 Binding -1s:
     <#items as item>
-- ${item.name} (${item.email})
+- ${item.name}
     </#items>
 </#list>
 
 <#list project['fineract.vote'].disapprove.nonBinding>
 Non binding -1s:
     <#items as item>
-- ${item.name} (${item.email})
+- ${item.name}
     </#items>
 </#list>
 
@@ -69,14 +69,14 @@ Non binding -1s:
 <#list project['fineract.vote'].noOpinion.binding>
 Binding +0s:
     <#items as item>
-- ${item.name} (${item.email})
+- ${item.name}
     </#items>
 </#list>
 
 <#list project['fineract.vote'].noOpinion.nonBinding>
 Non binding +0s:
     <#items as item>
-- ${item.name} (${item.email})
+- ${item.name}
     </#items>
 </#list>
 
