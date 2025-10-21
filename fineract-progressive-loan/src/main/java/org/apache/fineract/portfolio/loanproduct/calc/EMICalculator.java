@@ -28,6 +28,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.ProgressiveTransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelRepaymentPeriod;
 import org.apache.fineract.portfolio.loanproduct.calc.data.OutstandingDetails;
@@ -143,6 +144,14 @@ public interface EMICalculator {
      */
     void applyInterestPause(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate fromDate, LocalDate endDate);
 
-    void updateModelRepaymentPeriodsDuringReAge(ProgressiveLoanInterestScheduleModel scheduleModel, LoanTransaction loanTransaction,
+    void updateModelRepaymentPeriodsDuringReAge(ProgressiveTransactionCtx ctx, LoanTransaction loanTransaction,
             LoanApplicationTerms loanApplicationTerms, MathContext mc);
+
+    boolean recalculateModelOverdueAmountsTillDate(ProgressiveTransactionCtx ctx, LocalDate targetDate);
+
+    /**
+     * Gives back the sum of the outstanding interest from the whole model till the provided date.
+     */
+    @NotNull
+    Money getOutstandingInterestTillDate(@NotNull ProgressiveLoanInterestScheduleModel scheduleModel, @NotNull LocalDate tillDate);
 }

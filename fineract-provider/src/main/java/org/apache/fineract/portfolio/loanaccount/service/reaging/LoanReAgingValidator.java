@@ -76,6 +76,7 @@ public class LoanReAgingValidator {
 
         LocalDate startDate = command.localDateValueOfParameterNamed(LoanReAgingApiConstants.startDate);
         if (loan.isProgressiveSchedule()) {
+            // validate re-age transaction occurs after or on the disbursement date
             baseDataValidator.reset().parameter(LoanReAgingApiConstants.startDate).value(startDate).notNull()
                     .validateDateAfterOrEqual(loan.getDisbursementDate());
         } else {

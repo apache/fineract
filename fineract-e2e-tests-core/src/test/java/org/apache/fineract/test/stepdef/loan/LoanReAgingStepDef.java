@@ -233,8 +233,9 @@ public class LoanReAgingStepDef extends AbstractStepDef {
         eventAssertion.assertEventRaised(LoanReAgeEvent.class, loanId);
     }
 
-    @When("Admin fails to create a Loan re-aging transaction with error {string} and with the following data:")
-    public void adminFailsToCreateReAgingTransactionWithError(final String expectedError, final DataTable table) throws IOException {
+    @When("Admin fails to create a Loan re-aging transaction with status code {int} error {string} and with the following data:")
+    public void adminFailsToCreateReAgingTransactionWithError(final int statusCode, final String expectedError, final DataTable table)
+            throws IOException {
         final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         final long loanId = loanResponse.body().getLoanId();
 
@@ -259,7 +260,7 @@ public class LoanReAgingStepDef extends AbstractStepDef {
             assertThat(errorBody.string()).contains(expectedError);
         }
 
-        ErrorHelper.checkFailedApiCall(response, 403);
+        ErrorHelper.checkFailedApiCall(response, statusCode);
     }
 
     @Then("Admin fails to create a Loan re-aging transaction with the following data because loan was charged-off:")

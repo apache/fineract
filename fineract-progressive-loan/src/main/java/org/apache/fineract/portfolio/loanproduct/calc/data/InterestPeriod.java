@@ -60,6 +60,7 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
     private Money creditedPrincipal;
     /** Stores credited interest. Related transaction: Chargeback */
     private Money creditedInterest;
+    @Setter
     private Money disbursementAmount;
     private Money balanceCorrectionAmount;
     private Money outstandingLoanBalance;
