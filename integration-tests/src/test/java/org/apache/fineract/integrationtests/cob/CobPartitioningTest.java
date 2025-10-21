@@ -59,7 +59,6 @@ import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuil
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -107,12 +106,6 @@ public class CobPartitioningTest extends BaseLoanIntegrationTest {
         setProperFinancialActivity(TRANSFER_ACCOUNT);
     }
 
-    @AfterEach
-    public void tearDown() {
-        // Restore business date configuration after each test
-        cleanUpAndRestoreBusinessDate();
-    }
-
     private static void setProperFinancialActivity(Account transferAccount) {
         List<GetFinancialActivityAccountsResponse> financialMappings = FINANCIAL_ACTIVITY_ACCOUNT_HELPER.getAllFinancialActivityAccounts();
         financialMappings.forEach(mapping -> FINANCIAL_ACTIVITY_ACCOUNT_HELPER.deleteFinancialActivityAccount(mapping.getId()));
@@ -151,16 +144,13 @@ public class CobPartitioningTest extends BaseLoanIntegrationTest {
 
             // Force close loans 3, 4, ... , N-3, N-2
             Collections.sort(loanIds);
-            List<Integer> forelosedLoanIds = new ArrayList<>();
             final CountDownLatch closeLatch = new CountDownLatch(N - 5);
             // Warm up (EclipseLink sometimes fails if JPQL cache is not warm up but concurrent queries are executed)
             LOAN_TRANSACTION_HELPER.forecloseLoan("02 March 2020", loanIds.get(2));
-            forelosedLoanIds.add(loanIds.get(2));
             for (int i = 3; i < N - 2; i++) {
                 final int idx = i;
                 futures.add(executorService.submit(() -> {
                     LOAN_TRANSACTION_HELPER.forecloseLoan("02 March 2020", loanIds.get(idx));
-                    forelosedLoanIds.add(loanIds.get(idx));
                     closeLatch.countDown();
                 }));
             }
@@ -173,45 +163,24 @@ public class CobPartitioningTest extends BaseLoanIntegrationTest {
             });
             closeLatch.await();
 
-            // Create list of active (non-foreclosed) loan IDs
-            List<Integer> activeLoanIds = new ArrayList<>(loanIds);
-            activeLoanIds.removeAll(forelosedLoanIds);
-            log.info("Active loan IDs after foreclosure: {}", activeLoanIds);
-
             // Let's retrieve the partitions
-            List<Map<String, Object>> allPartitions = CobHelper.getCobPartitions(REQUEST_SPEC, RESPONSE_SPEC, 3, "");
-            log.info("\nLoans created by this test: {}\nAll partitions retrieved: {}", loanIds, allPartitions);
+            List<Map<String, Object>> cobPartitions = CobHelper.getCobPartitions(REQUEST_SPEC, RESPONSE_SPEC, 3, "");
+            log.info("\nLoans created: {},\nRetrieved partitions: {}", loanIds, cobPartitions);
+            Assertions.assertEquals(2, cobPartitions.size());
 
-            // Filter partitions to only include ACTIVE loans created by THIS test
-            // This ensures test isolation - we don't care about leftover loans from other tests
-            List<Map<String, Object>> testLoanPartitions = filterPartitionsForTestLoans(allPartitions, activeLoanIds);
-            log.info("Filtered partitions containing only our active test loans: {}", testLoanPartitions);
+            Assertions.assertEquals(0, cobPartitions.get(0).get("pageNo"));
+            Assertions.assertEquals(loanIds.get(0), cobPartitions.get(0).get("minId"));
+            Assertions.assertEquals(loanIds.get(8), cobPartitions.get(0).get("maxId"));
+            Assertions.assertEquals(3, cobPartitions.get(0).get("count"));
 
-            // Verify partitioning works correctly for our 4 active loans (10 created - 6 foreclosed)
-            // Expected: 2 partitions with page size 3
-            // Partition 0: loans 0, 1, 8 (3 loans)
-            // Partition 1: loan 9 (1 loan)
-            Assertions.assertEquals(2, testLoanPartitions.size(), "Expected 2 partitions for our 4 active test loans");
-
-            // Verify first partition
-            Assertions.assertEquals(0, testLoanPartitions.get(0).get("pageNo"));
-            Assertions.assertEquals(3, testLoanPartitions.get(0).get("count"));
-            Assertions.assertTrue(isLoanIdInRange(loanIds.get(0), testLoanPartitions.get(0)),
-                    "First active loan should be in first partition");
-            Assertions.assertTrue(isLoanIdInRange(loanIds.get(1), testLoanPartitions.get(0)),
-                    "Second active loan should be in first partition");
-            Assertions.assertTrue(isLoanIdInRange(loanIds.get(8), testLoanPartitions.get(0)),
-                    "Ninth active loan should be in first partition");
-
-            // Verify second partition
-            Assertions.assertEquals(1, testLoanPartitions.get(1).get("pageNo"));
-            Assertions.assertEquals(1, testLoanPartitions.get(1).get("count"));
-            Assertions.assertTrue(isLoanIdInRange(loanIds.get(9), testLoanPartitions.get(1)), "Tenth loan should be in second partition");
+            Assertions.assertEquals(1, cobPartitions.get(1).get("pageNo"));
+            Assertions.assertEquals(loanIds.get(9), cobPartitions.get(1).get("minId"));
+            Assertions.assertEquals(loanIds.get(9), cobPartitions.get(1).get("maxId"));
+            Assertions.assertEquals(1, cobPartitions.get(1).get("count"));
 
             executorService.shutdown();
-        } catch (Exception e) {
-            log.error("Test failed with exception", e);
-            throw e;
+        } finally {
+            cleanUpAndRestoreBusinessDate();
         }
     }
 
@@ -320,43 +289,6 @@ public class CobPartitioningTest extends BaseLoanIntegrationTest {
         collateral.put("clientCollateralId", collateralId.toString());
         collateral.put("quantity", quantity.toString());
         return collateral;
-    }
-
-    /**
-     * Filters partitions to only include those containing loans from the test's loan IDs. This ensures test isolation
-     * by ignoring any leftover loans from previous test runs.
-     */
-    private List<Map<String, Object>> filterPartitionsForTestLoans(List<Map<String, Object>> allPartitions, List<Integer> testLoanIds) {
-        List<Map<String, Object>> filteredPartitions = new ArrayList<>();
-
-        for (Map<String, Object> partition : allPartitions) {
-            Integer minId = (Integer) partition.get("minId");
-            Integer maxId = (Integer) partition.get("maxId");
-
-            // Check if this partition contains any of our test loan IDs
-            boolean containsTestLoans = testLoanIds.stream().anyMatch(loanId -> loanId >= minId && loanId <= maxId);
-
-            if (containsTestLoans) {
-                // Count how many of OUR loans are in this partition's range
-                long testLoansInPartition = testLoanIds.stream().filter(loanId -> loanId >= minId && loanId <= maxId).count();
-
-                // Create a new partition entry with corrected count
-                Map<String, Object> filteredPartition = new HashMap<>(partition);
-                filteredPartition.put("count", (int) testLoansInPartition);
-                filteredPartitions.add(filteredPartition);
-            }
-        }
-
-        return filteredPartitions;
-    }
-
-    /**
-     * Checks if a loan ID falls within the min/max range of a partition.
-     */
-    private boolean isLoanIdInRange(Integer loanId, Map<String, Object> partition) {
-        Integer minId = (Integer) partition.get("minId");
-        Integer maxId = (Integer) partition.get("maxId");
-        return loanId >= minId && loanId <= maxId;
     }
 
 }
