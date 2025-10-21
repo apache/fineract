@@ -137,8 +137,8 @@ public class LoanProductTestBuilder {
     private String minimumGuaranteeFromOwnFunds = null;
     private String minimumGuaranteeFromGuarantor = null;
     private String isArrearsBasedOnOriginalSchedule = null;
-    private String graceOnPrincipalPayment = "1";
-    private String graceOnInterestPayment = "1";
+    private String graceOnPrincipalPayment = null;
+    private String graceOnInterestPayment = null;
     private JsonObject allowAttributeOverrides = null;
     private Boolean allowPartialPeriodInterestCalcualtion = false;
 
