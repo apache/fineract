@@ -571,7 +571,6 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             final LoanTransaction loanTransaction, final LoanApplicationTerms loanApplicationTerms, final MathContext mc) {
         final LoanReAgeParameter loanReAgeParameter = loanTransaction.getLoanReAgeParameter();
         final LocalDate reAgingStartDate = loanReAgeParameter.getStartDate();
-        final LocalDate transactionDate = loanTransaction.getTransactionDate();
         final List<RepaymentPeriod> existingRepaymentPeriods = scheduleModel.repaymentPeriods();
 
         moveOutstandingAmountsFromPeriodsBeforeReAging(existingRepaymentPeriods, reAgingStartDate);
@@ -579,7 +578,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         final LocalDate periodStartDate = calculateFirstReAgedPeriodStartDate(loanReAgeParameter);
 
         final ProgressiveLoanInterestScheduleModel temporaryReAgedScheduleModel = generateTemporaryReAgedScheduleModel(loanApplicationTerms,
-                mc, periodStartDate, transactionDate);
+                mc, periodStartDate);
 
         mergeNewInterestScheduleModelWithExistingOne(scheduleModel, temporaryReAgedScheduleModel, loanTransaction);
     }
@@ -644,14 +643,14 @@ public final class ProgressiveEMICalculator implements EMICalculator {
      */
     @NotNull
     private ProgressiveLoanInterestScheduleModel generateTemporaryReAgedScheduleModel(final LoanApplicationTerms loanApplicationTerms,
-            final MathContext mc, final LocalDate periodStartDate, final LocalDate transactionDate) {
+            final MathContext mc, final LocalDate periodStartDate) {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = scheduledDateGenerator.generateRepaymentPeriods(mc,
                 periodStartDate, loanApplicationTerms, null);
         final ProgressiveLoanInterestScheduleModel temporaryReAgedScheduleModel = generatePeriodInterestScheduleModel(
                 expectedRepaymentPeriods, loanApplicationTerms.toLoanProductRelatedDetailMinimumData(), null,
                 loanApplicationTerms.getInstallmentAmountInMultiplesOf(), mc);
 
-        addDisbursement(temporaryReAgedScheduleModel, EmiChangeOperation.disburse(transactionDate, loanApplicationTerms.getPrincipal()));
+        addDisbursement(temporaryReAgedScheduleModel, EmiChangeOperation.disburse(periodStartDate, loanApplicationTerms.getPrincipal()));
         return temporaryReAgedScheduleModel;
     }
 

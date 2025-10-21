@@ -132,6 +132,18 @@ public class LoanReAgingValidator {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.reage.transaction.already.present.for.today",
                     "Loan reaging can only be done once a day. There has already been a reaging done for today", loan.getId());
         }
+
+        // validate loan is not charged-off
+        if (loan.isChargedOff()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.not.allowed.on.charged.off",
+                    "Loan re-aging is not allowed on charged-off loan.", loan.getId());
+        }
+
+        // validate loan is not contract terminated
+        if (loan.isContractTermination()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.not.allowed.on.contract.terminated",
+                    "Loan re-aging is not allowed on contract terminated loan.", loan.getId());
+        }
     }
 
     public void validateUndoReAge(Loan loan, JsonCommand command) {

@@ -33,6 +33,8 @@ import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.services.LoanTransactionsApi;
 import org.apache.fineract.test.factory.LoanRequestFactory;
 import org.apache.fineract.test.helper.ErrorHelper;
+import org.apache.fineract.test.helper.ErrorMessageHelper;
+import org.apache.fineract.test.helper.ErrorResponse;
 import org.apache.fineract.test.messaging.EventAssertion;
 import org.apache.fineract.test.messaging.event.loan.LoanReAgeEvent;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
@@ -146,4 +148,53 @@ public class LoanReAgingStepDef extends AbstractStepDef {
         ErrorHelper.checkFailedApiCall(response, 403);
     }
 
+    @Then("Admin fails to create a Loan re-aging transaction with the following data because loan was charged-off:")
+    public void reAgeChargedOffLoanFailure(final DataTable table) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanResponse.body() != null;
+        final long loanId = loanResponse.body().getLoanId();
+
+        final List<String> data = table.asLists().get(1);
+
+        final PostLoansLoanIdTransactionsRequest reAgingRequest = LoanRequestFactory//
+                .defaultReAgingRequest()//
+                .frequencyNumber(Integer.parseInt(data.get(0)))//
+                .frequencyType(data.get(1))//
+                .startDate(data.get(2))//
+                .numberOfInstallments(Integer.parseInt(data.get(3)));//
+
+        final Response<PostLoansLoanIdTransactionsResponse> response = loanTransactionsApi
+                .executeLoanTransaction(loanId, reAgingRequest, "reAge").execute();
+        testContext().set(TestContextKey.LOAN_REAGING_RESPONSE, response);
+        final ErrorResponse errorDetails = ErrorResponse.from(response);
+        final String developerMessage = errorDetails.getSingleError().getDeveloperMessage();
+
+        assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(403);
+        assertThat(developerMessage).matches(ErrorMessageHelper.reAgeChargedOffLoanFailure());
+    }
+
+    @Then("Admin fails to create a Loan re-aging transaction with the following data because loan was contract terminated:")
+    public void reAgeContractTerminatedLoanFailure(final DataTable table) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanResponse.body() != null;
+        final long loanId = loanResponse.body().getLoanId();
+
+        final List<String> data = table.asLists().get(1);
+
+        final PostLoansLoanIdTransactionsRequest reAgingRequest = LoanRequestFactory//
+                .defaultReAgingRequest()//
+                .frequencyNumber(Integer.parseInt(data.get(0)))//
+                .frequencyType(data.get(1))//
+                .startDate(data.get(2))//
+                .numberOfInstallments(Integer.parseInt(data.get(3)));//
+
+        final Response<PostLoansLoanIdTransactionsResponse> response = loanTransactionsApi
+                .executeLoanTransaction(loanId, reAgingRequest, "reAge").execute();
+        testContext().set(TestContextKey.LOAN_REAGING_RESPONSE, response);
+        final ErrorResponse errorDetails = ErrorResponse.from(response);
+        final String developerMessage = errorDetails.getSingleError().getDeveloperMessage();
+
+        assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(403);
+        assertThat(developerMessage).matches(ErrorMessageHelper.reAgeContractTerminatedLoanFailure());
+    }
 }
