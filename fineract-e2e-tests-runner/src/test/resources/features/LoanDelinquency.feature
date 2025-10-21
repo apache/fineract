@@ -2105,3 +2105,42 @@ Feature: LoanDelinquency
 
     When Loan Pay-off is made on "1 September 2024"
     Then Loan's all installments have obligations met
+
+  @TestRailId:C4130
+  Scenario: Verify that paused days are not counted in installment level delinquency
+    When Admin sets the business date to "28 May 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL_INSTALLMENT_LEVEL_DELINQUENCY | 28 May 2025       | 1000           | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "28 May 2025" with "1000" amount and expected disbursement date on "28 May 2025"
+    And Admin successfully disburse the loan on "28 May 2025" with "1000" EUR transaction amount
+#    --- Delinquency pause ---
+    And Admin sets the business date to "15 June 2025"
+    And Admin runs inline COB job for Loan
+    And Admin initiate a DELINQUENCY PAUSE with startDate: "17 June 2025" and endDate: "19 August 2025"
+    And Admin sets the business date to "01 July 2025"
+    And Admin runs inline COB job for Loan
+    And Admin sets the business date to "01 August 2025"
+    And Admin runs inline COB job for Loan
+    And Admin sets the business date to "01 September 2025"
+    And Admin runs inline COB job for Loan
+    And Admin sets the business date to "01 October 2025"
+    And Admin runs inline COB job for Loan
+    And Admin sets the business date to "31 October 2025"
+    And Admin runs inline COB job for Loan
+    Then Delinquency-actions have the following data:
+      | action | startDate    | endDate        |
+      | PAUSE  | 17 June 2025 | 19 August 2025 |
+    And Loan Delinquency pause periods has the following data:
+      | active | pausePeriodStart | pausePeriodEnd |
+      | false  | 17 June 2025     | 19 August 2025 |
+    And Loan has the following LOAN level delinquency data:
+      | classification | delinquentAmount | delinquentDate | delinquentDays | pastDueDays |
+      | RANGE_60       | 875.0            | 31 May 2025    | 90             | 156         |
+    And Loan has the following INSTALLMENT level delinquency data:
+      | rangeId | Range    | Amount |
+      | 1       | RANGE_1  | 125.00 |
+      | 3       | RANGE_30 | 125.00 |
+      | 4       | RANGE_60 | 375.00 |
+      | 5       | RANGE_90 | 250.00 |
