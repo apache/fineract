@@ -285,15 +285,15 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
             verifyLoanDelinquencyData(loanId, 6, new InstallmentDelinquencyData(4, 10, BigDecimal.valueOf(250.0)));
 
             // Create Delinquency Pause for the Loan in the past
-            PostLoansDelinquencyActionResponse response = loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE,
-                    "27 January 2023", "15 February 2023");
+            loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "27 January 2023", "15 February 2023");
 
             List<GetDelinquencyActionsResponse> loanDelinquencyActions = loanTransactionHelper.getLoanDelinquencyActions(loanId);
             Assertions.assertNotNull(loanDelinquencyActions);
             Assertions.assertEquals(1, loanDelinquencyActions.size());
-            Assertions.assertEquals("PAUSE", loanDelinquencyActions.get(0).getAction());
-            Assertions.assertEquals(LocalDate.parse("27 January 2023", dateTimeFormatter), loanDelinquencyActions.get(0).getStartDate());
-            Assertions.assertEquals(LocalDate.parse("15 February 2023", dateTimeFormatter), loanDelinquencyActions.get(0).getEndDate());
+            Assertions.assertEquals("PAUSE", loanDelinquencyActions.getFirst().getAction());
+            Assertions.assertEquals(LocalDate.parse("27 January 2023", dateTimeFormatter),
+                    loanDelinquencyActions.getFirst().getStartDate());
+            Assertions.assertEquals(LocalDate.parse("15 February 2023", dateTimeFormatter), loanDelinquencyActions.getFirst().getEndDate());
 
             // Loan delinquency data calculation after backdated pause
             verifyLoanDelinquencyData(loanId, 3, new InstallmentDelinquencyData(1, 3, BigDecimal.valueOf(250.0)));

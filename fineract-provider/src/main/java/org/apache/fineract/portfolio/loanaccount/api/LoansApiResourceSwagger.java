@@ -1216,6 +1216,14 @@ final class LoansApiResourceSwagger {
         public Boolean chargedOff;
         @Schema(example = "3")
         public Integer inArrearsTolerance;
+        @Schema(example = "0")
+        public Integer graceOnPrincipalPayment;
+        @Schema(example = "0")
+        public Integer graceOnInterestPayment;
+        @Schema(example = "0")
+        public Integer graceOnInterestCharged;
+        @Schema(example = "3")
+        public Integer graceOnArrearsAgeing;
         @Schema(example = "false")
         public Boolean enableDownPayment;
         @Schema(example = "0.000000")
@@ -1348,6 +1356,8 @@ final class LoansApiResourceSwagger {
         public Integer graceOnInterestPayment;
         @Schema(example = "1")
         public Integer graceOnArrearsAgeing;
+        @Schema(example = "10")
+        public BigDecimal inArrearsTolerance;
         @Schema(example = "HORIZONTAL")
         public String loanScheduleProcessingType;
         @Schema(example = "false")

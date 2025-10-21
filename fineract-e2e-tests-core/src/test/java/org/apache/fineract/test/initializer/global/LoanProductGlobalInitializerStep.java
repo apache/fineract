@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.models.AdvancedPaymentData;
+import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.CreditAllocationData;
 import org.apache.fineract.client.models.CreditAllocationOrder;
 import org.apache.fineract.client.models.LoanProductChargeData;
@@ -4056,6 +4057,54 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY,
                 responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmi36030InterestRecalculationDaily);
+
+        // (LP1_WITH_OVERRIDES) - Loan product with all attribute overrides ENABLED
+        final String nameWithOverrides = DefaultLoanProduct.LP1_WITH_OVERRIDES.getName();
+        final PostLoanProductsRequest loanProductsRequestWithOverrides = loanProductsRequestFactory.defaultLoanProductsRequestLP1() //
+                .name(nameWithOverrides) //
+                .interestRatePerPeriod(1.0) //
+                .maxInterestRatePerPeriod(30.0) //
+                .inArrearsTolerance(10) //
+                .graceOnPrincipalPayment(1) //
+                .graceOnInterestPayment(1) //
+                .graceOnArrearsAgeing(3) //
+                .numberOfRepayments(6) //
+                .allowAttributeOverrides(new AllowAttributeOverrides() //
+                        .amortizationType(true) //
+                        .interestType(true) //
+                        .transactionProcessingStrategyCode(true) //
+                        .interestCalculationPeriodType(true) //
+                        .inArrearsTolerance(true) //
+                        .repaymentEvery(true) //
+                        .graceOnPrincipalAndInterestPayment(true) //
+                        .graceOnArrearsAgeing(true));
+        final Response<PostLoanProductsResponse> responseWithOverrides = loanProductsApi.createLoanProduct(loanProductsRequestWithOverrides)
+                .execute();
+        TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_WITH_OVERRIDES, responseWithOverrides);
+
+        // (LP1_NO_OVERRIDES) - Loan product with all attribute overrides DISABLED
+        final String nameNoOverrides = DefaultLoanProduct.LP1_NO_OVERRIDES.getName();
+        final PostLoanProductsRequest loanProductsRequestNoOverrides = loanProductsRequestFactory.defaultLoanProductsRequestLP1() //
+                .name(nameNoOverrides) //
+                .interestRatePerPeriod(1.0) //
+                .maxInterestRatePerPeriod(30.0) //
+                .inArrearsTolerance(10) //
+                .graceOnPrincipalPayment(1) //
+                .graceOnInterestPayment(1) //
+                .graceOnArrearsAgeing(3) //
+                .numberOfRepayments(6) //
+                .allowAttributeOverrides(new AllowAttributeOverrides() //
+                        .amortizationType(false) //
+                        .interestType(false) //
+                        .transactionProcessingStrategyCode(false) //
+                        .interestCalculationPeriodType(false) //
+                        .inArrearsTolerance(false) //
+                        .repaymentEvery(false) //
+                        .graceOnPrincipalAndInterestPayment(false) //
+                        .graceOnArrearsAgeing(false));
+        final Response<PostLoanProductsResponse> responseNoOverrides = loanProductsApi.createLoanProduct(loanProductsRequestNoOverrides)
+                .execute();
+        TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_NO_OVERRIDES, responseNoOverrides);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,

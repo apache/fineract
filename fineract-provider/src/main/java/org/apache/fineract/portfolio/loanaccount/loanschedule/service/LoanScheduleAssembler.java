@@ -350,27 +350,33 @@ public class LoanScheduleAssembler {
         }
 
         // grace details
-        final Integer graceOnPrincipalPayment = allowOverridingGraceOnPrincipalAndInterestPayment
-                ? this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnPrincipalPayment", element)
-                : loanProduct.getLoanProductRelatedDetail().getGraceOnPrincipalPayment();
+        Integer graceOnPrincipalPayment = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnPrincipalPayment", element);
+        if (!allowOverridingGraceOnPrincipalAndInterestPayment || graceOnPrincipalPayment == null) {
+            graceOnPrincipalPayment = loanProduct.getLoanProductRelatedDetail().getGraceOnPrincipalPayment();
+        }
         final Integer recurringMoratoriumOnPrincipalPeriods = this.fromApiJsonHelper
                 .extractIntegerWithLocaleNamed("recurringMoratoriumOnPrincipalPeriods", element);
-        final Integer graceOnInterestPayment = allowOverridingGraceOnPrincipalAndInterestPayment
-                ? this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestPayment", element)
-                : loanProduct.getLoanProductRelatedDetail().getGraceOnInterestPayment();
+        Integer graceOnInterestPayment = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestPayment", element);
+        if (!allowOverridingGraceOnPrincipalAndInterestPayment || graceOnInterestPayment == null) {
+            graceOnInterestPayment = loanProduct.getLoanProductRelatedDetail().getGraceOnInterestPayment();
+        }
         final Integer graceOnInterestCharged = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestCharged", element);
         final LocalDate interestChargedFromDate = this.fromApiJsonHelper.extractLocalDateNamed("interestChargedFromDate", element);
         final Boolean isInterestChargedFromDateSameAsDisbursalDateEnabled = this.configurationDomainService
                 .isInterestChargedFromDateSameAsDisbursementDate();
 
-        final Integer graceOnArrearsAgeing = allowOverridingGraceOnArrearsAging
-                ? this.fromApiJsonHelper.extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element)
-                : loanProduct.getLoanProductRelatedDetail().getGraceOnArrearsAgeing();
+        Integer graceOnArrearsAgeing = this.fromApiJsonHelper
+                .extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element);
+        if (!allowOverridingGraceOnArrearsAging || graceOnArrearsAgeing == null) {
+            graceOnArrearsAgeing = loanProduct.getLoanProductRelatedDetail().getGraceOnArrearsAgeing();
+        }
 
         // other
-        final BigDecimal inArrearsTolerance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element);
-        final Money inArrearsToleranceMoney = allowOverridingArrearsTolerance ? Money.of(currency, inArrearsTolerance)
-                : loanProduct.getLoanProductRelatedDetail().getInArrearsTolerance();
+        BigDecimal inArrearsTolerance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element);
+        if (!allowOverridingArrearsTolerance || inArrearsTolerance == null) {
+            inArrearsTolerance = loanProduct.getLoanProductRelatedDetail().getInArrearsTolerance().getAmount();
+        }
+        final Money inArrearsToleranceMoney = Money.of(currency, inArrearsTolerance);
 
         final BigDecimal emiAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.fixedEmiAmountParameterName,
                 element);
