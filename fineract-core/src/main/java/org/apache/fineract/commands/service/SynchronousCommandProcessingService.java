@@ -30,6 +30,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -166,13 +167,12 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         try {
             CommandSource finalCommandSource = commandSource;
+            AtomicInteger attemptNumber = new AtomicInteger(0);
             CommandSource savedCommandSource = persistenceRetry.executeSupplier(() -> {
-                // Get metrics for logging
-                long attemptNumber = persistenceRetry.getMetrics().getNumberOfFailedCallsWithRetryAttempt() + 1;
-
                 // Critical: Refetch on retry attempts (not on first attempt)
                 CommandSource currentSource = finalCommandSource;
-                if (attemptNumber > 1) {
+                attemptNumber.getAndIncrement();
+                if (attemptNumber.get() > 1 && commandSource.getId() != null) {
                     log.info("Retrying command result save - attempt {} for command ID {}", attemptNumber, finalCommandSource.getId());
                     currentSource = commandSourceService.getCommandSource(finalCommandSource.getId());
                 }

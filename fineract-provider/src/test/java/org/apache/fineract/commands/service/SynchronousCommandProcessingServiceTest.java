@@ -591,5 +591,11 @@ public class SynchronousCommandProcessingServiceTest {
         assertEquals(persistentException, exception.getCause());
 
         assertTrue(saveAttempts.get() >= 3, "Expected at least 3 save attempts, but got: " + saveAttempts.get());
+        // First call was before saving CommandSource, then 2 calls during retry (1st retry does not try to fetch it)
+        verify(commandSourceService, times(3)).getCommandSource(commandId);
+        // Let test whether consecutive calls does not try to refetch immediately
+        when(commandSourceService.saveResultSameTransaction(any(CommandSource.class))).thenReturn(commandSource);
+        underTest.executeCommand(commandWrapper, jsonCommand, false);
+        verify(commandSourceService, times(4)).getCommandSource(commandId);
     }
 }
