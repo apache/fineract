@@ -22,7 +22,9 @@ import static org.apache.fineract.test.data.TransactionProcessingStrategyCode.AD
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.GetLoanPaymentChannelToFundSourceMappings;
@@ -67,6 +69,8 @@ public class LoanProductsRequestFactory {
     private final AccountTypeResolver accountTypeResolver;
     private final CodeValueResolver codeValueResolver;
 
+    private final Set<String> productShortNameMap = new HashSet<>();
+
     @Autowired
     private CodeHelper codeHelper;
 
@@ -78,9 +82,6 @@ public class LoanProductsRequestFactory {
     public static final String NAME_PREFIX_INTEREST_DECLINING = "LP1InterestDeclining-";
     public static final String NAME_PREFIX_INTEREST_DECLINING_RECALCULATION = "LP1InterestDecliningRecalculation-";
     public static final String NAME_PREFIX_INTEREST_RECALCULATION = "LP2InterestRecalculation-";
-    public static final String SHORT_NAME_PREFIX = "p";
-    public static final String SHORT_NAME_PREFIX_INTEREST = "i";
-    public static final String SHORT_NAME_PREFIX_EMI = "e";
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     public static final String LOCALE_EN = "en";
     public static final String DESCRIPTION = "30 days repayment";
@@ -126,8 +127,8 @@ public class LoanProductsRequestFactory {
     public static final String CHARGE_OFF_REASONS = "ChargeOffReasons";
 
     public PostLoanProductsRequest defaultLoanProductsRequestLP1() {
-        String name = Utils.randomNameGenerator(NAME_PREFIX, 4);
-        String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX, 3);
+        String name = Utils.randomNameGenerator(NAME_PREFIX, 10);
+        String shortName = generateShortNameSafely();
 
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
@@ -236,8 +237,8 @@ public class LoanProductsRequestFactory {
     }
 
     public PostLoanProductsRequest defaultLoanProductsRequestLP1InterestFlat() {
-        String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_FLAT, 4);
-        String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX_INTEREST, 3);
+        String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_FLAT, 10);
+        String shortName = generateShortNameSafely();
 
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
@@ -344,8 +345,8 @@ public class LoanProductsRequestFactory {
     }
 
     public PostLoanProductsRequest defaultLoanProductsRequestLP1InterestDeclining() {
-        String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_DECLINING, 4);
-        String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX_INTEREST, 3);
+        String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_DECLINING, 10);
+        String shortName = generateShortNameSafely();
 
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
@@ -452,8 +453,8 @@ public class LoanProductsRequestFactory {
     }
 
     public PostLoanProductsRequest defaultLoanProductsRequestLP11MonthInterestDecliningBalanceDailyRecalculationCompoundingMonthly() {
-        String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_DECLINING_RECALCULATION, 4);
-        String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX_INTEREST, 3);
+        String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_DECLINING_RECALCULATION, 10);
+        String shortName = generateShortNameSafely();
 
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
@@ -565,8 +566,8 @@ public class LoanProductsRequestFactory {
     }
 
     public PostLoanProductsRequest defaultLoanProductsRequestLP1InterestDecliningBalanceDailyRecalculationCompoundingNone() {
-        String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_DECLINING_RECALCULATION, 4);
-        String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX_INTEREST, 3);
+        String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_DECLINING_RECALCULATION, 10);
+        String shortName = generateShortNameSafely();
 
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
@@ -675,8 +676,8 @@ public class LoanProductsRequestFactory {
     }
 
     public PostLoanProductsRequest defaultLoanProductsRequestLP2InterestDailyRecalculation() {
-        final String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_RECALCULATION, 4);
-        final String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX_INTEREST, 3);
+        final String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_RECALCULATION, 10);
+        final String shortName = generateShortNameSafely();
 
         List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
         List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
@@ -790,8 +791,8 @@ public class LoanProductsRequestFactory {
     }
 
     public PostLoanProductsRequest defaultLoanProductsRequestLP2() {
-        String name = Utils.randomNameGenerator(NAME_PREFIX_LP2, 4);
-        String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX, 3);
+        String name = Utils.randomNameGenerator(NAME_PREFIX_LP2, 10);
+        String shortName = generateShortNameSafely();
 
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
@@ -903,8 +904,8 @@ public class LoanProductsRequestFactory {
     }
 
     public PostLoanProductsRequest defaultLoanProductsRequestLP2InterestFlat() {
-        String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_FLAT_LP2, 4);
-        String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX_INTEREST, 3);
+        String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_FLAT_LP2, 10);
+        String shortName = generateShortNameSafely();
 
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
@@ -1014,8 +1015,8 @@ public class LoanProductsRequestFactory {
     }
 
     public PostLoanProductsRequest defaultLoanProductsRequestLP2Emi() {
-        String name = Utils.randomNameGenerator(NAME_PREFIX_LP2_EMI, 4);
-        String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX_EMI, 3);
+        String name = Utils.randomNameGenerator(NAME_PREFIX_LP2_EMI, 10);
+        String shortName = generateShortNameSafely();
 
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
@@ -1124,8 +1125,8 @@ public class LoanProductsRequestFactory {
     }
 
     public PostLoanProductsRequest defaultLoanProductsRequestLP2EmiWithChargeOff() {
-        String name = Utils.randomNameGenerator(NAME_PREFIX_LP2_EMI, 4);
-        String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX_EMI, 3);
+        String name = Utils.randomNameGenerator(NAME_PREFIX_LP2_EMI, 10);
+        String shortName = generateShortNameSafely();
 
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
@@ -1254,8 +1255,8 @@ public class LoanProductsRequestFactory {
     }
 
     public PostLoanProductsRequest defaultLoanProductsRequestLP2ChargeOffReasonToExpenseAccountMappings() {
-        final String name = Utils.randomNameGenerator(NAME_PREFIX_LP2, 4);
-        final String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX, 3);
+        final String name = Utils.randomNameGenerator(NAME_PREFIX_LP2, 10);
+        final String shortName = generateShortNameSafely();
 
         final List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         final List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
@@ -1376,8 +1377,8 @@ public class LoanProductsRequestFactory {
     }
 
     public PostLoanProductsRequest defaultLoanProductsRequestLP2EmiCashAccounting() {
-        String name = Utils.randomNameGenerator(NAME_PREFIX_LP2_EMI, 4);
-        String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX_EMI, 3);
+        String name = Utils.randomNameGenerator(NAME_PREFIX_LP2_EMI, 10);
+        String shortName = generateShortNameSafely();
 
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
@@ -1503,8 +1504,8 @@ public class LoanProductsRequestFactory {
     }
 
     public PostLoanProductsRequest defaultLoanProductsRequestLP2CapitalizedIncome() {
-        final String name = Utils.randomNameGenerator(NAME_PREFIX_LP2, 4);
-        final String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX, 3);
+        final String name = Utils.randomNameGenerator(NAME_PREFIX_LP2, 10);
+        final String shortName = generateShortNameSafely();
         final List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         final List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         final List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
@@ -1641,8 +1642,8 @@ public class LoanProductsRequestFactory {
     }
 
     public PostLoanProductsRequest defaultLoanProductsRequestLP2BuyDownFees() {
-        final String name = Utils.randomNameGenerator(NAME_PREFIX_LP2, 4);
-        final String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX, 3);
+        final String name = Utils.randomNameGenerator(NAME_PREFIX_LP2, 10);
+        final String shortName = generateShortNameSafely();
         final List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         final List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         final List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
@@ -1776,5 +1777,19 @@ public class LoanProductsRequestFactory {
 
         return defaultLoanProductsRequestLP2BuyDownFees()//
                 .chargeOffReasonToExpenseAccountMappings(chargeOffReasonToExpenseAccountMappings);//
+    }
+
+    public String generateShortNameSafely() {
+        String generatedShortName;
+        int counter = 0;
+        do {
+            counter++;
+            generatedShortName = Utils.randomNameGenerator("", 4);
+            if (counter > 999) {
+                throw new RuntimeException("Unable to generate unique short name");
+            }
+        } while (productShortNameMap.contains(generatedShortName));
+        productShortNameMap.add(generatedShortName);
+        return generatedShortName;
     }
 }

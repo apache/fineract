@@ -26,7 +26,6 @@ import static org.apache.fineract.test.factory.LoanProductsRequestFactory.INTERE
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.INTEREST_RATE_FREQUENCY_TYPE_YEAR;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.LOAN_ACCOUNTING_RULE_NONE;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.REPAYMENT_FREQUENCY_TYPE_MONTHS;
-import static org.apache.fineract.test.factory.LoanProductsRequestFactory.SHORT_NAME_PREFIX_EMI;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -62,7 +61,6 @@ import org.apache.fineract.test.data.codevalue.DefaultCodeValue;
 import org.apache.fineract.test.data.loanproduct.DefaultLoanProduct;
 import org.apache.fineract.test.factory.LoanProductsRequestFactory;
 import org.apache.fineract.test.helper.CodeHelper;
-import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.support.TestContext;
 import org.apache.fineract.test.support.TestContextKey;
 import org.springframework.stereotype.Component;
@@ -2290,7 +2288,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         final String name91 = DefaultLoanProduct.LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF.getName();
         final PostLoanProductsRequest loanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullZeroIntChargeOff = loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundFull
                 .name(name91)//
-                .shortName(Utils.randomNameGenerator(SHORT_NAME_PREFIX_EMI, 3))//
+                .shortName(loanProductsRequestFactory.generateShortNameSafely())//
                 .chargeOffBehaviour("ZERO_INTEREST");//
         final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullZeroIntChargeOff = loanProductsApi
                 .createLoanProduct(loanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullZeroIntChargeOff).execute();
@@ -2305,7 +2303,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .getName();
         final PostLoanProductsRequest loanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullAccelerateMaturityChargeOff = loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundFull
                 .name(name92)//
-                .shortName(Utils.randomNameGenerator(SHORT_NAME_PREFIX_EMI, 3))//
+                .shortName(loanProductsRequestFactory.generateShortNameSafely())//
                 .chargeOffBehaviour("ACCELERATE_MATURITY");//
         final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullAccelerateMaturityChargeOff = loanProductsApi
                 .createLoanProduct(loanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullAccelerateMaturityChargeOff).execute();
@@ -2340,7 +2338,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .getName();
         final PostLoanProductsRequest loanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullZeroIntChargeOff = loanProductsRequestLP2AdvancedPaymentInterestEmiActualActualNoInterestRecalcRefundFull
                 .name(name94)//
-                .shortName(Utils.randomNameGenerator(SHORT_NAME_PREFIX_EMI, 3))//
+                .shortName(loanProductsRequestFactory.generateShortNameSafely())//
                 .chargeOffBehaviour("ZERO_INTEREST");//
         final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullZeroIntChargeOff = loanProductsApi
                 .createLoanProduct(loanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullZeroIntChargeOff)
@@ -2356,7 +2354,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .getName();
         final PostLoanProductsRequest loanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullAccelerateMaturityChargeOff = loanProductsRequestLP2AdvancedPaymentInterestEmiActualActualNoInterestRecalcRefundFull
                 .name(name95)//
-                .shortName(Utils.randomNameGenerator(SHORT_NAME_PREFIX_EMI, 3))//
+                .shortName(loanProductsRequestFactory.generateShortNameSafely())//
                 .chargeOffBehaviour("ACCELERATE_MATURITY");//
         final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullAccelerateMaturityChargeOff = loanProductsApi
                 .createLoanProduct(
@@ -3155,8 +3153,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .add(new LoanProductChargeData().id(ChargeProductType.LOAN_INSTALLMENT_FEE_PERCENTAGE_INTEREST.value));
         final PostLoanProductsRequest loanProductsRequestLP2AdvPaymentInstallmentFeeFlatPlusInterestChargesMultiDisburse = loanProductsRequestLP2AdvPaymentInstallmentFeePercentInterestCharges//
                 .name(name121)//
+                .shortName(loanProductsRequestFactory.generateShortNameSafely())//
                 .charges(chargesInstallmentFeeFlatPlusInterest)//
-                .shortName(Utils.randomNameGenerator(SHORT_NAME_PREFIX_EMI, 3))//
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
