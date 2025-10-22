@@ -74,7 +74,7 @@ cd ..
 
 === Run from binary
 
-Before running Fineract you must first start a <<Database support,supported relational database server>> and ensure the `fineract_default` and `fineract_tenants` databases exist. Detailed steps for database preparation are left as an exercise for the reader. You can find ideas on how to prepare your database in the `build-mariadb.yml`, `build-mysql.yml`, and `build-postgresql.yml` files in source control.
+Before running Fineract you must first start a <<Database support,supported relational database server>> and ensure the `fineract_default` and `fineract_tenants` databases exist. Detailed steps for database preparation are left as an exercise for the reader. You can find ideas on how to prepare your database in the `build-mariadb.yml`, `build-mysql.yml`, and `build-postgresql.yml` files in source control, and in <<Database Setup>>.
 
 Finally, start your Fineract server:
 

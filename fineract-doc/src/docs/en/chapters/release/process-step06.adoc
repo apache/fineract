@@ -9,7 +9,7 @@ Create source and binary tarballs.
 ./gradlew clean srcDistTar binaryDistTar
 ----
 
-Check that `fineract-provider/build/classes/java/main/git.properties` exists. If so, continue. If not, you're likely encountering https://github.com/n0mer/gradle-git-properties/issues/233[this bug], and you need to re-run the command above to create proper source and binary tarballs. That `git.properties` file is supposed to end up at `BOOT-INF/classes/git.properties` in `fineract-provider-{revnumber}.jar` in the binary release tarball. Its contents are displayed at the `/fineract-provider/actuator/info` endpoint. It may be possible to fix this heisenbug entirely by https://github.com/gradle/gradle/issues/34177#issuecomment-3051970053[modifying our git properties gradle plugin config] in `fineract-provider/build.gradle`, perhaps by changing where `git.properties` is written.
+Check that `fineract-provider/build/classes/java/main/git.properties` exists. If so, continue. If not, you're likely encountering https://github.com/n0mer/gradle-git-properties/issues/233[this bug], and you need to *re-run the command above* to create proper source and binary tarballs. That `git.properties` file is supposed to end up at `BOOT-INF/classes/git.properties` in `fineract-provider-{revnumber}.jar` in the binary release tarball. Its contents are displayed at the `/fineract-provider/actuator/info` endpoint. It may be possible to fix this heisenbug entirely by https://github.com/gradle/gradle/issues/34177#issuecomment-3051970053[modifying our git properties gradle plugin config] in `fineract-provider/build.gradle`, perhaps by changing where `git.properties` is written.
 
 Look in `fineract-war/build/distributions/` for the tarballs.
 

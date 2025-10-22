@@ -23,10 +23,7 @@ the release of Apache Fineract ${project['fineract.release.version']}.
 The release is available for download from
 https://fineract.apache.org/#downloads
 
-Fineract provides a reliable, robust, and affordable solution for entrepreneurs,
-financial institutions, and service providers to offer financial services to the
-world’s 2 billion underbanked and unbanked. Fineract is aimed at innovative mobile
-and cloud-based solutions, and enables digital transaction accounts for all.
+Apache Fineract is an open-source core banking platform providing a flexible, extensible foundation for a wide range of financial services. By making robust banking technology openly available, it lowers barriers for institutions and innovators to reach underserved and unbanked populations.
 
 This release addressed ${project['fineract.release.issues']?size} issues.
 
