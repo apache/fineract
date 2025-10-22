@@ -121,6 +121,8 @@ public class LoanTransactionData implements Serializable {
     private Collection<CodeValueData> reAgeReasonOptions = null;
     private Collection<PeriodFrequencyType> periodFrequencyOptions = null;
     private Collection<StringEnumOptionData> reAgeInterestHandlingOptions = null;
+    private Collection<CodeValueData> reAmortizationReasonOptions = null;
+    private Collection<StringEnumOptionData> reAmortizationInterestHandlingOptions = null;
 
     public static LoanTransactionData importInstance(BigDecimal repaymentAmount, LocalDate lastRepaymentDate, Long repaymentTypeId,
             Integer rowIndex, String locale, String dateFormat) {

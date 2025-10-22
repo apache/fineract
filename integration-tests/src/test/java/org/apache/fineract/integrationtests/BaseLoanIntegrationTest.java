@@ -1026,8 +1026,9 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         loanTransactionHelper.reAge(loanId, request);
     }
 
-    protected void reAmortizeLoan(Long loanId) {
+    protected void reAmortizeLoan(Long loanId, String reAmortizationInterestHandling) {
         PostLoansLoanIdTransactionsRequest request = new PostLoansLoanIdTransactionsRequest();
+        request.setReAmortizationInterestHandling(reAmortizationInterestHandling);
         request.setDateFormat(DATETIME_PATTERN);
         request.setLocale("en");
         loanTransactionHelper.reAmortize(loanId, request);

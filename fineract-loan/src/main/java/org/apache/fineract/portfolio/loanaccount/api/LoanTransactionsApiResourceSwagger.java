@@ -370,6 +370,8 @@ final class LoanTransactionsApiResourceSwagger {
         public Integer numberOfInstallments;
         @Schema(example = "DEFAULT")
         public String reAgeInterestHandling;
+        @Schema(example = "DEFAULT")
+        public String reAmortizationInterestHandling;
         @Schema(example = "1")
         public Long reasonCodeValueId;
 

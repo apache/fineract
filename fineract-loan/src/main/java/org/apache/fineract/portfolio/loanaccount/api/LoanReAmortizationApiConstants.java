@@ -23,4 +23,7 @@ public interface LoanReAmortizationApiConstants {
     String localeParameterName = "locale";
     String dateFormatParameterName = "dateFormat";
     String externalIdParameterName = "externalId";
+
+    String reAmortizationInterestHandlingParamName = "reAmortizationInterestHandling";
+    String reasonCodeValueIdParamName = "reasonCodeValueId";
 }

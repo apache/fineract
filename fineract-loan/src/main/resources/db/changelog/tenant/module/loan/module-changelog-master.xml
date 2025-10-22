@@ -56,4 +56,5 @@
   <include relativeToChangelogFile="true" file="parts/1031_loan_merchant_buy_down_fee.xml"/>
   <include relativeToChangelogFile="true" file="parts/1032_add_classification_to_loan_transaction.xml"/>
   <include relativeToChangelogFile="true" file="parts/1033_add_reage_reasons_for_loan.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1034_loan_reamortization_parameters.xml"/>
 </databaseChangeLog>

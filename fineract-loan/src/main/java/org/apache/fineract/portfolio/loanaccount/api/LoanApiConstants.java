@@ -142,6 +142,8 @@ public interface LoanApiConstants {
     String CHARGE_OFF_REASONS = "ChargeOffReasons";
     // loan ReAge
     String REAGE_REASONS = "ReAgeReasons";
+    // loan ReAmortization
+    String REAMORTIZATION_REASONS = "ReAmortizationReasons";
     // fore closure constants
     String transactionDateParamName = "transactionDate";
     String noteParamName = "note";
@@ -186,6 +188,7 @@ public interface LoanApiConstants {
     String BUY_DOWN_FEE_COMMAND = "buyDownFee";
     String BUY_DOWN_FEE_ADJUSTMENT_COMMAND = "buyDownFeeAdjustment";
     String REAGE_COMMAND = "reAge";
+    String REAMORTIZATION_COMMAND = "reAmortization";
 
     // Data Validator names
     String LOAN_FRAUD_DATAVALIDATOR_PREFIX = "loans.fraud";

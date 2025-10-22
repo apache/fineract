@@ -699,6 +699,8 @@ public class LoanTransactionsApiResource {
             transactionData = this.loanReadPlatformService.retrieveManualInterestRefundTemplate(resolvedLoanId, transactionId);
         } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.REAGE_COMMAND)) {
             transactionData = this.loanReadPlatformService.retrieveLoanReAgeTemplate(resolvedLoanId);
+        } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.REAMORTIZATION_COMMAND)) {
+            transactionData = this.loanReadPlatformService.retrieveLoanReAmortizationTemplate(resolvedLoanId);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }

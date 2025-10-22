@@ -132,6 +132,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepayment
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeInterestHandlingType;
+import org.apache.fineract.portfolio.loanaccount.domain.reamortization.LoanReAmortizationInterestHandlingType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
@@ -2115,6 +2116,19 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 .externalLoanId(loan.getExternalId()).periodFrequencyOptions(CommonEnumerations.BASIC_PERIOD_FREQUENCY_TYPES)
                 .reAgeReasonOptions(reAgeReasonOptions)
                 .reAgeInterestHandlingOptions(LoanReAgeInterestHandlingType.getValuesAsEnumOptionDataList()).build();
+    }
+
+    @Override
+    public LoanTransactionData retrieveLoanReAmortizationTemplate(final Long loanId) {
+        final LoanAccountData loan = this.retrieveOne(loanId);
+        final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.REAMORTIZE);
+        final BigDecimal totalOutstanding = loan.getSummary() != null ? loan.getSummary().getTotalOutstanding() : null;
+        final List<CodeValueData> reAmortizationReasonOptions = new ArrayList<>(
+                codeValueReadPlatformService.retrieveCodeValuesByCode(LoanApiConstants.REAMORTIZATION_REASONS));
+        return LoanTransactionData.builder().type(transactionType).currency(loan.getCurrency()).date(DateUtils.getBusinessLocalDate())
+                .amount(totalOutstanding).netDisbursalAmount(loan.getNetDisbursalAmount()).loanId(loanId)
+                .externalLoanId(loan.getExternalId()).reAmortizationReasonOptions(reAmortizationReasonOptions)
+                .reAmortizationInterestHandlingOptions(LoanReAmortizationInterestHandlingType.getValuesAsEnumOptionDataList()).build();
     }
 
     @Override
