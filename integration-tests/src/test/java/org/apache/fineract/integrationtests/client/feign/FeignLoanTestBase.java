@@ -40,8 +40,11 @@ import org.apache.fineract.integrationtests.client.feign.modules.LoanTestAccount
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestValidators;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
+import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(LoanTestLifecycleExtension.class)
 public abstract class FeignLoanTestBase extends FeignIntegrationTest implements LoanProductTemplates {
 
     protected static FeignAccountHelper accountHelper;
