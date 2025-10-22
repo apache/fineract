@@ -777,6 +777,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             final InterestPeriod lastInterestPeriod = rp.getInterestPeriods().getLast();
             lastInterestPeriod.addBalanceCorrectionAmount(rp.getOutstandingPrincipal().negated());
             rp.setEmi(rp.getTotalPaidAmount());
+            rp.setOutstandingMovedDueToReAging(true);
         });
     }
 

@@ -142,7 +142,7 @@ public interface EMICalculator {
     void applyInterestPause(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate fromDate, LocalDate endDate);
 
     void updateModelRepaymentPeriodsDuringReAge(ProgressiveLoanInterestScheduleModel ctx, LocalDate loanTransaction,
-            LocalDate reageFirstDueDate, LocalDate transactionDate, LoanApplicationTerms loanApplicationTerms, MathContext mc);
+            LocalDate reAgeFirstDueDate, LocalDate transactionDate, LoanApplicationTerms loanApplicationTerms, MathContext mc);
 
     boolean recalculateModelOverdueAmountsTillDate(ProgressiveLoanInterestScheduleModel ctx, LocalDate targetDate, boolean prepayAttempt);
 
