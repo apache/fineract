@@ -4036,6 +4036,7 @@ Feature: LoanReAging
       | 15 March 2024    | Re-age           | 101.42 | 100.0     | 1.42     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Repayment        | 101.42 | 100.0     | 1.42     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+  @TestRailId:C4135 @AdvancedPaymentAllocation
   Scenario: Verify allowing Re-aging on interest bearing loan - Interest calculation: Default Behavior - Charge-back before re-aging and installment is partially paid - UC3.1
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
