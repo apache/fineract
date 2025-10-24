@@ -24,6 +24,7 @@ import static org.apache.fineract.test.factory.LoanProductsRequestFactory.INTERE
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.INTEREST_RATE_FREQUENCY_TYPE_MONTH;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.INTEREST_RATE_FREQUENCY_TYPE_WHOLE_TERM;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.INTEREST_RATE_FREQUENCY_TYPE_YEAR;
+import static org.apache.fineract.test.factory.LoanProductsRequestFactory.INTEREST_TYPE_FLAT;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.LOAN_ACCOUNTING_RULE_NONE;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.REPAYMENT_FREQUENCY_TYPE_MONTHS;
 
@@ -1324,7 +1325,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .recalculationRestFrequencyType(1)//
                 .recalculationRestFrequencyInterval(1)//
                 .repaymentEvery(1)//
-                .interestRatePerPeriod(7D)//
+                .interestRatePerPeriod((double) 7.0)//
                 .interestRateFrequencyType(INTEREST_RATE_FREQUENCY_TYPE_MONTH)//
                 .enableDownPayment(false)//
                 .interestRecalculationCompoundingMethod(0)//
@@ -3873,6 +3874,106 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPaymentWriteOffReasonMap).execute();
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_PROGRESSIVE_ADV_PYMNT_WRITE_OFF_REASON_MAP,
                 responseLoanProductsRequestLP2ProgressiveAdvPaymentWriteOffReasonMap);
+
+        // LP1 with 12% Flat interest, interest period: Same as repayment,
+        // Interest recalculation-Same as repayment, Multi-disbursement
+        String name143 = DefaultLoanProduct.LP1_INTEREST_FLAT_SAR_RECALCULATION_SAME_AS_REPAYMENT_ACTUAL_ACTUAL_MULTIDISB.getName();
+        PostLoanProductsRequest loanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursement = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP1InterestDecliningBalanceDailyRecalculationCompoundingNone()//
+                .name(name143)//
+                .interestType(INTEREST_TYPE_FLAT)//
+                .interestCalculationPeriodType(InterestCalculationPeriodTime.SAME_AS_REPAYMENT_PERIOD.value)//
+                .recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT.value)//
+                .installmentAmountInMultiplesOf(null)//
+                .multiDisburseLoan(true)//
+                .disallowExpectedDisbursements(true)//
+                .allowPartialPeriodInterestCalcualtion(true)//
+                .maxTrancheCount(10)//
+                .outstandingLoanBalance(10000.0)//
+                .allowApprovedDisbursedAmountsOverApplied(true)//
+                .overAppliedCalculationType(OverAppliedCalculationType.PERCENTAGE.value)//
+                .overAppliedNumber(50);//
+        Response<PostLoanProductsResponse> responseInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursement = loanProductsApi
+                .createLoanProduct(loanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursement).execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_FLAT_SAR_RECALCULATION_SAME_AS_REPAYMENT_ACTUAL_ACTUAL_MULTIDISB,
+                responseInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursement);
+
+        // LP1 with 12% Flat interest, interest period: Same as repayment,
+        // Interest recalculation-Daily, Multi-disbursement
+        String name144 = DefaultLoanProduct.LP1_INTEREST_FLAT_SAR_RECALCULATION_DAILY_360_30_APPROVED_OVER_APPLIED_MULTIDISB.getName();
+        PostLoanProductsRequest loanProductsRequestInterestFlatSaRRecalculationDailyMultiDisbursement = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP1InterestDecliningBalanceDailyRecalculationCompoundingNone()//
+                .name(name144)//
+                .interestType(INTEREST_TYPE_FLAT)//
+                .interestCalculationPeriodType(InterestCalculationPeriodTime.SAME_AS_REPAYMENT_PERIOD.value)//
+                .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY.value)//
+                .recalculationRestFrequencyInterval(1)//
+                .daysInYearType(DaysInYearType.DAYS360.value)//
+                .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                .installmentAmountInMultiplesOf(null)//
+                .multiDisburseLoan(true)//
+                .disallowExpectedDisbursements(true)//
+                .allowPartialPeriodInterestCalcualtion(true)//
+                .maxTrancheCount(10)//
+                .outstandingLoanBalance(10000.0)//
+                .allowApprovedDisbursedAmountsOverApplied(true)//
+                .overAppliedCalculationType(OverAppliedCalculationType.PERCENTAGE.value)//
+                .overAppliedNumber(50);//
+        Response<PostLoanProductsResponse> responseLoanProductsRequestInterestFlatSaRRecalculationDailyMultiDisbursement = loanProductsApi
+                .createLoanProduct(loanProductsRequestInterestFlatSaRRecalculationDailyMultiDisbursement).execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_FLAT_SAR_RECALCULATION_DAILY_360_30_APPROVED_OVER_APPLIED_MULTIDISB,
+                responseLoanProductsRequestInterestFlatSaRRecalculationDailyMultiDisbursement);
+
+        // LP1 with 12% Flat interest, interest period: Daily, Interest recalculation-Daily,
+        // Multi-disbursement
+        String name145 = DefaultLoanProduct.LP1_INTEREST_FLAT_DAILY_RECALCULATION_DAILY_360_30_MULTIDISB.getName();
+        PostLoanProductsRequest loanProductsRequestInterestFlatDailyRecalculationDSameAsRepaymentMultiDisbursement = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP1InterestDecliningBalanceDailyRecalculationCompoundingNone()//
+                .name(name145)//
+                .interestType(INTEREST_TYPE_FLAT)//
+                .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value)//
+                .allowPartialPeriodInterestCalcualtion(false)//
+                .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY.value)//
+                .recalculationRestFrequencyInterval(1)//
+                .daysInYearType(DaysInYearType.DAYS360.value)//
+                .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                .installmentAmountInMultiplesOf(null)//
+                .multiDisburseLoan(true)//
+                .disallowExpectedDisbursements(true)//
+                .maxTrancheCount(10)//
+                .outstandingLoanBalance(10000.0);//
+        Response<PostLoanProductsResponse> responseLoanProductsRequestInterestFlatDailyRecalculationDSameAsRepaymentMultiDisbursement = loanProductsApi
+                .createLoanProduct(loanProductsRequestInterestFlatDailyRecalculationDSameAsRepaymentMultiDisbursement).execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_FLAT_DAILY_RECALCULATION_DAILY_360_30_MULTIDISB,
+                responseLoanProductsRequestInterestFlatDailyRecalculationDSameAsRepaymentMultiDisbursement);
+
+        // LP1 with 12% Flat interest, interest period: Daily, Interest recalculation-Daily
+        // Multi-disbursement with auto down payment
+        String name146 = DefaultLoanProduct.LP1_INTEREST_FLAT_SAR_RECALCULATION_SAME_AS_REPAYMENT_MULTIDISB_AUTO_DOWNPAYMENT.getName();
+        PostLoanProductsRequest loanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementAUtoDownPayment = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP1InterestDecliningBalanceDailyRecalculationCompoundingNone()//
+                .name(name146)//
+                .interestType(INTEREST_TYPE_FLAT)//
+                .installmentAmountInMultiplesOf(null)//
+                .interestCalculationPeriodType(InterestCalculationPeriodTime.SAME_AS_REPAYMENT_PERIOD.value)//
+                .recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT.value)//
+                .multiDisburseLoan(true)//
+                .disallowExpectedDisbursements(true)//
+                .enableDownPayment(true)//
+                .enableAutoRepaymentForDownPayment(true)//
+                .disbursedAmountPercentageForDownPayment(new BigDecimal(25))//
+                .allowPartialPeriodInterestCalcualtion(true)//
+                .maxTrancheCount(10)//
+                .outstandingLoanBalance(10000.0);//
+        Response<PostLoanProductsResponse> responseLoanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementAUtoDownPayment = loanProductsApi
+                .createLoanProduct(loanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementAUtoDownPayment)
+                .execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_FLAT_SAR_RECALCULATION_SAME_AS_REPAYMENT_MULTIDISB_AUTO_DOWNPAYMENT,
+                responseLoanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementAUtoDownPayment);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,
