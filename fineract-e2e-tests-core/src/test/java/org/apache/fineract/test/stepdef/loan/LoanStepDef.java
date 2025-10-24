@@ -2567,6 +2567,13 @@ public class LoanStepDef extends AbstractStepDef {
         assertThat(allInstallmentsObligationsMet).isTrue();
     }
 
+    @Then("Loan is closed with zero outstanding balance and it's all installments have obligations met")
+    public void loanClosedAndInstallmentsObligationsMet() throws IOException {
+        loanInstallmentsObligationsMet();
+        loanOutstanding(0);
+        loanStatus("CLOSED_OBLIGATIONS_MET");
+    }
+
     @Then("Loan closedon_date is {string}")
     public void loanClosedonDate(String date) throws IOException {
         Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
