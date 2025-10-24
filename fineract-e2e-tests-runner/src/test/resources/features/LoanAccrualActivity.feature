@@ -5816,8 +5816,7 @@ Feature: LoanAccrualActivity
     When Admin sets the business date to "28 March 2025"
     And Admin runs inline COB job for Loan
     When Admin makes Credit Balance Refund transaction on "28 March 2025" with 100 EUR transaction amount
-    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
-    Then Loan has 0 outstanding amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Repayment schedule has 13 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 21 March 2025     |               | 242.46          |               |          | 0.0  |           | 0.0    |  0.0  |            |      |             |
@@ -5889,6 +5888,9 @@ Feature: LoanAccrualActivity
       | 18 April 2025    | Accrual                | 0.08   | 0.0       | 0.08     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 19 April 2025    | Accrual                | 0.08   | 0.0       | 0.08     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 20 April 2025    | Accrual                | 0.08   | 0.0       | 0.08     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+    When Loan Pay-off is made on "21 April 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3693
   Scenario: Verify that accruals are added in case of reversed repayment made before MIR and CBR for progressive loan with auto downpayment - UC2
@@ -6030,6 +6032,9 @@ Feature: LoanAccrualActivity
       | 18 April 2025    | Accrual                | 0.08   | 0.0       | 0.08     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 19 April 2025    | Accrual                | 0.08   | 0.0       | 0.08     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 20 April 2025    | Accrual                | 0.08   | 0.0       | 0.08     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+    When Loan Pay-off is made on "21 April 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3694
   Scenario: Verify repayment and accruals are added after reversed repayment made before MIR and CBR for progressive loan - UC3
@@ -6226,6 +6231,9 @@ Feature: LoanAccrualActivity
       | 21 April 2025    | Repayment              | 80.0   | 40.0      | 0.77     | 0.0  | 0.0       | 0.0          | true     | false    |
       | 21 April 2025    | Accrual                | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+    When Loan Pay-off is made on "21 April 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3695
   Scenario: Verify accrual activity of overpaid loan in case of reversed repayment made before MIR and CBR for loan with interest refund - UC4
     When Admin sets the business date to "21 March 2025"
@@ -6286,8 +6294,7 @@ Feature: LoanAccrualActivity
     When Admin sets the business date to "28 March 2025"
     And Admin runs inline COB job for Loan
     When Admin makes Credit Balance Refund transaction on "28 March 2025" with 100 EUR transaction amount
-    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
-    Then Loan has 0 outstanding amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     When Admin sets the business date to "02 April 2025"
     And Admin runs inline COB job for Loan
     When Customer undo "1"th "Merchant Issued Refund" transaction made on "21 March 2025"
@@ -6353,8 +6360,7 @@ Feature: LoanAccrualActivity
     When Admin sets the business date to "23 April 2025"
     And Admin runs inline COB job for Loan
     When Admin makes Credit Balance Refund transaction on "23 April 2025" with 156.7 EUR transaction amount
-    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
-    Then Loan has 0 outstanding amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Repayment schedule has 12 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 21 March 2025     |               | 242.46          |               |          | 0.0  |           | 0.0    |  0.0   |            |      |             |
@@ -6422,6 +6428,9 @@ Feature: LoanAccrualActivity
 # - CBR on active loan - with outstanding amount is forbidden -#
     Then Credit Balance Refund transaction on active loan "25 April 2025" with 100 EUR transaction amount will result an error
 
+    When Loan Pay-off is made on "25 April 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3696
   Scenario: Verify accrual activity of overpaid loan in case of reversed repayment made before MIR and CBR for progressive multidisbursal loan - UC5
     When Admin sets the business date to "21 March 2025"
@@ -6482,8 +6491,7 @@ Feature: LoanAccrualActivity
     When Admin sets the business date to "28 March 2025"
     And Admin runs inline COB job for Loan
     When Admin makes Credit Balance Refund transaction on "28 March 2025" with 100 EUR transaction amount
-    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
-    Then Loan has 0 outstanding amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     When Admin sets the business date to "02 April 2025"
     And Admin runs inline COB job for Loan
     When Customer undo "1"th "Repayment" transaction made on "21 March 2025"
@@ -6550,8 +6558,7 @@ Feature: LoanAccrualActivity
     When Admin sets the business date to "28 April 2025"
     And Admin runs inline COB job for Loan
     When Admin makes Credit Balance Refund transaction on "28 April 2025" with 48.07 EUR transaction amount
-    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
-    Then Loan has 0 outstanding amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 # - CBR on closed loan is forbidden - #
     Then Credit Balance Refund transaction on active loan "28 April 2025" with 100 EUR transaction amount will result an error
     When Admin sets the business date to "06 May 2025"
@@ -6680,10 +6687,13 @@ Feature: LoanAccrualActivity
       | 28 April 2025    | Accrual                | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 April 2025    | Accrual                | 0.09   | 0.0       | 0.09     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 April 2025    | Accrual                | 0.08   | 0.0       | 0.08     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 01 May 2025      | Repayment              | 330.0  | 246.03    | 1.77     | 0.0  | 0.0       | 0.0          | true    | false    |
+      | 01 May 2025      | Repayment              | 330.0  | 246.03    | 1.77     | 0.0  | 0.0       | 0.0          | true     | false    |
       | 01 May 2025      | Accrual                | 4.87   | 0.0       | 4.87     | 0.0  | 0.0       | 0.0          | false    | false    |
 # - CBR on closed loan is forbidden - #
     Then Credit Balance Refund transaction on active loan "03 May 2025" with 100 EUR transaction amount will result an error
+
+    When Loan Pay-off is made on "03 May 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3697
   Scenario: Verify accrual activity of overpaid loan in case of reversed MIR made before MIR and CBR for progressive loan - UC6
@@ -6722,8 +6732,7 @@ Feature: LoanAccrualActivity
     When Admin sets the business date to "28 March 2025"
     And Admin runs inline COB job for Loan
     When Admin makes Credit Balance Refund transaction on "28 March 2025" with 100 EUR transaction amount
-    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
-    Then Loan has 0 outstanding amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     When Admin sets the business date to "02 April 2025"
     And Admin runs inline COB job for Loan
     When Customer undo "1"th "Repayment" transaction made on "21 March 2025"
@@ -6798,7 +6807,7 @@ Feature: LoanAccrualActivity
     When Admin sets the business date to "06 May 2025"
     And Admin runs inline COB job for Loan
     And Customer makes "AUTOPAY" repayment on "06 May 2025" with 2.6 EUR transaction amount
-    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan has 0 outstanding amount
     Then Loan Repayment schedule has 12 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late   | Outstanding |
@@ -6938,6 +6947,7 @@ Feature: LoanAccrualActivity
     When Admin sets the business date to "07 May 2025"
     And Admin runs inline COB job for Loan
     And Customer makes "AUTOPAY" repayment on "07 May 2025" with 73.68 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     When Admin sets the business date to "08 May 2025"
     And Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 12 periods, with the following data for periods:
@@ -7099,6 +7109,7 @@ Feature: LoanAccrualActivity
     When Admin sets the business date to "07 May 2025"
     And Admin runs inline COB job for Loan
     And Customer makes "AUTOPAY" repayment on "07 May 2025" with 55.27 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Repayment schedule has 13 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 07 April 2025     |               |  72.3           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -7219,8 +7230,7 @@ Feature: LoanAccrualActivity
     When Admin sets the business date to "28 March 2025"
     And Admin runs inline COB job for Loan
     When Admin makes Credit Balance Refund transaction on "28 March 2025" with 100 EUR transaction amount
-    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
-    Then Loan has 0 outstanding amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Repayment schedule has 13 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 21 March 2025     |               | 242.46          |               |          | 0.0  |           | 0.0    |  0.0  |            |      |             |
@@ -7362,8 +7372,7 @@ Feature: LoanAccrualActivity
       | 21 April 2025    | Accrual                | 0.08   | 0.0       | 0.08     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 22 April 2025    | Accrual                | 0.08   | 0.0       | 0.08     | 0.0  | 0.0       | 0.0          | false    | false    |
     And Customer makes "AUTOPAY" repayment on "23 April 2025" with 102.1 EUR transaction amount
-    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
-    Then Loan has 0 outstanding amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     And Loan Transactions tab has the following data:
       | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 21 March 2025    | Disbursement           | 242.46 | 0.0       | 0.0      | 0.0  | 0.0       | 242.46       | false    | false    |
@@ -7553,8 +7562,7 @@ Feature: LoanAccrualActivity
       | 25 May 2025      | Accrual                | 0.09   | 0.0       | 0.09     | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan has 8.7 total unpaid payable due interest
     And Customer makes "AUTOPAY" repayment on "26 May 2025" with 107.75 EUR transaction amount
-    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
-    Then Loan has 0 outstanding amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3802
   Scenario: Correct Accrual Activity event publishing for backdated loans when the loan re-opens after reversing a goodwill credit transaction  - UC1
@@ -7591,7 +7599,7 @@ Feature: LoanAccrualActivity
     And "Accrual Activity" transaction on "05 June 2023" got reverse-replayed on "24 June 2025"
 
     When Loan Pay-off is made on "24 June 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3803
   Scenario: Correct Accrual Activity event publishing for backdated loans when the overpaid loan re-opens after reversing a goodwill credit transaction - UC2
@@ -7628,7 +7636,7 @@ Feature: LoanAccrualActivity
     And "Accrual Activity" transaction on "05 June 2023" got reverse-replayed on "24 June 2025"
 
     When Loan Pay-off is made on "24 June 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3805
   Scenario: Correct Accrual Activity event publishing for backdated loans when the loan re-opens after reversing a payout refund transaction - UC3
@@ -7665,7 +7673,7 @@ Feature: LoanAccrualActivity
     And "Accrual Activity" transaction on "05 June 2023" got reverse-replayed on "24 June 2025"
 
     When Loan Pay-off is made on "24 June 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3806
   Scenario: Correct Accrual Activity event publishing for backdated loans when the loan re-opens after reversing a merchant issue refund transaction  - UC4
@@ -7703,7 +7711,7 @@ Feature: LoanAccrualActivity
     And "Accrual Activity" transaction on "05 June 2023" got reverse-replayed on "24 June 2025"
 
     When Loan Pay-off is made on "24 June 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3807
   Scenario: Correct Accrual Activity event publishing for backdated loans when the loan re-opens after reversing a interest payment waiver transaction - UC5
@@ -7740,7 +7748,7 @@ Feature: LoanAccrualActivity
     And "Accrual Activity" transaction on "05 June 2023" got reverse-replayed on "24 June 2025"
 
     When Loan Pay-off is made on "24 June 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3808
   Scenario: Correct Accrual Activity event publishing for backdated loans when the loan re-opens after reversing a repayment transaction  - UC6
@@ -7777,7 +7785,7 @@ Feature: LoanAccrualActivity
     And "Accrual Activity" transaction on "05 June 2023" got reverse-replayed on "24 June 2025"
 
     When Loan Pay-off is made on "24 June 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4052
   Scenario: Verify that no extra accrual activity will be created upon loan reprocessing with merchant issued refund and NSF penalty
@@ -8011,6 +8019,9 @@ Feature: LoanAccrualActivity
       | 18 July 2025     | Accrual Adjustment     | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 July 2025     | Accrual                | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+    When Admin makes Credit Balance Refund transaction on "18 July 2025" with 22.2 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C4054
   Scenario: Verify that no extra accrual activity will be created upon loan reprocessing with merchant issued refund and SNOOZE fee
     When Admin sets the business date to "13 June 2025"
@@ -8242,6 +8253,8 @@ Feature: LoanAccrualActivity
       | 18 July 2025     | Accrual                | 2.8    | 0.0       | 0.0      | 2.8  | 0.0       | 0.0          | false    | false    |
       | 18 July 2025     | Accrual Adjustment     | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 July 2025     | Accrual                | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Admin makes Credit Balance Refund transaction on "18 July 2025" with 22.2 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3955
   Scenario: Verify accrual activity trn just reversed but nt replayed with backdated repayment that overpays loan - UC1
@@ -8450,7 +8463,7 @@ Feature: LoanAccrualActivity
    And In Loan Transactions all transactions have non-null external-id
 
     When Admin makes Credit Balance Refund transaction on "06 October 2025" with 4.06 EUR transaction amount
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3956
   Scenario: Verify accrual activity trn just reversed but not replayed with backdated repayment that fully pays loan and charge - UC2
@@ -8655,8 +8668,7 @@ Feature: LoanAccrualActivity
     When Admin runs inline COB job for Loan
 #  --- backdated repayment on 01 August 2025 ---
     And Admin makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 August 2025" with 145.74 EUR transaction amount
-    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
-    Then Loan has 0 outstanding amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 August 2025    |                | 135.94          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -8830,8 +8842,7 @@ Feature: LoanAccrualActivity
 
 #    --- backdated repayment on 01 August 2025 ---
     And Admin makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 August 2025" with 135.94 EUR transaction amount
-    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
-    Then Loan has 0 outstanding amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 August 2025    |                | 135.94          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |

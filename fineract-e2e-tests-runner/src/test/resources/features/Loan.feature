@@ -7818,8 +7818,8 @@ Feature: Loan
       | 01 January 2025          | 01 January 2025 | 700.0       |                      |
       | 01 January 2025          | 01 January 2025 | 200.0       |                      |
 
-    When Loan Pay-off is made on "1 January 2025"
-    Then Loan's all installments have obligations met
+    When Loan Pay-off is made on "01 January 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4029
   Scenario: Verify tranche interest bearing progressive loan that expects two tranches at the same date with over expected disb amount in expected order  - UC2
@@ -7892,7 +7892,7 @@ Feature: Loan
       | 01 January 2025          | 01 January 2025 | 250.0       |                      |
 
     When Loan Pay-off is made on "1 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4030
   Scenario: Verify tranche interest bearing progressive loan that expects two tranches at the same date with over expected disb amount in not expected order  - UC3
@@ -7966,6 +7966,9 @@ Feature: Loan
       | 01 January 2025          | 01 January 2025 | 300.0       |                      |
       | 01 January 2025          | 01 January 2025 | 600.0       |                      |
 
+    When Loan Pay-off is made on "01 January 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C4031
   Scenario: Verify tranche interest bearing progressive loan that expects two tranches at the same date with diff expected disb amounts in diff order - UC4
     When Admin sets the business date to "01 January 2025"
@@ -8038,7 +8041,7 @@ Feature: Loan
       | 01 January 2025          | 01 January 2025 | 300.0       |                      |
 
     When Loan Pay-off is made on "1 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4032
   Scenario: Verify tranche interest bearing progressive loan that expects two tranches at the same date in defined order with over expected 2nd disb amount  - UC5
@@ -8111,7 +8114,7 @@ Feature: Loan
       | 01 January 2025          | 01 January 2025 | 800.0       |                      |
 
     When Loan Pay-off is made on "1 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4033
   Scenario: Verify tranche interest bearing progressive loan that expects tranche with added 2nd tranche at the same date and undo disbursement - UC6
@@ -8246,7 +8249,7 @@ Feature: Loan
     Then Admin fails to disburse the loan on "01 February 2025" with "50" amount
 
     When Loan Pay-off is made on "1 February 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4034
   Scenario: Verify tranche interest bearing progressive loan that expects tranches at the same date with repayment and undo last disbursement - UC7
@@ -8357,7 +8360,7 @@ Feature: Loan
     Then Admin fails to disburse the loan on "01 January 2025" with "200" amount
 
     When Loan Pay-off is made on "1 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4035
   Scenario: Verify tranche interest bearing progressive loan that expects tranche with added 2 tranches at the same date - UC8
@@ -8485,7 +8488,7 @@ Feature: Loan
     Then Admin fails to disburse the loan on "01 February 2025" with "50" amount
 
     When Loan Pay-off is made on "1 February 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4118
   Scenario: Verify cumulative multidisb loan with 2nd disb at 1st installment with flat interest type and same_as_repeyment interest calculation period - UC1

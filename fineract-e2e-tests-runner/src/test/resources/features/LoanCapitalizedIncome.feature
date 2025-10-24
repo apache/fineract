@@ -35,6 +35,9 @@ Feature: Capitalized Income
       | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
       | 100.0  | 0.0              | 100.0               | 0.0             | 0.0                |
 
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3637
   Scenario: As a user I want to add capitalized income to a progressive loan after disbursement - UC2
     When Admin sets the business date to "1 January 2024"
@@ -63,6 +66,9 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                 | Debit  | Credit |
       | ASSET     | 112601       | Loans Receivable             | 100.0  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |
+
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3638
   Scenario: Verify capitalized income amount with disbursement amount calculation within approved amount for multidisbursal progressive loan - UC3
@@ -102,6 +108,9 @@ Feature: Capitalized Income
       | ASSET     | 112601       | Loans Receivable             | 200.0  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income  |        | 200.0  |
 
+    When Loan Pay-off is made on "03 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3639
   Scenario: Verify validation of capitalized income amount with disbursement amount within approved amount for progressive loan - UC4
     When Admin sets the business date to "1 January 2024"
@@ -114,6 +123,9 @@ Feature: Capitalized Income
     Then Loan status will be "ACTIVE"
     When Admin sets the business date to "2 January 2024"
     Then Capitalized income with payment type "AUTOPAY" on "02 January 2024" is forbidden with amount "200" while exceed approved amount
+
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3640
   Scenario: Verify validation of capitalized income amount with disbursement amount within approved amount for multidisbursal progressive loan - UC5
@@ -128,6 +140,9 @@ Feature: Capitalized Income
     When Admin sets the business date to "2 January 2024"
     And Admin successfully disburse the loan on "2 January 2024" with "300" EUR transaction amount
     Then Capitalized income with payment type "AUTOPAY" on "2 January 2024" is forbidden with amount "300" while exceed approved amount
+
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3641
   Scenario: Verify validation of capitalized income amount with disbursement amount within approved amount after undo disbursement - UC6
@@ -178,6 +193,9 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                 | Debit  | Credit |
       | ASSET     | 112601       | Loans Receivable             | 200.0  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income  |        | 200.0  |
+
+    When Loan Pay-off is made on "03 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3642
   Scenario: Verify capitalized income amount with disbursement amount calculation within approved amount for multidisbursal loan after undo disbursement - UC7
@@ -247,7 +265,7 @@ Feature: Capitalized Income
       | LIABILITY | 145024       | Deferred Capitalized Income  |        | 300.0  |
 
     When Loan Pay-off is made on "04 January 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3720
   Scenario: Verify capitalized income amount with disbursement amount calculation within approved amount for multidisbursal loan - UC8
@@ -286,7 +304,7 @@ Feature: Capitalized Income
     Then Capitalized income with payment type "AUTOPAY" on "02 January 2024" is forbidden with amount "200" while exceed approved amount
 
     When Loan Pay-off is made on "02 January 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3721
   Scenario: Verify capitalized income amount with disbursement amount calculation within approved amount for multidisbursal loan with undo last disbursal - UC9
@@ -367,7 +385,7 @@ Feature: Capitalized Income
     Then Capitalized income with payment type "AUTOPAY" on "04 January 2024" is forbidden with amount "200" while exceed approved amount
 
     When Loan Pay-off is made on "04 January 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3723
   Scenario: Verify capitalized income with disbursement amount calculation within approved amount for multidisbursal loan with undo capitalized income - UC10
@@ -445,7 +463,7 @@ Feature: Capitalized Income
     Then Capitalized income with payment type "AUTOPAY" on "04 January 2024" is forbidden with amount "300" while exceed approved amount
 
     When Loan Pay-off is made on "04 January 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3730
   Scenario: Verify capitalized income amount with disbursement amount calculation within approved over applied amount with percentage type for multidisbursal loan - UC11
@@ -512,7 +530,7 @@ Feature: Capitalized Income
     Then Capitalized income with payment type "AUTOPAY" on "04 January 2024" is forbidden with amount "100" while exceed approved amount
 
     When Loan Pay-off is made on "04 January 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3764
   Scenario: Verify capitalized income with disbursement amount within approved over applied amount with flat type with undo last disbursal for multidisbursal loan - UC12
@@ -578,7 +596,7 @@ Feature: Capitalized Income
     Then Capitalized income with payment type "AUTOPAY" on "03 January 2024" is forbidden with amount "300" while exceed approved amount
 
     When Loan Pay-off is made on "03 January 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3765
   Scenario: Verify capitalized income with disbursement amount within approved over applied amount with percentage type with undo disbursal for single disbursal loan - UC13
@@ -640,7 +658,7 @@ Feature: Capitalized Income
     Then Capitalized income with payment type "AUTOPAY" on "04 January 2024" is forbidden with amount "100" while exceed approved amount
 
     When Loan Pay-off is made on "04 January 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3766
   Scenario: Verify capitalized income with adjustment amount with disbursement amount within approved over applied amount with flat type for single disbursal loan - UC14
@@ -686,7 +704,7 @@ Feature: Capitalized Income
     Then Capitalized income with payment type "AUTOPAY" on "02 January 2024" is forbidden with amount "200" while exceed approved amount
 
     When Loan Pay-off is made on "02 January 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3776
   Scenario: Verify capitalized income amount with disbursement amount calculation within approved over applied amount with percentage type for multidisbursal loan - UC15
@@ -750,7 +768,7 @@ Feature: Capitalized Income
     Then Capitalized income with payment type "AUTOPAY" on "04 January 2024" is forbidden with amount "100" while exceed approved amount
 
     When Loan Pay-off is made on "04 January 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3777
   Scenario: Verify capitalized income with disbursement amount within approved over applied amount with flat type with undo last disbursal for multidisbursal loan - UC16
@@ -816,7 +834,7 @@ Feature: Capitalized Income
     Then Capitalized income with payment type "AUTOPAY" on "03 January 2024" is forbidden with amount "300" while exceed approved amount
 
     When Loan Pay-off is made on "03 January 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3778
   Scenario: Verify capitalized income with disbursement amount within approved over applied amount with percentage type with undo disbursal for single disbursal loan - UC17
@@ -878,7 +896,7 @@ Feature: Capitalized Income
     Then Capitalized income with payment type "AUTOPAY" on "04 January 2024" is forbidden with amount "100" while exceed approved amount
 
     When Loan Pay-off is made on "04 January 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3779
   Scenario: Verify capitalized income with adjustment amount with disbursement amount within approved over applied amount with flat type for single disbursal loan - UC18
@@ -927,7 +945,7 @@ Feature: Capitalized Income
     Then Capitalized income with payment type "AUTOPAY" on "02 January 2024" is forbidden with amount "200" while exceed approved amount
 
     When Loan Pay-off is made on "02 January 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3646
   Scenario: As a user I want to add capitalized income to a progressive loan after disbursement and then make a full repayment - amortization in case of loan close event
@@ -958,6 +976,7 @@ Feature: Capitalized Income
       | ASSET     | 112601       | Loans Receivable             | 100.0  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |
     When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "2 January 2024" with 1000.17 EUR transaction amount and system-generated Idempotency key
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Repayment schedule has 1 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                 | 900.0           |               |          | 0.0  |           | 0.0     | 0.0     |            |      |             |
@@ -1031,6 +1050,9 @@ Feature: Capitalized Income
       | INCOME    | 404000       | Interest Income              |        | 100.0  |
       | LIABILITY | 145024       | Deferred Capitalized Income  | 100.0  |        |
     And LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "02 January 2024"
+
+    When Admin makes Credit Balance Refund transaction on "02 January 2024" with 99.83 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3651
   Scenario: As a user I want to add capitalized income to a progressive loan after disbursement and then write off loan - amortization in case of loan close event
@@ -1265,6 +1287,9 @@ Feature: Capitalized Income
       | 50.0   | 50.0             | 0.0                 | 0.0             | 0.0                |
     And Loan Capitalized Income Amortization Transaction Created Business Event is created on "31 March 2024"
 
+    When Loan Pay-off is made on "01 April 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3649
   Scenario: Verify capitalized income: daily amortization - Capitalized Income type: fee
     When Admin sets the business date to "01 January 2024"
@@ -1445,6 +1470,9 @@ Feature: Capitalized Income
       | LIABILITY | 145024       | Deferred Capitalized Income | 0.55  |        |
     And Loan Capitalized Income Amortization Transaction Created Business Event is created on "31 March 2024"
 
+    When Loan Pay-off is made on "01 April 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3661
   Scenario: As a user I want to add capitalized income to a progressive loan after disbursement and then charge-off the loan with "delinquent" reason - amortization in case of loan charge-off event
     When Admin sets the business date to "1 January 2024"
@@ -1490,6 +1518,9 @@ Feature: Capitalized Income
       | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 16.67  |
       | LIABILITY | 145024       | Deferred Capitalized Income  | 16.67  |        |
     Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "26 January 2024"
+
+    When Loan Pay-off is made on "26 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3662
   Scenario: As a user I want to add capitalized income to a progressive loan after disbursement and then charge-off a fraud loan - amortization in case of loan charge-off event
@@ -1540,6 +1571,9 @@ Feature: Capitalized Income
       | 100.0  | 83.33            | 0.0                 | 0.0             | 16.67              |
     Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "26 January 2024"
 
+    When Loan Pay-off is made on "26 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3663
   Scenario: As a user I want to add capitalized income to a progressive loan after disbursement and then charge-off the loan - amortization in case of loan charge-off event
     When Admin sets the business date to "1 January 2024"
@@ -1588,6 +1622,9 @@ Feature: Capitalized Income
       | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
       | 100.0  | 83.33            | 0.0                 | 0.0             | 16.67              |
     Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "26 January 2024"
+
+    When Loan Pay-off is made on "26 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3664
   Scenario: As a user I want to add capitalized income to a progressive loan after disbursement and then undo the charge-off transaction with "delinquent" reason - amortization in case of loan charge-off event should also be reversed
@@ -1660,6 +1697,10 @@ Feature: Capitalized Income
     And Deferred Capitalized Income by external-id contains the following data:
       | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
       | 100.0  | 83.33            | 16.67               | 0.0             | 0.0                |
+
+    When Loan Pay-off is made on "26 January 2024"
+    And Customer makes "AUTOPAY" repayment on "26 January 2024" with 225 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3673
   Scenario: Verify capitalized income: repayment schedule - UC1: Simple loan - full payment
@@ -1916,7 +1957,7 @@ Feature: Capitalized Income
     And Admin sets the business date to "01 April 2024"
     And Admin runs inline COB job for Loan
     And Customer makes "AUTOPAY" repayment on "01 April 2024" with 50.59 EUR transaction amount
-    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -2232,7 +2273,7 @@ Feature: Capitalized Income
     When Admin sets the business date to "01 March 2024"
     And Admin runs inline COB job for Loan
     And Loan Pay-off is made on "01 March 2024"
-    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     And Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -2628,6 +2669,9 @@ Feature: Capitalized Income
       | 01 March 2024    | Charge-off                      | 101.17 | 100.29    | 0.88     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Capitalized Income Amortization | 16.48  | 0.0       | 16.48    | 0.0  | 0.0       | 0.0          | false    | false    |
 
+    When Loan Pay-off is made on "01 March 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3665
   Scenario: Verify Capitalized Income Adjustment with partial amortization and allocation strategy - Credit Adj < Bal - UC4
     When Admin sets the business date to "01 January 2024"
@@ -2717,6 +2761,7 @@ Feature: Capitalized Income
       | 01 March 2024    | Capitalized Income Adjustment   | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 40.3         | false    |
     When Admin sets the business date to "01 April 2024"
     And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 April 2024" with 40.54 EUR transaction amount and system-generated Idempotency key
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
@@ -2866,6 +2911,7 @@ Feature: Capitalized Income
       | 50.0   | 17.58            | 17.42               | 15.0            | 0.0                |
     When Admin sets the business date to "01 April 2024"
     And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 April 2024" with 35.52 EUR transaction amount and system-generated Idempotency key
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
@@ -2907,7 +2953,6 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                 | Debit  | Credit |
       | ASSET     | 112601       | Loans Receivable             |        | 5.0    |
       | LIABILITY | 145024       | Deferred Capitalized Income  | 5.0    |        |
-    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
 
   @TestRailId:C3702
   Scenario: Verify Capitalized Income adjustment reverse replay with backdated repayment transaction
@@ -3185,6 +3230,9 @@ Feature: Capitalized Income
       | ASSET     | 112601       | Loans Receivable            |       | 49.13  |
       | ASSET     | 112603       | Interest/Fee Receivable     |       | 0.87   |
       | LIABILITY | 145024       | Deferred Capitalized Income | 50.0  |        |
+
+    When Loan Pay-off is made on "01 March 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3703
   Scenario: Verify Capitalized Income adjustment reverse replay with backdated charge
@@ -3468,6 +3516,9 @@ Feature: Capitalized Income
       | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
       | 51.0   | 0.0              | 0.0                 | 51.0            | 0.0                |
 
+    When Loan Pay-off is made on "01 March 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3712
   Scenario: Verify Capitalized Income Adjustment validation - Total adjustment amount cannot exceed original transaction amount
     When Admin sets the business date to "01 January 2024"
@@ -3482,6 +3533,9 @@ Feature: Capitalized Income
     When Admin sets the business date to "01 February 2024"
     # Try to adjust more than original capitalized income amount (50 EUR) - should fail
     And Admin adds invalid capitalized income adjustment with "AUTOPAY" payment type to the loan on "01 February 2024" with "60" EUR transaction amount
+
+    When Loan Pay-off is made on "01 February 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3713
   Scenario: Verify Capitalized Income Adjustment validation - Adjustment transaction date cannot be earlier than original transaction date
@@ -3498,6 +3552,9 @@ Feature: Capitalized Income
   # Try to adjust with date earlier than original transaction (31 December 2023) - should fail
     And Admin adds invalid capitalized income adjustment with "AUTOPAY" payment type to the loan on "31 December 2024" with "60" EUR transaction amount
 
+    When Loan Pay-off is made on "01 February 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3714
   Scenario: Verify Capitalized Income Adjustment validation - Multiple adjustments cannot exceed original amount
     When Admin sets the business date to "01 January 2024"
@@ -3513,7 +3570,10 @@ Feature: Capitalized Income
     And Admin adds capitalized income adjustment with "AUTOPAY" payment type to the loan on "01 February 2024" with "30" EUR transaction amount
     When Admin sets the business date to "01 March 2024"
   # Try to add another adjustment that would exceed total
-    And Admin adds invalid capitalized income adjustment with "AUTOPAY" payment type to the loan on "01 Marcj 2024" with "25" EUR transaction amount
+    And Admin adds invalid capitalized income adjustment with "AUTOPAY" payment type to the loan on "01 March 2024" with "25" EUR transaction amount
+
+    When Loan Pay-off is made on "01 March 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3715
   Scenario: Verify Capitalized Income Adjustment - Balance cannot go negative, set to zero instead
@@ -3553,6 +3613,7 @@ Feature: Capitalized Income
     When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 March 2024" with 50.89 EUR transaction amount and system-generated Idempotency key
     When Admin sets the business date to "02 March 2024"
     And Admin adds capitalized income adjustment with "AUTOPAY" payment type to the loan on "02 March 2024" with "50" EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -3598,6 +3659,9 @@ Feature: Capitalized Income
     And Admin adds capitalized income adjustment with "AUTOPAY" payment type to the loan on "01 February 2024" with "30" EUR transaction amount
     Then Capitalized income adjustment with payment type "AUTOPAY" on "01 April 2024" is forbidden with amount "10" due to future date
 
+    When Loan Pay-off is made on "01 February 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3717
   Scenario: Verify Capitalized Income validation while run COB at first day of loan
     When Admin sets the business date to "01 January 2024"
@@ -3630,6 +3694,9 @@ Feature: Capitalized Income
       | 01 January 2024  | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 January 2024  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    | false    |
       | 01 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3718
   Scenario: Verify Capitalized Income Adjustment validation while run COB at first day of loan
@@ -3669,6 +3736,9 @@ Feature: Capitalized Income
     And Deferred Capitalized Income by external-id contains the following data:
       | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
       | 50.0   | 0.11             | 9.89                | 40.0            | 0.0                |
+
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3704
   Scenario: Verify Capitalized Income adjustment reverse - UC1
@@ -3960,6 +4030,9 @@ Feature: Capitalized Income
       | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
       | 50.0   | 34.07            | 15.93               | 0.0             | 0.0                |
 
+    When Loan Pay-off is made on "03 March 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3705
   Scenario: Verify Capitalized Income adjustment reverse - UC2
     When Admin sets the business date to "01 January 2024"
@@ -4041,6 +4114,9 @@ Feature: Capitalized Income
       | LIABILITY | 145024       | Deferred Capitalized Income | 40.0  |        |
       | ASSET     | 112601       | Loans Receivable            | 40.0  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income |       |  40.0  |
+
+    When Loan Pay-off is made on "12 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3706
   Scenario: Verify Capitalized Income adjustment reverse - UC3
@@ -4128,6 +4204,9 @@ Feature: Capitalized Income
       | ASSET     | 112603       | Interest/Fee Receivable     |  0.25 |        |
       | LIABILITY | 145024       | Deferred Capitalized Income |       | 55.0   |
 
+    When Loan Pay-off is made on "12 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3756
   Scenario: Verify Capitalised Income Adjustment reversed on same biz date when added - UC4
     When Admin sets the business date to "01 January 2024"
@@ -4198,7 +4277,7 @@ Feature: Capitalized Income
       | 04 January 2024  | Capitalized Income Amortization | 1.1    | 0.0       | 1.1      | 0.0  | 0.0       | 0.0          | false    | false    |
 
     When Loan Pay-off is made on "05 January 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3708
   Scenario: Verify capitalized income reversed after repayment - UC1
@@ -4530,6 +4609,9 @@ Feature: Capitalized Income
     Then LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent is raised on "14 February 2024"
     Then Customer is forbidden to undo "1"th "Capitalized Income" transaction made on "01 January 2024" due to transaction type is non-reversal
 
+    When Loan Pay-off is made on "16 February 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3737
   Scenario: Verify overpayment amount when capitalized income transactions are reversed and replayed - basic flow
     When Admin sets the business date to "1 January 2024"
@@ -4567,6 +4649,9 @@ Feature: Capitalized Income
       | 05 January 2024  | Capitalized Income Amortization Adjustment | 200.0  | 0.0       | 200.0    | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan status will be "OVERPAID"
     Then Loan has 299.25 overpaid amount
+
+    When Admin makes Credit Balance Refund transaction on "5 January 2024" with 299.25 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3739
   Scenario: Verify multiple capitalized income transactions reversal with overpayment - selective middle transaction reversal
@@ -4613,6 +4698,9 @@ Feature: Capitalized Income
     Then Loan status will be "OVERPAID"
     Then Loan has 197.18 overpaid amount
 
+    When Admin makes Credit Balance Refund transaction on "15 January 2024" with 197.18 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3740
   Scenario: Verify capitalized income reversal with partial repayment when loan transitions from active to overpaid state
     When Admin sets the business date to "1 January 2024"
@@ -4641,6 +4729,9 @@ Feature: Capitalized Income
       | 05 January 2024  | Accrual            | 0.75   | 0.0       | 0.75     | 0.0  | 0.0       | 0.0          | false    | false    |
     And Loan has 0.0 outstanding amount
     And Loan has 199.25 overpaid amount
+
+    When Admin makes Credit Balance Refund transaction on "5 January 2024" with 199.25 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3741
   Scenario: Verify backdated disbursement with capitalized income and overpayment reverse-replay
@@ -4676,6 +4767,9 @@ Feature: Capitalized Income
       | 10 January 2024  | Capitalized Income Amortization | 200.0  | 0.0       | 200.0    | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Repayment                       | 750.0  | 748.87    | 1.13     | 0.0  | 0.0       | 251.13       | false    | true     |
     And Loan has 255.09 outstanding amount
+
+    When Loan Pay-off is made on "10 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3742
   Scenario: Verify capitalized income amortization reversal when multiple payments create complex overpayment scenario
@@ -4721,6 +4815,9 @@ Feature: Capitalized Income
       | 08 January 2024  | Accrual Adjustment                         | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
     And Loan has 0.0 outstanding amount
     And Loan has 398.53 overpaid amount
+
+    When Admin makes Credit Balance Refund transaction on "08 January 2024" with 398.53 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3743
   Scenario: Verify Capitalized income and Caplitalized income adjustment - Accounting and repayment schedule handling in case of loan is overpaid (Capitalized Income Scenarios - UC9)
@@ -5390,6 +5487,9 @@ Feature: Capitalized Income
       | 15 April 2024    | Capitalized Income Adjustment   | 15.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 April 2024    | Capitalized Income Amortization Adjustment | 15.0   | 0.0       | 15.0     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+    When Admin makes Credit Balance Refund transaction on "15 April 2024" with 15 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @Skip @TestRailId:C3744
   Scenario: Verify Capitalized income and Caplitalized income adjustment - Accounting and repayment schedule handling in case of loan is overpaid (Capitalized Income Scenarios - UC10)
     When Admin sets the business date to "1 January 2024"
@@ -5849,6 +5949,9 @@ Feature: Capitalized Income
       | 01 April 2024    | Accrual                         | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 April 2024    | Capitalized Income Adjustment   | 15.0   | 9.71      | 0.29     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 April 2024    | Capitalized Income Amortization Adjustment | 15.0   | 0.0       | 15.0     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+    When Admin makes Credit Balance Refund transaction on "15 April 2024" with 5 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3745
   Scenario: Verify Capitalized income and Caplitalized income adjustment - Accounting and repayment schedule handling in case of loan is overpaid (Capitalized Income Scenarios - UC11)
@@ -6420,6 +6523,9 @@ Feature: Capitalized Income
       | 15 March 2024    | Credit Balance Refund           | 0.16   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 March 2024    | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 50.0         | false    | false    |
 
+    When Loan Pay-off is made on "16 March 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3746
   Scenario: Verify Capitalized income and Caplitalized income adjustment - Accounting and repayment schedule handling in case of loan is overpaid (Capitalized Income Scenarios - UC12)
     When Admin sets the business date to "1 January 2024"
@@ -6815,6 +6921,9 @@ Feature: Capitalized Income
       | 15 March 2024    | Capitalized Income Amortization | 9.34   | 0.0       | 9.34     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 March 2024    | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 49.84        | false    | false    |
 
+    When Loan Pay-off is made on "16 March 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3747
   Scenario: Verify Capitalized Income Amortization validation while run COB a month after Capitalized Income trn - UC1
     When Admin sets the business date to "01 January 2024"
@@ -6849,7 +6958,7 @@ Feature: Capitalized Income
       | 31 January 2024  | Capitalized Income Amortization | 17.03  | 0.0       | 17.03    | 0.0  | 0.0       | 0.0          | false    | false    |
 
     When Loan Pay-off is made on "01 February 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3748
   Scenario: Verify Capitalized Income Amortization while run COB a month after Capitalized Income with Adjustment trns - UC2
@@ -6888,7 +6997,7 @@ Feature: Capitalized Income
       | 31 January 2024  | Capitalized Income Amortization | 3.41   | 0.0       | 3.41     | 0.0  | 0.0       | 0.0          | false    | false    |
 
     When Loan Pay-off is made on "01 February 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3749
   Scenario: Verify backdated Capitalized Income Amortization while add Capitalised Income trn with a month earlier date - UC3
@@ -6939,7 +7048,7 @@ Feature: Capitalized Income
       | 01 February 2024 | Capitalized Income Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    | false    |
 
     When Loan Pay-off is made on "02 February 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3750
   Scenario: Verify backdated Capitalized Income Amortization while add Capitalised Income and Adjustment trns with earlier date - UC4
@@ -6992,7 +7101,7 @@ Feature: Capitalized Income
       | 01 February 2024 | Capitalized Income Amortization | 3.44   | 0.0       | 3.44     | 0.0  | 0.0       | 0.0          | false    | false    |
 
     When Loan Pay-off is made on "02 February 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3751
   Scenario: Verify Capitalized Income Amortization while add additional Capitalized Income trn with earlier date - UC5
@@ -7050,7 +7159,7 @@ Feature: Capitalized Income
       | 01 February 2024 | Capitalized Income Amortization | 17.77  | 0.0       | 17.77    | 0.0  | 0.0       | 0.0          | false    | false    |
 
     When Loan Pay-off is made on "02 February 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3752
   Scenario: Verify Capitalized Income Amortization while add additional Capitalized Income trn with earlier date after Adjustment trn - UC6
@@ -7113,7 +7222,7 @@ Feature: Capitalized Income
       | 01 February 2024 | Capitalized Income Amortization | 17.33  | 0.0       | 17.33    | 0.0  | 0.0       | 0.0          | false    | false    |
 
     When Loan Pay-off is made on "02 February 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3753
   Scenario: Verify Capitalized Income Amortization while add additional Capitalized Income with Adjustment trns with earlier date after Adjustment trn - UC7
@@ -7178,7 +7287,7 @@ Feature: Capitalized Income
       | 01 February 2024 | Capitalized Income Amortization | 3.55   | 0.0       | 3.55     | 0.0  | 0.0       | 0.0          | false    | false    |
 
     When Loan Pay-off is made on "02 February 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3754
   Scenario: Verify Capitalized Income Amortization while run COB a month after Capitalized Income with Adjustment trns for multidisbursl loan - UC8
@@ -7217,7 +7326,7 @@ Feature: Capitalized Income
       | 31 January 2024  | Capitalized Income Amortization | 3.41   | 0.0       | 3.41     | 0.0  | 0.0       | 0.0          | false    | false    |
 
     When Loan Pay-off is made on "01 February 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3755
   Scenario: Verify Capitalized Income Amortization while add additional Capitalized Income trn with earlier date for multidisbursl loan - UC9
@@ -7275,7 +7384,7 @@ Feature: Capitalized Income
       | 01 February 2024 | Capitalized Income Amortization | 17.77  | 0.0       | 17.77    | 0.0  | 0.0       | 0.0          | false    | false    |
 
     When Loan Pay-off is made on "02 February 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3735
   Scenario: Verify Capitalized Income business events
@@ -7303,6 +7412,9 @@ Feature: Capitalized Income
     And Admin sets the business date to "05 January 2024"
     And Admin runs inline COB job for Loan
 
+    When Loan Pay-off is made on "05 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3758
   Scenario: Verify validation of capitalized income amount with disbursement amount not exceed approved over applied amount for multidisbursal progressive loan - failed scenario
     When Admin sets the business date to "1 January 2024"
@@ -7317,6 +7429,9 @@ Feature: Capitalized Income
     And Admin successfully disburse the loan on "2 January 2024" with "300" EUR transaction amount
     Then Capitalized income with payment type "AUTOPAY" on "2 January 2024" is forbidden with amount "300" while exceed approved amount
 
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3759
   Scenario: Verify validation of capitalized income amount with disbursement amount not exceed approved over applied amount for multidisbursal progressive loan - successful scenario
     When Admin sets the business date to "1 January 2024"
@@ -7330,6 +7445,9 @@ Feature: Capitalized Income
     When Admin sets the business date to "2 January 2024"
     And Admin successfully disburse the loan on "2 January 2024" with "300" EUR transaction amount
     And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "02 January 2024" with "200" EUR transaction amount
+
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3782
   Scenario: Verify that Capitalized Income Amortization Adjustment is created when a Capitalized Income Adjustment overpays the loan
@@ -7435,6 +7553,9 @@ Feature: Capitalized Income
       | INCOME    | 404000       | Interest Income              | 5.26   |        |
       | LIABILITY | 145024       | Deferred Capitalized Income  |        | 5.26   |
 
+    When Admin makes Credit Balance Refund transaction on "03 January 2024" with 96.33 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3899
   Scenario: Verify available disbursement amount should consider calculation with capitalized income
     When Admin sets the business date to "1 January 2024"
@@ -7455,6 +7576,9 @@ Feature: Capitalized Income
     When Admin successfully disburse the loan on "2 January 2024" with "300" EUR transaction amount
   # Available amount = 1000 - 800 - 200 - 0 = 0
     Then Loan's available disbursement amount is "0.0"
+
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3913
   Scenario: Verify available disbursement amount calculation with multiple capitalized income transactions
@@ -7484,6 +7608,9 @@ Feature: Capitalized Income
   # Available amount = 2000 - 1400 - 600 - 0 = 0
     Then Loan's available disbursement amount is "0.0"
 
+    When Loan Pay-off is made on "03 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3914
   Scenario: Verify available disbursement amount calculation after capitalized income adjustment
     When Admin sets the business date to "1 January 2024"
@@ -7508,6 +7635,9 @@ Feature: Capitalized Income
   # Available amount = 1000 - 850 - 150 - 0 = 0
     Then Loan's available disbursement amount is "0.0"
 
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3915
   Scenario: Verify available disbursement amount calculation with over applied amount configuration
     When Admin sets the business date to "1 January 2024"
@@ -7529,6 +7659,9 @@ Feature: Capitalized Income
     When Admin successfully disburse the loan on "2 January 2024" with "300" EUR transaction amount
   # Available amount = 1200 - 900 - 300 - 0 = 0
     Then Loan's available disbursement amount is "0.0"
+
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4005
   Scenario: Verify capitalized income transaction creation with classification field set
@@ -7566,6 +7699,9 @@ Feature: Capitalized Income
       | 100.0  | 0.0              | 100.0               | 0.0             | 0.0                |
     And Admin adds capitalized income adjustment with "AUTOPAY" payment type to the loan on "02 January 2024" with "50" EUR transaction amount
     And Loan Transactions tab has a "Capitalized Income Adjustment" transaction with date "02 January 2024" which has classification code value "capitalized_income_transaction_classification_value"
+
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4008
   Scenario: Verify Capitalized income amortization allocation mappings
@@ -7617,6 +7753,9 @@ Feature: Capitalized Income
     And Loan Amortization Allocation Mapping for "CAPITALIZED_INCOME" transaction created on "02 January 2024" contains the following data:
       | Date            | Type | Amount |
       | 02 January 2024 | AM   | 1.11   |
+
+    When Loan Pay-off is made on "03 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4020
   Scenario: Verify Capitalized income amortization allocation mappings when capitalized income transaction is reversed
@@ -7714,6 +7853,9 @@ Feature: Capitalized Income
       | 02 January 2024 | AM   | 2.22   |
       | 03 January 2024 | AM   | 2.22   |
       | 04 January 2024 | AM   | 2.23   |
+
+    When Loan Pay-off is made on "05 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4021
   Scenario: Verify Capitalized income amortization allocation mappings when capitalized income adjustment occurs
@@ -7884,6 +8026,9 @@ Feature: Capitalized Income
       | 05 January 2024 | AM_ADJ | 0.25   |
       | 06 January 2024 | AM     | 0.43   |
 
+    When Loan Pay-off is made on "05 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C4041
   Scenario: Verify Capitalized Income amortization allocation mapping when already amortized amount is greater than should be after capitalized income adjustment
     When Admin sets the business date to "1 January 2024"
@@ -7962,6 +8107,9 @@ Feature: Capitalized Income
     And Deferred Capitalized Income by external-id contains the following data:
       | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
       | 1.0    | 0.3              | 0.0                 | 0.7             | 0.0                |
+
+    When Loan Pay-off is made on "25 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4042
   Scenario: Verify Capitalized Income amortization allocation mapping when after capitalized income adjustment and charge-off
@@ -8102,6 +8250,9 @@ Feature: Capitalized Income
       | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
       | 1.0    | 0.5              | 0.0                 | 0.3             | 0.2                |
 
+    When Loan Pay-off is made on "16 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C4095
   Scenario: Verify GL entries for Capitalized Income Amortization - UC1: Amortization for Capitalized Income with NO classification rule
     When Admin sets the business date to "01 January 2024"
@@ -8123,6 +8274,9 @@ Feature: Capitalized Income
       | INCOME    | 404000       | Interest Income             |       | 0.55   |
       | LIABILITY | 145024       | Deferred Capitalized Income | 0.55  |        |
 
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C4096
   Scenario: Verify GL entries for Capitalized Income Amortization - UC2: Amortization for Capitalized Income with classification rule: pending_bankruptcy
     When Admin sets the business date to "01 January 2024"
@@ -8143,6 +8297,9 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                | Debit | Credit |
       | INCOME    | 744008       | Recoveries                  |       | 0.55   |
       | LIABILITY | 145024       | Deferred Capitalized Income | 0.55  |        |
+
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4097
   Scenario: Verify GL entries for Capitalized Income Amortization - UC3: Amortization for Capitalized Incomes with NO classification and with classification rule: pending_bankruptcy
@@ -8176,6 +8333,9 @@ Feature: Capitalized Income
       | INCOME    | 744008       | Recoveries                  |       | 0.22   |
       | INCOME    | 404000       | Interest Income             |       | 0.55   |
       | LIABILITY | 145024       | Deferred Capitalized Income | 0.77  |        |
+
+    When Loan Pay-off is made on "03 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4114
   Scenario: Verify Capitalized Income journal entries values when backdated new capitalized income with no classification and capitalized income adjustment for existing one with classification occurs on the same day
@@ -8266,6 +8426,9 @@ Feature: Capitalized Income
       | LIABILITY | 145024       | Deferred Capitalized Income | 30.0  |        |
       | INCOME    | 744008       | Recoveries                  | 5.0   |        |
 
+    When Loan Pay-off is made on "16 April 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C4115
   Scenario: Verify Capitalized Income journal entries values when backdated new capitalized income and capitalized income adjustment for existing one occurs on the same day, no classification
     When Admin sets the business date to "01 January 2024"
@@ -8353,3 +8516,6 @@ Feature: Capitalized Income
       | LIABILITY | 145024       | Deferred Capitalized Income |       | 5.0    |
       | LIABILITY | 145024       | Deferred Capitalized Income | 30.0  |        |
       | INCOME    | 404000       | Interest Income             | 5.0   |        |
+
+    When Loan Pay-off is made on "16 April 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met

@@ -15,7 +15,7 @@ Feature: LoanUpdateAvailableDisbursementAmount
     When Admin successfully disburse the loan on "01 January 2025" with "600" EUR transaction amount
 
     When Loan Pay-off is made on "01 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3919
   Scenario: Verify update available disbursement amount after undo disbursement for single disb progressive loan - UC3
@@ -32,7 +32,7 @@ Feature: LoanUpdateAvailableDisbursementAmount
     When Admin successfully disburse the loan on "01 January 2025" with "700" EUR transaction amount
 
     When Loan Pay-off is made on "01 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3920
   Scenario: Verify update available disbursement amount with approved over applied amount for progressive multidisbursal loan with percentage overAppliedCalculationType - UC4
@@ -53,7 +53,7 @@ Feature: LoanUpdateAvailableDisbursementAmount
     Then Loan has availableDisbursementAmountWithOverApplied field with value: 0
 
     When Loan Pay-off is made on "01 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3921
   Scenario: Verify update available disbursement amount with approved over applied amount and capitalized income for progressive loan with percentage overAppliedCalculationType - UC8_1
@@ -77,7 +77,7 @@ Feature: LoanUpdateAvailableDisbursementAmount
     Then Loan has availableDisbursementAmountWithOverApplied field with value: 0
 
     When Loan Pay-off is made on "01 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3922
   Scenario: Verify update available disbursement amount with capitalized income for progressive loan - UC8_2
@@ -95,7 +95,7 @@ Feature: LoanUpdateAvailableDisbursementAmount
     And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "1 January 2025" with "150" EUR transaction amount
 
     When Loan Pay-off is made on "01 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3923
   Scenario: Verify update available disbursement amount with capitalized income for progressive multidisbursal loan - UC8_3
@@ -113,7 +113,7 @@ Feature: LoanUpdateAvailableDisbursementAmount
     And Admin successfully disburse the loan on "1 January 2025" with "200" EUR transaction amount
 
     When Loan Pay-off is made on "01 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3924
   Scenario: Verify update available disbursement amount before disbursement for single disb cumulative loan - UC5_1
@@ -128,7 +128,7 @@ Feature: LoanUpdateAvailableDisbursementAmount
     And Admin successfully disburse the loan on "1 January 2025" with "900" EUR transaction amount
 
     When Loan Pay-off is made on "01 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3925
   Scenario: Verify update available disbursement amount before disbursement for single disb progressive loan - UC5_2
@@ -143,7 +143,7 @@ Feature: LoanUpdateAvailableDisbursementAmount
     And Admin successfully disburse the loan on "1 January 2025" with "900" EUR transaction amount
 
     When Loan Pay-off is made on "01 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3926
   Scenario: Verify available disbursement amount change for progressive multidisbursal loan that doesn't expect tranches - UC6
@@ -172,7 +172,7 @@ Feature: LoanUpdateAvailableDisbursementAmount
     Then Update loan available disbursement amount is forbidden with amount "500" due to exceed applied amount
 
     When Loan Pay-off is made on "01 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3927
   Scenario: Verify available disbursement amount change is forbidden with lower value for progressive multidisbursal loan that expects tranches - UC7_1
@@ -216,7 +216,7 @@ Feature: LoanUpdateAvailableDisbursementAmount
       | 03 January 2025  | Disbursement     | 500.0   | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
 
     When Loan Pay-off is made on "01 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3928
   Scenario: Verify available disbursement amount change with greater value above approved amount for progressive multidisbursal loan that expects tranches - UC7_2
@@ -256,7 +256,7 @@ Feature: LoanUpdateAvailableDisbursementAmount
       | 03 January 2025  | Disbursement     | 700.0   | 0.0       | 0.0      | 0.0  | 0.0       | 1200.0       | false    | false    |
 
     When Loan Pay-off is made on "01 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3929
   Scenario: Verify available disbursement amount change with greater value under approved amount for progressive multidisbursal loan that expects tranches - UC7_3
@@ -295,7 +295,7 @@ Feature: LoanUpdateAvailableDisbursementAmount
       | 03 January 2025  | Disbursement     | 350.0   | 0.0       | 0.0      | 0.0  | 0.0       | 950.0        | false    | false    |
 
     When Loan Pay-off is made on "01 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3995
   Scenario: Verify update available disbursement amount to zero is forbidden for not approved loan
@@ -366,7 +366,7 @@ Feature: LoanUpdateAvailableDisbursementAmount
     Then Admin fails to disburse the loan on "1 January 2025" with "1" EUR transaction amount due to exceed approved amount
 
     When Loan Pay-off is made on "01 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3999
   Scenario: Verify availableDisbursementAmountWithOverApplied field calculation
@@ -387,7 +387,7 @@ Feature: LoanUpdateAvailableDisbursementAmount
     And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "1 January 2025" with "150" EUR transaction amount
     Then Loan has availableDisbursementAmountWithOverApplied field with value: 50
     When Loan Pay-off is made on "01 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4003
   Scenario: Verify availableDisbursementAmountWithOverApplied field calculation for progressive multidisbursal loan that expects tranches
@@ -430,3 +430,6 @@ Feature: LoanUpdateAvailableDisbursementAmount
       | 01 January 2025  | Disbursement     | 300.0   | 0.0       | 0.0      | 0.0  | 0.0       | 300.0        | false    | false    |
       | 02 January 2025  | Disbursement     | 200.0   | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
       | 03 January 2025  | Disbursement     | 1000.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       | false    | false    |
+
+    When Loan Pay-off is made on "03 January 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met

@@ -13,7 +13,7 @@ Feature: LoanUpdateApprovedAmount
     When Admin successfully disburse the loan on "01 January 2025" with "1000" EUR transaction amount
 
     When Loan Pay-off is made on "1 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3859
   Scenario: Verify update approved amount after undo disbursement for single disb progressive loan - UC3
@@ -30,7 +30,7 @@ Feature: LoanUpdateApprovedAmount
     When Admin successfully disburse the loan on "01 January 2025" with "600" EUR transaction amount
 
     When Loan Pay-off is made on "1 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3860
   Scenario: Verify update approved amount with approved over applied amount for progressive multidisbursal loan with percentage overAppliedCalculationType - UC4
@@ -49,7 +49,7 @@ Feature: LoanUpdateApprovedAmount
     And Admin successfully disburse the loan on "1 January 2025" with "400" EUR transaction amount
 
     When Loan Pay-off is made on "1 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3861
   Scenario: Verify update approved amount with approved over applied amount and capitalized income for progressive loan with percentage overAppliedCalculationType - UC8_1
@@ -69,7 +69,7 @@ Feature: LoanUpdateApprovedAmount
     And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "1 January 2025" with "400" EUR transaction amount
 
     When Loan Pay-off is made on "1 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3862
   Scenario: Verify update approved amount with capitalized income for progressive loan - UC8_2
@@ -86,7 +86,7 @@ Feature: LoanUpdateApprovedAmount
     And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "1 January 2025" with "200" EUR transaction amount
 
     When Loan Pay-off is made on "1 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3863
   Scenario: Verify update approved amount with capitalized income for progressive multidisbursal loan - UC8_3
@@ -103,7 +103,7 @@ Feature: LoanUpdateApprovedAmount
     And Admin successfully disburse the loan on "1 January 2025" with "200" EUR transaction amount
 
     When Loan Pay-off is made on "1 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3864
   Scenario: Verify update approved amount before disbursement for single disb cumulative loan - UC5_1
@@ -117,7 +117,7 @@ Feature: LoanUpdateApprovedAmount
     And Admin successfully disburse the loan on "1 January 2025" with "100" EUR transaction amount
 
     When Loan Pay-off is made on "1 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3865
   Scenario: Verify update approved amount before disbursement for single disb progressive loan - UC5_2
@@ -131,7 +131,7 @@ Feature: LoanUpdateApprovedAmount
     And Admin successfully disburse the loan on "1 January 2025" with "100" EUR transaction amount
 
     When Loan Pay-off is made on "1 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3866
   Scenario: Verify approved amount change for progressive multidisbursal loan that doesn't expect tranches - UC6
@@ -159,7 +159,7 @@ Feature: LoanUpdateApprovedAmount
     Then Update loan approved amount is forbidden with amount "500" due to higher principal amount on loan
 
     When Loan Pay-off is made on "1 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3867
   Scenario: Verify approved amount change with lower value for progressive multidisbursal loan that expects two tranches - UC7_1
@@ -198,7 +198,7 @@ Feature: LoanUpdateApprovedAmount
       | 03 January 2025  | Disbursement     | 500.0   | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
 
     When Loan Pay-off is made on "3 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3868
   Scenario: Verify approved amount change with greater value for progressive multidisbursal loan that expects two tranches - UC7_2
@@ -237,4 +237,4 @@ Feature: LoanUpdateApprovedAmount
       | 03 January 2025  | Disbursement     | 600.0   | 0.0       | 0.0      | 0.0  | 0.0       | 1200.0       | false    | false    |
 
     When Loan Pay-off is made on "3 January 2025"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met

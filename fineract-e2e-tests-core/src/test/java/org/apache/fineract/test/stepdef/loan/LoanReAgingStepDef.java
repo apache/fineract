@@ -333,8 +333,7 @@ public class LoanReAgingStepDef extends AbstractStepDef {
                 loanId, frequencyNumber, frequencyType, startDate, numberOfInstallments);
     }
 
-    @When("Admin creates a Loan re-aging preview by Loan external ID with the following data:")
-    public void createReAgingPreviewByLoanExternalId(DataTable table) throws IOException {
+    public Response<LoanScheduleData> reAgingPreviewByLoanExternalId(DataTable table) throws IOException {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         String loanExternalId = loanResponse.body().getResourceExternalId();
 
@@ -347,12 +346,39 @@ public class LoanReAgingStepDef extends AbstractStepDef {
         Response<LoanScheduleData> response = loanTransactionsApi
                 .previewReAgeSchedule1(loanExternalId, frequencyNumber, frequencyType, startDate, numberOfInstallments, DATE_FORMAT, "en")
                 .execute();
+        log.info(
+                "Re-aging preview is requested to be created with loan external ID: {} with parameters: frequencyNumber={}, frequencyType={}, startDate={}, numberOfInstallments={}",
+                loanExternalId, frequencyNumber, frequencyType, startDate, numberOfInstallments);
+        return response;
+    }
+
+    @When("Admin creates a Loan re-aging preview by Loan external ID with the following data:")
+    public void createReAgingPreviewByLoanExternalId(DataTable table) throws IOException {
+        Response<LoanScheduleData> response = reAgingPreviewByLoanExternalId(table);
         ErrorHelper.checkSuccessfulApiCall(response);
         testContext().set(TestContextKey.LOAN_REAGING_PREVIEW_RESPONSE, response);
 
-        log.info(
-                "Re-aging preview created for loan external ID: {} with parameters: frequencyNumber={}, frequencyType={}, startDate={}, numberOfInstallments={}",
-                loanExternalId, frequencyNumber, frequencyType, startDate, numberOfInstallments);
+        log.info("Re-aging preview is created with loan externalId.");
+    }
+
+    @Then("Admin fails to create a Loan re-aging preview with the following data because loan was charged-off:")
+    public void reAgePreviewChargedOffLoanFailure(final DataTable table) throws IOException {
+        Response<LoanScheduleData> response = reAgingPreviewByLoanExternalId(table);
+        final ErrorResponse errorDetails = ErrorResponse.from(response);
+        final String developerMessage = errorDetails.getSingleError().getDeveloperMessage();
+
+        assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(403);
+        assertThat(developerMessage).matches(ErrorMessageHelper.reAgeChargedOffLoanFailure());
+    }
+
+    @Then("Admin fails to create a Loan re-aging preview with the following data because loan was contract terminated:")
+    public void reAgePreviewContractTerminatedLoanFailure(final DataTable table) throws IOException {
+        Response<LoanScheduleData> response = reAgingPreviewByLoanExternalId(table);
+        final ErrorResponse errorDetails = ErrorResponse.from(response);
+        final String developerMessage = errorDetails.getSingleError().getDeveloperMessage();
+
+        assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(403);
+        assertThat(developerMessage).matches(ErrorMessageHelper.reAgeContractTerminatedLoanFailure());
     }
 
     @Then("Loan Repayment schedule preview has {int} periods, with the following data for periods:")
