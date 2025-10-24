@@ -507,9 +507,10 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         ArgumentCaptor<Money> paidPortionCaptor = ArgumentCaptor.forClass(Money.class);
         ArgumentCaptor<LocalDate> payDateCaptor = ArgumentCaptor.forClass(LocalDate.class);
 
+        final LocalDate repaymentPeriodFromDate = transactionDate.minusMonths(1);
         // Verify `payPrincipal` is called when allocation type is DUE_PRINCIPAL
-        Mockito.verify(emiCalculator, atLeastOnce()).payPrincipal(eq(model), eq(transactionDate), payDateCaptor.capture(),
-                paidPortionCaptor.capture());
+        Mockito.verify(emiCalculator, atLeastOnce()).payPrincipal(eq(model), eq(repaymentPeriodFromDate), eq(transactionDate),
+                payDateCaptor.capture(), paidPortionCaptor.capture());
         Money paidPortion = paidPortionCaptor.getValue();
         LocalDate payDate = payDateCaptor.getValue();
 

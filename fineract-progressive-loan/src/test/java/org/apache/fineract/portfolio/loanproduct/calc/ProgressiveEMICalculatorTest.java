@@ -447,10 +447,13 @@ class ProgressiveEMICalculatorTest {
 
         final Money disbursedAmount = toMoney(100.0);
         emiCalculator.addDisbursement(interestModel, LocalDate.of(2024, 1, 1), disbursedAmount);
-        emiCalculator.payInterest(interestModel, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1), toMoney(0.58));
-        emiCalculator.payPrincipal(interestModel, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1), toMoney(16.43));
+        emiCalculator.payInterest(interestModel, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+                toMoney(0.58));
+        emiCalculator.payPrincipal(interestModel, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+                toMoney(16.43));
 
-        emiCalculator.payPrincipal(interestModel, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 2, 1), toMoney(16.90));
+        emiCalculator.payPrincipal(interestModel, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), LocalDate.of(2024, 2, 1),
+                toMoney(16.90));
 
         final BigDecimal interestRateNewValue = BigDecimal.valueOf(4.0);
         final LocalDate interestChangeDate = LocalDate.of(2024, 2, 2);
@@ -495,7 +498,8 @@ class ProgressiveEMICalculatorTest {
         final Money disbursedAmount = toMoney(100.0);
         emiCalculator.addDisbursement(interestModel, LocalDate.of(2024, 1, 1), disbursedAmount);
 
-        emiCalculator.payPrincipal(interestModel, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 1, 15), toMoney(17.01));
+        emiCalculator.payPrincipal(interestModel, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1), LocalDate.of(2024, 1, 15),
+                toMoney(17.01));
 
         final BigDecimal interestRateNewValue = BigDecimal.valueOf(4.0);
         final LocalDate interestChangeDate = LocalDate.of(2024, 1, 20);
@@ -588,12 +592,14 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         // schedule 1st period 1st day
-        PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 1, 1));
+        PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1),
+                LocalDate.of(2024, 1, 1));
         Assertions.assertEquals(17.01, toDouble(dueAmounts.getDuePrincipal()));
         Assertions.assertEquals(0.0, toDouble(dueAmounts.getDueInterest()));
 
         // schedule 2nd period last day
-        dueAmounts = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1));
+        dueAmounts = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1),
+                LocalDate.of(2024, 3, 1));
         Assertions.assertEquals(16.52, toDouble(dueAmounts.getDuePrincipal()));
         Assertions.assertEquals(0.49, toDouble(dueAmounts.getDueInterest()));
 
@@ -603,13 +609,15 @@ class ProgressiveEMICalculatorTest {
         final Money op1stCorrectionAmount = toMoney(16.77);
 
         // get remaining balance and dues for a date
-        final PeriodDueDetails repaymentDetails1st = emiCalculator.getDueAmounts(interestSchedule, op1stCorrectionPeriodDueDate,
-                op1stCorrectionDate);
+        final PeriodDueDetails repaymentDetails1st = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 2, 1),
+                op1stCorrectionPeriodDueDate, op1stCorrectionDate);
         Assertions.assertEquals(16.77, toDouble(repaymentDetails1st.getDuePrincipal()));
         Assertions.assertEquals(0.24, toDouble(repaymentDetails1st.getDueInterest()));
 
-        emiCalculator.payPrincipal(interestSchedule, op1stCorrectionPeriodDueDate, op1stCorrectionDate, op1stCorrectionAmount);
-        emiCalculator.payInterest(interestSchedule, op1stCorrectionPeriodDueDate, op1stCorrectionDate, toMoney(0.24));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), op1stCorrectionPeriodDueDate, op1stCorrectionDate,
+                op1stCorrectionAmount);
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), op1stCorrectionPeriodDueDate, op1stCorrectionDate,
+                toMoney(0.24));
 
         checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
         checkPeriod(interestSchedule, 1, 0, 17.01, 0.002816091954, 0.235340804584, 0.24, 16.77, 66.80);
@@ -625,13 +633,15 @@ class ProgressiveEMICalculatorTest {
         final Money op2ndCorrectionAmount = toMoney(16.42);
 
         // get remaining balance and dues for a date
-        final PeriodDueDetails repaymentDetails2st = emiCalculator.getDueAmounts(interestSchedule, op2ndCorrectionPeriodDueDate,
-                op2ndCorrectionDate);
+        final PeriodDueDetails repaymentDetails2st = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 3, 1),
+                op2ndCorrectionPeriodDueDate, op2ndCorrectionDate);
         Assertions.assertEquals(16.81, toDouble(repaymentDetails2st.getDuePrincipal()));
         Assertions.assertEquals(0.20, toDouble(repaymentDetails2st.getDueInterest()));
 
-        emiCalculator.payPrincipal(interestSchedule, op2ndCorrectionPeriodDueDate, op2ndCorrectionDate, op2ndCorrectionAmount);
-        emiCalculator.payInterest(interestSchedule, op2ndCorrectionPeriodDueDate, op2ndCorrectionDate, toMoney(0.49));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), op2ndCorrectionPeriodDueDate, op2ndCorrectionDate,
+                op2ndCorrectionAmount);
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 3, 1), op2ndCorrectionPeriodDueDate, op2ndCorrectionDate,
+                toMoney(0.49));
 
         checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
         checkPeriod(interestSchedule, 1, 0, 17.01, 0.002816091954, 0.235340804584, 0.24, 16.77, 50.38);
@@ -644,14 +654,16 @@ class ProgressiveEMICalculatorTest {
         // check numbers on last period due date
         LocalDate periodDueDate = LocalDate.of(2024, 7, 1);
         LocalDate payDate = LocalDate.of(2024, 7, 1);
-        final PeriodDueDetails repaymentDetails3rd = emiCalculator.getDueAmounts(interestSchedule, periodDueDate, payDate);
+        final PeriodDueDetails repaymentDetails3rd = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 6, 1), periodDueDate,
+                payDate);
         Assertions.assertEquals(16.75, toDouble(repaymentDetails3rd.getDuePrincipal()));
         Assertions.assertEquals(0.1, toDouble(repaymentDetails3rd.getDueInterest()));
 
         // check numbers after the last period due date
         periodDueDate = LocalDate.of(2024, 7, 1);
         payDate = LocalDate.of(2024, 7, 15);
-        final PeriodDueDetails repaymentDetails4th = emiCalculator.getDueAmounts(interestSchedule, periodDueDate, payDate);
+        final PeriodDueDetails repaymentDetails4th = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 6, 1), periodDueDate,
+                payDate);
         Assertions.assertEquals(16.75, toDouble(repaymentDetails4th.getDuePrincipal()));
         Assertions.assertEquals(0.1, toDouble(repaymentDetails4th.getDueInterest()));
 
@@ -700,30 +712,41 @@ class ProgressiveEMICalculatorTest {
         final Money op1stCorrectionAmount = toMoney(15.0);
 
         // get remaining balance and dues for a date
-        final PeriodDueDetails repaymentDetails1st = emiCalculator.getDueAmounts(interestSchedule, op1stCorrectionPeriodDueDate,
-                op1stCorrectionDate);
+        final PeriodDueDetails repaymentDetails1st = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 2, 1),
+                op1stCorrectionPeriodDueDate, op1stCorrectionDate);
         Assertions.assertEquals(16.77, toDouble(repaymentDetails1st.getDuePrincipal()));
         Assertions.assertEquals(0.24, toDouble(repaymentDetails1st.getDueInterest()));
 
         // check getDueAmounts forcast
-        PeriodDueDetails details = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1));
+        PeriodDueDetails details = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1),
+                LocalDate.of(2024, 3, 1));
         Assertions.assertEquals(16.52, toDouble(details.getDuePrincipal()));
         Assertions.assertEquals(0.49, toDouble(details.getDueInterest()));
 
         // apply balance change and check again
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), op1stCorrectionDate, op1stCorrectionAmount);
-        details = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), op1stCorrectionDate,
+                op1stCorrectionAmount);
+        details = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1),
+                LocalDate.of(2024, 3, 1));
         Assertions.assertEquals(16.52, toDouble(details.getDuePrincipal()));
         Assertions.assertEquals(0.49, toDouble(details.getDueInterest()));
 
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 15), toMoney(1.43));
-        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 15), toMoney(0.58));
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 2, 15), toMoney(16.77));
-        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 2, 15), toMoney(0.24));
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 2, 15), toMoney(17.01));
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 2, 15), toMoney(17.01));
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 2, 15), toMoney(17.01));
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 2, 15), toMoney(15.77));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 15),
+                toMoney(1.43));
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 15),
+                toMoney(0.58));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), LocalDate.of(2024, 2, 15),
+                toMoney(16.77));
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), LocalDate.of(2024, 2, 15),
+                toMoney(0.24));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1), LocalDate.of(2024, 2, 15),
+                toMoney(17.01));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1), LocalDate.of(2024, 2, 15),
+                toMoney(17.01));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1), LocalDate.of(2024, 2, 15),
+                toMoney(17.01));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1), LocalDate.of(2024, 2, 15),
+                toMoney(15.77));
 
         // check periods in model
 
@@ -766,28 +789,37 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         // get remaining balance and dues on due date
-        PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1));
+        PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1),
+                LocalDate.of(2024, 2, 1));
         Assertions.assertEquals(16.43, toDouble(dueAmounts.getDuePrincipal()));
         Assertions.assertEquals(0.58, toDouble(dueAmounts.getDueInterest()));
 
         // check numbers on payoff date
-        dueAmounts = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 1, 15));
+        dueAmounts = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1),
+                LocalDate.of(2024, 1, 15));
         Assertions.assertEquals(16.75, toDouble(dueAmounts.getDuePrincipal()));
         Assertions.assertEquals(0.26, toDouble(dueAmounts.getDueInterest()));
 
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 1, 15), toMoney(16.75));
-        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 1, 15), toMoney(0.26));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 1, 15),
+                toMoney(16.75));
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 1, 15),
+                toMoney(0.26));
 
         // check again numbers are zero
         // dueAmounts = emiCalculator.getdueAmounts(interestSchedule, LocalDate.of(2024, 2, 1),
         // LocalDate.of(2024, 2, 1));
 
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 1, 15), toMoney(17.01));
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 1, 15), toMoney(17.01));
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 1, 15), toMoney(17.01));
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 1, 15), toMoney(17.01));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), LocalDate.of(2024, 1, 15),
+                toMoney(17.01));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1), LocalDate.of(2024, 1, 15),
+                toMoney(17.01));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1), LocalDate.of(2024, 1, 15),
+                toMoney(17.01));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1), LocalDate.of(2024, 1, 15),
+                toMoney(17.01));
 
-        dueAmounts = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 7, 1));
+        dueAmounts = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1),
+                LocalDate.of(2024, 7, 1));
         Assertions.assertEquals(15.21, toDouble(dueAmounts.getDuePrincipal()));
         Assertions.assertEquals(0.5, toDouble(dueAmounts.getDueInterest()));
 
@@ -801,7 +833,8 @@ class ProgressiveEMICalculatorTest {
         checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.0887249999949, 0.0, 17.01, 15.21);
         checkPeriod(interestSchedule, 5, 0, 15.71, 0.005833333333, 0.0887249999949, 0.5, 15.21, 0.0);
 
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 1, 15), toMoney(15.21));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1), LocalDate.of(2024, 1, 15),
+                toMoney(15.21));
 
         // check periods in model
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.26, 16.75, 0.0);
@@ -1023,12 +1056,18 @@ class ProgressiveEMICalculatorTest {
         Assertions.assertEquals(6.15, toDouble(interestSchedule.getTotalDueInterest()));
 
         // pay back the whole loan on first day
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 1, 1), toMoney(51.03));
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 1, 1), toMoney(51.03));
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 1, 1), toMoney(51.03));
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 1, 1), toMoney(51.03));
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 1, 1), toMoney(51.03));
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 1, 1), toMoney(44.85));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 1, 1),
+                toMoney(51.03));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), LocalDate.of(2024, 1, 1),
+                toMoney(51.03));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1), LocalDate.of(2024, 1, 1),
+                toMoney(51.03));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1), LocalDate.of(2024, 1, 1),
+                toMoney(51.03));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1), LocalDate.of(2024, 1, 1),
+                toMoney(51.03));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1), LocalDate.of(2024, 1, 1),
+                toMoney(44.85));
 
         checkTotalInterestDue(interestSchedule, 0.0);
 
@@ -1208,11 +1247,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, disbursementDate, disbursedAmount);
 
         for (int i = 0; i < 12; i++) {
+            LocalDate fromDate = expectedRepaymentPeriods.get(i).getFromDate();
             LocalDate dueDate = expectedRepaymentPeriods.get(i).getDueDate();
-            PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(interestSchedule, dueDate, disbursementDate);
+            PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(interestSchedule, fromDate, dueDate, disbursementDate);
             Money duePrincipal = dueAmounts.getDuePrincipal();
             if (duePrincipal.isGreaterThanZero()) {
-                emiCalculator.payPrincipal(interestSchedule, dueDate, disbursementDate, duePrincipal);
+                emiCalculator.payPrincipal(interestSchedule, fromDate, dueDate, disbursementDate, duePrincipal);
             }
         }
 
@@ -1321,7 +1361,7 @@ class ProgressiveEMICalculatorTest {
         final LocalDate dueDate = LocalDate.of(2024, 2, 1);
         final LocalDate startDay = LocalDate.of(2024, 1, 1);
 
-        emiCalculator.payInterest(interestModel, dueDate, startDay.plusDays(3), toMoney(0.56));
+        emiCalculator.payInterest(interestModel, startDay, dueDate, startDay.plusDays(3), toMoney(0.56));
         emiCalculator.creditInterest(interestModel, startDay.plusDays(3), toMoney(0.0));
         emiCalculator.addBalanceCorrection(interestModel, startDay.plusDays(3), toMoney(0.0));
 
@@ -2019,9 +2059,9 @@ class ProgressiveEMICalculatorTest {
         checkPeriod(interestSchedule, 4, 857.71, 14.33, 843.38, 850.76, false);
         checkPeriod(interestSchedule, 5, 857.73, 6.97, 850.76, 0, false);
 
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2023, 12, 13), LocalDate.of(2023, 12, 10),
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2023, 11, 13), LocalDate.of(2023, 12, 13), LocalDate.of(2023, 12, 10),
                 Money.of(currency, BigDecimal.valueOf(820.76)));
-        emiCalculator.payInterest(interestSchedule, LocalDate.of(2023, 12, 13), LocalDate.of(2023, 12, 10),
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2023, 11, 13), LocalDate.of(2023, 12, 13), LocalDate.of(2023, 12, 10),
                 Money.of(currency, BigDecimal.valueOf(36.95)));
 
         checkPeriod(interestSchedule, 0, 857.71, 36.95, 820.76, 4179.24, true);
@@ -2062,8 +2102,9 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, disbursementDate, disbursedAmount);
 
         for (int i = 0; i < 6; i++) {
+            LocalDate fromDate = expectedRepaymentPeriods.get(i).getFromDate();
             LocalDate dueDate = expectedRepaymentPeriods.get(i).getDueDate();
-            PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(interestSchedule, dueDate, dueDate);
+            PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(interestSchedule, fromDate, dueDate, dueDate);
             Money duePrincipal = dueAmounts.getDuePrincipal();
             emiCalculator.addBalanceCorrection(interestSchedule, dueDate, duePrincipal);
         }
@@ -2105,14 +2146,15 @@ class ProgressiveEMICalculatorTest {
 
         emiCalculator.addDisbursement(interestSchedule, disbursementDate, disbursedAmount);
 
-        emiCalculator.payInterest(interestSchedule, LocalDate.of(2023, 12, 13), LocalDate.of(2023, 12, 10),
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2023, 11, 13), LocalDate.of(2023, 12, 13), LocalDate.of(2023, 12, 10),
                 Money.of(currency, BigDecimal.valueOf(36.95)));
-        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2023, 12, 13), LocalDate.of(2023, 12, 10),
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2023, 11, 13), LocalDate.of(2023, 12, 13), LocalDate.of(2023, 12, 10),
                 Money.of(currency, BigDecimal.valueOf(820.76)));
 
         for (int i = 1; i < 6; i++) {
+            LocalDate fromDate = expectedRepaymentPeriods.get(i).getFromDate();
             LocalDate dueDate = expectedRepaymentPeriods.get(i).getDueDate();
-            PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(interestSchedule, dueDate, dueDate);
+            PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(interestSchedule, fromDate, dueDate, dueDate);
             Money duePrincipal = dueAmounts.getDuePrincipal();
             emiCalculator.addBalanceCorrection(interestSchedule, dueDate, duePrincipal);
         }
@@ -2450,11 +2492,15 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.0985833333276, 0.1, 16.9, 0.0);
 
             // repay 1st period
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1), toMoney(16.43));
-            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1), toMoney(0.58));
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+                    toMoney(16.43));
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+                    toMoney(0.58));
             // repay 2nd period
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1), toMoney(16.52));
-            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1), toMoney(0.49));
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1),
+                    toMoney(16.52));
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1),
+                    toMoney(0.49));
 
             // full chargeback on duedate
             emiCalculator.creditPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), toMoney(17.01));
@@ -2503,11 +2549,15 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.0985833333276, 0.1, 16.9, 0.0);
 
             // repay 1st period
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1), toMoney(16.43));
-            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1), toMoney(0.58));
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+                    toMoney(16.43));
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+                    toMoney(0.58));
             // repay 2nd period
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1), toMoney(16.52));
-            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1), toMoney(0.49));
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1),
+                    toMoney(16.52));
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1),
+                    toMoney(0.49));
 
             // partial chargeback
             emiCalculator.creditPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), toMoney(15.0));
@@ -2567,11 +2617,15 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.0985833333276, 0.1, 16.9, 0.0);
 
             // repay 1st period
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1), toMoney(16.43));
-            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1), toMoney(0.58));
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+                    toMoney(16.43));
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+                    toMoney(0.58));
             // repay 2nd period
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1), toMoney(16.52));
-            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1), toMoney(0.49));
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1),
+                    toMoney(16.52));
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1),
+                    toMoney(0.49));
 
             // full chargeback on duedate
             emiCalculator.creditPrincipal(interestSchedule, LocalDate.of(2024, 3, 15), toMoney(17.01));
@@ -2623,13 +2677,13 @@ class ProgressiveEMICalculatorTest {
 
         // repay 1st period
         LocalDate txnDate = LocalDate.of(2024, 2, 1);
-        emiCalculator.payPrincipal(interestSchedule, txnDate, txnDate, toMoney(16.43));
-        emiCalculator.payInterest(interestSchedule, txnDate, txnDate, toMoney(0.58));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), txnDate, txnDate, toMoney(16.43));
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), txnDate, txnDate, toMoney(0.58));
 
         // repay 2nd period
         txnDate = LocalDate.of(2024, 3, 1);
-        emiCalculator.payPrincipal(interestSchedule, txnDate, txnDate, toMoney(16.52));
-        emiCalculator.payInterest(interestSchedule, txnDate, txnDate, toMoney(0.49));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), txnDate, txnDate, toMoney(16.52));
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), txnDate, txnDate, toMoney(0.49));
 
         // chargeback
         txnDate = LocalDate.of(2024, 3, 1);
@@ -2681,13 +2735,13 @@ class ProgressiveEMICalculatorTest {
 
         // repay 1st period
         LocalDate txnDate = LocalDate.of(2024, 2, 1);
-        emiCalculator.payPrincipal(interestSchedule, txnDate, txnDate, toMoney(16.43));
-        emiCalculator.payInterest(interestSchedule, txnDate, txnDate, toMoney(0.58));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), txnDate, txnDate, toMoney(16.43));
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), txnDate, txnDate, toMoney(0.58));
 
         // repay 2nd period
         txnDate = LocalDate.of(2024, 3, 1);
-        emiCalculator.payPrincipal(interestSchedule, txnDate, txnDate, toMoney(16.52));
-        emiCalculator.payInterest(interestSchedule, txnDate, txnDate, toMoney(0.49));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), txnDate, txnDate, toMoney(16.52));
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), txnDate, txnDate, toMoney(0.49));
 
         // chargeback
         txnDate = LocalDate.of(2024, 7, 1);
@@ -2733,13 +2787,13 @@ class ProgressiveEMICalculatorTest {
 
         // repay 1st period
         LocalDate txnDate = LocalDate.of(2024, 2, 1);
-        emiCalculator.payPrincipal(interestSchedule, txnDate, txnDate, toMoney(16.43));
-        emiCalculator.payInterest(interestSchedule, txnDate, txnDate, toMoney(0.58));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), txnDate, txnDate, toMoney(16.43));
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), txnDate, txnDate, toMoney(0.58));
 
         // repay 2nd period
         txnDate = LocalDate.of(2024, 3, 1);
-        emiCalculator.payPrincipal(interestSchedule, txnDate, txnDate, toMoney(16.52));
-        emiCalculator.payInterest(interestSchedule, txnDate, txnDate, toMoney(0.49));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), txnDate, txnDate, toMoney(16.52));
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), txnDate, txnDate, toMoney(0.49));
 
         // chargeback
         txnDate = LocalDate.of(2024, 3, 1);
@@ -2791,13 +2845,13 @@ class ProgressiveEMICalculatorTest {
 
         // repay 1st period
         LocalDate txnDate = LocalDate.of(2024, 2, 1);
-        emiCalculator.payPrincipal(interestSchedule, txnDate, txnDate, toMoney(16.43));
-        emiCalculator.payInterest(interestSchedule, txnDate, txnDate, toMoney(0.58));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), txnDate, txnDate, toMoney(16.43));
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), txnDate, txnDate, toMoney(0.58));
 
         // repay 2nd period
         txnDate = LocalDate.of(2024, 3, 1);
-        emiCalculator.payPrincipal(interestSchedule, txnDate, txnDate, toMoney(16.52));
-        emiCalculator.payInterest(interestSchedule, txnDate, txnDate, toMoney(0.49));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), txnDate, txnDate, toMoney(16.52));
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), txnDate, txnDate, toMoney(0.49));
 
         // chargeback
         txnDate = LocalDate.of(2024, 3, 1);
@@ -2848,13 +2902,13 @@ class ProgressiveEMICalculatorTest {
 
         // repay 1st period
         LocalDate txnDate = LocalDate.of(2024, 2, 1);
-        emiCalculator.payPrincipal(interestSchedule, txnDate, txnDate, toMoney(16.43));
-        emiCalculator.payInterest(interestSchedule, txnDate, txnDate, toMoney(0.58));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), txnDate, txnDate, toMoney(16.43));
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), txnDate, txnDate, toMoney(0.58));
 
         // repay 2nd period
         txnDate = LocalDate.of(2024, 3, 1);
-        emiCalculator.payPrincipal(interestSchedule, txnDate, txnDate, toMoney(16.52));
-        emiCalculator.payInterest(interestSchedule, txnDate, txnDate, toMoney(0.49));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), txnDate, txnDate, toMoney(16.52));
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), txnDate, txnDate, toMoney(0.49));
 
         // chargeback 1st
         txnDate = LocalDate.of(2024, 3, 1);
@@ -3142,20 +3196,21 @@ class ProgressiveEMICalculatorTest {
 
         // repay 1st period
         LocalDate txnDate = LocalDate.of(2024, 2, 1);
-        emiCalculator.payPrincipal(interestSchedule, txnDate, txnDate, toMoney(16.43));
-        emiCalculator.payInterest(interestSchedule, txnDate, txnDate, toMoney(0.58));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), txnDate, txnDate, toMoney(16.43));
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), txnDate, txnDate, toMoney(0.58));
 
         // repay 2nd period
         txnDate = LocalDate.of(2024, 3, 1);
-        emiCalculator.payPrincipal(interestSchedule, txnDate, txnDate, toMoney(16.52));
-        emiCalculator.payInterest(interestSchedule, txnDate, txnDate, toMoney(0.49));
+        emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), txnDate, txnDate, toMoney(16.52));
+        emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), txnDate, txnDate, toMoney(0.49));
 
         // chargeback
         txnDate = LocalDate.of(2024, 3, 15);
         emiCalculator.creditPrincipal(interestSchedule, txnDate, toMoney(16.52));
         emiCalculator.creditInterest(interestSchedule, txnDate, toMoney(0.49));
 
-        PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 4, 1), txnDate);
+        PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1),
+                txnDate);
         Assertions.assertEquals(33.09, toDouble(interestSchedule.repaymentPeriods().get(2).getDuePrincipal()));
         Assertions.assertEquals(33.35, toDouble(dueAmounts.getDuePrincipal()));
         Assertions.assertEquals(0.67, toDouble(dueAmounts.getDueInterest()));
@@ -3204,10 +3259,10 @@ class ProgressiveEMICalculatorTest {
 
         // repay 1st period
         LocalDate txnDate = LocalDate.of(2024, 2, 1);
-        emiCalculator.payPrincipal(interestScheduleExpected, txnDate, txnDate, toMoney(16.43));
-        emiCalculator.payInterest(interestScheduleExpected, txnDate, txnDate, toMoney(0.58));
-        emiCalculator.payPrincipal(interestScheduleActual, txnDate, txnDate, toMoney(16.43));
-        emiCalculator.payInterest(interestScheduleActual, txnDate, txnDate, toMoney(0.58));
+        emiCalculator.payPrincipal(interestScheduleExpected, LocalDate.of(2024, 1, 1), txnDate, txnDate, toMoney(16.43));
+        emiCalculator.payInterest(interestScheduleExpected, LocalDate.of(2024, 1, 1), txnDate, txnDate, toMoney(0.58));
+        emiCalculator.payPrincipal(interestScheduleActual, LocalDate.of(2024, 1, 1), txnDate, txnDate, toMoney(16.43));
+        emiCalculator.payInterest(interestScheduleActual, LocalDate.of(2024, 1, 1), txnDate, txnDate, toMoney(0.58));
 
         verifyAllPeriods(interestScheduleExpected, interestScheduleActual);
         interestScheduleActual = copyJson(interestScheduleExpected);
@@ -3215,10 +3270,10 @@ class ProgressiveEMICalculatorTest {
 
         // repay 2nd period
         txnDate = LocalDate.of(2024, 3, 1);
-        emiCalculator.payPrincipal(interestScheduleExpected, txnDate, txnDate, toMoney(16.52));
-        emiCalculator.payInterest(interestScheduleExpected, txnDate, txnDate, toMoney(0.49));
-        emiCalculator.payPrincipal(interestScheduleActual, txnDate, txnDate, toMoney(16.52));
-        emiCalculator.payInterest(interestScheduleActual, txnDate, txnDate, toMoney(0.49));
+        emiCalculator.payPrincipal(interestScheduleExpected, LocalDate.of(2024, 2, 1), txnDate, txnDate, toMoney(16.52));
+        emiCalculator.payInterest(interestScheduleExpected, LocalDate.of(2024, 1, 1), txnDate, txnDate, toMoney(0.49));
+        emiCalculator.payPrincipal(interestScheduleActual, LocalDate.of(2024, 2, 1), txnDate, txnDate, toMoney(16.52));
+        emiCalculator.payInterest(interestScheduleActual, LocalDate.of(2024, 2, 1), txnDate, txnDate, toMoney(0.49));
 
         verifyAllPeriods(interestScheduleExpected, interestScheduleActual);
         interestScheduleActual = copyJson(interestScheduleExpected);
@@ -3235,8 +3290,10 @@ class ProgressiveEMICalculatorTest {
         interestScheduleActual = copyJson(interestScheduleExpected);
         verifyAllPeriods(interestScheduleExpected, interestScheduleActual);
 
-        PeriodDueDetails dueAmountsExpected = emiCalculator.getDueAmounts(interestScheduleExpected, LocalDate.of(2024, 4, 1), txnDate);
-        PeriodDueDetails dueAmountsActual = emiCalculator.getDueAmounts(interestScheduleActual, LocalDate.of(2024, 4, 1), txnDate);
+        PeriodDueDetails dueAmountsExpected = emiCalculator.getDueAmounts(interestScheduleExpected, LocalDate.of(2024, 3, 1),
+                LocalDate.of(2024, 4, 1), txnDate);
+        PeriodDueDetails dueAmountsActual = emiCalculator.getDueAmounts(interestScheduleActual, LocalDate.of(2024, 3, 1),
+                LocalDate.of(2024, 4, 1), txnDate);
 
         Assertions.assertEquals(toDouble(dueAmountsExpected.getDuePrincipal()), toDouble(dueAmountsActual.getDuePrincipal()));
         Assertions.assertEquals(toDouble(dueAmountsExpected.getDueInterest()), toDouble(dueAmountsActual.getDueInterest()));
@@ -4069,11 +4126,11 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 3, 256.29, 2.54, 253.75, 0.00, false); //
 
             // simulate merchant issued refund allocated on last installment ( fully repaid ) on first date
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 10, 1), LocalDate.of(2024, 6, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 9, 1), LocalDate.of(2024, 10, 1), LocalDate.of(2024, 6, 1),
                     Money.of(currency, BigDecimal.valueOf(256.29D)));
 
             // simulate early repayment on day 0
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 6, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1), LocalDate.of(2024, 6, 1),
                     Money.of(currency, BigDecimal.valueOf(256.28D)));
 
             // verify 1st and 4th installments are fully repaid
@@ -4130,9 +4187,9 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 3, 260.00, 10.00, 250.00, 0.00, false); //
 
             // simulate merchant issued refund allocated on last installment ( fully repaid ) on first date
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 10, 1), LocalDate.of(2024, 6, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 9, 1), LocalDate.of(2024, 10, 1), LocalDate.of(2024, 6, 1),
                     Money.of(currency, BigDecimal.valueOf(250.0D)));
-            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 10, 1), LocalDate.of(2024, 6, 1),
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 9, 1), LocalDate.of(2024, 10, 1), LocalDate.of(2024, 6, 1),
                     Money.of(currency, BigDecimal.valueOf(10.0D)));
 
             checkPeriod(interestSchedule, 0, 260.00, 10.00, 250.00, 500.00, false); //
@@ -4141,9 +4198,9 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 3, 260.00, 10.00, 250.00, 0.00, true); //
 
             // simulate early repayment on day 0
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 6, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1), LocalDate.of(2024, 6, 1),
                     Money.of(currency, BigDecimal.valueOf(250.0D)));
-            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 6, 1),
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1), LocalDate.of(2024, 6, 1),
                     Money.of(currency, BigDecimal.valueOf(10.0D)));
 
             // verify 1st and 4th installments are fully repaid
@@ -4283,26 +4340,30 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 5, 0, 17.47, 0.012886027397, 0.222283972598, 0.22, 17.25, 0.0);
 
             // repay EMI on first period due date
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(16.1)));
-            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(1.33)));
 
             // repay EMI on first period due date - next installment for 2nd period
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(17.43)));
 
             // repay 20 for last installment on first period due date -- ie MIR
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(17.43)));
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(2.57)));
 
             emiCalculator.addBalanceCorrection(interestSchedule, LocalDate.of(2024, 4, 1),
-                    emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 1)).getDuePrincipal());
+                    emiCalculator
+                            .getDueAmounts(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 1))
+                            .getDuePrincipal());
 
-            emiCalculator.addBalanceCorrection(interestSchedule, LocalDate.of(2024, 4, 15), emiCalculator
-                    .getDueAmounts(interestSchedule, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 1)).getDuePrincipal().negated());
+            emiCalculator.addBalanceCorrection(interestSchedule, LocalDate.of(2024, 4, 15),
+                    emiCalculator
+                            .getDueAmounts(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 1))
+                            .getDuePrincipal().negated());
 
             LocalDate reAgingStartDate = LocalDate.of(2024, 4, 20);
 
@@ -4360,9 +4421,9 @@ class ProgressiveEMICalculatorTest {
             emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
             // repay EMI on first period due date
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(16.43)));
-            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(0.58)));
 
             // chargeback
@@ -4419,9 +4480,9 @@ class ProgressiveEMICalculatorTest {
             emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
             // repay EMI on first period due date
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(16.43)));
-            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(0.58)));
 
             // chargeback
@@ -4487,26 +4548,30 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 5, 0, 17.47, 0.012886027397, 0.222283972598, 0.22, 17.25, 0.0);
 
             // repay EMI on first period due date
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(16.1)));
-            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(1.33)));
 
             // repay EMI on first period due date - next installment for 2nd period
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(17.43)));
 
             // repay 20 for last installment on first period due date -- ie MIR
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(17.43)));
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(2.57)));
 
             emiCalculator.addBalanceCorrection(interestSchedule, LocalDate.of(2024, 4, 1),
-                    emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 1)).getDuePrincipal());
+                    emiCalculator
+                            .getDueAmounts(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 1))
+                            .getDuePrincipal());
 
-            emiCalculator.addBalanceCorrection(interestSchedule, LocalDate.of(2024, 4, 15), emiCalculator
-                    .getDueAmounts(interestSchedule, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 1)).getDuePrincipal().negated());
+            emiCalculator.addBalanceCorrection(interestSchedule, LocalDate.of(2024, 4, 15),
+                    emiCalculator
+                            .getDueAmounts(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 1))
+                            .getDuePrincipal().negated());
 
             LocalDate transactionDate = LocalDate.of(2024, 4, 15);
             LocalDate reAgingStartDate = LocalDate.of(2024, 4, 20);
@@ -4566,26 +4631,30 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 5, 0, 17.47, 0.012886027397, 0.222283972598, 0.22, 17.25, 0.0);
 
             // repay EMI on first period due date
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(16.1)));
-            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(1.33)));
 
             // repay EMI on first period due date - next installment for 2nd period
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(17.43)));
 
             // repay 20 for last installment on first period due date -- ie MIR
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(17.43)));
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(2.57)));
 
             emiCalculator.addBalanceCorrection(interestSchedule, LocalDate.of(2024, 4, 1),
-                    emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 1)).getDuePrincipal());
+                    emiCalculator
+                            .getDueAmounts(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 1))
+                            .getDuePrincipal());
 
-            emiCalculator.addBalanceCorrection(interestSchedule, LocalDate.of(2024, 4, 15), emiCalculator
-                    .getDueAmounts(interestSchedule, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 1)).getDuePrincipal().negated());
+            emiCalculator.addBalanceCorrection(interestSchedule, LocalDate.of(2024, 4, 15),
+                    emiCalculator
+                            .getDueAmounts(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 1))
+                            .getDuePrincipal().negated());
 
             LocalDate transactionDate = LocalDate.of(2024, 4, 15);
             LocalDate reAgingStartDate = LocalDate.of(2024, 5, 1);
@@ -4645,19 +4714,19 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 5, 0, 17.47, 0.012886027397, 0.222283972598, 0.22, 17.25, 0.0);
 
             // repay EMI on first period due date
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(16.1)));
-            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(1.33)));
 
             // repay EMI on first period due date - next installment for 2nd period
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(17.43)));
 
             // repay 20 for last installment on first period due date -- ie MIR
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(17.43)));
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(2.57)));
 
             LocalDate transactionDate = LocalDate.of(2024, 7, 1);
@@ -4718,19 +4787,19 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 5, 0, 17.47, 0.012886027397, 0.222283972598, 0.22, 17.25, 0.0);
 
             // repay EMI on first period due date
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(16.1)));
-            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(1.33)));
 
             // repay EMI on first period due date - next installment for 2nd period
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(17.43)));
 
             // repay 20 for last installment on first period due date -- ie MIR
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(17.43)));
-            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 2, 1),
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1), LocalDate.of(2024, 2, 1),
                     Money.of(currency, BigDecimal.valueOf(2.57)));
 
             LocalDate transactionDate = LocalDate.of(2024, 7, 10);
@@ -4809,9 +4878,9 @@ class ProgressiveEMICalculatorTest {
 
     private static void checkDailyInterest(final ProgressiveLoanInterestScheduleModel interestModel, final LocalDate repaymentPeriodDueDate,
             final LocalDate interestStartDay, final int dayOffset, final double dailyInterest, final double interest) {
-        Money previousInterest = emiCalculator.getPeriodInterestTillDate(interestModel, repaymentPeriodDueDate,
+        Money previousInterest = emiCalculator.getPeriodInterestTillDate(interestModel, interestStartDay, repaymentPeriodDueDate,
                 interestStartDay.plusDays(dayOffset - 1), true);
-        Money currentInterest = emiCalculator.getPeriodInterestTillDate(interestModel, repaymentPeriodDueDate,
+        Money currentInterest = emiCalculator.getPeriodInterestTillDate(interestModel, interestStartDay, repaymentPeriodDueDate,
                 interestStartDay.plusDays(dayOffset), true);
         Assertions.assertEquals(dailyInterest, toDouble(currentInterest.minus(previousInterest)));
         Assertions.assertEquals(interest, toDouble(currentInterest));

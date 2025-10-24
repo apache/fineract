@@ -61,7 +61,8 @@ public interface EMICalculator {
     /**
      * Find repayment period based on Due Date.
      */
-    Optional<RepaymentPeriod> findRepaymentPeriod(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate dueDate);
+    Optional<RepaymentPeriod> findRepaymentPeriod(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate fromDate,
+            LocalDate dueDate);
 
     /**
      * Applies the disbursement on the interest model. This method recalculates the EMI amounts from the action date.
@@ -95,14 +96,14 @@ public interface EMICalculator {
     /**
      * This method used for pay interest portion during the repayment transaction.
      */
-    void payInterest(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate repaymentPeriodDueDate, LocalDate transactionDate,
-            Money interestAmount);
+    void payInterest(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate repaymentPeriodFromDate,
+            LocalDate repaymentPeriodDueDate, LocalDate transactionDate, Money interestAmount);
 
     /**
      * This method used for pay principal portion during the repayment transaction.
      */
-    void payPrincipal(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate repaymentPeriodDueDate, LocalDate transactionDate,
-            Money principalAmount);
+    void payPrincipal(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate repaymentPeriodFromDate,
+            LocalDate repaymentPeriodDueDate, LocalDate transactionDate, Money principalAmount);
 
     /**
      * This method used for credit principal portion. This method increases the outstanding balance. This method creates
@@ -120,15 +121,15 @@ public interface EMICalculator {
      * This method gives back the maximum of the due principal and maximum of the due interest for a requested day.
      */
     @NotNull
-    PeriodDueDetails getDueAmounts(@NotNull ProgressiveLoanInterestScheduleModel scheduleModel, @NotNull LocalDate periodDueDate,
-            @NotNull LocalDate targetDate);
+    PeriodDueDetails getDueAmounts(@NotNull ProgressiveLoanInterestScheduleModel scheduleModel, @NotNull LocalDate periodFromDate,
+            @NotNull LocalDate periodDueDate, @NotNull LocalDate targetDate);
 
     /**
      * Gives back the sum of the interest from the whole model on the given date.
      */
     @NotNull
-    Money getPeriodInterestTillDate(@NotNull ProgressiveLoanInterestScheduleModel scheduleModel, @NotNull LocalDate periodDueDate,
-            @NotNull LocalDate targetDate, boolean includeChargebackInterest);
+    Money getPeriodInterestTillDate(@NotNull ProgressiveLoanInterestScheduleModel scheduleModel, @NotNull LocalDate periodFromDate,
+            @NotNull LocalDate periodDueDate, @NotNull LocalDate targetDate, boolean includeChargebackInterest);
 
     Money getOutstandingLoanBalanceOfPeriod(ProgressiveLoanInterestScheduleModel interestScheduleModel, LocalDate targetDate);
 

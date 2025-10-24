@@ -143,12 +143,14 @@ public class ProgressiveLoanInterestScheduleModel {
         interestRates.add(new InterestRate(newInterestEffectiveDate, newInterestRate));
     }
 
-    public Optional<RepaymentPeriod> findRepaymentPeriodByDueDate(final LocalDate repaymentPeriodDueDate) {
+    public Optional<RepaymentPeriod> findRepaymentPeriodByFromAndDueDate(final LocalDate repaymentPeriodFromDate,
+            final LocalDate repaymentPeriodDueDate) {
         if (repaymentPeriodDueDate == null) {
             return Optional.empty();
         }
         return repaymentPeriods.stream()//
-                .filter(repaymentPeriodItem -> DateUtils.isEqual(repaymentPeriodItem.getDueDate(), repaymentPeriodDueDate))//
+                .filter(repaymentPeriodItem -> DateUtils.isEqual(repaymentPeriodItem.getFromDate(), repaymentPeriodFromDate)
+                        && DateUtils.isEqual(repaymentPeriodItem.getDueDate(), repaymentPeriodDueDate))//
                 .findFirst();
     }
 
