@@ -560,6 +560,21 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     }
 
     private void calculateLastUnpaidRepaymentPeriodEMI(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate tillDate) {
+
+        Money totalDuePaidDiff = scheduleModel.getTotalDuePrincipal().minus(scheduleModel.getTotalPaidPrincipal());
+        // Remove outstanding principal from EMI in case outstanding principal is greater than total due minus paid
+        // diff. We need this extra step in case excessive principal was paid with LAST_INSTALLMENT strategy
+        scheduleModel.repaymentPeriods().forEach(rp -> {
+            if (rp.getOutstandingPrincipal().isGreaterThan(totalDuePaidDiff)) {
+                Money delta = rp.getOutstandingPrincipal().minus(totalDuePaidDiff);
+                rp.setEmi(rp.getEmi().minus(delta));
+                Money minimumEMI = MathUtil.plus(rp.getPaidInterest(), rp.getPaidPrincipal());
+                if (rp.getEmi().isLessThan(minimumEMI)) {
+                    rp.setEmi(minimumEMI);
+                }
+            }
+        });
+
         Optional<RepaymentPeriod> findLastUnpaidRepaymentPeriod = scheduleModel.repaymentPeriods().stream().filter(rp -> !rp.isFullyPaid())
                 .reduce((first, second) -> second);
 
