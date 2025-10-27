@@ -4010,16 +4010,16 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PENALTY, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_FEE), //
                         createPaymentAllocation("GOODWILL_CREDIT", "REAMORTIZATION",
-                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_PRINCIPAL, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_INTEREST, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_PRINCIPAL, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_PENALTY, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_FEE, //
-                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_PRINCIPAL, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_INTEREST, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_PRINCIPAL, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_PENALTY, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_FEE, //
-                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PRINCIPAL, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_INTEREST, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PRINCIPAL, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PENALTY, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_FEE), //
                         createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT",
