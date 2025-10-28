@@ -278,7 +278,8 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
         if (reprocessRequired) {
             if (loan.isProgressiveSchedule() && ((loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy())
-                    || loan.hasContractTerminationTransaction())) {
+                    || loan.hasContractTerminationTransaction()
+                    || (loan.isInterestRecalculationEnabled() && loan.hasReAgingTransaction()))) {
                 final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
                 loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
             }
@@ -857,7 +858,8 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             if (reprocessRequired) {
                 addInstallmentIfPenaltyAppliedAfterLastDueDate(loan, lastChargeDate);
                 if (loan.isProgressiveSchedule() && ((loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy())
-                        || loan.hasContractTerminationTransaction())) {
+                        || loan.hasContractTerminationTransaction()
+                        || (loan.isInterestRecalculationEnabled() && loan.hasReAgingTransaction()))) {
                     final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
                     loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
                 }
@@ -888,7 +890,8 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         loan.addLoanTransaction(loanChargeAdjustmentTransaction);
         if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
             if (loan.isProgressiveSchedule() && ((loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy())
-                    || loan.hasContractTerminationTransaction())) {
+                    || loan.hasContractTerminationTransaction()
+                    || (loan.isInterestRecalculationEnabled() && loan.hasReAgingTransaction()))) {
                 final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
                 loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
             }
@@ -1446,7 +1449,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 && DateUtils.isBefore(loanCharge.getDueLocalDate(), businessDate)) {
             loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
         } else if (loan.isProgressiveSchedule() && ((loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy())
-                || loan.hasContractTerminationTransaction())) {
+                || loan.hasContractTerminationTransaction() || (loan.isInterestRecalculationEnabled() && loan.hasReAgingTransaction()))) {
             loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
         }
         // Waive of charges whose due date falls after latest 'repayment' transaction don't require entire loan schedule

@@ -27,6 +27,8 @@ import java.util.Optional;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelRepaymentPeriod;
 import org.apache.fineract.portfolio.loanproduct.calc.data.OutstandingDetails;
 import org.apache.fineract.portfolio.loanproduct.calc.data.PeriodDueDetails;
@@ -140,4 +142,7 @@ public interface EMICalculator {
      * interest paused.
      */
     void applyInterestPause(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate fromDate, LocalDate endDate);
+
+    void updateModelRepaymentPeriodsDuringReAge(ProgressiveLoanInterestScheduleModel scheduleModel, LoanTransaction loanTransaction,
+            LoanApplicationTerms loanApplicationTerms, MathContext mc);
 }

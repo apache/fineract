@@ -545,7 +545,7 @@ public final class ErrorMessageHelper {
             List<String> expected) {
         String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
         return String.format("%nWrong value in Repayment schedule of resource %s tab line %s." //
-                + "%nActual values in line (with the same due date) are: %n%s - But expected values in line: %n%s", resourceId, line,
+                + "%nActual values in line (with the same due date) are: %n%s - %nBut expected values in line: %n%s", resourceId, line,
                 actual, expected);
     }
 

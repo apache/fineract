@@ -165,8 +165,13 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
             ProgressiveLoanInterestScheduleModel model = savedModel
                     .orElseGet(() -> advancedProcessor.calculateInterestScheduleModel(loan.getId(), loanTransaction.getTransactionDate()));
 
-            transactionCtx = new ProgressiveTransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                    loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail(), model);
+            final ProgressiveTransactionCtx progressiveTransactionCtx = new ProgressiveTransactionCtx(loan.getCurrency(),
+                    loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()),
+                    new ChangedTransactionDetail(), model);
+            progressiveTransactionCtx.setChargedOff(loan.isChargedOff());
+            progressiveTransactionCtx.setWrittenOff(loan.isClosedWrittenOff());
+            progressiveTransactionCtx.setContractTerminated(loan.isContractTermination());
+            transactionCtx = progressiveTransactionCtx;
         } else {
             transactionCtx = new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                     new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail());
