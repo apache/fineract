@@ -2144,3 +2144,35 @@ Feature: LoanDelinquency
       | 3       | RANGE_30 | 125.00 |
       | 4       | RANGE_60 | 375.00 |
       | 5       | RANGE_90 | 250.00 |
+
+  @TestRailId:C4140
+  Scenario: Verify that loan delinquent days are correct when graceOnArrearsAgeing is set on loan product level (value=3)
+    When Admin sets the business date to "01 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES | 01 January 2025   | 1000           | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "1000" amount and expected disbursement date on "01 January 2025"
+    And Admin successfully disburse the loan on "01 January 2025" with "1000" EUR transaction amount
+    And Admin sets the business date to "15 May 2025"
+    And Admin runs inline COB job for Loan
+    Then Admin checks that delinquency range is: "RANGE_90" and has delinquentDate "2025-02-04"
+    And Loan has the following LOAN level delinquency data:
+      | classification | delinquentAmount | delinquentDate   | delinquentDays | pastDueDays |
+      | RANGE_90       | 666.68           | 04 February 2025 | 100            | 103         |
+
+  @TestRailId:C4141
+  Scenario: Verify that loan delinquent days are correct when graceOnArrearsAgeing is overrided on loan level (value=5)
+    When Admin sets the business date to "01 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with graceOnArrearsAgeing and following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | graceOnArrearsAgeing |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES | 01 January 2025   | 1000           | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | 5                    |
+    And Admin successfully approves the loan on "01 January 2025" with "1000" amount and expected disbursement date on "01 January 2025"
+    And Admin successfully disburse the loan on "01 January 2025" with "1000" EUR transaction amount
+    And Admin sets the business date to "15 May 2025"
+    And Admin runs inline COB job for Loan
+    Then Admin checks that delinquency range is: "RANGE_90" and has delinquentDate "2025-02-06"
+    And Loan has the following LOAN level delinquency data:
+      | classification | delinquentAmount | delinquentDate   | delinquentDays | pastDueDays |
+      | RANGE_90       | 666.68           | 06 February 2025 | 98             | 103         |
