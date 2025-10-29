@@ -97,8 +97,11 @@ public class TellerApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Create teller", description = "Mandatory Fields\n" + "Teller name, OfficeId, Description, Start Date, Status\n"
-            + "Optional Fields\n" + "End Date")
+    @Operation(summary = "Create teller", description = """
+            Mandatory Fields
+            Teller name, OfficeId, Description, Start Date, Status
+            Optional Fields
+            End Date""")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PostTellersRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PostTellersResponse.class))) })
@@ -185,9 +188,14 @@ public class TellerApiResource {
     @Path("{tellerId}/cashiers")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Create Cashiers", description = "Mandatory Fields: \n"
-            + "Cashier/staff, Fromm Date, To Date, Full Day or From time and To time\n" + "\n\n\n" + "Optional Fields: \n"
-            + "Description/Notes")
+    @Operation(summary = "Create Cashiers", description = """
+            Mandatory Fields:\s
+            Cashier/staff, Fromm Date, To Date, Full Day or From time and To time
+
+
+
+            Optional Fields:\s
+            Description/Notes""")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PostTellersTellerIdCashiersRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PostTellersTellerIdCashiersResponse.class))) })

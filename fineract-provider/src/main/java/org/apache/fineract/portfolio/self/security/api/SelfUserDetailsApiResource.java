@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
 
 @Path("/v1/self/userdetails")
 @Component
-@ConditionalOnProperty("fineract.security.oauth.enabled")
+@ConditionalOnProperty("fineract.security.oauth2.enabled")
 @Tag(name = "Self User Details", description = "")
 @RequiredArgsConstructor
 @Conditional(SelfServiceModuleIsEnabledCondition.class)

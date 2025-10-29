@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static java.lang.Integer.parseInt;
 import static org.apache.http.HttpStatus.SC_FORBIDDEN;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -2459,7 +2458,7 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
         ResponseSpecification conflictResponseSpec = new ResponseSpecBuilder().expectStatusCode(409).build();
         ErrorResponse errorResponse = BatchHelper.postBatchRequestsWithoutEnclosingTransactionError(requestSpec, conflictResponseSpec,
                 jsonifiedRepaymentRequest);
-        assertEquals(409, parseInt(errorResponse.getHttpStatusCode()));
+        assertEquals(409, errorResponse.getHttpStatusCode());
     }
 
     /**
@@ -2541,7 +2540,7 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
         ResponseSpecification conflictResponseSpec = new ResponseSpecBuilder().expectStatusCode(409).build();
         ErrorResponse errorResponse = BatchHelper.postBatchRequestsWithoutEnclosingTransactionError(requestSpec, conflictResponseSpec,
                 jsonifiedRepaymentRequest);
-        assertEquals(409, parseInt(errorResponse.getHttpStatusCode()));
+        assertEquals(409, errorResponse.getHttpStatusCode());
     }
 
     @Test

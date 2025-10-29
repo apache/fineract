@@ -157,7 +157,7 @@ public class BatchLoanIntegrationTest extends BaseLoanIntegrationTest {
                         .approveRescheduleLoan(2L, 1L, "01 January 2023") //
                         .executeEnclosingTransactionError(new ResponseSpecBuilder().expectStatusCode(409).build()); //
 
-                Assertions.assertEquals(HttpStatus.SC_CONFLICT, Integer.parseInt(response.getHttpStatusCode()));
+                Assertions.assertEquals(HttpStatus.SC_CONFLICT, response.getHttpStatusCode());
             });
         });
     }

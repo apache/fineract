@@ -30,8 +30,9 @@ import lombok.Getter;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
-import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeOffReasonToGLAccountMapper;
+import org.apache.fineract.accounting.producttoaccountmapping.data.AdvancedMappingToExpenseAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
+import org.apache.fineract.accounting.producttoaccountmapping.data.ClassificationToGLAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
@@ -162,9 +163,10 @@ public class LoanProductData implements Serializable {
     private Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings;
     private Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings;
     private Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
-    private List<ChargeOffReasonToGLAccountMapper> chargeOffReasonToExpenseAccountMappings;
+    private List<AdvancedMappingToExpenseAccountData> chargeOffReasonToExpenseAccountMappings;
     private final boolean enableAccrualActivityPosting;
-
+    private List<AdvancedMappingToExpenseAccountData> writeOffReasonsToExpenseMappings;
+    private final List<CodeValueData> writeOffReasonOptions;
     // rates
     private final boolean isRatesEnabled;
     private final Collection<RateData> rates;
@@ -260,6 +262,11 @@ public class LoanProductData implements Serializable {
     private List<StringEnumOptionData> buyDownFeeCalculationTypeOptions;
     private List<StringEnumOptionData> buyDownFeeStrategyOptions;
     private List<StringEnumOptionData> buyDownFeeIncomeTypeOptions;
+
+    private final List<CodeValueData> capitalizedIncomeClassificationOptions;
+    private final List<CodeValueData> buydownFeeClassificationOptions;
+    private List<ClassificationToGLAccountData> capitalizedIncomeClassificationToIncomeAccountMappings;
+    private List<ClassificationToGLAccountData> buydownFeeClassificationToIncomeAccountMappings;
 
     /**
      * Used when returning lookup information about loan product for dropdowns.
@@ -373,6 +380,8 @@ public class LoanProductData implements Serializable {
         final StringEnumOptionData buyDownFeeStrategy = null;
         final StringEnumOptionData buyDownFeeIncomeType = null;
         final boolean merchantBuyDownFee = false;
+        final List<AdvancedMappingToExpenseAccountData> writeOffReasonsToExpenseMappings = null;
+        final List<CodeValueData> writeOffReasonOptions = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -396,7 +405,8 @@ public class LoanProductData implements Serializable {
                 loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour,
                 interestRecognitionOnDisbursementDate, daysInYearTypeCustomStrategy, enableIncomeCapitalization,
                 capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, enableBuyDownFee,
-                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee);
+                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee, writeOffReasonsToExpenseMappings,
+                writeOffReasonOptions);
 
     }
 
@@ -510,6 +520,8 @@ public class LoanProductData implements Serializable {
         final StringEnumOptionData buyDownFeeStrategy = null;
         final StringEnumOptionData buyDownFeeIncomeType = null;
         final boolean merchantBuyDownFee = false;
+        final List<AdvancedMappingToExpenseAccountData> writeOffReasonsToExpenseMappings = null;
+        final List<CodeValueData> writeOffReasonOptions = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -533,7 +545,8 @@ public class LoanProductData implements Serializable {
                 loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour,
                 interestRecognitionOnDisbursementDate, daysInYearTypeCustomStrategy, enableIncomeCapitalization,
                 capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, enableBuyDownFee,
-                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee);
+                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee, writeOffReasonsToExpenseMappings,
+                writeOffReasonOptions);
 
     }
 
@@ -654,6 +667,8 @@ public class LoanProductData implements Serializable {
         final StringEnumOptionData buyDownFeeStrategy = null;
         final StringEnumOptionData buyDownFeeIncomeType = null;
         final boolean merchantBuyDownFee = false;
+        final List<AdvancedMappingToExpenseAccountData> writeOffReasonsToExpenseMappings = null;
+        final List<CodeValueData> writeOffReasonOptions = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -677,7 +692,8 @@ public class LoanProductData implements Serializable {
                 loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour,
                 interestRecognitionOnDisbursementDate, daysInYearTypeCustomStrategy, enableIncomeCapitalization,
                 capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, enableBuyDownFee,
-                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee);
+                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee, writeOffReasonsToExpenseMappings,
+                writeOffReasonOptions);
 
     }
 
@@ -792,6 +808,8 @@ public class LoanProductData implements Serializable {
         final StringEnumOptionData buyDownFeeStrategy = null;
         final StringEnumOptionData buyDownFeeIncomeType = null;
         final boolean merchantBuyDownFee = false;
+        final List<AdvancedMappingToExpenseAccountData> writeOffReasonsToExpenseMappings = null;
+        final List<CodeValueData> writeOffReasonOptions = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -815,19 +833,26 @@ public class LoanProductData implements Serializable {
                 loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour,
                 interestRecognitionOnDisbursementDate, daysInYearTypeCustomStrategy, enableIncomeCapitalization,
                 capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, enableBuyDownFee,
-                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee);
+                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee, writeOffReasonsToExpenseMappings,
+                writeOffReasonOptions);
     }
 
     public static LoanProductData withAccountingDetails(final LoanProductData productData, final Map<String, Object> accountingMappings,
             final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings,
             final Collection<ChargeToGLAccountMapper> feeToGLAccountMappings,
             final Collection<ChargeToGLAccountMapper> penaltyToGLAccountMappings,
-            final List<ChargeOffReasonToGLAccountMapper> chargeOffReasonToGLAccountMappings) {
+            final List<AdvancedMappingToExpenseAccountData> chargeOffReasonToGLAccountMappings,
+            final List<AdvancedMappingToExpenseAccountData> writeOffReasonToGLAccountMappings,
+            final List<ClassificationToGLAccountData> capitalizedIncomeClassificationToIncomeAccountMappings,
+            final List<ClassificationToGLAccountData> buydownFeeClassificationToIncomeAccountMappings) {
         productData.accountingMappings = accountingMappings;
         productData.paymentChannelToFundSourceMappings = paymentChannelToFundSourceMappings;
         productData.feeToIncomeAccountMappings = feeToGLAccountMappings;
         productData.penaltyToIncomeAccountMappings = penaltyToGLAccountMappings;
         productData.chargeOffReasonToExpenseAccountMappings = chargeOffReasonToGLAccountMappings;
+        productData.writeOffReasonsToExpenseMappings = writeOffReasonToGLAccountMappings;
+        productData.capitalizedIncomeClassificationToIncomeAccountMappings = capitalizedIncomeClassificationToIncomeAccountMappings;
+        productData.buydownFeeClassificationToIncomeAccountMappings = buydownFeeClassificationToIncomeAccountMappings;
         return productData;
     }
 
@@ -874,7 +899,9 @@ public class LoanProductData implements Serializable {
             final StringEnumOptionData capitalizedIncomeCalculationType, final StringEnumOptionData capitalizedIncomeStrategy,
             final StringEnumOptionData capitalizedIncomeType, final boolean enableBuyDownFee,
             final StringEnumOptionData buyDownFeeCalculationType, final StringEnumOptionData buyDownFeeStrategy,
-            final StringEnumOptionData buyDownFeeIncomeType, final boolean merchantBuyDownFee) {
+            final StringEnumOptionData buyDownFeeIncomeType, final boolean merchantBuyDownFee,
+            final List<AdvancedMappingToExpenseAccountData> writeOffReasonsToExpenseMappings,
+            final List<CodeValueData> writeOffReasonOptions) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -961,6 +988,7 @@ public class LoanProductData implements Serializable {
         this.feeToIncomeAccountMappings = null;
         this.penaltyToIncomeAccountMappings = null;
         this.chargeOffReasonToExpenseAccountMappings = null;
+        this.writeOffReasonsToExpenseMappings = null;
         this.valueConditionTypeOptions = null;
         this.principalVariationsForBorrowerCycle = principalVariations;
         this.interestRateVariationsForBorrowerCycle = interestRateVariations;
@@ -1036,6 +1064,12 @@ public class LoanProductData implements Serializable {
         this.buyDownFeeCalculationTypeOptions = ApiFacingEnum.getValuesAsStringEnumOptionDataList(LoanBuyDownFeeCalculationType.class);
         this.buyDownFeeStrategyOptions = ApiFacingEnum.getValuesAsStringEnumOptionDataList(LoanBuyDownFeeStrategy.class);
         this.buyDownFeeIncomeTypeOptions = ApiFacingEnum.getValuesAsStringEnumOptionDataList(LoanBuyDownFeeIncomeType.class);
+        this.writeOffReasonsToExpenseMappings = writeOffReasonsToExpenseMappings;
+        this.writeOffReasonOptions = writeOffReasonOptions;
+        this.capitalizedIncomeClassificationOptions = null;
+        this.buydownFeeClassificationOptions = null;
+        this.capitalizedIncomeClassificationToIncomeAccountMappings = null;
+        this.buydownFeeClassificationToIncomeAccountMappings = null;
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
@@ -1065,7 +1099,8 @@ public class LoanProductData implements Serializable {
             final List<StringEnumOptionData> capitalizedIncomeStrategyOptions,
             final List<StringEnumOptionData> capitalizedIncomeTypeOptions,
             final List<StringEnumOptionData> buyDownFeeCalculationTypeOptions, final List<StringEnumOptionData> buyDownFeeStrategyOptions,
-            final List<StringEnumOptionData> buyDownFeeIncomeTypeOptions) {
+            final List<StringEnumOptionData> buyDownFeeIncomeTypeOptions, final List<CodeValueData> writeOffReasonOptions,
+            final List<CodeValueData> capitalizedIncomeClassificationOptions, final List<CodeValueData> buydownFeeClassificationOptions) {
 
         this.id = productData.id;
         this.name = productData.name;
@@ -1119,6 +1154,8 @@ public class LoanProductData implements Serializable {
         this.feeToIncomeAccountMappings = productData.feeToIncomeAccountMappings;
         this.penaltyToIncomeAccountMappings = productData.penaltyToIncomeAccountMappings;
         this.chargeOffReasonToExpenseAccountMappings = productData.chargeOffReasonToExpenseAccountMappings;
+        this.writeOffReasonsToExpenseMappings = productData.writeOffReasonsToExpenseMappings;
+        this.writeOffReasonOptions = writeOffReasonOptions;
 
         this.chargeOptions = chargeOptions;
         this.penaltyOptions = penaltyOptions;
@@ -1246,6 +1283,10 @@ public class LoanProductData implements Serializable {
         this.buyDownFeeIncomeTypeOptions = buyDownFeeIncomeTypeOptions;
 
         this.merchantBuyDownFee = productData.isMerchantBuyDownFee();
+        this.capitalizedIncomeClassificationOptions = capitalizedIncomeClassificationOptions;
+        this.buydownFeeClassificationOptions = buydownFeeClassificationOptions;
+        this.buydownFeeClassificationToIncomeAccountMappings = productData.buydownFeeClassificationToIncomeAccountMappings;
+        this.capitalizedIncomeClassificationToIncomeAccountMappings = productData.capitalizedIncomeClassificationToIncomeAccountMappings;
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {

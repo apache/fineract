@@ -36,9 +36,10 @@ import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-public class LoanTestLifecycleExtension implements AfterEachCallback {
+public class LoanTestLifecycleExtension implements AfterEachCallback, BeforeEachCallback {
 
     private LoanTransactionHelper loanTransactionHelper;
     public static final String DATE_FORMAT = "dd MMMM yyyy";
@@ -46,6 +47,15 @@ public class LoanTestLifecycleExtension implements AfterEachCallback {
 
     @Override
     public void afterEach(ExtensionContext context) {
+        closeOpenLoans();
+    }
+
+    @Override
+    public void beforeEach(ExtensionContext context) {
+        closeOpenLoans();
+    }
+
+    private void closeOpenLoans() {
         BusinessDateHelper.runAt(DateTimeFormatter.ofPattern(DATE_FORMAT).format(Utils.getLocalDateOfTenant()), () -> {
             this.loanTransactionHelper = new LoanTransactionHelper(null, null);
 

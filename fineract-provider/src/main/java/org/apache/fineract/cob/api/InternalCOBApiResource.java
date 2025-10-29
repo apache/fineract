@@ -21,6 +21,7 @@ package org.apache.fineract.cob.api;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -46,6 +47,7 @@ import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -54,6 +56,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Path("/v1/internal/cob")
 @RequiredArgsConstructor
+@Tag(name = "Internal COB", description = "Internal COB api for testing purpose")
 @Slf4j
 public class InternalCOBApiResource implements InitializingBean {
 
@@ -63,6 +66,7 @@ public class InternalCOBApiResource implements InitializingBean {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final ToApiJsonSerializer<List> toApiJsonSerializerForList;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
+    private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
 
     protected DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
 
@@ -101,6 +105,13 @@ public class InternalCOBApiResource implements InitializingBean {
         LocalDate localDate = LocalDate.parse(lastClosedBusinessDate, dateTimeFormatter);
         loan.setLastClosedBusinessDate(localDate);
         loanRepositoryWrapper.save(loan);
+    }
+
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Path("loan-reprocess/{loanId}")
+    public void loanReprocess(@Context final UriInfo uriInfo, @PathParam("loanId") long loanId) {
+        reprocessLoanTransactionsService.reprocessTransactions(loanRepositoryWrapper.findOneWithNotFoundDetection(loanId));
     }
 
 }

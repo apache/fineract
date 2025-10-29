@@ -406,6 +406,17 @@ public class FixedDepositAccountHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
+    public Object closeForFixedDeposit(final Integer fixedDepositAccountId, final String closedOnDate, final String closureType,
+            final Integer toSavingsId, final String jsonAttributeToGetBack) {
+        LOG.info("--------------------- CLOSE FOR FIXED DEPOSIT ----------------------------");
+        return performFixedDepositActions(createFixedDepositCalculateInterestURL(CLOSE_FIXED_DEPOSIT_COMMAND, fixedDepositAccountId),
+                getPrematureCloseForFixedDepositAccountAsJSON(closedOnDate, closureType, toSavingsId), jsonAttributeToGetBack);
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private String getApproveFixedDepositAccountAsJSON(final String approvedOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.LOCALE);

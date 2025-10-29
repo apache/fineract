@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <changeSet author="fineract" id="1">
+        <insert tableName="m_code">
+            <column name="code_name" value="ReAgeReasons"/>
+            <column name="is_system_defined" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="fineract" id="2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <addColumn tableName="m_loan_reage_parameter">
+            <column defaultValue="DEFAULT" name="interest_handling_type" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="3">
+        <addColumn tableName="m_loan_reage_parameter">
+            <column defaultValueComputed="NULL" name="reage_reason_code_value_id" type="INT"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="reage_reason_code_value_id" baseTableName="m_loan_reage_parameter"
+                                 constraintName="FK_reage_reason_code_m_code_value" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="m_code_value" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

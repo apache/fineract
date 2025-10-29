@@ -400,9 +400,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             }
         }
 
-        final List<Note> relatedNotes = this.noteRepository.findBySavingsAccount(account);
-        this.noteRepository.deleteAllInBatch(relatedNotes);
-
+        this.noteRepository.deleteAllBySavingsAccount(account);
         this.savingAccountRepository.delete(account);
 
         return new CommandProcessingResultBuilder() //

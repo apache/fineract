@@ -24,8 +24,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -39,6 +42,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
+import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanReAgingApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -46,6 +50,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTra
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeInterestHandlingType;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
@@ -77,6 +82,7 @@ public class LoanReAgingServiceImpl {
     private final LoanUtilService loanUtilService;
     private final LoanScheduleService loanScheduleService;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
+    private final CodeValueRepository codeValueRepository;
 
     public CommandProcessingResult reAge(Long loanId, JsonCommand command) {
         Loan loan = loanAssembler.assembleFrom(loanId);
@@ -89,14 +95,27 @@ public class LoanReAgingServiceImpl {
         LoanTransaction reAgeTransaction = createReAgeTransaction(loan, command);
         LoanReAgeParameter reAgeParameter = createReAgeParameter(reAgeTransaction, command);
         reAgeTransaction.setLoanReAgeParameter(reAgeParameter);
-
         loanTransactionRepository.saveAndFlush(reAgeTransaction);
-
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
                 .determineProcessor(loan.transactionProcessingStrategy());
-        loanRepaymentScheduleTransactionProcessor.processLatestTransaction(reAgeTransaction, new TransactionCtx(loan.getCurrency(),
-                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
-
+        if (reAgeTransaction.getTransactionDate().isBefore(reAgeTransaction.getSubmittedOnDate())
+                && !loan.isInterestBearingAndInterestRecalculationEnabled()) {
+            reprocessLoanTransactionsService.reprocessTransactionsWithPostTransactionChecks(loan, reAgeTransaction.getTransactionDate());
+        } else if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
+            if (loan.isProgressiveSchedule() && ((loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy())
+                    || loan.hasContractTerminationTransaction()
+                    || (loan.isInterestRecalculationEnabled() && loan.hasReAgingTransaction()))) {
+                final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
+                loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
+            }
+            final List<LoanTransaction> loanTransactions = loanTransactionRepository.findNonReversedTransactionsForReprocessingByLoan(loan);
+            loanTransactions.add(reAgeTransaction);
+            reprocessLoanTransactionsService.reprocessParticularTransactions(loan, loanTransactions);
+        } else {
+            loanRepaymentScheduleTransactionProcessor.processLatestTransaction(reAgeTransaction,
+                    new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
+                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+        }
         loan.updateLoanScheduleDependentDerivedFields();
         persistNote(loan, command, changes);
 
@@ -126,13 +145,13 @@ public class LoanReAgingServiceImpl {
         if (reAgeTransaction == null) {
             throw new LoanTransactionNotFoundException("Re-Age transaction for loan was not found");
         }
-        reverseReAgeTransaction(reAgeTransaction, command);
-        loanTransactionRepository.saveAndFlush(reAgeTransaction);
         if (loan.isProgressiveSchedule() && ((loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy())
-                || loan.hasContractTerminationTransaction())) {
+                || loan.hasContractTerminationTransaction() || (loan.isInterestRecalculationEnabled() && loan.hasReAgingTransaction()))) {
             final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
             loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
         }
+        reverseReAgeTransaction(reAgeTransaction, command);
+        loanTransactionRepository.saveAndFlush(reAgeTransaction);
         reprocessLoanTransactionsService.reprocessTransactions(loan);
         loan.updateLoanScheduleDependentDerivedFields();
         persistNote(loan, command, changes);
@@ -172,7 +191,10 @@ public class LoanReAgingServiceImpl {
 
         // reaging transaction date is always the current business date
         LocalDate transactionDate = DateUtils.getBusinessLocalDate();
-
+        LocalDate startDate = command.dateValueOfParameterNamed(LoanReAgingApiConstants.startDate);
+        if (transactionDate.isAfter(startDate)) {
+            transactionDate = startDate;
+        }
         // in case of a reaging transaction, only the outstanding principal amount until the business date is considered
         Money txPrincipal = loan.getTotalPrincipalOutstandingUntil(transactionDate);
         BigDecimal txPrincipalAmount = txPrincipal.getAmount();
@@ -182,13 +204,26 @@ public class LoanReAgingServiceImpl {
     }
 
     private LoanReAgeParameter createReAgeParameter(LoanTransaction reAgeTransaction, JsonCommand command) {
-        // TODO: these parameters should be checked when the validations are implemented
         PeriodFrequencyType periodFrequencyType = command.enumValueOfParameterNamed(LoanReAgingApiConstants.frequencyType,
                 PeriodFrequencyType.class);
         LocalDate startDate = command.dateValueOfParameterNamed(LoanReAgingApiConstants.startDate);
         Integer numberOfInstallments = command.integerValueOfParameterNamed(LoanReAgingApiConstants.numberOfInstallments);
         Integer periodFrequencyNumber = command.integerValueOfParameterNamed(LoanReAgingApiConstants.frequencyNumber);
-        return new LoanReAgeParameter(reAgeTransaction, periodFrequencyType, periodFrequencyNumber, startDate, numberOfInstallments);
+
+        LoanReAgeInterestHandlingType reAgeInterestHandlingType = command
+                .enumValueOfParameterNamed(LoanReAgingApiConstants.reAgeInterestHandlingParamName, LoanReAgeInterestHandlingType.class);
+        if (reAgeInterestHandlingType == null) {
+            reAgeInterestHandlingType = LoanReAgeInterestHandlingType.DEFAULT;
+        }
+
+        CodeValue reasonCodeValue = null;
+        if (command.parameterExists(LoanReAgingApiConstants.reasonCodeValueIdParamName)) {
+            reasonCodeValue = codeValueRepository.findByCodeNameAndId(LoanApiConstants.REAGE_REASONS,
+                    command.longValueOfParameterNamed(LoanReAgingApiConstants.reasonCodeValueIdParamName));
+        }
+
+        return new LoanReAgeParameter(reAgeTransaction, periodFrequencyType, periodFrequencyNumber, startDate, numberOfInstallments,
+                reAgeInterestHandlingType, reasonCodeValue);
     }
 
     private void persistNote(Loan loan, JsonCommand command, Map<String, Object> changes) {

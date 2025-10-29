@@ -28,28 +28,38 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.BuyDownFeeAmortizationDetails;
+import org.apache.fineract.client.models.GetCodesResponse;
+import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
+import org.apache.fineract.client.models.PostClassificationToIncomeAccountMappings;
 import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostCodeValueDataResponse;
+import org.apache.fineract.client.models.PostCodeValuesDataRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.externalevents.BusinessEvent;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventHelper;
 import org.apache.fineract.integrationtests.common.externalevents.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.integrationtests.common.externalevents.LoanTransactionMinimalBusinessEvent;
+import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionApiConstants;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,7 +98,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
         runAt("01 September 2024", () -> {
             clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                    .createLoanProduct(createProgressiveLoanProductWithBuyDownFee());
+                    .createLoanProduct(createProgressiveLoanProductWithBuyDownFee(null));
 
             // Apply for the loan with proper progressive loan settings
             PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(clientId,
@@ -240,14 +250,16 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
     /**
      * Creates a progressive loan product with buy down fee enabled
      */
-    private PostLoanProductsRequest createProgressiveLoanProductWithBuyDownFee() {
+    private PostLoanProductsRequest createProgressiveLoanProductWithBuyDownFee(
+            PostClassificationToIncomeAccountMappings buydownFeeClassificationAccountMappings) {
         // Create a progressive loan product with accrual-based accounting and proper GL mappings
-        return new PostLoanProductsRequest().name(Utils.uniqueRandomStringGenerator("BUY_DOWN_FEE_PROGRESSIVE_", 6))
-                .shortName(Utils.uniqueRandomStringGenerator("", 4)).description("Progressive loan product with buy down fee enabled")
-                .includeInBorrowerCycle(false).useBorrowerCycle(false).currencyCode("USD").digitsAfterDecimal(2).principal(1000.0)
-                .minPrincipal(100.0).maxPrincipal(10000.0).numberOfRepayments(12).minNumberOfRepayments(6).maxNumberOfRepayments(24)
-                .repaymentEvery(1).repaymentFrequencyType(RepaymentFrequencyType.MONTHS_L).interestRatePerPeriod(10.0)
-                .minInterestRatePerPeriod(0.0).maxInterestRatePerPeriod(120.0).interestRateFrequencyType(InterestRateFrequencyType.YEARS)
+        PostLoanProductsRequest postLoanProductsRequest = new PostLoanProductsRequest()
+                .name(Utils.uniqueRandomStringGenerator("BUY_DOWN_FEE_PROGRESSIVE_", 6)).shortName(Utils.uniqueRandomStringGenerator("", 4))
+                .description("Progressive loan product with buy down fee enabled").includeInBorrowerCycle(false).useBorrowerCycle(false)
+                .currencyCode("USD").digitsAfterDecimal(2).principal(1000.0).minPrincipal(100.0).maxPrincipal(10000.0)
+                .numberOfRepayments(12).minNumberOfRepayments(6).maxNumberOfRepayments(24).repaymentEvery(1)
+                .repaymentFrequencyType(RepaymentFrequencyType.MONTHS_L).interestRatePerPeriod(10.0).minInterestRatePerPeriod(0.0)
+                .maxInterestRatePerPeriod(120.0).interestRateFrequencyType(InterestRateFrequencyType.YEARS)
                 .amortizationType(AmortizationType.EQUAL_INSTALLMENTS).interestType(InterestType.DECLINING_BALANCE)
                 .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY).allowPartialPeriodInterestCalcualtion(false)
                 .transactionProcessingStrategyCode("advanced-payment-allocation-strategy")
@@ -275,6 +287,11 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
                 .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                 .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
                 .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE).locale("en").dateFormat("dd MMMM yyyy");
+
+        if (buydownFeeClassificationAccountMappings != null) {
+            postLoanProductsRequest.addBuydownfeeClassificationToIncomeAccountMappingsItem(buydownFeeClassificationAccountMappings);
+        }
+        return postLoanProductsRequest;
     }
 
     @Test
@@ -485,6 +502,15 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
         return response.getResourceId();
     }
 
+    private Long addBuyDownFeeForLoan(Long loanId, Double amount, String date, Long classificationId) {
+        String buyDownFeeExternalId = UUID.randomUUID().toString();
+        PostLoansLoanIdTransactionsResponse response = loanTransactionHelper.makeLoanBuyDownFee(loanId,
+                new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate(date).locale("en")
+                        .transactionAmount(amount).externalId(buyDownFeeExternalId).note("Buy Down Fee Transaction")
+                        .classificationId(classificationId));
+        return response.getResourceId();
+    }
+
     @Test
     public void testBuyDownFeeDailyAmortization() {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
@@ -645,7 +671,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
     @Test
     public void testRetrieveBuyDownFeeAmortizationDetails() {
         final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(createProgressiveLoanProductWithBuyDownFee());
+        final PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(createProgressiveLoanProductWithBuyDownFee(null));
 
         final long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 February 2024", 1000.0,
                 7.0, 6, null);
@@ -677,7 +703,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
     public void testRetrieveBuyDownFeeAmortizationDetails_notEnabled() {
         final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
         final PostLoanProductsResponse loanProduct = loanProductHelper
-                .createLoanProduct(createProgressiveLoanProductWithBuyDownFee().enableBuyDownFee(false));
+                .createLoanProduct(createProgressiveLoanProductWithBuyDownFee(null).enableBuyDownFee(false));
 
         final long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 February 2024", 1000.0,
                 7.0, 6, null);
@@ -872,7 +898,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
             // Add initial buy down fee
 
             final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                    .createLoanProduct(createProgressiveLoanProductWithBuyDownFee().merchantBuyDownFee(false));
+                    .createLoanProduct(createProgressiveLoanProductWithBuyDownFee(null).merchantBuyDownFee(false));
 
             // Apply for the loan with proper progressive loan settings
             PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(clientId,
@@ -917,4 +943,90 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
         });
     }
 
+    @Test
+    public void testBuyDownFeeWithAdvanceAccountingMappings() {
+        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        final AtomicReference<Long> classificationIdRef = new AtomicReference<>();
+        final AtomicReference<Account> classificationIncomeAccountRef = new AtomicReference<>();
+        runAt("10 September 2024", () -> {
+            deleteAllExternalEvents();
+
+            final AccountHelper accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+            final Account classificationIncomeAccount = accountHelper
+                    .createIncomeAccount(Utils.uniqueRandomStringGenerator("buydownfee_class_income_", 6));
+            classificationIncomeAccountRef.set(classificationIncomeAccount);
+
+            final GetCodesResponse code = codeHelper.retrieveCodeByName(LoanTransactionApiConstants.BUY_DOWN_FEE_CLASSIFICATION_CODE);
+            final PostCodeValueDataResponse classificationCode = codeHelper.createCodeValue(code.getId(),
+                    new PostCodeValuesDataRequest().name(Utils.uniqueRandomStringGenerator("CLASS_", 6)).isActive(true).position(10));
+            classificationIdRef.set(classificationCode.getSubResourceId());
+
+            // Loan Product create
+            final PostClassificationToIncomeAccountMappings classificationToIncomeMapping = new PostClassificationToIncomeAccountMappings()
+                    .classificationCodeValueId(classificationIdRef.get())
+                    .incomeAccountId(classificationIncomeAccount.getAccountID().longValue());
+            final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                    .createLoanProduct(createProgressiveLoanProductWithBuyDownFee(classificationToIncomeMapping));
+
+            GetLoanProductsProductIdResponse getLoanProductResponse = loanProductHelper
+                    .retrieveLoanProductById(loanProductsResponse.getResourceId());
+            assertNotNull(getLoanProductResponse);
+            assertNotNull(getLoanProductResponse.getBuydownFeeClassificationToIncomeAccountMappings());
+            Assertions.assertEquals(1, getLoanProductResponse.getBuydownFeeClassificationToIncomeAccountMappings().size());
+            Assertions.assertEquals(classificationIdRef.get(), getLoanProductResponse.getBuydownFeeClassificationToIncomeAccountMappings()
+                    .get(0).getClassificationCodeValue().getId());
+
+            final PostCodeValueDataResponse secClassificationCode = codeHelper.createCodeValue(code.getId(),
+                    new PostCodeValuesDataRequest().name(Utils.uniqueRandomStringGenerator("CLASS_", 6)).isActive(true).position(10));
+            classificationIdRef.set(secClassificationCode.getSubResourceId());
+
+            // Loan Product update
+            final PutLoanProductsProductIdRequest putLoanProductRequest = new PutLoanProductsProductIdRequest();
+            putLoanProductRequest.addBuydownfeeClassificationToIncomeAccountMappingsItem(
+                    new PostClassificationToIncomeAccountMappings().classificationCodeValueId(classificationIdRef.get())
+                            .incomeAccountId(classificationIncomeAccount.getAccountID().longValue()));
+
+            loanProductHelper.updateLoanProductById(loanProductsResponse.getResourceId(), putLoanProductRequest);
+            getLoanProductResponse = loanProductHelper.retrieveLoanProductById(loanProductsResponse.getResourceId());
+            assertNotNull(getLoanProductResponse);
+            assertNotNull(getLoanProductResponse.getBuydownFeeClassificationToIncomeAccountMappings());
+            Assertions.assertEquals(1, getLoanProductResponse.getBuydownFeeClassificationToIncomeAccountMappings().size());
+            Assertions.assertEquals(classificationIdRef.get(), getLoanProductResponse.getBuydownFeeClassificationToIncomeAccountMappings()
+                    .get(0).getClassificationCodeValue().getId());
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(clientId,
+                    loanProductsResponse.getResourceId(), "10 September 2024", 1000.0, 10.0, 12, null));
+            loanId = postLoansResponse.getLoanId();
+            loanIdRef.set(loanId);
+            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(1000.0, "10 September 2024"));
+            disburseLoan(loanId, BigDecimal.valueOf(1000.0), "10 September 2024");
+
+            Long buyDownFeeTransactionId = addBuyDownFeeForLoan(loanId, 400.0, "10 September 2024", classificationIdRef.get());
+            assertNotNull(buyDownFeeTransactionId);
+        });
+
+        runAt("20 September 2024", () -> {
+            Long loanId = loanIdRef.get();
+            deleteAllExternalEvents();
+            executeInlineCOB(loanId);
+
+            Long buyDownFeeTransactionId = addBuyDownFeeForLoan(loanId, 50.0, "20 September 2024");
+            assertNotNull(buyDownFeeTransactionId);
+        });
+
+        runAt("30 September 2024", () -> {
+            Long loanId = loanIdRef.get();
+            deleteAllExternalEvents();
+            executeInlineCOB(loanId);
+
+            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            final Optional<GetLoansLoanIdTransactions> optTx = loanDetails.getTransactions().stream()
+                    .filter(item -> Objects.equals(Utils.getDoubleValue(item.getAmount()), 1.23)
+                            && Objects.equals(item.getType().getValue(), "Buy Down Fee Amortization"))
+                    .findFirst();
+            verifyTRJournalEntries(optTx.get().getId(), debit(deferredIncomeLiabilityAccount, 1.23),
+                    credit(classificationIncomeAccountRef.get(), 1.09), // First BuyDown Fee With classification
+                    credit(feeIncomeAccount, 0.14)); // Second BuyDown Fee Without classification
+        });
+    }
 }

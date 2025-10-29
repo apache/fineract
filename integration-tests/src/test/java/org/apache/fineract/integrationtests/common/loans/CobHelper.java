@@ -23,6 +23,8 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 
 @Slf4j
@@ -41,15 +43,13 @@ public final class CobHelper {
         return Utils.performServerGet(requestSpec, responseSpec, url, jsonReturn);
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static void fastForwardLoansLastCOBDate(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer loanId, final String cobDate) {
-        final String url = "/fineract-provider/api/v1/internal/cob/fast-forward-cob-date-of-loan/" + loanId + "?" + Utils.TENANT_IDENTIFIER;
-        log.info("-------------------- -----------FAST FORWARD LAST COB DATE OF LOAN ----------------------------------------");
-        Utils.performServerPost(requestSpec, responseSpec, url, "{\"lastClosedBusinessDate\":\"" + cobDate + "\"}");
+    public static void fastForwardLoansLastCOBDate(final Long loanId, final String cobDate) {
+        Calls.ok(FineractClientHelper.getFineractClient().internalCob.updateLoanCobLastDate(loanId,
+                "{\"lastClosedBusinessDate\":\"" + cobDate + "\"}"));
+    }
+
+    public static void reprocessLoan(final Long loanId) {
+        Calls.ok(FineractClientHelper.getFineractClient().internalCob.loanReprocess(loanId));
     }
 
 }

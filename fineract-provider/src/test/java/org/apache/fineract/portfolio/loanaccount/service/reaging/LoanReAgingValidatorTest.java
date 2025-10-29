@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
@@ -288,20 +289,6 @@ class LoanReAgingValidatorTest {
     }
 
     @Test
-    public void testValidateReAge_ShouldThrowException_WhenLoanIsBeforeMaturity() {
-        // given
-        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, actualDate)));
-        Loan loan = loan();
-        JsonCommand command = jsonCommand();
-        // when
-        GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
-                () -> underTest.validateReAge(loan, command));
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reage.cannot.be.submitted.before.maturity");
-    }
-
-    @Test
     public void testValidateReAge_ShouldThrowException_WhenStartDateIsBeforeMaturity() {
         // given
         Loan loan = loan();
@@ -347,20 +334,6 @@ class LoanReAgingValidatorTest {
         assertThat(result).isNotNull();
         assertThat(result.getGlobalisationMessageCode())
                 .isEqualTo("error.msg.loan.reage.supported.only.for.progressive.loan.schedule.type");
-    }
-
-    @Test
-    public void testValidateReAge_ShouldThrowException_WhenLoanIsInterestBearing() {
-        // given
-        Loan loan = loan();
-        given(loan.isInterestBearing()).willReturn(true);
-        JsonCommand command = jsonCommand();
-        // when
-        GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
-                () -> underTest.validateReAge(loan, command));
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reage.supported.only.for.non.interest.loans");
     }
 
     @Test
@@ -516,6 +489,9 @@ class LoanReAgingValidatorTest {
         given(loanProductRelatedDetail.getLoanScheduleType()).willReturn(LoanScheduleType.PROGRESSIVE);
         given(loan.isInterestBearing()).willReturn(false);
         given(loan.getLoanTransactions()).willReturn(List.of());
+        LoanSummary loanSummary = mock(LoanSummary.class);
+        given(loan.getSummary()).willReturn(loanSummary);
+        given(loanSummary.getTotalPrincipalOutstanding()).willReturn(java.math.BigDecimal.valueOf(1000));
         return loan;
     }
 

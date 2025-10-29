@@ -37,6 +37,7 @@ import org.apache.fineract.client.services.FundsApi;
 import org.apache.fineract.client.services.GeneralLedgerAccountApi;
 import org.apache.fineract.client.services.GlobalConfigurationApi;
 import org.apache.fineract.client.services.InlineJobApi;
+import org.apache.fineract.client.services.InternalCobApi;
 import org.apache.fineract.client.services.JournalEntriesApi;
 import org.apache.fineract.client.services.LoanAccountLockApi;
 import org.apache.fineract.client.services.LoanBuyDownFeesApi;
@@ -267,5 +268,10 @@ public class ApiConfiguration {
     @Bean
     public LoanCapitalizedIncomeApi loanCapitalizedIncomeApi() {
         return fineractClient.createService(LoanCapitalizedIncomeApi.class);
+    }
+
+    @Bean
+    public InternalCobApi internalCobApi() {
+        return fineractClient.createService(InternalCobApi.class);
     }
 }

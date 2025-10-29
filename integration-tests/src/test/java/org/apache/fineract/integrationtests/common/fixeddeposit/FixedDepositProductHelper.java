@@ -163,6 +163,9 @@ public class FixedDepositProductHelper {
         if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());
         }
+        if (this.accountingRule.equals(ACCRUAL_PERIODIC)) {
+            map.putAll(getAccountMappingForAccrualBased());
+        }
 
         String FixedDepositProductCreateJson = new Gson().toJson(map);
         LOG.info("{}", FixedDepositProductCreateJson);
@@ -397,6 +400,12 @@ public class FixedDepositProductHelper {
         return this;
     }
 
+    public FixedDepositProductHelper withAccountingRuleAsAccrual(final Account[] account_list) {
+        this.accountingRule = ACCRUAL_PERIODIC;
+        this.accountList = account_list;
+        return this;
+    }
+
     public FixedDepositProductHelper withPeriodRangeChart() {
         this.chartSlabs = constructChartSlabWithPeriodRange();
         return this;
@@ -441,6 +450,41 @@ public class FixedDepositProductHelper {
                     final String ID = this.accountList[i].getAccountID().toString();
                     map.put("savingsControlAccountId", ID);
                     map.put("transfersInSuspenseAccountId", ID);
+                }
+                if (this.accountList[i].getAccountType().equals(Account.AccountType.EXPENSE)) {
+                    final String ID = this.accountList[i].getAccountID().toString();
+                    map.put("interestOnSavingsAccountId", ID);
+                }
+                if (this.accountList[i].getAccountType().equals(Account.AccountType.INCOME)) {
+                    final String ID = this.accountList[i].getAccountID().toString();
+                    map.put("incomeFromFeeAccountId", ID);
+                    map.put("incomeFromPenaltyAccountId", ID);
+                }
+            }
+        }
+        return map;
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    private Map<String, String> getAccountMappingForAccrualBased() {
+        final Map<String, String> map = new HashMap<>();
+        if (accountList != null) {
+            for (int i = 0; i < this.accountList.length; i++) {
+                if (this.accountList[i].getAccountType().equals(Account.AccountType.ASSET)) {
+                    final String ID = this.accountList[i].getAccountID().toString();
+                    map.put("savingsReferenceAccountId", ID);
+                    map.put("feesReceivableAccountId", ID);
+                    map.put("penaltiesReceivableAccountId", ID);
+                }
+                if (this.accountList[i].getAccountType().equals(Account.AccountType.LIABILITY)) {
+
+                    final String ID = this.accountList[i].getAccountID().toString();
+                    map.put("savingsControlAccountId", ID);
+                    map.put("transfersInSuspenseAccountId", ID);
+                    map.put("interestPayableAccountId", ID);
                 }
                 if (this.accountList[i].getAccountType().equals(Account.AccountType.EXPENSE)) {
                     final String ID = this.accountList[i].getAccountID().toString();

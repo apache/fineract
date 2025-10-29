@@ -53,13 +53,21 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @SuppressFBWarnings({ "VA_FORMAT_STRING_USES_NEWLINE" })
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class LoanReAmortizationValidatorTest {
 
     private final LocalDate actualDate = LocalDate.now(Clock.systemUTC());
 
-    private LoanReAmortizationValidator underTest = new LoanReAmortizationValidator();
+    @InjectMocks
+    private LoanReAmortizationValidator underTest;
 
     @BeforeEach
     public void setUp() {
@@ -138,20 +146,6 @@ class LoanReAmortizationValidatorTest {
         assertThat(result).isNotNull();
         assertThat(result.getGlobalisationMessageCode())
                 .isEqualTo("error.msg.loan.reamortize.supported.only.for.progressive.loan.schedule.type");
-    }
-
-    @Test
-    public void testValidateReAmortize_ShouldThrowException_WhenLoanIsInterestBearing() {
-        // given
-        Loan loan = loan();
-        given(loan.isInterestBearing()).willReturn(true);
-        JsonCommand command = jsonCommand();
-        // when
-        GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
-                () -> underTest.validateReAmortize(loan, command));
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reamortize.supported.only.for.non.interest.loans");
     }
 
     @Test

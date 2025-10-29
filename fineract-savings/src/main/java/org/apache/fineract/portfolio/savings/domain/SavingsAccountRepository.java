@@ -94,4 +94,7 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
             """)
     List<SavingsAccrualData> findAccrualData(@Param("tillDate") LocalDate tillDate, @Param("savingsId") Long savingsId,
             @Param("status") Integer status, @Param("accountingRule") Integer accountingRule);
+
+    @Query("SELECT sa.id FROM SavingsAccount sa WHERE sa.status = :status")
+    List<Long> findSavingsAccountIdsByStatusId(Integer status);
 }

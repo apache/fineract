@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -177,7 +178,9 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
                         savingsAccount.office(), period.getPeriodInterval().endDate(), period.getInterestEarned().abs(), false, refNo);
                 savingsAccountTransaction.setRunningBalance(period.getClosingBalance());
                 savingsAccountTransaction.setOverdraftAmount(period.getInterestEarned());
-                savingsAccount.addTransaction(savingsAccountTransaction);
+                if (!MathUtil.isZero(savingsAccountTransaction.getAmount())) {
+                    savingsAccount.addTransaction(savingsAccountTransaction);
+                }
             }
         }
 

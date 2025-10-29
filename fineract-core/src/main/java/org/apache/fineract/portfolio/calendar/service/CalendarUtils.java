@@ -285,17 +285,17 @@ public final class CalendarUtils {
             NumberList nthDays = recur.getSetPosList();
             Integer nthDay = null;
             if (!nthDays.isEmpty()) {
-                nthDay = nthDays.get(0);
+                nthDay = nthDays.getFirst();
             }
             NumberList monthDays = recur.getMonthDayList();
             Integer monthDay = null;
             if (!monthDays.isEmpty()) {
-                monthDay = monthDays.get(0);
+                monthDay = monthDays.getFirst();
             }
             WeekDayList weekdays = recur.getDayList();
             WeekDay weekDay = null;
             if (!weekdays.isEmpty()) {
-                weekDay = weekdays.get(0);
+                weekDay = weekdays.getFirst();
             }
             if (nthDay != null && weekDay != null) {
                 NthDayType nthDayType = NthDayType.fromInt(nthDay);

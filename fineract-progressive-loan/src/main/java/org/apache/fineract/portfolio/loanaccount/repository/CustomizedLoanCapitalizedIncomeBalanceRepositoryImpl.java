@@ -49,7 +49,7 @@ public class CustomizedLoanCapitalizedIncomeBalanceRepositoryImpl implements Cus
         loanIds = new ArrayList<>(loanIds);
 
         TypedQuery<LoanTransactionRepaymentPeriodData> query = entityManager.createQuery(
-                LoanCapitalizedIncomeBalanceRepository.FIND_BALANCE_REPAYMENT_SCHEDULE_DATA + " WHERE lcib.loan.id IN (:loanIds)",
+                LoanCapitalizedIncomeBalanceRepository.FIND_BALANCE_REPAYMENT_SCHEDULE_DATA + " WHERE lcib.loan.id IN :loanIds",
                 LoanTransactionRepaymentPeriodData.class);
         query.setParameter("loanIds", loanIds);
         List<LoanTransactionRepaymentPeriodData> result = query.getResultList();

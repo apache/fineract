@@ -88,13 +88,67 @@ cargo {
 
 cargoRunLocal.dependsOn ':fineract-war:war'
 cargoStartLocal.dependsOn ':fineract-war:war'
-cargoStartLocal.mustRunAfter 'testClasses'
 
-if (!project.hasProperty('cargoDisabled')) {
-    test {
-        dependsOn(cargoStartLocal)
+import java.net.HttpURLConnection
+import java.net.URL
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
+
+tasks.register('waitForFineract') {
+    doLast {
+        int timeoutSeconds = (project.findProperty('waitForFineractTimeoutSeconds') ?: '600') as int
+        int waited = 0
+        int interval = 5
+
+        TrustManager[] trustAllCerts = [
+            new X509TrustManager() {
+                java.security.cert.X509Certificate[] getAcceptedIssuers() { return null }
+                void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+                void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+            }
+        ] as TrustManager[]
+
+        SSLContext sc = SSLContext.getInstance("SSL")
+        sc.init(null, trustAllCerts, new java.security.SecureRandom())
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
+        HttpsURLConnection.setDefaultHostnameVerifier({ hostname, session -> true })
+
+        URL url = new URL("https://localhost:8443/fineract-provider/actuator/health")
+        println "Waiting for Fineract startup (timeout: ${timeoutSeconds}s)..."
+
+        while (waited < timeoutSeconds) {
+            try {
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection()
+                connection.setConnectTimeout(2000)
+                connection.setReadTimeout(2000)
+                connection.setRequestMethod("GET")
+                int responseCode = connection.getResponseCode()
+                if (responseCode == 200) {
+                    println "Fineract is up!"
+                    return
+                }
+            } catch (Exception ignored) { }
+            sleep(interval * 1000)
+            waited += interval
+            println "Still waiting..."
+        }
+
+        throw new GradleException("Fineract did not start within ${timeoutSeconds} seconds")
+    }
+}
+
+tasks.named('test').configure {
+    if (!project.hasProperty('cargoDisabled')) {
+        dependsOn cargoStartLocal, waitForFineract
         finalizedBy cargoStopLocal
     }
+}
+
+if (!project.hasProperty('cargoDisabled')) {
+    cargoStartLocal.mustRunAfter testClasses
+    waitForFineract.mustRunAfter cargoStartLocal
 }
 
 // Configure proper test output directories

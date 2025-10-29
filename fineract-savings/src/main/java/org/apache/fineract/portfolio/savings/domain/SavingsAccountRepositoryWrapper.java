@@ -186,4 +186,8 @@ public class SavingsAccountRepositoryWrapper {
             final Integer accountingRule) {
         return this.repository.findAccrualData(tillDate, savingsId, status, accountingRule);
     }
+
+    public List<Long> findLoanIdsByStatusId(Integer status) {
+        return null;
+    }
 }

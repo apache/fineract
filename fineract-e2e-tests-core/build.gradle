@@ -68,7 +68,7 @@ dependencies {
 
     testImplementation 'com.squareup.retrofit2:retrofit:2.11.0'
     testImplementation 'org.apache.httpcomponents:httpclient:4.5.14'
-    testImplementation 'org.apache.commons:commons-lang3:3.17.0'
+    testImplementation 'org.apache.commons:commons-lang3:3.18.0'
     testImplementation ('com.googlecode.json-simple:json-simple:1.1.1') {
         exclude group: 'junit', module: 'junit'
     }
@@ -101,4 +101,27 @@ dependencies {
 
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs.add("-parameters")
+}
+
+// Configure the jar task to include test classes and resources
+tasks.named('jar') {
+    from sourceSets.test.output
+    
+    // Include the test resources
+    from(sourceSets.test.resources) {
+        // Handle duplicate files by using the first one found
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
+    
+    // Include the manifest with the classpath
+    manifest {
+        attributes(
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+            'Built-By': System.getProperty('user.name'),
+            'Built-Date': new Date(),
+            'Created-By': 'Gradle ' + gradle.gradleVersion,
+            'Build-Jdk': System.getProperty('java.version')
+        )
+    }
 }

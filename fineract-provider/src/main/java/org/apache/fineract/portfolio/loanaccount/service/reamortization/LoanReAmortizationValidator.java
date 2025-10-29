@@ -24,22 +24,30 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanReAmortizationApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.reamortization.LoanReAmortizationInterestHandlingType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.ChangeOperation;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class LoanReAmortizationValidator {
+
+    private final CodeValueRepository codeValueRepository;
 
     public void validateReAmortize(Loan loan, JsonCommand command) {
         validateReAmortizeRequest(command);
@@ -53,6 +61,23 @@ public class LoanReAmortizationValidator {
         String externalId = command.stringValueOfParameterNamedAllowingNull(LoanReAmortizationApiConstants.externalIdParameterName);
         baseDataValidator.reset().parameter(LoanReAmortizationApiConstants.externalIdParameterName).ignoreIfNull().value(externalId)
                 .notExceedingLengthOf(100);
+
+        final LoanReAmortizationInterestHandlingType reAmortizationInterestHandlingType = command.enumValueOfParameterNamed(
+                LoanReAmortizationApiConstants.reAmortizationInterestHandlingParamName, LoanReAmortizationInterestHandlingType.class);
+        baseDataValidator.reset().parameter(LoanReAmortizationApiConstants.reAmortizationInterestHandlingParamName)
+                .value(reAmortizationInterestHandlingType).ignoreIfNull();
+
+        Long reasonCodeValueId = command.longValueOfParameterNamed(LoanReAmortizationApiConstants.reasonCodeValueIdParamName);
+        baseDataValidator.reset().parameter(LoanReAmortizationApiConstants.reasonCodeValueIdParamName).value(reasonCodeValueId)
+                .ignoreIfNull();
+        if (reasonCodeValueId != null) {
+            final CodeValue reasonCodeValue = codeValueRepository.findByCodeNameAndId(LoanApiConstants.REAMORTIZATION_REASONS,
+                    reasonCodeValueId);
+            if (reasonCodeValue == null) {
+                dataValidationErrors.add(ApiParameterError.parameterError("validation.msg.reamortization.reason.invalid",
+                        "Reamortization Reason with ID " + reasonCodeValueId + " does not exist", LoanApiConstants.REAMORTIZATION_REASONS));
+            }
+        }
 
         throwExceptionIfValidationErrorsExist(dataValidationErrors);
     }
@@ -76,12 +101,6 @@ public class LoanReAmortizationValidator {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.reamortize.supported.only.for.progressive.loan.schedule.type",
                     "Loan reamortization is only available for progressive repayment schedule and Advanced payment allocation strategy",
                     loan.getId());
-        }
-
-        // validate reamortization is only available for non-interest bearing loans
-        if (loan.isInterestBearing()) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.reamortize.supported.only.for.non.interest.loans",
-                    "Loan reamortization is only available for non-interest bearing loans", loan.getId());
         }
 
         // validate reamortization is only done on an active loan

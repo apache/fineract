@@ -1089,4 +1089,48 @@ Feature: LoanReschedule
       | 01 February 2024 | Repayment        | 17.16  | 16.33     | 0.83     | 0.0  | 0.0       | 83.67        | false    | false    |
       | 15 February 2024 | Repayment        | 8.58   | 8.58      | 0.0      | 0.0  | 0.0       | 75.09        | false    | false    |
 
+  @TestRailId:C4126
+  Scenario: Verify rescheduling of progressive loan is allowed on the first day of 1st repayment schedule
+    When Admin sets the business date to "24 July 2025"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                             | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30 | 24 July 2025      | 500            | 35                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "24 July 2025" with "500" amount and expected disbursement date on "24 July 2025"
+    When Admin successfully disburse the loan on "24 July 2025" with "500" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 24 July 2025      |           | 500.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 24 August 2025    |           | 422.54          | 77.46         | 14.58    | 0.0  | 0.0       | 92.04 | 0.0  | 0.0        | 0.0  | 92.04       |
+      | 2  | 31   | 24 September 2025 |           | 342.82          | 79.72         | 12.32    | 0.0  | 0.0       | 92.04 | 0.0  | 0.0        | 0.0  | 92.04       |
+      | 3  | 30   | 24 October 2025   |           | 260.78          | 82.04         | 10.0     | 0.0  | 0.0       | 92.04 | 0.0  | 0.0        | 0.0  | 92.04       |
+      | 4  | 31   | 24 November 2025  |           | 176.35          | 84.43         | 7.61     | 0.0  | 0.0       | 92.04 | 0.0  | 0.0        | 0.0  | 92.04       |
+      | 5  | 30   | 24 December 2025  |           | 89.45           | 86.9          | 5.14     | 0.0  | 0.0       | 92.04 | 0.0  | 0.0        | 0.0  | 92.04       |
+      | 6  | 31   | 24 January 2026   |           | 0.0             | 89.45         | 2.61     | 0.0  | 0.0       | 92.06 | 0.0  | 0.0        | 0.0  | 92.06       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 500.0         | 52.26    | 0.0  | 0.0       | 552.26 | 0.0  | 0.0        | 0.0  | 552.26      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 24 July 2025     | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+    When Admin creates and approves Loan reschedule with the following data:
+      | rescheduleFromDate | submittedOnDate  | adjustedDueDate  | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
+      | 24 July 2025       | 24 July 2025     |                    |                  |                 |            | 5              |
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 24 July 2025      |           | 500.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 24 August 2025    |           | 417.53          | 82.47         | 2.08     | 0.0  | 0.0       | 84.55 | 0.0  | 0.0        | 0.0  | 84.55       |
+      | 2  | 31   | 24 September 2025 |           | 334.72          | 82.81         | 1.74     | 0.0  | 0.0       | 84.55 | 0.0  | 0.0        | 0.0  | 84.55       |
+      | 3  | 30   | 24 October 2025   |           | 251.56          | 83.16         | 1.39     | 0.0  | 0.0       | 84.55 | 0.0  | 0.0        | 0.0  | 84.55       |
+      | 4  | 31   | 24 November 2025  |           | 168.06          | 83.5          | 1.05     | 0.0  | 0.0       | 84.55 | 0.0  | 0.0        | 0.0  | 84.55       |
+      | 5  | 30   | 24 December 2025  |           | 84.21           | 83.85         | 0.7      | 0.0  | 0.0       | 84.55 | 0.0  | 0.0        | 0.0  | 84.55       |
+      | 6  | 31   | 24 January 2026   |           | 0.0             | 84.21         | 0.35     | 0.0  | 0.0       | 84.56 | 0.0  | 0.0        | 0.0  | 84.56       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 500.0         | 7.31    | 0.0  | 0.0       | 507.31 | 0.0  | 0.0        | 0.0  |  507.31      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 24 July 2025     | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+    Then LoanRescheduledDueAdjustScheduleBusinessEvent is raised on "24 July 2025"
+
 

@@ -78,16 +78,6 @@ public class GlobalConfigurationStepDef {
         assertThat(errorDetails.getSingleError().getDeveloperMessage()).isEqualTo(ErrorMessageHelper.setCurrencyEmptyValueFailure());
     }
 
-    @When("Update currency with incorrect null value outcomes with an error")
-    public void updateCurrencyIncorrectNullValueFailure() throws IOException {
-        var request = new CurrencyUpdateRequest();
-        var currencyResponse = currencyApi.updateCurrencies(request.currencies(Collections.singletonList(null))).execute();
-        final ErrorResponse errorDetails = ErrorResponse.from(currencyResponse);
-        assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.setCurrencyIncorrectValueFailure("null")).isEqualTo(404);
-        assertThat(errorDetails.getSingleError().getDeveloperMessage())
-                .isEqualTo(ErrorMessageHelper.setCurrencyIncorrectValueFailure("null"));
-    }
-
     @When("Update currency as NULL value outcomes with an error")
     public void updateCurrencyNullValueFailure() throws IOException {
         var request = new CurrencyUpdateRequest();

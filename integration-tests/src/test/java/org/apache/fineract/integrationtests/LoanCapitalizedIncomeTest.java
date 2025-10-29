@@ -26,14 +26,17 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.fineract.client.models.CapitalizedIncomeDetails;
 import org.apache.fineract.client.models.GetCodesResponse;
+import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.LoanCapitalizedIncomeData;
+import org.apache.fineract.client.models.PostClassificationToIncomeAccountMappings;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostCodeValueDataResponse;
 import org.apache.fineract.client.models.PostCodeValuesDataRequest;
@@ -42,10 +45,13 @@ import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.externalevents.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.integrationtests.common.externalevents.LoanBusinessEvent;
 import org.apache.fineract.integrationtests.common.externalevents.LoanTransactionBusinessEvent;
@@ -1179,4 +1185,103 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             );
         });
     }
+
+    @Test
+    public void testCapitalizedIncomeWithAdvanceAccountingMappings() {
+        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        final AtomicReference<Long> classificationIdRef = new AtomicReference<>();
+        final AtomicReference<Account> classificationIncomeAccountRef = new AtomicReference<>();
+        runAt("10 September 2024", () -> {
+            deleteAllExternalEvents();
+            final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+
+            final AccountHelper accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+            final Account classificationIncomeAccount = accountHelper
+                    .createIncomeAccount(Utils.uniqueRandomStringGenerator("capitalizedincome_class_income_", 6));
+            classificationIncomeAccountRef.set(classificationIncomeAccount);
+
+            final GetCodesResponse code = codeHelper.retrieveCodeByName(LoanTransactionApiConstants.CAPITALIZED_INCOME_CLASSIFICATION_CODE);
+            final PostCodeValueDataResponse classificationCode = codeHelper.createCodeValue(code.getId(),
+                    new PostCodeValuesDataRequest().name(Utils.uniqueRandomStringGenerator("CLASS_", 6)).isActive(true).position(10));
+            classificationIdRef.set(classificationCode.getSubResourceId());
+
+            // Loan Product create
+            final PostClassificationToIncomeAccountMappings classificationToIncomeMapping = new PostClassificationToIncomeAccountMappings()
+                    .classificationCodeValueId(classificationIdRef.get())
+                    .incomeAccountId(classificationIncomeAccount.getAccountID().longValue());
+
+            final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                    .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                            .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                            .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                            .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                            .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
+                            .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE)
+                            .addCapitalizedIncomeClassificationToIncomeAccountMappingsItem(classificationToIncomeMapping));
+
+            GetLoanProductsProductIdResponse getLoanProductResponse = loanProductHelper
+                    .retrieveLoanProductById(loanProductsResponse.getResourceId());
+            assertNotNull(getLoanProductResponse);
+            assertNotNull(getLoanProductResponse.getCapitalizedIncomeClassificationToIncomeAccountMappings());
+            Assertions.assertEquals(1, getLoanProductResponse.getCapitalizedIncomeClassificationToIncomeAccountMappings().size());
+            Assertions.assertEquals(classificationIdRef.get(), getLoanProductResponse
+                    .getCapitalizedIncomeClassificationToIncomeAccountMappings().get(0).getClassificationCodeValue().getId());
+
+            final PostCodeValueDataResponse secClassificationCode = codeHelper.createCodeValue(code.getId(),
+                    new PostCodeValuesDataRequest().name(Utils.uniqueRandomStringGenerator("CLASS_", 6)).isActive(true).position(10));
+            classificationIdRef.set(secClassificationCode.getSubResourceId());
+
+            // Loan Product update
+            final PutLoanProductsProductIdRequest putLoanProductRequest = new PutLoanProductsProductIdRequest();
+            putLoanProductRequest.addCapitalizedIncomeClassificationToIncomeAccountMappingsItem(
+                    new PostClassificationToIncomeAccountMappings().classificationCodeValueId(classificationIdRef.get())
+                            .incomeAccountId(classificationIncomeAccount.getAccountID().longValue()));
+
+            loanProductHelper.updateLoanProductById(loanProductsResponse.getResourceId(), putLoanProductRequest);
+            getLoanProductResponse = loanProductHelper.retrieveLoanProductById(loanProductsResponse.getResourceId());
+            assertNotNull(getLoanProductResponse);
+            assertNotNull(getLoanProductResponse.getCapitalizedIncomeClassificationToIncomeAccountMappings());
+            Assertions.assertEquals(1, getLoanProductResponse.getCapitalizedIncomeClassificationToIncomeAccountMappings().size());
+            Assertions.assertEquals(classificationIdRef.get(), getLoanProductResponse
+                    .getCapitalizedIncomeClassificationToIncomeAccountMappings().get(0).getClassificationCodeValue().getId());
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(client.getClientId(),
+                    loanProductsResponse.getResourceId(), "10 September 2024", 1000.0, 10.0, 12, null));
+            Long loanId = postLoansResponse.getLoanId();
+            loanIdRef.set(loanId);
+            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(1000.0, "10 September 2024"));
+            disburseLoan(loanId, BigDecimal.valueOf(1000.0), "10 September 2024");
+
+            Long capitalizedIncomeTransactionId = loanTransactionHelper
+                    .addCapitalizedIncome(loanId, "10 September 2024", 100.0, classificationIdRef.get()).getResourceId();
+            assertNotNull(capitalizedIncomeTransactionId);
+        });
+
+        runAt("20 September 2024", () -> {
+            Long loanId = loanIdRef.get();
+            deleteAllExternalEvents();
+            executeInlineCOB(loanId);
+
+            Long capitalizedIncomeTransactionId = loanTransactionHelper.addCapitalizedIncome(loanId, "20 September 2024", 20.0)
+                    .getResourceId();
+            assertNotNull(capitalizedIncomeTransactionId);
+        });
+
+        runAt("30 September 2024", () -> {
+            Long loanId = loanIdRef.get();
+            deleteAllExternalEvents();
+            executeInlineCOB(loanId);
+
+            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            final Optional<GetLoansLoanIdTransactions> optTx = loanDetails.getTransactions().stream()
+                    .filter(item -> Objects.equals(Utils.getDoubleValue(item.getAmount()), 0.33)
+                            && Objects.equals(item.getType().getValue(), "Capitalized Income Amortization"))
+                    .findFirst();
+            verifyTRJournalEntries(optTx.get().getId(), debit(deferredIncomeLiabilityAccount, 0.33),
+                    credit(classificationIncomeAccountRef.get(), 0.27), // First Capitalized Income With classification
+                    credit(feeIncomeAccount, 0.06)); // Second Capitalized Income Without classification
+
+        });
+    }
+
 }

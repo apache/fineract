@@ -39,7 +39,7 @@ import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.data.PlatformRequestLog;
 import org.apache.fineract.infrastructure.security.exception.InvalidTenantIdentifierException;
-import org.apache.fineract.infrastructure.security.service.BasicAuthTenantDetailsService;
+import org.apache.fineract.infrastructure.security.service.AuthTenantDetailsService;
 import org.apache.fineract.notification.service.UserNotificationService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -75,7 +75,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     private final ConfigurationDomainService configurationDomainService;
     private final CacheWritePlatformService cacheWritePlatformService;
     private final UserNotificationService userNotificationService;
-    private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
+    private final AuthTenantDetailsService basicAuthTenantDetailsService;
     private final BusinessDateReadPlatformService businessDateReadPlatformService;
 
     @Setter
@@ -84,7 +84,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     public TenantAwareBasicAuthenticationFilter(final AuthenticationManager authenticationManager,
             final AuthenticationEntryPoint authenticationEntryPoint, ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer,
             ConfigurationDomainService configurationDomainService, CacheWritePlatformService cacheWritePlatformService,
-            UserNotificationService userNotificationService, BasicAuthTenantDetailsService basicAuthTenantDetailsService,
+            UserNotificationService userNotificationService, AuthTenantDetailsService basicAuthTenantDetailsService,
             BusinessDateReadPlatformService businessDateReadPlatformService) {
         super(authenticationManager, authenticationEntryPoint);
         this.toApiJsonSerializer = toApiJsonSerializer;

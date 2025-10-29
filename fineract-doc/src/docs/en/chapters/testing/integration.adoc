@@ -1,3 +1,805 @@
 = Integration Testing
 
-TBD
+Integration tests in Apache Fineract validate the complete API layer and business logic by making HTTP calls to a running Fineract instance. These tests ensure that different components work together correctly and that the API behaves as expected.
+
+== Overview
+
+=== Architecture
+
+* *Location*: `integration-tests/src/test/java/org/apache/fineract/integrationtests`
+* *Framework*: JUnit 5 with REST Assured for HTTP communication
+* *Base Class*: Most tests extend `BaseLoanIntegrationTest` or `IntegrationTest`
+* *Client Library*: Uses Fineract client library for type-safe API interactions
+* *Prerequisites*: Running Apache Fineract instance (default: https://localhost:8443)
+
+=== Key Characteristics
+
+* Tests run against a live Fineract instance
+* Validates end-to-end API functionality
+* Tests business logic, validation rules, and workflows
+* Includes accounting verification and data integrity checks
+* Uses real database transactions
+* Tests can be run individually or as a suite
+
+== Prerequisites
+
+=== Required Software
+
+* *Java 21*: Apache Fineract requires Java 21 (Azul Zulu JDK recommended)
+* *Database*: MariaDB 11.5.2, PostgreSQL 17.4, or MySQL 9.1
+* *Git*: For source code management
+* *Gradle 8.14.3*: Included via wrapper
+* *12GB RAM*: Recommended for test execution
+
+=== Database Setup
+
+Before running integration tests, ensure the databases are created:
+
+[source,bash]
+----
+# Create required databases
+./gradlew createDB -PdbName=fineract_tenants
+./gradlew createDB -PdbName=fineract_default
+----
+
+=== Fineract Instance
+
+Integration tests run fineract instance from cargo plugin by default.
+
+== Configuration
+
+=== Default Connection Settings
+
+Integration tests use the following default connection settings:
+
+[source,properties]
+----
+BACKEND_PROTOCOL=https
+BACKEND_HOST=localhost
+BACKEND_PORT=8443
+BACKEND_USERNAME=mifos
+BACKEND_PASSWORD=password
+BACKEND_TENANT=default
+----
+
+=== Override Configuration
+
+To override default values, set environment variables:
+
+[source,bash]
+----
+# Set custom connection details
+export BACKEND_PROTOCOL=http
+export BACKEND_HOST=localhost
+export BACKEND_PORT=8080
+export BACKEND_USERNAME=admin
+export BACKEND_PASSWORD=admin123
+export BACKEND_TENANT=default
+----
+
+== Running Integration Tests
+
+=== Complete Workflow
+
+==== Step 1: Start Fineract
+
+[source,bash]
+----
+# Start Fineract in background
+./gradlew bootRun &
+
+# Wait for startup (manual check)
+curl -k https://localhost:8443/actuator/health
+----
+
+Expected response:
+[source,json]
+----
+{"status":"UP"}
+----
+
+==== Step 2: Run Integration Tests
+
+Navigate to the project root and execute tests:
+
+[source,bash]
+----
+# Run all integration tests
+./gradlew :integration-tests:test
+
+# Run with clean build
+./gradlew clean :integration-tests:test
+----
+
+=== Running Specific Tests
+
+==== Run Single Test Class
+
+[source,bash]
+----
+# Run entire test class
+./gradlew :integration-tests:test --tests ClientLoanIntegrationTest
+
+# Run with verbose output
+./gradlew :integration-tests:test --tests ClientLoanIntegrationTest --info
+----
+
+==== Run Specific Test Method
+
+[source,bash]
+----
+# Run single test method
+./gradlew :integration-tests:test --tests ClientLoanIntegrationTest.testLoanSchedule
+
+# Run multiple specific tests
+./gradlew :integration-tests:test --tests ClientLoanIntegrationTest.testLoanSchedule \
+  --tests ClientLoanIntegrationTest.testLoanRepayment
+----
+
+==== Run Tests by Pattern
+
+[source,bash]
+----
+# Run all loan-related tests
+./gradlew :integration-tests:test --tests "*Loan*"
+
+# Run all client-related tests
+./gradlew :integration-tests:test --tests "*Client*"
+
+# Run all accounting tests
+./gradlew :integration-tests:test --tests "*Accounting*"
+
+# Run all COB tests
+./gradlew :integration-tests:test --tests "*COB*"
+----
+
+=== Advanced Test Execution
+
+==== Run with Test Filtering
+
+[source,bash]
+----
+# Run tests excluding specific packages
+./gradlew :integration-tests:test --tests "*" \
+  --exclude "*Deprecated*"
+
+# Run only fast tests (custom tag)
+./gradlew :integration-tests:test --tests "*Fast*"
+----
+
+==== Parallel Execution
+
+[source,bash]
+----
+# Run tests in parallel
+./gradlew :integration-tests:test --parallel --max-workers=4
+
+# Set custom thread count
+./gradlew :integration-tests:test --parallel --max-workers=8
+----
+
+WARNING: Some integration tests may have dependencies on shared state. Use parallel execution carefully and ensure tests are properly isolated.
+
+==== Run with Custom JVM Arguments
+
+[source,bash]
+----
+# Increase heap size for large test suites
+./gradlew :integration-tests:test -Xmx4g
+
+# Enable debugging
+./gradlew :integration-tests:test --debug-jvm
+----
+
+==== Generate Test Reports
+
+[source,bash]
+----
+# Run tests and generate HTML reports
+./gradlew :integration-tests:test
+
+# Reports are generated at:
+# integration-tests/build/reports/tests/test/index.html
+----
+
+==== Continuous Execution
+
+[source,bash]
+----
+# Watch for changes and re-run tests
+./gradlew :integration-tests:test --continuous
+
+# Run specific test continuously
+./gradlew :integration-tests:test --continuous --tests ClientLoanIntegrationTest
+----
+
+=== Test Execution Examples
+
+==== Basic Loan Workflow Test
+
+[source,bash]
+----
+# Test complete loan lifecycle
+./gradlew :integration-tests:test --tests LoanApplicationTest
+----
+
+==== Progressive Loan Tests
+
+[source,bash]
+----
+# Run all progressive loan tests
+./gradlew :integration-tests:test --tests "*Progressive*"
+----
+
+==== Accounting Integration Tests
+
+[source,bash]
+----
+# Run accounting-related tests
+./gradlew :integration-tests:test --tests AccountingScenarioIntegrationTest
+----
+
+==== Business Date Tests
+
+[source,bash]
+----
+# Run business date functionality tests
+./gradlew :integration-tests:test --tests BusinessDateTest
+----
+
+==== Charge-Off Tests
+
+[source,bash]
+----
+# Run charge-off related tests
+./gradlew :integration-tests:test --tests "*ChargeOff*"
+----
+
+== Test Structure
+
+=== BaseLoanIntegrationTest Overview
+
+`BaseLoanIntegrationTest` is the comprehensive base test class for loan-related integration tests. It provides:
+
+==== Pre-configured Loan Product Creation
+
+[source,java]
+----
+// Create standard loan products
+createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct()
+create4IProgressive() // Progressive loan products
+create4IProgressiveWithCapitalizedIncome() // With capitalized income
+createOnePeriod30DaysPeriodicAccrualProductWithAdvancedPaymentAllocation()
+----
+
+==== Transaction Management
+
+[source,java]
+----
+// Validate loan transactions
+verifyTransactions(loanId,
+    transaction(100.0, "Disbursement", "01 January 2024"),
+    transaction(50.0, "Repayment", "15 January 2024")
+);
+
+// Verify accounting journal entries
+verifyJournalEntries(loanId, expectedEntries);
+
+// Create transaction test data
+Transaction txn = transaction(amount, type, date);
+----
+
+==== Loan Lifecycle Operations
+
+[source,java]
+----
+// Disburse loan
+disburseLoan(loanId, BigDecimal.valueOf(100), "01 January 2024");
+
+// Undo disbursement
+undoDisbursement(loanId);
+
+// Re-age loan
+reAgeLoan(loanId, reAgeRequest);
+
+// Re-amortize loan
+reAmortizeLoan(loanId, reAmortizeRequest);
+
+// Execute Close of Business
+executeInlineCOB(loanId);
+----
+
+==== Business Date Management
+
+[source,java]
+----
+// Execute code at specific business date
+runAt("01 January 2024", () -> {
+    Long loanId = applyAndApproveProgressiveLoan(...);
+    disburseLoan(loanId, BigDecimal.valueOf(100), "01 January 2024");
+});
+
+// Execute over date range
+runFromToInclusive("01 January 2024", "31 January 2024", () -> {
+    // Operations for each date in the range
+});
+
+// Execute without bypass privileges
+runAsNonByPass(() -> {
+    // Test operations with regular user permissions
+});
+----
+
+==== Verification Methods
+
+[source,java]
+----
+// Validate repayment schedule
+verifyRepaymentSchedule(loanId, expectedSchedule);
+
+// Check loan status
+verifyLoanStatus(loanId, "ACTIVE");
+
+// Verify outstanding amounts
+verifyOutstanding(loanId, expectedOutstanding);
+
+// Check arrears status
+verifyArrears(loanId, expectedArrears);
+----
+
+=== Common Test Patterns
+
+==== Test Setup Pattern
+
+[source,java]
+----
+@BeforeEach
+public void setup() {
+    Utils.initializeRESTAssured();
+    this.requestSpec = new RequestSpecBuilder()
+        .setContentType(ContentType.JSON)
+        .build();
+    this.requestSpec.header("Authorization", "Basic " +
+        Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+    this.responseSpec = new ResponseSpecBuilder()
+        .expectStatusCode(200)
+        .build();
+}
+----
+
+==== Date-Specific Operations
+
+[source,java]
+----
+runAt("01 January 2024", () -> {
+    // Create client
+    Long clientId = clientHelper.createClient(...);
+
+    // Apply for loan
+    Long loanId = applyLoan(clientId, productId, amount);
+
+    // Approve loan
+    approveLoan(loanId, "01 January 2024");
+
+    // Disburse loan
+    disburseLoan(loanId, amount, "01 January 2024");
+});
+----
+
+==== Structured Verification
+
+[source,java]
+----
+// Verify transactions
+verifyTransactions(loanId,
+    transaction(100.0, "Disbursement", "01 January 2024"),
+    transaction(50.0, "Capitalized Income", "01 January 2024"),
+    transaction(0.55, "Capitalized Income Amortization", "01 January 2024")
+);
+
+// Verify journal entries using convenience methods
+verifyJournalEntries(loanId,
+    debit(account.getLoansReceivable(), 100.0),
+    credit(account.getSuspenseClearingAccount(), 100.0)
+);
+
+// Or using full journalEntry method with Account objects
+verifyJournalEntries(loanId,
+    journalEntry(100.0, account.getLoansReceivable(), "DEBIT"),
+    journalEntry(100.0, account.getSuspenseClearingAccount(), "CREDIT")
+);
+----
+
+==== Progressive Loan Testing
+
+[source,java]
+----
+// Create progressive loan product
+Long productId = create4IProgressive();
+
+// Apply and approve
+Long loanId = applyAndApproveProgressiveLoan(clientId, productId,
+    amount, numberOfRepayments, interestRate);
+
+// Test advanced features
+testCapitalizedIncome(loanId);
+testDownPayment(loanId);
+testAdvancedPaymentAllocation(loanId);
+----
+
+== Writing Integration Tests
+
+=== Test Development Guidelines
+
+==== 1. Create Test Class
+
+Create a new test class in `integration-tests/src/test/java/org/apache/fineract/integrationtests/`:
+
+[source,java]
+----
+package org.apache.fineract.integrationtests;
+
+import org.apache.fineract.integrationtests.common.Utils;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+
+public class MyNewFeatureIntegrationTest extends BaseLoanIntegrationTest {
+
+    @BeforeEach
+    public void setup() {
+        Utils.initializeRESTAssured();
+        this.requestSpec = new RequestSpecBuilder()
+            .setContentType(ContentType.JSON)
+            .build();
+        this.requestSpec.header("Authorization", "Basic " +
+            Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.responseSpec = new ResponseSpecBuilder()
+            .expectStatusCode(200)
+            .build();
+    }
+
+    @Test
+    public void testMyNewFeature() {
+        // Test implementation
+    }
+}
+----
+
+==== 2. Use Helper Classes
+
+Leverage existing helper classes:
+
+[source,java]
+----
+// Client operations
+ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
+Long clientId = clientHelper.createClient(...);
+
+// Loan operations
+LoanTransactionHelper loanHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+Long loanId = loanHelper.applyLoan(...);
+
+// Account operations
+AccountHelper accountHelper = new AccountHelper(requestSpec, responseSpec);
+
+// Business date operations
+BusinessDateHelper businessDateHelper = new BusinessDateHelper();
+businessDateHelper.updateBusinessDate(...);
+
+// COB operations
+InlineLoanCOBHelper cobHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+cobHelper.executeInlineCOB(loanId);
+----
+
+==== 3. Follow Best Practices
+
+* *Self-Contained Tests*: Each test should be independent
+* *Clear Setup*: Use `@BeforeEach` for test initialization
+* *Date Management*: Use `runAt()` for consistent date-based testing
+* *Comprehensive Verification*: Verify transactions, schedules, and accounting
+* *Helper Methods*: Use provided helper classes rather than direct API calls
+* *Error Testing*: Test both positive and negative scenarios
+* *Cleanup*: Clean up test data when necessary
+
+==== 4. Test Complex Scenarios
+
+[source,java]
+----
+@Test
+public void testLoanWithMultipleDisbursements() {
+    runAt("01 January 2024", () -> {
+        // Create client
+        Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+
+        // Create multi-disbursement loan product
+        Long productId = createMultiDisbursementProduct();
+
+        // Apply for loan
+        Long loanId = applyAndApproveProgressiveLoan(clientId, productId,
+            BigDecimal.valueOf(1000), 12, BigDecimal.valueOf(10));
+
+        // First disbursement
+        disburseLoan(loanId, BigDecimal.valueOf(500), "01 January 2024");
+
+        // Verify first disbursement
+        verifyTransactions(loanId,
+            transaction(500.0, "Disbursement", "01 January 2024")
+        );
+    });
+
+    runAt("15 January 2024", () -> {
+        // Second disbursement
+        disburseLoan(loanId, BigDecimal.valueOf(500), "15 January 2024");
+
+        // Verify both disbursements
+        verifyTransactions(loanId,
+            transaction(500.0, "Disbursement", "01 January 2024"),
+            transaction(500.0, "Disbursement", "15 January 2024")
+        );
+
+        // Verify outstanding balance
+        verifyOutstanding(loanId, BigDecimal.valueOf(1000));
+    });
+}
+----
+
+==== 5. Run and Verify
+
+[source,bash]
+----
+# Run your new test
+./gradlew :integration-tests:test --tests MyNewFeatureIntegrationTest
+
+# Run with verbose output for debugging
+./gradlew :integration-tests:test --tests MyNewFeatureIntegrationTest --info
+
+# Run specific test method
+./gradlew :integration-tests:test --tests MyNewFeatureIntegrationTest.testMyNewFeature
+----
+
+== Troubleshooting
+
+=== Common Test Failures
+
+==== Connection Issues
+
+*Symptom*: Tests fail with connection refused errors
+
+*Solutions*:
+[source,bash]
+----
+# Verify Fineract is running
+curl -k https://localhost:8443/actuator/health
+
+# Check if port is available
+netstat -tulpn | grep 8443
+
+# Check Fineract logs (logs go to console/stdout)
+# If running in background with output redirection:
+# tail -f build/bootRun.log
+
+# Restart Fineract if needed
+pkill -f bootRun
+./gradlew bootRun &
+----
+
+==== Authentication Failures
+
+*Symptom*: Tests fail with 401 or 403 errors
+
+*Solutions*:
+[source,bash]
+----
+# Check default credentials
+mysql -u root -pmysql fineract_default -e \
+  "SELECT username, password FROM m_appuser WHERE username = 'mifos';"
+
+# Reset credentials if needed
+mysql -u root -pmysql fineract_default -e \
+  "UPDATE m_appuser SET password = '5jdQ3dNQXHPzCuBbZVdQZ2XnVlPc3l2l' \
+   WHERE username = 'mifos';"
+
+# Verify connection settings
+echo "Protocol: ${BACKEND_PROTOCOL:-https}"
+echo "Host: ${BACKEND_HOST:-localhost}"
+echo "Port: ${BACKEND_PORT:-8443}"
+----
+
+==== Data Inconsistency
+
+*Symptom*: Tests fail due to unexpected data state
+
+*Solutions*:
+[source,bash]
+----
+# Reset database
+mysql -u root -pmysql -e "DROP DATABASE fineract_default;"
+mysql -u root -pmysql -e "DROP DATABASE fineract_tenants;"
+
+# Recreate databases
+./gradlew createDB -PdbName=fineract_tenants
+./gradlew createDB -PdbName=fineract_default
+
+# Restart Fineract
+pkill -f bootRun
+./gradlew bootRun &
+----
+
+==== Test Timeout
+
+*Symptom*: Tests hang or timeout
+
+*Solutions*:
+[source,bash]
+----
+# Increase test timeout
+./gradlew :integration-tests:test -Dtest.timeout=600
+
+# Check for database locks
+mysql -u root -pmysql fineract_default -e "SHOW PROCESSLIST;"
+
+# Kill long-running queries
+mysql -u root -pmysql fineract_default -e "KILL <process_id>;"
+----
+
+==== Memory Issues
+
+*Symptom*: OutOfMemoryError during test execution
+
+*Solutions*:
+[source,bash]
+----
+# Increase heap size
+./gradlew :integration-tests:test -Xmx4g -Xms2g
+
+# Run fewer tests in parallel
+./gradlew :integration-tests:test --max-workers=2
+
+# Clean build directory
+./gradlew clean
+----
+
+=== Debugging Tips
+
+==== Enable Detailed Logging
+
+[source,bash]
+----
+# Run with debug output
+./gradlew :integration-tests:test --debug
+
+# Run with info level
+./gradlew :integration-tests:test --info
+
+# Save output to file
+./gradlew :integration-tests:test --info > test-output.log 2>&1
+----
+
+==== Check Test Reports
+
+After test execution, detailed reports are available:
+
+[source]
+----
+# HTML report
+integration-tests/build/reports/tests/test/index.html
+
+# XML reports (for CI/CD)
+integration-tests/build/test-results/test/
+
+# Gradle scan (upload for detailed analysis)
+----
+
+Generate Gradle build scan:
+[source,bash]
+----
+./gradlew :integration-tests:test --scan
+----
+
+==== Database State Verification
+
+[source,bash]
+----
+# Check loan status
+mysql -u root -pmysql fineract_default -e \
+  "SELECT id, account_no, loan_status_id, principal_amount \
+   FROM m_loan ORDER BY id DESC LIMIT 10;"
+
+# Check transactions
+mysql -u root -pmysql fineract_default -e \
+  "SELECT loan_id, transaction_type_enum, amount, transaction_date \
+   FROM m_loan_transaction WHERE loan_id = <loan_id>;"
+
+# Check journal entries
+mysql -u root -pmysql fineract_default -e \
+  "SELECT entry_date, account_id, type_enum, amount \
+   FROM acc_gl_journal_entry WHERE loan_id = <loan_id>;"
+
+# Check configurations
+mysql -u root -pmysql fineract_default -e \
+  "SELECT name, enabled FROM c_configuration \
+   WHERE name LIKE '%business%' OR name LIKE '%enable%';"
+----
+
+==== API Response Debugging
+
+Add logging to test methods:
+
+[source,java]
+----
+Response response = loanHelper.applyLoan(...);
+System.out.println("Response: " + response.asString());
+System.out.println("Status Code: " + response.getStatusCode());
+
+// Or use logger
+log.info("Response: {}", response.asString());
+----
+
+==== Isolate Failing Tests
+
+[source,bash]
+----
+# Run only the failing test
+./gradlew :integration-tests:test --tests FailingTest --info
+
+# Run with rerun-tasks option
+./gradlew :integration-tests:test --tests FailingTest --rerun-tasks
+
+# Run with fail-fast to stop on first failure
+./gradlew :integration-tests:test --fail-fast
+----
+
+== Best Practices
+
+=== Test Organization
+
+* Extend appropriate base classes (`BaseLoanIntegrationTest`, `IntegrationTest`)
+* Use descriptive test method names that explain what is being tested
+* Group related tests in the same test class
+* Use `@BeforeEach` for setup and `@AfterEach` for cleanup
+* Follow existing naming conventions
+
+=== Test Isolation
+
+* Each test should be independent and not rely on other tests
+* Create fresh test data for each test
+* Clean up test data after test execution
+* Use unique identifiers to avoid conflicts
+* Don't share mutable state between tests
+
+=== Performance Optimization
+
+* Reuse Fineract instance across test runs
+* Use `runAt()` for efficient date management
+* Minimize unnecessary API calls
+* Use bulk operations when appropriate
+* Consider parallel execution for independent tests
+* Run subset of tests during development
+
+=== Code Quality
+
+* Follow existing code patterns and conventions
+* Use helper methods instead of duplicating code
+* Add comments for complex business logic
+* Verify both positive and negative scenarios
+* Include edge cases in test coverage
+* Document test assumptions and prerequisites
+
+=== Comprehensive Verification
+
+* Always verify transaction creation
+* Check accounting journal entries
+* Validate repayment schedules
+* Verify loan status transitions
+* Test charge applications
+* Validate business date handling
+* Check error messages for validation failures
+
+=== Maintenance
+
+* Update tests when API changes
+* Remove deprecated test methods
+* Keep test data realistic
+* Document complex test scenarios
+* Review and refactor tests regularly
+* Keep tests aligned with current best practices

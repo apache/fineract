@@ -266,7 +266,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             scheduledJobDetails.setNextRunTime(null);
             final String stackTrace = getStackTraceAsString(throwable);
             scheduledJobDetails.setErrorLog(stackTrace);
-            log.error("Could not schedule job: {}", scheduledJobDetails.getJobName(), throwable);
+            log.warn("Could not schedule job: {}", scheduledJobDetails.getJobName(), throwable);
         }
         scheduledJobDetails.setCurrentlyRunning(false);
     }
