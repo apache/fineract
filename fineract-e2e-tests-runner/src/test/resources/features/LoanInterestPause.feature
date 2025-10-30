@@ -40,6 +40,9 @@ Feature: Loan interest pause on repayment schedule
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 100           | 1.95     | 0    | 0         | 101.95 | 17.01 | 0          | 0    | 84.94       |
 
+    When Loan Pay-off is made on "01 February 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3476
   Scenario: S2 - pause calculation between two periods, interestRecalculation = true
     When Admin sets the business date to "1 January 2024"
@@ -78,6 +81,9 @@ Feature: Loan interest pause on repayment schedule
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 100           | 1.57     | 0    | 0         | 101.57 | 17.01 | 0          | 0    | 84.56       |
+
+    When Loan Pay-off is made on "01 February 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3477
   Scenario: Backdated pause after the repayment
@@ -140,6 +146,9 @@ Feature: Loan interest pause on repayment schedule
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 01 March 2024    | Repayment        | 17.01  | 16.62     | 0.39     | 0.0  | 0.0       | 66.95        | false    | true     |
+
+    When Loan Pay-off is made on "01 March 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3478
   Scenario: Multiple pause
@@ -222,6 +231,9 @@ Feature: Loan interest pause on repayment schedule
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 01 March 2024    | Repayment        | 17.01  | 16.62     | 0.39     | 0.0  | 0.0       | 66.95        | false    | true     |
+
+    When Loan Pay-off is made on "01 March 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3479
   Scenario: Interest accrual pause between two periods - UC2
@@ -339,6 +351,9 @@ Feature: Loan interest pause on repayment schedule
       | 03 April 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 04 April 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+    When Loan Pay-off is made on "5 April 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3480
   Scenario: Early repayment and interest pause
     When Admin sets the business date to "1 January 2024"
@@ -397,6 +412,9 @@ Feature: Loan interest pause on repayment schedule
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 14 January 2024  | Repayment        | 17.01  | 16.77     | 0.24     | 0.0  | 0.0       | 83.23        | false    | false    |
+
+    When Loan Pay-off is made on "14 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3624
   Scenario: Verify repayment in the middle of interest pause period - UC1
@@ -503,6 +521,9 @@ Feature: Loan interest pause on repayment schedule
       | 29 April 2025    | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 April 2025    | Accrual          | 0.71   | 0.0       | 0.71     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+    When Loan Pay-off is made on "01 May 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3625
   Scenario: Verify a few repayments in the middle of interest pause period - UC2
     When Admin sets the business date to "01 April 2025"
@@ -607,6 +628,9 @@ Feature: Loan interest pause on repayment schedule
       | 08 May 2025      | Accrual          | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 May 2025      | Accrual          | 0.88   | 0.0       | 0.88     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+    When Loan Pay-off is made on "10 May 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3626
   Scenario: Verify charge with repayment, payout refund and CBR in the middle of interest pause period - UC3
     When Admin sets the business date to "01 April 2025"
@@ -695,7 +719,7 @@ Feature: Loan interest pause on repayment schedule
       | 22 April 2025    | Payout Refund         | 400.0  | 234.75    | 1.06     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 22 April 2025    | Accrual               | 1.06   | 0.0       | 1.06     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 23 April 2025    | Credit Balance Refund | 164.19 | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3627
   Scenario: Verify repayment with reversed charge-off in the middle of interest pause period - UC4
@@ -785,6 +809,9 @@ Feature: Loan interest pause on repayment schedule
       | 29 April 2025    | Accrual          | 0.33   | 0.0       | 0.33     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 April 2025    | Accrual          | 0.34   | 0.0       | 0.34     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+    When Loan Pay-off is made on "01 May 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3628
   Scenario: Verify MIR with backdated repayment in the middle of interest pause period - UC5
     When Admin sets the business date to "01 April 2025"
@@ -868,6 +895,9 @@ Feature: Loan interest pause on repayment schedule
       | 29 April 2025    | Accrual                | 0.11   | 0.0       | 0.11     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 April 2025    | Accrual Adjustment     | 0.36   | 0.0       | 0.36     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_REFUND_FULL" loan product "MERCHANT_ISSUED_REFUND" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+
+    When Loan Pay-off is made on "01 May 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3629
   Scenario: Verify repayment with Goodwill Credit the middle of interest pause period for multidisbursal loan with downpayment - UC6
@@ -955,6 +985,9 @@ Feature: Loan interest pause on repayment schedule
       | 08 May 2025      | Accrual          | 0.23   | 0.0       | 0.23     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 May 2025      | Accrual          | 0.23   | 0.0       | 0.23     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+    When Loan Pay-off is made on "10 May 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3630
   Scenario: Verify repayment with 2nd disbursement the middle of interest pause period for multidisbursal loan  - UC7
     When Admin sets the business date to "01 April 2025"
@@ -1040,6 +1073,9 @@ Feature: Loan interest pause on repayment schedule
       | 28 April 2025    | Accrual          | 0.77   | 0.0       | 0.77     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 April 2025    | Accrual          | 0.77   | 0.0       | 0.77     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 April 2025    | Accrual          | 0.76   | 0.0       | 0.76     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+    When Loan Pay-off is made on "01 May 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3631
   Scenario: Verify charge with repayment, payout refund and CBR in the middle of interest pause period for loan with LAST_INSTALLMENT strategy - UC8
@@ -1130,6 +1166,9 @@ Feature: Loan interest pause on repayment schedule
       | 22 April 2025    | Accrual               | 0.9    | 0.0       | 0.9      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 23 April 2025    | Credit Balance Refund | 160.75 | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan status will be "OVERPAID"
+    Then Loan has 3.6 overpaid amount
+    When Admin makes Credit Balance Refund transaction on "01 May 2025" with 3.6 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3393
   Scenario: Interest pause with same period - UC1
@@ -1215,6 +1254,9 @@ Feature: Loan interest pause on repayment schedule
       | 12 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 13 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+    When Loan Pay-off is made on "15 February 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3394
   Scenario: Interest pause between two periods - UC2
@@ -1326,6 +1368,9 @@ Feature: Loan interest pause on repayment schedule
       | 02 April 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 03 April 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 04 April 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+    When Loan Pay-off is made on "5 April 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3395
   Scenario: Backdated interest pause after the repayment - UC3
@@ -1452,6 +1497,9 @@ Feature: Loan interest pause on repayment schedule
       | 02 March 2024    | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 03 March 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 04 March 2024    | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+    When Loan Pay-off is made on "5 March 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3396
   Scenario: Multiple interest pauses - UC4
@@ -1624,6 +1672,9 @@ Feature: Loan interest pause on repayment schedule
       | 03 April 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 04 April 2024    | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+    When Loan Pay-off is made on "5 April 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3397
   Scenario: Backdated interest pause outcomes with Accrual Adjustment - UC5
     When Admin sets the business date to "2 January 2024"
@@ -1765,6 +1816,9 @@ Feature: Loan interest pause on repayment schedule
       | 14 February 2024 | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 February 2024 | Accrual Adjustment | 0.1    | 0.0       | 0.1      | 0.0  | 0.0       | 0.0          | false    | false    |
 
+    When Loan Pay-off is made on "16 February 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3402
   Scenario: Backdated interest pause after the early repayment - UC6
     When Admin sets the business date to "2 January 2024"
@@ -1871,6 +1925,9 @@ Feature: Loan interest pause on repayment schedule
       | 03 March 2024    | Accrual            | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 04 March 2024    | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+    When Loan Pay-off is made on "5 March 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3403
   Scenario: Early repayment before interest pause - UC7
     When Admin sets the business date to "1 January 2024"
@@ -1929,6 +1986,9 @@ Feature: Loan interest pause on repayment schedule
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 14 January 2024  | Repayment        | 17.01  | 16.77     | 0.24     | 0.0  | 0.0       | 83.23        | false    | false    |
+
+    When Loan Pay-off is made on "14 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3404
   Scenario: Interest pause that overlaps a few installments - UC8
@@ -2006,6 +2066,9 @@ Feature: Loan interest pause on repayment schedule
       | 03 March 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 04 March 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+    When Loan Pay-off is made on "5 March 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3668
   Scenario: Verify interest pause period is forbidden for loan with zero interest rate- UC1
     When Admin sets the business date to "01 April 2025"
@@ -2028,7 +2091,7 @@ Feature: Loan interest pause on repayment schedule
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 April 2025    | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
-   # And Admin runs inline COB job for Loan
+    And Admin runs inline COB job for Loan
     And Admin is not able to add an interest pause period with start date "15 April 2025" and end date "25 April 2025"
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date           | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
@@ -2043,6 +2106,9 @@ Feature: Loan interest pause on repayment schedule
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 April 2025    | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+
+    When Loan Pay-off is made on "01 April 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3669
   Scenario: Verify interest pause period is forbidden for loan with zero interest rate with repayment trns - UC2
@@ -2109,6 +2175,10 @@ Feature: Loan interest pause on repayment schedule
       | 01 April 2025    | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
       | 01 May 2025      | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        | false    | false    |
       | 01 June 2025     | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+    Then LoanScheduleVariationsAddedBusinessEvent is not raised on "05 June 2025"
+
+    When Loan Pay-off is made on "05 June 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3670
   Scenario: Verify interest pause period is forbidden for paid-off loan with zero interest rate - UC3
@@ -2181,6 +2251,8 @@ Feature: Loan interest pause on repayment schedule
       | 01 June 2025     | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
       | 01 July 2025     | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 250.0        | false    | false    |
       | 01 August 2025   | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then LoanScheduleVariationsAddedBusinessEvent is not raised on "05 August 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3671
   Scenario: Verify interest pause period is forbidden for multidisbursal loan with zero interest rate - UC4
@@ -2246,6 +2318,10 @@ Feature: Loan interest pause on repayment schedule
     And Admin is not able to add an interest pause period with start date "15 April 2025" and end date "25 April 2025"
     And Admin is not able to add an interest pause period with start date "10 May 2025" and end date "20 May 2025"
     And Admin is not able to add an interest pause period with start date "25 April 2025" and end date "05 May 2025"
+    Then LoanScheduleVariationsAddedBusinessEvent is not raised on "05 May 2025"
+
+    When Loan Pay-off is made on "05 May 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3672
   Scenario: Verify interest pause period is forbidden for charged-off loan with zero interest rate - UC5
@@ -2288,6 +2364,7 @@ Feature: Loan interest pause on repayment schedule
     And Admin is not able to add an interest pause period with start date "15 April 2025" and end date "25 April 2025"
     And Admin is not able to add an interest pause period with start date "10 May 2025" and end date "20 May 2025"
     And Admin is not able to add an interest pause period with start date "25 April 2025" and end date "05 May 2025"
+    Then LoanScheduleVariationsAddedBusinessEvent is not raised on "01 May 2025"
     When Admin sets the business date to "02 May 2025"
     When Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "02 May 2025" with 125 EUR transaction amount and system-generated Idempotency key
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -2307,6 +2384,7 @@ Feature: Loan interest pause on repayment schedule
     And Admin is not able to add an interest pause period with start date "15 April 2025" and end date "25 April 2025"
     And Admin is not able to add an interest pause period with start date "10 May 2025" and end date "20 May 2025"
     And Admin is not able to add an interest pause period with start date "25 April 2025" and end date "05 May 2025"
+    Then LoanScheduleVariationsAddedBusinessEvent is not raised on "02 May 2025"
     When Admin sets the business date to "05 May 2025"
     And Admin does charge-off the loan on "05 May 2025"
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -2327,6 +2405,10 @@ Feature: Loan interest pause on repayment schedule
     And Admin is not able to add an interest pause period with start date "15 April 2025" and end date "25 April 2025"
     And Admin is not able to add an interest pause period with start date "10 May 2025" and end date "20 May 2025"
     And Admin is not able to add an interest pause period with start date "25 April 2025" and end date "05 May 2025"
+    Then LoanScheduleVariationsAddedBusinessEvent is not raised on "05 May 2025"
+
+    When Loan Pay-off is made on "05 May 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3722
   Scenario: Verify that the repayment schedule calculated correctly when interest pause added on the 1st day of the first installment
@@ -2366,6 +2448,10 @@ Feature: Loan interest pause on repayment schedule
       | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       | 100           | 1.9      | 0    | 0         | 101.9 | 0    | 0          | 0    | 101.9       |
 
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C4146
   Scenario: Verify interest pause deletion
     When Admin sets the business date to "1 January 2024"
     And Admin creates a client with random data
@@ -2417,6 +2503,10 @@ Feature: Loan interest pause on repayment schedule
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100           | 2.05     | 0    | 0         | 102.05 | 0    | 0          | 0    | 102.05      |
 
+    When Loan Pay-off is made on "01 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C4147
   Scenario: Verify interest pause update
     When Admin sets the business date to "1 January 2024"
     And Admin creates a client with random data
@@ -2467,3 +2557,6 @@ Feature: Loan interest pause on repayment schedule
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100           | 1.78     | 0    | 0         | 101.78 | 0    | 0          | 0    | 101.78      |
+
+    When Loan Pay-off is made on "01 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met

@@ -156,6 +156,12 @@ public class LoanInterestPauseStepDef extends AbstractStepDef {
         });
     }
 
+    @Then("LoanScheduleVariationsAddedBusinessEvent is not raised on {string}")
+    public void checkLoanScheduleVariationsAddedBusinessEvent(final String date) {
+        eventAssertion.assertEventNotRaised(LoanScheduleVariationsAddedEvent.class,
+                em -> FORMATTER.format(em.getBusinessDate()).equals(date));
+    }
+
     @Then("LoanScheduleVariationsDeletedBusinessEvent is created for interest pause from {string} to {string}")
     public void checkLoanScheduleVariationsDeletedBusinessEvent(final String start, final String end) {
         final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
