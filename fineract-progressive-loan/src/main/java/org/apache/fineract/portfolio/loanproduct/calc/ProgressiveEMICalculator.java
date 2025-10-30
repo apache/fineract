@@ -291,17 +291,21 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         LocalDate balanceCorrectionDate = DateUtils.isBefore(repaymentPeriodDueDate, transactionDate) ? repaymentPeriodDueDate
                 : transactionDate;
         addBalanceCorrection(scheduleModel, balanceCorrectionDate, principalAmount.negated());
+        long notFullyRepaidRepaymentPeriodCount = scheduleModel.repaymentPeriods().stream().filter(rp -> !rp.isFullyPaid()).count();
+        boolean multiplePeriodsAreUnpaid = notFullyRepaidRepaymentPeriodCount > 1L;
         if (scheduleModel.isEMIRecalculationEnabled()) {
             repaymentPeriod.ifPresent(rp -> {
                 // If any period total paid > calculated EMI, then set EMI to total paid -> effectively it is marked as
                 // fully paid
-                boolean transactionDateIsBefore = transactionDate.isBefore(repaymentPeriod.get().getFromDate());
-                if (transactionDateIsBefore
-                        && rp.getTotalPaidAmount().isGreaterThan(rp.getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest())) {
-                    rp.setEmi(rp.getTotalPaidAmount().minus(rp.getTotalCreditedAmount()));
-                } else if (transactionDateIsBefore
-                        && rp.getTotalPaidAmount().isEqualTo(rp.getOriginalEmi().add(rp.getTotalCreditedAmount()))) {
-                    rp.setEmi(rp.getTotalPaidAmount().minus(rp.getTotalCreditedAmount()));
+                if (multiplePeriodsAreUnpaid) {
+                    boolean transactionDateIsBefore = transactionDate.isBefore(repaymentPeriod.get().getFromDate());
+                    if (transactionDateIsBefore
+                            && rp.getTotalPaidAmount().isGreaterThan(rp.getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest())) {
+                        rp.setEmi(rp.getTotalPaidAmount().minus(rp.getTotalCreditedAmount()));
+                    } else if (transactionDateIsBefore
+                            && rp.getTotalPaidAmount().isEqualTo(rp.getOriginalEmi().add(rp.getTotalCreditedAmount()))) {
+                        rp.setEmi(rp.getTotalPaidAmount().minus(rp.getTotalCreditedAmount()));
+                    }
                 }
                 calculateLastUnpaidRepaymentPeriodEMI(scheduleModel, balanceCorrectionDate);
             });
