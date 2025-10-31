@@ -81,6 +81,11 @@ public class LoanRepositoryWrapper {
         return loan;
     }
 
+    @Transactional
+    public Loan findOneForUpdate(Long id) {
+        return this.repository.findByIdForUpdate(id).orElseThrow(() -> new LoanNotFoundException(id));
+    }
+
     // Root Entities are enough
     public Collection<Loan> findActiveLoansByLoanIdAndGroupId(Long clientId, Long groupId) {
         final Collection<LoanStatus> loanStatuses = new ArrayList<>(
