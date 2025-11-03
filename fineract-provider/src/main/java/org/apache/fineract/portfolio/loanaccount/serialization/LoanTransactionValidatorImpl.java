@@ -273,7 +273,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
 
                 final Integer installmentId = this.fromApiJsonHelper.extractIntegerNamed("installmentId", postDatedCheck, locale);
                 final List<LoanRepaymentScheduleInstallment> installmentList = loanRepaymentScheduleInstallment.stream().filter(
-                                repayment -> repayment.getInstallmentNumber().equals(installmentId) && repayment.getLoan().getId().equals(loanId))
+                        repayment -> repayment.getInstallmentNumber().equals(installmentId) && repayment.getLoan().getId().equals(loanId))
                         .collect(Collectors.toList());
                 if (installmentList.size() > 1) {
                     throw new PlatformDataIntegrityException("error.repayment.redundancy", "Multiple installment data found",
@@ -292,7 +292,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
     }
 
     public void validateDisbursementDateWithMeetingDate(final LocalDate actualDisbursementDate, final CalendarInstance calendarInstance,
-                                                        Boolean isSkipRepaymentOnFirstMonth, Integer numberOfDays) {
+            Boolean isSkipRepaymentOnFirstMonth, Integer numberOfDays) {
         if (null != calendarInstance) {
             final Calendar calendar = calendarInstance.getCalendar();
             if (!calendar.isValidRecurringDate(actualDisbursementDate, isSkipRepaymentOnFirstMonth, numberOfDays)) {
@@ -667,7 +667,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
     }
 
     public void validateLoanHasNoLaterChargeRefundTransactionToReverseOrCreateATransaction(Loan loan, LocalDate transactionDate,
-                                                                                           String reversedOrCreated) {
+            String reversedOrCreated) {
         for (LoanTransaction txn : loan.getLoanTransactions()) {
             if (txn.isChargeRefund() && DateUtils.isBefore(transactionDate, txn.getTransactionDate())) {
                 final String errorMessage = "loan.transaction.cant.be." + reversedOrCreated + ".because.later.charge.refund.exists";
@@ -750,7 +750,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
 
     @Override
     public void validateRepaymentDateIsOnNonWorkingDay(final LocalDate repaymentDate, final WorkingDays workingDays,
-                                                       final boolean allowTransactionsOnNonWorkingDay) {
+            final boolean allowTransactionsOnNonWorkingDay) {
         if (!allowTransactionsOnNonWorkingDay && !WorkingDaysUtil.isWorkingDay(workingDays, repaymentDate)) {
             final String errorMessage = "Repayment date cannot be on a non working day";
             throw new LoanApplicationDateException("repayment.date.on.non.working.day", errorMessage, repaymentDate);
@@ -759,7 +759,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
 
     @Override
     public void validateRepaymentDateIsOnHoliday(final LocalDate repaymentDate, final boolean allowTransactionsOnHoliday,
-                                                 final List<Holiday> holidays) {
+            final List<Holiday> holidays) {
         if (!allowTransactionsOnHoliday && HolidayUtil.isHoliday(repaymentDate, holidays)) {
             final String errorMessage = "Repayment date cannot be on a holiday";
             throw new LoanApplicationDateException("repayment.date.on.holiday", errorMessage, repaymentDate);
@@ -823,7 +823,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
 
     @Override
     public void validateRefund(final Loan loan, LoanTransactionType loanTransactionType, final LocalDate transactionDate,
-                               ScheduleGeneratorDTO scheduleGeneratorDTO) {
+            ScheduleGeneratorDTO scheduleGeneratorDTO) {
         checkClientOrGroupActive(loan);
         loanDownPaymentTransactionValidator.validateLoanStatusIsActiveOrFullyPaidOrOverpaid(loan);
         validateActivityNotBeforeClientOrGroupTransferDate(loan, transactionDate);
@@ -838,7 +838,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
     }
 
     public void validateRepaymentTypeTransactionNotBeforeAChargeRefund(final Loan loan, final LoanTransactionType loanTransactionType,
-                                                                       final LocalDate transactionDate) {
+            final LocalDate transactionDate) {
         if (loanTransactionType.isRepaymentType() && !loanTransactionType.isChargeRefund()) {
             for (LoanTransaction txn : loan.getLoanTransactions()) {
                 if (txn.isChargeRefund() && DateUtils.isBefore(transactionDate, txn.getTransactionDate())) {
@@ -1027,7 +1027,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
     }
 
     private void validateTransactionNotBeforeLastTransactionDate(final Loan loan, LoanTransactionType loanTransactionType,
-                                                                 final LocalDate transactionDate) {
+            final LocalDate transactionDate) {
         if (!((LoanScheduleType.CUMULATIVE.equals(loan.getLoanProductRelatedDetail().getLoanScheduleType())
                 && loan.isInterestBearingAndInterestRecalculationEnabled()) || loan.getLoanProduct().isHoldGuaranteeFunds())) {
             return;

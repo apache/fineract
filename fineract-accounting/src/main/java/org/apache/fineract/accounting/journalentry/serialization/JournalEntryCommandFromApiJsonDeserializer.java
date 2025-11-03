@@ -115,7 +115,7 @@ public class JournalEntryCommandFromApiJsonDeserializer extends AbstractFromApiJ
      * @param paramName
      */
     private SingleDebitOrCreditEntryCommand[] populateCreditsOrDebitsArray(final JsonObject topLevelJsonElement, final Locale locale,
-                                                                           final String paramName) {
+            final String paramName) {
         final JsonArray array = topLevelJsonElement.get(paramName).getAsJsonArray();
         SingleDebitOrCreditEntryCommand[] debitOrCredits = new SingleDebitOrCreditEntryCommand[array.size()];
         for (int i = 0; i < array.size(); i++) {
