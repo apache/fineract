@@ -114,6 +114,33 @@ public class LoanReAgingService {
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put(LoanReAgingApiConstants.localeParameterName, command.locale());
         changes.put(LoanReAgingApiConstants.dateFormatParameterName, command.dateFormat());
+
+        LoanTransaction reAgeTransaction = createReAgeTransaction(loan, command);
+        LoanReAgeParameter reAgeParameter = createReAgeParameter(reAgeTransaction, command);
+        reAgeTransaction.setLoanReAgeParameter(reAgeParameter);
+        loanTransactionRepository.saveAndFlush(reAgeTransaction);
+        if (reAgeTransaction.getTransactionDate().isBefore(reAgeTransaction.getSubmittedOnDate())
+                && !loan.isInterestBearingAndInterestRecalculationEnabled()) {
+            reprocessLoanTransactionsService.reprocessTransactionsWithPostTransactionChecks(loan, reAgeTransaction.getTransactionDate());
+        } else if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
+            if (loan.isProgressiveSchedule() && ((loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy())
+                    || loan.hasContractTerminationTransaction()
+                    || (loan.isInterestRecalculationEnabled() && loan.hasReAgingTransaction()))) {
+                final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
+                loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
+            }
+            final List<LoanTransaction> loanTransactions = loanTransactionRepository.findNonReversedTransactionsForReprocessingByLoan(loan);
+            loanTransactions.add(reAgeTransaction);
+            reprocessLoanTransactionsService.reprocessParticularTransactions(loan, loanTransactions);
+        } else {
+            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
+                    .determineProcessor(loan.transactionProcessingStrategy());
+
+            loanRepaymentScheduleTransactionProcessor.processLatestTransaction(reAgeTransaction,
+                    new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
+                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+        }
+        loan.updateLoanScheduleDependentDerivedFields();
         persistNote(loan, command, changes);
 
         // delinquency recalculation will be triggered by the event in a decoupled way via a listener

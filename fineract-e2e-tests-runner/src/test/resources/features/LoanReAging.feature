@@ -14567,3 +14567,58 @@ Feature: LoanReAging
     When Loan Pay-off is made on "01 January 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
+  @TestRailId:C4157 @AdvancedPaymentAllocation
+  Scenario: Verify Loan in case loan paid-off the status is closed outstanding amount is 0, in case any repayment amount less that paid-off amount the status is active with correct outstanding amount
+    When Admin sets the business date to "01 January 2025"
+    When Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_IR_DAILY_TILL_PRECLOSE_LAST_INSTALLMENT_STRATEGY | 01 January 2025   | 1000.0         | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "1000" amount and expected disbursement date on "01 January 2025"
+    When Admin successfully disburse the loan on "01 January 2025" with "1000" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025   |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025  |           | 833.33          | 166.67        | 0.0      | 0.0  | 0.0       | 166.67 | 0.0  | 0.0        | 0.0  | 166.67      |
+      | 2  | 28   | 01 March 2025     |           | 666.66          | 166.67        | 0.0      | 0.0  | 0.0       | 166.67 | 0.0  | 0.0        | 0.0  | 166.67      |
+      | 3  | 31   | 01 April 2025     |           | 499.99          | 166.67        | 0.0      | 0.0  | 0.0       | 166.67 | 0.0  | 0.0        | 0.0  | 166.67      |
+      | 4  | 30   | 01 May 2025       |           | 333.32          | 166.67        | 0.0      | 0.0  | 0.0       | 166.67 | 0.0  | 0.0        | 0.0  | 166.67      |
+      | 5  | 31   | 01 June 2025      |           | 166.65          | 166.67        | 0.0      | 0.0  | 0.0       | 166.67 | 0.0  | 0.0        | 0.0  | 166.67      |
+      | 6  | 30   | 01 July 2025      |           | 0.0             | 166.65        | 0.0      | 0.0  | 0.0       | 166.65 | 0.0  | 0.0        | 0.0  | 166.65      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 0.0  | 0.0        | 0.0  | 1000.0      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2025  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+# --- make early repayment --- #
+    When Admin sets the business date to "15 January 2025"
+    And Customer makes "AUTOPAY" repayment on "15 January 2025" with 166.65 EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      |    |      | 01 January 2025   |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
+      | 1  | 31   | 01 February 2025  |                 | 833.33          | 166.67        | 0.0      | 0.0  | 0.0       | 166.67 | 0.0    | 0.0        | 0.0  | 166.67      |
+      | 2  | 28   | 01 March 2025     |                 | 666.66          | 166.67        | 0.0      | 0.0  | 0.0       | 166.67 | 0.0    | 0.0        | 0.0  | 166.67      |
+      | 3  | 31   | 01 April 2025     |                 | 499.99          | 166.67        | 0.0      | 0.0  | 0.0       | 166.67 | 0.0    | 0.0        | 0.0  | 166.67      |
+      | 4  | 30   | 01 May 2025       |                 | 333.32          | 166.67        | 0.0      | 0.0  | 0.0       | 166.67 | 0.0    | 0.0        | 0.0  | 166.67      |
+      | 5  | 31   | 01 June 2025      |                 | 166.65          | 166.67        | 0.0      | 0.0  | 0.0       | 166.67 | 0.0    | 0.0        | 0.0  | 166.67      |
+      | 6  | 30   | 01 July 2025      | 15 January 2025 | 0.0             | 166.65        | 0.0      | 0.0  | 0.0       | 166.65 | 166.65 | 166.65     | 0.0  |   0.0       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 166.65 | 166.65     | 0.0  | 833.35      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type  | Amount  | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2025  | Disbursement      | 1000.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 15 January 2025  | Repayment         |  166.65 | 166.65    | 0.0      | 0.0  | 0.0       | 833.35       | false    |
+# --- re-age loan on 1st installment ---#
+    When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
+      | 1               | MONTHS        | 16 January 2025  | 8                    |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type  | Amount  | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2025  | Disbursement      | 1000.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 15 January 2025  | Repayment         |  166.65 | 166.65    | 0.0      | 0.0  | 0.0       | 833.35       | false    |
+      | 15 January 2025  | Re-age            |  833.35 | 833.35    | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+    When Loan Pay-off is made on "15 January 2025"
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan has 0 outstanding amount
