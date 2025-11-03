@@ -6,12 +6,12 @@ Next, you create a git tag from the HEAD of the release's git branch.
 
 [source,bash,subs="attributes+,+macros"]
 ----
-% git checkout {revnumber}
-% ./gradlew clean integrationTests <1>
-% git tag -a {revnumber} -m "Fineract {revnumber} release"
-% git push origin tag {revnumber}
+git checkout -b release/{revnumber} <1>
+git tag -a {revnumber} -m "Fineract {revnumber} release" -s <2>
+git push origin tag {revnumber}
 ----
-<1> Run additonally manual tests with the community app.
+<1> Ensure all tests pass for this commit both in CI and locally.
+<2> `-s` is optional but recommended: GPG signatures on tags are useful for trust and integrity.
 
 CAUTION: It is important to create so called annotated tags (vs. lightweight) for releases.
 
@@ -20,5 +20,5 @@ CAUTION: It is important to create so called annotated tags (vs. lightweight) fo
 .Command
 [source,bash,subs="attributes+,+macros"]
 ----
-% ./gradlew fineractReleaseStep5 -Pfineract.release.version={revnumber}
+./gradlew fineractReleaseStep5 -Pfineract.release.version={revnumber}
 ----

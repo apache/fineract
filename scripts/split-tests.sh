@@ -12,7 +12,7 @@ fi
 
 echo "🔍 Searching for eligible JUnit test classes..."
 
-ALL_TESTS=$(find . -type f -path "*/src/test/java/*Test.java" \
+ALL_TESTS=$(find . -type f -path "*/src/test/java/*.java" \
   | while read filepath; do
       filename=$(basename "$filepath")
 
@@ -22,8 +22,8 @@ ALL_TESTS=$(find . -type f -path "*/src/test/java/*Test.java" \
         continue
       fi
 
-      # Skip if file doesn't contain valid JUnit annotations
-      if ! grep -qE "@Test|@Nested|@ParameterizedTest" "$filepath"; then
+      # Check for valid JUnit test annotations (exact word match)
+      if ! grep -q -w "@Test\|@Nested\|@ParameterizedTest" "$filepath"; then
         continue
       fi
 

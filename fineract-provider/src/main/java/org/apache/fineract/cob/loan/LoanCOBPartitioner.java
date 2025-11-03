@@ -29,8 +29,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
-import org.apache.fineract.cob.data.LoanCOBParameter;
-import org.apache.fineract.cob.data.LoanCOBPartition;
+import org.apache.fineract.cob.data.COBParameter;
+import org.apache.fineract.cob.data.COBPartition;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.springframework.batch.core.JobExecution;
@@ -81,13 +81,13 @@ public class LoanCOBPartitioner implements Partitioner {
         }
         StopWatch sw = new StopWatch();
         sw.start();
-        List<LoanCOBPartition> loanCOBPartitions = new ArrayList<>(
+        List<COBPartition> loanCOBPartitions = new ArrayList<>(
                 retrieveLoanIdService.retrieveLoanCOBPartitions(numberOfDays, businessDate, isCatchUp != null && isCatchUp, partitionSize));
         sw.stop();
         // if there is no loan to be closed, we still would like to create at least one partition
 
         if (loanCOBPartitions.size() == 0) {
-            loanCOBPartitions.add(new LoanCOBPartition(0L, 0L, 1L, 0L));
+            loanCOBPartitions.add(new COBPartition(0L, 0L, 1L, 0L));
         }
         log.info(
                 "LoanCOBPartitioner found {} loans to be processed as part of COB. {} partitions were created using partition size {}. RetrieveLoanCOBPartitions was executed in {} ms.",
@@ -96,15 +96,15 @@ public class LoanCOBPartitioner implements Partitioner {
                 .collect(Collectors.toMap(l -> PARTITION_PREFIX + l.getPageNo(), l -> createNewPartition(cobBusinessSteps, l)));
     }
 
-    private long getLoanCount(List<LoanCOBPartition> loanCOBPartitions) {
-        return loanCOBPartitions.stream().map(LoanCOBPartition::getCount).reduce(0L, Long::sum);
+    private long getLoanCount(List<COBPartition> loanCOBPartitions) {
+        return loanCOBPartitions.stream().map(COBPartition::getCount).reduce(0L, Long::sum);
     }
 
-    private ExecutionContext createNewPartition(Set<BusinessStepNameAndOrder> cobBusinessSteps, LoanCOBPartition loanCOBPartition) {
+    private ExecutionContext createNewPartition(Set<BusinessStepNameAndOrder> cobBusinessSteps, COBPartition loanCOBPartition) {
         ExecutionContext executionContext = new ExecutionContext();
         executionContext.put(LoanCOBConstant.BUSINESS_STEPS, cobBusinessSteps);
         executionContext.put(LoanCOBConstant.LOAN_COB_PARAMETER,
-                new LoanCOBParameter(loanCOBPartition.getMinId(), loanCOBPartition.getMaxId()));
+                new COBParameter(loanCOBPartition.getMinId(), loanCOBPartition.getMaxId()));
         executionContext.put("partition", PARTITION_PREFIX + loanCOBPartition.getPageNo());
         return executionContext;
     }

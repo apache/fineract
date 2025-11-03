@@ -13,8 +13,9 @@ jobs:
       issues: write  # for actions/stale to close stale issues
       pull-requests: write  # for actions/stale to close stale PRs
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
-    - uses: actions/stale@5bef64f19d7facfb25b37b414482c7164d639639 # v9
+    - uses: actions/stale@5f858e3efba33a5ca4407a664cc011ad407f2008 # v9
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         # stale-issue-message: 'Stale issue message'

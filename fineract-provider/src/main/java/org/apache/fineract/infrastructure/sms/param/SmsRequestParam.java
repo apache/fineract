@@ -18,8 +18,39 @@
  */
 package org.apache.fineract.infrastructure.sms.param;
 
+import jakarta.ws.rs.QueryParam;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.DateParam;
 
-public record SmsRequestParam(Long status, DateParam fromDate, DateParam toDate, String locale, String rawDateFormat, Integer offset,
-        Integer limit, String orderBy, String sortOrder) {
+@Data
+@NoArgsConstructor
+public class SmsRequestParam {
+
+    @QueryParam("status")
+    private Long status;
+
+    @QueryParam("fromDate")
+    private DateParam fromDate;
+
+    @QueryParam("toDate")
+    private DateParam toDate;
+
+    @QueryParam("locale")
+    private String locale;
+
+    @QueryParam("dateFormat")
+    private String rawDateFormat;
+
+    @QueryParam("offset")
+    private Integer offset;
+
+    @QueryParam("limit")
+    private Integer limit;
+
+    @QueryParam("orderBy")
+    private String orderBy;
+
+    @QueryParam("sortOrder")
+    private String sortOrder;
 }

@@ -16,12 +16,52 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+buildscript {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    
+    dependencies {
+        classpath 'org.asciidoctor:asciidoctor-gradle-jvm:4.0.5'
+        classpath 'org.asciidoctor:asciidoctor-gradle-jvm-pdf:4.0.5'
+        classpath 'org.yaml:snakeyaml:1.33'
+    }
+}
+
+plugins {
+    id 'org.asciidoctor.jvm.convert' version '4.0.5' apply false
+    id 'org.asciidoctor.jvm.pdf' version '4.0.5' apply false
+}
+
 apply plugin: 'org.asciidoctor.jvm.convert'
 apply plugin: 'org.asciidoctor.jvm.pdf'
 
-asciidoctorj {
-    version = '2.5.3'
+// Configure resolution strategy for all configurations
+configurations.all {
+    resolutionStrategy {
+        // Force specific versions of dependencies to avoid conflicts
+        force 'org.yaml:snakeyaml:1.33',
+              'org.jruby:jruby-complete:9.4.5.0'
+    }
+}
 
+// Configure Asciidoctor PDF
+asciidoctorPdf {
+    asciidoctorj {
+        version = '2.5.11' // Explicitly set AsciidoctorJ version
+        
+        modules {
+            // Use a specific version of asciidoctorj-pdf that's known to work with AsciidoctorJ 2.5.11
+            pdf.version '2.3.10'
+        }
+    }
+}
+
+// see also: https://asciidoctor.github.io/asciidoctor-gradle-plugin/master/user-guide/
+
+asciidoctorj {
     attributes = [
         version: "${project.version}",
         docdate: new Date(),
@@ -35,14 +75,21 @@ asciidoctorj {
     ]
 
     modules {
-        pdf.version '1.6.2'
-        diagram.version '2.2.1'
-        epub.version '1.5.1'
-        //        revealjs.version '4.1.0'
+        diagram.use()
     }
 
     fatalWarnings ~/include file not found|missing callout|image to embed not found or not readable/
     fatalWarnings missingIncludes()
+}
+
+task copyImages(type: Copy) {
+    from "${projectDir}/src/docs/en/images"
+    into "${buildDir}/generated/images"
+}
+
+task copyDiagrams(type: Copy) {
+    from "${projectDir}/src/docs/en/diagrams"
+    into "${buildDir}/generated/diagrams"
 }
 
 asciidoctor {
@@ -57,17 +104,9 @@ asciidoctor {
 
     logging.captureStandardError LogLevel.INFO
 
+    dependsOn copyImages, copyDiagrams
+
     dependsOn(':fineract-client:clean', ':fineract-client:buildAsciidoc')
-}
-
-task copyImages(type: Copy) {
-    from "${projectDir}/src/docs/en/images"
-    into "${buildDir}/generated/images"
-}
-
-task copyDiagrams(type: Copy) {
-    from "${projectDir}/src/docs/en/diagrams"
-    into "${buildDir}/generated/diagrams"
 }
 
 asciidoctorPdf {

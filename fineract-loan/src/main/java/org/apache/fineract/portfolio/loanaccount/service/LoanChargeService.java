@@ -51,7 +51,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTrancheDisbursementCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.SingleLoanChargeRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
@@ -64,7 +63,6 @@ public class LoanChargeService {
     private final LoanTransactionProcessingService loanTransactionProcessingService;
     private final LoanLifecycleStateMachine loanLifecycleStateMachine;
     private final LoanBalanceService loanBalanceService;
-    private final LoanTransactionRepository loanTransactionRepository;
 
     public void recalculateAllCharges(final Loan loan) {
         Set<LoanCharge> charges = loan.getActiveCharges();
@@ -134,11 +132,9 @@ public class LoanChargeService {
         }
     }
 
-    public void makeChargePayment(final Loan loan, final Long chargeId, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds, final LoanTransaction paymentTransaction, final Integer installmentNumber) {
+    public void makeChargePayment(final Loan loan, final Long chargeId, final LoanTransaction paymentTransaction,
+            final Integer installmentNumber) {
         loanChargeValidator.validateChargePaymentNotInFuture(paymentTransaction);
-        existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
-        existingReversedTransactionIds.addAll(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
         LoanCharge charge = null;
         for (final LoanCharge loanCharge : loan.getCharges()) {
             if (loanCharge.isActive() && chargeId.equals(loanCharge.getId())) {
@@ -655,7 +651,8 @@ public class LoanChargeService {
     private List<LoanInstallmentCharge> generateInstallmentLoanCharges(final Loan loan, final LoanCharge loanCharge) {
         final List<LoanInstallmentCharge> loanChargePerInstallments = new ArrayList<>();
         if (loanCharge.isInstalmentFee()) {
-            List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
+            final List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments().stream()
+                    .filter(i -> !i.isDownPayment() && !i.isAdditional() && !i.isReAged()).toList();
             for (final LoanRepaymentScheduleInstallment installment : installments) {
                 BigDecimal amount;
                 if (loanCharge.getChargeCalculation().isFlat()) {

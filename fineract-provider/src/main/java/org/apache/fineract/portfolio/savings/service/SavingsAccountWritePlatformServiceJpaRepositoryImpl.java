@@ -595,6 +595,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 for (SavingsAccountTransactionData accountTransaction : transactions) {
                     if (accountTransaction.getId() == null) {
                         savingsAccountData.setNewSavingsAccountTransactionData(accountTransaction);
+                        selectAccountId(accountTransaction, savingsAccountData);
                     }
                 }
             }
@@ -602,6 +603,23 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             savingsAccountData.setExistingReversedTransactionIds(existingReversedTransactionIds);
         }
         return savingsAccountData;
+    }
+
+    public void selectAccountId(SavingsAccountTransactionData accountTransaction, SavingsAccountData savingsAccountData) {
+        SavingsAccountTransactionType transactionType = SavingsAccountTransactionType
+                .fromInt(accountTransaction.getTransactionType().getId().intValue());
+        if (transactionType.isOverDraftInterestPosting()) {
+            if (MathUtil.isGreaterThanZero(accountTransaction.getRunningBalance())) {
+                accountTransaction.setAccountDebit(savingsAccountData.getGlAccountIdForSavingsControl());
+                accountTransaction.setAccountCredit(savingsAccountData.getGlAccountIdForInterestReceivable());
+            } else {
+                accountTransaction.setAccountDebit(savingsAccountData.getGlAccountIdForOverdraftPorfolio());
+                accountTransaction.setAccountCredit(savingsAccountData.getGlAccountIdForInterestReceivable());
+            }
+        } else {
+            accountTransaction.setAccountDebit(savingsAccountData.getGlAccountIdForInterestPayable());
+            accountTransaction.setAccountCredit(savingsAccountData.getGlAccountIdForSavingsControl());
+        }
     }
 
     @Override

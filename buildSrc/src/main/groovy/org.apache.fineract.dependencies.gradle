@@ -25,15 +25,13 @@ dependencyManagement {
         mavenBom 'com.squareup.okhttp3:okhttp-bom:4.12.0'
         mavenBom 'org.slf4j:slf4j-bom:2.0.17'
         mavenBom 'io.micrometer:micrometer-bom:1.13.6'
-        mavenBom 'org.springframework:spring-framework-bom:6.2.5'
-        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.4.4'
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.5.5'
         mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:3.2.1'
         mavenBom 'io.opentelemetry:opentelemetry-bom:1.44.1'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:2.0.21'
         mavenBom 'org.junit:junit-bom:5.11.3'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.18.3'
         mavenBom 'io.cucumber:cucumber-bom:7.20.1'
-        mavenBom 'io.netty:netty-bom:4.1.119.Final'
         mavenBom 'org.mockito:mockito-bom:5.14.2'
         mavenBom 'software.amazon.awssdk:bom:2.29.9'
         mavenBom 'io.github.resilience4j:resilience4j-bom:2.2.0'
@@ -65,8 +63,8 @@ dependencyManagement {
             exclude 'com.sun.mail:javax.mail'
             exclude 'javax.activation:activation'
         }
-        dependency 'commons-io:commons-io:2.17.0'
-        dependency 'com.github.librepdf:openpdf:2.0.3'
+        dependency 'commons-io:commons-io:2.18.0'
+        dependency 'com.github.librepdf:openpdf:3.0.0'
         dependency ('org.mnode.ical4j:ical4j:3.2.19') {
             exclude 'com.sun.mail:javax.mail'
             exclude 'org.codehaus.groovy:groovy'
@@ -123,12 +121,10 @@ dependencyManagement {
         dependency 'jakarta.jms:jakarta.jms-api:3.1.0'
         dependency 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
         dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.6' // Swagger needs exactly this version
-        dependency 'org.apache.bval:org.apache.bval.bundle:3.0.2'
         dependency 'joda-time:joda-time:2.13.1'
 
         dependency 'io.github.classgraph:classgraph:4.8.179'
         dependency 'org.awaitility:awaitility:4.2.2'
-        // TODO: upgrade to 4.8.3
         dependency 'com.github.spotbugs:spotbugs-annotations:4.8.6'
         dependency 'javax.cache:cache-api:1.1.1'
         dependency 'org.mock-server:mockserver-junit-jupiter:5.15.0'
@@ -151,9 +147,6 @@ dependencyManagement {
         dependency "com.squareup.retrofit2:converter-gson:2.11.0"
         dependency "com.squareup.retrofit2:converter-protobuf:2.11.0"
         dependency 'io.reactivex.rxjava2:rxjava:2.2.21'
-        dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.common:1.0.1"
-        dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:1.0.1"
-        dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.httpclient4:1.0.1"
         dependency "io.gsonfire:gson-fire:1.9.0"
         dependency "com.google.code.findbugs:jsr305:3.0.2"
         dependency "commons-codec:commons-codec:1.17.1"
@@ -214,7 +207,7 @@ dependencyManagement {
             exclude 'pull-parser:pull-parser'
         }
 
-        dependency 'org.owasp.esapi:esapi:2.6.0.0'
+        dependency 'org.owasp.esapi:esapi:2.7.0.0'
         dependency 'org.awaitility:awaitility:4.2.2'
 
         dependencySet(group: 'org.apache.poi', version: '5.4.1') {
@@ -240,9 +233,7 @@ dependencyManagement {
             exclude 'org.slf4j:jcl-over-slf4j'
             exclude 'org.slf4j:slf4j-api'
         }
-
-        //v42.7.5: performance issue: https://github.com/pgjdbc/pgjdbc/issues/3511#issuecomment-2637277977
-        dependency 'org.postgresql:postgresql:42.7.4'
+        dependency 'org.postgresql:postgresql:42.7.8'
 
         dependency 'com.mysql:mysql-connector-j:9.2.0'
 
@@ -276,5 +267,15 @@ dependencyManagement {
 
         dependency 'com.ibm.icu:icu4j:76.1'
         dependency 'org.yakworks:spring-icu4j:0.4.2'
+        dependency 'org.apache.commons:commons-lang3:3.18.0'
+        dependency 'com.nimbusds:nimbus-jose-jwt:10.0.2'
+        // Force Spring Framework version: CVE-2025-41249
+        dependency 'org.springframework:spring-core:6.2.11'
+        // Force Spring Framework version: CVE-2025-41248
+        dependency 'org.springframework.security:spring-security-core:6.5.4'
+        // Force netty-codec version: CVE-2025-58057
+        dependency 'io.netty:netty-codec:4.1.125.Final'
+        // Force netty-codec version: CVE-2025-58056
+        dependency 'io.netty:netty-codec-http:4.1.125.Final'
     }
 }

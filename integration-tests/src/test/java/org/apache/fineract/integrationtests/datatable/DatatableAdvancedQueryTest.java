@@ -78,11 +78,11 @@ import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.apache.fineract.integrationtests.common.system.DatatableHelper;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 
 public class DatatableAdvancedQueryTest {
 
@@ -344,7 +344,7 @@ public class DatatableAdvancedQueryTest {
         return datatable;
     }
 
-    @NotNull
+    @NonNull
     private HashMap<String, Object> createDatatableEntry(String datatable, Integer apptableId, LocalDate dateValue, Boolean boolValue,
             Integer intValue, BigDecimal decValue) {
         final HashMap<String, Object> request = new HashMap<>();

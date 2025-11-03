@@ -22,7 +22,7 @@ import static org.mockito.Mockito.times;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.apache.fineract.cob.data.LoanCOBPartition;
+import org.apache.fineract.cob.data.COBPartition;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -48,7 +48,7 @@ public class RetrieveAllNonClosedLoanIdServiceImplTest {
     @Captor
     private ArgumentCaptor<SqlParameterSource> paramsCaptor;
     @Captor
-    private ArgumentCaptor<RowMapper<LoanCOBPartition>> rowMapper;
+    private ArgumentCaptor<RowMapper<COBPartition>> rowMapper;
 
     @Test
     public void testRetrieveLoanCOBPartitionsNoCatchup() {

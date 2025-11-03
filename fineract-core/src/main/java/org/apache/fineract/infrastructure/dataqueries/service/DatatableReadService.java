@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.dataqueries.service;
 
 import com.google.gson.JsonObject;
-import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Locale;
 import org.apache.fineract.infrastructure.core.service.PagedLocalRequest;
@@ -28,6 +27,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.portfolio.search.data.AdvancedQueryData;
 import org.springframework.data.domain.Page;
+import org.springframework.lang.NonNull;
 
 public interface DatatableReadService {
 
@@ -35,14 +35,14 @@ public interface DatatableReadService {
 
     DatatableData retrieveDatatable(String datatable);
 
-    List<JsonObject> queryDataTable(@NotNull String datatable, @NotNull String columnName, String columnValue,
-            @NotNull String resultColumns);
+    List<JsonObject> queryDataTable(@NonNull String datatable, @NonNull String columnName, String columnValue,
+            @NonNull String resultColumns);
 
-    Page<JsonObject> queryDataTableAdvanced(@NotNull String datatable, @NotNull PagedLocalRequest<AdvancedQueryData> pagedRequest);
+    Page<JsonObject> queryDataTableAdvanced(@NonNull String datatable, @NonNull PagedLocalRequest<AdvancedQueryData> pagedRequest);
 
-    boolean buildDataQueryEmbedded(@NotNull EntityTables entityTable, @NotNull String datatable, @NotNull AdvancedQueryData request,
-            @NotNull List<String> selectColumns, @NotNull StringBuilder select, @NotNull StringBuilder from, @NotNull StringBuilder where,
-            @NotNull List<Object> params, String mainAlias, String alias, String dateFormat, String dateTimeFormat, Locale locale);
+    boolean buildDataQueryEmbedded(@NonNull EntityTables entityTable, @NonNull String datatable, @NonNull AdvancedQueryData request,
+            @NonNull List<String> selectColumns, @NonNull StringBuilder select, @NonNull StringBuilder from, @NonNull StringBuilder where,
+            @NonNull List<Object> params, String mainAlias, String alias, String dateFormat, String dateTimeFormat, Locale locale);
 
     GenericResultsetData retrieveDataTableGenericResultSet(String datatable, Long appTableId, String order, Long id);
 

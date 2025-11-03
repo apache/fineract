@@ -27,7 +27,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
-import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
+import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.loan.LoanCOBConstant;
 import org.apache.fineract.cob.loan.RetrieveLoanIdService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
@@ -70,7 +70,7 @@ public class AsyncLoanCOBExecutorServiceImpl implements AsyncLoanCOBExecutorServ
         try {
             ThreadLocalContextUtil.init(context);
             LocalDate cobBusinessDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
-            List<LoanIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDate = retrieveLoanIdService
+            List<COBIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDate = retrieveLoanIdService
                     .retrieveLoanIdsOldestCobProcessed(cobBusinessDate);
 
             LocalDate oldestCOBProcessedDate = !loanIdAndLastClosedBusinessDate.isEmpty()

@@ -42,6 +42,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportExportType;
+import org.apache.fineract.infrastructure.dataqueries.data.ReportParameters;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
 import org.apache.fineract.infrastructure.report.provider.ReportingProcessServiceProvider;
 import org.apache.fineract.infrastructure.report.service.ReportingProcessService;
@@ -53,7 +54,7 @@ import org.springframework.stereotype.Component;
 
 @Path("/v1/runreports")
 @Component
-@Tag(name = "Run Reports")
+@Tag(name = "Run Reports", description = "API for executing predefined reports with dynamic parameters")
 @RequiredArgsConstructor
 public class RunreportsApiResource {
 
@@ -67,12 +68,16 @@ public class RunreportsApiResource {
     @Path("/availableExports/{reportName}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Return all available export types for the specific report", description = "Returns the list of all available export types.")
+    @Operation(summary = "Return all available export types for the specific report", description = "Returns the list of all available export types for a given report.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ReportExportType.class)))) })
-    public Response retrieveAllAvailableExports(@PathParam("reportName") @Parameter(description = "reportName") final String reportName,
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ReportExportType.class)))),
+            @ApiResponse(responseCode = "400", description = "Bad Request - Invalid report name or parameters"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error") })
+    public Response retrieveAllAvailableExports(
+            @PathParam("reportName") @Parameter(description = "Name of the report to get available export types for", example = "Client Listing", required = true) final String reportName,
             @Context final UriInfo uriInfo,
-            @DefaultValue("false") @QueryParam(IS_SELF_SERVICE_USER_REPORT_PARAMETER) @Parameter(description = IS_SELF_SERVICE_USER_REPORT_PARAMETER) final boolean isSelfServiceUserReport) {
+            @DefaultValue("false") @QueryParam(IS_SELF_SERVICE_USER_REPORT_PARAMETER) @Parameter(description = "Indicates if this is a self-service user report", example = "false") final boolean isSelfServiceUserReport) {
+
         MultivaluedMap<String, String> queryParams = new MultivaluedStringMap();
         queryParams.putAll(uriInfo.getQueryParameters());
 
@@ -90,41 +95,56 @@ public class RunreportsApiResource {
     @Path("{reportName}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON, "text/csv", "application/vnd.ms-excel", "application/pdf", "text/html" })
-    @Operation(summary = "Running a Report", description = "This resource allows you to run and receive output from pre-defined Apache Fineract reports.\n"
-            + "\n" + "Reports can also be used to provide data for searching and workflow functionality.\n" + "\n"
-            + "The default output is a JSON formatted \"Generic Resultset\". The Generic Resultset contains Column Heading as well as Data information. However, you can export to CSV format by simply adding \"&exportCSV=true\" to the end of your URL.\n"
-            + "\n"
-            + "If Pentaho reports have been pre-defined, they can also be run through this resource. Pentaho reports can return HTML, PDF or CSV formats.\n"
-            + "\n"
-            + "The Apache Fineract reference application uses a JQuery plugin called stretchy reporting which, itself, uses this reports resource to provide a pretty flexible reporting User Interface (UI).\n\n"
-            + "\n" + "\n" + "Example Requests:\n" + "\n" + "runreports/Client%20Listing?R_officeId=1\n" + "\n" + "\n"
-            + "runreports/Client%20Listing?R_officeId=1&exportCSV=true\n" + "\n" + "\n"
-            + "runreports/OfficeIdSelectOne?R_officeId=1&parameterType=true\n" + "\n" + "\n"
-            + "runreports/OfficeIdSelectOne?R_officeId=1&parameterType=true&exportCSV=true\n" + "\n" + "\n"
-            + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=HTML&R_officeId=1\n"
-            + "\n" + "\n"
-            + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=XLS&R_officeId=1\n"
-            + "\n" + "\n"
-            + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=CSV&R_officeId=1\n"
-            + "\n" + "\n"
-            + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=PDF&R_officeId=1")
+    @Operation(summary = "Run a predefined report", description = ReportParameters.FULL_DESCRIPTION)
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RunreportsApiResourceSwagger.RunReportsResponse.class))) })
-    public Response runReport(@PathParam("reportName") @Parameter(description = "reportName") final String reportName,
+            @ApiResponse(responseCode = "200", description = "OK - Report executed successfully", content = @Content(schema = @Schema(implementation = RunreportsApiResourceSwagger.RunReportsResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request - Missing or invalid parameters"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Not authorized to run this report"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error") })
+    public Response runReport(
+            @PathParam("reportName") @Parameter(description = "The name of the report to execute (e.g., 'Client Listing', 'Expected Payments By Date')", example = "Client Listing", required = true) final String reportName,
             @Context final UriInfo uriInfo,
-            @DefaultValue("false") @QueryParam(IS_SELF_SERVICE_USER_REPORT_PARAMETER) @Parameter(description = IS_SELF_SERVICE_USER_REPORT_PARAMETER) final boolean isSelfServiceUserReport) {
 
+            @DefaultValue("false") @QueryParam(IS_SELF_SERVICE_USER_REPORT_PARAMETER) @Parameter(description = "Whether this is a self-service user report", example = "false") final boolean isSelfServiceUserReport,
+
+            @DefaultValue("false") @QueryParam("exportCSV") @Parameter(description = "Set to true to export results as CSV", example = "false") final Boolean exportCSV,
+
+            @DefaultValue("false") @QueryParam("parameterType") @Parameter(description = "Indicates if this is a parameter type request", example = "false") final Boolean parameterType,
+
+            @QueryParam("output-type") @Parameter(description = "Output format type (HTML, XLS, CSV, PDF)", example = "HTML") final String outputType,
+
+            @QueryParam("R_officeId") @Parameter(description = "Office ID filter", example = "1") final String rOfficeId,
+
+            @QueryParam("R_loanOfficerId") @Parameter(description = "Loan officer ID filter", example = "5") final String rLoanOfficerId,
+
+            @QueryParam("R_fromDate") @Parameter(description = "Start date filter (yyyy-MM-dd)", example = "2023-01-01") final String rFromDate,
+
+            @QueryParam("R_toDate") @Parameter(description = "End date filter (yyyy-MM-dd)", example = "2023-12-31") final String rToDate,
+
+            @QueryParam("R_currencyId") @Parameter(description = "Currency ID filter", example = "USD") final String rCurrencyId,
+
+            @QueryParam("R_accountNo") @Parameter(description = "Account number filter", example = "00010001") final String rAccountNo) {
+
+        return processReportRequest(reportName, uriInfo, isSelfServiceUserReport);
+    }
+
+    public Response runReport(final String reportName, final UriInfo uriInfo, final boolean isSelfServiceUserReport) {
+
+        return processReportRequest(reportName, uriInfo, isSelfServiceUserReport);
+    }
+
+    private Response processReportRequest(final String reportName, final UriInfo uriInfo, final boolean isSelfServiceUserReport) {
         MultivaluedMap<String, String> queryParams = new MultivaluedStringMap();
         queryParams.putAll(uriInfo.getQueryParameters());
 
-        final boolean parameterType = ApiParameterHelper.parameterType(queryParams);
+        final boolean parameterTypeValue = ApiParameterHelper.parameterType(queryParams);
 
-        checkUserPermissionForReport(reportName, parameterType);
+        checkUserPermissionForReport(reportName, parameterTypeValue);
 
         // Pass through isSelfServiceUserReport so that ReportingProcessService implementations can use it
         queryParams.putSingle(IS_SELF_SERVICE_USER_REPORT_PARAMETER, Boolean.toString(isSelfServiceUserReport));
 
-        String reportType = readExtraDataAndReportingService.getReportType(reportName, isSelfServiceUserReport, parameterType);
+        String reportType = readExtraDataAndReportingService.getReportType(reportName, isSelfServiceUserReport, parameterTypeValue);
         ReportingProcessService reportingProcessService = reportingProcessServiceProvider.findReportingProcessService(reportType);
         if (reportingProcessService == null) {
             throw new PlatformServiceUnavailableException("err.msg.report.service.implementation.missing",

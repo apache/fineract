@@ -24,6 +24,10 @@ import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.interestpauses.service.LoanAccountTransfersService;
@@ -36,8 +40,11 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.ProgressiveTransactionCtx;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +60,9 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
     private final LoanBalanceService loanBalanceService;
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanTransactionService loanTransactionService;
+    private final LoanJournalEntryPoster loanJournalEntryPoster;
+    private final BusinessEventNotifierService businessEventNotifierService;
+    private final LoanAccrualActivityProcessingService loanAccrualActivityProcessingService;
 
     @Override
     public void reprocessTransactions(final Loan loan) {
@@ -145,12 +155,28 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
 
     @Override
     public void processLatestTransaction(final LoanTransaction loanTransaction, final Loan loan) {
-        final ChangedTransactionDetail changedTransactionDetail = loanTransactionProcessingService.processLatestTransaction(
-                loan.getTransactionProcessingStrategyCode(), loanTransaction,
-                new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                        new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail()));
+        LoanRepaymentScheduleTransactionProcessor transactionProcessor = loanTransactionProcessingService
+                .getTransactionProcessor(loan.getTransactionProcessingStrategyCode());
+
+        TransactionCtx transactionCtx;
+        if (transactionProcessor instanceof AdvancedPaymentScheduleTransactionProcessor advancedProcessor) {
+            Optional<ProgressiveLoanInterestScheduleModel> savedModel = interestScheduleModelRepositoryWrapper.getSavedModel(loan,
+                    loanTransaction.getTransactionDate());
+            ProgressiveLoanInterestScheduleModel model = savedModel
+                    .orElseGet(() -> advancedProcessor.calculateInterestScheduleModel(loan.getId(), loanTransaction.getTransactionDate()));
+
+            transactionCtx = new ProgressiveTransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
+                    loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail(), model);
+        } else {
+            transactionCtx = new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
+                    new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail());
+        }
+
+        final ChangedTransactionDetail changedTransactionDetail = loanTransactionProcessingService
+                .processLatestTransaction(loan.getTransactionProcessingStrategyCode(), loanTransaction, transactionCtx);
         final List<LoanTransaction> newTransactions = changedTransactionDetail.getTransactionChanges().stream()
-                .map(TransactionChangeData::getNewTransaction).peek(transaction -> transaction.updateLoan(loan)).toList();
+                .map(TransactionChangeData::getNewTransaction).toList().stream().filter(LoanTransaction::isNotReversed)
+                .peek(transaction -> transaction.updateLoan(loan)).toList();
         loan.getLoanTransactions().addAll(newTransactions);
 
         loanBalanceService.updateLoanSummaryDerivedFields(loan);
@@ -170,11 +196,25 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
         for (TransactionChangeData change : changedTransactionDetail.getTransactionChanges()) {
             final LoanTransaction newTransaction = change.getNewTransaction();
             final LoanTransaction oldTransaction = change.getOldTransaction();
+            if (newTransaction.isNotReversed()) {
+                loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newTransaction);
 
-            loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newTransaction);
+                // Create journal entries for new transaction
+                loanJournalEntryPoster.postJournalEntriesForLoanTransaction(newTransaction, false, false);
+                if (oldTransaction == null && (newTransaction.isAccrual() || newTransaction.isAccrualAdjustment())) {
+                    final LoanTransactionBusinessEvent businessEvent = newTransaction.isAccrual()
+                            ? new LoanAccrualTransactionCreatedBusinessEvent(newTransaction)
+                            : new LoanAccrualAdjustmentTransactionBusinessEvent(newTransaction);
+                    businessEventNotifierService.notifyPostBusinessEvent(businessEvent);
+                }
+                if (oldTransaction != null) {
+                    loanAccountTransfersService.updateLoanTransaction(oldTransaction.getId(), newTransaction);
+                }
+            }
 
             if (oldTransaction != null) {
-                loanAccountTransfersService.updateLoanTransaction(oldTransaction.getId(), newTransaction);
+                // Create reversal journal entries for old transaction if it exists (reverse-replay scenario)
+                loanJournalEntryPoster.postJournalEntriesForLoanTransaction(oldTransaction, false, false);
             }
         }
         replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
@@ -189,9 +229,10 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
             change.getNewTransaction().updateLoan(loan);
         }
         final List<LoanTransaction> newTransactions = changedTransactionDetail.getTransactionChanges().stream()
-                .map(TransactionChangeData::getNewTransaction).toList();
+                .map(TransactionChangeData::getNewTransaction).toList().stream().filter(LoanTransaction::isNotReversed).toList();
         loan.getLoanTransactions().addAll(newTransactions);
         loanBalanceService.updateLoanSummaryDerivedFields(loan);
+        loanAccrualActivityProcessingService.recalculateAccrualActivityTransaction(loan, changedTransactionDetail);
         return changedTransactionDetail;
     }
 }

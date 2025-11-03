@@ -1,0 +1,160 @@
+= Journal Entry Aggregation
+
+== Overview
+The Journal Entry Aggregation Job is a Spring Batch-based solution designed to efficiently aggregate journal entries in the Fineract system. This job processes journal entries in configurable chunks, improving performance and resource utilization when dealing with large volumes of financial transactions.
+
+== Key Features
+
+=== Chunk-based Processing
+* Processes journal entries in configurable batch sizes
+* Reduces memory footprint by working with manageable data subsets
+* Improves performance through efficient batch processing
+
+=== Tracking and Deduplication
+* Tracks processed date ranges to prevent duplicate aggregations
+* Uses `JournalEntryAggregationTracking` to maintain execution history
+* Skips already processed date ranges in subsequent runs
+
+=== Configurable Exclude Recent N Days
+* Excludes the last N days (from business date) from processing
+* Default `Exclude Recent N Days` can be customized via application properties
+
+== How It Works
+
+=== Job Flow
+
+==== Job Initialization
+* Determines the date range to process based on last execution
+* Sets up execution context with date boundaries
+
+==== Data Reading
+* Fetches unaggregated journal entries within the target date range
+* Groups entries by GL account, product, office, and other dimensions
+
+==== Processing
+* Aggregates debit and credit amounts for each group
+* Handles external asset owner mappings
+* Processes data in configurable chunk sizes
+
+==== Tracking
+* Records successful aggregation runs
+* Maintains execution history for future reference
+
+== Configuration
+
+=== Job Parameters
+* `aggregatedOnDate`: (Optional) Specific date to process (defaults to business date)
+* `chunkSize`: (Optional) Number of records to process in each chunk
+
+=== Application Properties
+[source,properties]
+----
+# Exclude Recent N days from aggregation
+fineract.job.journal-entry-aggregation.exclude-recent-N-days=1
+
+# Chunk size for batch processing
+fineract.job.journal-entry-aggregation.chunk-size=1000
+----
+
+== Usage
+
+=== Manual Execution
+Trigger the job manually through the Fineract API:
+
+[source,http]
+----
+POST /jobs/short-name/JRNL_AGG
+Content-Type: application/json
+
+{
+}
+----
+
+=== Scheduled Execution
+Configure the job to run on a schedule by adding to your scheduler configuration.
+
+=== Monitoring
+Monitor job execution through:
+
+* Job execution logs
+* `JOURNAL_ENTRY_AGGREGATION_TRACKING` table
+* Spring Batch job execution tables
+
+== Best Practices
+
+=== Chunk Size Tuning
+* Larger chunks improve throughput but increase memory usage
+* Monitor memory usage and adjust chunk size accordingly
+
+=== Scheduling
+* Schedule during off-peak hours for large datasets
+* Consider running more frequently with smaller `Exclude Recent N Days` values
+
+=== Error Handling
+* Failed jobs can be restarted from the last successful chunk
+* Review job execution logs for any processing issues
+
+== Performance Considerations
+
+* *Indexing*: Ensure proper indexes exist on `aggregated_on_date`, `office_id`, and other filtering columns
+* *Partitioning*: Consider partitioning large journal entry tables by date for better performance
+* *Batch Window*: Allocate sufficient time for the job to complete during maintenance windows
+
+== Database Schema
+
+=== m_journal_entry_aggregation_summary Table
+This table stores the aggregated journal entry amounts, grouped by various dimensions for efficient reporting and analysis.
+
+[cols="1,2,2,2", options="header"]
+|===
+| Column | Type | Nullable | Description
+| id | BIGINT | No | Primary key
+| gl_account_id | BIGINT | No | Reference to `acc_gl_account`
+| product_id | BIGINT | Yes | Reference to the product (if applicable)
+| office_id | BIGINT | No | Reference to `m_office`
+| entity_type_enum | SMALLINT | No | Type of entity (e.g., loan, savings)
+| submitted_on_date | DATE | No | The date of the business date when entry was submitted
+| aggregated_on_date | DATE | No | The date when aggregation was performed
+| debit_amount | DECIMAL(19,6) | No | Sum of debit amounts
+| credit_amount | DECIMAL(19,6) | No | Sum of credit amounts
+| external_owner_id | BIGINT | Yes | Reference to external owner (if applicable)
+| job_execution_id | BIGINT | No | Reference to batch job execution
+| created_date | TIMESTAMP | No | Record creation timestamp
+| last_modified_date | TIMESTAMP | Yes | Last modification timestamp
+|===
+
+The table is designed to support efficient querying of aggregated financial data by:
+* Date ranges (using `submitted_on_date` and `aggregated_on_date`)
+* Organizational structure (using `office_id`)
+* Financial dimensions (using `gl_account_id` and `product_id`)
+* Entity types (using `entity_type_enum`)
+
+=== m_journal_entry_aggregation_tracking Table
+This table maintains a history of aggregation job executions, tracking which date ranges have been processed to prevent duplicate aggregations.
+
+[cols="1,2,2,2", options="header"]
+|===
+| Column | Type | Nullable | Description
+| id | BIGINT | No | Primary key
+| job_execution_id | BIGINT | No | Reference to Spring Batch job execution
+| aggregated_on_date_from | DATE | No | Start date of the aggregation period
+| aggregated_on_date_to | DATE | No | End date of the aggregation period
+| submitted_on_date | DATE | No | The date of the business date when entry was submitted
+| status | VARCHAR(20) | No | Status of the aggregation (e.g., COMPLETED, FAILED)
+| error_message | TEXT | Yes | Error details if the job failed
+| start_time | TIMESTAMP | No | When the aggregation started
+| end_time | TIMESTAMP | Yes | When the aggregation completed
+| records_processed | INT | Yes | Number of records processed
+| created_date | TIMESTAMP | No | Record creation timestamp
+| last_modified_date | TIMESTAMP | Yes | Last modification timestamp
+|===
+
+Key aspects of the tracking table:
+* Tracks the exact date ranges processed in each job execution
+* Maintains job status and error information for debugging
+* Records performance metrics (processing time, record counts)
+* Used by the job to determine which date ranges need processing in subsequent runs
+
+Indexes are created on frequently queried columns to ensure optimal performance for reporting and analysis.
+
+This aggregation job provides a robust, scalable solution for processing journal entries while maintaining data integrity and providing clear audit trails of all aggregation activities.

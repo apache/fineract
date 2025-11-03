@@ -2,26 +2,28 @@
 
 == Description
 
-Finally create a directory with release name ({revnumber} in this example) in https://dist.apache.org/repos/dist/dev/fineract and add the following files in this new directory:
+Next we'll stage the release candidate. Create a new folder and add these files:
 
-* apache-fineract-{revnumber}-binary.tar.gz
-* apache-fineract-{revnumber}-binary.tar.gz.sha512
-* apache-fineract-{revnumber}-binary.tar.gz.asc
-* apache-fineract-{revnumber}-src.tar.gz
-* apache-fineract-{revnumber}-src.tar.gz.sha512
-* apache-fineract-{revnumber}-src.tar.gz.asc
+* apache-fineract-bin-{revnumber}.tar.gz
+* apache-fineract-bin-{revnumber}.tar.gz.sha512
+* apache-fineract-bin-{revnumber}.tar.gz.asc
+* apache-fineract-src-{revnumber}.tar.gz
+* apache-fineract-src-{revnumber}.tar.gz.sha512
+* apache-fineract-src-{revnumber}.tar.gz.asc
 
-These files (or "artifacts") make up the release candidate.
-
-Upload these files to ASF's distribution dev (staging) area:
+These files (or "artifacts") comprise the release candidate. Upload these files to https://www.apache.org/legal/release-policy.html#stage[ASF's distribution dev/staging area] like so:
 
 [source,bash,subs="attributes+"]
 ----
-% svn co https://dist.apache.org/repos/dist/dev/fineract/ fineract-dist-dev
-% mkdir fineract-dist-dev/{revnumber}
-% cp path/to/files/* fineract-dist-dev/{revnumber}/
-% cd fineract-dist-dev
-% svn commit
+# this is a remote operation
+svn mkdir https://dist.apache.org/repos/dist/dev/fineract/{revnumber}
+# create local svn-tracked folder "{revnumber}"
+svn checkout https://dist.apache.org/repos/dist/dev/fineract/{revnumber}
+# prepare to upload
+cp path/to/new/folder/* {revnumber}/
+cd {revnumber}/
+# actual upload occurs here
+svn add * && svn commit
 ----
 
 NOTE: You will need your ASF Committer credentials to be able to access the Subversion host at `dist.apache.org`.
@@ -31,5 +33,7 @@ NOTE: You will need your ASF Committer credentials to be able to access the Subv
 .Command
 [source,bash,subs="attributes+,+macros"]
 ----
-% ./gradlew fineractReleaseStep8 -Pfineract.release.version={revnumber}
+./gradlew fineractReleaseStep8 -Pfineract.release.version={revnumber}
 ----
+
+CAUTION: This task is inefficient. Follow `svn mkdir` and other manual steps above.

@@ -50,7 +50,7 @@ import org.apache.fineract.investor.domain.LoanOwnershipTransferBusinessEvent;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
-import org.jetbrains.annotations.NotNull;
+import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,6 +67,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.lang.NonNull;
 
 @ExtendWith(MockitoExtension.class)
 public class LoanAccountOwnerTransferServiceTest {
@@ -82,6 +83,8 @@ public class LoanAccountOwnerTransferServiceTest {
     private BusinessEventNotifierService businessEventNotifierService;
     @Mock
     private ExternalAssetOwnerTransferOutstandingInterestCalculation externalAssetOwnerTransferOutstandingInterestCalculation;
+    @Mock
+    private LoanJournalEntryPoster loanJournalEntryPoster;
 
     @InjectMocks
     private LoanAccountOwnerTransferServiceImpl underTest;
@@ -237,7 +240,7 @@ public class LoanAccountOwnerTransferServiceTest {
         return Stream.of(Arguments.of(ExternalTransferStatus.BUYBACK_INTERMEDIATE), Arguments.of(ExternalTransferStatus.BUYBACK));
     }
 
-    @NotNull
+    @NonNull
     private ArgumentCaptor<BusinessEvent<?>> verifyBusinessEvents(int expectedBusinessEvents) {
         @SuppressWarnings("unchecked")
         ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = ArgumentCaptor.forClass(BusinessEvent.class);

@@ -47,7 +47,9 @@ public class ReplayedTransactionBusinessEventServiceImpl implements ReplayedTran
 
                 if (oldTransaction != null) {
                     final LoanAdjustTransactionBusinessEvent.Data data = new LoanAdjustTransactionBusinessEvent.Data(oldTransaction);
-                    data.setNewTransactionDetail(newTransaction);
+                    if (newTransaction.isNotReversed()) {
+                        data.setNewTransactionDetail(newTransaction);
+                    }
                     businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(data));
                 }
             }

@@ -23,7 +23,6 @@ import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiCon
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.TABLE_FIELD_ID;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.TABLE_REGISTERED_TABLE;
 
-import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +44,7 @@ import org.apache.fineract.portfolio.search.service.SearchUtil;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -96,7 +96,7 @@ public class DatatableUtil {
         return entityTable;
     }
 
-    @NotNull
+    @NonNull
     public EntityTables queryForApplicationEntity(final String datatable) {
         sqlValidator.validate(datatable);
         final String sql = "SELECT application_table_name FROM x_registered_table where registered_table_name = ?";
@@ -111,7 +111,7 @@ public class DatatableUtil {
         return resolveEntity(applicationTableName);
     }
 
-    public CommandProcessingResult checkMainResourceExistsWithinScope(@NotNull EntityTables entityTable, final Long appTableId) {
+    public CommandProcessingResult checkMainResourceExistsWithinScope(@NonNull EntityTables entityTable, final Long appTableId) {
         final String sql = dataScopedSQL(entityTable, appTableId);
         log.debug("data scoped sql: {}", sql);
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
@@ -140,7 +140,7 @@ public class DatatableUtil {
                 .build();
     }
 
-    public String dataScopedSQL(@NotNull EntityTables entityTable, final Long appTableId) {
+    public String dataScopedSQL(@NonNull EntityTables entityTable, final Long appTableId) {
         // unfortunately have to, one way or another, be able to restrict data to the users office hierarchy. Here, a
         // few key tables are done. But if additional fields are needed on other tables the same pattern applies
         final AppUser currentUser = this.context.authenticatedUser();

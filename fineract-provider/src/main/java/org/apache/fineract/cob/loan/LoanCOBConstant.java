@@ -18,24 +18,20 @@
  */
 package org.apache.fineract.cob.loan;
 
-public final class LoanCOBConstant {
+import org.apache.fineract.cob.COBConstant;
+
+public final class LoanCOBConstant extends COBConstant {
 
     public static final String JOB_NAME = "LOAN_COB";
     public static final String JOB_HUMAN_READABLE_NAME = "Loan COB";
     public static final String LOAN_COB_JOB_NAME = "LOAN_CLOSE_OF_BUSINESS";
     public static final String LOAN_COB_PARAMETER = "loanCobParameter";
-    public static final String BUSINESS_STEPS = "businessSteps";
     public static final String LOAN_COB_WORKER_STEP = "loanCOBWorkerStep";
 
     public static final String INLINE_LOAN_COB_JOB_NAME = "INLINE_LOAN_COB";
-    public static final String BUSINESS_DATE_PARAMETER_NAME = "BusinessDate";
-    public static final String IS_CATCH_UP_PARAMETER_NAME = "IS_CATCH_UP";
     public static final String LOAN_IDS_PARAMETER_NAME = "LoanIds";
 
     public static final String LOAN_COB_PARTITIONER_STEP = "Loan COB partition - Step";
-    public static final String LOAN_COB_CUSTOM_JOB_PARAMETER_KEY = "CUSTOM_JOB_PARAMETER_ID";
-
-    public static final Long NUMBER_OF_DAYS_BEHIND = 1L;
 
     private LoanCOBConstant() {
 

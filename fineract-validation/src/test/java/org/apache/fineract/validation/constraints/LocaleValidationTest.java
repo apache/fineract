@@ -20,22 +20,39 @@ package org.apache.fineract.validation.constraints;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.validation.config.ValidationConfig;
+import org.hibernate.validator.HibernateValidator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.validation.Validator;
 
 @Slf4j
 @SpringBootTest
-@ContextConfiguration(classes = { ValidationConfig.class })
+@ContextConfiguration(classes = { LocalDateValidationTest.TestConfig.class })
 class LocaleValidationTest {
+
+    @Configuration
+    @Import({ MessageSourceAutoConfiguration.class })
+    static class TestConfig {
+
+        @Bean
+        public jakarta.validation.Validator validator() {
+            return Validation.byProvider(HibernateValidator.class).configure().buildValidatorFactory().getValidator();
+        }
+    }
 
     @Autowired
     private Validator validator;
@@ -44,31 +61,36 @@ class LocaleValidationTest {
     void invalidBlank() {
         var request = LocaleModel.builder().locale(null).build();
 
-        var errors = validator.validateObject(request);
+        var errors = validator.validate(request);
 
-        assertThat(errors.getFieldErrorCount()).isEqualTo(1);
+        assertThat(errors).hasSize(1);
 
-        assertThat(errors.getFieldErrors()).anyMatch(e -> e.getField().equals("locale"));
+        assertThat(errors).anyMatch(e -> e.getPropertyPath().toString().equals("locale"));
     }
 
-    @Test
-    void invalidFormat() {
-        var request = LocaleModel.builder().locale("EN").build();
-
-        var errors = validator.validateObject(request);
-
-        assertThat(errors.getFieldErrorCount()).isEqualTo(1);
-
-        assertThat(errors.getFieldErrors()).anyMatch(e -> e.getField().equals("locale"));
+    @ParameterizedTest
+    @ValueSource(strings = { "invalid-locale", // invalid format
+            "xx-YY", // non-existent locale
+            "random text", // random text
+            "123", // numbers
+            "en-US-extra" // extra segment
+    })
+    void invalidFormats(String locale) {
+        var request = LocaleModel.builder().locale(locale).build();
+        var errors = validator.validate(request);
+        assertThat(errors).as("Expected locale '%s' to be invalid but it was valid", locale).hasSize(1);
     }
 
-    @Test
-    void valid() {
-        var request = LocaleModel.builder().locale("en").build();
-
-        var errors = validator.validateObject(request);
-
-        assertThat(errors.getFieldErrorCount()).isEqualTo(0);
+    @ParameterizedTest
+    @ValueSource(strings = { "en", // language only
+            "EN", // uppercase language only
+            "en-US", // language with country (hyphen)
+            "en_US", // language with country (underscore)
+    })
+    void validLocales(String locale) {
+        var request = LocaleModel.builder().locale(locale).build();
+        var errors = validator.validate(request);
+        assertThat(errors).as("Expected locale '%s' to be valid but it was invalid", locale).hasSize(0);
     }
 
     @Builder

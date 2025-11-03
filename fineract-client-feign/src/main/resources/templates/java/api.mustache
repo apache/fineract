@@ -1,0 +1,47 @@
+package {{package}};
+
+import feign.*;
+import feign.Param;
+import feign.RequestLine;
+
+{{#imports}}import {{import}};
+{{/imports}}
+
+import java.util.List;
+import java.util.Map;
+
+public interface {{classname}} {
+
+{{#operations}}
+    {{#operation}}
+        /**
+        * {{summary}}
+        * {{notes}}
+        {{#allParams}}
+            * @param {{paramName}} {{description}}
+        {{/allParams}}
+        * @return {{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}void{{/returnType}}
+        */
+        @RequestLine("{{httpMethod}} {{path}}")
+        {{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}void{{/returnType}} {{operationId}}(
+        {{#pathParams}}
+            @Param("{{baseName}}") {{{dataType}}} {{paramName}}{{^-last}},{{/-last}}
+        {{/pathParams}}
+        {{#bodyParam}}
+            {{#hasPathParams}},{{/hasPathParams}}{{{dataType}}} {{paramName}}
+        {{/bodyParam}}
+        {{#hasQueryParams}}
+            {{#hasPathParams}}{{^bodyParam}},{{/bodyParam}}{{/hasPathParams}}{{#bodyParam}},{{/bodyParam}}
+            @QueryMap Map<String, Object> queryParams
+        {{/hasQueryParams}}
+        {{#hasHeaderParams}}
+            {{#hasPathParams}}{{^bodyParam}}{{^hasQueryParams}},{{/hasQueryParams}}{{/bodyParam}}{{/hasPathParams}}
+            {{#bodyParam}}{{^hasQueryParams}},{{/hasQueryParams}}{{/bodyParam}}
+            {{#hasQueryParams}},{{/hasQueryParams}}
+            @HeaderMap Map<String, Object> headerParams
+        {{/hasHeaderParams}}
+        );
+
+    {{/operation}}
+{{/operations}}
+}

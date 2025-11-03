@@ -21,4 +21,29 @@ package org.apache.fineract.infrastructure.security.service;
 public interface SqlInjectionPreventerService {
 
     String encodeSql(String literal);
+
+    /**
+     * Validates and quotes a database identifier (table name, column name) using database-specific quoting rules. This
+     * method ensures that identifiers are safely quoted to prevent SQL injection attacks.
+     *
+     * @param identifier
+     *            the database identifier to quote
+     * @param allowedValues
+     *            optional set of allowed values for whitelist validation
+     * @return the properly quoted identifier safe for use in SQL queries
+     * @throws IllegalArgumentException
+     *             if the identifier is invalid or not in the whitelist (if provided)
+     */
+    String quoteIdentifier(String identifier, java.util.Set<String> allowedValues);
+
+    /**
+     * Validates and quotes a database identifier without whitelist validation.
+     *
+     * @param identifier
+     *            the database identifier to quote
+     * @return the properly quoted identifier safe for use in SQL queries
+     * @throws IllegalArgumentException
+     *             if the identifier is null or empty
+     */
+    String quoteIdentifier(String identifier);
 }

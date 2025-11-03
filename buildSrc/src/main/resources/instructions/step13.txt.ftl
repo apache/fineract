@@ -26,13 +26,9 @@ As discussed in https://issues.apache.org/jira/browse/FINERACT-1154, now that ev
 and make sure that everything on the release tag is merged to develop and that e.g. git describe works:
 
 >> git checkout develop
->> git branch -D ${project['fineract.release.version']}
->> git push origin :${project['fineract.release.version']}
->> git checkout develop
->> git checkout -b merge-${project['fineract.release.version']}
->> git merge -s recursive -Xignore-all-space ${project['fineract.release.version']}
->> git commit
->> git push <USER>
->> hub pull-request
+>> git merge release/${project['fineract.release.version']}
+>> git push origin develop
+>> git branch -D release/${project['fineract.release.version']}
+>> git push origin :release/${project['fineract.release.version']}
 
 [INSTRUCTIONS:END]

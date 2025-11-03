@@ -1,0 +1,12 @@
+= Features
+
+This section covers specific features and functionality available in Apache Fineract.
+
+include::capitalized-income.adoc[leveloffset=+1]
+include::buydown-fee.adoc[leveloffset=+1]
+include::approved-amount-modification.adoc[leveloffset=+1]
+include::backdated-interest-modification.adoc[leveloffset=+1]
+include::interest-rate-change-progressive-loans.adoc[leveloffset=+1]
+include::contract-termination.adoc[leveloffset=+1]
+include::loan-charges.adoc[leveloffset=+1]
+include::journal-entry-aggregation.adoc[leveloffset=+1]

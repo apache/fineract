@@ -1,0 +1,204 @@
+
+= Interest Rate Modification For Progressive Loan
+:description: Developer documentation for the interest rate modification feature in Apache Fineract
+:keywords: fineract, loans, interest rate, progressive loans, EMI, API, developer
+
+== Overview
+
+The Original Interest Rate Modification feature allows updating the interest rate for **active loans**. The updated interest rate can be applied only for active loans and effective date should be in the future.
+
+This capability is introduced to support flexible interest rate management in loan lifecycles, reflecting changes due to inflation, risk reassessment, or customer-specific conditions.
+
+New Progressive Loan Interest Change Modification feature can be applied for overpaid, charged off or even backdated cases, which makes it much more usable.
+
+== Scope and Limitations
+
+* Only supported for **progressive** loan types.
+* Loans must be **disbursed**
+* Interest rate modifications apply from a specified **applied date**, which can be backdated from the **original disbursement date** onward.
+* **Paid EMIs (Equal Monthly Installments) and interest amounts may be affected** by backdated interest rate changes.
+* The modified interest rate affects **EMI amounts**
+* Installment counts are not affected
+* **Reversals/backdated repayments** are allowed after modification.
+
+== Feature Behavior
+
+* When a new interest rate is applied, the system recalculates EMI values starting from the **applied date**.
+* If the applied date is in the past, previously paid installments will be reprocessed under the new interest rate.
+* The updated interest rate is effective **from the applied date itself**.
+* Repayment schedule is updated using the current recalculation strategy.
+
+== Configuration
+
+Interest calculation and interest recalculation strategies are **inherited from the loan product** configuration at the time of loan application.
+
+This means:
+
+* The interest calculation method (e.g., declining balance, flat) and
+* The interest recalculation strategy
+
+are **fixed per loan account** once the loan is created.
+
+As a result, **no further changes** to these configurations are possible after loan creation. Any interest rate modifications must operate within the originally defined calculation and recalculation strategies.
+
+== API Specification
+
+=== Endpoint
+
+`POST https://DomainName/api/v1/rescheduleloans`
+
+==== related API-s
+Retrieve a Loan Reschedule Request
+
+`GET https://DomainName/api/v1/rescheduleloans/{requestId}`
+
+Retrieve a Preview of The New Loan Repayment Schedule
+
+`GET https://DomainName/api/v1/rescheduleloans/{requestId}?command=previewLoanReschedule`
+
+Reject a Loan Reschedule Request
+
+`POST https://DomainName/api/v1/rescheduleloans/{requestId}?command=reject`
+
+Approve a Loan Reschedule Request
+
+`POST https://DomainName/api/v1/rescheduleloans/{requestId}?command=approve`
+
+=== Request Payload
+
+The following fields are accepted in the request body for interest rate modification. All date fields must follow the format specified by the `dateFormat` field, and parsing is performed using the specified `locale`.
+
+[cols="2,3,5", options="header"]
+|===
+| Field | Type | Description
+
+| `loanId`
+| Long
+| Identifier of the loan to be modified. Must refer to a disbursed progressive loan.
+
+| `newInterestRate`
+| BigDecimal
+| Required. The new interest rate to be applied. Must be zero or positive, and comply with the loan product’s min/max rate constraints.
+
+| `dateFormat`
+| String
+| Required when any date fields are provided. Defines the expected format of date values (e.g., `yyyy-MM-dd`, `dd-MM-yyyy`, etc.).
+
+| `locale`
+| String
+| Required. Specifies the locale (e.g., `en`, `fr`, `in`) used for parsing numbers and dates.
+
+| `submittedOnDate`
+| String
+| Optional. The date the request is submitted. If provided, must match the specified `dateFormat`.
+
+| `rescheduleFromDate`
+| String
+| Required. The date from which the new interest rate becomes effective. Must be on or after the loan disbursement date. Format must match `dateFormat`.
+
+| `rescheduleReasonComment`
+| String
+| Optional. A free-text comment describing the reason for the interest rate change.
+
+| `rescheduleReasonId`
+| Long
+| Optional. ID referencing a predefined rescheduling reason (e.g., from a dropdown or lookup table).
+
+|===
+
+[NOTE]
+====
+The following fields are **not applicable** in the context of an interest rate change request:
+
+* `adjustedDueDate`
+* `extraTerms`
+* `graceOnPrincipal`
+* `graceOnInterest`
+
+These parameters are reserved for other loan rescheduling operations.
+====
+
+==== newInterestRate
+
+When processing an interest rate modification request, the system validates the `newInterestRate` parameter as follows:
+
+* The value must be a valid `BigDecimal` parsed with the appropriate locale.
+* The interest rate must be **zero or positive**.
+* If defined on the loan product, the new interest rate must satisfy the following boundaries:
+** It must be **greater than or equal to** the product-level `minNominalInterestRatePerPeriod`.
+** It must be **less than or equal to** the product-level `maxNominalInterestRatePerPeriod`.
+
+These boundaries are enforced using the product's configured range at the time the loan was applied. If no minimum or maximum is set on the product, only the zero-or-positive constraint is enforced.
+
+=== Example
+
+==== Example Create Request
+`POST https://DomainName/api/v1/rescheduleloans`
+
+```
+POST rescheduleloans
+Content-Type: application/json
+```
+```JSON
+{
+"loanId": 1,
+"graceOnPrincipal": null,
+"graceOnInterest": null,
+"extraTerms": null,
+"rescheduleFromDate": "04 December 2014",
+"dateFormat": "dd MMMM yyyy",
+"locale": "en",
+"recalculateInterest": null,
+"submittedOnDate": "04 September 2014",
+"newInterestRate" : 28,
+"rescheduleReasonId": 1
+}
+```
+
+Response
+
+```JSON
+{
+    "loanId": 1,
+    "resourceId": 2
+}
+```
+
+==== Example Approval
+
+`POST https://DomainName/api/v1/rescheduleloans/{requestId}?command=approve`
+
+```
+POST rescheduleloans/2?command=approve
+Content-Type: application/json
+```
+```JSON
+{
+"locale": "en",
+"dateFormat": "dd MMMM yyyy",
+"approvedOnDate": "11 September 2014"
+}
+```
+
+```JSON
+
+
+{
+"loanId": 1,
+"resourceId": 2,
+"changes": {
+"locale": "en",
+"dateFormat": "dd MMMM yyyy",
+"approvedOnDate": "11 September 2014",
+"approvedByUserId": 3
+}
+}
+```
+
+== Developer Notes
+
+The core concept is that the `AdvancedPaymentScheduleTransactionProcessor` processes transactions in order of their effective date, allowing it to handle backdated transaction cases.
+
+The transaction processor uses the `EMICalculator` to manage interest rate changes over time, ensuring that changes only affect future transactions relative to the actual processing transaction. The `ProgressiveLoanInterestScheduleModel` is responsible for holding and calculating interest for future installments.
+
+The underlying principle is to split repayment periods into smaller interest periods, enabling the calculation of interest for partial repayment periods. This approach makes it easier to adjust interest rates for specific interest periods as needed.

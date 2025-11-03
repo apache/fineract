@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
-import jakarta.validation.constraints.NotNull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -47,6 +46,7 @@ import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -78,7 +78,7 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
     }
 
     @Override
-    public Page<EntityDataTableChecksData> retrieveAll(@NotNull SearchParameters searchParameters, final Integer status,
+    public Page<EntityDataTableChecksData> retrieveAll(@NonNull SearchParameters searchParameters, final Integer status,
             final String entity, final Long productId) {
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select ").append(sqlGenerator.calcFoundRows()).append(" ").append(this.entityDataTableChecksMapper.schema());

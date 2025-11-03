@@ -62,7 +62,7 @@ resolve {
     prettyPrint = false
     classpath = sourceSets.main.runtimeClasspath
     buildClasspath = classpath
-    outputDir = file("${buildDir}/classes/java/main/static")
+    outputDir = file("${buildDir}/resources/main/static")
     openApiFile = file("${buildDir}/tmp/swagger/fineract-input.yaml")
     sortOutput = true
     dependsOn(prepareInputYaml)
@@ -315,7 +315,8 @@ cucumber {
     ]
 }
 
-tasks.jibDockerBuild.dependsOn(bootJar)
+tasks.jib.dependsOn(bootJar, resolve)
+tasks.jibDockerBuild.dependsOn(bootJar, resolve)
 
 // Configuration for git properties gradle plugin
 // https://github.com/n0mer/gradle-git-properties

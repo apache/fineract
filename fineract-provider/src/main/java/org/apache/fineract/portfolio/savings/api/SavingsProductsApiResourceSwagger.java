@@ -257,6 +257,7 @@ final class SavingsProductsApiResourceSwagger {
             public GetSavingsProductsGlAccount feeReceivableAccount;
             public GetSavingsProductsGlAccount penaltyReceivableAccount;
             public GetSavingsProductsGlAccount incomeFromFeeAccount;
+            public GetSavingsProductsGlAccount interestReceivableAccount;
             public GetSavingsProductsGlAccount incomeFromPenaltyAccount;
             public GetSavingsProductsGlAccount incomeFromInterest;
             public GetSavingsProductsGlAccount interestOnSavingsAccount;

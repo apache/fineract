@@ -19,11 +19,16 @@
 package org.apache.fineract.infrastructure.configuration.domain;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 
 public interface ConfigurationDomainService {
 
     boolean isMakerCheckerEnabledForTask(String taskPermissionCode);
+
+    List<String> getAllowedLoanStatusesForExternalAssetTransfer();
+
+    List<String> getAllowedLoanStatusesOfDelayedSettlementForExternalAssetTransfer();
 
     boolean isSameMakerCheckerEnabled();
 

@@ -25,6 +25,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.client.models.PostTaxesGroupRequest;
+import org.apache.fineract.client.models.PostTaxesGroupResponse;
+import org.apache.fineract.client.util.Calls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +57,7 @@ public final class TaxGroupHelper {
     @Deprecated(forRemoval = true)
     public static String getTaxGroupAsJSON(final Collection<Integer> taxComponentIds) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("name", randomNameGenerator("Tax_component_Name_", 5));
+        map.put("name", Utils.randomStringGenerator("Tax_group_Name_", 5));
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
         map.put("taxComponents", getTaxGroupComponents(taxComponentIds));
@@ -84,8 +87,8 @@ public final class TaxGroupHelper {
         return map;
     }
 
-    public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
-        return Utils.randomStringGenerator(prefix, lenOfRandomSuffix);
+    public static PostTaxesGroupResponse createTaxGroup(PostTaxesGroupRequest request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().taxGroups.createTaxGroup(request));
     }
 
 }

@@ -25,6 +25,7 @@ dependencies {
     }
 
     implementation(project(path: ':fineract-core'))
+    implementation(project(path: ':fineract-cob'))
     implementation(project(path: ':fineract-command'))
     implementation(project(path: ':fineract-validation'))
     implementation(project(path: ':fineract-accounting'))
@@ -54,6 +55,7 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-web',
             'org.springframework.boot:spring-boot-starter-validation',
             'org.springframework.boot:spring-boot-starter-security',
+            "org.springframework.boot:spring-boot-starter-oauth2-authorization-server",
             'org.springframework.boot:spring-boot-starter-cache',
             'org.springframework.boot:spring-boot-starter-oauth2-resource-server',
             'org.springframework.boot:spring-boot-starter-actuator',
@@ -185,8 +187,6 @@ dependencies {
 
     // runtimeOnly dependencies are things that Fineract code has no direct compile time dependency on, but which must be present at run-time
     runtimeOnly(
-            'org.apache.bval:org.apache.bval.bundle',
-
             // Although fineract (at the time of writing) doesn't have any compile time dep. on httpclient,
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
             'org.apache.httpcomponents:httpclient'
@@ -203,6 +203,7 @@ dependencies {
     implementation 'org.apache.commons:commons-math3'
 
     implementation 'io.github.classgraph:classgraph'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!

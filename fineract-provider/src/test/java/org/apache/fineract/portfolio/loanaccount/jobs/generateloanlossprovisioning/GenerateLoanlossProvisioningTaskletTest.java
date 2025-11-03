@@ -68,7 +68,8 @@ class GenerateLoanlossProvisioningTaskletTest {
 
     @BeforeEach
     public void setUp() {
-        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE)));
+        ThreadLocalContextUtil.setBusinessDates(
+                new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE, BusinessDateType.COB_DATE, BUSINESS_DATE)));
     }
 
     @Test

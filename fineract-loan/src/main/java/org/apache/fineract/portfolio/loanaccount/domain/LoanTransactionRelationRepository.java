@@ -20,8 +20,17 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
 public interface LoanTransactionRelationRepository
         extends JpaRepository<LoanTransactionRelation, Long>, JpaSpecificationExecutor<LoanTransactionRelation> {
+
+    @Query("""
+            SELECT CASE WHEN COUNT(ltr) > 0 THEN true ELSE false END
+            FROM LoanTransactionRelation ltr
+            WHERE ltr.toTransaction = :toTransaction AND ltr.relationType = :relationType
+              AND ltr.fromTransaction.reversed = false
+            """)
+    boolean hasLoanTransactionRelationsWithType(LoanTransaction toTransaction, LoanTransactionRelationTypeEnum relationType);
 
 }

@@ -65,10 +65,6 @@ public final class ChargesHelper {
     public static final Integer SHARE_PURCHASE = 14;
     public static final Integer SHARE_REDEEM = 15;
 
-    private static final Integer CHARGE_SAVINGS_NO_ACTIVITY_FEE = 16;
-
-    private static final Integer CHARGE_CLIENT_SPECIFIED_DUE_DATE = 1;
-
     public static final Integer CHARGE_CALCULATION_TYPE_FLAT = 1;
     public static final Integer CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT = 2;
     public static final Integer CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST = 3;

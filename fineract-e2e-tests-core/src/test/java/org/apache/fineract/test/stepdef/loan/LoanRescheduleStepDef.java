@@ -75,8 +75,7 @@ public class LoanRescheduleStepDef extends AbstractStepDef {
                 : Integer.valueOf(rescheduleData.get(4));
         Integer extraTerms = (rescheduleData.get(5) == null || "0".equals(rescheduleData.get(5))) ? null
                 : Integer.valueOf(rescheduleData.get(5));
-        BigDecimal newInterestRate = (rescheduleData.get(6) == null || "0".equals(rescheduleData.get(6))) ? null
-                : new BigDecimal(rescheduleData.get(6));
+        BigDecimal newInterestRate = (rescheduleData.get(6) == null) ? null : new BigDecimal(rescheduleData.get(6));
 
         PostCreateRescheduleLoansRequest request = new PostCreateRescheduleLoansRequest()//
                 .loanId(loanId)//

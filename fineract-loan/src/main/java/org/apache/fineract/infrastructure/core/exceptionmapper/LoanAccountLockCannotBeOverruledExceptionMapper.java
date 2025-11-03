@@ -23,7 +23,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.cob.exceptions.LoanAccountLockCannotBeOverruledException;
+import org.apache.fineract.cob.exceptions.AccountLockCannotBeOverruledException;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.springframework.stereotype.Component;
@@ -31,10 +31,10 @@ import org.springframework.stereotype.Component;
 @Provider
 @Component
 @Slf4j
-public class LoanAccountLockCannotBeOverruledExceptionMapper implements ExceptionMapper<LoanAccountLockCannotBeOverruledException> {
+public class LoanAccountLockCannotBeOverruledExceptionMapper implements ExceptionMapper<AccountLockCannotBeOverruledException> {
 
     @Override
-    public Response toResponse(LoanAccountLockCannotBeOverruledException exception) {
+    public Response toResponse(AccountLockCannotBeOverruledException exception) {
         final String globalisationMessageCode = "error.msg.invalid.request.body";
         final String defaultUserMessage = exception.getMessage();
         log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));

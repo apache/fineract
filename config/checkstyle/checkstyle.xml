@@ -101,6 +101,14 @@
             <property name="forbiddenImportsExcludesRegexp" value="" />
             <message key="forbid.certain.imports" value="Use ''java.nio.charset.StandardCharsets'' instead of ''{0}''" />
         </module>
+        <!-- Forbid JetBrains annotations in Java sources; prefer Jakarta or Spring annotations -->
+        <module name="com.github.sevntu.checkstyle.checks.coding.ForbidCertainImportsCheck">
+            <property name="packageNameRegexp" value=".*" />
+            <property name="forbiddenImportsRegexp" value="org.jetbrains.annotations(\..*)?" />
+            <property name="forbiddenImportsExcludesRegexp" value="" />
+            <message key="forbid.certain.imports"
+                     value="Use 'jakarta.validation.constraints.NotNull' (API/DTO) or 'org.springframework.lang.NonNull' (services) instead of JetBrains annotations: ''{0}''" />
+        </module>
            <module name="OneStatementPerLine"/>
            <module name="EmptyStatement"/>
          <module name="EmptyCatchBlock">

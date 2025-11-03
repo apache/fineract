@@ -183,6 +183,7 @@ public class InvestorBusinessEventSerializerTest {
         assertEquals(1, result.getCurrency().getInMultiplesOf());
         assertEquals("1.0", result.getPurchasePriceRatio());
         assertEquals(ASSET_OWNER_EXTERNAL_ID, result.getAssetOwnerExternalId());
+        assertEquals("previous-owner-123", result.getPreviousOwnerExternalId());
         assertEquals(LOAN_EXTERNAL_ID, result.getLoanExternalId());
         assertEquals(TRANSFER_EXTERNAL_ID.getValue(), result.getTransferExternalId());
         assertEquals(LOAN_ID, result.getLoanId());
@@ -232,6 +233,7 @@ public class InvestorBusinessEventSerializerTest {
 
         ExternalTransferData data = new ExternalTransferData();
         data.setOwner(new ExternalTransferOwnerData(ASSET_OWNER_EXTERNAL_ID));
+        data.setPreviousOwner(new ExternalTransferOwnerData("previous-owner-123"));
         data.setStatus(status);
         data.setSubStatus(subStatus);
         data.setTransferId(123L);

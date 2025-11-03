@@ -43,6 +43,7 @@ public interface ExternalAssetOwnersTransferMapper {
     @Mapping(target = "purchasePriceRatio", source = "purchasePriceRatio")
     @Mapping(target = "settlementDate", source = "settlementDate")
     @Mapping(target = "status", source = "status")
+    @Mapping(target = "previousOwner", source = "previousOwner")
     @Mapping(target = "details", source = "externalAssetOwnerTransferDetails")
     ExternalTransferData mapTransfer(ExternalAssetOwnerTransfer source);
 

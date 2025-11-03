@@ -48,12 +48,17 @@ import java.util.Locale;
 import java.util.TimeZone;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.TaxComponentHelper;
 import org.apache.fineract.integrationtests.common.TaxGroupHelper;
@@ -92,6 +97,7 @@ public class FixedDepositTest extends IntegrationTest {
     private SavingsAccountHelper savingsAccountHelper;
     private JournalEntryHelper journalEntryHelper;
     private FinancialActivityAccountHelper financialActivityAccountHelper;
+    private GlobalConfigurationHelper globalConfigurationHelper;
 
     private FixedDepositAccountInterestCalculationServiceImpl fixedDepositAccountInterestCalculationServiceImpl;
 
@@ -108,12 +114,14 @@ public class FixedDepositTest extends IntegrationTest {
 
     private static final String NONE = "1";
     private static final String CASH_BASED = "2";
+    private static final String ACCRUAL = "3";
 
     public static final String MINIMUM_OPENING_BALANCE = "1000.0";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
     public static final String CLOSURE_TYPE_WITHDRAW_DEPOSIT = "100";
     public static final String CLOSURE_TYPE_TRANSFER_TO_SAVINGS = "200";
     public static final String CLOSURE_TYPE_REINVEST = "300";
+    public static final String CLOSURE_TYPE_REINVEST_PRINCIPAL_ONLY = "400";
     public static final Integer DAILY_COMPOUNDING_INTERVAL = 0;
     public static final Integer MONTHLY_INTERVAL = 1;
     public static final Integer QUARTERLY_INTERVAL = 3;
@@ -130,6 +138,7 @@ public class FixedDepositTest extends IntegrationTest {
     public static final Float THRESHOLD = 1.0f;
 
     private MockedStatic<MoneyHelper> moneyHelperStatic;
+    private SchedulerJobHelper schedulerJobHelper;
 
     @BeforeEach
     public void setup() {
@@ -138,8 +147,11 @@ public class FixedDepositTest extends IntegrationTest {
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
         this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec);
+        this.globalConfigurationHelper = new GlobalConfigurationHelper();
         TimeZone.setDefault(TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE));
     }
 
@@ -2598,6 +2610,158 @@ public class FixedDepositTest extends IntegrationTest {
         FixedDepositAccountStatusChecker.verifyFixedDepositIsActive(fixedDepositAccountStatusHashMap);
     }
 
+    @Test
+    public void testCloseFixedDepositForCLOSURE_TYPE_REINVEST_withConfigurationMaturityInstruction() {
+        try {
+            final Account assetAccount = this.accountHelper.createAssetAccount();
+            final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+            final Account incomeAccount = this.accountHelper.createIncomeAccount();
+            final Account expenseAccount = this.accountHelper.createExpenseAccount();
+
+            this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+            this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
+
+            DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+            DateFormat monthDayFormat = new SimpleDateFormat("dd MMM", Locale.US);
+            DateFormat currentDateFormat = new SimpleDateFormat("dd");
+
+            Calendar todaysDate = Calendar.getInstance();
+            int currentYear = todaysDate.get(Calendar.YEAR);
+            todaysDate.set(currentYear, Calendar.JANUARY, 1);
+            final String VALID_FROM = dateFormat.format(todaysDate.getTime());
+            todaysDate.set(currentYear + 1, Calendar.MARCH, 1);
+            final String VALID_TO = dateFormat.format(todaysDate.getTime());
+
+            todaysDate = Calendar.getInstance();
+            Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
+            todaysDate.set(currentYear, Calendar.JANUARY, 1);
+            final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+            final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
+            dateFormat.format(todaysDate.getTime());
+            monthDayFormat.format(todaysDate.getTime());
+
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+
+            LocalDate marchDate = LocalDate.of(currentYear + 1, 3, 1);
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, marchDate);
+
+            log.info("Submitted Date: {}", SUBMITTED_ON_DATE);
+
+            final String accountingRule = ACCRUAL;
+            Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule, assetAccount, liabilityAccount,
+                    incomeAccount, expenseAccount);
+            Assertions.assertNotNull(fixedDepositProductId);
+
+            Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+            Assertions.assertNotNull(clientId);
+
+            Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(),
+                    SUBMITTED_ON_DATE, WHOLE_TERM, Integer.valueOf(CLOSURE_TYPE_REINVEST));
+            Assertions.assertNotNull(fixedDepositAccountId);
+
+            this.fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
+            this.fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
+
+            schedulerJobHelper.executeAndAwaitJob("Update Deposit Accounts Maturity details");
+
+            HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
+                    this.responseSpec, fixedDepositAccountId.toString());
+
+            FixedDepositAccountStatusChecker.verifyFixedDepositAccountIsClosed(fixedDepositAccountStatusHashMap);
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
+
+    }
+
+    @Test
+    public void testCloseFixedDepositForCLOSURE_TYPE_REINVEST() {
+        testClosureTypeReinvestVariants(CLOSURE_TYPE_REINVEST);
+    }
+
+    @Test
+    public void testCloseFixedDepositForCLOSURE_TYPE_REINVEST_PRINCIPAL_ONLY() {
+        testClosureTypeReinvestVariants(CLOSURE_TYPE_REINVEST_PRINCIPAL_ONLY);
+    }
+
+    public void testClosureTypeReinvestVariants(String reInvest) {
+        try {
+            final Account assetAccount = this.accountHelper.createAssetAccount();
+            final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+            final Account incomeAccount = this.accountHelper.createIncomeAccount();
+            final Account expenseAccount = this.accountHelper.createExpenseAccount();
+
+            this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+            this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
+
+            DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+            DateFormat monthDayFormat = new SimpleDateFormat("dd MMM", Locale.US);
+            DateFormat currentDateFormat = new SimpleDateFormat("dd");
+
+            Calendar todaysDate = Calendar.getInstance();
+            int currentYear = todaysDate.get(Calendar.YEAR);
+            todaysDate.set(currentYear, Calendar.JANUARY, 1);
+            final String VALID_FROM = dateFormat.format(todaysDate.getTime());
+            todaysDate.set(currentYear + 1, Calendar.JANUARY, 1);
+            final String VALID_TO = dateFormat.format(todaysDate.getTime());
+
+            todaysDate = Calendar.getInstance();
+            Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
+            todaysDate.set(currentYear, Calendar.JANUARY, 1);
+            final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+            final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
+            dateFormat.format(todaysDate.getTime());
+            monthDayFormat.format(todaysDate.getTime());
+
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+
+            LocalDate marchDate = LocalDate.of(currentYear + 1, 1, 1);
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, marchDate);
+
+            log.info("Submitted Date: {}", SUBMITTED_ON_DATE);
+
+            final String accountingRule = ACCRUAL;
+            Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule, assetAccount, liabilityAccount,
+                    incomeAccount, expenseAccount);
+            Assertions.assertNotNull(fixedDepositProductId);
+
+            Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+            Assertions.assertNotNull(clientId);
+
+            Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(),
+                    SUBMITTED_ON_DATE, WHOLE_TERM, "10000", "12");
+            Assertions.assertNotNull(fixedDepositAccountId);
+
+            this.fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
+            this.fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
+
+            schedulerJobHelper.executeAndAwaitJob("Update Deposit Accounts Maturity details");
+
+            HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
+                    this.responseSpec, fixedDepositAccountId.toString());
+
+            FixedDepositAccountStatusChecker.verifyFixedDepositAccountIsMatured(fixedDepositAccountStatusHashMap);
+
+            todaysDate.set(currentYear + 1, Calendar.JANUARY, 1);
+            final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
+
+            Integer prematureClosureTransactionId = (Integer) this.fixedDepositAccountHelper.closeForFixedDeposit(fixedDepositAccountId,
+                    CLOSED_ON_DATE, reInvest, null, CommonConstants.RESPONSE_RESOURCE_ID);
+
+            fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
+                    this.responseSpec, fixedDepositAccountId.toString());
+
+            FixedDepositAccountStatusChecker.verifyFixedDepositAccountIsClosed(fixedDepositAccountStatusHashMap);
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
+
+    }
+
     private Integer createFixedDepositProduct(final String validFrom, final String validTo, final String accountingRule,
             Account... accounts) {
         log.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
@@ -2606,6 +2770,8 @@ public class FixedDepositTest extends IntegrationTest {
             fixedDepositProductHelper = fixedDepositProductHelper.withAccountingRuleAsCashBased(accounts);
         } else if (accountingRule.equals(NONE)) {
             fixedDepositProductHelper = fixedDepositProductHelper.withAccountingRuleAsNone();
+        } else if (accountingRule.equals(ACCRUAL)) {
+            fixedDepositProductHelper = fixedDepositProductHelper.withAccountingRuleAsAccrual(accounts);
         }
         final String fixedDepositProductJSON = fixedDepositProductHelper.withPeriodRangeChart() //
                 .build(validFrom, validTo, true);

@@ -188,7 +188,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
                     + " g.hierarchy as hierarchy,   c.id as calendarId, ci.id as calendarInstanceId, ci.entity_id as entityId,"
                     + " ci.entity_type_enum as entityTypeId, c.title as title,  c.description as description,"
                     + "c.location as location, c.start_date as startDate, c.end_date as endDate, c.recurrence as recurrence,c.meeting_time as meetingTime,"
-                    + "sum(CASE WHEN l.loan_status_id=300 and lrs.duedate = ? THEN COALESCE(lrs.principal_amount,0)) + (COALESCE(lrs.interest_amount,0) ELSE 0 END)) as installmentDue,"
+                    + "sum(CASE WHEN l.loan_status_id=300 and lrs.duedate = ? THEN COALESCE(lrs.principal_amount,0) + COALESCE(lrs.interest_amount,0) ELSE 0 END) as installmentDue,"
                     + "sum(CASE WHEN l.loan_status_id=300 and lrs.duedate = ? THEN COALESCE(lrs.principal_completed_derived,0) + COALESCE(lrs.interest_completed_derived,0) ELSE 0 END) as totalCollected,"
                     + "sum(CASE WHEN l.loan_status_id=300 and lrs.duedate <= ? THEN COALESCE(lrs.principal_amount,0) + COALESCE(lrs.interest_amount,0) ELSE 0 END)"
                     + "- sum(CASE WHEN l.loan_status_id=300 and lrs.duedate <= ? THEN COALESCE(lrs.principal_completed_derived,0) + COALESCE(lrs.interest_completed_derived,0) ELSE 0 END) as totaldue, "
@@ -495,8 +495,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         String sql = centerCalendarMapper.schema();
         Collection<CenterData> centerDataArray;
         if (staffId != null) {
-            sql += " and g.staff_id=? ";
-            sql += "and lrs.duedate<=? and l.loan_type_enum=3";
+            sql += " and g.staff_id = ? ";
+            sql += " and lrs.duedate <= ? "; // and l.loan_type_enum = 3 ";
             sql += " group by c.id, ci.id, g.account_no, g.external_id, g.status_enum, g.activation_date, g.hierarchy";
             centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, // NOSONAR
                     meetingDate, meetingDate, meetingDate, meetingDate, meetingDate, meetingDate, officeId, staffId, meetingDate);

@@ -3876,4 +3876,31 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId + "/transactions/template?command=buyDownFee";
         return this;
     }
+
+    public CommandWrapperBuilder updateLoanApprovedAmount(final Long loanId) {
+        this.actionName = "UPDATE_APPROVED_AMOUNT";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
+
+    public CommandWrapperBuilder manualInterestRefund(final Long loanId, final Long transactionId) {
+        this.actionName = "MANUAL_INTEREST_REFUND_TRANSACTION";
+        this.entityName = "LOAN";
+        this.loanId = loanId;
+        this.entityId = transactionId;
+        this.href = "/loans/" + loanId + "/transactions/" + transactionId + "?command=interest-refund";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateLoanAvailableDisbursementAmount(final Long loanId) {
+        this.actionName = "UPDATE";
+        this.entityName = "LOAN_AVAILABLE_DISBURSEMENT_AMOUNT";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
 }

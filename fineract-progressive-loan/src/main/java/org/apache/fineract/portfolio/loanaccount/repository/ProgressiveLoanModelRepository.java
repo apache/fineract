@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.repository;
 
 import java.util.Optional;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.ProgressiveLoanModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -27,4 +28,6 @@ public interface ProgressiveLoanModelRepository
         extends JpaSpecificationExecutor<ProgressiveLoanModel>, JpaRepository<ProgressiveLoanModel, Long> {
 
     Optional<ProgressiveLoanModel> findOneByLoanId(Long loanId);
+
+    Optional<ProgressiveLoanModel> findOneByLoan(Loan loan);
 }

@@ -94,7 +94,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
 
-        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
+        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "collection", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetails);
         Integer loanStatus = loanDetails.body().getStatus().getId();
 
@@ -517,7 +517,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
 
-        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
+        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "collection", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetails);
         List<GetLoansLoanIdLoanInstallmentLevelDelinquency> installmentLevelDelinquency = loanDetails.body().getDelinquent()
                 .getInstallmentLevelDelinquency() == null ? null : loanDetails.body().getDelinquent().getInstallmentLevelDelinquency();
@@ -534,7 +534,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
         String expectedDelinquencyRangeValue = expectedDelinquencyRange.getValue();
         expectedValuesList.set(0, expectedDelinquencyRangeValue);
 
-        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
+        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "collection", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetails);
         String actualDelinquencyRangeValue = loanDetails.body().getDelinquencyRange() == null ? "NO_DELINQUENCY"
                 : loanDetails.body().getDelinquencyRange().getClassification();
@@ -549,12 +549,39 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
                 .isEqualTo(expectedValuesList);
     }
 
+    @Then("Loan has the following LOAN level next payment due data:")
+    public void loanNextPaymentDataCheck(DataTable table) throws IOException {
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+
+        List<String> expectedValuesList = table.asLists().get(1);
+        DelinquencyRange expectedDelinquencyRange = DelinquencyRange.valueOf(expectedValuesList.get(0));
+        String expectedDelinquencyRangeValue = expectedDelinquencyRange.getValue();
+        expectedValuesList.set(0, expectedDelinquencyRangeValue);
+
+        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "collection", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetails);
+
+        String actualDelinquencyRangeValue = loanDetails.body().getDelinquencyRange() == null ? "NO_DELINQUENCY"
+                : loanDetails.body().getDelinquencyRange().getClassification();
+        GetLoansLoanIdDelinquencySummary delinquent = loanDetails.body().getDelinquent();
+
+        String delinquentAmount = delinquent.getNextPaymentAmount() == null ? null
+                : new Utils.DoubleFormatter(delinquent.getNextPaymentAmount().doubleValue()).format();
+        List<String> actualValuesList = List.of(actualDelinquencyRangeValue,
+                delinquent.getNextPaymentDueDate() == null ? "null" : FORMATTER.format(delinquent.getNextPaymentDueDate()),
+                delinquentAmount);
+
+        assertThat(actualValuesList).as(ErrorMessageHelper.wrongValueInLoanLevelDelinquencyData(actualValuesList, expectedValuesList))
+                .isEqualTo(expectedValuesList);
+    }
+
     @Then("Loan has the following INSTALLMENT level delinquency data:")
     public void loanDelinquencyInstallmentLevelDataCheck(DataTable table) throws IOException {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
 
-        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
+        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "collection", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetails);
         List<GetLoansLoanIdLoanInstallmentLevelDelinquency> installmentLevelDelinquency = loanDetails.body().getDelinquent()
                 .getInstallmentLevelDelinquency();
@@ -585,7 +612,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
         long loanId = loanResponse.body().getLoanId();
 
         List<List<String>> expectedData = table.asLists();
-        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
+        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "collection", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetails);
 
         List<GetLoansLoanIdDelinquencyPausePeriod> delinquencyPausePeriods = loanDetails.body().getDelinquent()
@@ -612,7 +639,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
 
-        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
+        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "collection", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetails);
         String actualDate = FORMATTER.format(loanDetails.body().getDelinquent().getNextPaymentDueDate());
 
@@ -642,7 +669,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
 
-        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
+        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "collection", "", "").execute();
         DelinquencyRangeData delinquencyRange = loanDetails.body().getDelinquencyRange();
         GetLoansLoanIdDelinquencySummary delinquent = loanDetails.body().getDelinquent();
 
@@ -714,7 +741,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
 
-        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
+        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "collection", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetails);
 
         Double expectedLastRepaymentAmount1 = Double.valueOf(expectedLastRepaymentAmount);

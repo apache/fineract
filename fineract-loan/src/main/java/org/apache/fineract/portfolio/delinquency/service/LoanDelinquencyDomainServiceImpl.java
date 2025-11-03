@@ -119,14 +119,15 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         log.debug("Loan id {} with overdue since date {} and outstanding amount {}", loan.getId(), overdueSinceDate, outstandingAmount);
 
         long overdueDays = 0L;
+        LocalDate overdueSinceDateForCalculation = overdueSinceDate;
         if (overdueSinceDate != null) {
             overdueDays = DateUtils.getDifferenceInDays(overdueSinceDate, businessDate);
             if (overdueDays < 0) {
                 overdueDays = 0L;
             }
             collectionData.setPastDueDays(overdueDays);
-            overdueSinceDate = overdueSinceDate.plusDays(graceDays.longValue());
-            collectionData.setDelinquentDate(overdueSinceDate);
+            LocalDate delinquentStartDate = overdueSinceDate.plusDays(graceDays.longValue());
+            collectionData.setDelinquentDate(delinquentStartDate);
         }
         collectionData.setDelinquentAmount(outstandingAmount);
         collectionData.setDelinquentPrincipal(delinquentPrincipal);
@@ -134,11 +135,8 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         collectionData.setDelinquentFee(delinquentFee);
         collectionData.setDelinquentPenalty(delinquentPenalty);
 
-        collectionData.setDelinquentDays(0L);
-        final long delinquentDays = overdueDays - graceDays;
-        if (delinquentDays > 0) {
-            calculateDelinquentDays(effectiveDelinquencyList, businessDate, collectionData, delinquentDays);
-        }
+        calculateAndSetDelinquentDays(collectionData, overdueDays, graceDays, effectiveDelinquencyList, businessDate,
+                overdueSinceDateForCalculation);
 
         log.debug("Result: {}", collectionData);
         return collectionData;
@@ -200,29 +198,20 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         log.debug("Loan id {} with overdue since date {} and outstanding amount {}", loan.getId(), overdueSinceDate, outstandingAmount);
 
         long overdueDays = 0L;
+        LocalDate overdueSinceDateForCalculation = overdueSinceDate;
         if (overdueSinceDate != null) {
             overdueDays = DateUtils.getDifferenceInDays(overdueSinceDate, businessDate);
             if (overdueDays < 0) {
                 overdueDays = 0L;
             }
             collectionData.setPastDueDays(overdueDays);
-            overdueSinceDate = overdueSinceDate.plusDays(graceDays.longValue());
-            collectionData.setDelinquentDate(overdueSinceDate);
+            LocalDate delinquentStartDate = overdueSinceDate.plusDays(graceDays.longValue());
+            collectionData.setDelinquentDate(delinquentStartDate);
         }
         collectionData.setDelinquentAmount(outstandingAmount);
-        collectionData.setDelinquentDays(0L);
-        final long delinquentDays = overdueDays - graceDays;
-        if (delinquentDays > 0) {
-            calculateDelinquentDays(effectiveDelinquencyList, businessDate, collectionData, delinquentDays);
-        }
+        calculateAndSetDelinquentDays(collectionData, overdueDays, graceDays, effectiveDelinquencyList, businessDate,
+                overdueSinceDateForCalculation);
         return new LoanDelinquencyData(collectionData, loanInstallmentsCollectionData);
-    }
-
-    private void calculateDelinquentDays(List<LoanDelinquencyActionData> effectiveDelinquencyList, LocalDate businessDate,
-            CollectionData collectionData, Long delinquentDays) {
-        Long pausedDays = delinquencyEffectivePauseHelper.getPausedDaysBeforeDate(effectiveDelinquencyList, businessDate);
-        Long calculatedDelinquentDays = delinquentDays - pausedDays;
-        collectionData.setDelinquentDays(calculatedDelinquentDays > 0 ? calculatedDelinquentDays : 0L);
     }
 
     private CollectionData getInstallmentOverdueCollectionData(final Loan loan, final LoanRepaymentScheduleInstallment installment,
@@ -248,6 +237,7 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
 
         // Grace days are not considered for installment level delinquency calculation currently.
         long overdueDays = 0L;
+        LocalDate overdueSinceDateForCalculation = overdueSinceDate;
         if (overdueSinceDate != null) {
             overdueDays = DateUtils.getDifferenceInDays(overdueSinceDate, businessDate);
             if (overdueDays < 0) {
@@ -257,11 +247,8 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
             collectionData.setDelinquentDate(overdueSinceDate);
         }
         collectionData.setDelinquentAmount(outstandingAmount);
-        collectionData.setDelinquentDays(0L);
-        final long delinquentDays = overdueDays;
-        if (delinquentDays > 0) {
-            calculateDelinquentDays(effectiveDelinquencyList, businessDate, collectionData, delinquentDays);
-        }
+        calculateAndSetDelinquentDays(collectionData, overdueDays, 0, effectiveDelinquencyList, businessDate,
+                overdueSinceDateForCalculation);
         return collectionData;
 
     }
@@ -354,6 +341,20 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         collectionData.setDelinquentFee(delinquentFee);
         collectionData.setDelinquentPenalty(delinquentPenalty);
         return collectionData;
+    }
+
+    private void calculateAndSetDelinquentDays(CollectionData collectionData, long overdueDays, Integer graceDays,
+            List<LoanDelinquencyActionData> effectiveDelinquencyList, LocalDate businessDate, LocalDate overdueSinceDate) {
+        collectionData.setDelinquentDays(0L);
+        if (overdueDays > 0) {
+            Long pausedDays = delinquencyEffectivePauseHelper.getPausedDaysWithinRange(effectiveDelinquencyList, overdueSinceDate,
+                    businessDate);
+            if (pausedDays == null) {
+                pausedDays = 0L;
+            }
+            final long delinquentDays = overdueDays - pausedDays - graceDays;
+            collectionData.setDelinquentDays(delinquentDays > 0 ? delinquentDays : 0L);
+        }
     }
 
 }

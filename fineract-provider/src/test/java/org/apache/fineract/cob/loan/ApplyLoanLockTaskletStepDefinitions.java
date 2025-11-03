@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
-import org.apache.fineract.cob.data.LoanCOBParameter;
+import org.apache.fineract.cob.data.COBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.exceptions.LoanLockCannotBeAppliedException;
@@ -76,7 +76,7 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
             ThreadLocalContextUtil.setBusinessDates(businessDateMap);
             StepExecution stepExecution = new StepExecution("test", null);
             ExecutionContext executionContext = new ExecutionContext();
-            LoanCOBParameter loanCOBParameter = new LoanCOBParameter(1L, 4L);
+            COBParameter loanCOBParameter = new COBParameter(1L, 4L);
             executionContext.put(LoanCOBConstant.LOAN_COB_PARAMETER, loanCOBParameter);
             lenient().when(
                     retrieveLoanIdService.retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter, false))

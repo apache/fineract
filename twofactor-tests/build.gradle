@@ -57,7 +57,7 @@ cargo {
         startStopTimeout = 240000
         sharedClasspath = configurations.driver
         containerProperties {
-            def jvmArgs = '--add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.security=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.management/javax.management=ALL-UNNAMED --add-opens=java.naming/javax.naming=ALL-UNNAMED -Dfineract.security.basicauth.enabled=true -Dfineract.security.oauth.enabled=false -Dfineract.security.2fa.enabled=true '
+            def jvmArgs = '--add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.security=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.management/javax.management=ALL-UNNAMED --add-opens=java.naming/javax.naming=ALL-UNNAMED -Dfineract.security.basicauth.enabled=true -Dfineract.security.oauth2.enabled=false -Dfineract.security.2fa.enabled=true '
             if (project.hasProperty('dbType')) {
                 if ('postgresql'.equalsIgnoreCase(dbType)) {
                     jvmArgs += '-Dspring.datasource.hikari.driverClassName=org.postgresql.Driver -Dspring.datasource.hikari.jdbcUrl=jdbc:postgresql://localhost:5432/fineract_tenants -Dspring.datasource.hikari.username=root -Dspring.datasource.hikari.password=postgres -Dfineract.tenant.host=localhost -Dfineract.tenant.port=5432 -Dfineract.tenant.username=root -Dfineract.tenant.password=postgres'

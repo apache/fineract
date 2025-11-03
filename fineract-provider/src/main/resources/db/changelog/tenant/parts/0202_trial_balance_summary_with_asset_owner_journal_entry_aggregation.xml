@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet author="fineract" id="trial-balance-summary-with-asset-owner-update-4">
+        <update tableName="stretchy_report">
+            <column name="report_sql"  value="WITH retained_earning AS (
+      SELECT DISTINCT '${endDate}' AS postingdate,
+             lp.name AS product,
+             gl_code AS glacct,
+             COALESCE((SELECT name FROM acc_gl_account WHERE gl_code = e.gl_code), '') AS description,
+             COALESCE(e.owner_external_id, 'self') AS assetowner,
+             SUM(opening_balance_amount) AS beginningbalance,
+             0 AS debitmovement,
+             0 AS creditmovement,
+             SUM(opening_balance_amount) AS endingbalance
+      FROM acc_gl_journal_entry_annual_summary e, m_product_loan lp
+      WHERE e.office_id = ${officeId}
+        AND lp.id = product_id
+        AND date_part('year', e.year_end_date::date) &lt; date_part('year', '${endDate}'::date)
+      GROUP BY gl_code, lp.name, office_id, owner_external_id
+  ),
+  aggregated_date AS (
+      SELECT MAX(aggregated_on_date_to) as latest
+      FROM m_journal_entry_aggregation_tracking
+  ),
+  summary_snapshot_baseline_data AS (
+      SELECT lp.NAME AS productname,
+             acc_gl_account.gl_code AS glcode,
+             acc_gl_account.NAME AS glname,
+             CASE WHEN ags.external_owner_id IS NULL THEN 0 ELSE ags.external_owner_id END AS assetowner,
+             SUM(ags.debit_amount) AS debitamount,
+             SUM(ags.credit_amount) AS creditamount
+      FROM acc_gl_account
+      JOIN m_journal_entry_aggregation_summary ags ON acc_gl_account.id = ags.gl_account_id
+      JOIN m_product_loan lp ON lp.id = ags.product_id
+      WHERE ags.entity_type_enum = 1
+        AND ags.manual_entry = false
+        AND ags.aggregated_on_date &lt;= (select latest from aggregated_date)
+        AND (ags.office_id = ${officeId})
+      GROUP BY productname, glcode, glname, assetowner
+  ),
+  post_snapshot_delta_data AS (
+      SELECT lp.NAME AS productname,
+             acc_gl_account.gl_code AS glcode,
+             acc_gl_account.NAME AS glname,
+             CASE WHEN aw.owner_id IS NULL THEN 0 ELSE aw.owner_id END AS assetowner,
+             SUM(CASE WHEN acc_gl_journal_entry.type_enum = 2 THEN amount ELSE 0 END) AS debitamount,
+             SUM(CASE WHEN acc_gl_journal_entry.type_enum = 1 THEN amount ELSE 0 END) AS creditamount
+      FROM acc_gl_account
+      JOIN acc_gl_journal_entry ON acc_gl_account.id = acc_gl_journal_entry.account_id
+      JOIN m_loan m ON m.id = acc_gl_journal_entry.entity_id
+      JOIN m_product_loan lp ON lp.id = m.product_id
+      LEFT JOIN m_external_asset_owner_journal_entry_mapping aw ON aw.journal_entry_id = acc_gl_journal_entry.id
+      WHERE acc_gl_journal_entry.entity_type_enum = 1
+        AND acc_gl_journal_entry.manual_entry = false
+        AND (
+              (SELECT latest FROM aggregated_date) IS NULL
+              OR acc_gl_journal_entry.submitted_on_date &gt; (SELECT latest FROM aggregated_date)
+          )
+        AND acc_gl_journal_entry.submitted_on_date &lt; '${endDate}'
+        AND (acc_gl_journal_entry.office_id = ${officeId})
+      GROUP BY productname, glcode, glname, assetowner
+  ),
+  merged_historical_data AS (
+      SELECT COALESCE(summary_snapshot_baseline_data.productname, post_snapshot_delta_data.productname) AS productname,
+             COALESCE(summary_snapshot_baseline_data.glcode, post_snapshot_delta_data.glcode) AS glcode,
+             COALESCE(summary_snapshot_baseline_data.glname, post_snapshot_delta_data.glname) AS glname,
+             COALESCE(summary_snapshot_baseline_data.assetowner, post_snapshot_delta_data.assetowner, 0) AS assetowner,
+             COALESCE(summary_snapshot_baseline_data.debitamount, 0) + COALESCE(post_snapshot_delta_data.debitamount, 0) AS debitamount,
+             COALESCE(summary_snapshot_baseline_data.creditamount, 0) + COALESCE(post_snapshot_delta_data.creditamount, 0) AS creditamount
+      FROM summary_snapshot_baseline_data
+      FULL OUTER JOIN post_snapshot_delta_data ON summary_snapshot_baseline_data.glcode = post_snapshot_delta_data.glcode
+           AND summary_snapshot_baseline_data.productname = post_snapshot_delta_data.productname
+           AND summary_snapshot_baseline_data.assetowner = post_snapshot_delta_data.assetowner
+  ),
+  current_cob_data AS (
+      SELECT lp.name AS productname,
+             account_id,
+             acc_gl_account.gl_code AS glcode,
+             acc_gl_account.name AS glname,
+             CASE WHEN aw.owner_id IS NULL THEN 0 ELSE aw.owner_id END AS assetowner,
+             SUM(CASE WHEN acc_gl_journal_entry.type_enum = 2 THEN amount ELSE 0 END) AS debitamount,
+             SUM(CASE WHEN acc_gl_journal_entry.type_enum = 1 THEN amount ELSE 0 END) AS creditamount
+      FROM acc_gl_journal_entry
+      JOIN acc_gl_account ON acc_gl_account.id = acc_gl_journal_entry.account_id
+      JOIN m_loan m ON m.id = acc_gl_journal_entry.entity_id
+      JOIN m_product_loan lp ON lp.id = m.product_id
+      LEFT JOIN m_external_asset_owner_journal_entry_mapping aw ON aw.journal_entry_id = acc_gl_journal_entry.id
+      WHERE acc_gl_journal_entry.entity_type_enum = 1
+        AND acc_gl_journal_entry.manual_entry = false
+        AND acc_gl_journal_entry.submitted_on_date = '${endDate}'
+        AND (acc_gl_journal_entry.office_id = ${officeId})
+      GROUP BY productname, account_id, glcode, glname, assetowner
+  )
+  SELECT *
+  FROM (
+      SELECT *
+      FROM retained_earning
+      WHERE glacct = (SELECT gl_code FROM acc_gl_account WHERE name = 'Retained Earnings Prior Year')
+
+      UNION
+
+      SELECT txnreport.postingdate,
+             txnreport.product,
+             txnreport.glacct,
+             txnreport.description,
+             txnreport.assetowner,
+             (COALESCE(txnreport.beginningbalance, 0) + COALESCE(summary.beginningbalance, 0)) AS beginningbalance,
+             txnreport.debitmovement AS debitmovement,
+             txnreport.creditmovement AS creditmovement,
+             (COALESCE(txnreport.endingbalance, 0) + COALESCE(summary.beginningbalance, 0)) AS endingbalance
+      FROM (
+          SELECT *
+          FROM (
+              SELECT DISTINCT '${endDate}' AS postingdate,
+                            loan.pname AS product,
+                            loan.gl_code AS glacct,
+                            loan.glname AS description,
+                            COALESCE((SELECT external_id FROM m_external_asset_owner WHERE id = loan.assetowner), 'self') AS
+  assetowner,
+                            loan.openingbalance AS beginningbalance,
+                            (loan.debitamount * 1) AS debitmovement,
+                            (loan.creditamount * -1) AS creditmovement,
+                            (loan.openingbalance + loan.debitamount - loan.creditamount) AS endingbalance
+              FROM (
+                  SELECT DISTINCT COALESCE(g.pname, current_cob_data.productname) pname,
+                                 COALESCE(g.gl_code, current_cob_data.glcode) gl_code,
+                                 COALESCE(g.glname, current_cob_data.glname) glname,
+                                 COALESCE(merged_historical_data.assetowner, current_cob_data.assetowner) assetowner,
+                                 COALESCE(merged_historical_data.debitamount, 0) - COALESCE(merged_historical_data.creditamount, 0) AS openingbalance,
+                                 COALESCE(current_cob_data.debitamount, 0) AS debitamount,
+                                 COALESCE(current_cob_data.creditamount, 0) AS creditamount
+                  FROM (
+                      SELECT DISTINCT ag.gl_code, ag.id, pl.NAME AS pname, ag.NAME AS glname
+                      FROM acc_gl_account ag
+                      JOIN acc_product_mapping am ON am.gl_account_id = ag.id AND am.product_type = 1
+                      JOIN m_product_loan pl ON pl.id = am.product_id
+                  ) g
+                  LEFT JOIN merged_historical_data ON g.gl_code = merged_historical_data.glcode AND merged_historical_data.productname = g.pname
+                  FULL OUTER JOIN current_cob_data ON g.gl_code = current_cob_data.glcode
+                                 AND current_cob_data.productname = g.pname
+                                 AND merged_historical_data.assetowner = current_cob_data.assetowner
+              ) loan
+          ) a
+      ) AS txnreport
+      LEFT JOIN retained_earning summary ON txnreport.glacct = summary.glacct
+                                        AND txnreport.assetowner = summary.assetowner
+                                        AND summary.product = txnreport.product
+  ) report
+  WHERE report.endingbalance != 0
+     OR report.debitmovement != 0
+     OR report.creditmovement != 0
+  ORDER BY glacct"/>
+            <where>report_name='Trial Balance Summary Report with Asset Owner'</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>

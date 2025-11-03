@@ -48,7 +48,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;
-import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
+import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.loan.RetrieveLoanIdService;
 import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
@@ -312,7 +312,7 @@ class LoanCOBApiFilterTest {
         businessDates.put(BusinessDateType.COB_DATE, businessDate.minusDays(1));
         ThreadLocalContextUtil.setBusinessDates(businessDates);
 
-        LoanIdAndLastClosedBusinessDate result = mock(LoanIdAndLastClosedBusinessDate.class);
+        COBIdAndLastClosedBusinessDate result = mock(COBIdAndLastClosedBusinessDate.class);
         given(result.getId()).willReturn(2L);
         given(result.getLastClosedBusinessDate()).willReturn(businessDate.minusDays(2));
         given(request.getPathInfo()).willReturn("/v1/loans/2?command=approve");
@@ -346,7 +346,7 @@ class LoanCOBApiFilterTest {
         businessDates.put(BusinessDateType.COB_DATE, businessDate.minusDays(1));
         ThreadLocalContextUtil.setBusinessDates(businessDates);
 
-        LoanIdAndLastClosedBusinessDate result = mock(LoanIdAndLastClosedBusinessDate.class);
+        COBIdAndLastClosedBusinessDate result = mock(COBIdAndLastClosedBusinessDate.class);
         given(result.getId()).willReturn(2L);
         given(request.getPathInfo()).willReturn("/v1/loans/2?command=approve");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());

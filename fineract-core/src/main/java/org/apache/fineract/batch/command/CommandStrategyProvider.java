@@ -57,7 +57,7 @@ public class CommandStrategyProvider {
     /**
      * Regex pattern for specifying any query param that has key = 'command' or not specific anything.
      */
-    private static final String OPTIONAL_COMMAND_PARAM_REGEX = "(\\?command=[\\w]+)?";
+    private static final String OPTIONAL_COMMAND_PARAM_REGEX = "(\\?command=[\\w\\-]+)?";
 
     /**
      * Regex pattern for specifying a mandatory query param that has key = 'command'.

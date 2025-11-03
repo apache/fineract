@@ -82,6 +82,7 @@ import org.apache.fineract.portfolio.delinquency.mapper.LoanDelinquencyTagMapper
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.delinquency.service.LoanDelinquencyDomainService;
+import org.apache.fineract.portfolio.delinquency.service.PossibleNextRepaymentCalculationServiceDiscovery;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -100,6 +101,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionProcessingService;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -129,8 +131,7 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
     private AvroDateTimeMapper mapper;
 
     private final LoanChargeService loanChargeService = new LoanChargeService(mock(LoanChargeValidator.class),
-            mock(LoanTransactionProcessingService.class), mock(LoanLifecycleStateMachine.class), mock(LoanBalanceService.class),
-            mock(LoanTransactionRepository.class));
+            mock(LoanTransactionProcessingService.class), mock(LoanLifecycleStateMachine.class), mock(LoanBalanceService.class));
 
     private MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
 
@@ -363,13 +364,19 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         DelinquencyReadPlatformService delinquencyReadPlatformService = new DelinquencyReadPlatformServiceImpl(repositoryRange,
                 repositoryBucket, repositoryLoanDelinquencyTagHistory, mapperRange, mapperBucket, mapperLoanDelinquencyTagHistory,
                 loanRepository, loanDelinquencyDomainService, repositoryLoanInstallmentDelinquencyTag, loanDelinquencyActionRepository,
-                delinquencyEffectivePauseHelper, configurationDomainService, Mockito.mock(LoanTransactionRepository.class));
+                delinquencyEffectivePauseHelper, configurationDomainService, Mockito.mock(LoanTransactionRepository.class),
+                Mockito.mock(PossibleNextRepaymentCalculationServiceDiscovery.class));
 
         LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
         when(loanProduct.isMultiDisburseLoan()).thenReturn(false);
+
+        LoanProductRelatedDetail loanProductRelatedDetail = Mockito.mock(LoanProductRelatedDetail.class);
+        when(loanProductRelatedDetail.isEnableIncomeCapitalization()).thenReturn(false);
+
         Loan loan = Mockito.spy(Loan.class);
         ReflectionTestUtils.setField(loan, "loanProduct", loanProduct);
         ReflectionTestUtils.setField(loan, "loanStatus", LoanStatus.ACTIVE);
+        when(loan.getLoanRepaymentScheduleDetail()).thenReturn(loanProductRelatedDetail);
         LoanTransaction transaction1 = Mockito.mock(LoanTransaction.class);
         LoanTransaction transaction2 = Mockito.mock(LoanTransaction.class);
         CollectionData collectionData = Mockito.mock(CollectionData.class);

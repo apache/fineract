@@ -177,6 +177,7 @@ public final class ErrorHandler {
             msg = defaultMsg == null ? cause.getMessage() : defaultMsg;
             if (nre instanceof NonTransientDataAccessException) {
                 msgCode = msgCode == null ? codePfx + ".data.integrity.issue" : msgCode;
+                log.warn("Handled exception is", nre);
                 return new PlatformDataIntegrityException(msgCode, msg, param, args);
             } else if (cause instanceof OptimisticLockException) {
                 return (RuntimeException) cause;

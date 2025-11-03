@@ -25,6 +25,7 @@ dependencies {
     // implementation dependencies are directly used (compiled against) in src/main (and src/test)
     //
     implementation(project(path: ':fineract-core'))
+    implementation(project(path: ':fineract-cob'))
     implementation(project(path: ':fineract-accounting'))
     implementation(project(path: ':fineract-charge'))
     implementation(project(path: ':fineract-rates'))

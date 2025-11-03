@@ -33,22 +33,32 @@ The actual code can be found in the `DatabaseTypeResolver` class.
 
 == Tenant database security
 
-The tenant database schema password is stored in the `tenant_server_connections` table in the tenant database.
-The password and the read only schema password are encrypted using the `fineract.tenant.master-password` property.
-By default, the database property will be encrypted in the first start from a plane text.
+The tenant database schema password is stored in the `tenant_server_connections` table in the tenant database. The password and the read only schema password are encrypted using the `fineract.tenant.master-password` property. By default, the database property will be encrypted in the first start from a plain text.
 
 When you want to generate a new encrypted password, you can use the `org.apache.fineract.infrastructure.core.service.database.DatabasePasswordEncryptor` class.
 
 === Database password encryption usage
-```
-java -cp fineract-provider.jar -Dloader.main=org.apache.fineract.infrastructure.core.service.database.DatabasePasswordEncryptor org.springframework.boot.loader.PropertiesLauncher <masterPassword> <plainPassword>
-```
+
+[%nowrap,bash]
+----
+java -cp fineract-provider.jar \
+  -Dloader.main=org.apache.fineract.infrastructure.core.service.database.DatabasePasswordEncryptor \
+  org.springframework.boot.loader.PropertiesLauncher \
+  <masterPassword> \
+  <plainPassword>
+----
 
 For example:
-```
-java -cp fineract-provider-0.0.0-48f7e315.jar -Dloader.main=org.apache.fineract.infrastructure.core.service.database.DatabasePasswordEncryptor org.springframework.boot.loader.PropertiesLauncher fineract-master-password fineract-tenant-password
+
+[%nowrap,text]
+----
+java -cp fineract-provider-0.0.0-48f7e315.jar \
+  -Dloader.main=org.apache.fineract.infrastructure.core.service.database.DatabasePasswordEncryptor \
+  org.springframework.boot.loader.PropertiesLauncher \
+  fineract-master-password \
+  fineract-tenant-password
 The encrypted password: VLwGl7vOP/q275ZTku+PNGWnGwW4mzzNHSNaO9Pr67WT5/NZMpBr9tGYYiYsqwL1eRew2jl7O3/N1EFbLlXhSA==
-```
+----
 
 == Data-access layer
 
@@ -85,38 +95,38 @@ The switch from Flyway (1.6.x) to Liquibase (1.7.x) was planned to be as smooth 
 === Troubleshooting
 
 1. During upgrade from Fineract 1.5.0 to 1.6.0, Liquibase fails
-
++
 After dropping the flyway migrations table (schema_version), Liquibase runs its
 own migrations which fails (in recreating tables which already exist) because
 we are aiming to re-use DB with existing data from Fineract 1.5.0.
-
++
 Solution: The latest release version (1.6.0) doesn't have Liquibase at all, it
 still runs Flyway migrations. Only the develop branch (later to be 1.7.0) got
 switched to Liquibase. Do not pull the develop before upgrading your instance.
-
++
 Make sure first you upgrade your instance (aka database schema with Fineract 1.6.0).
 Then upgrade with the current develop branch. Check if some migration scripts
 did not run which led to some operations failing due to slight differences in
 schema. Try with running the missing migrations manually.
-
++
 Note: develop is considered unstable until released.
 
 2. Upgrading database from MySQL 5.7 as advised to Maria DB 10.6, fails. If we
 use data from version 18.03.01 it fails to migrate the data. If we use databases
 running on 1.5.0 release it completes the startup but the system login fails.
-
++
 Solution: A database upgrade is separate thing to take care of.
 
 3. We are getting `ScehmaUpgradeNeededException: Make sure to upgrade to Fineract
 1.6 first and then to a newer version` error while upgrading to `tag 1.6`.
-
++
 1.6 version shouldn't include Liquibase. It will only be released after 1.6.
 Make sure Liquibase is dropping `schema_version` table, as there is no Flyway
 it is not required. Drop Flyway and use Liquibase for both migrations and
 database independence. In case, if you still get errors, you can use git SHA
 `746c589a6e809b33d68c0596930fcaa7338d5270` and Flyway migration will be done to
 the latest.
-
++
 ```
 TENANT_LATEST_FLYWAY_VERSION = 392;
 TENANT_LATEST_FLYWAY_SCRIPT_NAME =

@@ -92,7 +92,7 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
                 .reprocessProgressiveLoanTransactions(loan.getDisbursementDate(), relatedRefundTransactionDate, transactionsToReprocess,
                         loan.getCurrency(), installmentsToReprocess, loan.getActiveCharges());
         final List<LoanTransaction> newTransactions = reprocessResult.getLeft().getTransactionChanges().stream()
-                .map(TransactionChangeData::getNewTransaction).toList();
+                .map(TransactionChangeData::getNewTransaction).toList().stream().filter(LoanTransaction::isNotReversed).toList();
         loan.getLoanTransactions().addAll(newTransactions);
         ProgressiveLoanInterestScheduleModel modelAfter = reprocessResult.getRight();
 

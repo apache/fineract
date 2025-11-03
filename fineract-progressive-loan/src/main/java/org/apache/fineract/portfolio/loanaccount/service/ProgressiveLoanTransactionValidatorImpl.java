@@ -43,9 +43,9 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
-import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.portfolio.common.service.Validator;
+import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeBalance;
@@ -61,7 +61,6 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionProces
 import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -73,6 +72,7 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
     private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
     private final LoanBuyDownFeeBalanceRepository loanBuydownFeeBalanceRepository;
     private final LoanTransactionRepository loanTransactionRepository;
+    private final LoanMaximumAmountCalculator loanMaximumAmountCalculator;
 
     @Override
     public void validateCapitalizedIncome(final JsonCommand command, final Long loanId) {
@@ -137,7 +137,7 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
                 final BigDecimal newTotal = totalDisbursed.add(capitalizedIncome).add(transactionAmount);
 
                 if (loan.loanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
-                    final BigDecimal maxAppliedAmount = getOverAppliedMax(loan);
+                    final BigDecimal maxAppliedAmount = loanMaximumAmountCalculator.getOverAppliedMax(loan);
                     if (newTotal.compareTo(maxAppliedAmount) > 0) {
                         baseDataValidator.reset().parameter("transactionAmount").failWithCode("exceeds.approved.amount",
                                 "Sum of disbursed amount and capitalized income can't be greater than maximum applied loan amount calculation.");
@@ -149,6 +149,11 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
                     }
                 }
             }
+
+            final Long transactionClassificationId = fromApiJsonHelper
+                    .extractLongNamed(LoanTransactionApiConstants.TRANSACTION_CLASSIFICATIONID_PARAMNAME, element);
+            loanTransactionValidator.validateClassificationCodeValue(LoanTransactionApiConstants.CAPITALIZED_INCOME_CLASSIFICATION_CODE,
+                    transactionClassificationId, baseDataValidator);
 
             validatePaymentDetails(baseDataValidator, element);
             validateNote(baseDataValidator, element);
@@ -219,7 +224,7 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
                 }
                 if (transactionAmount != null) {
                     LoanCapitalizedIncomeBalance capitalizedIncomeBalance = loanCapitalizedIncomeBalanceRepository
-                            .findByLoanIdAndLoanTransactionId(loanId, capitalizedIncomeTransactionId);
+                            .findByLoanIdAndLoanTransactionIdAndDeletedFalseAndClosedFalse(loanId, capitalizedIncomeTransactionId);
                     if (MathUtil.isLessThan(capitalizedIncomeBalance.getAmount()
                             .subtract(MathUtil.nullToZero(capitalizedIncomeBalance.getAmountAdjustment())), transactionAmount)) {
                         baseDataValidator.reset().parameter("transactionAmount").value(transactionAmount).failWithCode(
@@ -277,7 +282,8 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
     }
 
     private static final List<String> BUY_DOWN_FEE_TRANSACTION_SUPPORTED_PARAMETERS = List
-            .of(new String[] { "transactionDate", "dateFormat", "locale", "transactionAmount", "paymentTypeId", "note", "externalId" });
+            .of(new String[] { "transactionDate", "dateFormat", "locale", "transactionAmount", "paymentTypeId", "note", "externalId",
+                    LoanTransactionApiConstants.TRANSACTION_CLASSIFICATIONID_PARAMNAME });
 
     @Override
     public void validateBuyDownFee(JsonCommand command, Long loanId) {
@@ -313,6 +319,11 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
 
         final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("transactionAmount", element);
         baseDataValidator.reset().parameter("transactionAmount").value(transactionAmount).notNull().positiveAmount();
+
+        final Long transactionClassificationId = fromApiJsonHelper
+                .extractLongNamed(LoanTransactionApiConstants.TRANSACTION_CLASSIFICATIONID_PARAMNAME, element);
+        loanTransactionValidator.validateClassificationCodeValue(LoanTransactionApiConstants.BUY_DOWN_FEE_CLASSIFICATION_CODE,
+                transactionClassificationId, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -390,8 +401,8 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
 
                 }
                 if (transactionAmount != null) {
-                    LoanBuyDownFeeBalance buydownFeeBalance = loanBuydownFeeBalanceRepository.findByLoanIdAndLoanTransactionId(loanId,
-                            buyDownFeeTransactionId);
+                    LoanBuyDownFeeBalance buydownFeeBalance = loanBuydownFeeBalanceRepository
+                            .findByLoanIdAndLoanTransactionIdAndDeletedFalseAndClosedFalse(loanId, buyDownFeeTransactionId);
                     if (buydownFeeBalance == null) {
                         baseDataValidator.reset().parameter("buyDownFeeTransactionId").failWithCode("buydown.fee.balance.not.found",
                                 "Buy down fee balance not found for the specified transaction.");
@@ -572,9 +583,20 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
         loanTransactionValidator.validateReversalExternalId(baseDataValidator, element);
     }
 
+    @Override
+    public void validateManualInterestRefundTransaction(final String json) {
+        loanTransactionValidator.validateManualInterestRefundTransaction(json);
+    }
+
+    @Override
+    public void validateClassificationCodeValue(final String codeName, final Long transactionClassificationId,
+            DataValidatorBuilder baseDataValidator) {
+        loanTransactionValidator.validateClassificationCodeValue(codeName, transactionClassificationId, baseDataValidator);
+    }
+
     private Set<String> getCapitalizedIncomeParameters() {
-        return new HashSet<>(
-                Arrays.asList("transactionDate", "dateFormat", "locale", "transactionAmount", "paymentTypeId", "note", "externalId"));
+        return new HashSet<>(Arrays.asList("transactionDate", "dateFormat", "locale", "transactionAmount", "paymentTypeId", "note",
+                "externalId", LoanTransactionApiConstants.TRANSACTION_CLASSIFICATIONID_PARAMNAME));
     }
 
     private Set<String> getCapitalizedIncomeAdjustmentParameters() {
@@ -589,17 +611,5 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
     private Set<String> getBuyDownFeeAdjustmentParameters() {
         return new HashSet<>(
                 Arrays.asList("transactionDate", "dateFormat", "locale", "transactionAmount", "paymentTypeId", "note", "externalId"));
-    }
-
-    private BigDecimal getOverAppliedMax(final Loan loan) {
-        final LoanProduct loanProduct = loan.getLoanProduct();
-        if ("percentage".equals(loanProduct.getOverAppliedCalculationType())) {
-            final BigDecimal overAppliedNumber = BigDecimal.valueOf(loanProduct.getOverAppliedNumber());
-            final BigDecimal totalPercentage = BigDecimal.valueOf(1)
-                    .add(overAppliedNumber.divide(BigDecimal.valueOf(100L), MoneyHelper.getMathContext()));
-            return loan.getProposedPrincipal().multiply(totalPercentage);
-        } else {
-            return loan.getProposedPrincipal().add(BigDecimal.valueOf(loanProduct.getOverAppliedNumber()));
-        }
     }
 }

@@ -100,11 +100,11 @@ import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.report.ReportHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.hamcrest.Matchers;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.lang.NonNull;
 
 @SuppressWarnings("rawtypes")
 @ExtendWith({ ExternalEventsExtension.class })
@@ -698,8 +698,8 @@ public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationT
                             new BigDecimal("757.420000"), new BigDecimal("0.000000"), new BigDecimal("0.000000"),
                             new BigDecimal("0.000000")),
                     ExpectedExternalTransferData.expected(BUYBACK, buybackTransferResponse.getResourceExternalId(), "2020-03-06",
-                            "2020-03-05", "2020-03-05", true, new BigDecimal("15757.420000"), new BigDecimal("15000.000000"),
-                            new BigDecimal("757.420000"), new BigDecimal("0.000000"), new BigDecimal("0.000000"),
+                            "2020-03-05", "2020-03-05", true, new BigDecimal("0.000000"), new BigDecimal("0.000000"),
+                            new BigDecimal("0.000000"), new BigDecimal("0.000000"), new BigDecimal("0.000000"),
                             new BigDecimal("0.000000")));
             getAndValidateThereIsNoActiveMapping(saleTransferResponse.getResourceExternalId());
         } finally {
@@ -1312,14 +1312,14 @@ public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationT
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, false);
     }
 
-    @NotNull
+    @NonNull
     private Integer createClient() {
         final Integer clientID = ClientHelper.createClient(REQUEST_SPEC, RESPONSE_SPEC);
         Assertions.assertNotNull(clientID);
         return clientID;
     }
 
-    @NotNull
+    @NonNull
     private Integer createLoanForClient(Integer clientID) {
         Integer overdueFeeChargeId = ChargesHelper.createCharges(REQUEST_SPEC, RESPONSE_SPEC,
                 ChargesHelper.getLoanOverdueFeeJSONWithCalculationTypePercentage("1"));
@@ -1368,8 +1368,8 @@ public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationT
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("4").withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2").withAmortizationTypeAsEqualInstallments()
                 .withInterestTypeAsDecliningBalance().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate(date).withSubmittedOnDate(date).withCollaterals(collaterals)
-                .build(clientID, loanProductID, null);
+                .withExpectedDisbursementDate(date).withSubmittedOnDate(date).withCollaterals(collaterals).withInArrearsTolerance("0")
+                .withPrincipalGrace("0").withInterestGrace("0").build(clientID, loanProductID, null);
         return LOAN_TRANSACTION_HELPER.getLoanId(loanApplicationJSON);
     }
 

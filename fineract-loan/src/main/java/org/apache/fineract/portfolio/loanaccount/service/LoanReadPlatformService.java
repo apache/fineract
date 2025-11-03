@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -43,6 +43,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleD
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.NonNull;
 
 public interface LoanReadPlatformService {
 
@@ -56,7 +57,7 @@ public interface LoanReadPlatformService {
 
     Collection<LoanTransactionData> retrieveLoanTransactions(Long loanId);
 
-    org.springframework.data.domain.Page<LoanTransactionData> retrieveLoanTransactions(@NotNull Long loanId,
+    org.springframework.data.domain.Page<LoanTransactionData> retrieveLoanTransactions(@NonNull Long loanId,
             Set<LoanTransactionType> excludedTransactionTypes, Pageable pageable);
 
     LoanAccountData retrieveTemplateWithClientAndProductDetails(Long clientId, Long productId);
@@ -103,6 +104,8 @@ public interface LoanReadPlatformService {
     Integer retriveLoanCounter(Long clientId, Long productId);
 
     Collection<DisbursementData> retrieveLoanDisbursementDetails(Long loanId);
+
+    Map<Long, List<DisbursementData>> retrieveLoanDisbursementDetails(List<Long> loanIds);
 
     DisbursementData retrieveLoanDisbursementDetail(Long loanId, Long disbursementId);
 
@@ -155,4 +158,11 @@ public interface LoanReadPlatformService {
     List<Long> retrieveLoanIdsByExternalIds(List<ExternalId> externalIds);
 
     boolean existsByLoanId(Long loanId);
+
+    LoanTransactionData retrieveManualInterestRefundTemplate(Long loanId, Long targetTransactionId);
+
+    Long getResolvedLoanId(ExternalId loanExternalId);
+
+    Long getResolvedLoanTransactionId(Long transactionId, ExternalId externalTransactionId);
+
 }

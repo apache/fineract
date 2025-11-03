@@ -209,4 +209,17 @@
     <include file="parts/0188_create_loan_buy_down_fee_balance.xml" relativeToChangelogFile="true" />
     <include file="parts/0189_add_loan_buydown_fee_event.xml" relativeToChangelogFile="true" />
     <include file="parts/0190_buy_down_fee_amortization.xml" relativeToChangelogFile="true" />
+    <include file="parts/0191_add_LoanApprovedAmountChangedBusinessEvent.xml" relativeToChangelogFile="true" />
+    <include file="parts/0192_create_loan_approved_amount_history.xml" relativeToChangelogFile="true" />
+    <include file="parts/0193_add_column_ip.xml" relativeToChangelogFile="true" />
+    <include file="parts/0194_fix_missing_permission.xml" relativeToChangelogFile="true" />
+    <include file="parts/0195_create_loan_amortization_allocation_mapping.xml" relativeToChangelogFile="true" />
+    <include file="parts/0196_add_deleted_and_closed_to_buy_down_fee_balance.xml" relativeToChangelogFile="true" />
+    <include file="parts/0197_add_deleted_and_closed_to_capitalized_income_balance.xml" relativeToChangelogFile="true" />
+    <include file="parts/0198_add_classification_id_to_acc_product_mapping.xml" relativeToChangelogFile="true" />
+    <include file="parts/0199_write_off_reason_mapping_loan.xml" relativeToChangelogFile="true" />
+    <include file="parts/0200_add_journal_entry_aggregation_tables.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0201_add_journal_entry_aggregation_job.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0202_trial_balance_summary_with_asset_owner_journal_entry_aggregation.xml" relativeToChangelogFile="true" />
+    <include file="parts/0203_transaction_summary_with_asset_owner_report_with_capitalized_income.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

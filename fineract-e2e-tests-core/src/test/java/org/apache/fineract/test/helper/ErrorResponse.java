@@ -61,5 +61,14 @@ public class ErrorResponse {
     public static class Error {
 
         private String developerMessage;
+        private List<ErrorMessageArg> args;
+    }
+
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    public static class ErrorMessageArg {
+
+        private Object value;
     }
 }

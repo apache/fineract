@@ -2030,7 +2030,7 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
         } else {
             if (loanApplicationTerms.getDisbursementDatas().isEmpty()) {
                 loanApplicationTerms.getDisbursementDatas()
-                        .add(new DisbursementData(1L, loanApplicationTerms.getExpectedDisbursementDate(),
+                        .add(new DisbursementData(1L, null, loanApplicationTerms.getExpectedDisbursementDate(),
                                 loanApplicationTerms.getExpectedDisbursementDate(), loanApplicationTerms.getPrincipal().getAmount(), null,
                                 null, null, null));
             }

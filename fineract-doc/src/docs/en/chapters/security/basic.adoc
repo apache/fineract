@@ -14,5 +14,5 @@ FINERACT_SECURITY_OAUTH_ENABLED=false
 +
 [source,bash]
 ----
-java -Dfineract.security.basicauth.enabled=true -Dfineract.security.oauth.enabled=false -jar fineract-provider.jar
+java -Dfineract.security.basicauth.enabled=true -Dfineract.security.oauth2.enabled=false -jar fineract-provider.jar
 ----

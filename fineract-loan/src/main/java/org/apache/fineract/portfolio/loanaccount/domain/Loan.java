@@ -61,6 +61,7 @@ import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -813,7 +814,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             }
             return principal;
         } else {
-            return getNetDisbursalAmount();
+            if (this.actualDisbursementDate == null) {
+                return BigDecimal.ZERO;
+            } else {
+                return getNetDisbursalAmount();
+            }
         }
     }
 
@@ -1352,7 +1357,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     }
 
     public boolean isInterestBearing() {
-        return BigDecimal.ZERO.compareTo(getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate()) < 0;
+        return BigDecimal.ZERO.compareTo(getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate()) < 0
+                || (isProgressiveSchedule() && !getLoanTermVariations().isEmpty()
+                        && loanTermVariations.stream().anyMatch(ltv -> ltv.getTermType().isInterestRateFromInstallment()
+                                && ltv.getTermValue() != null && MathUtil.isGreaterThanZero(ltv.getTermValue())));
     }
 
     public boolean isInterestBearingAndInterestRecalculationEnabled() {
@@ -1403,8 +1411,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
      * @return a schedule installment is related to the provided date
      **/
     public LoanRepaymentScheduleInstallment getRelatedRepaymentScheduleInstallment(LocalDate date) {
-        // TODO first installment should be fromInclusive
-        return getRepaymentScheduleInstallment(e -> DateUtils.isDateInRangeFromExclusiveToInclusive(date, e.getFromDate(), e.getDueDate()));
+        return getRepaymentScheduleInstallment(
+                e -> (e.isFirstNormalInstallment() && DateUtils.isDateInRangeInclusive(date, e.getFromDate(), e.getDueDate()))
+                        || DateUtils.isDateInRangeFromExclusiveToInclusive(date, e.getFromDate(), e.getDueDate()));
     }
 
     public LoanRepaymentScheduleInstallment fetchRepaymentScheduleInstallment(final Integer installmentNumber) {
@@ -1541,7 +1550,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
             int numberOfInstallments = 0;
             for (final LoanRepaymentScheduleInstallment installment : installments) {
-                if (!installment.isRecalculatedInterestComponent()) {
+                if (!installment.isRecalculatedInterestComponent() && !installment.isAdditional() && !installment.isDownPayment()
+                        && !installment.isReAged()) {
                     numberOfInstallments++;
                 }
             }

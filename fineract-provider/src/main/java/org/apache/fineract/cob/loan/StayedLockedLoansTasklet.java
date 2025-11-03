@@ -23,9 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.cob.data.COBIdAndExternalIdAndAccountNo;
 import org.apache.fineract.cob.data.LoanAccountStayedLockedData;
 import org.apache.fineract.cob.data.LoanAccountsStayedLockedData;
-import org.apache.fineract.cob.data.LoanIdAndExternalIdAndAccountNo;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
@@ -52,7 +52,7 @@ public class StayedLockedLoansTasklet implements Tasklet {
 
     private LoanAccountsStayedLockedData buildLoanAccountData() {
         LocalDate cobBusinessDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
-        List<LoanIdAndExternalIdAndAccountNo> stayedLockedLoanAccounts = retrieveLoanIdService
+        List<COBIdAndExternalIdAndAccountNo> stayedLockedLoanAccounts = retrieveLoanIdService
                 .findAllStayedLockedByCobBusinessDate(cobBusinessDate);
         List<LoanAccountStayedLockedData> loanAccounts = new ArrayList<>();
         stayedLockedLoanAccounts.forEach(loanAccount -> {

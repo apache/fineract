@@ -30,7 +30,7 @@ Tagged as ${project['fineract.release.version']}
 
 Committer PGP keys, including the release signing key: https://dist.apache.org/repos/dist/dev/fineract/KEYS
 
-Note that this release contains source and binary artifacts.
+Note that this release candidate contains source and binary artifacts.
 
 This vote will be open for 72 hours:
 
@@ -38,15 +38,13 @@ This vote will be open for 72 hours:
 [ ] +0 no opinion
 [ ] -1 disapprove (and reason why)
 
-Please indicate if you are a binding vote (member of the PMC).
+Please indicate if yours is a binding vote, and "Verified: YES/NO/PARTIAL".
 
-Please also indicate with "Tested: YES/NO/PARTIAL" if you have locally built and/or tested these artifacts and/or a clone of the code checked out to the release commit, following the form:
+Verified: YES ... Verified integrity and signatures of release artifacts locally, built from source, ran jar/war: Did everything mentioned in the current release candidate verification guidance ( https://fineract.apache.org/docs/rc/#_artifact_verification ). If you did more than that, please specify. "Verified: YES" is required for binding votes.
 
-Tested: YES ... Verified integrity and signatures of release artifacts locally, built from source, ran jar/war: Did everything mentioned in the current release candidate verification guidance ( https://lists.apache.org/thread/hym94pdy3nk9gjspkz4qonv2v15n5dpo ). If you did more than that, please specify.
+Verified: NO ... No testing performed on release candidate, e.g. relying on testing performed by other contributors and/or output of GitHub Actions, while exercising your right to vote.
 
-Tested: NO ... No testing performed on release candidate, e.g. relying on testing performed by other contributors and/or output of GitHub Actions, while exercising my right to vote.
-
-Tested: PARTIAL ... Please specify.
+Verified: PARTIAL ... Please specify.
 
 Cheers,
 

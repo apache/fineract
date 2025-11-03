@@ -23,7 +23,6 @@ import static org.apache.fineract.infrastructure.core.service.database.SqlOperat
 
 import com.google.common.base.Splitter;
 import com.google.gson.JsonObject;
-import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -48,6 +47,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -126,8 +126,8 @@ public class DatatableReadServiceImpl implements DatatableReadService {
     }
 
     @Override
-    public List<JsonObject> queryDataTable(@NotNull String datatable, @NotNull String columnName, String columnValueString,
-            @NotNull String resultColumnsString) {
+    public List<JsonObject> queryDataTable(@NonNull String datatable, @NonNull String columnName, String columnValueString,
+            @NonNull String resultColumnsString) {
         datatable = datatableUtil.validateDatatableRegistered(datatable);
         Map<String, ResultsetColumnHeaderData> headersByName = searchUtil
                 .mapHeadersToName(genericDataService.fillResultsetColumnHeaders(datatable));
@@ -149,7 +149,7 @@ public class DatatableReadServiceImpl implements DatatableReadService {
     }
 
     @Override
-    public Page<JsonObject> queryDataTableAdvanced(@NotNull String datatable, @NotNull PagedLocalRequest<AdvancedQueryData> pagedRequest) {
+    public Page<JsonObject> queryDataTableAdvanced(@NonNull String datatable, @NonNull PagedLocalRequest<AdvancedQueryData> pagedRequest) {
         datatable = datatableUtil.validateDatatableRegistered(datatable);
         context.authenticatedUser().validateHasDatatableReadPermission(datatable);
 
@@ -219,9 +219,9 @@ public class DatatableReadServiceImpl implements DatatableReadService {
     }
 
     @Override
-    public boolean buildDataQueryEmbedded(@NotNull EntityTables entityTable, @NotNull String datatable, @NotNull AdvancedQueryData request,
-            @NotNull List<String> selectColumns, @NotNull StringBuilder select, @NotNull StringBuilder from, @NotNull StringBuilder where,
-            @NotNull List<Object> params, String mainAlias, String alias, String dateFormat, String dateTimeFormat, Locale locale) {
+    public boolean buildDataQueryEmbedded(@NonNull EntityTables entityTable, @NonNull String datatable, @NonNull AdvancedQueryData request,
+            @NonNull List<String> selectColumns, @NonNull StringBuilder select, @NonNull StringBuilder from, @NonNull StringBuilder where,
+            @NonNull List<Object> params, String mainAlias, String alias, String dateFormat, String dateTimeFormat, Locale locale) {
         List<String> resultColumns = request.getResultColumns();
         List<ColumnFilterData> columnFilters = request.getColumnFilters();
         if ((resultColumns == null || resultColumns.isEmpty()) && (columnFilters == null || columnFilters.isEmpty())) {

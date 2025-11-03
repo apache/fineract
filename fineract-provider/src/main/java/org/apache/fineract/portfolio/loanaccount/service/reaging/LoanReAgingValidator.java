@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -34,17 +35,23 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.api.LoanReAgingApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.ChangeOperation;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class LoanReAgingValidator {
+
+    private final LoanTransactionRepository loanTransactionRepository;
 
     public void validateReAge(Loan loan, JsonCommand command) {
         validateReAgeRequest(loan, command);
         validateReAgeBusinessRules(loan);
+        validateReAgeOutstandingBalance(loan, command);
     }
 
     private void validateReAgeRequest(Loan loan, JsonCommand command) {
@@ -56,9 +63,13 @@ public class LoanReAgingValidator {
                 .notExceedingLengthOf(100);
 
         LocalDate startDate = command.localDateValueOfParameterNamed(LoanReAgingApiConstants.startDate);
-        baseDataValidator.reset().parameter(LoanReAgingApiConstants.startDate).value(startDate).notNull()
-                .validateDateAfter(loan.getMaturityDate());
-
+        if (loan.isProgressiveSchedule() && !loan.isInterestBearing()) {
+            baseDataValidator.reset().parameter(LoanReAgingApiConstants.startDate).value(startDate).notNull()
+                    .validateDateAfterOrEqual(loan.getDisbursementDate());
+        } else {
+            baseDataValidator.reset().parameter(LoanReAgingApiConstants.startDate).value(startDate).notNull()
+                    .validateDateAfter(loan.getMaturityDate());
+        }
         String frequencyType = command.stringValueOfParameterNamedAllowingNull(LoanReAgingApiConstants.frequencyType);
         baseDataValidator.reset().parameter(LoanReAgingApiConstants.frequencyType).value(frequencyType).notNull();
 
@@ -75,7 +86,9 @@ public class LoanReAgingValidator {
 
     private void validateReAgeBusinessRules(Loan loan) {
         // validate reaging shouldn't happen before maturity
-        if (DateUtils.isBefore(getBusinessLocalDate(), loan.getMaturityDate())) {
+        // on progressive loans it can
+        if (!(loan.isProgressiveSchedule() && !loan.isInterestBearing())
+                && DateUtils.isBefore(getBusinessLocalDate(), loan.getMaturityDate())) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.cannot.be.submitted.before.maturity",
                     "Loan cannot be re-aged before maturity", loan.getId());
         }
@@ -107,8 +120,9 @@ public class LoanReAgingValidator {
         }
 
         // validate if there's already a re-aging transaction for today
-        boolean isReAgingTransactionForTodayPresent = loan.getLoanTransactions().stream()
-                .anyMatch(tx -> tx.getTypeOf().isReAge() && tx.getTransactionDate().equals(getBusinessLocalDate()));
+        final boolean isReAgingTransactionForTodayPresent = loanTransactionRepository.existsNonReversedByLoanAndTypeAndDate(loan,
+                LoanTransactionType.REAGE, getBusinessLocalDate());
+
         if (isReAgingTransactionForTodayPresent) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.reage.transaction.already.present.for.today",
                     "Loan reaging can only be done once a day. There has already been a reaging done for today", loan.getId());
@@ -147,4 +161,20 @@ public class LoanReAgingValidator {
     private boolean transactionHappenedAfterOther(LoanTransaction transaction, LoanTransaction otherTransaction) {
         return new ChangeOperation(transaction).compareTo(new ChangeOperation(otherTransaction)) > 0;
     }
+
+    private void validateReAgeOutstandingBalance(final Loan loan, final JsonCommand command) {
+        final LocalDate businessDate = getBusinessLocalDate();
+        final LocalDate startDate = command.dateValueOfParameterNamed(LoanReAgingApiConstants.startDate);
+
+        final boolean isBackdated = businessDate.isAfter(startDate);
+        if (isBackdated) {
+            return;
+        }
+
+        if (loan.getSummary().getTotalPrincipalOutstanding().compareTo(java.math.BigDecimal.ZERO) == 0) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.no.outstanding.balance.to.reage",
+                    "Loan cannot be re-aged as there are no outstanding balances to be re-aged", loan.getId());
+        }
+    }
+
 }

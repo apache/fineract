@@ -61,6 +61,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalculationDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
@@ -467,6 +468,9 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(loanTransaction.getLoan()).thenReturn(loan);
         when(loan.getCurrency()).thenReturn(currency);
         when(loan.getPaymentAllocationRules()).thenReturn(List.of(loanPaymentAllocationRule));
+        LoanInterestRecalculationDetails loanInterestRecalculationDetails = mock(LoanInterestRecalculationDetails.class);
+        when(loanInterestRecalculationDetails.disallowInterestCalculationOnPastDue()).thenReturn(false);
+        when(loan.getLoanInterestRecalculationDetails()).thenReturn(loanInterestRecalculationDetails);
 
         when(loanPaymentAllocationRule.getTransactionType()).thenReturn(PaymentAllocationTransactionType.DEFAULT);
         when(loanPaymentAllocationRule.getAllocationTypes())
@@ -535,7 +539,6 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
 
         Loan loan = mock(Loan.class);
         when(loan.getLoanRepaymentScheduleDetail()).thenReturn(loanProductRelatedDetail);
-        when(loan.isInterestBearing()).thenReturn(true);
 
         LoanRepaymentScheduleInstallment installment1 = spy(
                 new LoanRepaymentScheduleInstallment(loan, 1, disbursementDate, disbursementDate.plusMonths(1), BigDecimal.valueOf(200.0),

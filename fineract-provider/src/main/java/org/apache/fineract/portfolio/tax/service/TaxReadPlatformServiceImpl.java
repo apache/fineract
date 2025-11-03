@@ -220,7 +220,7 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
                     break;
                 }
             }
-            return TaxGroupData.instance(id, name, taxAssociations);
+            return new TaxGroupData(id, name, taxAssociations, null);
         }
 
         public String getSchema() {

@@ -91,16 +91,18 @@ public class SmsApiResource {
     public Page<SmsData> retrieveAllSmsByStatus(@PathParam("campaignId") final Long campaignId,
             @BeanParam SmsRequestParam smsRequestParam) {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
-        final SearchParameters searchParameters = SearchParameters.builder().limit(smsRequestParam.limit()).offset(smsRequestParam.offset())
-                .orderBy(smsRequestParam.orderBy()).sortOrder(smsRequestParam.sortOrder()).build();
+        final SearchParameters searchParameters = SearchParameters.builder().limit(smsRequestParam.getLimit())
+                .offset(smsRequestParam.getOffset()).orderBy(smsRequestParam.getOrderBy()).sortOrder(smsRequestParam.getSortOrder())
+                .build();
 
-        final DateFormat dateFormat = Optional.ofNullable(smsRequestParam.rawDateFormat()).map(DateFormat::new).orElse(null);
-        final LocalDate fromDate = Optional.ofNullable(smsRequestParam.fromDate())
-                .map(fromDateParam -> fromDateParam.getDate(FROM_DATE_PARAM, dateFormat, smsRequestParam.locale())).orElse(null);
-        final LocalDate toDate = Optional.ofNullable(smsRequestParam.toDate())
-                .map(toDateParam -> toDateParam.getDate(TO_DATE_PARAM, dateFormat, smsRequestParam.locale())).orElse(null);
+        final DateFormat dateFormat = Optional.ofNullable(smsRequestParam.getRawDateFormat()).map(DateFormat::new).orElse(null);
+        final LocalDate fromDate = Optional.ofNullable(smsRequestParam.getFromDate())
+                .map(fromDateParam -> fromDateParam.getDate(FROM_DATE_PARAM, dateFormat, smsRequestParam.getLocale())).orElse(null);
+        final LocalDate toDate = Optional.ofNullable(smsRequestParam.getToDate())
+                .map(toDateParam -> toDateParam.getDate(TO_DATE_PARAM, dateFormat, smsRequestParam.getLocale())).orElse(null);
 
-        return readPlatformService.retrieveSmsByStatus(campaignId, searchParameters, smsRequestParam.status().intValue(), fromDate, toDate);
+        return readPlatformService.retrieveSmsByStatus(campaignId, searchParameters, smsRequestParam.getStatus().intValue(), fromDate,
+                toDate);
     }
 
     @PUT

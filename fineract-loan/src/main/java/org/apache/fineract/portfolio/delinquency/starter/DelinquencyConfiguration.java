@@ -37,6 +37,7 @@ import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatfor
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatformServiceImpl;
 import org.apache.fineract.portfolio.delinquency.service.LoanDelinquencyDomainService;
 import org.apache.fineract.portfolio.delinquency.service.LoanDelinquencyDomainServiceImpl;
+import org.apache.fineract.portfolio.delinquency.service.PossibleNextRepaymentCalculationServiceDiscovery;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyActionParseAndValidator;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyBucketParseAndValidator;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyRangeParseAndValidator;
@@ -62,11 +63,12 @@ public class DelinquencyConfiguration {
             LoanInstallmentDelinquencyTagRepository repositoryLoanInstallmentDelinquencyTag,
             LoanDelinquencyActionRepository loanDelinquencyActionRepository,
             DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper, ConfigurationDomainService configurationDomainService,
-            LoanTransactionRepository loanTransactionRepository) {
+            LoanTransactionRepository loanTransactionRepository,
+            PossibleNextRepaymentCalculationServiceDiscovery possibleNextRepaymentCalculationService) {
         return new DelinquencyReadPlatformServiceImpl(repositoryRange, repositoryBucket, repositoryLoanDelinquencyTagHistory, mapperRange,
                 mapperBucket, mapperLoanDelinquencyTagHistory, loanRepository, loanDelinquencyDomainService,
                 repositoryLoanInstallmentDelinquencyTag, loanDelinquencyActionRepository, delinquencyEffectivePauseHelper,
-                configurationDomainService, loanTransactionRepository);
+                configurationDomainService, loanTransactionRepository, possibleNextRepaymentCalculationService);
     }
 
     @Bean

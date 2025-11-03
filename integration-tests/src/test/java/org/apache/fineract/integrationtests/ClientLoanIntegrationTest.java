@@ -5570,11 +5570,11 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
 
             List<HashMap> journalEntries = JOURNAL_ENTRY_HELPER.getJournalEntriesByTransactionId("L" + accrualTransactionId);
             assertEquals(10.0f, (float) journalEntries.get(0).get("amount"));
-            assertEquals(uniqueIncomeAccountForPenalty.getResourceId().intValue(), (int) journalEntries.get(0).get("glAccountId"));
-            assertEquals("CREDIT", ((HashMap) journalEntries.get(0).get("entryType")).get("value"));
+            assertEquals(assetFeeAndPenaltyAccount.getAccountID(), (int) journalEntries.get(0).get("glAccountId"));
+            assertEquals("DEBIT", ((HashMap) journalEntries.get(0).get("entryType")).get("value"));
             assertEquals(10.0f, (float) journalEntries.get(1).get("amount"));
-            assertEquals(assetFeeAndPenaltyAccount.getAccountID(), (int) journalEntries.get(1).get("glAccountId"));
-            assertEquals("DEBIT", ((HashMap) journalEntries.get(1).get("entryType")).get("value"));
+            assertEquals(uniqueIncomeAccountForPenalty.getResourceId(), (int) journalEntries.get(1).get("glAccountId"));
+            assertEquals("CREDIT", ((HashMap) journalEntries.get(1).get("entryType")).get("value"));
 
             loanSchedulePeriods = loanDetails.getRepaymentSchedule().getPeriods();
             assertEquals(2, loanSchedulePeriods.size());
@@ -5660,12 +5660,13 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
             accrualTransactionId = transactions.get(2).getId();
 
             journalEntries = JOURNAL_ENTRY_HELPER.getJournalEntriesByTransactionId("L" + accrualTransactionId);
+            // FINERACT-2323: Journal entry order changed - DEBIT entries come first, then CREDIT entries
             assertEquals(3.0f, (float) journalEntries.get(0).get("amount"));
-            assertEquals(uniqueIncomeAccountForFee.getResourceId().intValue(), (int) journalEntries.get(0).get("glAccountId"));
-            assertEquals("CREDIT", ((HashMap) journalEntries.get(0).get("entryType")).get("value"));
+            assertEquals(assetFeeAndPenaltyAccount.getAccountID(), (int) journalEntries.get(0).get("glAccountId"));
+            assertEquals("DEBIT", ((HashMap) journalEntries.get(0).get("entryType")).get("value"));
             assertEquals(3.0f, (float) journalEntries.get(1).get("amount"));
-            assertEquals(assetFeeAndPenaltyAccount.getAccountID(), (int) journalEntries.get(1).get("glAccountId"));
-            assertEquals("DEBIT", ((HashMap) journalEntries.get(1).get("entryType")).get("value"));
+            assertEquals(uniqueIncomeAccountForFee.getResourceId().intValue(), (int) journalEntries.get(1).get("glAccountId"));
+            assertEquals("CREDIT", ((HashMap) journalEntries.get(1).get("entryType")).get("value"));
 
             loanSchedulePeriods = loanDetails.getRepaymentSchedule().getPeriods();
             assertEquals(2, loanSchedulePeriods.size());
@@ -6048,18 +6049,27 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
         Integer accrualTransactionId = (int) transactions.get(2).get("id");
 
         List<HashMap> journalEntries = JOURNAL_ENTRY_HELPER.getJournalEntriesByTransactionId("L" + accrualTransactionId);
+        // FINERACT-2323: Due to multiple legs for journal entries, the system now uses charge-specific GL accounts
+        // instead of product-level defaults. The journal entry structure has changed with alternating DEBIT/CREDIT
+        // pairs.
+        // This transaction accrues both penalty (10) and fee (10) charges.
+        // Entry 0: DEBIT for penalty receivable
         assertEquals(10.0f, (float) journalEntries.get(0).get("amount"));
-        assertEquals(incomeAccount.getAccountID(), (int) journalEntries.get(0).get("glAccountId"));
-        assertEquals("CREDIT", ((HashMap) journalEntries.get(0).get("entryType")).get("value"));
+        assertEquals(assetAccount.getAccountID(), (int) journalEntries.get(0).get("glAccountId"));
+        assertEquals("DEBIT", ((HashMap) journalEntries.get(0).get("entryType")).get("value"));
+        // Entry 1: CREDIT for penalty income
         assertEquals(10.0f, (float) journalEntries.get(1).get("amount"));
-        assertEquals(assetAccount.getAccountID(), (int) journalEntries.get(1).get("glAccountId"));
-        assertEquals("DEBIT", ((HashMap) journalEntries.get(1).get("entryType")).get("value"));
+        assertEquals(incomeAccount.getAccountID(), (int) journalEntries.get(1).get("glAccountId"));
+        assertEquals("CREDIT", ((HashMap) journalEntries.get(1).get("entryType")).get("value"));
+        // Entry 2: DEBIT for fee receivable (uses charge-specific or fallback account due to FINERACT-2323)
         assertEquals(10.0f, (float) journalEntries.get(2).get("amount"));
-        assertEquals(incomeAccount.getAccountID(), (int) journalEntries.get(2).get("glAccountId"));
-        assertEquals("CREDIT", ((HashMap) journalEntries.get(2).get("entryType")).get("value"));
+        // Due to FINERACT-2323, the fee uses a different asset account
+        assertEquals(assetAccount.getAccountID(), (int) journalEntries.get(2).get("glAccountId"));
+        assertEquals("DEBIT", ((HashMap) journalEntries.get(2).get("entryType")).get("value"));
+        // Entry 3: CREDIT for fee income
         assertEquals(10.0f, (float) journalEntries.get(3).get("amount"));
-        assertEquals(assetAccount.getAccountID(), (int) journalEntries.get(3).get("glAccountId"));
-        assertEquals("DEBIT", ((HashMap) journalEntries.get(3).get("entryType")).get("value"));
+        assertEquals(incomeAccount.getAccountID(), (int) journalEntries.get(3).get("glAccountId"));
+        assertEquals("CREDIT", ((HashMap) journalEntries.get(3).get("entryType")).get("value"));
 
         loanSchedule = LOAN_TRANSACTION_HELPER.getLoanRepaymentSchedule(REQUEST_SPEC, RESPONSE_SPEC, loanID);
         assertEquals(2, loanSchedule.size());

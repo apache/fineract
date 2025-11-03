@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.loanaccount.data.CumulativeIncomeFromIncomePosting;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
@@ -282,6 +283,19 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
     BigDecimal findChargeAccrualAmount(@Param("loanCharge") LoanCharge loanCharge);
 
     @Query("""
+            SELECT COALESCE(SUM(CASE WHEN lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL THEN lcpb.amount
+                 WHEN lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL_ADJUSTMENT THEN -lcpb.amount
+                 ELSE 0 END), 0)
+            FROM LoanChargePaidBy lcpb
+            JOIN lcpb.loanTransaction lt
+            WHERE lcpb.loanCharge = :loanCharge
+                AND lcpb.installmentNumber = :installmentNumber
+                AND lt.reversed = false
+            """)
+    BigDecimal findChargeAccrualAmountByInstallment(@Param("loanCharge") LoanCharge loanCharge,
+            @Param("installmentNumber") Integer installmentNumber);
+
+    @Query("""
             SELECT COALESCE(SUM(lt.unrecognizedIncomePortion), 0)
             FROM LoanChargePaidBy lcpb
             JOIN lcpb.loanTransaction lt
@@ -304,36 +318,6 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
     @Query("""
             SELECT lt FROM LoanTransaction lt
             WHERE lt.loan = :loan
-                AND (
-                    (lt.reversed = true AND lt.id IN :existingTransactionIds AND lt.id NOT IN :existingReversedTransactionIds)
-                    OR (lt.id NOT IN :existingTransactionIds)
-                )
-            """)
-    List<LoanTransaction> findTransactionsForAccountingBridge(@Param("loan") Loan loan,
-            @Param("existingTransactionIds") List<Long> existingTransactionIds,
-            @Param("existingReversedTransactionIds") List<Long> existingReversedTransactionIds);
-
-    @Query("""
-            SELECT lt FROM LoanTransaction lt
-            WHERE lt.loan = :loan
-                AND (
-                    (lt.reversed = true AND lt.id IN :existingTransactionIds)
-                    OR (lt.id NOT IN :existingTransactionIds)
-                )
-            """)
-    List<LoanTransaction> findTransactionsForAccountingBridge(@Param("loan") Loan loan,
-            @Param("existingTransactionIds") List<Long> existingTransactionIds);
-
-    @Query("""
-            SELECT lt FROM LoanTransaction lt
-            WHERE lt.loan = :loan
-                AND lt.reversed = false
-            """)
-    List<LoanTransaction> findNonReversedByLoan(@Param("loan") Loan loan);
-
-    @Query("""
-            SELECT lt FROM LoanTransaction lt
-            WHERE lt.loan = :loan
                 AND lt.reversed = false
                 AND lt.typeOf = :type
                 AND lt.dateOf IN :transactionDates
@@ -341,6 +325,17 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
             """)
     List<LoanTransaction> findNonReversedLoanAndTypeAndDates(@Param("loan") Loan loan, @Param("type") LoanTransactionType type,
             @Param("transactionDates") Set<LocalDate> transactionDates);
+
+    @Query("""
+            SELECT lt FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND lt.reversed = false
+                AND lt.typeOf = :type
+                AND lt.dateOf = :transactionDate
+            ORDER BY lt.dateOf, lt.createdDate, lt.id
+            """)
+    List<LoanTransaction> findNonReversedLoanAndTypeAndDate(@Param("loan") Loan loan, @Param("type") LoanTransactionType type,
+            @Param("transactionDate") LocalDate transactionDate);
 
     @Query("""
             SELECT lt FROM LoanTransaction lt
@@ -467,5 +462,23 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
                 AND lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.RECOVERY_REPAYMENT
             """)
     BigDecimal calculateTotalRecoveryPaymentAmount(@Param("loan") Loan loan);
+
+    @Query("""
+            SELECT CASE WHEN COUNT(lt) > 0 THEN true ELSE false END
+            FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND lt.reversed = false
+                AND lt.typeOf = :type
+                AND lt.dateOf = :transactionDate
+            """)
+    boolean existsNonReversedByLoanAndTypeAndDate(@Param("loan") Loan loan, @Param("type") LoanTransactionType type,
+            @Param("transactionDate") LocalDate transactionDate);
+
+    @Query("""
+            SELECT lt.classification
+            FROM LoanTransaction lt
+            WHERE lt.id = :transactionId
+            """)
+    CodeValue fetchClassificationCodeValueByTransactionId(@Param("transactionId") Long transactionId);
 
 }

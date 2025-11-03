@@ -30,7 +30,9 @@ import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiCon
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_NEWCODE;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_NEWNAME;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE;
+import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE_DATETIME;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE_DROPDOWN;
+import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_TYPE_TIMESTAMP;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_UNIQUE;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_PARAM_ADDCOLUMNS;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_PARAM_APPTABLE_NAME;
@@ -52,7 +54,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import jakarta.persistence.PersistenceException;
-import jakarta.validation.constraints.NotNull;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -110,6 +111,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.lang.NonNull;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -1197,7 +1199,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
         });
     }
 
-    private static boolean isUserInsertable(@NotNull EntityTables entityTable, @NotNull ResultsetColumnHeaderData columnHeader) {
+    private static boolean isUserInsertable(@NonNull EntityTables entityTable, @NonNull ResultsetColumnHeaderData columnHeader) {
         String columnName = columnHeader.getColumnName();
         return !columnHeader.getIsColumnPrimaryKey() && !CREATEDAT_FIELD_NAME.equals(columnName) && !UPDATEDAT_FIELD_NAME.equals(columnName)
                 && !entityTable.getForeignKeyColumnNameOnDatatable().equals(columnName);
@@ -1296,7 +1298,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
                 .with(changes).build();
     }
 
-    private static boolean isUserUpdatable(@NotNull EntityTables entityTable, @NotNull ResultsetColumnHeaderData columnHeader) {
+    private static boolean isUserUpdatable(@NonNull EntityTables entityTable, @NonNull ResultsetColumnHeaderData columnHeader) {
         return isUserInsertable(entityTable, columnHeader);
     }
 
@@ -1367,7 +1369,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
 
     // --- DbUtils ---
 
-    @NotNull
+    @NonNull
     private String mapApiTypeToDbType(String apiType, Integer length) {
         if (StringUtils.isEmpty(apiType)) {
             return "";
@@ -1378,6 +1380,8 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
             return jdbcType.formatSql(dialect, 19, 6); // TODO: parameter length is not used
         } else if (apiType.equalsIgnoreCase(API_FIELD_TYPE_DROPDOWN)) {
             return jdbcType.formatSql(dialect, 11); // TODO: parameter length is not used
+        } else if (apiType.equalsIgnoreCase(API_FIELD_TYPE_DATETIME) || apiType.equalsIgnoreCase(API_FIELD_TYPE_TIMESTAMP)) {
+            return jdbcType.formatSql(dialect, 6);
         }
         return jdbcType.formatSql(dialect, length);
     }

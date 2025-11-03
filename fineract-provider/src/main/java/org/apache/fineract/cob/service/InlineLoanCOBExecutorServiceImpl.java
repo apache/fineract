@@ -37,11 +37,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
-import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
+import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
-import org.apache.fineract.cob.exceptions.LoanAccountLockCannotBeOverruledException;
+import org.apache.fineract.cob.exceptions.AccountLockCannotBeOverruledException;
 import org.apache.fineract.cob.loan.LoanCOBConstant;
 import org.apache.fineract.cob.loan.RetrieveLoanIdService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
@@ -101,7 +101,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public CommandProcessingResult executeInlineJob(JsonCommand command, String jobName) throws LoanAccountLockCannotBeOverruledException {
+    public CommandProcessingResult executeInlineJob(JsonCommand command, String jobName) throws AccountLockCannotBeOverruledException {
         List<Long> loanIds = dataParser.parseExecution(command);
         validateLoanIdsListSize(loanIds);
         execute(loanIds, jobName);
@@ -111,7 +111,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
     @Override
     public void execute(List<Long> loanIds, String jobName) {
         LocalDate cobBusinessDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
-        List<LoanIdAndLastClosedBusinessDate> loansToBeProcessed = getLoansToBeProcessed(loanIds, cobBusinessDate);
+        List<COBIdAndLastClosedBusinessDate> loansToBeProcessed = getLoansToBeProcessed(loanIds, cobBusinessDate);
         LocalDate executingBusinessDate = getOldestCOBBusinessDate(loansToBeProcessed).plusDays(1);
         if (!loansToBeProcessed.isEmpty()) {
             while (!DateUtils.isAfter(executingBusinessDate, cobBusinessDate)) {
@@ -121,7 +121,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
         }
     }
 
-    private List<Long> getLoanIdsToBeProcessed(List<LoanIdAndLastClosedBusinessDate> loansToBeProcessed, LocalDate executingBusinessDate) {
+    private List<Long> getLoanIdsToBeProcessed(List<COBIdAndLastClosedBusinessDate> loansToBeProcessed, LocalDate executingBusinessDate) {
         List<Long> loanIdsToBeProcessed = new ArrayList<>();
         loansToBeProcessed.forEach(loan -> {
             if (loan.getLastClosedBusinessDate() != null) {
@@ -159,16 +159,16 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
         }
     }
 
-    private LocalDate getOldestCOBBusinessDate(List<LoanIdAndLastClosedBusinessDate> loans) {
-        LoanIdAndLastClosedBusinessDate oldestLoan = loans.stream().min(Comparator
-                .comparing(LoanIdAndLastClosedBusinessDate::getLastClosedBusinessDate, Comparator.nullsLast(Comparator.naturalOrder())))
+    private LocalDate getOldestCOBBusinessDate(List<COBIdAndLastClosedBusinessDate> loans) {
+        COBIdAndLastClosedBusinessDate oldestLoan = loans.stream().min(Comparator
+                .comparing(COBIdAndLastClosedBusinessDate::getLastClosedBusinessDate, Comparator.nullsLast(Comparator.naturalOrder())))
                 .orElse(null);
         return oldestLoan != null && oldestLoan.getLastClosedBusinessDate() != null ? oldestLoan.getLastClosedBusinessDate()
                 : ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE).minusDays(1);
     }
 
-    private List<LoanIdAndLastClosedBusinessDate> getLoansToBeProcessed(List<Long> loanIds, LocalDate cobBusinessDate) {
-        List<LoanIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDates = new ArrayList<>();
+    private List<COBIdAndLastClosedBusinessDate> getLoansToBeProcessed(List<Long> loanIds, LocalDate cobBusinessDate) {
+        List<COBIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDates = new ArrayList<>();
         List<List<Long>> partitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());
         partitions.forEach(partition -> loanIdAndLastClosedBusinessDates
                 .addAll(retrieveLoanIdService.retrieveLoanIdsBehindDateOrNull(cobBusinessDate, partition)));
@@ -194,7 +194,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
         if (!alreadyLockedLoanIds.isEmpty()) {
             String message = "There is a hard lock on the loan account without any error, so it can't be overruled.";
             String loanIdsMessage = " Locked loan IDs: " + alreadyLockedLoanIds;
-            throw new LoanAccountLockCannotBeOverruledException(message + loanIdsMessage);
+            throw new AccountLockCannotBeOverruledException(message + loanIdsMessage);
         }
 
         return loanAccountLocks;
@@ -229,7 +229,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
                         loanAccountLockRepository.saveAndFlush(loanAccountLock);
                     } catch (Exception e) {
                         log.error("Error updating lock on loan account. Locked loan ID: {}", loanAccountLock.getLoanId(), e);
-                        throw new LoanAccountLockCannotBeOverruledException(
+                        throw new AccountLockCannotBeOverruledException(
                                 "Error updating lock on loan account. Locked loan ID: %s".formatted(loanAccountLock.getLoanId()), e);
                     }
                 });

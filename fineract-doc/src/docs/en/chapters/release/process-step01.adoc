@@ -22,5 +22,5 @@ include::{rootdir}/buildSrc/src/main/resources/email/release.step01.headsup.mess
 .Command
 [source,bash,subs="attributes+,+macros"]
 ----
-% ./gradlew fineractReleaseStep1 -Pfineract.release.issue=1234 -Pfineract.releaseBranch.date="Monday, April 25, 2022" -Pfineract.release.version={revnumber}
+./gradlew fineractReleaseStep1 -Pfineract.release.issue=1234 -Pfineract.releaseBranch.date="Monday, April 25, 2022" -Pfineract.release.version={revnumber}
 ----

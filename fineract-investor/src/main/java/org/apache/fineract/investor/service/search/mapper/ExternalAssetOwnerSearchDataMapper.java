@@ -39,6 +39,7 @@ public interface ExternalAssetOwnerSearchDataMapper {
     @Mapping(target = "status", source = "source", qualifiedByName = "toStatus")
     @Mapping(target = "subStatus", source = "source", qualifiedByName = "toSubStatus")
     @Mapping(target = "details", source = "source", qualifiedByName = "toDetails")
+    @Mapping(target = "previousOwner", ignore = true)
     ExternalTransferData map(SearchedExternalAssetOwner source);
 
     @Named("toTransferExternalId")

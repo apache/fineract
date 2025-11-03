@@ -286,14 +286,6 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
                     new PostLoansLoanIdRequest().actualDisbursementDate("15 February 2023").dateFormat(DATETIME_PATTERN)
                             .transactionAmount(BigDecimal.valueOf(500.00)).locale("en"));
 
-            exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> loanRescheduleRequestHelper
-                            .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanResponse.get().getLoanId())
-                                    .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("15 February 2023")
-                                    .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("15 February 2023")));
-            assertEquals(403, exception.getResponse().code());
-            assertTrue(exception.getMessage().contains("loan.reschedule.interest.rate.change.reschedule.from.date.should.be.in.future"));
-
             rescheduleResponse.set(loanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()
                     .loanId(loanResponse.get().getLoanId()).dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("15 February 2023")
                     .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("16 February 2023")));
@@ -310,13 +302,6 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
         // Do not allow create interest rate change if a previous interest rate change got already approved for that
         // date
         runAt("16 February 2023", () -> {
-            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleResponse.get().getResourceId(),
-                            new PostUpdateRescheduleLoansRequest().approvedOnDate("16 February 2024").locale("en")
-                                    .dateFormat(DATETIME_PATTERN)));
-            assertEquals(403, exception.getResponse().code());
-            assertTrue(exception.getMessage().contains("loan.reschedule.interest.rate.change.reschedule.from.date.should.be.in.future"));
-
             PostCreateRescheduleLoansResponse rescheduleLoansResponse = loanRescheduleRequestHelper
                     .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanResponse.get().getLoanId())
                             .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("17 February 2023").newInterestRate(BigDecimal.ONE)
@@ -325,7 +310,7 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
             loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(),
                     new PostUpdateRescheduleLoansRequest().approvedOnDate("17 February 2024").locale("en").dateFormat(DATETIME_PATTERN));
 
-            exception = assertThrows(CallFailedRuntimeException.class,
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> loanRescheduleRequestHelper
                             .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(rescheduleLoansResponse.getLoanId())
                                     .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("17 February 2023")

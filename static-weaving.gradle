@@ -22,7 +22,7 @@
 project.afterEvaluate {
     // Only configure if this is a Java project
     if (!project.plugins.hasPlugin('java')) {
-        logger.lifecycle("ℹ Skipping static weaving configuration for non-Java project: ${project.name}")
+        logger.info("ℹ Skipping static weaving configuration for non-Java project: ${project.name}")
         return
     }
 
@@ -31,7 +31,7 @@ project.afterEvaluate {
     def hasJpaEntities = persistenceXmlFile.exists()
 
     if (hasJpaEntities) {
-        logger.lifecycle("Configuring EclipseLink static weaving for ${project.name}")
+        logger.info("Configuring EclipseLink static weaving for ${project.name}")
 
         compileJava.doLast {
             def source = sourceSets.main.java.classesDirectory.get()
@@ -59,8 +59,8 @@ project.afterEvaluate {
             }
         }
 
-        logger.lifecycle("✓ EclipseLink static weaving configured for ${project.name}")
+        logger.info("✓ EclipseLink static weaving configured for ${project.name}")
     } else {
-        logger.lifecycle("ℹ No JPA entities found in ${project.name}, skipping static weaving configuration")
+        logger.info("ℹ No JPA entities found in ${project.name}, skipping static weaving configuration")
     }
 }

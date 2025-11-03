@@ -19,16 +19,16 @@
 package org.apache.fineract.portfolio.savings.service.search;
 
 import com.google.gson.JsonObject;
-import jakarta.validation.constraints.NotNull;
 import org.apache.fineract.infrastructure.core.service.PagedLocalRequest;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.search.data.AdvancedQueryRequest;
 import org.apache.fineract.portfolio.search.data.TransactionSearchRequest;
 import org.springframework.data.domain.Page;
+import org.springframework.lang.NonNull;
 
 public interface SavingsAccountTransactionSearchService {
 
-    Page<SavingsAccountTransactionData> searchTransactions(@NotNull Long savingsId, @NotNull TransactionSearchRequest searchParameters);
+    Page<SavingsAccountTransactionData> searchTransactions(@NonNull Long savingsId, @NonNull TransactionSearchRequest searchParameters);
 
-    Page<JsonObject> queryAdvanced(@NotNull Long savingsId, @NotNull PagedLocalRequest<AdvancedQueryRequest> pagedRequest);
+    Page<JsonObject> queryAdvanced(@NonNull Long savingsId, @NonNull PagedLocalRequest<AdvancedQueryRequest> pagedRequest);
 }

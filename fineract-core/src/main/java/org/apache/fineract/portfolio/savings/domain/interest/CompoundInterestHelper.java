@@ -61,7 +61,7 @@ public class CompoundInterestHelper {
             // calculation.
             if (!(postingPeriod.isInterestTransfered() || !interestTransferEnabled
                     || (lockUntil != null && !DateUtils.isAfter(postingPeriod.dateOfPostingTransaction(), lockUntil)))) {
-                compoundInterestValues.setcompoundedInterest(BigDecimal.ZERO);
+                compoundInterestValues.setCompoundedInterest(BigDecimal.ZERO);
             }
         }
 

@@ -639,21 +639,21 @@ Feature: Loan interest pause on repayment schedule
     And Customer makes "PAYOUT_REFUND" transaction with "AUTOPAY" payment type on "22 April 2025" with 400 EUR transaction amount and self-generated Idempotency key
     When Admin sets the business date to "23 April 2025"
     And Admin runs inline COB job for Loan
-    And Admin makes Credit Balance Refund transaction on "23 April 2025" with 165.25 EUR transaction amount
+    And Admin makes Credit Balance Refund transaction on "23 April 2025" with 164.19 EUR transaction amount
     When Admin sets the business date to "01 May 2025"
     And Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 April 2025     |               | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
-      | 1  | 30   | 01 May 2025       | 21 April 2025 | 829.71          | 170.29        |  9.75    | 0.0  | 25.0      | 205.04 | 205.04 | 205.04     | 0.0  | 0.0         |
-      | 2  | 31   | 01 June 2025      | 21 April 2025 | 649.67          | 180.04        |  0.0     | 0.0  | 0.0       | 180.04 | 180.04 | 180.04     | 0.0  | 0.0         |
-      | 3  | 30   | 01 July 2025      | 21 April 2025 | 469.63          | 180.04        |  0.0     | 0.0  | 0.0       | 180.04 | 180.04 | 180.04     | 0.0  | 0.0         |
-      | 4  | 31   | 01 August 2025    | 21 April 2025 | 289.59          | 180.04        |  0.0     | 0.0  | 0.0       | 180.04 | 180.04 | 180.04     | 0.0  | 0.0         |
-      | 5  | 31   | 01 September 2025 | 22 April 2025 | 109.55          | 180.04        |  0.0     | 0.0  | 0.0       | 180.04 | 180.04 | 180.04     | 0.0  | 0.0         |
-      | 6  | 30   | 01 October 2025   | 22 April 2025 | 0.0             | 109.55        |  0.0     | 0.0  | 0.0       | 109.55 | 109.55 | 109.55     | 0.0  | 0.0         |
+      | 1  | 30   | 01 May 2025       | 22 April 2025 | 828.65          | 171.35        |  9.75    | 0.0  | 25.0      | 206.1  | 206.1  | 206.1      | 0.0  | 0.0         |
+      | 2  | 31   | 01 June 2025      | 21 April 2025 | 648.61          | 180.04        |  0.0     | 0.0  | 0.0       | 180.04 | 180.04 | 180.04     | 0.0  | 0.0         |
+      | 3  | 30   | 01 July 2025      | 21 April 2025 | 468.57          | 180.04        |  0.0     | 0.0  | 0.0       | 180.04 | 180.04 | 180.04     | 0.0  | 0.0         |
+      | 4  | 31   | 01 August 2025    | 21 April 2025 | 288.53          | 180.04        |  0.0     | 0.0  | 0.0       | 180.04 | 180.04 | 180.04     | 0.0  | 0.0         |
+      | 5  | 31   | 01 September 2025 | 22 April 2025 | 108.49          | 180.04        |  0.0     | 0.0  | 0.0       | 180.04 | 180.04 | 180.04     | 0.0  | 0.0         |
+      | 6  | 30   | 01 October 2025   | 22 April 2025 | 0.0             | 108.49        |  1.06    | 0.0  | 0.0       | 109.55 | 109.55 | 109.55     | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
-      | 1000.0        | 9.75     | 0.0  | 25.0      | 1034.75 | 1034.75 | 1034.75    | 0.0  | 0.0        |
+      | 1000.0        | 10.81    | 0.0  | 25.0      | 1035.81 | 1035.81 | 1035.81    | 0.0  | 0.0        |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type      | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 April 2025    | Disbursement          | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
@@ -672,8 +672,9 @@ Feature: Loan interest pause on repayment schedule
       | 14 April 2025    | Accrual               | 0.75   | 0.0       | 0.75     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 20 April 2025    | Accrual               | 25.0   | 0.0       | 0.0      | 0.0  | 25.0      | 0.0          | false    | false    |
       | 21 April 2025    | Repayment             | 800.0  | 765.25    | 9.75     | 0.0  | 25.0      | 234.75       | false    | false    |
-      | 22 April 2025    | Payout Refund         | 400.0  | 234.75    | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 23 April 2025    | Credit Balance Refund | 165.25 | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 April 2025    | Payout Refund         | 400.0  | 234.75    | 1.06     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 April 2025    | Accrual               | 1.06   | 0.0       | 1.06     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 April 2025    | Credit Balance Refund | 164.19 | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
 
   @TestRailId:C3627

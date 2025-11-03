@@ -219,6 +219,20 @@ public class LoanScheduleAssembler {
         BigDecimal fixedPrincipalPercentagePerInstallment = this.fromApiJsonHelper
                 .extractBigDecimalWithLocaleNamed(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName, element);
 
+        /**
+         * Interest recalculation settings copy from product definition
+         */
+        final DaysInMonthType daysInMonthType = loanProduct.fetchDaysInMonthType();
+
+        DaysInYearType daysInYearType = null;
+        final Integer daysInYearTypeIntFromApplication = this.fromApiJsonHelper
+                .extractIntegerNamed(LoanApiConstants.daysInYearTypeParameterName, element, Locale.getDefault());
+        if (daysInYearTypeIntFromApplication != null) {
+            daysInYearType = DaysInYearType.fromInt(daysInYearTypeIntFromApplication);
+        } else {
+            daysInYearType = loanProduct.fetchDaysInYearType();
+        }
+
         // interest terms
         final Integer interestType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("interestType", element);
         final InterestMethod interestMethod = allowOverridingInterestMethod ? InterestMethod.fromInt(interestType)
@@ -246,7 +260,7 @@ public class LoanScheduleAssembler {
         BigDecimal annualNominalInterestRate = BigDecimal.ZERO;
         if (interestRatePerPeriod != null) {
             annualNominalInterestRate = this.aprCalculator.calculateFrom(interestRatePeriodFrequencyType, interestRatePerPeriod,
-                    numberOfRepayments, repaymentEvery, repaymentPeriodFrequencyType);
+                    numberOfRepayments, repaymentEvery, repaymentPeriodFrequencyType, daysInYearType);
         }
 
         // disbursement details
@@ -336,27 +350,33 @@ public class LoanScheduleAssembler {
         }
 
         // grace details
-        final Integer graceOnPrincipalPayment = allowOverridingGraceOnPrincipalAndInterestPayment
-                ? this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnPrincipalPayment", element)
-                : loanProduct.getLoanProductRelatedDetail().getGraceOnPrincipalPayment();
+        Integer graceOnPrincipalPayment = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnPrincipalPayment", element);
+        if (!allowOverridingGraceOnPrincipalAndInterestPayment || graceOnPrincipalPayment == null) {
+            graceOnPrincipalPayment = loanProduct.getLoanProductRelatedDetail().getGraceOnPrincipalPayment();
+        }
         final Integer recurringMoratoriumOnPrincipalPeriods = this.fromApiJsonHelper
                 .extractIntegerWithLocaleNamed("recurringMoratoriumOnPrincipalPeriods", element);
-        final Integer graceOnInterestPayment = allowOverridingGraceOnPrincipalAndInterestPayment
-                ? this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestPayment", element)
-                : loanProduct.getLoanProductRelatedDetail().getGraceOnInterestPayment();
+        Integer graceOnInterestPayment = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestPayment", element);
+        if (!allowOverridingGraceOnPrincipalAndInterestPayment || graceOnInterestPayment == null) {
+            graceOnInterestPayment = loanProduct.getLoanProductRelatedDetail().getGraceOnInterestPayment();
+        }
         final Integer graceOnInterestCharged = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestCharged", element);
         final LocalDate interestChargedFromDate = this.fromApiJsonHelper.extractLocalDateNamed("interestChargedFromDate", element);
         final Boolean isInterestChargedFromDateSameAsDisbursalDateEnabled = this.configurationDomainService
                 .isInterestChargedFromDateSameAsDisbursementDate();
 
-        final Integer graceOnArrearsAgeing = allowOverridingGraceOnArrearsAging
-                ? this.fromApiJsonHelper.extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element)
-                : loanProduct.getLoanProductRelatedDetail().getGraceOnArrearsAgeing();
+        Integer graceOnArrearsAgeing = this.fromApiJsonHelper
+                .extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element);
+        if (!allowOverridingGraceOnArrearsAging || graceOnArrearsAgeing == null) {
+            graceOnArrearsAgeing = loanProduct.getLoanProductRelatedDetail().getGraceOnArrearsAgeing();
+        }
 
         // other
-        final BigDecimal inArrearsTolerance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element);
-        final Money inArrearsToleranceMoney = allowOverridingArrearsTolerance ? Money.of(currency, inArrearsTolerance)
-                : loanProduct.getLoanProductRelatedDetail().getInArrearsTolerance();
+        BigDecimal inArrearsTolerance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element);
+        if (!allowOverridingArrearsTolerance || inArrearsTolerance == null) {
+            inArrearsTolerance = loanProduct.getLoanProductRelatedDetail().getInArrearsTolerance().getAmount();
+        }
+        final Money inArrearsToleranceMoney = Money.of(currency, inArrearsTolerance);
 
         final BigDecimal emiAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.fixedEmiAmountParameterName,
                 element);
@@ -364,20 +384,6 @@ public class LoanScheduleAssembler {
                 .extractBigDecimalWithLocaleNamed(LoanApiConstants.maxOutstandingBalanceParameterName, element);
 
         final List<DisbursementData> disbursementDatas = fetchDisbursementData(element.getAsJsonObject());
-
-        /**
-         * Interest recalculation settings copy from product definition
-         */
-        final DaysInMonthType daysInMonthType = loanProduct.fetchDaysInMonthType();
-
-        DaysInYearType daysInYearType = null;
-        final Integer daysInYearTypeIntFromApplication = this.fromApiJsonHelper
-                .extractIntegerNamed(LoanApiConstants.daysInYearTypeParameterName, element, Locale.getDefault());
-        if (daysInYearTypeIntFromApplication != null) {
-            daysInYearType = DaysInYearType.fromInt(daysInYearTypeIntFromApplication);
-        } else {
-            daysInYearType = loanProduct.fetchDaysInYearType();
-        }
 
         final boolean isInterestRecalculationEnabled = loanProduct.isInterestRecalculationEnabled();
         RecalculationFrequencyType recalculationFrequencyType = null;
@@ -554,7 +560,8 @@ public class LoanScheduleAssembler {
                 loanProduct.getLoanProductRelatedDetail().isEnableBuyDownFee(),
                 loanProduct.getLoanProductRelatedDetail().getBuyDownFeeCalculationType(),
                 loanProduct.getLoanProductRelatedDetail().getBuyDownFeeStrategy(),
-                loanProduct.getLoanProductRelatedDetail().getBuyDownFeeIncomeType());
+                loanProduct.getLoanProductRelatedDetail().getBuyDownFeeIncomeType(),
+                loanProduct.getLoanProductRelatedDetail().isMerchantBuyDownFee());
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,
@@ -636,8 +643,8 @@ public class LoanScheduleAssembler {
                                 .getAsBigDecimal();
                     }
                     BigDecimal waivedChargeAmount = null;
-                    disbursementDatas.add(new DisbursementData(null, expectedDisbursementDate, null, principal, netDisbursalAmount, null,
-                            null, waivedChargeAmount));
+                    disbursementDatas.add(new DisbursementData(null, null, expectedDisbursementDate, null, principal, netDisbursalAmount,
+                            null, null, waivedChargeAmount));
                     i++;
                 } while (i < disbursementDataArray.size());
             }
@@ -973,7 +980,7 @@ public class LoanScheduleAssembler {
         final LocalDate recalculateFrom = null;
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
         loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
-        loanAccrualsProcessingService.reprocessExistingAccruals(loan);
+        loanAccrualsProcessingService.reprocessExistingAccruals(loan, false);
 
     }
 
@@ -1552,7 +1559,7 @@ public class LoanScheduleAssembler {
             if (actualChanges.containsKey(LoanApiConstants.approvedLoanAmountParameterName)
                     || actualChanges.containsKey("recalculateLoanSchedule") || actualChanges.containsKey("expectedDisbursementDate")) {
                 loanScheduleService.regenerateRepaymentSchedule(loan, loanUtilService.buildScheduleGeneratorDTO(loan, null));
-                loanAccrualsProcessingService.reprocessExistingAccruals(loan);
+                loanAccrualsProcessingService.reprocessExistingAccruals(loan, false);
             }
         }
 

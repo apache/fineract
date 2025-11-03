@@ -25,7 +25,7 @@ import org.apache.fineract.client.models.IsCatchUpRunningDTO;
 import org.apache.fineract.client.models.OldestCOBProcessedLoanDTO;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.common.FineractClientHelper;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import retrofit2.Response;
 
 @Slf4j
@@ -38,7 +38,7 @@ public class LoanCOBCatchUpHelper {
         return Boolean.TRUE.equals(Objects.requireNonNull(response.body()).getCatchUpRunning());
     }
 
-    public boolean isLoanCOBCatchUpFinishedFor(@NotNull LocalDate cobBusinessDate) {
+    public boolean isLoanCOBCatchUpFinishedFor(@NonNull LocalDate cobBusinessDate) {
         Response<IsCatchUpRunningDTO> response = executeGetLoanCatchUpStatus();
         IsCatchUpRunningDTO isCatchUpRunningResponse = Objects.requireNonNull(response.body());
         OldestCOBProcessedLoanDTO getOldestCOBProcessedLoanResponse = executeRetrieveOldestCOBProcessedLoan();

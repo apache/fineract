@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
-import org.apache.fineract.cob.data.LoanCOBParameter;
+import org.apache.fineract.cob.data.COBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.exceptions.LoanReadException;
@@ -82,7 +82,7 @@ public class LoanItemReaderStepDefinitions implements En {
                 minLoanId = splitAccounts.get(0);
                 maxLoanId = splitAccounts.get(splitAccounts.size() - 1);
             }
-            LoanCOBParameter loanCOBParameter = new LoanCOBParameter(minLoanId, maxLoanId);
+            COBParameter loanCOBParameter = new COBParameter(minLoanId, maxLoanId);
             stepExecutionContext.put(LoanCOBConstant.LOAN_COB_PARAMETER, loanCOBParameter);
             stepExecution.setExecutionContext(stepExecutionContext);
 

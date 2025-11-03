@@ -18,10 +18,33 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import java.util.List;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
 public interface LoanJournalEntryPoster {
 
-    void postJournalEntries(Loan loan, List<Long> existingTransactionIds, List<Long> existingReversedTransactionIds);
+    /**
+     * Create journal entries immediately for a single loan transaction This replaces the old 2-step process of
+     * collecting transaction IDs and then creating journal entries
+     *
+     * @param loanTransaction
+     *            the loan transaction to create journal entries for
+     * @param isAccountTransfer
+     *            whether this is an account transfer transaction
+     * @param isLoanToLoanTransfer
+     *            whether this is a loan-to-loan transfer transaction
+     */
+    void postJournalEntriesForLoanTransaction(LoanTransaction loanTransaction, boolean isAccountTransfer, boolean isLoanToLoanTransfer);
+
+    /**
+     * Create journal entries immediately for an external owner transfer
+     *
+     * @param loan
+     *            the loan being transferred
+     * @param externalAssetOwnerTransfer
+     *            the external owner transfer details
+     * @param previousOwner
+     *            the previous owner (can be null for initial transfers)
+     */
+    void postJournalEntriesForExternalOwnerTransfer(Loan loan, Object externalAssetOwnerTransfer, Object previousOwner);
 }

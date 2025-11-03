@@ -96,6 +96,16 @@ final class ChargesApiResourceSwagger {
             public String description;
         }
 
+        static final class GetChargesTaxGroup {
+
+            private GetChargesTaxGroup() {}
+
+            @Schema(example = "1")
+            public Long id;
+            @Schema(example = "tax")
+            public String name;
+        }
+
         @Schema(example = "1")
         public Long id;
         @Schema(example = "Loan Service fee")
@@ -113,6 +123,7 @@ final class ChargesApiResourceSwagger {
         public GetChargesPaymentModeResponse chargePaymentMode;
         public BigDecimal minCap;
         public BigDecimal maxCap;
+        public GetChargesTaxGroup taxGroup;
     }
 
     @Schema(description = "PostChargesRequest")
@@ -146,6 +157,8 @@ final class ChargesApiResourceSwagger {
         public BigDecimal minCap;
         @Schema(example = "45.56")
         public BigDecimal maxCap;
+        @Schema(example = "1")
+        public Long taxGroupId;
     }
 
     @Schema(description = "PostChargesResponse")
@@ -206,6 +219,8 @@ final class ChargesApiResourceSwagger {
         public BigDecimal minCap;
         @Schema(example = "120.0")
         public BigDecimal maxCap;
+        @Schema(example = "1")
+        public Long taxGroupId;
     }
 
     @Schema(description = "PutChargesChargeIdResponse")

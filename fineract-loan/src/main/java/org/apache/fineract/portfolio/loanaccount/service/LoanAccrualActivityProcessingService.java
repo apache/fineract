@@ -18,21 +18,24 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface LoanAccrualActivityProcessingService {
 
     @Transactional
-    void makeAccrualActivityTransaction(@NotNull Long loanId, @NotNull LocalDate currentDate);
+    void makeAccrualActivityTransaction(@NonNull Long loanId, @NonNull LocalDate currentDate);
 
-    void makeAccrualActivityTransaction(@NotNull Loan loan, @NotNull LocalDate currentDate);
+    void makeAccrualActivityTransaction(@NonNull Loan loan, @NonNull LocalDate currentDate);
+
+    void recalculateAccrualActivityTransaction(Loan loan, ChangedTransactionDetail changedTransactionDetail);
 
     @Transactional
-    void processAccrualActivityForLoanClosure(@NotNull Loan loan);
+    void processAccrualActivityForLoanClosure(@NonNull Loan loan);
 
     @Transactional
-    void processAccrualActivityForLoanReopen(@NotNull Loan loan);
+    void processAccrualActivityForLoanReopen(@NonNull Loan loan);
 }

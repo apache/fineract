@@ -18,13 +18,12 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
-import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
-import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeDataDTO;
+import org.apache.fineract.investor.domain.ExternalAssetOwner;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.mapper.LoanAccountingBridgeMapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -32,25 +31,20 @@ import org.springframework.stereotype.Component;
 public class LoanJournalEntryPosterImpl implements LoanJournalEntryPoster {
 
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
-    private final LoanAccountingBridgeMapper loanAccountingBridgeMapper;
 
     @Override
-    public void postJournalEntries(final Loan loan, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds) {
-        final MonetaryCurrency currency = loan.getCurrency();
-        boolean isAccountTransfer = false;
-
-        if (loan.isChargedOff()) {
-            List<AccountingBridgeDataDTO> accountingBridgeDataList = loanAccountingBridgeMapper.deriveAccountingBridgeDataForChargeOff(
-                    currency.getCode(), existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, loan);
-            for (AccountingBridgeDataDTO accountingBridgeData : accountingBridgeDataList) {
-                this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
-            }
-        } else {
-            AccountingBridgeDataDTO accountingBridgeData = loanAccountingBridgeMapper.deriveAccountingBridgeData(currency.getCode(),
-                    existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, loan);
-            this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
-        }
+    public void postJournalEntriesForLoanTransaction(final LoanTransaction loanTransaction, final boolean isAccountTransfer,
+            final boolean isLoanToLoanTransfer) {
+        this.journalEntryWritePlatformService.createJournalEntriesForLoanTransaction(loanTransaction, isAccountTransfer,
+                isLoanToLoanTransfer);
     }
 
+    @Override
+    public void postJournalEntriesForExternalOwnerTransfer(final Loan loan, final Object externalAssetOwnerTransfer,
+            final Object previousOwner) {
+        // Cast to proper types
+        final ExternalAssetOwnerTransfer transfer = (ExternalAssetOwnerTransfer) externalAssetOwnerTransfer;
+        final ExternalAssetOwner prevOwner = (ExternalAssetOwner) previousOwner;
+        this.journalEntryWritePlatformService.createJournalEntriesForExternalOwnerTransfer(loan, transfer, prevOwner);
+    }
 }

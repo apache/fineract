@@ -28,7 +28,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -67,6 +66,7 @@ import org.apache.fineract.infrastructure.creditbureau.domain.TokenRepositoryWra
 import org.apache.fineract.infrastructure.creditbureau.serialization.CreditBureauTokenCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -88,7 +88,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
     @Transactional
     @Override
     public String okHttpConnectionMethod(String userName, String password, String subscriptionKey, String subscriptionId, String url,
-            String token, File file, FormDataContentDisposition fileData, Long uniqueId, String nrcId, @NotNull String process) {
+            String token, File file, FormDataContentDisposition fileData, Long uniqueId, String nrcId, @NonNull String process) {
 
         String responseMessage = null;
         if (StringUtils.isBlank(url)) {

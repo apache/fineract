@@ -29,14 +29,17 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
+import org.apache.fineract.client.models.PutLoansApprovedAmountRequest;
 import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-public class LoanTestLifecycleExtension implements AfterEachCallback {
+public class LoanTestLifecycleExtension implements AfterEachCallback, BeforeEachCallback {
 
     private LoanTransactionHelper loanTransactionHelper;
     public static final String DATE_FORMAT = "dd MMMM yyyy";
@@ -44,6 +47,15 @@ public class LoanTestLifecycleExtension implements AfterEachCallback {
 
     @Override
     public void afterEach(ExtensionContext context) {
+        closeOpenLoans();
+    }
+
+    @Override
+    public void beforeEach(ExtensionContext context) {
+        closeOpenLoans();
+    }
+
+    private void closeOpenLoans() {
         BusinessDateHelper.runAt(DateTimeFormatter.ofPattern(DATE_FORMAT).format(Utils.getLocalDateOfTenant()), () -> {
             this.loanTransactionHelper = new LoanTransactionHelper(null, null);
 
@@ -52,6 +64,13 @@ public class LoanTestLifecycleExtension implements AfterEachCallback {
             loanIds.forEach(loanId -> {
                 GetLoansLoanIdResponse loanResponse = Calls
                         .ok(FineractClientHelper.getFineractClient().loans.retrieveLoan((long) loanId, null, "all", null, null));
+                if (MathUtil.isLessThan(loanResponse.getApprovedPrincipal(), loanResponse.getProposedPrincipal())) {
+                    // reset approved principal in case it's less than proposed principal so all expected disbursements
+                    // can be properly disbursed
+                    PutLoansApprovedAmountRequest request = new PutLoansApprovedAmountRequest().amount(loanResponse.getProposedPrincipal())
+                            .locale("en");
+                    Calls.ok(FineractClientHelper.getFineractClient().loans.modifyLoanApprovedAmount(loanId, request));
+                }
                 loanResponse.getDisbursementDetails().forEach(disbursementDetail -> {
                     if (disbursementDetail.getActualDisbursementDate() == null) {
                         loanTransactionHelper.disburseLoan((long) loanId,

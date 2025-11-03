@@ -281,7 +281,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
     private void prepareDisbursementsOnLoanApplicationTerms(final LoanApplicationTerms loanApplicationTerms) {
         if (loanApplicationTerms.getDisbursementDatas().isEmpty()) {
             loanApplicationTerms.getDisbursementDatas()
-                    .add(new DisbursementData(1L, loanApplicationTerms.getExpectedDisbursementDate(),
+                    .add(new DisbursementData(1L, null, loanApplicationTerms.getExpectedDisbursementDate(),
                             loanApplicationTerms.getExpectedDisbursementDate(), loanApplicationTerms.getPrincipal().getAmount(), null, null,
                             null, null));
         }

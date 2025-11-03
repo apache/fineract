@@ -27,9 +27,18 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.GetChargesResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
+import org.apache.fineract.client.models.PostTaxesComponentsRequest;
+import org.apache.fineract.client.models.PostTaxesComponentsResponse;
+import org.apache.fineract.client.models.PostTaxesGroupRequest;
+import org.apache.fineract.client.models.PostTaxesGroupResponse;
+import org.apache.fineract.client.models.PostTaxesGroupTaxComponents;
+import org.apache.fineract.integrationtests.common.TaxComponentHelper;
+import org.apache.fineract.integrationtests.common.TaxGroupHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
@@ -350,6 +359,41 @@ public class ChargesTest {
         Assertions.assertNotNull(chargeResponseData);
         Assertions.assertEquals(minCapVal.stripTrailingZeros(), chargeResponseData.getMinCap().stripTrailingZeros());
         Assertions.assertEquals(maxCapVal.stripTrailingZeros(), chargeResponseData.getMaxCap().stripTrailingZeros());
+    }
+
+    @Test
+    public void testChargeCreationWithTaxGroup() {
+        final ChargesHelper chargesHelper = new ChargesHelper();
+
+        final PostTaxesComponentsRequest taxComponentRequest = new PostTaxesComponentsRequest()
+                .name(Utils.randomStringGenerator("TAX_COM_", 4)).percentage(12.0f).startDate("01 January 2023").dateFormat("dd MMMM yyyy")
+                .locale("en");
+
+        final PostTaxesComponentsResponse taxComponentRespose = TaxComponentHelper.createTaxComponent(taxComponentRequest);
+        Assertions.assertNotNull(taxComponentRequest);
+
+        final Set<PostTaxesGroupTaxComponents> taxComponentsSet = new HashSet<>();
+        taxComponentsSet
+                .add(new PostTaxesGroupTaxComponents().taxComponentId(taxComponentRespose.getResourceId()).startDate("01 January 2023"));
+        final PostTaxesGroupRequest taxGroupRequest = new PostTaxesGroupRequest().name(Utils.randomStringGenerator("TAX_GRP_", 4))
+                .taxComponents(taxComponentsSet).dateFormat("dd MMMM yyyy").locale("en");
+        final PostTaxesGroupResponse taxGroupResponse = TaxGroupHelper.createTaxGroup(taxGroupRequest);
+        Assertions.assertNotNull(taxGroupResponse);
+
+        final PostChargesResponse feeCharge = chargesHelper.createCharges(
+                new ChargeRequest().penalty(false).amount(9.0).chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue())
+                        .chargeTimeType(ChargeTimeType.DISBURSEMENT.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
+                        .currencyCode("USD").name(Utils.randomStringGenerator("FEE_" + Calendar.getInstance().getTimeInMillis(), 5))
+                        .chargeAppliesTo(1).locale("en").active(true).taxGroupId(taxGroupResponse.getResourceId()));
+
+        Assertions.assertNotNull(feeCharge);
+        final Long chargeId = feeCharge.getResourceId();
+        Assertions.assertNotNull(chargeId);
+
+        final GetChargesResponse chargeResponseData = chargesHelper.retrieveCharge(chargeId);
+        Assertions.assertNotNull(chargeResponseData);
+        Assertions.assertNotNull(chargeResponseData.getTaxGroup());
+        Assertions.assertEquals(chargeResponseData.getTaxGroup().getId(), taxGroupResponse.getResourceId());
     }
 
 }

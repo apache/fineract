@@ -101,6 +101,8 @@ public class SavingsProductHelper {
     private Boolean withgsimID = null;
     private Integer gsimID = null;
     private String nominalAnnualInterestRateOverdraft = null;
+    private String interestPayableAccountId;
+    private String interestReceivableAccountId = null;
 
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
@@ -126,6 +128,7 @@ public class SavingsProductHelper {
         map.put("transfersInSuspenseAccountId", this.transfersInSuspenseAccountId);
         map.put("savingsControlAccountId", this.savingsControlAccountId);
         map.put("interestOnSavingsAccountId", this.interestOnSavingsAccountId);
+        map.put("interestReceivableAccountId", this.interestReceivableAccountId);
         map.put("incomeFromFeeAccountId", this.incomeFromFeeAccountId);
         map.put("incomeFromPenaltyAccountId", this.incomeFromPenaltyAccountId);
         map.put("overdraftPortfolioControlId", this.overdraftPortfolioControlId);
@@ -161,10 +164,22 @@ public class SavingsProductHelper {
             map.put("daysToEscheat", this.daysToEscheat);
 
         }
+        if (this.accountingRule.equals(ACCRUAL_PERIODIC) && this.interestReceivableAccountId != null) {
+            map.put("interestReceivableAccountId", this.interestReceivableAccountId);
+        }
+        if (this.accountingRule.equals(ACCRUAL_PERIODIC)) {
+            if (this.savingsControlAccountId != null) {
+                map.put("savingsControlAccountId", this.savingsControlAccountId);
+            }
+        }
 
         String savingsProductCreateJson = new Gson().toJson(map);
         LOG.info("{}", savingsProductCreateJson);
         return savingsProductCreateJson;
+    }
+
+    public static String urlSavingsUpdate(Integer productId) {
+        return SAVINGS_PRODUCT_URL + "/" + productId;
     }
 
     public SavingsProductHelper withSavingsName(final String savingsName) {
@@ -184,6 +199,11 @@ public class SavingsProductHelper {
 
     public SavingsProductHelper withInterestCompoundingPeriodTypeAsMonthly() {
         this.interestCompoundingPeriodType = MONTHLY;
+        return this;
+    }
+
+    public SavingsProductHelper withInterestCompoundingPeriodTypeAsAnnually() {
+        this.interestCompoundingPeriodType = ANNUAL;
         return this;
     }
 
@@ -261,6 +281,11 @@ public class SavingsProductHelper {
         return this;
     }
 
+    public SavingsProductHelper withAccountInterestReceivables(final String interestReceivableAccountId) {
+        this.interestReceivableAccountId = interestReceivableAccountId;
+        return this;
+    }
+
     public SavingsProductHelper withOverDraftRate(final String overdraftLimit, String nominalAnnualInterestRateOverdraft) {
         this.allowOverdraft = "true";
         this.overdraftLimit = overdraftLimit;
@@ -291,6 +316,62 @@ public class SavingsProductHelper {
     public SavingsProductHelper withNominalAnnualInterestRate(BigDecimal interestRate) {
         this.nominalAnnualInterestRate = interestRate.toString();
         return this;
+    }
+
+    public SavingsProductHelper withSavingsReferenceAccountId(final String savingsReferenceAccountId) {
+        this.savingsReferenceAccountId = savingsReferenceAccountId;
+        return this;
+    }
+
+    public SavingsProductHelper withSavingsControlAccountId(final String savingsControlAccountId) {
+        this.savingsControlAccountId = savingsControlAccountId;
+        return this;
+    }
+
+    public SavingsProductHelper withInterestOnSavingsAccountId(final String interestOnSavingsAccountId) {
+        this.interestOnSavingsAccountId = interestOnSavingsAccountId;
+        return this;
+    }
+
+    public SavingsProductHelper withIncomeFromFeeAccountId(final String incomeFromFeeAccountId) {
+        this.incomeFromFeeAccountId = incomeFromFeeAccountId;
+        return this;
+    }
+
+    public SavingsProductHelper withInterestPayableAccountId(final String interestPayableAccountId) {
+        this.interestPayableAccountId = interestPayableAccountId;
+        return this;
+    }
+
+    public SavingsProductHelper withOverdraftPortfolioControlId(final String overdraftPortfolioControlId) {
+        this.overdraftPortfolioControlId = overdraftPortfolioControlId;
+        return this;
+    }
+
+    public SavingsProductHelper withInterestReceivableAccountId(final String interestReceivableAccountId) {
+        this.interestReceivableAccountId = interestReceivableAccountId;
+        return this;
+    }
+
+    public SavingsProductHelper withIncomeFromInterestId(final String incomeFromInterestId) {
+        this.incomeFromInterestId = incomeFromInterestId;
+        return this;
+    }
+
+    public BigDecimal getNominalAnnualInterestRate() {
+        return new BigDecimal(nominalAnnualInterestRate);
+    }
+
+    public BigDecimal getNominalAnnualInterestRateOverdraft() {
+        return new BigDecimal(nominalAnnualInterestRateOverdraft);
+    }
+
+    public BigDecimal getInterestCalculationDaysInYearType() {
+        return new BigDecimal(interestCalculationDaysInYearType);
+    }
+
+    public Integer getDecimalCurrency() {
+        return Integer.parseInt(DIGITS_AFTER_DECIMAL);
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -341,8 +422,18 @@ public class SavingsProductHelper {
                     map.put("overdraftPortfolioControlId", ID);
                     map.put("feesReceivableAccountId", ID);
                     map.put("penaltiesReceivableAccountId", ID);
+                    if (Boolean.parseBoolean(this.allowOverdraft)) {
+                        if (this.interestReceivableAccountId != null) {
+                            map.put("interestReceivableAccountId", this.interestReceivableAccountId);
+                        } else {
+                            map.put("interestReceivableAccountId", ID);
+                        }
+                    } else {
+                        map.put("interestReceivableAccountId", "");
+                    }
                 }
                 if (this.accountList[i].getAccountType().equals(Account.AccountType.LIABILITY)) {
+
                     final String ID = this.accountList[i].getAccountID().toString();
                     map.put("savingsControlAccountId", ID);
                     map.put("transfersInSuspenseAccountId", ID);
@@ -371,6 +462,13 @@ public class SavingsProductHelper {
     public static Integer createSavingsProduct(final String savingsProductJSON, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_SAVINGS_PRODUCT_URL, savingsProductJSON, "resourceId");
+    }
+
+    @Deprecated(forRemoval = true)
+    public static Integer updateSavingsProduct(final String savingsProductJSON, final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, Integer productId) {
+        return Utils.performServerPut(requestSpec, responseSpec, urlSavingsUpdate(productId) + "?" + Utils.TENANT_IDENTIFIER,
+                savingsProductJSON, "resourceId");
     }
 
     // TODO: Rewrite to use fineract-client instead!

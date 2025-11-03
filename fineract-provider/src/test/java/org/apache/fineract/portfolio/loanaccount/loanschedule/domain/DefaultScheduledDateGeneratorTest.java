@@ -34,14 +34,12 @@ import static org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDat
 import static org.apache.fineract.util.TimeZoneConstants.ASIA_MANILA_ID;
 import static org.apache.fineract.util.TimeZoneConstants.EUROPE_BERLIN_ID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.junit.context.WithTenantContext;
 import org.apache.fineract.junit.context.WithTenantContextExtension;
 import org.apache.fineract.junit.system.WithSystemProperty;
@@ -59,8 +57,6 @@ import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith({ WithSystemTimeZoneExtension.class, WithTenantContextExtension.class, WithSystemPropertyExtension.class })
 public class DefaultScheduledDateGeneratorTest {
@@ -69,12 +65,8 @@ public class DefaultScheduledDateGeneratorTest {
 
     @BeforeEach
     public void setUp() {
-        ConfigurationDomainService cds = Mockito.mock(ConfigurationDomainService.class);
-        given(cds.getRoundingMode()).willReturn(6); // default
-
-        MoneyHelper moneyHelper = new MoneyHelper();
-        ReflectionTestUtils.setField(moneyHelper, "configurationDomainService", cds);
-        moneyHelper.initialize();
+        // Initialize MoneyHelper with default rounding mode (HALF_EVEN = 6)
+        MoneyHelper.initializeTenantRoundingMode("default", 6);
     }
 
     @Test
@@ -99,7 +91,7 @@ public class DefaultScheduledDateGeneratorTest {
                 DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL, false, null, null, null, null, null, ZERO, null, NONE, null, ZERO,
                 EMPTY_LIST, true, 0, false, holidayDetailDTO, false, false, false, null, false, false, null, false, DISBURSEMENT_DATE,
                 submittedOnDate, CUMULATIVE, LoanScheduleProcessingType.HORIZONTAL, null, false, null, null, false, null, false, null, null,
-                null, false, null, null, null);
+                null, false, null, null, null, false);
 
         // when
         List<? extends LoanScheduleModelPeriod> result = underTest.generateRepaymentPeriods(mathContext, expectedDisbursementDate,
@@ -180,7 +172,7 @@ public class DefaultScheduledDateGeneratorTest {
                 EMPTY_LIST, BigDecimal.valueOf(36_000L), null, DaysInMonthType.ACTUAL, DaysInYearType.ACTUAL, false, null, null, null, null,
                 null, ZERO, null, NONE, null, ZERO, EMPTY_LIST, true, 0, false, holidayDetailDTO, false, false, false, null, false, false,
                 null, false, DISBURSEMENT_DATE, submittedOnDate, CUMULATIVE, LoanScheduleProcessingType.HORIZONTAL, null, false, null, null,
-                false, null, false, null, null, null, false, null, null, null);
+                false, null, false, null, null, null, false, null, null, null, false);
     }
 
     private HolidayDetailDTO createHolidayDTO() {

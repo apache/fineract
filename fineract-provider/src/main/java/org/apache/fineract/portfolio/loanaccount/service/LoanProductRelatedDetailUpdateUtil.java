@@ -359,6 +359,13 @@ public class LoanProductRelatedDetailUpdateUtil {
             loanRepaymentScheduleDetail.setBuyDownFeeIncomeType(newValue);
         }
 
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.MERCHANT_BUY_DOWN_FEE_PARAM_NAME,
+                loanRepaymentScheduleDetail.isMerchantBuyDownFee())) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.MERCHANT_BUY_DOWN_FEE_PARAM_NAME);
+            actualChanges.put(LoanProductConstants.MERCHANT_BUY_DOWN_FEE_PARAM_NAME, newValue);
+            loanRepaymentScheduleDetail.setMerchantBuyDownFee(newValue);
+        }
+
         return actualChanges;
     }
 
@@ -366,7 +373,8 @@ public class LoanProductRelatedDetailUpdateUtil {
             final AprCalculator aprCalculator) {
         BigDecimal annualNominalInterestRate = aprCalculator.calculateFrom(loanRepaymentScheduleDetail.getInterestPeriodFrequencyType(),
                 loanRepaymentScheduleDetail.getNominalInterestRatePerPeriod(), loanRepaymentScheduleDetail.getNumberOfRepayments(),
-                loanRepaymentScheduleDetail.getRepayEvery(), loanRepaymentScheduleDetail.getRepaymentPeriodFrequencyType());
+                loanRepaymentScheduleDetail.getRepayEvery(), loanRepaymentScheduleDetail.getRepaymentPeriodFrequencyType(),
+                loanRepaymentScheduleDetail.fetchDaysInYearType());
         loanRepaymentScheduleDetail.setAnnualNominalInterestRate(annualNominalInterestRate);
     }
 }

@@ -18,10 +18,57 @@
  */
 package org.apache.fineract.integrationtests.common.error;
 
-import lombok.Data;
+import com.google.gson.Gson;
+import java.io.IOException;
+import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.apache.fineract.client.util.JSON;
+import retrofit2.Response;
 
-@Data
+@NoArgsConstructor
+@Getter
+@Setter
 public class ErrorResponse {
 
-    private String httpStatusCode;
+    private static final Gson GSON = new JSON().getGson();
+
+    private String developerMessage;
+    private Integer httpStatusCode;
+    private List<Error> errors;
+
+    public Error getSingleError() {
+        if (errors.size() != 1) {
+            throw new IllegalStateException("Multiple errors found");
+        } else {
+            return errors.iterator().next();
+        }
+    }
+
+    public static ErrorResponse from(Response retrofitResponse) {
+        try {
+            String errorBody = retrofitResponse.errorBody().string();
+            return GSON.fromJson(errorBody, ErrorResponse.class);
+        } catch (IOException e) {
+            throw new RuntimeException("Error while parsing the error body", e);
+        }
+    }
+
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    public static class Error {
+
+        private String developerMessage;
+        private List<ErrorMessageArg> args;
+    }
+
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    public static class ErrorMessageArg {
+
+        private Object value;
+    }
 }

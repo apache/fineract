@@ -110,11 +110,12 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
                     + "ck.username as checker, aud.checked_on_date as checkedOnDate, aud.checked_on_date_utc as checkedOnDateUTC,  ev.enum_message_property as processingResult "
                     + commandAsJsonString + ", "
                     + " o.name as officeName, gl.level_name as groupLevelName, g.display_name as groupName, c.display_name as clientName, "
-                    + " l.account_no as loanAccountNo, s.account_no as savingsAccountNo " + " from m_portfolio_command_source aud "
-                    + " left join m_appuser mk on mk.id = aud.maker_id" + " left join m_appuser ck on ck.id = aud.checker_id"
-                    + " left join m_office o on o.id = aud.office_id" + " left join m_group g on g.id = aud.group_id"
-                    + " left join m_group_level gl on gl.id = g.level_id" + " left join m_client c on c.id = aud.client_id"
-                    + " left join m_loan l on l.id = aud.loan_id" + " left join m_savings_account s on s.id = aud.savings_account_id"
+                    + " l.account_no as loanAccountNo, s.account_no as savingsAccountNo , aud.client_ip  as ip "
+                    + " from m_portfolio_command_source aud " + " left join m_appuser mk on mk.id = aud.maker_id"
+                    + " left join m_appuser ck on ck.id = aud.checker_id" + " left join m_office o on o.id = aud.office_id"
+                    + " left join m_group g on g.id = aud.group_id" + " left join m_group_level gl on gl.id = g.level_id"
+                    + " left join m_client c on c.id = aud.client_id" + " left join m_loan l on l.id = aud.loan_id"
+                    + " left join m_savings_account s on s.id = aud.savings_account_id"
                     + " left join r_enum_value ev on ev.enum_name = 'status' and ev.enum_id = aud.status";
 
             // data scoping: head office (hierarchy = ".") can see all audit
@@ -158,13 +159,14 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final String clientName = rs.getString("clientName");
             final String loanAccountNo = rs.getString("loanAccountNo");
             final String savingsAccountNo = rs.getString("savingsAccountNo");
+            final String ip = rs.getString("ip");
 
             ZonedDateTime madeOnDate = madeOnDateUTC != null ? madeOnDateUTC.toZonedDateTime() : madeOnDateTenant;
             ZonedDateTime checkedOnDate = checkedOnDateUTC != null ? checkedOnDateUTC.toZonedDateTime() : checkedOnDateTenant;
 
             return new AuditData(id, actionName, entityName, resourceId, subresourceId, maker, madeOnDate, checker, checkedOnDate,
                     processingResult, commandAsJson, officeName, groupLevelName, groupName, clientName, loanAccountNo, savingsAccountNo,
-                    clientId, loanId, resourceGetUrl);
+                    clientId, loanId, resourceGetUrl, ip);
         }
     }
 

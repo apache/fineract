@@ -23,6 +23,7 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.persistence.FlushModeHandler;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -79,6 +80,15 @@ public class InterestScheduleModelRepositoryWrapperImpl implements InterestSched
     }
 
     @Override
+    public Optional<ProgressiveLoanModel> findOneByLoan(Loan loan) {
+        AtomicReference<Optional<ProgressiveLoanModel>> progressiveLoanModelRef = new AtomicReference<>();
+        flushModeHandler.withFlushMode(FlushModeType.COMMIT, () -> {
+            progressiveLoanModelRef.set(loanModelRepository.findOneByLoan(loan));
+        });
+        return progressiveLoanModelRef.get();
+    }
+
+    @Override
     public Optional<ProgressiveLoanInterestScheduleModel> extractModel(Optional<ProgressiveLoanModel> progressiveLoanModel) {
         return progressiveLoanModel.map(ProgressiveLoanModel::getJsonModel) //
                 .map(jsonModel -> progressiveLoanInterestScheduleModelParserService.fromJson(jsonModel,
@@ -103,6 +113,7 @@ public class InterestScheduleModelRepositoryWrapperImpl implements InterestSched
                 ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
                         Set.of(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail(), savedModel.get());
                 ctx.setChargedOff(loan.isChargedOff());
+                ctx.setWrittenOff(loan.isClosedWrittenOff());
                 ctx.setContractTerminated(loan.isContractTermination());
                 advancedPaymentScheduleTransactionProcessor.recalculateInterestForDate(businessDate, ctx);
             }

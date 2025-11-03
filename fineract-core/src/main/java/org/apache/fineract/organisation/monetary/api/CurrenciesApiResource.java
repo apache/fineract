@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.monetary.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
@@ -66,7 +67,7 @@ public class CurrenciesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Currency Configuration", description = "Updates the list of currencies permitted for use.")
-    public CurrencyUpdateResponse updateCurrencies(CurrencyUpdateRequest request) {
+    public CurrencyUpdateResponse updateCurrencies(@Valid CurrencyUpdateRequest request) {
         final var command = new CurrencyUpdateCommand();
 
         command.setId(UUID.randomUUID());

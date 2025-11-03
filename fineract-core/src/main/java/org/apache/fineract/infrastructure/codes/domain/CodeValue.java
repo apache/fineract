@@ -126,6 +126,6 @@ public class CodeValue extends AbstractPersistableCustom<Long> {
     }
 
     public CodeValueData toData() {
-        return CodeValueData.instance(getId(), this.label, this.position, this.isActive, this.mandatory);
+        return CodeValueData.instance(getId(), this.label, this.description, this.position, this.isActive, this.mandatory);
     }
 }

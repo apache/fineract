@@ -67,15 +67,18 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
+import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.savings.SavingsTransactionData;
 import org.apache.fineract.integrationtests.common.system.DatatableHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes" })
+@ExtendWith({ SavingsTestLifecycleExtension.class })
 public class SavingsAccountTransactionTest {
 
     private static final Logger log = LoggerFactory.getLogger(SavingsAccountTransactionTest.class);

@@ -123,6 +123,7 @@
         <class>org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement</class>
         <class>org.apache.fineract.portfolio.collateralmanagement.domain.CollateralManagementDomain</class>
         <class>org.apache.fineract.portfolio.collateral.domain.LoanCollateral</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanAmortizationAllocationMapping</class>
 
         <!-- Loan Module Converters -->
         <class>org.apache.fineract.portfolio.loanproduct.domain.AllocationTypeListConverter</class>

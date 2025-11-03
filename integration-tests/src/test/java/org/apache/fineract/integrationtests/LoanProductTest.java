@@ -19,13 +19,24 @@
 package org.apache.fineract.integrationtests;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.GetChargeOffReasonToExpenseAccountMappings;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.GetLoanProductsTemplateResponse;
+import org.apache.fineract.client.models.GetLoanProductsWriteOffReasonOptions;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostCodeValueDataResponse;
+import org.apache.fineract.client.models.PostCodeValuesDataRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.client.models.PostWriteOffReasonToExpenseAccountMappings;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeCalculationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeIncomeType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeStrategy;
@@ -36,6 +47,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+@Slf4j
 public class LoanProductTest extends BaseLoanIntegrationTest {
 
     @Nested
@@ -259,7 +271,7 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                     .enableBuyDownFee(true).buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                     .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
                     .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE)
-                    .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())
+                    .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue()).merchantBuyDownFee(true)
                     .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue()));
 
             final GetLoanProductsProductIdResponse loanProductsProductIdResponse = loanProductHelper
@@ -339,7 +351,7 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                     .enableBuyDownFee(true).buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                     .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
                     .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE)
-                    .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())
+                    .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue()).merchantBuyDownFee(true)
                     .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue()));
 
             final GetLoanProductsProductIdResponse loanProductsProductIdResponse = loanProductHelper
@@ -404,7 +416,7 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                             .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                             .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
                             .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE)
-                            .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())
+                            .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue()).merchantBuyDownFee(true)
                             .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue())));
         }
 
@@ -414,7 +426,7 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                     () -> loanProductHelper.createLoanProduct(create4IProgressive().enableBuyDownFee(true)
                             .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
                             .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE)
-                            .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())
+                            .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue()).merchantBuyDownFee(true)
                             .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue())));
         }
 
@@ -424,7 +436,7 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                     () -> loanProductHelper.createLoanProduct(create4IProgressive().enableBuyDownFee(true)
                             .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                             .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE)
-                            .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())
+                            .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue()).merchantBuyDownFee(true)
                             .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue())));
         }
 
@@ -434,7 +446,7 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                     () -> loanProductHelper.createLoanProduct(create4IProgressive().enableBuyDownFee(true)
                             .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                             .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
-                            .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())
+                            .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue()).merchantBuyDownFee(true)
                             .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue())));
         }
 
@@ -444,7 +456,7 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                     () -> loanProductHelper.createLoanProduct(create4IProgressive().enableBuyDownFee(true)
                             .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                             .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
-                            .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE)
+                            .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE).merchantBuyDownFee(true)
                             .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue())));
         }
 
@@ -454,8 +466,122 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                     () -> loanProductHelper.createLoanProduct(create4IProgressive().enableBuyDownFee(true)
                             .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
                             .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
-                            .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE)
+                            .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE).merchantBuyDownFee(true)
                             .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())));
         }
+    }
+
+    @Nested
+    public class WriteOffReasonsToExpenseMappings {
+
+        @Test
+        public void testWriteOffReasonToExpenseAccountMapping_shouldFail_on_nonExistingGLAccount_And_nonExistingWriteOffReason() {
+            try {
+                loanProductHelper.createLoanProduct(
+                        create4IProgressive().addWriteOffReasonsToExpenseMappingsItem(new PostWriteOffReasonToExpenseAccountMappings()
+                                .expenseAccountId("101230023").writeOffReasonCodeValueId("201230023")));
+                Assertions.fail("Should have thrown an IllegalArgumentException");
+            } catch (final RuntimeException ex) {
+                Assertions.assertTrue(
+                        ex.getMessage().contains("GL Account with ID 101230023 does not exist or is not an Expense GL account"));
+                Assertions.assertTrue(ex.getMessage().contains("Write-off reason with ID 201230023 does not exist"));
+            }
+        }
+
+        @Test
+        public void testWriteOffReasonToExpenseAccountMapping_shouldFail_on_nonExistingGLAccount_And_Invalid_expenseAccountId() {
+            try {
+                loanProductHelper.createLoanProduct(create4IProgressive().addWriteOffReasonsToExpenseMappingsItem(
+                        new PostWriteOffReasonToExpenseAccountMappings().expenseAccountId("asdf323").writeOffReasonCodeValueId("111")));
+                Assertions.fail("Should have thrown an IllegalArgumentException");
+            } catch (final RuntimeException ex) {
+                Assertions.assertTrue(ex.getMessage()
+                        .contains("validation.msg.loanproduct.writeOffReasonsToExpenseMappings[0].expenseAccountId.not.a.number"));
+                Assertions.assertTrue(
+                        ex.getMessage().contains("The parameter `writeOffReasonsToExpenseMappings[0].expenseAccountId` must be a number."));
+            }
+        }
+
+        @Test
+        public void testWriteOffReasonToExpenseAccountMapping_shouldFail_on_nonExistingGLAccount_And_Invalid_writeOffReasonCodeValueId() {
+            try {
+                loanProductHelper.createLoanProduct(create4IProgressive().addWriteOffReasonsToExpenseMappingsItem(
+                        new PostWriteOffReasonToExpenseAccountMappings().expenseAccountId("111").writeOffReasonCodeValueId("asdf323")));
+                Assertions.fail("Should have thrown an IllegalArgumentException");
+            } catch (final RuntimeException ex) {
+                log.info("Exception: {}", ex.getMessage());
+                Assertions.assertTrue(ex.getMessage()
+                        .contains("validation.msg.loanproduct.writeOffReasonsToExpenseMappings[0].writeOffReasonCodeValueId.not.a.number"));
+                Assertions.assertTrue(ex.getMessage()
+                        .contains("The parameter `writeOffReasonsToExpenseMappings[0].writeOffReasonCodeValueId` must be a number."));
+            }
+        }
+
+        @Test
+        public void testWriteOffReasonsToExpenseMappings() {
+
+            // create Write Off reasons
+            Long reasonCode1 = createTestWriteOffReason();
+            Long reasonCode2 = createTestWriteOffReason();
+
+            // check if write Off reasons appears on loan product template
+            GetLoanProductsTemplateResponse loanProductTemplate = loanProductHelper.getLoanProductTemplate(false);
+            List<GetLoanProductsWriteOffReasonOptions> writeOffReasonOptions = loanProductTemplate.getWriteOffReasonOptions();
+            Assertions.assertNotNull(writeOffReasonOptions);
+
+            boolean isReasonCode1InTemplate = writeOffReasonOptions.stream().map(GetLoanProductsWriteOffReasonOptions::getId)
+                    .anyMatch(id -> Objects.equals(id, reasonCode1));
+            boolean isReasonCode2InTemplate = writeOffReasonOptions.stream().map(GetLoanProductsWriteOffReasonOptions::getId)
+                    .anyMatch(id -> Objects.equals(id, reasonCode2));
+            Assertions.assertTrue(isReasonCode1InTemplate);
+            Assertions.assertTrue(isReasonCode2InTemplate);
+
+            // Create Test Loan Product
+            String reasonCodeId = reasonCode1.toString();
+            String expenseAccountId = buyDownExpenseAccount.getAccountID().toString();
+
+            Long loanProductId = loanProductHelper.createLoanProduct(
+                    create4IProgressive().addWriteOffReasonsToExpenseMappingsItem(new PostWriteOffReasonToExpenseAccountMappings()
+                            .expenseAccountId(expenseAccountId).writeOffReasonCodeValueId(reasonCodeId)))
+                    .getResourceId();
+
+            // Verify that get loan product API has the corresponding fields
+            GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper.retrieveLoanProductById(loanProductId);
+            List<GetChargeOffReasonToExpenseAccountMappings> writeOffReasonToExpenseAccountMappings = getLoanProductsProductIdResponse
+                    .getWriteOffReasonsToExpenseMappings();
+            Assertions.assertNotNull(writeOffReasonToExpenseAccountMappings);
+            Assertions.assertEquals(1, writeOffReasonToExpenseAccountMappings.size());
+            GetChargeOffReasonToExpenseAccountMappings writeOffMapping = writeOffReasonToExpenseAccountMappings.getFirst();
+            Assertions.assertNotNull(writeOffMapping);
+            Assertions.assertEquals(expenseAccountId, writeOffMapping.getExpenseAccount().getId().toString());
+            Assertions.assertEquals(reasonCodeId, writeOffMapping.getReasonCodeValue().getId().toString());
+
+            List<GetLoanProductsWriteOffReasonOptions> writeOffReasonOptionsResultNonTemplate = getLoanProductsProductIdResponse
+                    .getWriteOffReasonOptions();
+            if (writeOffReasonOptionsResultNonTemplate != null && !writeOffReasonOptionsResultNonTemplate.isEmpty()) {
+                Assertions.fail("Write-off reason options with no template setting should be empty");
+            }
+
+            // test Update loan product API - delete writeOffReasonsToExpenseMappings
+
+            GetLoanProductsProductIdResponse getLoanProductsProductId = loanProductHelper.retrieveLoanProductById(loanProductId);
+
+            loanProductHelper.updateLoanProductById(loanProductId,
+                    update4IProgressive(getLoanProductsProductId.getName(), getLoanProductsProductId.getShortName(),
+                            getLoanProductsProductId.getDelinquencyBucket().getId()).writeOffReasonsToExpenseMappings(List.of()));
+
+            // Verify that get loan product API has the corresponding fields
+            Assertions.assertNull(loanProductHelper.retrieveLoanProductById(loanProductId).getWriteOffReasonsToExpenseMappings());
+        }
+    }
+
+    private Long createTestWriteOffReason() {
+        PostCodeValueDataResponse response = okR(FineractClientHelper.getFineractClient().codeValues.createCodeValue(26L,
+                new PostCodeValuesDataRequest().name(Utils.uniqueRandomStringGenerator("TestWriteOffReason_1_", 6))
+                        .description("Test write off reason value 1").isActive(true).position(0)))
+                .body();
+        Assertions.assertNotNull(response);
+        Assertions.assertNotNull(response.getSubResourceId());
+        return response.getSubResourceId();
     }
 }

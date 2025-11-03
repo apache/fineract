@@ -123,6 +123,23 @@ public class CodesApiResource {
         return this.toApiJsonSerializer.serialize(settings, code, RESPONSE_DATA_PARAMETERS);
     }
 
+    @GET
+    @Path("name/{codeName}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve a Code", description = "Returns the details of a Code.\n" + "\n" + "Example Requests:\n" + "\n"
+            + "codes/1")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.GetCodesResponse.class))) })
+    public String retrieveCodeByName(@PathParam("codeName") @Parameter(description = "codeName") final String codeName,
+            @Context final UriInfo uriInfo) {
+
+        final CodeData code = this.readPlatformService.retriveCode(codeName);
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, code, RESPONSE_DATA_PARAMETERS);
+    }
+
     @PUT
     @Path("{codeId}")
     @Consumes({ MediaType.APPLICATION_JSON })

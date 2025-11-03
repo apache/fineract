@@ -6,8 +6,10 @@ Move the release candidate from the dev area to the release area using a Subvers
 
 [source,bash,subs="attributes+"]
 ----
-% svn mv https://dist.apache.org/repos/dist/dev/fineract/{revnumber} https://dist.apache.org/repos/dist/release/fineract/
+svn mv https://dist.apache.org/repos/dist/dev/fineract/{revnumber} https://dist.apache.org/repos/dist/release/fineract/
 ----
+
+NOTE: https://www.apache.org/legal/release-policy.html#upload-ci[This must be done by a Fineract PMC member].
 
 You will now get an automated email from the Apache Reporter Service (no-reply@reporter.apache.org), subject "Please add your release data for 'fineract'" to add the release data (version and date) to the database on https://reporter.apache.org/addrelease.html?fineract (requires PMC membership).
 
@@ -16,7 +18,7 @@ You will now get an automated email from the Apache Reporter Service (no-reply@r
 .Command
 [source,bash,subs="attributes+,+macros"]
 ----
-% ./gradlew fineractReleaseStep12 -Pfineract.release.version={revnumber}
+./gradlew fineractReleaseStep12 -Pfineract.release.version={revnumber}
 ----
 
 CAUTION: This task is not yet automated!
