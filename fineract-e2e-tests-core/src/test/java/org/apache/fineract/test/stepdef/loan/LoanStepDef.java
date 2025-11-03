@@ -2171,6 +2171,23 @@ public class LoanStepDef extends AbstractStepDef {
                 .isEqualTo(totalUnpaidPayableDueInterestExpected);
     }
 
+    @Then("Loan has {double} total unpaid payable not due interest")
+    public void loanTotalUnpaidPayableNotDueInterest(double totalUnpaidPayableNotDueInterestExpected) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.body().getLoanId();
+
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "repaymentSchedule", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+        testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
+
+        Double totalUnpaidPayableNotDueInterestActual = loanDetailsResponse.body().getSummary()
+                .getTotalUnpaidPayableNotDueInterest()
+                .doubleValue();
+        assertThat(totalUnpaidPayableNotDueInterestActual).as(ErrorMessageHelper
+                        .wrongAmountInTotalUnpaidPayableDueInterest(totalUnpaidPayableNotDueInterestActual, totalUnpaidPayableNotDueInterestExpected))
+                .isEqualTo(totalUnpaidPayableNotDueInterestExpected);
+    }
+
     @Then("Loan has {double} overpaid amount")
     public void loanOverpaid(double totalOverpaidExpected) throws IOException {
         Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);

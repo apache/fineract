@@ -9949,3 +9949,25 @@ Feature: Charge-off
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       | 546.14        | 24.69    | 0.0  | 10.0      | 580.83 | 308.59 | 308.59     | 0.0  | 272.24      |
+
+  @TestRailId:C4153
+  Scenario: Verify that totalUnpaidPayableNotDueInterest doesn't get reset to 0 on the charge-off date
+    When Admin sets the business date to "01 May 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                    | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_360_30_ZERO_INTEREST_CHARGE_OFF_ACCRUAL_ACTIVITY | 01 May 2025       | 423.38         | 12.25                  | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 24                 | MONTHS               | 1              | MONTHS                 | 24                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 May 2025" with "423.38" amount and expected disbursement date on "01 May 2025"
+    And Admin successfully disburse the loan on "01 May 2025" with "423.38" EUR transaction amount
+    When Admin sets the business date to "01 June 2025"
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 June 2025" with 19.98 EUR transaction amount and system-generated Idempotency key
+    When Admin sets the business date to "01 July 2025"
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 July 2025" with 19.98 EUR transaction amount and system-generated Idempotency key
+    When Admin sets the business date to "08 October 2025"
+    When Admin runs inline COB job for Loan
+    Then Loan has 11.51 total unpaid payable due interest
+    Then Loan has 0.79 total unpaid payable not due interest
+    And Admin does charge-off the loan on "08 October 2025"
+    Then Loan has 11.51 total unpaid payable due interest
+    #then next step will fail since totalUnpaidPayableNotDueInterest reset to 0 on the day of charge off
+    Then Loan has 0.79 total unpaid payable not due interest

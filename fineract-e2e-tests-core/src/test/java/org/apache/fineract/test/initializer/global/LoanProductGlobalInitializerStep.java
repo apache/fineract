@@ -4058,6 +4058,25 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY,
                 responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmi36030InterestRecalculationDaily);
 
+        // LP2 + zero-interest chargeOff behaviour + progressive loan schedule + horizontal
+        // (LP2_ADV_PYMNT_360_30_ZERO_INTEREST_CHARGE_OFF_ACCRUAL_ACTIVITY)
+        final String name148 = DefaultLoanProduct.LP2_ADV_PYMNT_360_30_ZERO_INTEREST_CHARGE_OFF_ACCRUAL_ACTIVITY
+                .getName();
+        final PostLoanProductsRequest loanProductsRequestAdvZeroInterestChargeOffBehaviourAccrualActivity = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2Emi()//
+                .name(name148)//
+                .daysInYearType(DaysInYearType.DAYS360.value)//
+                .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT")))
+                .enableAccrualActivityPosting(true)//
+                .chargeOffBehaviour("ZERO_INTEREST");//
+        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvZeroInterestChargeOffBehaviourAccrualActivity = loanProductsApi
+                .createLoanProduct(loanProductsRequestAdvZeroInterestChargeOffBehaviourAccrualActivity).execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_360_30_ZERO_INTEREST_CHARGE_OFF_ACCRUAL_ACTIVITY,
+                responseLoanProductsRequestAdvZeroInterestChargeOffBehaviourAccrualActivity);
+
         // (LP1_WITH_OVERRIDES) - Loan product with all attribute overrides ENABLED
         final String nameWithOverrides = DefaultLoanProduct.LP1_WITH_OVERRIDES.getName();
         final PostLoanProductsRequest loanProductsRequestWithOverrides = loanProductsRequestFactory.defaultLoanProductsRequestLP1() //
