@@ -1072,4 +1072,12 @@ public final class ErrorMessageHelper {
                 "Wrong value in LoanDetails/availableDisbursementAmountWithOverApplied. %nActual value is: %s %nExpected Value is: %s",
                 actual, expected);
     }
+
+    public static String reAgeChargedOffLoanFailure() {
+        return "Loan re-aging is not allowed on charged-off loan.";
+    }
+
+    public static String reAgeContractTerminatedLoanFailure() {
+        return "Loan re-aging is not allowed on contract terminated loan.";
+    }
 }

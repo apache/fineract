@@ -207,6 +207,7 @@
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.reamortization.LoanReAmortizationParameter</class>
         <class>org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistory</class>
         <class>org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProduct</class>

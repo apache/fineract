@@ -26,17 +26,20 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanReAgingApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeInterestHandlingType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.ChangeOperation;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -47,6 +50,7 @@ import org.springframework.stereotype.Component;
 public class LoanReAgingValidator {
 
     private final LoanTransactionRepository loanTransactionRepository;
+    private final CodeValueRepository codeValueRepository;
 
     public void validateReAge(Loan loan, JsonCommand command) {
         validateReAgeRequest(loan, command);
@@ -63,7 +67,7 @@ public class LoanReAgingValidator {
                 .notExceedingLengthOf(100);
 
         LocalDate startDate = command.localDateValueOfParameterNamed(LoanReAgingApiConstants.startDate);
-        if (loan.isProgressiveSchedule() && !loan.isInterestBearing()) {
+        if (loan.isProgressiveSchedule()) {
             baseDataValidator.reset().parameter(LoanReAgingApiConstants.startDate).value(startDate).notNull()
                     .validateDateAfterOrEqual(loan.getDisbursementDate());
         } else {
@@ -81,18 +85,25 @@ public class LoanReAgingValidator {
         baseDataValidator.reset().parameter(LoanReAgingApiConstants.numberOfInstallments).value(numberOfInstallments).notNull()
                 .integerGreaterThanZero();
 
+        final LoanReAgeInterestHandlingType reAgeInterestHandlingType = command
+                .enumValueOfParameterNamed(LoanReAgingApiConstants.reAgeInterestHandlingParamName, LoanReAgeInterestHandlingType.class);
+        baseDataValidator.reset().parameter(LoanReAgingApiConstants.reAgeInterestHandlingParamName).value(reAgeInterestHandlingType)
+                .ignoreIfNull();
+
+        Long reasonCodeValueId = command.longValueOfParameterNamed(LoanReAgingApiConstants.reasonCodeValueIdParamName);
+        baseDataValidator.reset().parameter(LoanReAgingApiConstants.reasonCodeValueIdParamName).value(reasonCodeValueId).ignoreIfNull();
+        if (reasonCodeValueId != null) {
+            final CodeValue reasonCodeValue = codeValueRepository.findByCodeNameAndId(LoanApiConstants.REAGE_REASONS, reasonCodeValueId);
+            if (reasonCodeValue == null) {
+                dataValidationErrors.add(ApiParameterError.parameterError("validation.msg.reage.reason.invalid",
+                        "Reage Reason with ID " + reasonCodeValueId + " does not exist", LoanApiConstants.REAGE_REASONS));
+            }
+        }
+
         throwExceptionIfValidationErrorsExist(dataValidationErrors);
     }
 
     private void validateReAgeBusinessRules(Loan loan) {
-        // validate reaging shouldn't happen before maturity
-        // on progressive loans it can
-        if (!(loan.isProgressiveSchedule() && !loan.isInterestBearing())
-                && DateUtils.isBefore(getBusinessLocalDate(), loan.getMaturityDate())) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.cannot.be.submitted.before.maturity",
-                    "Loan cannot be re-aged before maturity", loan.getId());
-        }
-
         // validate reaging is only available for progressive schedule & advanced payment allocation
         LoanScheduleType loanScheduleType = LoanScheduleType.valueOf(loan.getLoanProductRelatedDetail().getLoanScheduleType().name());
         boolean isProgressiveSchedule = LoanScheduleType.PROGRESSIVE.equals(loanScheduleType);
@@ -105,12 +116,6 @@ public class LoanReAgingValidator {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.supported.only.for.progressive.loan.schedule.type",
                     "Loan reaging is only available for progressive repayment schedule and Advanced payment allocation strategy",
                     loan.getId());
-        }
-
-        // validate reaging is only available for non-interest bearing loans
-        if (loan.isInterestBearing()) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.supported.only.for.non.interest.loans",
-                    "Loan reaging is only available for non-interest bearing loans", loan.getId());
         }
 
         // validate reaging is only done on an active loan
@@ -126,6 +131,18 @@ public class LoanReAgingValidator {
         if (isReAgingTransactionForTodayPresent) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.reage.transaction.already.present.for.today",
                     "Loan reaging can only be done once a day. There has already been a reaging done for today", loan.getId());
+        }
+
+        // validate loan is not charged-off
+        if (loan.isChargedOff()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.not.allowed.on.charged.off",
+                    "Loan re-aging is not allowed on charged-off loan.", loan.getId());
+        }
+
+        // validate loan is not contract terminated
+        if (loan.isContractTermination()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.not.allowed.on.contract.terminated",
+                    "Loan re-aging is not allowed on contract terminated loan.", loan.getId());
         }
     }
 

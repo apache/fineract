@@ -16,14 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.api;
+package org.apache.fineract.test.messaging.event.loan;
 
-public interface LoanReAmortizationApiConstants {
+public class LoanScheduleVariationsDeletedEvent extends AbstractLoanEvent {
 
-    String localeParameterName = "locale";
-    String dateFormatParameterName = "dateFormat";
-    String externalIdParameterName = "externalId";
-
-    String reAmortizationInterestHandlingParamName = "reAmortizationInterestHandling";
-    String reasonCodeValueIdParamName = "reasonCodeValueId";
+    @Override
+    public String getEventName() {
+        return "LoanScheduleVariationsDeletedBusinessEvent";
+    }
 }

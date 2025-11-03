@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.domain.reaging;
+package org.apache.fineract.portfolio.loanaccount.domain.reamortization;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,51 +26,30 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
-import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
-// TODO FINERACT-1932-Fineract modularization: Move to fineract-progressive-loan module after refactor of Loan and LoanTransaction classes
 @Entity
-@Table(name = "m_loan_reage_parameter")
+@Table(name = "m_loan_reamortization_parameter")
 @AllArgsConstructor
 @Getter
-public class LoanReAgeParameter extends AbstractAuditableWithUTCDateTimeCustom<Long> {
+public class LoanReAmortizationParameter extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @OneToOne
     @JoinColumn(name = "loan_transaction_id", nullable = false)
     private LoanTransaction loanTransaction;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "frequency_type", nullable = false)
-    private PeriodFrequencyType frequencyType;
-
-    @Column(name = "frequency_number", nullable = false)
-    private Integer frequencyNumber;
-
-    @Column(name = "start_date", nullable = false)
-    private LocalDate startDate;
-
-    @Column(name = "number_of_installments", nullable = false)
-    private Integer numberOfInstallments;
-
-    @Enumerated(EnumType.STRING)
     @Column(name = "interest_handling_type")
-    private LoanReAgeInterestHandlingType interestHandlingType;
+    private LoanReAmortizationInterestHandlingType interestHandlingType;
 
     @ManyToOne
-    @JoinColumn(name = "reage_reason_code_value_id", nullable = true)
-    private CodeValue reageReason;
+    @JoinColumn(name = "reamortization_reason_code_value_id", nullable = true)
+    private CodeValue reamortizationReason;
 
     // for JPA, don't use
-    protected LoanReAgeParameter() {}
-
-    public LoanReAgeParameter getCopy(LoanTransaction loanTransaction) {
-        return new LoanReAgeParameter(loanTransaction, frequencyType, frequencyNumber, startDate, numberOfInstallments,
-                interestHandlingType, reageReason);
-    }
+    protected LoanReAmortizationParameter() {}
 }

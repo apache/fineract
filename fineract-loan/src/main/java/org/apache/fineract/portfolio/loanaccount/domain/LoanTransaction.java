@@ -48,6 +48,7 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
+import org.apache.fineract.portfolio.loanaccount.domain.reamortization.LoanReAmortizationParameter;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 
@@ -144,6 +145,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     @Setter
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "loanTransaction")
     private LoanReAgeParameter loanReAgeParameter;
+
+    @Setter
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "loanTransaction")
+    private LoanReAmortizationParameter loanReAmortizationParameter;
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
