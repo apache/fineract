@@ -542,9 +542,9 @@ public class LoanAccountConfiguration {
     @ConditionalOnMissingBean(InterestPauseWritePlatformService.class)
     public InterestPauseWritePlatformService interestPauseWritePlatformService(LoanTermVariationsRepository loanTermVariationsRepository,
             LoanRepositoryWrapper loanRepositoryWrapper, LoanAssembler loanAssembler,
-            ReprocessLoanTransactionsService reprocessLoanTransactionsService) {
+            ReprocessLoanTransactionsService reprocessLoanTransactionsService, BusinessEventNotifierService businessEventNotifierService) {
         return new InterestPauseWritePlatformServiceImpl(loanTermVariationsRepository, loanRepositoryWrapper, loanAssembler,
-                reprocessLoanTransactionsService);
+                reprocessLoanTransactionsService, businessEventNotifierService);
     }
 
     @Bean
