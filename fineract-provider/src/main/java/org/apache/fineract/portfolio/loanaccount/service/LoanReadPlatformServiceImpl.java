@@ -188,7 +188,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     private final ConfigurationDomainService configurationDomainService;
     private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
     private final ColumnValidator columnValidator;
-    private final DatabaseSpecificSQLGenerator sqlGenerator;
+    protected final DatabaseSpecificSQLGenerator sqlGenerator;
     private final DelinquencyReadPlatformService delinquencyReadPlatformService;
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanChargePaidByReadService loanChargePaidByReadService;
@@ -300,7 +300,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         try {
             this.context.authenticatedUser();
 
-            final LoanTransactionsMapper rm = new LoanTransactionsMapper(sqlGenerator);
+            final LoanTransactionsMapper rm = createLoanTransactionsMapper();
 
             // retrieve all loan transactions that are not invalid and have not
             // been 'contra'ed by another transaction
@@ -330,6 +330,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }
+    }
+
+    protected LoanTransactionsMapper createLoanTransactionsMapper() {
+        return new LoanTransactionsMapper(sqlGenerator);
     }
 
     @Override
@@ -704,7 +708,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     public LoanTransactionData retrieveLoanTransaction(final Long loanId, final Long transactionId) {
         this.context.authenticatedUser();
         try {
-            final LoanTransactionsMapper rm = new LoanTransactionsMapper(sqlGenerator);
+            final LoanTransactionsMapper rm = createLoanTransactionsMapper();
             final String sql = "select " + rm.loanPaymentsSchema() + " where l.id = ? and tr.id = ? ";
             LoanTransactionData loanTransactionData = this.jdbcTemplate.queryForObject(sql, rm, loanId, transactionId); // NOSONAR
             loanTransactionData.setTransactionRelations(
@@ -1702,11 +1706,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
     }
 
-    private static final class LoanTransactionsMapper implements RowMapper<LoanTransactionData> {
+    protected static class LoanTransactionsMapper implements RowMapper<LoanTransactionData> {
 
         private final DatabaseSpecificSQLGenerator sqlGenerator;
 
-        LoanTransactionsMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+        protected LoanTransactionsMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
             this.sqlGenerator = sqlGenerator;
         }
 

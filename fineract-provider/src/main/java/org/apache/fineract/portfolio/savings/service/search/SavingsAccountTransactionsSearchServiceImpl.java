@@ -70,6 +70,7 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
     private final DataTableValidator dataTableValidator;
     private final JdbcTemplate jdbcTemplate;
     private final SearchUtil searchUtil;
+    protected SavingsAccountReadPlatformServiceImpl.SavingsAccountTransactionsMapper tm = new SavingsAccountReadPlatformServiceImpl.SavingsAccountTransactionsMapper();
 
     @Override
     public Page<SavingsAccountTransactionData> searchTransactions(@NonNull Long savingsId,
@@ -111,7 +112,6 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
         ArrayList<Object> params = new ArrayList<>();
         searchUtil.buildQueryCondition(columnFilters, where, params, alias, headersByName, null, null, null, false, sqlGenerator);
 
-        SavingsAccountReadPlatformServiceImpl.SavingsAccountTransactionsMapper tm = new SavingsAccountReadPlatformServiceImpl.SavingsAccountTransactionsMapper();
         Object[] args = params.toArray();
 
         String countQuery = "SELECT COUNT(*) " + tm.from() + where;

@@ -79,11 +79,11 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
     private final PaginationHelper paginationHelper;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
 
-    private static final class GLJournalEntryMapper implements RowMapper<JournalEntryData> {
+    protected static class GLJournalEntryMapper implements RowMapper<JournalEntryData> {
 
         private final JournalEntryAssociationParametersData associationParametersData;
 
-        GLJournalEntryMapper(final JournalEntryAssociationParametersData associationParametersData) {
+        protected GLJournalEntryMapper(final JournalEntryAssociationParametersData associationParametersData) {
             this.associationParametersData = Objects.requireNonNullElseGet(associationParametersData,
                     JournalEntryAssociationParametersData::new);
         }
@@ -240,8 +240,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             final Boolean onlyManualEntries, final LocalDate fromDate, final LocalDate toDate, final LocalDate submittedOnDateFrom,
             final LocalDate submittedOnDateTo, final String transactionId, final Integer entityType,
             final JournalEntryAssociationParametersData associationParametersData) {
-
-        GLJournalEntryMapper rm = new GLJournalEntryMapper(associationParametersData);
+        GLJournalEntryMapper rm = getGlJournalEntryMapper(associationParametersData);
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select ").append(sqlGenerator.calcFoundRows()).append(" ");
         sqlBuilder.append(rm.schema());
@@ -383,12 +382,16 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), finalObjectArray, rm);
     }
 
+    protected GLJournalEntryMapper getGlJournalEntryMapper(JournalEntryAssociationParametersData associationParametersData) {
+        return new GLJournalEntryMapper(associationParametersData);
+    }
+
     @Override
     public JournalEntryData retrieveGLJournalEntryById(final long glJournalEntryId,
             JournalEntryAssociationParametersData associationParametersData) {
         try {
 
-            final GLJournalEntryMapper rm = new GLJournalEntryMapper(associationParametersData);
+            final GLJournalEntryMapper rm = getGlJournalEntryMapper(associationParametersData);
             // Programmatic query, disable sonar issue
             final String sql = "select " + rm.schema() + " where journalEntry.id = ?";
 
@@ -526,7 +529,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
     public Page<JournalEntryData> retrieveJournalEntriesByEntityId(String transactionId, Long entityId, Integer entityType) {
         JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(true, true);
         try {
-            final GLJournalEntryMapper rm = new GLJournalEntryMapper(associationParametersData);
+            final GLJournalEntryMapper rm = getGlJournalEntryMapper(associationParametersData);
             final String sql = "select " + rm.schema()
                     + " where journalEntry.transaction_id = ? and journalEntry.entity_id = ? and journalEntry.entity_type_enum = ?";
             Object[] data = { transactionId, entityId, entityType };

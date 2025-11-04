@@ -32,4 +32,8 @@ public class MDCWrapper {
     public void remove(String key) {
         MDC.remove(key);
     }
+
+    public String get(String key) {
+        return MDC.get(key);
+    }
 }
