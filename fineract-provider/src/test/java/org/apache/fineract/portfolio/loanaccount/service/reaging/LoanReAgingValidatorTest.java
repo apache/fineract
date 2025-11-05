@@ -381,42 +381,6 @@ class LoanReAgingValidatorTest {
     }
 
     @Test
-    public void testValidateUndoReAge_ShouldThrowException_WhenLoanAlreadyHasRepaymentAfterReAge() {
-        // given
-        List<LoanTransaction> transactions = List.of(loanTransaction(LoanTransactionType.DISBURSEMENT, actualDate.minusDays(3)),
-                loanTransaction(LoanTransactionType.REAGE, actualDate.minusDays(2)),
-                loanTransaction(LoanTransactionType.REPAYMENT, actualDate.minusDays(1)));
-        Loan loan = loan();
-        given(loan.getLoanTransactions()).willReturn(transactions);
-        JsonCommand command = jsonCommand();
-        // when
-        GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
-                () -> underTest.validateUndoReAge(loan, command));
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reage.repayment.exists.after.reaging");
-    }
-
-    @Test
-    public void testValidateUndoReAge_ShouldThrowException_WhenLoanAlreadyHasRepaymentAfterReAge_SameDay() {
-        // given
-        List<LoanTransaction> transactions = List.of(loanTransaction(LoanTransactionType.DISBURSEMENT, actualDate.minusDays(2)),
-                loanTransaction(LoanTransactionType.REAGE, actualDate.minusDays(1),
-                        OffsetDateTime.of(actualDate, LocalTime.of(10, 0), ZoneOffset.UTC)),
-                loanTransaction(LoanTransactionType.REPAYMENT, actualDate.minusDays(1),
-                        OffsetDateTime.of(actualDate, LocalTime.of(11, 0), ZoneOffset.UTC)));
-        Loan loan = loan();
-        given(loan.getLoanTransactions()).willReturn(transactions);
-        JsonCommand command = jsonCommand();
-        // when
-        GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
-                () -> underTest.validateUndoReAge(loan, command));
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reage.repayment.exists.after.reaging");
-    }
-
-    @Test
     public void testValidateUndoReAge_ShouldNotThrowException_WhenLoanAlreadyHasRepaymentAfterReAge_SameDay_RepaymentBeforeReAge() {
         // given
         List<LoanTransaction> transactions = List.of(loanTransaction(LoanTransactionType.DISBURSEMENT, actualDate.minusDays(2)),
