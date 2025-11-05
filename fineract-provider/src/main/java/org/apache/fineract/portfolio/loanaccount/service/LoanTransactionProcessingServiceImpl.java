@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import jakarta.persistence.FlushModeType;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.fineract.infrastructure.core.annotation.WithFlushMode;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -57,6 +59,7 @@ import org.springframework.util.ObjectUtils;
 
 @Service
 @RequiredArgsConstructor
+@WithFlushMode(FlushModeType.COMMIT)
 public class LoanTransactionProcessingServiceImpl implements LoanTransactionProcessingService {
 
     private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory;
@@ -91,36 +94,6 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
                 && currentInstallment.getTotalOutstanding(loan.getCurrency()).isEqualTo(loanTransaction.getAmount(loan.getCurrency()));
     }
 
-    private ChangedTransactionDetail processLatestTransactionProgressiveInterestRecalculation(
-            AdvancedPaymentScheduleTransactionProcessor advancedProcessor, Loan loan, LoanTransaction loanTransaction) {
-        Optional<ProgressiveLoanInterestScheduleModel> savedModel = modelRepository.getSavedModel(loan,
-                loanTransaction.getTransactionDate());
-        ProgressiveLoanInterestScheduleModel model = savedModel
-                .orElseGet(() -> advancedProcessor.calculateInterestScheduleModel(loan.getId(), loanTransaction.getTransactionDate()));
-
-        ProgressiveTransactionCtx progressiveContext = new ProgressiveTransactionCtx(loan.getCurrency(),
-                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()),
-                new ChangedTransactionDetail(), model, getTotalRefundInterestAmount(loan));
-        progressiveContext.getAlreadyProcessedTransactions().addAll(loanTransactionService.retrieveListOfTransactionsForReprocessing(loan));
-        progressiveContext.setChargedOff(loan.isChargedOff());
-        progressiveContext.setWrittenOff(loan.isClosedWrittenOff());
-        progressiveContext.setContractTerminated(loan.isContractTermination());
-        ChangedTransactionDetail result = advancedProcessor.processLatestTransaction(loanTransaction, progressiveContext);
-        if (!TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
-            modelRepository.writeInterestScheduleModel(loan, model);
-        }
-        return result;
-    }
-
-    private Money getTotalRefundInterestAmount(Loan loan) {
-        List<LoanTransactionType> supportedInterestRefundTransactionTypes = loan.getSupportedInterestRefundTransactionTypes();
-        if (supportedInterestRefundTransactionTypes != null && supportedInterestRefundTransactionTypes.isEmpty()) {
-            return Money.zero(loan.getCurrency());
-        }
-        return loan.getLoanTransactions().stream().filter(LoanTransaction::isNotReversed).filter(LoanTransaction::isInterestRefund)
-                .map(t -> t.getAmount(loan.getCurrency())).reduce(Money.zero(loan.getCurrency()), Money::add);
-    }
-
     @Override
     public ChangedTransactionDetail processLatestTransaction(String transactionProcessingStrategyCode, LoanTransaction loanTransaction,
             TransactionCtx ctx) {
@@ -131,19 +104,6 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
             return processLatestTransactionProgressiveInterestRecalculation(advancedProcessor, loanTransaction.getLoan(), loanTransaction);
         }
         return loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanTransaction, ctx);
-    }
-
-    private Loan getLoan(List<LoanTransaction> loanTransactions, List<LoanRepaymentScheduleInstallment> installments,
-            Set<LoanCharge> charges) {
-        if (!ObjectUtils.isEmpty(loanTransactions)) {
-            return loanTransactions.getFirst().getLoan();
-        } else if (!ObjectUtils.isEmpty(installments)) {
-            return installments.getFirst().getLoan();
-        } else if (!ObjectUtils.isEmpty(charges)) {
-            return charges.iterator().next().getLoan();
-        } else {
-            throw new IllegalArgumentException("No loan found for the given transactions, installments or charges");
-        }
     }
 
     @Override
@@ -253,5 +213,48 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
         }
         return new OutstandingAmountsDTO(totalPrincipal.getCurrency()).principal(totalPrincipal).interest(totalInterest)
                 .feeCharges(feeCharges).penaltyCharges(penaltyCharges);
+    }
+
+    private Loan getLoan(List<LoanTransaction> loanTransactions, List<LoanRepaymentScheduleInstallment> installments,
+            Set<LoanCharge> charges) {
+        if (!ObjectUtils.isEmpty(loanTransactions)) {
+            return loanTransactions.getFirst().getLoan();
+        } else if (!ObjectUtils.isEmpty(installments)) {
+            return installments.getFirst().getLoan();
+        } else if (!ObjectUtils.isEmpty(charges)) {
+            return charges.iterator().next().getLoan();
+        } else {
+            throw new IllegalArgumentException("No loan found for the given transactions, installments or charges");
+        }
+    }
+
+    private ChangedTransactionDetail processLatestTransactionProgressiveInterestRecalculation(
+            AdvancedPaymentScheduleTransactionProcessor advancedProcessor, Loan loan, LoanTransaction loanTransaction) {
+        Optional<ProgressiveLoanInterestScheduleModel> savedModel = modelRepository.getSavedModel(loan,
+                loanTransaction.getTransactionDate());
+        ProgressiveLoanInterestScheduleModel model = savedModel
+                .orElseGet(() -> advancedProcessor.calculateInterestScheduleModel(loan.getId(), loanTransaction.getTransactionDate()));
+
+        ProgressiveTransactionCtx progressiveContext = new ProgressiveTransactionCtx(loan.getCurrency(),
+                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()),
+                new ChangedTransactionDetail(), model, getTotalRefundInterestAmount(loan));
+        progressiveContext.getAlreadyProcessedTransactions().addAll(loanTransactionService.retrieveListOfTransactionsForReprocessing(loan));
+        progressiveContext.setChargedOff(loan.isChargedOff());
+        progressiveContext.setWrittenOff(loan.isClosedWrittenOff());
+        progressiveContext.setContractTerminated(loan.isContractTermination());
+        ChangedTransactionDetail result = advancedProcessor.processLatestTransaction(loanTransaction, progressiveContext);
+        if (!TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
+            modelRepository.writeInterestScheduleModel(loan, model);
+        }
+        return result;
+    }
+
+    private Money getTotalRefundInterestAmount(Loan loan) {
+        List<LoanTransactionType> supportedInterestRefundTransactionTypes = loan.getSupportedInterestRefundTransactionTypes();
+        if (supportedInterestRefundTransactionTypes != null && supportedInterestRefundTransactionTypes.isEmpty()) {
+            return Money.zero(loan.getCurrency());
+        }
+        return loan.getLoanTransactions().stream().filter(LoanTransaction::isNotReversed).filter(LoanTransaction::isInterestRefund)
+                .map(t -> t.getAmount(loan.getCurrency())).reduce(Money.zero(loan.getCurrency()), Money::add);
     }
 }

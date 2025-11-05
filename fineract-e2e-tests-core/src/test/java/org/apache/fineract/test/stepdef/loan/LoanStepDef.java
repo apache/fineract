@@ -418,6 +418,33 @@ public class LoanStepDef extends AbstractStepDef {
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
     }
 
+    @When("Admin makes {string} transaction with {string} payment type on {string} with {double} EUR transaction amount and self-generated external-id")
+    public void createTransactionWithExternalId(String transactionTypeInput, String transactionPaymentType, String transactionDate,
+            double transactionAmount) throws IOException, InterruptedException {
+        eventStore.reset();
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+        String externalId = UUID.randomUUID().toString();
+
+        TransactionType transactionType = TransactionType.valueOf(transactionTypeInput);
+        String transactionTypeValue = transactionType.getValue();
+        DefaultPaymentType paymentType = DefaultPaymentType.valueOf(transactionPaymentType);
+        Long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
+
+        PostLoansLoanIdTransactionsRequest paymentTransactionRequest = LoanRequestFactory.defaultPaymentTransactionRequest()
+                .transactionDate(transactionDate).transactionAmount(transactionAmount).paymentTypeId(paymentTypeValue)
+                .externalId(externalId);
+
+        Response<PostLoansLoanIdTransactionsResponse> paymentTransactionResponse = loanTransactionsApi
+                .executeLoanTransaction(loanId, paymentTransactionRequest, transactionTypeValue).execute();
+        testContext().set(TestContextKey.LOAN_PAYMENT_TRANSACTION_RESPONSE, paymentTransactionResponse);
+        ErrorHelper.checkSuccessfulApiCall(paymentTransactionResponse);
+        assertThat(paymentTransactionResponse.body().getResourceExternalId()).as("External id is not correct").isEqualTo(externalId);
+
+        eventCheckHelper.transactionEventCheck(paymentTransactionResponse, transactionType, null);
+        eventCheckHelper.loanBalanceChangedEventCheck(loanId);
+    }
+
     @When("Customer makes {string} transaction with {string} payment type on {string} with {double} EUR transaction amount and system-generated Idempotency key")
     public void createTransactionWithAutoIdempotencyKey(String transactionTypeInput, String transactionPaymentType, String transactionDate,
             double transactionAmount) throws IOException {

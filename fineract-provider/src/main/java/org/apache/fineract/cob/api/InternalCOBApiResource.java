@@ -51,6 +51,7 @@ import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactio
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Profile(FineractProfiles.TEST)
 @Component
@@ -110,6 +111,7 @@ public class InternalCOBApiResource implements InitializingBean {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Path("loan-reprocess/{loanId}")
+    @Transactional
     public void loanReprocess(@Context final UriInfo uriInfo, @PathParam("loanId") long loanId) {
         reprocessLoanTransactionsService.reprocessTransactions(loanRepositoryWrapper.findOneWithNotFoundDetection(loanId));
     }

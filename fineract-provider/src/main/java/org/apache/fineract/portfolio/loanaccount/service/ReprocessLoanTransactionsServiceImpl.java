@@ -18,11 +18,13 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import jakarta.persistence.FlushModeType;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.annotation.WithFlushMode;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
@@ -50,6 +52,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@WithFlushMode(FlushModeType.COMMIT)
 public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransactionsService {
 
     private final LoanAccountService loanAccountService;

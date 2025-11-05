@@ -690,3 +690,59 @@ Feature: LoanInterestWaiver
       | Type   | Account code | Account name               | Debit | Credit |
       | INCOME | 404001       | Interest Income Charge Off |       | 260.0  |
       | INCOME | 404000       | Interest Income            | 260.0 |        |
+
+
+  @TestRailId:C4200
+  Scenario: Verify Interest Payment Waiver transaction - UC12: IPW after Charge-off
+    When Admin sets the business date to "23 October 2025"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                   | submitted on date | with Principal   | ANNUAL interest rate %     | interest type              | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType  | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL_ZERO_CHARGE_OFF | 25 October 2021   | 678.03           | 9.5129                     | DECLINING_BALANCE          | DAILY                       | EQUAL_INSTALLMENTS | 24                 | MONTHS                | 1              | MONTHS                 | 24                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "25 October 2021" with "678.03" amount and expected disbursement date on "01 January 2024"
+    And Admin successfully disburse the loan on "25 October 2021" with "678.03" EUR transaction amount
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "29 October 2021" with 10 EUR transaction amount and self-generated Idempotency key
+    And Customer makes "AUTOPAY" repayment on "26 August 2022" with 186.84 EUR transaction amount
+    And Admin does charge-off the loan on "24 September 2022"
+    When Admin makes "INTEREST_PAYMENT_WAIVER" transaction with "AUTOPAY" payment type on "24 September 2022" with 46.56 EUR transaction amount and self-generated external-id
+    Then Loan Repayment schedule has 24 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance  | Late  | Outstanding |
+      |    |      | 25 October 2021   |                   | 678.03          |               |          | 0.0  |           | 0.0   | 0.0   |             |       |             |
+      | 1  | 31   | 25 November 2021  | 26 August 2022    | 652.2           | 25.83         | 5.31     | 0.0  | 0.0       | 31.14 | 31.14 |  0.01       | 31.13 | 0.0         |
+      | 2  | 30   | 25 December 2021  | 26 August 2022    | 626.36          | 25.84         | 5.3      | 0.0  | 0.0       | 31.14 | 31.14 |  0.0        | 31.14 | 0.0         |
+      | 3  | 31   | 25 January 2022   | 26 August 2022    | 600.52          | 25.84         | 5.3      | 0.0  | 0.0       | 31.14 | 31.14 |  0.0        | 31.14 | 0.0         |
+      | 4  | 31   | 25 February 2022  | 26 August 2022    | 574.68          | 25.84         | 5.3      | 0.0  | 0.0       | 31.14 | 31.14 |  0.0        | 31.14 | 0.0         |
+      | 5  | 28   | 25 March 2022     | 26 August 2022    | 548.84          | 25.84         | 5.3      | 0.0  | 0.0       | 31.14 | 31.14 |  0.0        | 31.14 | 0.0         |
+      | 6  | 31   | 25 April 2022     | 26 August 2022    | 523.0           | 25.84         | 5.3      | 0.0  | 0.0       | 31.14 | 31.14 |  0.0        | 31.14 | 0.0         |
+      | 7  | 30   | 25 May 2022       | 24 September 2022 | 497.16          | 25.84         | 5.3      | 0.0  | 0.0       | 31.14 | 31.14 |  0.0        | 31.14 | 0.0         |
+      | 8  | 31   | 25 June 2022      |                   | 471.32          | 25.84         | 5.3      | 0.0  | 0.0       | 31.14 | 15.43 |  0.0        | 15.43 | 15.71       |
+      | 9  | 30   | 25 July 2022      |                   | 445.48          | 25.84         | 5.3      | 0.0  | 0.0       | 31.14 |  0.0  |  0.0        | 0.0   | 31.14       |
+      | 10 | 31   | 25 August 2022    |                   | 419.64          | 25.84         | 5.3      | 0.0  | 0.0       | 31.14 |  0.0  |  0.0        | 0.0   | 31.14       |
+      | 11 | 31   | 25 September 2022 |                   | 392.48          | 27.16         | 3.98     | 0.0  | 0.0       | 31.14 |  0.0  |  0.0        | 0.0   | 31.14       |
+      | 12 | 30   | 25 October 2022   |                   | 361.34          | 31.14         | 0.0      | 0.0  | 0.0       | 31.14 |  0.0  |  0.0        | 0.0   | 31.14       |
+      | 13 | 31   | 25 November 2022  |                   | 330.2           | 31.14         | 0.0      | 0.0  | 0.0       | 31.14 |  0.0  |  0.0        | 0.0   | 31.14       |
+      | 14 | 30   | 25 December 2022  |                   | 299.06          | 31.14         | 0.0      | 0.0  | 0.0       | 31.14 |  0.0  |  0.0        | 0.0   | 31.14       |
+      | 15 | 31   | 25 January 2023   |                   | 267.92          | 31.14         | 0.0      | 0.0  | 0.0       | 31.14 |  0.0  |  0.0        | 0.0   | 31.14       |
+      | 16 | 31   | 25 February 2023  |                   | 236.78          | 31.14         | 0.0      | 0.0  | 0.0       | 31.14 |  0.0  |  0.0        | 0.0   | 31.14       |
+      | 17 | 28   | 25 March 2023     |                   | 205.64          | 31.14         | 0.0      | 0.0  | 0.0       | 31.14 |  0.0  |  0.0        | 0.0   | 31.14       |
+      | 18 | 31   | 25 April 2023     |                   | 174.5           | 31.14         | 0.0      | 0.0  | 0.0       | 31.14 |  0.0  |  0.0        | 0.0   | 31.14       |
+      | 19 | 30   | 25 May 2023       |                   | 143.36          | 31.14         | 0.0      | 0.0  | 0.0       | 31.14 |  0.0  |  0.0        | 0.0   | 31.14       |
+      | 20 | 31   | 25 June 2023      |                   | 112.22          | 31.14         | 0.0      | 0.0  | 0.0       | 31.14 |  0.0  |  0.0        | 0.0   | 31.14       |
+      | 21 | 30   | 25 July 2023      |                   |  81.08          | 31.14         | 0.0      | 0.0  | 0.0       | 31.14 |  0.0  |  0.0        | 0.0   | 31.14       |
+      | 22 | 31   | 25 August 2023    |                   | 49.94           | 31.14         | 0.0      | 0.0  | 0.0       | 31.14 |  0.0  |  0.0        | 0.0   | 31.14       |
+      | 23 | 31   | 25 September 2023 |                   | 18.8            | 31.14         | 0.0      | 0.0  | 0.0       | 31.14 |  0.0  |  0.0        | 0.0   | 31.14       |
+      | 24 | 30   | 25 October 2023   |                   | 0.0             | 18.8          | 0.0      | 0.0  | 0.0       | 18.8  | 10.0  | 10.0        | 0.0   | 8.8         |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late    | Outstanding |
+      | 678.03        | 56.99    | 0.0  | 0.0       | 735.02 | 243.41 | 10.01      | 233.40  | 491.61      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance |
+      | 25 October 2021    | Disbursement            | 678.03  |   0.0      |  0.0     | 0.0  | 0.0       | 678.03       |
+      | 29 October 2021    | Merchant Issued Refund  | 10.0    |  10.0      |  0.0     | 0.0  | 0.0       | 668.03       |
+      | 29 October 2021    | Interest Refund         |  0.01   |   0.0      |  0.01    | 0.0  | 0.0       | 668.03       |
+      | 26 August 2022     | Repayment               | 186.84  | 155.03     | 31.81    | 0.0  | 0.0       | 513.0        |
+      | 24 September 2022  | Accrual                 |  56.99  |   0.0      | 56.99    | 0.0  | 0.0       |   0.0        |
+      | 24 September 2022  | Charge-off              | 538.17  | 513.0      | 25.17    | 0.0  | 0.0       |   0.0        |
+      | 24 September 2022  | Interest Payment Waiver |  46.56  |  35.97     | 10.59    | 0.0  | 0.0       | 477.03       |
+    And Customer makes "AUTOPAY" repayment on "24 September 2022" with 491.61 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met

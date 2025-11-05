@@ -475,7 +475,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         final Loan loan = loanTransaction.getLoan();
         final LoanTransaction chargeOffTransaction = loan.getLoanTransactions().stream().filter(t -> t.isChargeOff() && t.isNotReversed())
                 .findFirst().orElse(null);
-        if (loan.isChargedOff() && chargeOffTransaction != null) {
+        boolean chargeOffInEffect = chargeOffIsInEffect(ctx, chargeOffTransaction, loanTransaction);
+        if (chargeOffInEffect) {
             final LoanChargeOffBehaviour chargeOffBehaviour = loanTransaction.getLoan().getLoanProductRelatedDetail()
                     .getChargeOffBehaviour();
             if (loan.isProgressiveSchedule() && !LoanChargeOffBehaviour.REGULAR.equals(chargeOffBehaviour)) {
@@ -508,6 +509,21 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             }
         }
         handleRepayment(loanTransaction, ctx);
+    }
+
+    private boolean chargeOffIsInEffect(TransactionCtx ctx, LoanTransaction chargeOffTransaction, LoanTransaction loanTransaction) {
+        if (ctx instanceof ProgressiveTransactionCtx progressiveCtx && progressiveCtx.isChargedOff()) {
+            return true;
+        }
+        if (chargeOffTransaction == null) {
+            return false;
+        }
+        List<LoanTransaction> orderedTransactions = new ArrayList<>();
+        orderedTransactions.add(chargeOffTransaction);
+        orderedTransactions.add(loanTransaction);
+        orderedTransactions.sort(LoanTransactionComparator.INSTANCE);
+
+        return orderedTransactions.getFirst().isChargeOff();
     }
 
     private void handleReAmortization(LoanTransaction loanTransaction, TransactionCtx transactionCtx) {
