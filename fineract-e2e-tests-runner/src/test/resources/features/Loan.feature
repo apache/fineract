@@ -8820,3 +8820,41 @@ Feature: Loan
 
     When Loan Pay-off is made on "15 January 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C4201
+  Scenario: Verify repayment reversal after adding NSF fee charge with transaction reprocessing
+    When Admin sets the business date to "06 November 2025"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_360_30_INTEREST_RECALCULATION_ZERO_INTEREST_CHARGE_OFF_ACCRUAL_ACTIVITY | 21 August 2025    | 102.47         | 11.3                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "21 August 2025" with "102.47" amount and expected disbursement date on "21 August 2025"
+    And Admin successfully disburse the loan on "21 August 2025" with "102.47" EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "21 September 2025" with 34.80 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "21 September 2025"
+    And Customer makes "AUTOPAY" repayment on "26 September 2025" with 34.79 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "29 September 2025" with 0.01 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "30 September 2025" with 71.63 EUR transaction amount
+    When Admin adds "LOAN_NSF_FEE" due date charge with "30 September 2025" due date and 2.8 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "26 September 2025"
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 21 August 2025    |                   | 102.47          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 21 September 2025 | 30 September 2025 | 68.63           | 33.84         | 0.96     | 0.0  | 0.0       | 34.8  | 34.8  | 0.0        | 34.8 | 0.0         |
+      | 2  | 30   | 21 October 2025   |                   | 34.35           | 34.28         | 0.52     | 0.0  | 2.8       | 37.6  | 36.84 | 36.84      | 0.0  | 0.76        |
+      | 3  | 31   | 21 November 2025  |                   | 0.0             | 34.35         | 0.32     | 0.0  | 0.0       | 34.67 | 0.0   | 0.0        | 0.0  | 34.67       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 102.47        | 1.8      | 0.0  | 2.8       | 107.07 | 71.64 | 36.84      | 34.8 | 35.43       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 21 August 2025    | Disbursement     | 102.47 | 0.0       | 0.0      | 0.0  | 0.0       | 102.47       | false    | false    |
+      | 21 September 2025 | Repayment        | 34.8   | 33.84     | 0.96     | 0.0  | 0.0       | 68.63        | true     | false    |
+      | 21 September 2025 | Accrual Activity | 0.96   | 0.0       | 0.96     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 September 2025 | Repayment        | 34.79  | 33.84     | 0.95     | 0.0  | 0.0       | 68.63        | true     | false    |
+      | 29 September 2025 | Repayment        | 0.01   | 0.01      | 0.0      | 0.0  | 0.0       | 102.46       | false    | true     |
+      | 30 September 2025 | Repayment        | 71.63  | 67.87     | 0.96     | 0.0  | 2.8       | 34.59        | false    | true     |
+      | 21 October 2025   | Accrual Activity | 3.32   | 0.0       | 0.52     | 0.0  | 2.8       | 0.0          | false    | true     |
+      | 06 November 2025  | Accrual          | 1.21   | 0.0       | 1.21     | 0.0  | 0.0       | 0.0          | false    | false    |
+    And Customer makes "AUTOPAY" repayment on "06 November 2025" with 35.28 EUR transaction amount
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
