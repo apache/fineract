@@ -67,8 +67,15 @@ public class LoanTermVariationsMapper {
         NthDayType nthDayType = null;
         DayOfWeekType dayOfWeekType = null;
         final List<DisbursementData> disbursementData = new ArrayList<>();
+        final boolean isDisbursed = loan.isDisbursed();
         for (LoanDisbursementDetails disbursementDetails : loan.getDisbursementDetails()) {
-            disbursementData.add(disbursementDetails.toData());
+            if (isDisbursed) {
+                if (disbursementDetails.actualDisbursementDate() != null) {
+                    disbursementData.add(disbursementDetails.toData());
+                }
+            } else {
+                disbursementData.add(disbursementDetails.toData());
+            }
         }
 
         Calendar calendar = scheduleGeneratorDTO.getCalendar();

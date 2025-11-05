@@ -530,7 +530,7 @@ public class LoansApiResource {
                             i.getPrincipal(), i.getInArrearsTolerance(), i.getFeeChargesAtDisbursementCharged());
                     LoanScheduleData repaymentSchedule = loanReadPlatformService.retrieveRepaymentSchedule(loanId,
                             repaymentScheduleRelatedData, disbursementData, capitalizedIncomeData, i.isInterestRecalculationEnabled(),
-                            LoanScheduleType.fromEnumOptionData(i.getLoanScheduleType()));
+                            LoanScheduleType.fromEnumOptionData(i.getLoanScheduleType()), i.getStatus());
 
                     LoanSummaryDataProvider loanSummaryDataProvider = loanSummaryProviderDelegate
                             .resolveLoanSummaryDataProvider(i.getTransactionProcessingStrategyCode());
@@ -1101,7 +1101,7 @@ public class LoansApiResource {
                         loanBasicDetails.getFeeChargesAtDisbursementCharged());
                 repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(resolvedLoanId, repaymentScheduleRelatedData,
                         disbursementData, capitalizedIncomeData, loanBasicDetails.isInterestRecalculationEnabled(),
-                        LoanScheduleType.fromEnumOptionData(loanBasicDetails.getLoanScheduleType()));
+                        LoanScheduleType.fromEnumOptionData(loanBasicDetails.getLoanScheduleType()), loanBasicDetails.getStatus());
 
                 if (associationParameters.contains(DataTableApiConstant.futureScheduleAssociateParamName)
                         && loanBasicDetails.isInterestRecalculationEnabled()) {

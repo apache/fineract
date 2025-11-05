@@ -4163,6 +4163,28 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_CUSTOM_PMT_ALLOC_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OFF_ACCRUAL,
                 responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffAccruals);
+
+        // LP1 with 12% Flat interest, interest period: Daily, Interest recalculation- Same as repayment
+        // Multi-disbursement that expects tranches
+        final String name150 = DefaultLoanProduct.LP1_INTEREST_FLAT_DAILY_RECALCULATION_SAR_MULTIDISB_EXPECT_TRANCHES.getName();
+        PostLoanProductsRequest loanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementExpectsTranches = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP1InterestDecliningBalanceDailyRecalculationCompoundingNone()//
+                .name(name150)//
+                .interestType(INTEREST_TYPE_FLAT)//
+                .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value)//
+                .allowPartialPeriodInterestCalcualtion(false)//
+                .recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT.value)//
+                .recalculationRestFrequencyInterval(1)//
+                .installmentAmountInMultiplesOf(null)//
+                .multiDisburseLoan(true)//
+                .disallowExpectedDisbursements(false)//
+                .maxTrancheCount(10)//
+                .outstandingLoanBalance(10000.0);//
+        Response<PostLoanProductsResponse> responseLoanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementExpectsTranches = loanProductsApi
+                .createLoanProduct(loanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementExpectsTranches)
+                .execute();
+        TestContext.INSTANCE.set(TestContextKey.LP1_INTEREST_FLAT_DAILY_RECALCULATION_SAR_MULTIDISB_EXPECT_TRANCHES,
+                responseLoanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementExpectsTranches);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,

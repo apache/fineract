@@ -270,7 +270,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 .findRepaymentPeriodDataByLoanId(accountData.getId());
         final LoanScheduleData repaymentSchedule = retrieveRepaymentSchedule(accountData.getId(), repaymentScheduleRelatedData,
                 disbursementData, capitalizedIncomeData, accountData.isInterestRecalculationEnabled(),
-                LoanScheduleType.fromEnumOptionData(accountData.getLoanScheduleType()));
+                LoanScheduleType.fromEnumOptionData(accountData.getLoanScheduleType()), accountData.getStatus());
         accountData.setRepaymentSchedule(repaymentSchedule);
         return accountData;
     }
@@ -279,14 +279,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     public LoanScheduleData retrieveRepaymentSchedule(final Long loanId,
             final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData, Collection<DisbursementData> disbursementData,
             Collection<LoanTransactionRepaymentPeriodData> capitalizedIncomeData, boolean isInterestRecalculationEnabled,
-            LoanScheduleType loanScheduleType) {
+            LoanScheduleType loanScheduleType, LoanStatusEnumData loanStatus) {
 
         try {
             this.context.authenticatedUser();
 
             final LoanScheduleResultSetExtractor fullResultsetExtractor = new LoanScheduleResultSetExtractor(
                     repaymentScheduleRelatedLoanData, disbursementData, capitalizedIncomeData, isInterestRecalculationEnabled,
-                    loanScheduleType);
+                    loanScheduleType, (loanStatus.getId() >= 300));
             final String sql = "select " + fullResultsetExtractor.schema() + " where ls.loan_id = ? order by ls.loan_id, ls.installment";
 
             return this.jdbcTemplate.query(sql, fullResultsetExtractor, loanId); // NOSONAR
@@ -1350,10 +1350,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         private LocalDate lastDueDate;
         private BigDecimal outstandingLoanPrincipalBalance;
         private boolean excludePastUnDisbursed;
+        private boolean loanIsDisbursed;
 
         LoanScheduleResultSetExtractor(final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData,
                 Collection<DisbursementData> disbursementData, Collection<LoanTransactionRepaymentPeriodData> capitalizedIncomeData,
-                boolean isInterestRecalculationEnabled, LoanScheduleType loanScheduleType) {
+                boolean isInterestRecalculationEnabled, LoanScheduleType loanScheduleType, boolean loanIsDisbursed) {
             this.currency = repaymentScheduleRelatedLoanData.getCurrency();
             this.disbursement = repaymentScheduleRelatedLoanData.disbursementData();
             this.capitalizedIncomeData = capitalizedIncomeData;
@@ -1363,6 +1364,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             this.disbursementData = disbursementData;
             this.excludePastUnDisbursed = isInterestRecalculationEnabled;
             this.loanScheduleType = loanScheduleType;
+            this.loanIsDisbursed = loanIsDisbursed;
         }
 
         public String schema() {
@@ -1441,9 +1443,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                         collectEligibleDisbursementData(loanScheduleType, disbursementData, fromDate, dueDate, disbursementPeriodIds));
                 combinedDataList.addAll(collectEligibleCapitalizedIncomeData(fromDate, dueDate, disbursementPeriodIds));
                 combinedDataList.sort(this::sortPeriodDataHolders);
-                fillLoanSchedulePeriodData(periods, combinedDataList, disbursementChargeAmount, waivedChargeAmount);
+                fillLoanSchedulePeriodData(periods, combinedDataList, disbursementChargeAmount, waivedChargeAmount, loanIsDisbursed);
 
-                BigDecimal disbursedAmount = calculateDisbursedAmount(combinedDataList);
+                BigDecimal disbursedAmount = calculateDisbursedAmount(combinedDataList, loanIsDisbursed);
 
                 // Add the Charge back or Credits to the initial amount to avoid negative balance
                 final BigDecimal principalCredits = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalCredits");
@@ -1642,14 +1644,15 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         }
 
         private void fillLoanSchedulePeriodData(List<LoanSchedulePeriodData> periods, List<LoanSchedulePeriodDataWrapper> combinedDataList,
-                BigDecimal disbursementChargeAmount, BigDecimal waivedChargeAmount) {
+                BigDecimal disbursementChargeAmount, BigDecimal waivedChargeAmount, boolean loanIsDisbursed) {
             // Process all collected data in chronological order
             for (LoanSchedulePeriodDataWrapper dataItem : combinedDataList) {
                 LoanSchedulePeriodData periodData;
+                DisbursementData disbursementData = null;
                 if (dataItem.isDisbursement()) {
                     // Process disbursement data
-                    DisbursementData data = (DisbursementData) dataItem.getData();
-                    periodData = createLoanSchedulePeriodData(data, disbursementChargeAmount, waivedChargeAmount);
+                    disbursementData = (DisbursementData) dataItem.getData();
+                    periodData = createLoanSchedulePeriodData(disbursementData, disbursementChargeAmount, waivedChargeAmount);
                 } else {
                     // Process capitalized income data
                     LoanTransactionRepaymentPeriodData data = (LoanTransactionRepaymentPeriodData) dataItem.getData();
@@ -1658,16 +1661,28 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
                 // Common processing for both data types
                 periods.add(periodData);
-                this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(periodData.getPrincipalDisbursed());
+                if (loanIsDisbursed) {
+                    if (disbursementData.isDisbursed()) {
+                        this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(periodData.getPrincipalDisbursed());
+                    }
+                } else {
+                    this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(periodData.getPrincipalDisbursed());
+                }
             }
         }
 
-        private BigDecimal calculateDisbursedAmount(List<LoanSchedulePeriodDataWrapper> combinedDataList) {
+        private BigDecimal calculateDisbursedAmount(List<LoanSchedulePeriodDataWrapper> combinedDataList, boolean loanIsDisbursed) {
             BigDecimal disbursedAmount = BigDecimal.ZERO;
             for (LoanSchedulePeriodDataWrapper dataItem : combinedDataList) {
                 if (dataItem.isDisbursement()) {
                     DisbursementData data = (DisbursementData) dataItem.getData();
-                    disbursedAmount = disbursedAmount.add(data.getPrincipal());
+                    if (loanIsDisbursed) {
+                        if (data.isDisbursed()) {
+                            disbursedAmount = disbursedAmount.add(data.getPrincipal());
+                        }
+                    } else {
+                        disbursedAmount = disbursedAmount.add(data.getPrincipal());
+                    }
                 }
             }
             return disbursedAmount;

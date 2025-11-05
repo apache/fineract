@@ -1333,7 +1333,7 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
         Money principalToBeScheduled;
         if (loanApplicationTerms.isMultiDisburseLoan()) {
             if (loanApplicationTerms.getTotalDisbursedAmount().isGreaterThanZero()) {
-                principalToBeScheduled = loanApplicationTerms.getTotalMultiDisbursedAmount();
+                principalToBeScheduled = loanApplicationTerms.getTotalDisbursedAmount();
             } else if (loanApplicationTerms.getApprovedPrincipal().isGreaterThanZero()) {
                 principalToBeScheduled = loanApplicationTerms.getApprovedPrincipal();
             } else {
@@ -1994,8 +1994,7 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
             for (DisbursementData disbursementData : loanApplicationTerms.getDisbursementDatas()) {
                 if (disbursementData.disbursementDate().equals(disbursementDate)) {
                     principal = principal.add(disbursementData.getPrincipal());
-                } else if (!excludePastUnDisbursed || disbursementData.isDisbursed()
-                        || !DateUtils.isBeforeBusinessDate(disbursementData.disbursementDate())) {
+                } else if (!excludePastUnDisbursed || disbursementData.isDisbursed()) {
                     /*
                      * JW: sums up amounts by disbursal date in case of side-effect issues. Original assumed that there
                      * were no duplicate disbursal dates and 'put' each amount into the map keyed by date

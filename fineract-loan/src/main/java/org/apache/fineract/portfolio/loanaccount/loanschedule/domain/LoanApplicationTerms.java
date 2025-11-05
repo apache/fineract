@@ -2050,18 +2050,6 @@ public final class LoanApplicationTerms {
         return disbursedAmount;
     }
 
-    public Money getTotalMultiDisbursedAmount() {
-        Money disbursedAmount = Money.zero(getCurrency());
-        if (isMultiDisburseLoan()) {
-            for (DisbursementData disbursement : getDisbursementDatas()) {
-                disbursedAmount = disbursedAmount.plus(disbursement.getPrincipal());
-            }
-        } else {
-            disbursedAmount = getPrincipal();
-        }
-        return disbursedAmount;
-    }
-
     public void updatePeriodNumberApplicableForPrincipalOrInterestGrace(final Integer periodsApplicationForGrace) {
         int applicablePeriodNumber = periodsApplicationForGrace;
         int graceOnPrincipal = defaultToZeroIfNull(this.principalGrace);
