@@ -18,14 +18,17 @@
  */
 package org.apache.fineract.infrastructure.core.service.database;
 
+import com.google.common.collect.Sets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.configuration.service.MoneyHelperInitializationService;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -53,6 +56,9 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
 
     private final DataSourcePerTenantServiceFactory dataSourcePerTenantServiceFactory;
 
+    private final MoneyHelperInitializationService moneyHelperInitializationService;
+    private final Set<Long> tenantMoneyInitializingSet = Sets.newConcurrentHashSet();
+
     @Override
     public DataSource retrieveDataSource() {
         // default to tenant database datasource
@@ -66,7 +72,23 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
             // appropriate datasource for that tenant.
             actualDataSource = TENANT_TO_DATA_SOURCE_MAP.computeIfAbsent(tenantConnectionKey,
                     (key) -> dataSourcePerTenantServiceFactory.createNewDataSourceFor(tenant, tenantConnection));
+        }
 
+        // TODO: This is definitely not the optimal place to initialize the rounding modes
+        // Preferably nothing should use a statically referenced context and the initialization
+        // should happen within the rounding mode retrieval
+        if (tenant != null) {
+            Long connectionId = tenant.getConnection().getConnectionId();
+            if (!tenantMoneyInitializingSet.contains(connectionId) && !moneyHelperInitializationService.isTenantInitialized(tenant)) {
+                // Double check to prevent visibility and race-condition issues
+                synchronized (tenantMoneyInitializingSet) {
+                    if (!tenantMoneyInitializingSet.contains(connectionId)) {
+                        tenantMoneyInitializingSet.add(connectionId);
+                        moneyHelperInitializationService.initializeTenantRoundingMode(tenant);
+                        tenantMoneyInitializingSet.remove(connectionId);
+                    }
+                }
+            }
         }
 
         return actualDataSource;
