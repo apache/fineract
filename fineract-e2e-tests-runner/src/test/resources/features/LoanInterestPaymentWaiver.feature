@@ -691,9 +691,8 @@ Feature: LoanInterestWaiver
       | INCOME | 404001       | Interest Income Charge Off |       | 260.0  |
       | INCOME | 404000       | Interest Income            | 260.0 |        |
 
-
   @TestRailId:C4200
-  Scenario: Verify Interest Payment Waiver transaction - UC12: IPW after Charge-off
+  Scenario: Verify Interest Payment Waiver transaction - UC12: IPW after Charge-off - UC1
     When Admin sets the business date to "23 October 2025"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -744,5 +743,658 @@ Feature: LoanInterestWaiver
       | 24 September 2022  | Accrual                 |  56.99  |   0.0      | 56.99    | 0.0  | 0.0       |   0.0        |
       | 24 September 2022  | Charge-off              | 538.17  | 513.0      | 25.17    | 0.0  | 0.0       |   0.0        |
       | 24 September 2022  | Interest Payment Waiver |  46.56  |  35.97     | 10.59    | 0.0  | 0.0       | 477.03       |
+    Then In Loan Transactions all transactions have non-null external-id
     And Customer makes "AUTOPAY" repayment on "24 September 2022" with 491.61 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C4204
+  Scenario: Verify Interest Payment Waiver transaction - UC12: IPW after Charge-off - UC2
+    When Admin sets the business date to "23 October 2025"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                     | submitted on date | with Principal   | ANNUAL interest rate %     | interest type              | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType  | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP2_ADV_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OF_ACCRUAL | 18 January 2022   | 431.98           | 9.99                       | DECLINING_BALANCE          | DAILY                       | EQUAL_INSTALLMENTS | 12                | MONTHS                | 1              | MONTHS                  | 12                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "18 January 2022" with "431.98" amount and expected disbursement date on "18 January 2022"
+    And Admin successfully disburse the loan on "18 January 2022" with "431.98" EUR transaction amount
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance  | Late  | Outstanding |
+      |    |      | 18 January 2022   |                   | 431.98          |               |          | 0.0  |           | 0.0   |  0.0  |             |       |             |
+      | 1  | 31   | 18 February 2022  |                   | 397.68          | 34.3          | 3.67     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 2  | 28   | 18 March 2022     |                   | 363.02          | 34.66         | 3.31     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 3  | 31   | 18 April 2022     |                   | 328.72          | 34.3          | 3.67     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 4  | 30   | 18 May 2022       |                   | 294.3           | 34.42         | 3.55     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 5  | 31   | 18 June 2022      |                   | 260.0           | 34.3          | 3.67     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 6  | 30   | 18 July 2022      |                   | 225.58          | 34.42         | 3.55     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 7  | 31   | 18 August 2022    |                   | 191.28          | 34.3          | 3.67     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 8  | 31   | 18 September 2022 |                   | 156.98          | 34.3          | 3.67     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 9  | 30   | 18 October 2022   |                   | 122.56          | 34.42         | 3.55     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 10 | 31   | 18 November 2022  |                   |  88.26          | 34.3          | 3.67     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 11 | 30   | 18 December 2022  |                   |  53.84          | 34.42         | 3.55     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 12 | 31   | 18 January 2023   |                   |   0.0           | 53.84         | 3.67     | 0.0  | 0.0       | 57.51 |  0.0  |  0.0        | 0.0   | 57.51       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late    | Outstanding |
+      | 431.98        | 43.2     | 0.0  | 0.0       | 475.18 | 0.0    | 0.0        | 0.0     | 475.18      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       |
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "20 January 2022" with 349.99 EUR transaction amount and self-generated Idempotency key
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance  | Late  | Outstanding |
+      |    |      | 18 January 2022   |                   | 431.98          |               |          | 0.0  |           | 0.0   |  0.0  |             |       |             |
+      | 1  | 31   | 18 February 2022  | 20 January 2022   | 394.25          | 37.73         | 0.24     | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 2  | 28   | 18 March 2022     | 20 January 2022   | 356.28          | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 3  | 31   | 18 April 2022     | 20 January 2022   | 318.31          | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 4  | 30   | 18 May 2022       | 20 January 2022   | 280.34          | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 5  | 31   | 18 June 2022      | 20 January 2022   | 242.37          | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 6  | 30   | 18 July 2022      | 20 January 2022   | 204.4           | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 7  | 31   | 18 August 2022    | 20 January 2022   | 166.43          | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 8  | 31   | 18 September 2022 | 20 January 2022   | 128.46          | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 9  | 30   | 18 October 2022   | 20 January 2022   |  90.49          | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 10 | 31   | 18 November 2022  |                   |  59.31          | 31.18         | 6.79     | 0.0  | 0.0       | 37.97 |  8.46 |  8.46       | 0.0   | 29.51       |
+      | 11 | 30   | 18 December 2022  |                   |  22.01          | 37.3          | 0.67     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 12 | 31   | 18 January 2023   |                   |   0.0           | 22.01         | 0.7      | 0.0  | 0.0       | 22.71 |  0.0  |  0.0        | 0.0   | 22.71       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late    | Outstanding |
+      | 431.98        | 8.4      | 0.0  | 0.0       | 440.38 | 350.19 | 350.19     | 0.0     | 90.19       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+    And Customer makes "AUTOPAY" repayment on "18 February 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 February 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "28 February 2022" with 19.83 EUR transaction amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | false    | false    |
+    And Customer makes "AUTOPAY" repayment on "18 March 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 March 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  18.65     |  1.18    | 0.0  | 0.0       |  43.55       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "31 March 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "31 March 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  18.65     |  1.18    | 0.0  | 0.0       |  43.55       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  18.43     |  1.4     | 0.0  | 0.0       |  43.77       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "18 April 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 April 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  18.65     |  1.18    | 0.0  | 0.0       |  43.55       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  18.43     |  1.4     | 0.0  | 0.0       |  43.77       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.12     |  1.71    | 0.0  | 0.0       |  44.08       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "18 May 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 May 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  18.65     |  1.18    | 0.0  | 0.0       |  43.55       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  18.43     |  1.4     | 0.0  | 0.0       |  43.77       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.12     |  1.71    | 0.0  | 0.0       |  44.08       | true     | false    |
+      | 18 May 2022        | Repayment               | 19.83   |  17.61     |  2.22    | 0.0  | 0.0       |  44.59       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "18 June 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 June 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  18.65     |  1.18    | 0.0  | 0.0       |  43.55       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  18.43     |  1.4     | 0.0  | 0.0       |  43.77       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.12     |  1.71    | 0.0  | 0.0       |  44.08       | true     | false    |
+      | 18 May 2022        | Repayment               | 19.83   |  17.61     |  2.22    | 0.0  | 0.0       |  44.59       | true     | false    |
+      | 18 June 2022       | Repayment               | 19.83   |  17.08     |  2.75    | 0.0  | 0.0       |  45.12       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "18 July 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 July 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  18.65     |  1.18    | 0.0  | 0.0       |  43.55       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  18.43     |  1.4     | 0.0  | 0.0       |  43.77       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.12     |  1.71    | 0.0  | 0.0       |  44.08       | true     | false    |
+      | 18 May 2022        | Repayment               | 19.83   |  17.61     |  2.22    | 0.0  | 0.0       |  44.59       | true     | false    |
+      | 18 June 2022       | Repayment               | 19.83   |  17.08     |  2.75    | 0.0  | 0.0       |  45.12       | true     | false    |
+      | 18 July 2022       | Repayment               | 19.83   |  16.57     |  3.26    | 0.0  | 0.0       |  45.63       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "18 August 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 August 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  18.65     |  1.18    | 0.0  | 0.0       |  43.55       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  18.43     |  1.4     | 0.0  | 0.0       |  43.77       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.12     |  1.71    | 0.0  | 0.0       |  44.08       | true     | false    |
+      | 18 May 2022        | Repayment               | 19.83   |  17.61     |  2.22    | 0.0  | 0.0       |  44.59       | true     | false    |
+      | 18 June 2022       | Repayment               | 19.83   |  17.08     |  2.75    | 0.0  | 0.0       |  45.12       | true     | false    |
+      | 18 July 2022       | Repayment               | 19.83   |  16.57     |  3.26    | 0.0  | 0.0       |  45.63       | true     | false    |
+      | 18 August 2022     | Repayment               | 19.83   |  16.04     |  3.79    | 0.0  | 0.0       |  46.16       | true     | false    |
+    And Admin does charge-off the loan on "16 September 2022"
+    When Admin makes "INTEREST_PAYMENT_WAIVER" transaction with "AUTOPAY" payment type on "16 September 2022" with 46.56 EUR transaction amount and self-generated external-id
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance  | Late  | Outstanding |
+      |    |      | 18 January 2022   |                   | 431.98          |               |          | 0.0  |           | 0.0   |  0.0  |             |       |             |
+      | 1  | 31   | 18 February 2022  | 20 January 2022   | 394.25          | 37.73         | 0.24     | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 2  | 28   | 18 March 2022     | 20 January 2022   | 356.28          | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 3  | 31   | 18 April 2022     | 20 January 2022   | 318.31          | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 4  | 30   | 18 May 2022       | 20 January 2022   | 280.34          | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 5  | 31   | 18 June 2022      | 20 January 2022   | 242.37          | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 6  | 30   | 18 July 2022      | 20 January 2022   | 204.4           | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 7  | 31   | 18 August 2022    | 20 January 2022   | 166.43          | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 8  | 31   | 18 September 2022 | 20 January 2022   | 132.74          | 33.69         | 4.28     | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 9  | 30   | 18 October 2022   | 20 January 2022   |  94.77          | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 10 | 31   | 18 November 2022  | 16 September 2022 |  56.8           | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 11 | 30   | 18 December 2022  |                   |  18.83          | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 36.88 | 36.88       | 0.0   | 1.09        |
+      | 12 | 31   | 18 January 2023   |                   |   0.0           | 18.83         | 0.0      | 0.0  | 0.0       | 18.83 |  0.0  |  0.0        | 0.0   | 18.83       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late    | Outstanding |
+      | 431.98        | 4.52     | 0.0  | 0.0       | 436.5  | 416.58 | 416.58     | 0.0     | 19.92       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  19.83     |  0.0     | 0.0  | 0.0       |  62.2        | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  18.65     |  1.18    | 0.0  | 0.0       |  43.55       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  18.43     |  1.4     | 0.0  | 0.0       |  43.77       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.12     |  1.71    | 0.0  | 0.0       |  44.08       | true     | false    |
+      | 18 May 2022        | Repayment               | 19.83   |  17.61     |  2.22    | 0.0  | 0.0       |  44.59       | true     | false    |
+      | 18 June 2022       | Repayment               | 19.83   |  17.08     |  2.75    | 0.0  | 0.0       |  45.12       | true     | false    |
+      | 18 July 2022       | Repayment               | 19.83   |  16.57     |  3.26    | 0.0  | 0.0       |  45.63       | true     | false    |
+      | 18 August 2022     | Repayment               | 19.83   |  16.04     |  3.79    | 0.0  | 0.0       |  46.16       | true     | false    |
+      | 16 September 2022  | Accrual                 | 4.52    |   0.0      |  4.52    | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 16 September 2022  | Charge-off              | 66.48   |  62.2      |  4.28    | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 16 September 2022  | Interest Payment Waiver | 46.56   |  46.56     |  0.0     | 0.0  | 0.0       |  15.64       | false    | false    |
+    Then In Loan Transactions all transactions have non-null external-id
+    And Customer makes "AUTOPAY" repayment on "16 September 2022" with 19.92 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C4205
+  Scenario: Verify Interest Payment Waiver transaction - UC12: Payout Refund after Charge-off - UC3
+    When Admin sets the business date to "23 October 2025"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                     | submitted on date | with Principal   | ANNUAL interest rate %     | interest type              | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType  | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP2_ADV_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OF_ACCRUAL | 18 January 2022   | 431.98           | 9.99                       | DECLINING_BALANCE          | DAILY                       | EQUAL_INSTALLMENTS | 24                | MONTHS                | 1              | MONTHS                  | 24                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "18 January 2022" with "431.98" amount and expected disbursement date on "18 January 2022"
+    And Admin successfully disburse the loan on "18 January 2022" with "431.98" EUR transaction amount
+    Then Loan Repayment schedule has 24 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance  | Late  | Outstanding |
+      |    |      | 18 January 2022   |                   | 431.98          |               |          | 0.0  |           | 0.0   |  0.0  |             |       |             |
+      | 1  | 31   | 18 February 2022  |                   | 415.72          | 16.26         | 3.67     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 2  | 28   | 18 March 2022     |                   | 399.1           | 16.62         | 3.31     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 3  | 31   | 18 April 2022     |                   | 382.84          | 16.26         | 3.67     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 4  | 30   | 18 May 2022       |                   | 366.46          | 16.38         | 3.55     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 5  | 31   | 18 June 2022      |                   | 350.2           | 16.26         | 3.67     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 6  | 30   | 18 July 2022      |                   | 333.82          | 16.38         | 3.55     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 7  | 31   | 18 August 2022    |                   | 317.56          | 16.26         | 3.67     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 8  | 31   | 18 September 2022 |                   | 301.3           | 16.26         | 3.67     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 9  | 30   | 18 October 2022   |                   | 284.92          | 16.38         | 3.55     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 10 | 31   | 18 November 2022  |                   | 268.66          | 16.26         | 3.67     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 11 | 30   | 18 December 2022  |                   | 252.28          | 16.38         | 3.55     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 12 | 31   | 18 January 2023   |                   | 236.02          | 16.26         | 3.67     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 13 | 31   | 18 February 2023  |                   | 219.76          | 16.26         | 3.67     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 14 | 28   | 18 March 2023     |                   | 203.14          | 16.62         | 3.31     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 15 | 31   | 18 April 2023     |                   | 186.88          | 16.26         | 3.67     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 16 | 30   | 18 May 2023       |                   | 170.5           | 16.38         | 3.55     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 17 | 31   | 18 June 2023      |                   | 154.24          | 16.26         | 3.67     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 18 | 30   | 18 July 2023      |                   | 137.86          | 16.38         | 3.55     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 19 | 31   | 18 August 2023    |                   | 121.6           | 16.26         | 3.67     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 20 | 31   | 18 September 2023 |                   | 105.34          | 16.26         | 3.67     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 21 | 30   | 18 October 2023   |                   |  88.96          | 16.38         | 3.55     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 22 | 31   | 18 November 2023  |                   |  72.7           | 16.26         | 3.67     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 23 | 30   | 18 December 2023  |                   |  56.32          | 16.38         | 3.55     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 24 | 31   | 18 January 2024   |                   |   0.0           | 56.32         | 3.67     | 0.0  | 0.0       | 59.99 |  0.0  |  0.0        | 0.0   | 59.99       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late    | Outstanding |
+      | 431.98        | 86.4     | 0.0  | 0.0       | 518.38 | 0.0    | 0.0        | 0.0     | 518.38      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       |
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "20 January 2022" with 349.99 EUR transaction amount and self-generated Idempotency key
+    Then Loan Repayment schedule has 24 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance  | Late  | Outstanding |
+      |    |      | 18 January 2022   |                   | 431.98          |               |          | 0.0  |           | 0.0   |  0.0  |             |       |             |
+      | 1  | 31   | 18 February 2022  | 20 January 2022   | 412.29          | 19.69         | 0.24     | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 2  | 28   | 18 March 2022     | 20 January 2022   | 392.36          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 3  | 31   | 18 April 2022     | 20 January 2022   | 372.43          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 4  | 30   | 18 May 2022       | 20 January 2022   | 352.5           | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 5  | 31   | 18 June 2022      | 20 January 2022   | 332.57          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 6  | 30   | 18 July 2022      | 20 January 2022   | 312.64          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 7  | 31   | 18 August 2022    | 20 January 2022   | 292.71          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 8  | 31   | 18 September 2022 | 20 January 2022   | 272.78          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 9  | 30   | 18 October 2022   | 20 January 2022   | 252.85          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 10 | 31   | 18 November 2022  | 20 January 2022   | 232.92          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 11 | 30   | 18 December 2022  | 20 January 2022   | 212.99          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 12 | 31   | 18 January 2023   | 20 January 2022   | 193.06          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 13 | 31   | 18 February 2023  | 20 January 2022   | 173.13          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 14 | 28   | 18 March 2023     | 20 January 2022   | 153.2           | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 15 | 31   | 18 April 2023     | 20 January 2022   | 133.27          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 16 | 30   | 18 May 2023       | 20 January 2022   | 113.34          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 17 | 31   | 18 June 2023      | 20 January 2022   |  93.41          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 18 | 30   | 18 July 2023      |                   |  73.48          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 11.38 | 11.38       | 0.0   |  8.55       |
+      | 19 | 31   | 18 August 2023    |                   |  66.48          |  7.0          | 12.93    | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 20 | 31   | 18 September 2023 |                   |  47.25          | 19.23         | 0.7      | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 21 | 30   | 18 October 2023   |                   |  27.99          | 19.26         | 0.67     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 22 | 31   | 18 November 2023  |                   |   8.76          | 19.23         | 0.7      | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
+      | 23 | 30   | 18 December 2023  |                   |   0.0           | 8.76          | 0.67     | 0.0  | 0.0       |  9.43 |  0.0  |  0.0        | 0.0   |  9.43       |
+      | 24 | 31   | 18 January 2024   | 20 January 2022   |   0.0           |  0.0          | 0.0      | 0.0  | 0.0       |  0.0  |  0.0  |  0.0        | 0.0   | 0.0         |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late    | Outstanding |
+      | 431.98        | 15.91    | 0.0  | 0.0       | 447.89 | 350.19 | 350.19     | 0.0     | 97.7        |
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+    And Customer makes "AUTOPAY" repayment on "18 February 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 February 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.18     |  0.65    | 0.0  | 0.0       |  62.85       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "28 February 2022" with 19.83 EUR transaction amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.18     |  0.65    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.96     |  0.87    | 0.0  | 0.0       |  63.07       | false    | false    |
+    And Customer makes "AUTOPAY" repayment on "18 March 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 March 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.18     |  0.65    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.96     |  0.87    | 0.0  | 0.0       |  63.07       | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  19.51     |  0.32    | 0.0  | 0.0       |  43.56       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "31 March 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "31 March 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.18     |  0.65    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.96     |  0.87    | 0.0  | 0.0       |  63.07       | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  19.51     |  0.32    | 0.0  | 0.0       |  43.56       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  19.29     |  0.54    | 0.0  | 0.0       |  43.78       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "18 April 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 April 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.18     |  0.65    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.96     |  0.87    | 0.0  | 0.0       |  63.07       | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  19.51     |  0.32    | 0.0  | 0.0       |  43.56       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  19.29     |  0.54    | 0.0  | 0.0       |  43.78       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.97     |  0.86    | 0.0  | 0.0       |  44.1        | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "18 May 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 May 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.18     |  0.65    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.96     |  0.87    | 0.0  | 0.0       |  63.07       | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  19.51     |  0.32    | 0.0  | 0.0       |  43.56       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  19.29     |  0.54    | 0.0  | 0.0       |  43.78       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.97     |  0.86    | 0.0  | 0.0       |  44.1        | true     | false    |
+      | 18 May 2022        | Repayment               | 19.83   |  18.45     |  1.38    | 0.0  | 0.0       |  44.62       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "18 June 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 June 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.18     |  0.65    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.96     |  0.87    | 0.0  | 0.0       |  63.07       | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  19.51     |  0.32    | 0.0  | 0.0       |  43.56       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  19.29     |  0.54    | 0.0  | 0.0       |  43.78       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.97     |  0.86    | 0.0  | 0.0       |  44.1        | true     | false    |
+      | 18 May 2022        | Repayment               | 19.83   |  18.45     |  1.38    | 0.0  | 0.0       |  44.62       | true     | false    |
+      | 18 June 2022       | Repayment               | 19.83   |  17.91     |  1.92    | 0.0  | 0.0       |  45.16       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "18 July 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 July 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.18     |  0.65    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.96     |  0.87    | 0.0  | 0.0       |  63.07       | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  19.51     |  0.32    | 0.0  | 0.0       |  43.56       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  19.29     |  0.54    | 0.0  | 0.0       |  43.78       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.97     |  0.86    | 0.0  | 0.0       |  44.1        | true     | false    |
+      | 18 May 2022        | Repayment               | 19.83   |  18.45     |  1.38    | 0.0  | 0.0       |  44.62       | true     | false    |
+      | 18 June 2022       | Repayment               | 19.83   |  17.91     |  1.92    | 0.0  | 0.0       |  45.16       | true     | false    |
+      | 18 July 2022       | Repayment               | 19.83   |  17.39     |  2.44    | 0.0  | 0.0       |  45.68       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "18 August 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 August 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.18     |  0.65    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.96     |  0.87    | 0.0  | 0.0       |  63.07       | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  19.51     |  0.32    | 0.0  | 0.0       |  43.56       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  19.29     |  0.54    | 0.0  | 0.0       |  43.78       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.97     |  0.86    | 0.0  | 0.0       |  44.1        | true     | false    |
+      | 18 May 2022        | Repayment               | 19.83   |  18.45     |  1.38    | 0.0  | 0.0       |  44.62       | true     | false    |
+      | 18 June 2022       | Repayment               | 19.83   |  17.91     |  1.92    | 0.0  | 0.0       |  45.16       | true     | false    |
+      | 18 July 2022       | Repayment               | 19.83   |  17.39     |  2.44    | 0.0  | 0.0       |  45.68       | true     | false    |
+      | 18 August 2022     | Repayment               | 19.83   |  16.85     |  2.98    | 0.0  | 0.0       |  46.22       | true     | false    |
+    And Admin does charge-off the loan on "16 September 2022"
+    When Admin makes "PAYOUT_REFUND" transaction with "AUTOPAY" payment type on "16 September 2022" with 67.42 EUR transaction amount and self-generated external-id
+    Then Loan Repayment schedule has 24 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance  | Late  | Outstanding |
+      |    |      | 18 January 2022   |                   | 431.98          |               |          | 0.0  |           | 0.0   |  0.0  |             |       |             |
+      | 1  | 31   | 18 February 2022  | 20 January 2022   | 412.29          | 19.69         | 0.24     | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 2  | 28   | 18 March 2022     | 20 January 2022   | 392.36          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 3  | 31   | 18 April 2022     | 20 January 2022   | 372.43          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 4  | 30   | 18 May 2022       | 20 January 2022   | 352.5           | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 5  | 31   | 18 June 2022      | 20 January 2022   | 332.57          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 6  | 30   | 18 July 2022      | 20 January 2022   | 312.64          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 7  | 31   | 18 August 2022    | 20 January 2022   | 292.71          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 8  | 31   | 18 September 2022 | 20 January 2022   | 277.13          | 15.58         | 4.35     | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 9  | 30   | 18 October 2022   | 20 January 2022   | 257.2           | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 10 | 31   | 18 November 2022  | 20 January 2022   | 237.27          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 11 | 30   | 18 December 2022  | 20 January 2022   | 217.34          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 12 | 31   | 18 January 2023   | 20 January 2022   | 197.41          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 13 | 31   | 18 February 2023  | 20 January 2022   | 177.48          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 14 | 28   | 18 March 2023     | 20 January 2022   | 157.55          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 15 | 31   | 18 April 2023     | 20 January 2022   | 137.62          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 16 | 30   | 18 May 2023       | 20 January 2022   | 117.69          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 17 | 31   | 18 June 2023      | 20 January 2022   |  97.76          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 18 | 30   | 18 July 2023      | 28 February 2022  |  78.7           | 19.06         | 0.87     | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 19 | 31   | 18 August 2023    | 16 September 2022 |  58.77          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 20 | 31   | 18 September 2023 | 16 September 2022 |  38.84          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 21 | 30   | 18 October 2023   | 16 September 2022 |  18.91          | 19.93         | 0.0      | 0.0  | 0.0       | 19.93 | 19.93 | 19.93       | 0.0   |  0.0        |
+      | 22 | 31   | 18 November 2023  | 16 September 2022 |   0.0           | 18.91         | 0.0      | 0.0  | 0.0       | 18.91 | 18.91 | 18.91       | 0.0   |  0.0        |
+      | 23 | 30   | 18 December 2023  | 16 September 2022 |   0.0           |  0.0          | 0.0      | 0.0  | 0.0       |  0.0  |  0.0  |  0.0        | 0.0   |  0.0        |
+      | 24 | 31   | 18 January 2024   | 20 January 2022   |   0.0           |  0.0          | 0.0      | 0.0  | 0.0       |  0.0  |  0.0  |  0.0        | 0.0   |  0.0        |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late    | Outstanding |
+      | 431.98        | 5.46     | 0.0  | 0.0       | 437.44  | 437.44  | 437.44     | 0.0     | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.75    |  0.24    | 0.0  | 0.0       |  82.23       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  82.03       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  19.18     |  0.65    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 18 February 2022   | Accrual Activity        |  0.24   |   0.0      |  0.24    | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.96     |  0.87    | 0.0  | 0.0       |  63.07       | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  19.51     |  0.32    | 0.0  | 0.0       |  43.56       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  19.29     |  0.54    | 0.0  | 0.0       |  43.78       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.97     |  0.86    | 0.0  | 0.0       |  44.1        | true     | false    |
+      | 18 May 2022        | Repayment               | 19.83   |  18.45     |  1.38    | 0.0  | 0.0       |  44.62       | true     | false    |
+      | 18 June 2022       | Repayment               | 19.83   |  17.91     |  1.92    | 0.0  | 0.0       |  45.16       | true     | false    |
+      | 18 July 2022       | Repayment               | 19.83   |  17.39     |  2.44    | 0.0  | 0.0       |  45.68       | true     | false    |
+      | 18 August 2022     | Repayment               | 19.83   |  16.85     |  2.98    | 0.0  | 0.0       |  46.22       | true     | false    |
+      | 16 September 2022  | Accrual                 | 4.59    |   0.0      |  4.59    | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 16 September 2022  | Charge-off              | 67.42   |  63.07     |  4.35    | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 16 September 2022  | Payout Refund           | 67.42   |  67.42     |  0.0     | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 16 September 2022  | Interest Refund         |  4.59   |   0.0      |  0.0     | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 16 September 2022  | Accrual Activity        |  5.22   |   0.0      |  5.22    | 0.0  | 0.0       |   0.0        | false    | false    |
+    Then In Loan Transactions all transactions have non-null external-id
+    When Admin makes Credit Balance Refund transaction on "16 September 2022" with 4.59 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C4206
+  Scenario: Verify Interest Payment Waiver transaction - UC12: Goodwill Credit after Charge-off - UC4
+    When Admin sets the business date to "23 October 2025"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                       | submitted on date | with Principal   | ANNUAL interest rate %     | interest type              | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType  | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP2_ADV_CUSTOM_PMT_ALLOC_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OFF_ACCRUAL | 18 January 2022   | 431.98           | 9.99                       | DECLINING_BALANCE          | DAILY                       | EQUAL_INSTALLMENTS | 12                | MONTHS                | 1              | MONTHS                  | 12                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "18 January 2022" with "431.98" amount and expected disbursement date on "18 January 2022"
+    And Admin successfully disburse the loan on "18 January 2022" with "431.98" EUR transaction amount
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance  | Late  | Outstanding |
+      |    |      | 18 January 2022   |                   | 431.98          |               |          | 0.0  |           | 0.0   |  0.0  |             |       |             |
+      | 1  | 31   | 18 February 2022  |                   | 397.68          | 34.3          | 3.67     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 2  | 28   | 18 March 2022     |                   | 363.02          | 34.66         | 3.31     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 3  | 31   | 18 April 2022     |                   | 328.72          | 34.3          | 3.67     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 4  | 30   | 18 May 2022       |                   | 294.3           | 34.42         | 3.55     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 5  | 31   | 18 June 2022      |                   | 260.0           | 34.3          | 3.67     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 6  | 30   | 18 July 2022      |                   | 225.58          | 34.42         | 3.55     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 7  | 31   | 18 August 2022    |                   | 191.28          | 34.3          | 3.67     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 8  | 31   | 18 September 2022 |                   | 156.98          | 34.3          | 3.67     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 9  | 30   | 18 October 2022   |                   | 122.56          | 34.42         | 3.55     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 10 | 31   | 18 November 2022  |                   |  88.26          | 34.3          | 3.67     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 11 | 30   | 18 December 2022  |                   |  53.84          | 34.42         | 3.55     | 0.0  | 0.0       | 37.97 |  0.0  |  0.0        | 0.0   | 37.97       |
+      | 12 | 31   | 18 January 2023   |                   |   0.0           | 53.84         | 3.67     | 0.0  | 0.0       | 57.51 |  0.0  |  0.0        | 0.0   | 57.51       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late    | Outstanding |
+      | 431.98        | 43.2     | 0.0  | 0.0       | 475.18 | 0.0    | 0.0        | 0.0     | 475.18      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       |
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "20 January 2022" with 349.99 EUR transaction amount and self-generated Idempotency key
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance  | Late  | Outstanding |
+      |    |      | 18 January 2022   |                   | 431.98          |               |          | 0.0  |           | 0.0   |  0.0  |             |       |             |
+      | 1  | 31   | 18 February 2022  |                   | 394.9           | 37.08         | 0.89     | 0.0  | 0.0       | 37.97 | 29.37 | 29.37       | 0.0   | 8.6         |
+      | 2  | 28   | 18 March 2022     |                   | 357.56          | 37.34         | 0.63     | 0.0  | 0.0       | 37.97 | 29.17 | 29.17       | 0.0   | 8.8         |
+      | 3  | 31   | 18 April 2022     |                   | 320.28          | 37.28         | 0.69     | 0.0  | 0.0       | 37.97 | 29.17 | 29.17       | 0.0   | 8.8         |
+      | 4  | 30   | 18 May 2022       |                   | 282.98          | 37.3          | 0.67     | 0.0  | 0.0       | 37.97 | 29.17 | 29.17       | 0.0   | 8.8         |
+      | 5  | 31   | 18 June 2022      |                   | 245.7           | 37.28         | 0.69     | 0.0  | 0.0       | 37.97 | 29.17 | 29.17       | 0.0   | 8.8         |
+      | 6  | 30   | 18 July 2022      |                   | 208.4           | 37.3          | 0.67     | 0.0  | 0.0       | 37.97 | 29.17 | 29.17       | 0.0   | 8.8         |
+      | 7  | 31   | 18 August 2022    |                   | 171.12          | 37.28         | 0.69     | 0.0  | 0.0       | 37.97 | 29.17 | 29.17       | 0.0   | 8.8         |
+      | 8  | 31   | 18 September 2022 |                   | 133.84          | 37.28         | 0.69     | 0.0  | 0.0       | 37.97 | 29.17 | 29.17       | 0.0   | 8.8         |
+      | 9  | 30   | 18 October 2022   |                   |  96.54          | 37.3          | 0.67     | 0.0  | 0.0       | 37.97 | 29.17 | 29.17       | 0.0   | 8.8         |
+      | 10 | 31   | 18 November 2022  |                   |  58.29          | 38.25         | 0.69     | 0.0  | 0.0       | 38.94 | 29.17 | 29.17       | 0.0   | 9.77        |
+      | 11 | 30   | 18 December 2022  | 20 January 2022   |  29.12          | 29.17         | 0.0      | 0.0  | 0.0       | 29.17 | 29.17 | 29.17       | 0.0   | 0.0         |
+      | 12 | 31   | 18 January 2023   | 20 January 2022   |   0.0           | 29.12         | 0.0      | 0.0  | 0.0       | 29.12 | 29.12 | 29.12       | 0.0   | 0.0         |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late    | Outstanding |
+      | 431.98        | 6.98     | 0.0  | 0.0       | 438.96 | 350.19 | 350.19     | 0.0     | 88.77       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.99    |  0.0     | 0.0  | 0.0       |  81.99       |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  81.79       |
+    And Customer makes "AUTOPAY" repayment on "18 February 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 February 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.99    |  0.0     | 0.0  | 0.0       |  81.99       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  81.79       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  18.94     |  0.89    | 0.0  | 0.0       |  62.85       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "28 February 2022" with 19.83 EUR transaction amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.99    |  0.0     | 0.0  | 0.0       |  81.99       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  81.79       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  18.94     |  0.89    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.72     |  1.11    | 0.0  | 0.0       |  63.07       | false    | false    |
+    And Customer makes "AUTOPAY" repayment on "18 March 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 March 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.99    |  0.0     | 0.0  | 0.0       |  81.99       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  81.79       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  18.94     |  0.89    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.72     |  1.11    | 0.0  | 0.0       |  63.07       | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  19.52     |  0.31    | 0.0  | 0.0       |  43.55       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "31 March 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "31 March 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.99    |  0.0     | 0.0  | 0.0       |  81.99       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  81.79       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  18.94     |  0.89    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.72     |  1.11    | 0.0  | 0.0       |  63.07       | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  19.52     |  0.31    | 0.0  | 0.0       |  43.55       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  19.3      |  0.53    | 0.0  | 0.0       |  43.77       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "18 April 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 April 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.99    |  0.0     | 0.0  | 0.0       |  81.99       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  81.79       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  18.94     |  0.89    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.72     |  1.11    | 0.0  | 0.0       |  63.07       | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  19.52     |  0.31    | 0.0  | 0.0       |  43.55       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  19.3      |  0.53    | 0.0  | 0.0       |  43.77       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.98     |  0.85    | 0.0  | 0.0       |  44.09       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "18 May 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 May 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.99    |  0.0     | 0.0  | 0.0       |  81.99       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  81.79       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  18.94     |  0.89    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.72     |  1.11    | 0.0  | 0.0       |  63.07       | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  19.52     |  0.31    | 0.0  | 0.0       |  43.55       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  19.3      |  0.53    | 0.0  | 0.0       |  43.77       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.98     |  0.85    | 0.0  | 0.0       |  44.09       | true     | false    |
+      | 18 May 2022        | Repayment               | 19.83   |  18.46     |  1.37    | 0.0  | 0.0       |  44.61       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "18 June 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 June 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.99    |  0.0     | 0.0  | 0.0       |  81.99       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  81.79       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  18.94     |  0.89    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.72     |  1.11    | 0.0  | 0.0       |  63.07       | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  19.52     |  0.31    | 0.0  | 0.0       |  43.55       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  19.3      |  0.53    | 0.0  | 0.0       |  43.77       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.98     |  0.85    | 0.0  | 0.0       |  44.09       | true     | false    |
+      | 18 May 2022        | Repayment               | 19.83   |  18.46     |  1.37    | 0.0  | 0.0       |  44.61       | true     | false    |
+      | 18 June 2022       | Repayment               | 19.83   |  18.46     |  1.37    | 0.0  | 0.0       |  44.61       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "18 July 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 July 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.99    |  0.0     | 0.0  | 0.0       |  81.99       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  81.79       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  18.94     |  0.89    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.72     |  1.11    | 0.0  | 0.0       |  63.07       | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  19.52     |  0.31    | 0.0  | 0.0       |  43.55       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  19.3      |  0.53    | 0.0  | 0.0       |  43.77       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.98     |  0.85    | 0.0  | 0.0       |  44.09       | true     | false    |
+      | 18 May 2022        | Repayment               | 19.83   |  18.46     |  1.37    | 0.0  | 0.0       |  44.61       | true     | false    |
+      | 18 June 2022       | Repayment               | 19.83   |  18.46     |  1.37    | 0.0  | 0.0       |  44.61       | true     | false    |
+      | 18 July 2022       | Repayment               | 19.83   |  18.46     |  1.37    | 0.0  | 0.0       |  44.61       | true     | false    |
+    And Customer makes "AUTOPAY" repayment on "18 August 2022" with 19.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "18 August 2022"
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.99    |  0.0     | 0.0  | 0.0       |  81.99       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  81.79       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  18.94     |  0.89    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.72     |  1.11    | 0.0  | 0.0       |  63.07       | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  19.52     |  0.31    | 0.0  | 0.0       |  43.55       | true     | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  19.3      |  0.53    | 0.0  | 0.0       |  43.77       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.98     |  0.85    | 0.0  | 0.0       |  44.09       | true     | false    |
+      | 18 May 2022        | Repayment               | 19.83   |  18.46     |  1.37    | 0.0  | 0.0       |  44.61       | true     | false    |
+      | 18 June 2022       | Repayment               | 19.83   |  18.46     |  1.37    | 0.0  | 0.0       |  44.61       | true     | false    |
+      | 18 July 2022       | Repayment               | 19.83   |  18.46     |  1.37    | 0.0  | 0.0       |  44.61       | true     | false    |
+      | 18 August 2022     | Repayment               | 19.83   |  18.46     |  1.37    | 0.0  | 0.0       |  44.61       | true     | false    |
+    And Admin does charge-off the loan on "16 September 2022"
+    When Admin makes "GOODWILL_CREDIT" transaction with "AUTOPAY" payment type on "16 September 2022" with 66.54 EUR transaction amount and self-generated external-id
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance  | Late  | Outstanding |
+      |    |      | 18 January 2022   |                   | 431.98          |               |          | 0.0  |           | 0.0   |  0.0  |             |       |             |
+      | 1  | 31   | 18 February 2022  | 28 February 2022  | 394.9           | 37.08         | 0.89     | 0.0  | 0.0       | 37.97 | 37.97 | 29.37       | 8.6   | 0.0         |
+      | 2  | 28   | 18 March 2022     | 28 February 2022  | 357.15          | 37.75         | 0.22     | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 3  | 31   | 18 April 2022     | 16 September 2022 | 320.03          | 37.12         | 0.85     | 0.0  | 0.0       | 37.97 | 37.97 | 31.6        | 6.37  | 0.0         |
+      | 4  | 30   | 18 May 2022       | 16 September 2022 | 282.58          | 37.45         | 0.52     | 0.0  | 0.0       | 37.97 | 37.97 | 29.17       | 8.8   | 0.0         |
+      | 5  | 31   | 18 June 2022      | 16 September 2022 | 245.15          | 37.43         | 0.54     | 0.0  | 0.0       | 37.97 | 37.97 | 29.17       | 8.8   | 0.0         |
+      | 6  | 30   | 18 July 2022      | 16 September 2022 | 207.7           | 37.45         | 0.52     | 0.0  | 0.0       | 37.97 | 37.97 | 29.17       | 8.8   | 0.0         |
+      | 7  | 31   | 18 August 2022    | 16 September 2022 | 170.27          | 37.43         | 0.54     | 0.0  | 0.0       | 37.97 | 37.97 | 29.17       | 8.8   | 0.0         |
+      | 8  | 31   | 18 September 2022 | 16 September 2022 | 132.8           | 37.47         | 0.5      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 9  | 30   | 18 October 2022   | 16 September 2022 |  94.83          | 37.97         | 0.0      | 0.0  | 0.0       | 37.97 | 37.97 | 37.97       | 0.0   | 0.0         |
+      | 10 | 31   | 18 November 2022  | 16 September 2022 |  58.29          | 36.54         | 0.0      | 0.0  | 0.0       | 36.54 | 36.54 | 36.54       | 0.0   | 0.0         |
+      | 11 | 30   | 18 December 2022  | 20 January 2022   |  29.12          | 29.17         | 0.0      | 0.0  | 0.0       | 29.17 | 29.17 | 29.17       | 0.0   | 0.0         |
+      | 12 | 31   | 18 January 2023   | 20 January 2022   |   0.0           | 29.12         | 0.0      | 0.0  | 0.0       | 29.12 | 29.12 | 29.12       | 0.0   | 0.0         |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late    | Outstanding |
+      | 431.98        | 4.58     | 0.0  | 0.0       | 436.56 | 436.56 | 386.39     | 50.17   | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |
+      | 20 January 2022    | Merchant Issued Refund  | 349.99  |  349.99    |  0.0     | 0.0  | 0.0       |  81.99       | false    | false    |
+      | 20 January 2022    | Interest Refund         |  0.2    |   0.2      |  0.0     | 0.0  | 0.0       |  81.79       | false    | false    |
+      | 18 February 2022   | Repayment               | 19.83   |  18.94     |  0.89    | 0.0  | 0.0       |  62.85       | true     | false    |
+      | 18 February 2022   | Accrual Activity        |  0.89   |   0.0      |  0.89    | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 28 February 2022   | Repayment               | 19.83   |  18.72     |  1.11    | 0.0  | 0.0       |  63.07       | false    | false    |
+      | 18 March 2022      | Repayment               | 19.83   |  19.52     |  0.31    | 0.0  | 0.0       |  43.55       | true     | false    |
+      | 18 March 2022      | Accrual Activity        |  0.22   |   0.0      |  0.22    | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 31 March 2022      | Repayment               | 19.83   |  19.3      |  0.53    | 0.0  | 0.0       |  43.77       | true     | false    |
+      | 18 April 2022      | Repayment               | 19.83   |  18.98     |  0.85    | 0.0  | 0.0       |  44.09       | true     | false    |
+      | 18 April 2022      | Accrual Activity        |  0.85   |   0.0      |  0.85    | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 18 May 2022        | Repayment               | 19.83   |  18.46     |  1.37    | 0.0  | 0.0       |  44.61       | true     | false    |
+      | 18 May 2022        | Accrual Activity        |  0.52   |   0.0      |  0.52    | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 18 June 2022       | Repayment               | 19.83   |  18.46     |  1.37    | 0.0  | 0.0       |  44.61       | true     | false    |
+      | 18 June 2022       | Accrual Activity        |  0.54   |   0.0      |  0.54    | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 18 July 2022       | Repayment               | 19.83   |  18.46     |  1.37    | 0.0  | 0.0       |  44.61       | true     | false    |
+      | 18 July 2022       | Accrual Activity        |  0.52   |   0.0      |  0.52    | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 18 August 2022     | Repayment               | 19.83   |  18.46     |  1.37    | 0.0  | 0.0       |  44.61       | true     | false    |
+      | 18 August 2022     | Accrual Activity        |  0.54   |   0.0      |  0.54    | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 16 September 2022  | Accrual                 | 4.58    |   0.0      |  4.58    | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 16 September 2022  | Charge-off              | 66.54   |  63.07     |  3.47    | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 16 September 2022  | Goodwill Credit         | 66.54   |  63.07     |  3.47    | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 16 September 2022  | Accrual Activity        |  0.5    |   0.0      |  0.5     | 0.0  | 0.0       |   0.0        | false    | false    |
+    Then In Loan Transactions all transactions have non-null external-id
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met

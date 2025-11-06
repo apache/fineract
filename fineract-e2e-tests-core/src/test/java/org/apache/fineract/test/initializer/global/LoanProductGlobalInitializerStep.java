@@ -3983,9 +3983,9 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .getName();
         PostLoanProductsRequest loanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmi36030InterestRecalculationDaily = loanProductsRequestFactory
                 .defaultLoanProductsRequestLP2Emi()//
-                .supportedInterestRefundTypes(supportedInterestRefundTypes)
-                // .installmentAmountInMultiplesOf(null) //
                 .name(name147)//
+                .supportedInterestRefundTypes(supportedInterestRefundTypes) //
+                .installmentAmountInMultiplesOf(null) //
                 .daysInYearType(DaysInYearType.DAYS360.value)//
                 .daysInMonthType(DaysInMonthType.DAYS30.value)//
                 .isInterestRecalculationEnabled(true)//
@@ -4105,6 +4105,64 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         final Response<PostLoanProductsResponse> responseNoOverrides = loanProductsApi.createLoanProduct(loanProductsRequestNoOverrides)
                 .execute();
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_NO_OVERRIDES, responseNoOverrides);
+
+        // LP2 advanced + progressive loan schedule + horizontal + interest recalculation
+        // Frequency for recalculate Outstanding Principal: Daily, Frequency Interval for recalculation: 1
+        String name148 = DefaultLoanProduct.LP2_ADV_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OF_ACCRUAL.getName();
+        PostLoanProductsRequest loanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2Emi()//
+                .name(name148)//
+                .supportedInterestRefundTypes(supportedInterestRefundTypes).installmentAmountInMultiplesOf(null) //
+                .daysInYearType(DaysInYearType.ACTUAL.value)//
+                .daysInMonthType(DaysInMonthType.ACTUAL.value)//
+                .daysInYearCustomStrategy(FEB_29_PERIOD_ONLY.getValue()).isInterestRecalculationEnabled(true)//
+                .preClosureInterestCalculationStrategy(1)//
+                .rescheduleStrategyMethod(4)//
+                .interestRecalculationCompoundingMethod(0)//
+                .recalculationRestFrequencyType(2)//
+                .recalculationRestFrequencyInterval(1)//
+                .enableAccrualActivityPosting(true) //
+                .chargeOffBehaviour(ZERO_INTEREST.value)//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"))); //
+        Response<PostLoanProductsResponse> responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals = loanProductsApi
+                .createLoanProduct(
+                        loanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals)
+                .execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OF_ACCRUAL,
+                responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals);
+
+        // LP2 advanced custom payment allocation + progressive loan schedule + horizontal + interest recalculation
+        // Frequency for recalculate Outstanding Principal: Daily, Frequency Interval for recalculation: 1
+        String name149 = DefaultLoanProduct.LP2_ADV_CUSTOM_PMT_ALLOC_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OFF_ACCRUAL
+                .getName();
+        PostLoanProductsRequest loanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffAccruals = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2Emi()//
+                .name(name149)//
+                .supportedInterestRefundTypes(supportedInterestRefundTypes).installmentAmountInMultiplesOf(null) //
+                .daysInYearType(DaysInYearType.ACTUAL.value)//
+                .daysInMonthType(DaysInMonthType.ACTUAL.value)//
+                .daysInYearCustomStrategy(FEB_29_PERIOD_ONLY.getValue()).isInterestRecalculationEnabled(true)//
+                .preClosureInterestCalculationStrategy(1)//
+                .rescheduleStrategyMethod(4)//
+                .interestRecalculationCompoundingMethod(0)//
+                .recalculationRestFrequencyType(2)//
+                .recalculationRestFrequencyInterval(1)//
+                .enableAccrualActivityPosting(true) //
+                .chargeOffBehaviour(ZERO_INTEREST.value)//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT"))); //
+        Response<PostLoanProductsResponse> responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffAccruals = loanProductsApi
+                .createLoanProduct(
+                        loanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffAccruals)
+                .execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_CUSTOM_PMT_ALLOC_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OFF_ACCRUAL,
+                responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffAccruals);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,
