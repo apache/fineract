@@ -1,0 +1,81 @@
+name: Fineract Liquibase Only mode - PostgreSQL
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+
+    services:
+      postgresql:
+        image: postgres:17.4
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: postgres
+        options: --health-cmd="pg_isready -q -d postgres -U root" --health-interval=5s --health-timeout=2s --health-retries=3
+
+    env:
+      TZ: Asia/Kolkata
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
+      - name: Setup Gradle and Validate Wrapper
+        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
+        with:
+          validate-wrappers: true
+
+      - name: Verify PostgreSQL connection
+        run: |
+          while ! pg_isready -d postgres -U root -h 127.0.0.1 -p 5432 ; do
+            sleep 1
+          done
+
+      - name: Initialise databases
+        run: |
+          ./gradlew --no-daemon -q createPGDB -PdbName=fineract_tenants
+          ./gradlew --no-daemon -q createPGDB -PdbName=fineract_default
+
+      - name: Run Fineract in Liquibase only mode
+        env:
+          FINERACT_DEFAULT_TENANTDB_CONN_PARAMS: ""
+          FINERACT_DEFAULT_TENANTDB_DESCRIPTION: "Default Demo Tenant"
+          FINERACT_DEFAULT_TENANTDB_HOSTNAME: "localhost"
+          FINERACT_DEFAULT_TENANTDB_IDENTIFIER: "default"
+          FINERACT_DEFAULT_TENANTDB_NAME: "fineract_default"
+          FINERACT_DEFAULT_TENANTDB_PORT: "5432"
+          FINERACT_DEFAULT_TENANTDB_PWD: "postgres"
+          FINERACT_DEFAULT_TENANTDB_TIMEZONE: "Asia/Kolkata"
+          FINERACT_DEFAULT_TENANTDB_UID: "root"
+          FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME: "org.postgresql.Driver"
+          FINERACT_HIKARI_JDBC_URL: "jdbc:postgresql://localhost:5432/fineract_tenants"
+          FINERACT_HIKARI_PASSWORD: "postgres"
+          FINERACT_HIKARI_USERNAME: "root"
+          SPRING_PROFILES_ACTIVE: "liquibase-only"
+        run:
+          ./gradlew fineract-provider:bootRun

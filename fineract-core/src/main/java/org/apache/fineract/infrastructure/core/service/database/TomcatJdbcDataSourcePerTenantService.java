@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -56,8 +57,9 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
 
     private final DataSourcePerTenantServiceFactory dataSourcePerTenantServiceFactory;
 
-    private final MoneyHelperInitializationService moneyHelperInitializationService;
     private final Set<Long> tenantMoneyInitializingSet = Sets.newConcurrentHashSet();
+    @Autowired(required = false)
+    private MoneyHelperInitializationService moneyHelperInitializationService;
 
     @Override
     public DataSource retrieveDataSource() {
@@ -77,7 +79,7 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         // TODO: This is definitely not the optimal place to initialize the rounding modes
         // Preferably nothing should use a statically referenced context and the initialization
         // should happen within the rounding mode retrieval
-        if (tenant != null) {
+        if (moneyHelperInitializationService != null && tenant != null) {
             Long connectionId = tenant.getConnection().getConnectionId();
             if (!tenantMoneyInitializingSet.contains(connectionId) && !moneyHelperInitializationService.isTenantInitialized(tenant)) {
                 // Double check to prevent visibility and race-condition issues
