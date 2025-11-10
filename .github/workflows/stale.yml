@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-    - uses: actions/stale@5f858e3efba33a5ca4407a664cc011ad407f2008 # v9
+    - uses: actions/stale@5f858e3efba33a5ca4407a664cc011ad407f2008 # v10
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         # stale-issue-message: 'Stale issue message'
