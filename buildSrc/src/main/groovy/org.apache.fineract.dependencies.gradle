@@ -198,7 +198,7 @@ dependencyManagement {
         dependency ('org.liquibase:liquibase-core:4.31.1') {
             exclude 'javax.xml.bind:jaxb-api'
         }
-        dependency 'org.liquibase.ext:liquibase-postgresql:4.31.1'
+        dependency 'org.liquibase.ext:liquibase-postgresql:5.0.1'
 
         dependency ('org.dom4j:dom4j:2.1.4') {
             exclude 'relaxngDatatype:relaxngDatatype' // already in com.sun.xml.bind:jaxb-osgi:2.3.0.1
