@@ -24,7 +24,6 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
     <changeSet id="1" author="fineract">
         <insert tableName="m_permission">
-            <column name="id" valueNumeric="963"/>
             <column name="grouping" value="portfolio"/>
             <column name="code" value="READ_FAMILYMEMBERS"/>
             <column name="entity_name" value="FAMILYMEMBERS"/>
