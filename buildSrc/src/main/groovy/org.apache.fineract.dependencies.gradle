@@ -195,7 +195,7 @@ dependencyManagement {
         dependency 'jakarta.validation:jakarta.validation-api:3.1.1'
         dependency 'org.hibernate.validator:hibernate-validator:9.0.1.Final'
 
-        dependency ('org.liquibase:liquibase-core:4.31.1') {
+        dependency ('org.liquibase:liquibase-core:5.0.1') {
             exclude 'javax.xml.bind:jaxb-api'
         }
         dependency 'org.liquibase.ext:liquibase-postgresql:4.31.1'
