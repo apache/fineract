@@ -223,4 +223,5 @@
     <include file="parts/0202_trial_balance_summary_with_asset_owner_journal_entry_aggregation.xml" relativeToChangelogFile="true" />
     <include file="parts/0203_transaction_summary_with_asset_owner_report_with_capitalized_income.xml" relativeToChangelogFile="true" />
     <include file="parts/0204_transaction_summary_with_asset_owner_and_from_asset_owner_id_for_buybacks.xml" relativeToChangelogFile="true" />
+    <include file="parts/0205_add_read_familymembers_permission.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
