@@ -84,14 +84,12 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalculatio
 import org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionComparator;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.SingleLoanChargeRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
@@ -119,8 +117,6 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.apache.fineract.util.LoopContext;
 import org.apache.fineract.util.LoopGuard;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
@@ -129,23 +125,18 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     public static final String ADVANCED_PAYMENT_ALLOCATION_STRATEGY_NAME = "Advanced payment allocation strategy";
 
     private final EMICalculator emiCalculator;
-    private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final InterestRefundService interestRefundService;
     private final LoanScheduleComponent loanSchedule;
-    private final LoanTransactionRepository loanTransactionRepository;
     private final LoanChargeService loanChargeService;
     private final SingleLoanChargeRepaymentScheduleProcessingWrapper loanChargeRepaymentScheduleProcessing;
 
-    public AdvancedPaymentScheduleTransactionProcessor(final EMICalculator emiCalculator, final LoanRepositoryWrapper loanRepositoryWrapper,
-            final InterestRefundService interestRefundService, final ExternalIdFactory externalIdFactory,
-            final LoanScheduleComponent loanSchedule, final LoanTransactionRepository loanTransactionRepository,
+    public AdvancedPaymentScheduleTransactionProcessor(final EMICalculator emiCalculator, final InterestRefundService interestRefundService,
+            final ExternalIdFactory externalIdFactory, final LoanScheduleComponent loanSchedule,
             final LoanChargeValidator loanChargeValidator, final LoanBalanceService loanBalanceService,
             final LoanChargeService loanChargeService) {
         super(externalIdFactory, loanChargeValidator, loanBalanceService);
         this.emiCalculator = emiCalculator;
-        this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.interestRefundService = interestRefundService;
-        this.loanTransactionRepository = loanTransactionRepository;
         this.loanSchedule = loanSchedule;
         this.loanChargeService = loanChargeService;
         this.loanChargeRepaymentScheduleProcessing = new SingleLoanChargeRepaymentScheduleProcessingWrapper();
@@ -193,13 +184,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     public Money handleRepaymentSchedule(List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> loanCharges) {
         throw new NotImplementedException();
-    }
-
-    @Transactional
-    public Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> reprocessProgressiveLoanTransactionsTransactional(
-            final LocalDate disbursementDate, final LocalDate targetDate, final List<LoanTransaction> loanTransactions,
-            final MonetaryCurrency currency, final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
-        return reprocessProgressiveLoanTransactions(disbursementDate, targetDate, loanTransactions, currency, installments, charges);
     }
 
     // only for progressive loans
@@ -300,18 +284,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> result = reprocessProgressiveLoanTransactions(disbursementDate,
                 currentDate, loanTransactions, currency, installments, charges);
         return result.getLeft();
-    }
-
-    @NotNull
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public ProgressiveLoanInterestScheduleModel calculateInterestScheduleModel(@NotNull Long loanId, LocalDate targetDate) {
-        Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
-        final List<LoanTransaction> transactions = loanTransactionRepository.findNonReversedTransactionsForReprocessingByLoan(loan);
-        MonetaryCurrency currency = loan.getLoanRepaymentScheduleDetail().getCurrency();
-        List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
-        Set<LoanCharge> charges = loan.getActiveCharges();
-        return reprocessProgressiveLoanTransactions(loan.getDisbursementDate(), targetDate, transactions, currency, installments, charges)
-                .getRight();
     }
 
     @NotNull
@@ -2937,9 +2909,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     private void updateInstallmentsByModelForReAging(final LoanTransaction loanTransaction, final ProgressiveTransactionCtx ctx) {
         ctx.getModel().repaymentPeriods().forEach(rp -> {
-            final LoanRepaymentScheduleInstallment installment = ctx.getInstallments().stream().filter(
-                    ri -> ri.getFromDate().equals(rp.getFromDate()) && ri.getDueDate().equals(rp.getDueDate()) && !ri.isDownPayment())
-                    .findFirst().orElse(null);
+            final LoanRepaymentScheduleInstallment installment = ctx.getInstallments().stream()
+                    .filter(ri -> ri.getFromDate().equals(rp.getFromDate()) && !ri.isDownPayment()).findFirst().orElse(null);
             final LocalDate transactionDate = loanTransaction.getTransactionDate();
             if (installment != null) {
                 installment.setFromDate(rp.getFromDate());
@@ -2953,6 +2924,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     installment.updateInterestCharged(rp.getDueInterest().getAmount());
                 }
                 installment.setReAged(true);
+                installment.setAdditional(false);
                 installment.updateObligationsMet(ctx.getCurrency(), transactionDate);
             } else {
                 final LoanRepaymentScheduleInstallment lastInstallment = ctx.getInstallments().getLast();
@@ -3247,7 +3219,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         final BigDecimal interestRate = loan.getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate();
         final Money totalOutstandingPrincipal = ctx.getModel().getTotalOutstandingPrincipal();
 
-        final LoanApplicationTerms loanApplicationTerms = new LoanApplicationTerms.Builder().currency(currency.getCurrencyData())
+        final LoanApplicationTerms loanApplicationTerms = new LoanApplicationTerms.Builder().currency(currency.toData())
                 .repaymentsStartingFromDate(reAgingStartDate).principal(totalOutstandingPrincipal)
                 .loanTermFrequency(loanTransaction.getLoanReAgeParameter().getNumberOfInstallments())
                 .loanTermPeriodFrequencyType(loanTransaction.getLoanReAgeParameter().getFrequencyType())

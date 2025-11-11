@@ -81,7 +81,7 @@ public class LoanPointInTimeServiceImpl implements LoanPointInTimeService {
             // the loan's state
             if (txCount != afterRemovalTxCount || chargeCount != afterRemovalChargeCount) {
                 ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null, null);
-                loanScheduleService.recalculateSchedule(loan, scheduleGeneratorDTO);
+                loanScheduleService.regenerateScheduleWithReprocessingTransactions(loan, scheduleGeneratorDTO);
             }
 
             LoanArrearsData arrearsData = arrearsAgingService.calculateArrearsForLoan(loan);

@@ -112,6 +112,7 @@ import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoReadPlat
 import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoWritePlatformServiceImpl;
+import org.apache.fineract.portfolio.loanaccount.service.ILoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.InterestRefundServiceDelegate;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccountServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualActivityProcessingService;
@@ -495,11 +496,10 @@ public class LoanAccountConfiguration {
     @Bean
     @ConditionalOnMissingBean(LoanDisbursementService.class)
     public LoanDisbursementService loanDisbursementService(LoanChargeValidator loanChargeValidator,
-            LoanDisbursementValidator loanDisbursementValidator, ReprocessLoanTransactionsService reprocessLoanTransactionsService,
-            LoanChargeService loanChargeService, LoanBalanceService loanBalanceService, LoanJournalEntryPoster journalEntryPoster,
-            LoanTransactionRepository loanTransactionRepository) {
-        return new LoanDisbursementService(loanChargeValidator, loanDisbursementValidator, reprocessLoanTransactionsService,
-                loanChargeService, loanBalanceService, journalEntryPoster, loanTransactionRepository);
+            LoanDisbursementValidator loanDisbursementValidator, LoanChargeService loanChargeService, LoanBalanceService loanBalanceService,
+            LoanJournalEntryPoster journalEntryPoster, LoanTransactionRepository loanTransactionRepository) {
+        return new LoanDisbursementService(loanChargeValidator, loanDisbursementValidator, loanChargeService, loanBalanceService,
+                journalEntryPoster, loanTransactionRepository);
     }
 
     @Bean
@@ -515,9 +515,9 @@ public class LoanAccountConfiguration {
     public LoanScheduleService loanScheduleService(final LoanChargeService loanChargeService,
             final ReprocessLoanTransactionsService reprocessLoanTransactionsService, final LoanMapper loanMapper,
             final LoanTransactionProcessingService loanTransactionProcessingService, LoanScheduleComponent loanSchedule,
-            final LoanTransactionRepository loanTransactionRepository) {
+            final LoanTransactionRepository loanTransactionRepository, final ILoanUtilService loanUtilService) {
         return new LoanScheduleService(loanChargeService, reprocessLoanTransactionsService, loanMapper, loanTransactionProcessingService,
-                loanSchedule, loanTransactionRepository);
+                loanSchedule, loanTransactionRepository, loanUtilService);
     }
 
     @Bean
@@ -544,9 +544,9 @@ public class LoanAccountConfiguration {
     @ConditionalOnMissingBean(InterestPauseWritePlatformService.class)
     public InterestPauseWritePlatformService interestPauseWritePlatformService(LoanTermVariationsRepository loanTermVariationsRepository,
             LoanRepositoryWrapper loanRepositoryWrapper, LoanAssembler loanAssembler,
-            ReprocessLoanTransactionsService reprocessLoanTransactionsService, BusinessEventNotifierService businessEventNotifierService) {
+            BusinessEventNotifierService businessEventNotifierService, LoanScheduleService loanScheduleService) {
         return new InterestPauseWritePlatformServiceImpl(loanTermVariationsRepository, loanRepositoryWrapper, loanAssembler,
-                reprocessLoanTransactionsService, businessEventNotifierService);
+                businessEventNotifierService, loanScheduleService);
     }
 
     @Bean

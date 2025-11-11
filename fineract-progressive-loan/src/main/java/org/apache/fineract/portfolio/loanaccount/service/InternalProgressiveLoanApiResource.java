@@ -28,26 +28,18 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.mapper.LoanConfigurationDetailsMapper;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -58,9 +50,9 @@ import org.springframework.stereotype.Component;
 public class InternalProgressiveLoanApiResource implements InitializingBean {
 
     private final LoanRepositoryWrapper loanRepository;
-    private final AdvancedPaymentScheduleTransactionProcessor advancedPaymentScheduleTransactionProcessor;
     private final InterestScheduleModelRepositoryWrapper writePlatformService;
-    private final LoanTransactionRepository loanTransactionRepository;
+    private final InterestScheduleModelRepositoryWrapper interestScheduleModelRepositoryWrapper;
+    private final LoanScheduleService loanScheduleService;
 
     @Override
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
@@ -89,28 +81,15 @@ public class InternalProgressiveLoanApiResource implements InitializingBean {
     }
 
     private ProgressiveLoanInterestScheduleModel reprocessTransactionsAndGetModel(final Loan loan) {
-        final List<LoanTransaction> transactionsToReprocess = loanTransactionRepository
-                .findNonReversedTransactionsForReprocessingByLoan(loan);
-        final LocalDate businessDate = ThreadLocalContextUtil.getBusinessDate();
-        final Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> changedTransactionDetailProgressiveLoanInterestScheduleModelPair = advancedPaymentScheduleTransactionProcessor
-                .reprocessProgressiveLoanTransactionsTransactional(loan.getDisbursementDate(), businessDate, transactionsToReprocess,
-                        loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
-        final ProgressiveLoanInterestScheduleModel model = changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getRight();
-        final List<Long> replayedTransactions = changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getLeft()
-                .getTransactionChanges().stream().filter(change -> change.getOldTransaction() != null)
-                .map(change -> change.getNewTransaction().getId()).filter(Objects::nonNull).toList();
-
-        if (!replayedTransactions.isEmpty()) {
-            log.warn("Reprocessed transactions show differences: There are unsaved changes of the following transactions: {}",
-                    replayedTransactions);
-        }
-        return model;
+        loanScheduleService.regenerateScheduleWithReprocessingTransactions(loan);
+        return interestScheduleModelRepositoryWrapper.extractModel(interestScheduleModelRepositoryWrapper.findOneByLoan(loan)).get();
     }
 
     @POST
     @Path("{loanId}/model")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update and Save ProgressiveLoanInterestScheduleModel", description = "DO NOT USE THIS IN PRODUCTION!")
+    @Transactional
     public ProgressiveLoanInterestScheduleModel updateModel(@PathParam("loanId") @Parameter(description = "loanId") long loanId) {
         Loan loan = loanRepository.findOneWithNotFoundDetection(loanId);
         if (!loan.isProgressiveSchedule()) {

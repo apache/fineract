@@ -1132,5 +1132,3 @@ Feature: LoanReschedule
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 24 July 2025     | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
     Then LoanRescheduledDueAdjustScheduleBusinessEvent is raised on "24 July 2025"
-
-

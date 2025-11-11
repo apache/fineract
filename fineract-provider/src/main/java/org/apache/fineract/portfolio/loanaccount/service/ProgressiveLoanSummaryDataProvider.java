@@ -21,23 +21,16 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionBalance;
-import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
@@ -51,10 +44,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataProvider {
 
-    private final AdvancedPaymentScheduleTransactionProcessor advancedPaymentScheduleTransactionProcessor;
     private final EMICalculator emiCalculator;
     private final LoanRepositoryWrapper loanRepository;
-    private final LoanTransactionRepository loanTransactionRepository;
     private final InterestScheduleModelRepositoryWrapper modelRepository;
 
     @Override
@@ -81,24 +72,6 @@ public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataPro
                 && businessDate.isAfter(i.getFromDate()) && !businessDate.isAfter(i.getDueDate())).findFirst();
     }
 
-    private ProgressiveLoanInterestScheduleModel calculateModel(Loan loan, LocalDate businessDate) {
-        final List<LoanTransaction> transactionsToReprocess = loanTransactionRepository
-                .findNonReversedTransactionsForReprocessingByLoan(loan).stream().filter(t -> !t.isAccrualActivity()).toList();
-        Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> changedTransactionDetailProgressiveLoanInterestScheduleModelPair = advancedPaymentScheduleTransactionProcessor
-                .reprocessProgressiveLoanTransactions(loan.getDisbursementDate(), businessDate, transactionsToReprocess, loan.getCurrency(),
-                        loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
-        ProgressiveLoanInterestScheduleModel model = changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getRight();
-        final List<Long> replayedTransactions = changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getLeft()
-                .getTransactionChanges().stream().filter(change -> change.getOldTransaction() != null && change.getNewTransaction() != null)
-                .map(change -> change.getNewTransaction().getId()).filter(Objects::nonNull).toList();
-
-        if (!replayedTransactions.isEmpty()) {
-            log.warn("Reprocessed transactions show differences: There are unsaved changes of the following transactions: {}",
-                    replayedTransactions);
-        }
-        return model;
-    }
-
     @Override
     public BigDecimal computeTotalUnpaidPayableNotDueInterestAmountOnActualPeriod(final Loan loan,
             final Collection<LoanSchedulePeriodData> periods, final LocalDate businessDate, final CurrencyData currency,
@@ -117,7 +90,7 @@ public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataPro
 
                 Optional<ProgressiveLoanInterestScheduleModel> savedModel = modelRepository.getSavedModel(loan, businessDate);
 
-                ProgressiveLoanInterestScheduleModel model = savedModel.orElseGet(() -> calculateModel(loan, businessDate));
+                ProgressiveLoanInterestScheduleModel model = savedModel.orElse(null);
                 if (model != null) {
                     OutstandingDetails outstandingDetails = emiCalculator.getOutstandingAmountsTillDate(model, businessDate);
                     if (!loan.isInterestRecalculationEnabled()) {

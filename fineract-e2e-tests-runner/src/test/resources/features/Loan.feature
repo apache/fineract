@@ -8394,13 +8394,13 @@ Feature: Loan
       | 2  | 15   | 31 January 2025  |           | 200.59          | 49.78         | 0.73     | 0.0  | 0.0       | 50.51  | 0.0  | 0.0        | 0.0  | 50.51       |
       |    |      | 01 February 2025 |           | 500.0           |               |          | 0.0  |           | 0.0    |      |            |      | 0.0         |
       |    |      | 01 February 2025 |           | 200.0           |               |          | 0.0  |           | 0.0    |      |            |      | 0.0         |
-      | 3  | 15   | 15 February 2025 |           | 850.67          | 49.92         | 0.59     | 0.0  | 0.0       | 50.51  | 0.0  | 0.0        | 0.0  | 50.51       |
-      | 4  | 15   | 02 March 2025    |           | 800.6           | 50.07         | 0.44     | 0.0  | 0.0       | 50.51  | 0.0  | 0.0        | 0.0  | 50.51       |
-      | 5  | 15   | 17 March 2025    |           | 750.38          | 50.22         | 0.29     | 0.0  | 0.0       | 50.51  | 0.0  | 0.0        | 0.0  | 50.51       |
-      | 6  | 15   | 01 April 2025    |           | 700.0           | 50.38         | 0.15     | 0.0  | 0.0       | 50.53  | 0.0  | 0.0        | 0.0  | 50.53       |
+      | 3  | 15   | 15 February 2025 |           | 676.32          | 224.27        | 2.49     | 0.0  | 0.0       | 226.76 | 0.0  | 0.0        | 0.0  | 226.76      |
+      | 4  | 15   | 02 March 2025    |           | 451.53          | 224.79        | 1.97     | 0.0  | 0.0       | 226.76 | 0.0  | 0.0        | 0.0  | 226.76      |
+      | 5  | 15   | 17 March 2025    |           | 226.09          | 225.44        | 1.32     | 0.0  | 0.0       | 226.76 | 0.0  | 0.0        | 0.0  | 226.76      |
+      | 6  | 15   | 01 April 2025    |           |   0.0           | 226.09        | 0.66     | 0.0  | 0.0       | 226.75 | 0.0  | 0.0        | 0.0  | 226.75      |
     Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
-      | 300.0         | 3.08     | 0.0  | 0.0       | 303.08  | 0.0  | 0.0        | 0.0  | 303.08      |
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 1000.00       | 8.05     | 0.0  | 0.0       | 1008.05  | 0.0  | 0.0        | 0.0  | 1008.05     |
     Then Loan Tranche Details tab has the following data:
       | Expected Disbursement On | Disbursed On    | Principal   | Net Disbursal Amount |
       | 01 January 2025          |                 | 300.0       |                      |

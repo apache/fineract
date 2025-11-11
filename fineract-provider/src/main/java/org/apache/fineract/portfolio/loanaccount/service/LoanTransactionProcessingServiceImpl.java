@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import jakarta.persistence.FlushModeType;
 import java.math.MathContext;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -65,7 +64,6 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
     private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory;
     private final LoanTermVariationsMapper loanMapper;
     private final InterestScheduleModelRepositoryWrapper modelRepository;
-    private final LoanBalanceService loanBalanceService;
     private final LoanTransactionService loanTransactionService;
 
     @Override
@@ -129,32 +127,6 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
     @Override
     public LoanRepaymentScheduleTransactionProcessor getTransactionProcessor(String transactionProcessingStrategyCode) {
         return transactionProcessorFactory.determineProcessor(transactionProcessingStrategyCode);
-    }
-
-    @Override
-    public Optional<ChangedTransactionDetail> processPostDisbursementTransactions(Loan loan) {
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = getTransactionProcessor(
-                loan.getTransactionProcessingStrategyCode());
-        final List<LoanTransaction> allNonContraTransactionsPostDisbursement = loanTransactionService
-                .retrieveListOfTransactionsForReprocessing(loan);
-
-        final List<LoanTransaction> copyTransactions = new ArrayList<>();
-
-        if (allNonContraTransactionsPostDisbursement.isEmpty()) {
-            return Optional.empty();
-        }
-
-        // TODO: Probably this is not needed and can be eliminated, make sure to double check it
-        for (LoanTransaction loanTransaction : allNonContraTransactionsPostDisbursement) {
-            copyTransactions.add(LoanTransaction.copyTransactionProperties(loanTransaction));
-        }
-        final ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(
-                loan.getDisbursementDate(), copyTransactions, loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                loan.getActiveCharges());
-
-        loanBalanceService.updateLoanSummaryDerivedFields(loan);
-
-        return Optional.of(changedTransactionDetail);
     }
 
     @Override
@@ -232,9 +204,10 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
             AdvancedPaymentScheduleTransactionProcessor advancedProcessor, Loan loan, LoanTransaction loanTransaction) {
         Optional<ProgressiveLoanInterestScheduleModel> savedModel = modelRepository.getSavedModel(loan,
                 loanTransaction.getTransactionDate());
-        ProgressiveLoanInterestScheduleModel model = savedModel
-                .orElseGet(() -> advancedProcessor.calculateInterestScheduleModel(loan.getId(), loanTransaction.getTransactionDate()));
-
+        if (savedModel.isEmpty()) {
+            throw new IllegalArgumentException("No saved model found for loan transaction " + loanTransaction);
+        }
+        ProgressiveLoanInterestScheduleModel model = savedModel.get();
         ProgressiveTransactionCtx progressiveContext = new ProgressiveTransactionCtx(loan.getCurrency(),
                 loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()),
                 new ChangedTransactionDetail(), model, getTotalRefundInterestAmount(loan));

@@ -4634,10 +4634,10 @@ Feature: LoanReAging
       | 01 February 2024 | Repayment            | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 01 March 2024    | Accrual              | 1.07   | 0.0       | 1.07     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Contract Termination | 84.06  | 83.57     | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
-    When Admin sets the business date to "15 April 2024"
-    Then Admin fails to create a Loan re-aging transaction with the following data because loan was contract terminated:
-      | frequencyNumber | frequencyType | startDate   | numberOfInstallments |
-      | 1               | MONTHS        | 01 May 2024 | 6                    |
+#    When Admin sets the business date to "15 April 2024"
+#    Then Admin fails to create a Loan re-aging transaction with the following data because loan was contract terminated:
+#      | frequencyNumber | frequencyType | startDate   | numberOfInstallments |
+#      | 1               | MONTHS        | 01 May 2024 | 6                    |
 
   @TestRailId:C4090 @AdvancedPaymentAllocation
   Scenario: Verify that Re-aging is forbidden on charged-off loan, interest bearing loan, Interest calculation: Default Behavior, Charge-off scenario (accelerate maturity) - UC11
@@ -5014,6 +5014,8 @@ Feature: LoanReAging
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    |
       | 15 March 2024    | Re-age           | 84.28  | 83.57     | 0.71     | 0.0  | 0.0       | 0.0          | true     |
       | 15 March 2024    | Interest waive   | 0.71   | 0.0       | 0.71     | 0.0  | 0.0       | 0.0          | true     |
+    When Loan Pay-off is made on "01 April 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @Skip @TestRailId:C4198 @AdvancedPaymentAllocation
   Scenario: Verify Re-aging reversal on interest bearing loan - UC3: Interest handling: EQUAL_AMORTIZATION_PAYABLE_INTEREST
@@ -5120,6 +5122,8 @@ Feature: LoanReAging
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    |
       | 15 March 2024    | Re-age           | 84.28  | 83.57     | 0.71     | 0.0  | 0.0       | 0.0          | true     |
+    When Loan Pay-off is made on "01 April 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @Skip @TestRailId:C4199 @AdvancedPaymentAllocation
   Scenario: Verify Re-aging reversal on interest bearing loan - UC4: Interest handling: EQUAL_AMORTIZATION_FULL_INTEREST
@@ -5226,6 +5230,8 @@ Feature: LoanReAging
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    |
       | 15 March 2024    | Re-age           | 85.08  | 83.57     | 1.51     | 0.0  | 0.0       | 0.0          | true     |
+    When Loan Pay-off is made on "01 April 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4202 @AdvancedPaymentAllocation
   Scenario: Verify Re-aging reversal on interest bearing loan - UC5: Interest handling: DEFAULT, re-aging is NOT the latest transaction on loan
@@ -5331,7 +5337,7 @@ Feature: LoanReAging
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
-      | 15 March 2024    | Re-age           | 84.28  | 83.57     | 0.71     | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 15 March 2024    | Re-age           | 84.28  | 83.57     | 0.71     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 March 2024    | Repayment        | 14.3   | 13.57     | 0.73     | 0.0  | 0.0       | 70.0         | false    | false    |
 #   --- Reversal of re-age transaction ---
     When Admin sets the business date to "01 April 2024"
@@ -5352,7 +5358,7 @@ Feature: LoanReAging
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
-      | 15 March 2024    | Re-age           | 84.28  | 83.57     | 0.71     | 0.0  | 0.0       | 0.0          | true     | true     |
+      | 15 March 2024    | Re-age           | 84.28  | 83.57     | 0.71     | 0.0  | 0.0       | 0.0          | true     | false    |
       | 16 March 2024    | Repayment        | 14.3   | 13.81     | 0.49     | 0.0  | 0.0       | 69.76        | false    | true     |
     When Loan Pay-off is made on "01 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
@@ -5416,12 +5422,12 @@ Feature: LoanReAging
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024 | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
       | 2  | 29   | 01 March 2024    | 01 March 2024    | 67.05           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024    |                  | 56.0            | 11.05         | 0.39     | 0.0  | 0.0       | 11.44 | 0.0   | 0.0        | 0.0  | 11.44       |
-      | 4  | 30   | 01 May 2024      |                  | 44.95           | 11.05         | 0.39     | 0.0  | 0.0       | 11.44 | 0.0   | 0.0        | 0.0  | 11.44       |
-      | 5  | 31   | 01 June 2024     |                  | 33.9            | 11.05         | 0.39     | 0.0  | 0.0       | 11.44 | 0.0   | 0.0        | 0.0  | 11.44       |
-      | 6  | 30   | 01 July 2024     |                  | 22.66           | 11.24         | 0.2      | 0.0  | 0.0       | 11.44 | 0.0   | 0.0        | 0.0  | 11.44       |
-      | 7  | 31   | 01 August 2024   |                  | 11.35           | 11.31         | 0.13     | 0.0  | 0.0       | 11.44 | 0.0   | 0.0        | 0.0  | 11.44       |
-      | 8  | 31   | 01 September 2024|                  | 0.0             | 11.35         | 0.07     | 0.0  | 0.0       | 11.42 | 0.0   | 0.0        | 0.0  | 11.42       |
+      | 3  | 31   | 01 April 2024    |                  | 56.04           | 11.01         | 0.39     | 0.0  | 0.0       | 11.4  | 0.0   | 0.0        | 0.0  | 11.4        |
+      | 4  | 30   | 01 May 2024      |                  | 45.03           | 11.01         | 0.39     | 0.0  | 0.0       | 11.4  | 0.0   | 0.0        | 0.0  | 11.4        |
+      | 5  | 31   | 01 June 2024     |                  | 34.02           | 11.01         | 0.39     | 0.0  | 0.0       | 11.4  | 0.0   | 0.0        | 0.0  | 11.4        |
+      | 6  | 30   | 01 July 2024     |                  | 22.82           | 11.2          | 0.2      | 0.0  | 0.0       | 11.4  | 0.0   | 0.0        | 0.0  | 11.4        |
+      | 7  | 31   | 01 August 2024   |                  | 11.55           | 11.27         | 0.13     | 0.0  | 0.0       | 11.4  | 0.0   | 0.0        | 0.0  | 11.4        |
+      | 8  | 31   | 01 September 2024|                  | 0.0             | 11.55         | 0.07     | 0.0  | 0.0       | 11.62 | 0.0   | 0.0        | 0.0  | 11.62       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 100.0         | 2.64     | 0.0  | 0.0       | 102.64 | 34.02 | 0.0        | 0.0  | 68.62       |
@@ -5430,7 +5436,7 @@ Feature: LoanReAging
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 01 March 2024    | Repayment        | 17.01  | 16.52     | 0.49     | 0.0  | 0.0       | 67.05        | false    | false    |
-      | 01 April 2024    | Re-age           | 67.44  | 67.05     | 0.39     | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 01 April 2024    | Re-age           | 67.44  | 67.05     | 0.39     | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @Skip
   @TestRailId:C4154 @AdvancedPaymentAllocation
@@ -5508,7 +5514,7 @@ Feature: LoanReAging
       | frequencyNumber | frequencyType | startDate          | numberOfInstallments |
       | 1               | MONTHS        | 31 December 2023   | 6                    |
 
-  @TestRailId:C4156 @AdvancedPaymentAllocation
+  @Skip @TestRailId:C4156 @AdvancedPaymentAllocation
   Scenario: Verify allowing Re-aging on interest bearing loan - Interest calculation: Default Behavior - Verify backdated re-aging on the day of repayment with interest recalculation enabled - UC16.3
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data

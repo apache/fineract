@@ -62,17 +62,16 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepositor
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeInterestHandlingType;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
+import org.apache.fineract.portfolio.loanaccount.service.InterestScheduleModelRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanRepaymentScheduleService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
 import org.apache.fineract.portfolio.note.domain.Note;
@@ -100,14 +99,16 @@ public class LoanReAgingService {
     private final LoanRepaymentScheduleService loanRepaymentScheduleService;
     private final LoanReadPlatformService loanReadPlatformService;
     private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
+    private final InterestScheduleModelRepositoryWrapper modelRepository;
+    private final LoanTransactionService loanTransactionService;
 
     public CommandProcessingResult reAge(final Long loanId, final JsonCommand command) {
         final Loan loan = loanAssembler.assembleFrom(loanId);
         reAgingValidator.validateReAge(loan, command);
 
         final LoanTransaction reAgeTransaction = createReAgeTransaction(loan, command);
-        loanTransactionRepository.saveAndFlush(reAgeTransaction);
         processReAgeTransaction(loan, reAgeTransaction, true);
+        loanTransactionRepository.saveAndFlush(reAgeTransaction);
         loan.updateLoanScheduleDependentDerivedFields();
 
         final Map<String, Object> changes = new LinkedHashMap<>();
@@ -170,8 +171,7 @@ public class LoanReAgingService {
         if (reAgeTransaction == null) {
             throw new LoanTransactionNotFoundException("Re-Age transaction for loan was not found");
         }
-        if (loan.isProgressiveSchedule() && ((loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy())
-                || loan.hasContractTerminationTransaction() || (loan.isInterestRecalculationEnabled() && loan.hasReAgingTransaction()))) {
+        if (loan.isProgressiveSchedule()) {
             final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
             loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
         }
@@ -196,31 +196,16 @@ public class LoanReAgingService {
     }
 
     private void processReAgeTransaction(final Loan loan, final LoanTransaction reAgeTransaction, final boolean withPostTransactionChecks) {
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
-                .determineProcessor(loan.transactionProcessingStrategy());
-        if (reAgeTransaction.getTransactionDate().isBefore(reAgeTransaction.getSubmittedOnDate())
-                && !loan.isInterestBearingAndInterestRecalculationEnabled()) {
+        if (reAgeTransaction.getTransactionDate().isBefore(reAgeTransaction.getSubmittedOnDate())) {
+            final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
+            loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
             if (withPostTransactionChecks) {
-                reprocessLoanTransactionsService.reprocessTransactionsWithPostTransactionChecks(loan,
-                        reAgeTransaction.getTransactionDate());
+                reprocessLoanTransactionsService.reprocessTransactions(loan, List.of(reAgeTransaction));
             } else {
-                reprocessLoanTransactionsService.reprocessTransactionsWithoutChecks(loan, reAgeTransaction.getTransactionDate(),
-                        List.of(reAgeTransaction));
+                reprocessLoanTransactionsService.reprocessTransactionsWithoutChecks(loan, List.of(reAgeTransaction));
             }
-        } else if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
-            if (loan.isProgressiveSchedule() && ((loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy())
-                    || loan.hasContractTerminationTransaction()
-                    || (loan.isInterestRecalculationEnabled() && loan.hasReAgingTransaction()))) {
-                final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
-                loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
-            }
-            final List<LoanTransaction> loanTransactions = loanTransactionRepository.findNonReversedTransactionsForReprocessingByLoan(loan);
-            loanTransactions.add(reAgeTransaction);
-            reprocessLoanTransactionsService.reprocessParticularTransactions(loan, loanTransactions);
         } else {
-            loanRepaymentScheduleTransactionProcessor.processLatestTransaction(reAgeTransaction,
-                    new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+            reprocessLoanTransactionsService.processLatestTransaction(reAgeTransaction, loan);
         }
     }
 

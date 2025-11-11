@@ -42,6 +42,7 @@ public class LoanScheduleService {
     private final LoanTransactionProcessingService loanTransactionProcessingService;
     private final LoanScheduleComponent loanSchedule;
     private final LoanTransactionRepository loanTransactionRepository;
+    private final ILoanUtilService loanUtilService;
 
     /**
      * Ability to regenerate the repayment schedule based on the loans current details/state.
@@ -60,7 +61,7 @@ public class LoanScheduleService {
         }
     }
 
-    public void recalculateSchedule(final Loan loan, final ScheduleGeneratorDTO generatorDTO) {
+    public void regenerateScheduleWithReprocessingTransactions(final Loan loan, final ScheduleGeneratorDTO generatorDTO) {
         if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isChargedOff()) {
             regenerateRepaymentScheduleWithInterestRecalculation(loan, generatorDTO);
         } else {
@@ -123,11 +124,20 @@ public class LoanScheduleService {
                 }
             }
         }
-        loanTransactionProcessingService.processPostDisbursementTransactions(loan);
     }
 
     public void handleRegenerateRepaymentScheduleWithInterestRecalculation(final Loan loan, final ScheduleGeneratorDTO generatorDTO) {
         regenerateRepaymentScheduleWithInterestRecalculation(loan, generatorDTO);
         reprocessLoanTransactionsService.reprocessTransactions(loan);
+    }
+
+    public void regenerateScheduleWithReprocessingTransactions(Loan loan) {
+        ScheduleGeneratorDTO generatorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
+        regenerateScheduleWithReprocessingTransactions(loan, generatorDTO);
+    }
+
+    public void regenerateRepaymentSchedule(final Loan loan) {
+        ScheduleGeneratorDTO generatorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
+        regenerateRepaymentSchedule(loan, generatorDTO);
     }
 }

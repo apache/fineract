@@ -108,7 +108,7 @@ public class InterestScheduleModelRepositoryWrapperImpl implements InterestSched
     public Optional<ProgressiveLoanInterestScheduleModel> getSavedModel(Loan loan, LocalDate businessDate) {
         Optional<ProgressiveLoanModel> progressiveLoanModel = findOneByLoanId(loan.getId());
         Optional<ProgressiveLoanInterestScheduleModel> savedModel;
-        if (progressiveLoanModel.isPresent() && !progressiveLoanModel.get().getBusinessDate().isAfter(businessDate)) {
+        if (progressiveLoanModel.isPresent()) {
             savedModel = extractModel(progressiveLoanModel);
             if (savedModel.isPresent() && progressiveLoanModel.get().getBusinessDate().isBefore(businessDate)) {
                 ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),

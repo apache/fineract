@@ -202,8 +202,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
 
         Optional<ProgressiveLoanInterestScheduleModel> savedModel = interestScheduleModelRepositoryWrapper.getSavedModel(loan,
                 transactionDate);
-        ProgressiveLoanInterestScheduleModel model = savedModel
-                .orElseGet(() -> processor.calculateInterestScheduleModel(loan.getId(), transactionDate));
+        ProgressiveLoanInterestScheduleModel model = savedModel.orElseThrow();
         OutstandingDetails outstandingAmounts = emiCalculator.getOutstandingAmountsTillDate(model, transactionDate);
         // TODO: We should add all the past due outstanding amounts as well
         OutstandingAmountsDTO result = new OutstandingAmountsDTO(currency) //
@@ -245,8 +244,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
             return Money.zero(loan.getCurrency());
         }
         Optional<ProgressiveLoanInterestScheduleModel> savedModel = interestScheduleModelRepositoryWrapper.getSavedModel(loan, targetDate);
-        ProgressiveLoanInterestScheduleModel model = savedModel
-                .orElseGet(() -> processor.calculateInterestScheduleModel(loan.getId(), targetDate));
+        ProgressiveLoanInterestScheduleModel model = savedModel.orElseThrow();
         return emiCalculator.getPeriodInterestTillDate(model, installment.getDueDate(), targetDate, false);
     }
 
@@ -438,7 +436,8 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
             } else {
                 amount = amount.add(principalInterestForThisPeriod.principal().getAmount());
             }
-            BigDecimal loanChargeAmt = amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100), mc);
+            Money loanChargeAmt = Money.of(cumulative.getCurrency(),
+                    amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100), mc));
             cumulative = cumulative.plus(loanChargeAmt);
         } else {
             cumulative = cumulative.plus(loanCharge.amountOrPercentage());
@@ -456,7 +455,8 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
         } else {
             amount = amount.add(principalDisbursed.getAmount());
         }
-        BigDecimal loanChargeAmt = amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100), mc);
+        Money loanChargeAmt = Money.of(cumulative.getCurrency(),
+                amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100), mc));
         cumulative = cumulative.plus(loanChargeAmt);
         return cumulative;
     }
