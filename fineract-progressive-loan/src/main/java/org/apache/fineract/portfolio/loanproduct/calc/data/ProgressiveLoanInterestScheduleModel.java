@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanproduct.calc.data;
 import static org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper.isInPeriod;
 import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestScheduleModelModifiers.COPY;
 import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestScheduleModelModifiers.EMI_RECALCULATION;
+import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestScheduleModelModifiers.INTEREST_RECALCULATION_ENABLED;
 
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -50,7 +51,7 @@ import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
+import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 
 @Data
 @Accessors(fluent = true)
@@ -60,7 +61,7 @@ public class ProgressiveLoanInterestScheduleModel {
     private final List<RepaymentPeriod> repaymentPeriods;
     private final TreeSet<InterestRate> interestRates;
     @JsonExclude
-    private final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail;
+    private final ILoanConfigurationDetails loanProductRelatedDetail;
     private final Map<LoanTermVariationType, List<LoanTermVariationsData>> loanTermVariations;
     private final Integer installmentAmountInMultiplesOf;
     @JsonExclude
@@ -73,8 +74,8 @@ public class ProgressiveLoanInterestScheduleModel {
     private LocalDate lastOverdueBalanceChange;
 
     public ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods,
-            final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail,
-            final List<LoanTermVariationsData> loanTermVariations, final Integer installmentAmountInMultiplesOf, final MathContext mc) {
+            final ILoanConfigurationDetails loanProductRelatedDetail, final List<LoanTermVariationsData> loanTermVariations,
+            final Integer installmentAmountInMultiplesOf, final MathContext mc) {
         this.repaymentPeriods = new ArrayList<>(repaymentPeriods);
         this.interestRates = new TreeSet<>(Collections.reverseOrder());
         this.loanProductRelatedDetail = loanProductRelatedDetail;
@@ -82,11 +83,12 @@ public class ProgressiveLoanInterestScheduleModel {
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.mc = mc;
         this.zero = Money.zero(loanProductRelatedDetail.getCurrencyData(), mc);
-        modifiers = new HashMap<>(Map.of(EMI_RECALCULATION, true, COPY, false));
+        modifiers = new HashMap<>(Map.of(EMI_RECALCULATION, true, COPY, false, INTEREST_RECALCULATION_ENABLED,
+                loanProductRelatedDetail.isInterestRecalculationEnabled()));
     }
 
     private ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods, final TreeSet<InterestRate> interestRates,
-            final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail,
+            final ILoanConfigurationDetails loanProductRelatedDetail,
             final Map<LoanTermVariationType, List<LoanTermVariationsData>> loanTermVariations, final Integer installmentAmountInMultiplesOf,
             final MathContext mc, final boolean isCopiedForCalculation) {
         this.mc = mc;
@@ -97,7 +99,8 @@ public class ProgressiveLoanInterestScheduleModel {
         this.loanTermVariations = loanTermVariations;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.zero = Money.zero(loanProductRelatedDetail.getCurrencyData(), mc);
-        modifiers = new HashMap<>(Map.of(EMI_RECALCULATION, true, COPY, isCopiedForCalculation));
+        modifiers = new HashMap<>(Map.of(EMI_RECALCULATION, true, COPY, isCopiedForCalculation, INTEREST_RECALCULATION_ENABLED,
+                loanProductRelatedDetail.isInterestRecalculationEnabled()));
     }
 
     public ProgressiveLoanInterestScheduleModel deepCopy(MathContext mc) {
@@ -439,5 +442,9 @@ public class ProgressiveLoanInterestScheduleModel {
             case DAYS -> instance::plusDays;
             default -> throw new UnsupportedOperationException();
         };
+    }
+
+    public boolean isInterestRecalculationIsAllowed() {
+        return modifiers.get(INTEREST_RECALCULATION_ENABLED);
     }
 }

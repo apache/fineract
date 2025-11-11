@@ -32,9 +32,9 @@ import java.util.List;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -86,8 +86,7 @@ class InterestPeriodTest {
         InterestPeriod period = InterestPeriod.empty(repaymentPeriod, MC);
         when(repaymentPeriod.getInterestPeriods()).thenReturn(List.of(period));
         when(repaymentPeriod.getFirstInterestPeriod()).thenReturn(period);
-        LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail = mock(
-                LoanProductMinimumRepaymentScheduleRelatedDetail.class);
+        ILoanConfigurationDetails loanProductRelatedDetail = mock(ILoanConfigurationDetails.class);
         when(loanProductRelatedDetail.getCurrencyData()).thenReturn(USD);
         when(loanProductRelatedDetail.getInterestMethod()).thenReturn(InterestMethod.DECLINING_BALANCE);
         when(loanProductRelatedDetail.getInterestCalculationPeriodMethod()).thenReturn(InterestCalculationPeriodMethod.DAILY);

@@ -26,7 +26,7 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 /**
  * Represents the bare minimum repayment details needed for activities related to generating repayment schedules.
  */
-public interface LoanProductMinimumRepaymentScheduleRelatedDetail {
+public interface ILoanConfigurationDetails {
 
     CurrencyData getCurrencyData();
 
@@ -67,4 +67,10 @@ public interface LoanProductMinimumRepaymentScheduleRelatedDetail {
     boolean isInterestRecognitionOnDisbursementDate();
 
     DaysInYearCustomStrategyType getDaysInYearCustomStrategy();
+
+    boolean isInterestRecalculationEnabled();
+
+    RecalculationFrequencyType getRestFrequencyType();
+
+    LoanPreCloseInterestCalculationStrategy getPreCloseInterestCalculationStrategy();
 }

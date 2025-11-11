@@ -31,9 +31,9 @@ import java.time.ZoneId;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ class RepaymentPeriodTest {
     private static final Money ZERO = Money.of(USD, BigDecimal.ZERO, MC);
 
     private static MockedStatic<MoneyHelper> moneyHelper;
-    private static LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail;
+    private static ILoanConfigurationDetails loanProductRelatedDetail;
 
     @BeforeAll
     static void init() {
@@ -55,7 +55,7 @@ class RepaymentPeriodTest {
         moneyHelper.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.HALF_EVEN);
         moneyHelper.when(MoneyHelper::getMathContext).thenReturn(MC);
 
-        loanProductRelatedDetail = mock(LoanProductMinimumRepaymentScheduleRelatedDetail.class);
+        loanProductRelatedDetail = mock(ILoanConfigurationDetails.class);
         when(loanProductRelatedDetail.getCurrencyData()).thenReturn(USD);
         when(loanProductRelatedDetail.getInterestMethod()).thenReturn(InterestMethod.DECLINING_BALANCE);
         when(loanProductRelatedDetail.getInterestCalculationPeriodMethod()).thenReturn(InterestCalculationPeriodMethod.DAILY);

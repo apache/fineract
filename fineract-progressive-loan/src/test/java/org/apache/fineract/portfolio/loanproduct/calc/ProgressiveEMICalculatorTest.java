@@ -47,9 +47,9 @@ import org.apache.fineract.portfolio.loanproduct.calc.data.InterestPeriod;
 import org.apache.fineract.portfolio.loanproduct.calc.data.PeriodDueDetails;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanproduct.calc.data.RepaymentPeriod;
+import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -72,8 +72,7 @@ class ProgressiveEMICalculatorTest {
     private static MockedStatic<ThreadLocalContextUtil> threadLocalContextUtil = Mockito.mockStatic(ThreadLocalContextUtil.class);
     private static MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
     private static MathContext mc = new MathContext(12, RoundingMode.HALF_EVEN);
-    private static LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail = Mockito
-            .mock(LoanProductMinimumRepaymentScheduleRelatedDetail.class);
+    private static ILoanConfigurationDetails loanProductRelatedDetail = Mockito.mock(ILoanConfigurationDetails.class);
 
     private static final CurrencyData currency = new CurrencyData("USD", "USD", 2, 1, "$", "USD");
 

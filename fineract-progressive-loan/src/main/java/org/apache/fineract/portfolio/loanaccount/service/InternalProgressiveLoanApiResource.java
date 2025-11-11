@@ -42,7 +42,9 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.mapper.LoanConfigurationDetailsMapper;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
+import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -81,8 +83,8 @@ public class InternalProgressiveLoanApiResource implements InitializingBean {
         if (!loan.isProgressiveSchedule()) {
             throw new IllegalArgumentException("The loan is not progressive.");
         }
-
-        return writePlatformService.readProgressiveLoanInterestScheduleModel(loanId, loan.getLoanRepaymentScheduleDetail(),
+        ILoanConfigurationDetails loanConfigurationDetails = LoanConfigurationDetailsMapper.map(loan);
+        return writePlatformService.readProgressiveLoanInterestScheduleModel(loanId, loanConfigurationDetails,
                 loan.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf()).orElse(null);
     }
 

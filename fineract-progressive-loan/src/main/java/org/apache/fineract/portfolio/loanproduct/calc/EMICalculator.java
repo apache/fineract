@@ -27,15 +27,13 @@ import java.util.Optional;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.ProgressiveTransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelRepaymentPeriod;
 import org.apache.fineract.portfolio.loanproduct.calc.data.OutstandingDetails;
 import org.apache.fineract.portfolio.loanproduct.calc.data.PeriodDueDetails;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanproduct.calc.data.RepaymentPeriod;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
+import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 
 public interface EMICalculator {
 
@@ -45,8 +43,8 @@ public interface EMICalculator {
      */
     @NotNull
     ProgressiveLoanInterestScheduleModel generatePeriodInterestScheduleModel(@NotNull List<LoanScheduleModelRepaymentPeriod> periods,
-            @NotNull LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail,
-            List<LoanTermVariationsData> loanTermVariations, Integer installmentAmountInMultiplesOf, MathContext mc);
+            @NotNull ILoanConfigurationDetails loanProductRelatedDetail, List<LoanTermVariationsData> loanTermVariations,
+            Integer installmentAmountInMultiplesOf, MathContext mc);
 
     /**
      * This method creates an Interest model with repayment periods from the installments which retrieved from the
@@ -54,8 +52,7 @@ public interface EMICalculator {
      */
     @NotNull
     ProgressiveLoanInterestScheduleModel generateInstallmentInterestScheduleModel(
-            @NotNull List<LoanRepaymentScheduleInstallment> installments,
-            @NotNull LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail,
+            @NotNull List<LoanRepaymentScheduleInstallment> installments, @NotNull ILoanConfigurationDetails loanProductRelatedDetail,
             List<LoanTermVariationsData> loanTermVariations, Integer installmentAmountInMultiplesOf, MathContext mc);
 
     /**
@@ -144,10 +141,10 @@ public interface EMICalculator {
      */
     void applyInterestPause(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate fromDate, LocalDate endDate);
 
-    void updateModelRepaymentPeriodsDuringReAge(ProgressiveTransactionCtx ctx, LoanTransaction loanTransaction,
-            LoanApplicationTerms loanApplicationTerms, MathContext mc);
+    void updateModelRepaymentPeriodsDuringReAge(ProgressiveLoanInterestScheduleModel ctx, LocalDate loanTransaction,
+            LocalDate reageFirstDueDate, LocalDate transactionDate, LoanApplicationTerms loanApplicationTerms, MathContext mc);
 
-    boolean recalculateModelOverdueAmountsTillDate(ProgressiveTransactionCtx ctx, LocalDate targetDate);
+    boolean recalculateModelOverdueAmountsTillDate(ProgressiveLoanInterestScheduleModel ctx, LocalDate targetDate, boolean prepayAttempt);
 
     /**
      * Gives back the sum of the outstanding interest from the whole model till the provided date.

@@ -35,9 +35,10 @@ import org.apache.fineract.portfolio.loanaccount.domain.ProgressiveLoanModel;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.ProgressiveTransactionCtx;
+import org.apache.fineract.portfolio.loanaccount.mapper.LoanConfigurationDetailsMapper;
 import org.apache.fineract.portfolio.loanaccount.repository.ProgressiveLoanModelRepository;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
+import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -92,7 +93,7 @@ public class InterestScheduleModelRepositoryWrapperImpl implements InterestSched
     public Optional<ProgressiveLoanInterestScheduleModel> extractModel(Optional<ProgressiveLoanModel> progressiveLoanModel) {
         return progressiveLoanModel.map(ProgressiveLoanModel::getJsonModel) //
                 .map(jsonModel -> progressiveLoanInterestScheduleModelParserService.fromJson(jsonModel,
-                        progressiveLoanModel.get().getLoan().getLoanProductRelatedDetail(), MoneyHelper.getMathContext(),
+                        LoanConfigurationDetailsMapper.map(progressiveLoanModel.get().getLoan()), MoneyHelper.getMathContext(),
                         progressiveLoanModel.get().getLoan().getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf()));
     }
 
@@ -125,7 +126,7 @@ public class InterestScheduleModelRepositoryWrapperImpl implements InterestSched
 
     @Override
     public Optional<ProgressiveLoanInterestScheduleModel> readProgressiveLoanInterestScheduleModel(final Long loanId,
-            final LoanProductMinimumRepaymentScheduleRelatedDetail detail, final Integer installmentAmountInMultipliesOf) {
+            final ILoanConfigurationDetails detail, final Integer installmentAmountInMultipliesOf) {
         return loanModelRepository.findOneByLoanId(loanId) //
                 .map(ProgressiveLoanModel::getJsonModel) //
                 .map(jsonModel -> progressiveLoanInterestScheduleModelParserService.fromJson(jsonModel, detail,

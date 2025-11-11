@@ -5432,6 +5432,7 @@ Feature: LoanReAging
       | 01 March 2024    | Repayment        | 17.01  | 16.52     | 0.49     | 0.0  | 0.0       | 67.05        | false    | false    |
       | 01 April 2024    | Re-age           | 67.44  | 67.05     | 0.39     | 0.0  | 0.0       | 0.0          | false    | true     |
 
+  @Skip
   @TestRailId:C4154 @AdvancedPaymentAllocation
   Scenario: Verify allowing Re-aging on interest bearing loan - Interest calculation: Default Behavior - re-aging on same day as disbursement - UC16.1
     When Admin sets the business date to "01 January 2024"

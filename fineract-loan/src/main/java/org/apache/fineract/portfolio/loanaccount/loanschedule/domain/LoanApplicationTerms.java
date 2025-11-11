@@ -53,13 +53,13 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCal
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
-import org.apache.fineract.portfolio.loanproduct.data.LoanProductRelatedDetailMinimumData;
+import org.apache.fineract.portfolio.loanproduct.data.LoanConfigurationDetails;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
+import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanPreCloseInterestCalculationStrategy;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
@@ -1694,15 +1694,16 @@ public final class LoanApplicationTerms {
                 this.buyDownFeeStrategy, this.buyDownFeeIncomeType, this.merchantBuyDownFee);
     }
 
-    public LoanProductMinimumRepaymentScheduleRelatedDetail toLoanProductRelatedDetailMinimumData() {
+    public ILoanConfigurationDetails toLoanConfigurationDetails() {
         final CurrencyData currency = new CurrencyData(this.currency.getCode(), this.currency.getDecimalPlaces(),
                 this.currency.getInMultiplesOf());
-        return new LoanProductRelatedDetailMinimumData(currency, interestRatePerPeriod, annualNominalInterestRate, interestChargingGrace,
+        return new LoanConfigurationDetails(currency, interestRatePerPeriod, annualNominalInterestRate, interestChargingGrace,
                 interestPaymentGrace, principalGrace, recurringMoratoriumOnPrincipalPeriods, interestMethod,
                 interestCalculationPeriodMethod, daysInYearType, daysInMonthType, amortizationMethod, repaymentPeriodFrequencyType,
                 repaymentEvery, numberOfRepayments,
                 isInterestChargedFromDateSameAsDisbursalDateEnabled != null && isInterestChargedFromDateSameAsDisbursalDateEnabled,
-                daysInYearCustomStrategy, allowPartialPeriodInterestCalcualtion);
+                daysInYearCustomStrategy, allowPartialPeriodInterestCalcualtion, interestRecalculationEnabled, recalculationFrequencyType,
+                preClosureInterestCalculationStrategy);
     }
 
     public Integer getLoanTermFrequency() {
