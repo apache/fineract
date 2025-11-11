@@ -70,6 +70,19 @@ public class LoanReAmortizationStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_REAMORTIZATION_RESPONSE, response);
     }
 
+    @When("Admin creates a Loan re-amortization transaction on current business date with reAmortizationInterestHandling {string}")
+    public void createLoanReAmortizationWithInterestHandling(String reAmortizationInterestHandling) throws IOException {
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+
+        PostLoansLoanIdTransactionsRequest reAmortizationRequest = LoanRequestFactory.defaultLoanReAmortizationRequest().reAmortizationInterestHandling(reAmortizationInterestHandling);
+
+        Response<PostLoansLoanIdTransactionsResponse> response = loanTransactionsApi
+                .executeLoanTransaction(loanId, reAmortizationRequest, "reAmortize").execute();
+        ErrorHelper.checkSuccessfulApiCall(response);
+        testContext().set(TestContextKey.LOAN_REAMORTIZATION_RESPONSE, response);
+    }
+
     @When("When Admin creates a Loan re-amortization transaction on current business date by loan external ID")
     public void createLoanReAmortizationByLoanExternalId() {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
