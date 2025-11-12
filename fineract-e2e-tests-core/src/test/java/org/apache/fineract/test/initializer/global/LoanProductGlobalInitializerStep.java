@@ -4172,10 +4172,9 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
 
         // LP2 advanced + progressive loan schedule + horizontal + interest recalculation
         // Frequency for recalculate Outstanding Principal: Daily, Frequency Interval for recalculation: 1
-        String name150 = DefaultLoanProduct.LP2_ADV_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OF_ACCRUAL.getName();
         PostLoanProductsRequest loanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals = loanProductsRequestFactory
                 .defaultLoanProductsRequestLP2Emi()//
-                .name(name150)//
+                .name(DefaultLoanProduct.LP2_ADV_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OF_ACCRUAL.getName())//
                 .supportedInterestRefundTypes(supportedInterestRefundTypes).installmentAmountInMultiplesOf(null) //
                 .daysInYearType(DaysInYearType.ACTUAL.value)//
                 .daysInMonthType(DaysInMonthType.ACTUAL.value)//
@@ -4217,6 +4216,23 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .execute();
         TestContext.INSTANCE.set(TestContextKey.LP1_INTEREST_FLAT_DAILY_RECALCULATION_SAR_MULTIDISB_EXPECT_TRANCHES,
                 responseLoanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementExpectsTranches);
+
+        // LP2 + zero-interest chargeOff behaviour + progressive loan schedule + horizontal
+        // (LP2_ADV_PYMNT_360_30_ZERO_INTEREST_CHARGE_OFF_ACCRUAL_ACTIVITY)
+        final PostLoanProductsRequest loanProductsRequestAdvZeroInterestChargeOffBehaviourAccrualActivity = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2Emi()//
+                .name(DefaultLoanProduct.LP2_ADV_PYMNT_360_30_ZERO_INTEREST_CHARGE_OFF_ACCRUAL_ACTIVITY.getName())//
+                .daysInYearType(DaysInYearType.DAYS360.value)//
+                .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT")))
+                .enableAccrualActivityPosting(true)//
+                .chargeOffBehaviour("ZERO_INTEREST");//
+        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvZeroInterestChargeOffBehaviourAccrualActivity = loanProductsApi
+                .createLoanProduct(loanProductsRequestAdvZeroInterestChargeOffBehaviourAccrualActivity).execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_360_30_ZERO_INTEREST_CHARGE_OFF_ACCRUAL_ACTIVITY,
+                responseLoanProductsRequestAdvZeroInterestChargeOffBehaviourAccrualActivity);
 
         // LP1 with 12% Flat interest, interest period: Daily, Interest recalculation- Actual
         // Multi-disbursement that expects tranches

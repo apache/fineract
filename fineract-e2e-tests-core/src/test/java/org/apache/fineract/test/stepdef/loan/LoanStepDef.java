@@ -6060,6 +6060,23 @@ public class LoanStepDef extends AbstractStepDef {
         checkLoanAmortizationAllocationMappingData(resourceId, loanAmortizationAllocationResponse.body(), table);
     }
 
+    @Then("Loan has {double} total unpaid payable not due interest")
+    public void loanTotalUnpaidPayableNotDueInterest(double totalUnpaidPayableNotDueInterestExpected) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.body().getLoanId();
+
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "repaymentSchedule", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+        testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
+
+        Double totalUnpaidPayableNotDueInterestActual = loanDetailsResponse.body().getSummary().getTotalUnpaidPayableNotDueInterest()
+                .doubleValue();
+        assertThat(totalUnpaidPayableNotDueInterestActual)
+                .as(ErrorMessageHelper.wrongAmountInTotalUnpaidPayableNotDueInterest(totalUnpaidPayableNotDueInterestActual,
+                        totalUnpaidPayableNotDueInterestExpected))
+                .isEqualTo(totalUnpaidPayableNotDueInterestExpected);
+    }
+
     private void checkLoanAmortizationAllocationMappingData(final String resourceId,
             final LoanAmortizationAllocationResponse amortizationAllocationResponse, final DataTable table) {
         final List<List<String>> data = table.asLists();
