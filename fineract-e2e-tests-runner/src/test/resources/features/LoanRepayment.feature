@@ -4562,7 +4562,7 @@ Feature: LoanRepayment
       | 27 March 2025    | Repayment              | 20.0   | 19.89     | 0.11     | 0.0  | 0.0       | 100.11       | false    | true     |
       | 27 March 2025    | Merchant Issued Refund | 120.0  | 100.11    | 0.0      | 0.0  | 0.0       |   0.0        | false    | true     |
       | 27 March 2025    | Interest Refund        | 0.11   | 0.0       | 0.0      | 0.0  | 0.0       |   0.0        | false    | true     |
-      | 27 March 2025    | Accrual Activity       | 0.11   | 0.0       | 0.11     | 0.0  | 0.0       |   0.0        | false    | true     |
+      | 27 March 2025    | Accrual Activity       | 0.11   | 0.0       | 0.11     | 0.0  | 0.0       |   0.0        | false    | false    |
       | 28 March 2025    | Accrual                | 0.11   | 0.0       | 0.11     | 0.0  | 0.0       |   0.0        | false    | false    |
       | 28 March 2025    | Credit Balance Refund  | 20.0   | 0.0       | 0.0      | 0.0  | 0.0       |   0.0        | false    | false    |
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"

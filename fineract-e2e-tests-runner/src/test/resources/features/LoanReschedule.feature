@@ -1132,3 +1132,45 @@ Feature: LoanReschedule
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 24 July 2025     | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
     Then LoanRescheduledDueAdjustScheduleBusinessEvent is raised on "24 July 2025"
+
+  @TestRailId:C4225
+  Scenario: Verify after reschedule of loan by changing due date, the last Accrual Activity transaction is reversed-replayed only once
+    When Admin sets the business date to "05 September 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_ACCRUAL_ACTIVITY | 31 December 2024   | 1111            | 24.99                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 24                 | MONTHS                | 1              | MONTHS                 | 24                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "31 December 2024" with "1111" amount and expected disbursement date on "31 December 2024"
+    And Admin successfully disburse the loan on "31 December 2024" with "1111" EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "31 January 2025" with 59.26 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "28 February 2025" with 59.26 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "31 March 2025" with 59.26 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "30 April 2025" with 59.26 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "30 May 2025" with 59.26 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "29 June 2025" with 59.26 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "31 July 2025" with 59.26 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "31 August 2025" with 59.26 EUR transaction amount
+    When Admin sets the business date to "06 September 2025"
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "11 September 2025"
+    When Customer undo "1"th "Repayment" transaction made on "31 August 2025"
+    When Admin sets the business date to "30 September 2025"
+    And Customer makes "AUTOPAY" repayment on "30 September 2025" with 59.26 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "30 September 2025" with 59.26 EUR transaction amount
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "10 October 2025"
+    When Customer undo "1"th "Repayment" transaction made on "30 September 2025"
+    When Customer undo "2"th "Repayment" transaction made on "30 September 2025"
+    When Admin sets the business date to "16 October 2025"
+    And Customer makes "AUTOPAY" repayment on "16 October 2025" with 60 EUR transaction amount
+    When Admin sets the business date to "31 October 2025"
+    And Customer makes "AUTOPAY" repayment on "31 October 2025" with 59.26 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "31 October 2025" with 58.52 EUR transaction amount
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "10 November 2025"
+    When Admin runs inline COB job for Loan
+    When Admin creates and approves Loan reschedule with the following data:
+      | rescheduleFromDate | submittedOnDate  | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
+      | 30 November 2025   | 10 November 2025 | 31 January 2026 |                  |                 |            |                 |
+    Then In Loan Transactions the "1"th Transaction of "Accrual Activity" on "31 October 2025" has "1" relationship with type="REPLAYED"
+

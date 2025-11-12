@@ -1191,7 +1191,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         boolean alreadyProcessed = changedTransactionDetail.getTransactionChanges().stream().map(TransactionChangeData::getNewTransaction)
                 .anyMatch(lt -> !lt.equals(newTransaction) && lt.getTransactionDate().equals(oldTransaction.getTransactionDate()));
         boolean amountMatch = LoanTransaction.transactionAmountsMatch(currency, oldTransaction, newTransaction);
-        if (!alreadyProcessed && amountMatch) {
+        if ((!alreadyProcessed && amountMatch) || newTransaction.isAccrualActivity()) {
             if (!oldTransaction.getTypeOf().isWaiveCharges()) { // WAIVE_CHARGES is not reprocessed
                 oldTransaction
                         .updateLoanTransactionToRepaymentScheduleMappings(newTransaction.getLoanTransactionToRepaymentScheduleMappings());

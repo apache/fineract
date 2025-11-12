@@ -27,6 +27,7 @@ import static org.apache.fineract.test.factory.LoanProductsRequestFactory.CHARGE
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.LOCALE_EN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -6094,5 +6095,27 @@ public class LoanStepDef extends AbstractStepDef {
             }
         }
         return actualValues;
+    }
+
+    @Then("In Loan Transactions the {string}th Transaction of {string} on {string} has {string} relationship with type={string}")
+    public void inLoanTransactionsTheThTransactionOfOnHasRelationshipWithTypeREPLAYED(String nthTransactionFromStr, String transactionType,
+            String transactionDate, String numberOfRelations, String relationshipType) throws IOException {
+        final Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanCreateResponse.body().getLoanId();
+
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        final List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+        final int nthTransactionFrom = nthTransactionFromStr == null ? transactions.size() - 1
+                : Integer.parseInt(nthTransactionFromStr) - 1;
+        final GetLoansLoanIdTransactions transactionFrom = transactions.stream()
+                .filter(t -> transactionType.equals(t.getType().getValue()) && transactionDate.equals(FORMATTER.format(t.getDate())))
+                .toList().get(nthTransactionFrom);
+
+        final List<GetLoansLoanIdLoanTransactionRelation> relationshipOptional = transactionFrom.getTransactionRelations().stream()
+                .filter(r -> r.getRelationType().equals(relationshipType)).toList();
+
+        assertEquals(Integer.valueOf(numberOfRelations), relationshipOptional.size(), "Missed relationship for transaction");
     }
 }
