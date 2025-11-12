@@ -1,0 +1,668 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements. See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership. The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+# Documentation Changes
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+          - "fineract-doc/**/*"
+          - "docs/**/*"
+          - "**/README*"
+          - "CONTRIBUTING.md"
+          - "CHANGELOG.md"
+          - "CODE_OF_CONDUCT.md"
+          - "STATIC_WEAVING.md"
+          - "APACHE_LICENSETEXT.md"
+
+# Backend Layer Labels
+api:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/api/**/*"
+          - "**/*ApiResource.java"
+          - "**/*ApiResourceSwagger.java"
+          - "**/*Controller.java"
+          - "**/*RestController.java"
+
+service:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/service/**/*"
+          - "**/*Service.java"
+          - "**/*ServiceImpl.java"
+          - "**/*PlatformService.java"
+          - "**/*ReadPlatformService.java"
+          - "**/*WritePlatformService.java"
+
+domain:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/domain/**/*"
+          - "**/*Repository.java"
+          - "**/*RepositoryWrapper.java"
+          - "**/*Entity.java"
+          - "**/*Assembler.java"
+
+handler:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/handler/**/*"
+          - "**/*Handler.java"
+          - "**/*CommandHandler.java"
+
+data:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/data/**/*"
+          - "**/*Data.java"
+          - "**/*DTO.java"
+          - "**/*Request.java"
+          - "**/*Response.java"
+
+serialization:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/serialization/**/*"
+          - "**/*Serializer.java"
+          - "**/*Deserializer.java"
+
+validation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-validation/**/*"
+          - "**/validator/**/*"
+          - "**/*Validator.java"
+          - "**/*ValidationService.java"
+
+exception:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/exception/**/*"
+          - "**/*Exception.java"
+
+mapper:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/mapper/**/*"
+          - "**/*Mapper.java"
+          - "**/*RowMapper.java"
+
+# Core Backend Modules
+core:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-core/**/*"
+
+provider:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-provider/**/*"
+
+# Domain/Feature Modules
+accounting:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-accounting/**/*"
+          - "**/accounting/**/*"
+
+loan:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-loan/**/*"
+          - "fineract-progressive-loan/**/*"
+          - "fineract-progressive-loan-embeddable-schedule-generator/**/*"
+          - "**/loan/**/*"
+          - "**/loanaccount/**/*"
+
+savings:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-savings/**/*"
+          - "**/savings/**/*"
+          - "**/savingsaccount/**/*"
+
+client:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-client/**/*"
+          - "fineract-client-feign/**/*"
+          - "**/client/**/*"
+          - "**/clients/**/*"
+
+branch:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-branch/**/*"
+          - "**/teller/**/*"
+          - "**/cashier/**/*"
+
+charge:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-charge/**/*"
+          - "**/charge/**/*"
+
+investor:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-investor/**/*"
+          - "**/investor/**/*"
+
+report:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-report/**/*"
+          - "**/report/**/*"
+          - "**/reporting/**/*"
+
+rates:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-rates/**/*"
+          - "**/rate/**/*"
+
+tax:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-tax/**/*"
+          - "**/tax/**/*"
+
+document:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-document/**/*"
+          - "**/document/**/*"
+          - "**/documentmanagement/**/*"
+
+group:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/group/**/*"
+          - "**/groups/**/*"
+
+portfolio:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/portfolio/**/*"
+
+products:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/product/**/*"
+          - "**/loanproduct/**/*"
+          - "**/savingsproduct/**/*"
+          - "**/shareproduct/**/*"
+
+organization:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/organisation/**/*"
+          - "**/organization/**/*"
+          - "**/office/**/*"
+          - "**/staff/**/*"
+          - "**/holiday/**/*"
+          - "**/workingdays/**/*"
+
+useradmin:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/useradministration/**/*"
+          - "**/user/**/*"
+          - "**/role/**/*"
+          - "**/permission/**/*"
+
+# Infrastructure Components
+infrastructure:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/infrastructure/**/*"
+
+configuration:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/configuration/**/*"
+          - "**/config/**/*"
+          - "**/*Configuration.java"
+          - "**/*Config.java"
+
+dataqueries:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/dataqueries/**/*"
+          - "**/datatable/**/*"
+          - "**/entitydatatable/**/*"
+
+jobs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/jobs/**/*"
+          - "**/job/**/*"
+          - "**/*Job.java"
+          - "**/*TaskConfig.java"
+
+scheduler:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/scheduler/**/*"
+          - "**/*Scheduler.java"
+
+survey:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/survey/**/*"
+          - "**/spm/**/*"
+
+template:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/template/**/*"
+
+notification:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/notification/**/*"
+          - "**/sms/**/*"
+          - "**/email/**/*"
+
+adhoc:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/adhocquery/**/*"
+          - "**/adhoc/**/*"
+
+hook:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/hook/**/*"
+          - "**/hooks/**/*"
+
+audit:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/audit/**/*"
+          - "**/auditing/**/*"
+
+entityaccess:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/entityaccess/**/*"
+
+code:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/code/**/*"
+          - "**/codes/**/*"
+
+note:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/note/**/*"
+          - "**/notes/**/*"
+
+calendar:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/calendar/**/*"
+          - "**/meeting/**/*"
+
+bulkimport:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/bulkimport/**/*"
+
+interoperation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/interoperation/**/*"
+
+search:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/search/**/*"
+
+transfer:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/transfer/**/*"
+          - "**/accounttransfer/**/*"
+
+guarantor:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/guarantor/**/*"
+
+collateral:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/collateral/**/*"
+
+# Database & Persistence
+database:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-db/**/*"
+          - "**/db/**/*"
+          - "**/*liquibase*"
+          - "**/*migration*"
+          - "**/sql/**/*"
+          - "**/changelog/**/*"
+
+jpa:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/jpa/**/*"
+          - "**/*Repository.java"
+
+cob:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-cob/**/*"
+          - "**/cob/**/*"
+
+command:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-command/**/*"
+          - "**/command/**/*"
+          - "**/*Command.java"
+          - "**/*CommandSource.java"
+
+avro:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-avro-schemas/**/*"
+          - "**/avro/**/*"
+
+# Build & Configuration
+build:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/build.gradle"
+          - "gradle/**/*"
+          - "gradlew*"
+          - "settings.gradle"
+          - "buildSrc/**/*"
+          - "gradle.properties"
+          - "**/dependencies.gradle"
+          - "static-weaving.gradle"
+          - "lombok.config"
+
+# Docker & Deployment
+docker:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/Dockerfile"
+          - "docker/**/*"
+          - "docker-compose*.yml"
+          - ".dockerignore"
+          - "config/docker/**/*"
+
+kubernetes:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "kubernetes/**/*"
+          - "**/*.yaml"
+          - "**/*.yml"
+
+# CI/CD & Testing
+ci-cd:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/**/*"
+          - ".github/**/*"
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*Test.java"
+          - "**/*Tests.java"
+          - "**/*Test.ts"
+          - "**/*spec.ts"
+          - "**/test/**/*"
+          - "integration-tests/**/*"
+          - "oauth2-tests/**/*"
+          - "twofactor-tests/**/*"
+
+e2e:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-e2e-tests-core/**/*"
+          - "fineract-e2e-tests-runner/**/*"
+          - "**/e2e/**/*"
+          - "**/cucumber/**/*"
+          - "**/features/**/*"
+
+unit-tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/test/java/**/*Test.java"
+          - "src/test/java/**/*Tests.java"
+
+integration-tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "integration-tests/**/*"
+          - "**/*IntegrationTest.java"
+
+# Web Application (Angular Frontend)
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "web-app/**/*"
+
+angular:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "web-app/src/**/*.ts"
+          - "web-app/src/**/*.html"
+          - "web-app/src/**/*.scss"
+          - "web-app/angular.json"
+          - "web-app/tsconfig*.json"
+
+ui-component:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "web-app/src/app/**/*.component.ts"
+          - "web-app/src/app/**/*.component.html"
+          - "web-app/src/app/**/*.component.scss"
+
+# Code Quality & Configuration
+config:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "config/**/*"
+          - "**/*.properties"
+          - "**/*.xml"
+          - "**/*.yml"
+          - "**/*.yaml"
+          - "**/*.json"
+          - ".editorconfig"
+          - "renovate.json"
+          - ".asf.yaml"
+          - ".profileconfig.json"
+
+linting:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".eslintrc*"
+          - "eslint.config.js"
+          - ".prettierrc*"
+          - ".stylelintrc*"
+          - ".htmlhintrc"
+          - "config/checkstyle/**/*"
+          - "config/spotbugs/**/*"
+          - "config/fineractdev-*"
+
+# Security & Authentication
+security:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/oauth2/**/*"
+          - "**/security/**/*"
+          - "**/auth/**/*"
+          - "**/authentication/**/*"
+          - "oauth2-tests/**/*"
+          - "twofactor-tests/**/*"
+
+# Messaging & Events
+messaging:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/kafka/**/*"
+          - "**/activemq/**/*"
+          - "**/messaging/**/*"
+          - "**/event/**/*"
+          - "docker-compose*kafka*.yml"
+          - "docker-compose*activemq*.yml"
+
+events:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/event/**/*"
+          - "**/*Event.java"
+          - "**/*EventListener.java"
+          - "**/*EventHandler.java"
+
+# Database Specific
+mariadb:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/mariadb/**/*"
+          - "docker-compose*mariadb*.yml"
+          - "config/docker/compose/mariadb.yml"
+
+mysql:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/mysql/**/*"
+          - "config/docker/mysql/**/*"
+
+postgresql:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/postgresql/**/*"
+          - "docker-compose*postgresql*.yml"
+          - "config/docker/compose/postgresql.yml"
+          - "config/docker/postgresql/**/*"
+
+# Observability
+monitoring:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/prometheus/**/*"
+          - "**/grafana/**/*"
+          - "**/loki/**/*"
+          - "**/tempo/**/*"
+          - "config/docker/compose/observability.yml"
+          - "config/docker/grafana/**/*"
+          - "config/docker/prometheus/**/*"
+          - "config/docker/tempo/**/*"
+
+# Custom & Scripts
+custom:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "custom/**/*"
+
+scripts:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "scripts/**/*"
+          - "**/*.sh"
+          - "**/*.bat"
+
+# Dependencies
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/package.json"
+          - "**/package-lock.json"
+          - "web-app/package*.json"
+          - "**/dependencies.gradle"
+          - "**/pom.xml"
+
+# GitHub Meta
+github-actions:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/**/*"
+
+# Performance
+performance:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/performance/**/*"
+          - "**/benchmark/**/*"
+
+# Java Source Files
+java:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.java"
+
+# Resources & Static Files
+resources:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/src/main/resources/**/*"
+          - "**/META-INF/**/*"
+
+static:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/static/**/*"
+          - "**/webapp/**/*"
+
+# War Packaging
+war:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "fineract-war/**/*"
+
+# Starter Modules
+starter:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/starter/**/*"
+          - "**/*Starter.java"
+
+# Self-Service
+self-service:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/self/**/*"
+
+# Share Accounts
+share:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/shareaccounts/**/*"
+          - "**/shares/**/*"
+
+# Fund Management
+fund:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/fund/**/*"
+
+# Rate Management
+rate:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/rate/**/*"
