@@ -5341,6 +5341,20 @@ public class LoanStepDef extends AbstractStepDef {
                 .isEqualTo(transactionId);
     }
 
+    @And("Admin successfully terminates loan contract - no event check")
+    public void makeLoanContractTerminationNoEventCheck() throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanResponse.body() != null;
+        final long loanId = loanResponse.body().getLoanId();
+
+        final PostLoansLoanIdRequest contractTerminationRequest = LoanRequestFactory.defaultLoanContractTerminationRequest();
+
+        final Response<PostLoansLoanIdResponse> loanContractTerminationResponse = loansApi
+                .stateTransitions(loanId, contractTerminationRequest, "contractTermination").execute();
+        testContext().set(TestContextKey.LOAN_CONTRACT_TERMINATION_RESPONSE, loanContractTerminationResponse);
+        ErrorHelper.checkSuccessfulApiCall(loanContractTerminationResponse);
+    }
+
     @And("Admin successfully undoes loan contract termination")
     public void undoLoanContractTermination() throws IOException {
         final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
