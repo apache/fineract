@@ -60,7 +60,7 @@ public class SavingsAccountTransactionDetailsForPostingPeriod {
 
     public EndOfDayBalance toEndOfDayBalance(final Money openingBalance) {
         final MonetaryCurrency currency = openingBalance.getCurrency();
-        Money endOfDayBalance = openingBalance.copy();
+        Money endOfDayBalance = openingBalance;
         if (isDeposit() || isDividendPayoutAndNotReversed()) {
             endOfDayBalance = openingBalance.plus(getAmount(currency));
         } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
@@ -94,7 +94,7 @@ public class SavingsAccountTransactionDetailsForPostingPeriod {
 
     public EndOfDayBalance toEndOfDayBalanceBoundedBy(final Money openingBalance, final LocalDateInterval boundedBy) {
         final MonetaryCurrency currency = openingBalance.getCurrency();
-        Money endOfDayBalance = openingBalance.copy();
+        Money endOfDayBalance = openingBalance;
 
         int numberOfDaysOfBalance = this.balanceNumberOfDays;
 

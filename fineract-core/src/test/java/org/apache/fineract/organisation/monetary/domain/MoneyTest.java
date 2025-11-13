@@ -88,7 +88,7 @@ class MoneyTest {
 
     @Test
     void testAddWithNullMoney() {
-        Money result = tenDollars.add((Money) null, MATH_CONTEXT);
+        Money result = tenDollars.plus((Money) null, MATH_CONTEXT);
         assertEquals(0, result.getAmount().compareTo(BigDecimal.TEN), "Should return the same amount when adding null Money");
     }
 
@@ -106,7 +106,7 @@ class MoneyTest {
 
     @Test
     void testAddMoney() {
-        Money result = tenDollars.add(oneDollar, MATH_CONTEXT);
+        Money result = tenDollars.plus(oneDollar, MATH_CONTEXT);
         assertEquals(0, result.getAmount().compareTo(new BigDecimal("11.00")), "Should correctly add two Money amounts");
     }
 }

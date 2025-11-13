@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.portfolio.loanproduct.calc.data;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
 public record EmiAdjustment(//
@@ -29,10 +33,11 @@ public record EmiAdjustment(//
 ) {
 
     public boolean shouldBeAdjusted() {
-        double lowerHalfOfRelatedPeriods = Math.floor(numberOfRelatedPeriods() / 2.0);
-        return lowerHalfOfRelatedPeriods > 0.0 && !emiDifference.isZero() && emiDifference.abs() //
+        MathContext mc = originalEmi.getMc();
+        BigDecimal lowerHalfOfRelatedPeriods = BigDecimal.valueOf(numberOfRelatedPeriods()).divide(BigDecimal.TWO, 0, RoundingMode.FLOOR);
+        return MathUtil.isGreaterThanZero(lowerHalfOfRelatedPeriods) && !emiDifference.isZero() && emiDifference.abs() //
                 .multipliedBy(100) //
-                .isGreaterThan(originalEmi.copy(lowerHalfOfRelatedPeriods)); //
+                .isGreaterThan(lowerHalfOfRelatedPeriods); //
     }
 
     public Money adjustment() {

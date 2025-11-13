@@ -232,7 +232,7 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
                 final Money amortizationTillDate = CapitalizedIncomeAmortizationUtil.calculateTotalAmortizationTillDate(balance,
                         adjustments, maturityDate, loan.getLoanProductRelatedDetail().getCapitalizedIncomeStrategy(), tillDatePlusOne,
                         loan.getCurrency());
-                totalAmortization = totalAmortization.add(amortizationTillDate);
+                totalAmortization = totalAmortization.plus(amortizationTillDate);
                 final BigDecimal alreadyAmortizedAmount = loanAmortizationAllocationService
                         .calculateAlreadyAmortizedAmount(balance.getLoanTransaction().getId(), loan.getId());
                 if (!adjustments.isEmpty()) {

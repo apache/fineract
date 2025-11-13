@@ -462,7 +462,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 loanTransaction.updateAmount(interestPortion.getAmount());
             }
             if (ctx instanceof ProgressiveTransactionCtx progCtx) {
-                progCtx.setSumOfInterestRefundAmount(progCtx.getSumOfInterestRefundAmount().add(loanTransaction.getAmount()));
+                progCtx.setSumOfInterestRefundAmount(progCtx.getSumOfInterestRefundAmount().plus(loanTransaction.getAmount()));
             }
         } else {
             if (ctx instanceof ProgressiveTransactionCtx progCtx) {
@@ -478,7 +478,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     final Money newAmount = interestBeforeRefund.minus(progCtx.getSumOfInterestRefundAmount()).minus(interestAfterRefund);
                     loanTransaction.updateAmount(newAmount.getAmount());
                 }
-                progCtx.setSumOfInterestRefundAmount(progCtx.getSumOfInterestRefundAmount().add(loanTransaction.getAmount()));
+                progCtx.setSumOfInterestRefundAmount(progCtx.getSumOfInterestRefundAmount().plus(loanTransaction.getAmount()));
             }
         }
         handleRepayment(loanTransaction, ctx);
@@ -1491,7 +1491,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
             candidateRepaymentInstallments.forEach(i -> {
                 Money previousPrincipal = i.getPrincipal(currency);
-                Money newPrincipal = previousPrincipal.add(increasePrincipalBy);
+                Money newPrincipal = previousPrincipal.plus(increasePrincipalBy);
                 if (installmentAmountInMultiplesOf != null) {
                     newPrincipal = Money.roundToMultiplesOf(newPrincipal, installmentAmountInMultiplesOf);
                 }
@@ -1642,23 +1642,23 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         switch (allocationType) {
             case PENALTY -> {
-                balances.setAggregatedPenaltyChargesPortion(balances.getAggregatedPenaltyChargesPortion().add(portion));
+                balances.setAggregatedPenaltyChargesPortion(balances.getAggregatedPenaltyChargesPortion().plus(portion));
                 addToTransactionMapping(loanTransactionToRepaymentScheduleMapping, zero, zero, zero, portion);
                 Set<LoanCharge> penalties = chargesOfInstallment.stream().filter(LoanCharge::isPenaltyCharge).collect(Collectors.toSet());
                 chargesPaidByFunction.accept(loanTransaction, portion, penalties, currentInstallment.getInstallmentNumber());
             }
             case FEE -> {
-                balances.setAggregatedFeeChargesPortion(balances.getAggregatedFeeChargesPortion().add(portion));
+                balances.setAggregatedFeeChargesPortion(balances.getAggregatedFeeChargesPortion().plus(portion));
                 addToTransactionMapping(loanTransactionToRepaymentScheduleMapping, zero, zero, portion, zero);
                 Set<LoanCharge> fees = chargesOfInstallment.stream().filter(LoanCharge::isFeeCharge).collect(Collectors.toSet());
                 chargesPaidByFunction.accept(loanTransaction, portion, fees, currentInstallment.getInstallmentNumber());
             }
             case INTEREST -> {
-                balances.setAggregatedInterestPortion(balances.getAggregatedInterestPortion().add(portion));
+                balances.setAggregatedInterestPortion(balances.getAggregatedInterestPortion().plus(portion));
                 addToTransactionMapping(loanTransactionToRepaymentScheduleMapping, zero, portion, zero, zero);
             }
             case PRINCIPAL -> {
-                balances.setAggregatedPrincipalPortion(balances.getAggregatedPrincipalPortion().add(portion));
+                balances.setAggregatedPrincipalPortion(balances.getAggregatedPrincipalPortion().plus(portion));
                 addToTransactionMapping(loanTransactionToRepaymentScheduleMapping, portion, zero, zero, zero);
             }
         }
@@ -1688,7 +1688,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         MoneyHolder overpaymentHolder = transactionCtx.getOverpaymentHolder();
         if (MathUtil.isGreaterThanZero(overpaymentPortion)) {
             onLoanOverpayment(loanTransaction, overpaymentPortion);
-            overpaymentHolder.setMoneyObject(overpaymentHolder.getMoneyObject().add(overpaymentPortion));
+            overpaymentHolder.setMoneyObject(overpaymentHolder.getMoneyObject().plus(overpaymentPortion));
             loanTransaction.setOverPayments(overpaymentPortion);
         } else {
             overpaymentHolder.setMoneyObject(Money.zero(transactionCtx.getCurrency()));
@@ -2076,7 +2076,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                                         Set<LoanCharge> inAdvanceInstallmentCharges = getLoanChargesOfInstallment(
                                                 context.getCtx().getCharges(), inAdvanceInstallment, firstNormalInstallmentNumber);
                                         if (inAdvanceInstallment.equals(inAdvanceInstallments.get(numberOfInstallments - 1))) {
-                                            evenPortion = evenPortion.add(balanceAdjustment);
+                                            evenPortion = evenPortion.plus(balanceAdjustment);
                                         }
                                         LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping = getTransactionMapping(
                                                 context.getTransactionMappings(), context.getLoanTransaction(), inAdvanceInstallment,
@@ -2163,7 +2163,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                                     Set<LoanCharge> inAdvanceInstallmentCharges = getLoanChargesOfInstallment(context.getCtx().getCharges(),
                                             context.getInstallment(), context.getFirstNormalInstallmentNumber());
                                     if (internalCurrentInstallment.equals(currentInstallments.get(numberOfInstallments - 1))) {
-                                        evenPortion = evenPortion.add(balanceAdjustment);
+                                        evenPortion = evenPortion.plus(balanceAdjustment);
                                     }
                                     LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping = getTransactionMapping(
                                             context.getTransactionMappings(), context.getLoanTransaction(), context.getInstallment(),
@@ -2425,7 +2425,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                                     // Adjustment might be needed due to the divide operation and the rounding mode
                                     Money balanceAdjustment = context.getTransactionAmountUnprocessed()
                                             .minus(evenPortion.multipliedBy(numberOfInstallments));
-                                    if (evenPortion.add(balanceAdjustment).isLessThanZero()) {
+                                    if (evenPortion.plus(balanceAdjustment).isLessThanZero()) {
                                         // Note: Rounding mode DOWN grants that evenPortion cant pay more than
                                         // unprocessed
                                         // transaction amount.
@@ -2446,7 +2446,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                                         Loan loan = context.getLoanTransaction().getLoan();
                                         // Adjust the portion for the last installment
                                         if (inAdvanceInstallment.equals(inAdvanceInstallments.get(numberOfInstallments - 1))) {
-                                            evenPortion = evenPortion.add(balanceAdjustment);
+                                            evenPortion = evenPortion.plus(balanceAdjustment);
                                         }
                                         if (isInterestRecalculationSupported(context.getCtx(), loan)) {
                                             context.setAllocatedAmount(handlingPaymentAllocationForInterestBearingProgressiveLoan(
@@ -2711,7 +2711,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                                                 context.getFirstNormalInstallmentNumber());
                                         // Adjust the portion for the last installment
                                         if (internalCurrentInstallment.equals(currentInstallments.get(numberOfInstallments - 1))) {
-                                            evenPortion = evenPortion.add(balanceAdjustment);
+                                            evenPortion = evenPortion.plus(balanceAdjustment);
                                         }
                                         LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping = getTransactionMapping(
                                                 context.getTransactionMappings(), context.getLoanTransaction(), context.getInstallment(),
@@ -2819,7 +2819,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             installments.forEach(i -> {
                 Money principalOutstanding = i.getPrincipalOutstanding(currency);
                 if (principalOutstanding.isGreaterThanZero()) {
-                    outstandingPrincipalBalance.set(outstandingPrincipalBalance.get().add(principalOutstanding));
+                    outstandingPrincipalBalance.set(outstandingPrincipalBalance.get().plus(principalOutstanding));
                     i.addToPrincipal(loanTransaction.getTransactionDate(), principalOutstanding.negated());
                 }
             });
@@ -3021,7 +3021,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         final BigDecimal newInterest = emiCalculator
                 .getPeriodInterestTillDate(transactionCtx.getModel(), lastPeriod.getDueDate(), transactionDate, false).getAmount();
 
-        lastPeriod.setEmi(lastPeriod.getDuePrincipal().add(totalPrincipal).add(newInterest));
+        lastPeriod.setEmi(lastPeriod.getDuePrincipal().plus(totalPrincipal).plus(newInterest));
 
         emiCalculator.calculateRateFactorForRepaymentPeriod(lastPeriod, transactionCtx.getModel());
         transactionCtx.getModel().disableEMIRecalculation();

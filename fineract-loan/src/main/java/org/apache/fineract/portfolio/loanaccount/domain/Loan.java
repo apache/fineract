@@ -1026,7 +1026,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     public Money getTotalPrincipalOutstandingUntil(LocalDate date) {
         return getRepaymentScheduleInstallments().stream()
                 .filter(installment -> installment.getDueDate().isBefore(date) || installment.getDueDate().isEqual(date))
-                .map(installment -> installment.getPrincipalOutstanding(getCurrency())).reduce(Money.zero(getCurrency()), Money::add);
+                .map(installment -> installment.getPrincipalOutstanding(getCurrency())).reduce(Money.zero(getCurrency()), Money::plus);
 
     }
 

@@ -195,8 +195,8 @@ public class LoanChargeService {
         final LoanRepaymentScheduleInstallment installmentForCharge = loan.getRelatedRepaymentScheduleInstallment(loanCharge.getDueDate());
         if (installmentForCharge != null) {
             installmentForCharge.updateAccrualPortion(installmentForCharge.getInterestAccrued(loan.getCurrency()),
-                    installmentForCharge.getFeeAccrued(loan.getCurrency()).add(feeCharges),
-                    installmentForCharge.getPenaltyAccrued(loan.getCurrency()).add(penaltyCharges));
+                    installmentForCharge.getFeeAccrued(loan.getCurrency()).plus(feeCharges),
+                    installmentForCharge.getPenaltyAccrued(loan.getCurrency()).plus(penaltyCharges));
             installmentNumber = installmentForCharge.getInstallmentNumber();
         }
         final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(applyLoanChargeTransaction, loanCharge,

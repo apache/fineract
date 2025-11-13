@@ -897,7 +897,7 @@ public final class LoanApplicationTerms {
 
                 final Money totalInterestPerInstallment = calculateTotalInterestPerInstallmentWithoutGrace(calculator, mc);
 
-                final Money totalGraceOnInterestCharged = totalInterestPerInstallment.multiplyRetainScale(getInterestChargingGrace(), mc);
+                final Money totalGraceOnInterestCharged = totalInterestPerInstallment.multipliedBy(getInterestChargingGrace(), mc);
 
                 totalInterestCharged = totalInterestChargedForLoanTerm.minus(totalGraceOnInterestCharged);
             break;
@@ -985,7 +985,7 @@ public final class LoanApplicationTerms {
             final LocalDate periodEndDate) {
 
         Money interestForInstallment = this.principal.zero();
-        Money interestBroughtForwardDueToGrace = cumulatingInterestPaymentDueToGrace.copy();
+        Money interestBroughtForwardDueToGrace = cumulatingInterestPaymentDueToGrace;
         InterestMethod interestMethod = this.interestMethod;
 
         if (this.isEqualAmortization() && this.totalInterestDue != null) {
@@ -1063,7 +1063,7 @@ public final class LoanApplicationTerms {
             case FLAT:
                 final BigDecimal interestRateForLoanTerm = calculateFlatInterestRateForLoanTerm(calculator, mc);
                 totalInterestDue = this.disbursedPrincipal.minus(totalPrincipalAccountedForInterestCalcualtion)
-                        .multiplyRetainScale(interestRateForLoanTerm, mc);
+                        .multipliedBy(interestRateForLoanTerm, mc);
 
             break;
             case DECLINING_BALANCE:
@@ -1250,7 +1250,8 @@ public final class LoanApplicationTerms {
                      * Sum: 417 + 13 - 12.5 = 417.5 as principal so the total outstanding amount is in line with the
                      * installmentAmountInMultiplesOf setting
                      */
-                    principalPerPeriod = roundedPrincipalPerPeriod.add(roundedInterestForThisInstallment).minus(interestForThisInstallment);
+                    principalPerPeriod = roundedPrincipalPerPeriod.plus(roundedInterestForThisInstallment)
+                            .minus(interestForThisInstallment);
                 } else {
                     principalPerPeriod = roundedPrincipalPerPeriod;
                 }
@@ -1266,7 +1267,7 @@ public final class LoanApplicationTerms {
     private PrincipalInterest calculateTotalFlatInterestForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
             final int periodNumber, final MathContext mc, final Money cumulatingInterestPaymentDueToGrace) {
 
-        Money interestBroughtForwardDueToGrace = cumulatingInterestPaymentDueToGrace.copy();
+        Money interestBroughtForwardDueToGrace = cumulatingInterestPaymentDueToGrace;
 
         Money interestForInstallment = calculateTotalInterestPerInstallmentWithoutGrace(calculator, mc);
         if (isInterestPaymentGraceApplicableForThisPeriod(periodNumber)) {
@@ -1570,14 +1571,9 @@ public final class LoanApplicationTerms {
 
     private Money calculateDecliningInterestDueForInstallmentBeforeApplyingGrace(final PaymentPeriodsInOneYearCalculator calculator,
             final MathContext mc, final Money outstandingBalance, LocalDate periodStartDate, LocalDate periodEndDate) {
-
-        Money interestDue = Money.zero(outstandingBalance.getCurrency());
-
         final BigDecimal periodicInterestRate = periodicInterestRate(calculator, mc, this.daysInMonthType, this.daysInYearType,
-                periodStartDate, periodEndDate);// 0.021232877 ob:14911.64
-        interestDue = outstandingBalance.multiplyRetainScale(periodicInterestRate, mc);
-
-        return interestDue;
+                periodStartDate, periodEndDate);
+        return outstandingBalance.multipliedBy(periodicInterestRate, mc);
     }
 
     private Money calculateDecliningInterestDueForInstallmentAfterApplyingGrace(final PaymentPeriodsInOneYearCalculator calculator,

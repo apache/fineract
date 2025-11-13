@@ -2241,7 +2241,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
     private LoanTransaction deriveDefaultInterestWaiverTransaction(final Loan loan) {
         final Money totalInterestOutstanding = loan.getTotalInterestOutstandingOnLoan();
-        Money possibleInterestToWaive = totalInterestOutstanding.copy();
+        Money possibleInterestToWaive = totalInterestOutstanding;
         LocalDate transactionDate = DateUtils.getBusinessLocalDate();
 
         if (totalInterestOutstanding.isGreaterThanZero()) {

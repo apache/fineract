@@ -81,7 +81,7 @@ public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyD
                 final List<LoanTransaction> adjustments = loanTransactionRepository.findAdjustments(balance.getLoanTransaction());
                 final Money amortizationTillDate = BuyDownFeeAmortizationUtil.calculateTotalAmortizationTillDate(balance, adjustments,
                         maturityDate, loan.getLoanProductRelatedDetail().getBuyDownFeeStrategy(), tillDatePlusOne, loan.getCurrency());
-                totalAmortization = totalAmortization.add(amortizationTillDate);
+                totalAmortization = totalAmortization.plus(amortizationTillDate);
                 final BigDecimal alreadyAmortizedAmount = loanAmortizationAllocationService
                         .calculateAlreadyAmortizedAmount(balance.getLoanTransaction().getId(), loan.getId());
                 if (!adjustments.isEmpty()) {

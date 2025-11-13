@@ -229,7 +229,7 @@ public class LoanRepaymentScheduleService {
             totalPaidInAdvance = totalPaidInAdvance.plus(totalPaidInAdvanceForPeriod);
             totalPaidLate = totalPaidLate.plus(totalPaidLateForPeriod);
             totalOutstanding = totalOutstanding.plus(totalOutstandingForPeriod);
-            totalCredits = totalCredits.add(credits);
+            totalCredits = totalCredits.plus(credits);
 
             if (fromDate == null) {
                 fromDate = lastDueDate;

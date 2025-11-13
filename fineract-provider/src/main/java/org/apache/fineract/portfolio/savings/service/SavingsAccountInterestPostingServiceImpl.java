@@ -497,7 +497,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
     protected void recalculateDailyBalances(final Money openingAccountBalance, final LocalDate interestPostingUpToDate,
             final boolean backdatedTxnsAllowedTill, final SavingsAccountData savingsAccountData) {
 
-        Money runningBalance = openingAccountBalance.copy();
+        Money runningBalance = openingAccountBalance;
 
         List<SavingsAccountTransactionData> accountTransactionsSorted = retrieveListOfTransactions(savingsAccountData);
         boolean isTransactionsModified = false;

@@ -118,9 +118,9 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
             // Calculate the amount of due charges
             for (LoanCharge charge : orderedLoanChargesByDueDate) {
                 if (charge.isPenaltyCharge()) {
-                    calculatedPenaltyCharge = calculatedPenaltyCharge.add(charge.getAmount(currency));
+                    calculatedPenaltyCharge = calculatedPenaltyCharge.plus(charge.getAmount(currency));
                 } else {
-                    calculatedFeeCharge = calculatedFeeCharge.add(charge.getAmount(currency));
+                    calculatedFeeCharge = calculatedFeeCharge.plus(charge.getAmount(currency));
                 }
             }
 
@@ -135,17 +135,17 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
                 }
                 subPenaltyPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, calculatedPenaltyCharge);
                 transactionAmountRemaining = transactionAmountRemaining.minus(subPenaltyPortion);
-                penaltyChargesPortion = penaltyChargesPortion.add(subPenaltyPortion);
+                penaltyChargesPortion = penaltyChargesPortion.plus(subPenaltyPortion);
 
                 Money subInterestPortion;
                 if (ignoreDueDateCheck || !DateUtils.isBefore(transactionDate, currentInstallment.getDueDate())) {
                     subInterestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
                     transactionAmountRemaining = transactionAmountRemaining.minus(subInterestPortion);
-                    interestPortion = interestPortion.add(subInterestPortion);
+                    interestPortion = interestPortion.plus(subInterestPortion);
 
                     Money subPrincipalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
                     transactionAmountRemaining = transactionAmountRemaining.minus(subPrincipalPortion);
-                    principalPortion = principalPortion.add(subPrincipalPortion);
+                    principalPortion = principalPortion.plus(subPrincipalPortion);
                 }
 
                 Money subFeePortion;
@@ -158,7 +158,7 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
                 }
                 subFeePortion = currentInstallment.payFeeChargesComponent(transactionDate, calculatedFeeCharge);
                 transactionAmountRemaining = transactionAmountRemaining.minus(subFeePortion);
-                feeChargesPortion = feeChargesPortion.add(subFeePortion);
+                feeChargesPortion = feeChargesPortion.plus(subFeePortion);
 
                 // If the transactionAmountRemaining is greater than zero, rerun the allocation without due date check
                 // to distribute the in advance portions
@@ -231,19 +231,19 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
         } else {
             Money subPenaltyPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(subPenaltyPortion);
-            penaltyChargesPortion = penaltyChargesPortion.add(subPenaltyPortion);
+            penaltyChargesPortion = penaltyChargesPortion.plus(subPenaltyPortion);
 
             Money subInterestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(subInterestPortion);
-            interestPortion = interestPortion.add(subInterestPortion);
+            interestPortion = interestPortion.plus(subInterestPortion);
 
             Money subPrincipalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(subPrincipalPortion);
-            principalPortion = principalPortion.add(subPrincipalPortion);
+            principalPortion = principalPortion.plus(subPrincipalPortion);
 
             Money subFeePortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(subFeePortion);
-            feeChargesPortion = feeChargesPortion.add(subFeePortion);
+            feeChargesPortion = feeChargesPortion.plus(subFeePortion);
 
             loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         }

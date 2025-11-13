@@ -248,7 +248,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                         loanTransaction.setOverPayments(transactionAmountUnprocessed);
                     }
                     ctx.getOverpaymentHolder()
-                            .setMoneyObject(ctx.getOverpaymentHolder().getMoneyObject().add(transactionAmountUnprocessed));
+                            .setMoneyObject(ctx.getOverpaymentHolder().getMoneyObject().plus(transactionAmountUnprocessed));
                 } else {
                     ctx.getOverpaymentHolder().setMoneyObject(Money.zero(ctx.getCurrency()));
                 }

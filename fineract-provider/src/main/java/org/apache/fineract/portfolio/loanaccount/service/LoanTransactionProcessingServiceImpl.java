@@ -228,6 +228,6 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
             return Money.zero(loan.getCurrency());
         }
         return loan.getLoanTransactions().stream().filter(LoanTransaction::isNotReversed).filter(LoanTransaction::isInterestRefund)
-                .map(t -> t.getAmount(loan.getCurrency())).reduce(Money.zero(loan.getCurrency()), Money::add);
+                .map(t -> t.getAmount(loan.getCurrency())).reduce(Money.zero(loan.getCurrency()), Money::plus);
     }
 }

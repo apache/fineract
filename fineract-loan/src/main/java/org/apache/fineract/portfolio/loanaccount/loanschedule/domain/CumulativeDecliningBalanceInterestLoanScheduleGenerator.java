@@ -159,7 +159,7 @@ public class CumulativeDecliningBalanceInterestLoanScheduleGenerator extends Abs
 
         if (loanApplicationTerms.isInterestToBeRecoveredFirstWhenGreaterThanEMIEnabled()
                 && loanApplicationTerms.isInterestTobeApproppriated()) {
-            interestForThisInstallment = interestForThisInstallment.add(loanApplicationTerms.getInterestTobeApproppriated());
+            interestForThisInstallment = interestForThisInstallment.plus(loanApplicationTerms.getInterestTobeApproppriated());
             loanApplicationTerms.setInterestTobeApproppriated(interestForThisInstallment.zero());
         }
 

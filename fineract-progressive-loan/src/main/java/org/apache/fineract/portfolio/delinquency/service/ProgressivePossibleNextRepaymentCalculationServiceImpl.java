@@ -65,8 +65,8 @@ public class ProgressivePossibleNextRepaymentCalculationServiceImpl extends Abst
         RepaymentPeriod repaymentPeriod = scheduleModel.findRepaymentPeriodByDueDate(nextPaymentDueDate)
                 .orElseGet(scheduleModel::getLastRepaymentPeriod);
 
-        return repaymentPeriod.getOutstandingPrincipal().add(repaymentPeriod.getOutstandingInterest())
-                .add(nextInstallment.getFeeChargesOutstanding(currency)).add(nextInstallment.getPenaltyChargesOutstanding(currency))
+        return repaymentPeriod.getOutstandingPrincipal().plus(repaymentPeriod.getOutstandingInterest())
+                .plus(nextInstallment.getFeeChargesOutstanding(currency)).plus(nextInstallment.getPenaltyChargesOutstanding(currency))
                 .getAmount();
     }
 

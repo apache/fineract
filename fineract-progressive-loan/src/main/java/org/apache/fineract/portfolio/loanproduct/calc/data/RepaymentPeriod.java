@@ -193,9 +193,9 @@ public class RepaymentPeriod {
                     getInterestPeriods().stream().map(InterestPeriod::getCalculatedDueInterest).reduce(BigDecimal.ZERO, BigDecimal::add),
                     mc);
         }
-        calculatedDueInterest = calculatedDueInterest.add(getFutureUnrecognizedInterest(), getMc());
+        calculatedDueInterest = calculatedDueInterest.plus(getFutureUnrecognizedInterest(), getMc());
         if (getPrevious().isPresent()) {
-            calculatedDueInterest = calculatedDueInterest.add(getPrevious().get().getUnrecognizedInterest(), getMc());
+            calculatedDueInterest = calculatedDueInterest.plus(getPrevious().get().getUnrecognizedInterest(), getMc());
         }
         return MathUtil.negativeToZero(calculatedDueInterest, getMc());
     }
@@ -356,7 +356,7 @@ public class RepaymentPeriod {
         Money totalCapitalizedIncomeAmount = getInterestPeriods().stream() //
                 .map(InterestPeriod::getCapitalizedIncomePrincipal) //
                 .reduce(getZero(), (m1, m2) -> m1.plus(m2, getMc())); //
-        return initialBalance.add(totalDisbursedAmount, getMc()).add(totalCapitalizedIncomeAmount, getMc());
+        return initialBalance.plus(totalDisbursedAmount, getMc()).plus(totalCapitalizedIncomeAmount, getMc());
     }
 
     public Money getZero() {

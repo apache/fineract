@@ -403,7 +403,7 @@ public class SavingsAccountTransactionData implements Serializable {
 
     public EndOfDayBalance toEndOfDayBalance(final Money openingBalance) {
         final MonetaryCurrency currency = openingBalance.getCurrency();
-        Money endOfDayBalance = openingBalance.copy();
+        Money endOfDayBalance = openingBalance;
         if (isDeposit() || isDividendPayoutAndNotReversed()) {
             endOfDayBalance = Money.of(currency, this.runningBalance);
         } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
@@ -439,7 +439,7 @@ public class SavingsAccountTransactionData implements Serializable {
             final boolean isAllowOverdraft) {
 
         final MonetaryCurrency currency = openingBalance.getCurrency();
-        Money endOfDayBalance = openingBalance.copy();
+        Money endOfDayBalance = openingBalance;
 
         int numberOfDaysOfBalance = this.balanceNumberOfDays;
 

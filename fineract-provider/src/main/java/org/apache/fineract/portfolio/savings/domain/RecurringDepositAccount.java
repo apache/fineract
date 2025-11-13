@@ -722,7 +722,7 @@ public class RecurringDepositAccount extends SavingsAccount {
     public BigDecimal calculatePreMatureAmount(final LocalDate preMatureDate, final boolean isPreMatureClosure,
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
 
-        final Money interestPostedToDate = totalInterestPosted().copy();
+        final Money interestPostedToDate = totalInterestPosted();
 
         final Money interestEarnedTillDate = calculatePreMatureInterest(preMatureDate, retreiveOrderedNonInterestPostingTransactions(),
                 isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
@@ -1096,7 +1096,7 @@ public class RecurringDepositAccount extends SavingsAccount {
     public RecurringDepositAccount reInvest(BigDecimal depositAmount) {
 
         final DepositAccountTermAndPreClosure newAccountTermAndPreClosure = this.accountTermAndPreClosure.copy(depositAmount);
-        final DepositAccountRecurringDetail recurringDetail = this.recurringDetail.copy();
+        final DepositAccountRecurringDetail recurringDetail = this.recurringDetail;
         final SavingsProduct product = this.product;
         final InterestRateChart productChart = product.applicableChart(getClosedOnDate());
         final DepositAccountInterestRateChart newChart = DepositAccountInterestRateChart.from(productChart);

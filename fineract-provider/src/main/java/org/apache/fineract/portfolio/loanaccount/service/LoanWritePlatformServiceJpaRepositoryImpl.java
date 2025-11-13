@@ -375,7 +375,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 loan.setNetDisbursalAmount(netDisbursalAmount);
             }
             Money disburseAmount = loanDisbursementService.adjustDisburseAmount(loan, command, actualDisbursementDate);
-            Money amountToDisburse = disburseAmount.copy();
+            Money amountToDisburse = disburseAmount;
             boolean recalculateSchedule = amountBeforeAdjust.isNotEqualTo(loan.getPrincipal());
             final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
 
