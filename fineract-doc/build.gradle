@@ -26,7 +26,7 @@ buildscript {
     dependencies {
         classpath 'org.asciidoctor:asciidoctor-gradle-jvm:4.0.5'
         classpath 'org.asciidoctor:asciidoctor-gradle-jvm-pdf:4.0.5'
-        classpath 'org.yaml:snakeyaml:1.33'
+        classpath 'org.yaml:snakeyaml:2.5'
     }
 }
 
@@ -42,7 +42,7 @@ apply plugin: 'org.asciidoctor.jvm.pdf'
 configurations.all {
     resolutionStrategy {
         // Force specific versions of dependencies to avoid conflicts
-        force 'org.yaml:snakeyaml:1.33',
+        force 'org.yaml:snakeyaml:2.5',
               'org.jruby:jruby-complete:9.4.5.0'
     }
 }
