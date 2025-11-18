@@ -61,6 +61,7 @@ import org.apache.fineract.client.feign.services.EntityDataTableApi;
 import org.apache.fineract.client.feign.services.EntityFieldConfigurationApi;
 import org.apache.fineract.client.feign.services.ExternalAssetOwnerLoanProductAttributesApi;
 import org.apache.fineract.client.feign.services.ExternalAssetOwnersApi;
+import org.apache.fineract.client.feign.services.ExternalAssetOwnersApiExtension;
 import org.apache.fineract.client.feign.services.ExternalEventConfigurationApi;
 import org.apache.fineract.client.feign.services.ExternalServicesApi;
 import org.apache.fineract.client.feign.services.FetchAuthenticatedUserDetailsApi;
@@ -95,6 +96,7 @@ import org.apache.fineract.client.feign.services.LoanCobCatchUpApi;
 import org.apache.fineract.client.feign.services.LoanCollateralApi;
 import org.apache.fineract.client.feign.services.LoanCollateralManagementApi;
 import org.apache.fineract.client.feign.services.LoanDisbursementDetailsApi;
+import org.apache.fineract.client.feign.services.LoanDisbursementDetailsApiExtension;
 import org.apache.fineract.client.feign.services.LoanInterestPauseApi;
 import org.apache.fineract.client.feign.services.LoanProductsApi;
 import org.apache.fineract.client.feign.services.LoanReschedulingApi;
@@ -392,6 +394,10 @@ public final class FineractFeignClient {
         return create(ExternalAssetOwnersApi.class);
     }
 
+    public ExternalAssetOwnersApiExtension externalAssetOwnersExtension() {
+        return create(ExternalAssetOwnersApiExtension.class);
+    }
+
     public ExternalEventConfigurationApi externalEventConfiguration() {
         return create(ExternalEventConfigurationApi.class);
     }
@@ -526,6 +532,10 @@ public final class FineractFeignClient {
 
     public LoanDisbursementDetailsApi loanDisbursementDetails() {
         return create(LoanDisbursementDetailsApi.class);
+    }
+
+    public LoanDisbursementDetailsApiExtension loanDisbursementDetailsExtension() {
+        return create(LoanDisbursementDetailsApiExtension.class);
     }
 
     public LoanInterestPauseApi loanInterestPause() {

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.test.initializer.global;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.apache.fineract.client.models.LoanProductRelatedDetail.DaysInYearCustomStrategyEnum.FEB_29_PERIOD_ONLY;
 import static org.apache.fineract.test.data.ChargeOffBehaviour.ZERO_INTEREST;
 import static org.apache.fineract.test.data.TransactionProcessingStrategyCode.ADVANCED_PAYMENT_ALLOCATION;
@@ -33,12 +34,16 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.CreditAllocationData;
 import org.apache.fineract.client.models.CreditAllocationOrder;
+import org.apache.fineract.client.models.GetLoanProductsResponse;
 import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.LoanProductPaymentAllocationRule;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
@@ -46,7 +51,6 @@ import org.apache.fineract.client.models.PostClassificationToIncomeAccountMappin
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostWriteOffReasonToExpenseAccountMappings;
-import org.apache.fineract.client.services.LoanProductsApi;
 import org.apache.fineract.test.data.AdvancePaymentsAdjustmentType;
 import org.apache.fineract.test.data.ChargeProductType;
 import org.apache.fineract.test.data.DaysInMonthType;
@@ -67,13 +71,13 @@ import org.apache.fineract.test.helper.CodeHelper;
 import org.apache.fineract.test.support.TestContext;
 import org.apache.fineract.test.support.TestContextKey;
 import org.springframework.stereotype.Component;
-import retrofit2.Response;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class LoanProductGlobalInitializerStep implements FineractGlobalInitializerStep {
 
-    private final LoanProductsApi loanProductsApi;
+    private final FineractFeignClient fineractClient;
     private final LoanProductsRequestFactory loanProductsRequestFactory;
     private final CodeHelper codeHelper;
     private final CodeValueResolver codeValueResolver;
@@ -83,7 +87,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         // LP1
         String name = DefaultLoanProduct.LP1.getName();
         PostLoanProductsRequest loanProductsRequest = loanProductsRequestFactory.defaultLoanProductsRequestLP1().name(name);
-        Response<PostLoanProductsResponse> response = loanProductsApi.createLoanProduct(loanProductsRequest).execute();
+        PostLoanProductsResponse response = createLoanProductIdempotent(loanProductsRequest);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1, response);
 
         // LP1 product with due date and overdue date for repayment in config
@@ -92,7 +96,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .name(DefaultLoanProduct.LP1_DUE_DATE.getName())//
                 .dueDaysForRepaymentEvent(3)//
                 .overDueDaysForRepaymentEvent(3);//
-        Response<PostLoanProductsResponse> responseDueDate = loanProductsApi.createLoanProduct(loanProductsRequestDueDate).execute();
+        PostLoanProductsResponse responseDueDate = createLoanProductIdempotent(loanProductsRequestDueDate);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_DUE_DATE, responseDueDate);
 
         // LP1 with 12% FLAT interest
@@ -100,8 +104,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         String name2 = DefaultLoanProduct.LP1_INTEREST_FLAT.getName();
         PostLoanProductsRequest loanProductsRequestInterestFlat = loanProductsRequestFactory.defaultLoanProductsRequestLP1InterestFlat()
                 .name(name2);
-        Response<PostLoanProductsResponse> responseInterestFlat = loanProductsApi.createLoanProduct(loanProductsRequestInterestFlat)
-                .execute();
+        PostLoanProductsResponse responseInterestFlat = createLoanProductIdempotent(loanProductsRequestInterestFlat);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_FLAT, responseInterestFlat);
 
         // LP1 with 12% DECLINING BALANCE interest, interest period: Same as payment period
@@ -109,8 +112,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         String name3 = DefaultLoanProduct.LP1_INTEREST_DECLINING_BALANCE_PERIOD_SAME_AS_PAYMENT.getName();
         PostLoanProductsRequest loanProductsRequestInterestDecliningPeriodSameAsPayment = loanProductsRequestFactory
                 .defaultLoanProductsRequestLP1InterestDeclining().name(name3);
-        Response<PostLoanProductsResponse> responseInterestDecliningPeriodSameAsPayment = loanProductsApi
-                .createLoanProduct(loanProductsRequestInterestDecliningPeriodSameAsPayment).execute();
+        PostLoanProductsResponse responseInterestDecliningPeriodSameAsPayment = createLoanProductIdempotent(
+                loanProductsRequestInterestDecliningPeriodSameAsPayment);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_DECLINING_PERIOD_SAME_AS_PAYMENT,
                 responseInterestDecliningPeriodSameAsPayment);
 
@@ -120,8 +123,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         PostLoanProductsRequest loanProductsRequestInterestDecliningPeriodDaily = loanProductsRequestFactory
                 .defaultLoanProductsRequestLP1InterestDeclining().name(name4)
                 .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value).allowPartialPeriodInterestCalcualtion(false);
-        Response<PostLoanProductsResponse> responseInterestDecliningPeriodDaily = loanProductsApi
-                .createLoanProduct(loanProductsRequestInterestDecliningPeriodDaily).execute();
+        PostLoanProductsResponse responseInterestDecliningPeriodDaily = createLoanProductIdempotent(
+                loanProductsRequestInterestDecliningPeriodDaily);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_DECLINING_PERIOD_DAILY,
                 responseInterestDecliningPeriodDaily);
 
@@ -131,8 +134,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         String name5 = DefaultLoanProduct.LP1_1MONTH_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_MONTHLY.getName();
         PostLoanProductsRequest loanProductsRequestInterestDecliningBalanceDailyRecalculationCompoundingMonthly = loanProductsRequestFactory
                 .defaultLoanProductsRequestLP11MonthInterestDecliningBalanceDailyRecalculationCompoundingMonthly().name(name5);
-        Response<PostLoanProductsResponse> responseInterestDecliningBalanceDailyRecalculationCompoundingMonthly = loanProductsApi
-                .createLoanProduct(loanProductsRequestInterestDecliningBalanceDailyRecalculationCompoundingMonthly).execute();
+        PostLoanProductsResponse responseInterestDecliningBalanceDailyRecalculationCompoundingMonthly = createLoanProductIdempotent(
+                loanProductsRequestInterestDecliningBalanceDailyRecalculationCompoundingMonthly);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_1MONTH_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_MONTHLY,
                 responseInterestDecliningBalanceDailyRecalculationCompoundingMonthly);
@@ -143,8 +146,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         String name6 = DefaultLoanProduct.LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE.getName();
         PostLoanProductsRequest loanProductsRequestInterestDecliningBalanceDailyRecalculationCompoundingNone = loanProductsRequestFactory
                 .defaultLoanProductsRequestLP1InterestDecliningBalanceDailyRecalculationCompoundingNone().name(name6);
-        Response<PostLoanProductsResponse> responseInterestDecliningBalanceDailyRecalculationCompoundingNone = loanProductsApi
-                .createLoanProduct(loanProductsRequestInterestDecliningBalanceDailyRecalculationCompoundingNone).execute();
+        PostLoanProductsResponse responseInterestDecliningBalanceDailyRecalculationCompoundingNone = createLoanProductIdempotent(
+                loanProductsRequestInterestDecliningBalanceDailyRecalculationCompoundingNone);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE,
                 responseInterestDecliningBalanceDailyRecalculationCompoundingNone);
@@ -158,10 +161,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .defaultLoanProductsRequestLP1InterestDecliningBalanceDailyRecalculationCompoundingNone()//
                 .name(name7)//
                 .rescheduleStrategyMethod(AdvancePaymentsAdjustmentType.REDUCE_NUMBER_OF_INSTALLMENTS.value);//
-        Response<PostLoanProductsResponse> responseInterestDecliningBalanceDailyRecalculationCompoundingNoneRescheduleReduceNrInstallments = loanProductsApi
-                .createLoanProduct(
-                        loanProductsRequestInterestDecliningBalanceDailyRecalculationCompoundingNoneRescheduleReduceNrInstallments)
-                .execute();
+        PostLoanProductsResponse responseInterestDecliningBalanceDailyRecalculationCompoundingNoneRescheduleReduceNrInstallments = createLoanProductIdempotent(
+                loanProductsRequestInterestDecliningBalanceDailyRecalculationCompoundingNoneRescheduleReduceNrInstallments);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE_RESCHEDULE_REDUCE_NR_INSTALLMENTS,
                 responseInterestDecliningBalanceDailyRecalculationCompoundingNoneRescheduleReduceNrInstallments);
@@ -175,10 +176,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .defaultLoanProductsRequestLP1InterestDecliningBalanceDailyRecalculationCompoundingNone()//
                 .name(name8)//
                 .rescheduleStrategyMethod(AdvancePaymentsAdjustmentType.RESCHEDULE_NEXT_REPAYMENTS.value);//
-        Response<PostLoanProductsResponse> responseInterestDecliningBalanceDailyRecalculationCompoundingNoneRescheduleRescheduleNextRepayments = loanProductsApi
-                .createLoanProduct(
-                        loanProductsRequestInterestDecliningBalanceDailyRecalculationCompoundingNoneRescheduleRescheduleNextRepayments)
-                .execute();
+        PostLoanProductsResponse responseInterestDecliningBalanceDailyRecalculationCompoundingNoneRescheduleRescheduleNextRepayments = createLoanProductIdempotent(
+                loanProductsRequestInterestDecliningBalanceDailyRecalculationCompoundingNoneRescheduleRescheduleNextRepayments);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE_RESCHEDULE_NEXT_REPAYMENTS,
                 responseInterestDecliningBalanceDailyRecalculationCompoundingNoneRescheduleRescheduleNextRepayments);
@@ -191,8 +190,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .defaultLoanProductsRequestLP1InterestDecliningBalanceDailyRecalculationCompoundingNone()//
                 .name(name9)//
                 .recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT.value);//
-        Response<PostLoanProductsResponse> responseInterestDecliningBalanceDailyRecalculationSameAsRepaymentCompoundingNone = loanProductsApi
-                .createLoanProduct(loanProductsRequestInterestDecliningBalanceDailyRecalculationSameAsRepaymentCompoundingNone).execute();
+        PostLoanProductsResponse responseInterestDecliningBalanceDailyRecalculationSameAsRepaymentCompoundingNone = createLoanProductIdempotent(
+                loanProductsRequestInterestDecliningBalanceDailyRecalculationSameAsRepaymentCompoundingNone);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_SAME_AS_REPAYMENT_COMPOUNDING_NONE,
                 responseInterestDecliningBalanceDailyRecalculationSameAsRepaymentCompoundingNone);
@@ -213,10 +212,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .allowPartialPeriodInterestCalcualtion(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        Response<PostLoanProductsResponse> responseInterestDecliningBalanceSaRRecalculationSameAsRepaymentCompoundingNoneMultiDisbursement = loanProductsApi
-                .createLoanProduct(
-                        loanProductsRequestInterestDecliningBalanceSaRRecalculationSameAsRepaymentCompoundingNoneMultiDisbursement)
-                .execute();
+        PostLoanProductsResponse responseInterestDecliningBalanceSaRRecalculationSameAsRepaymentCompoundingNoneMultiDisbursement = createLoanProductIdempotent(
+                loanProductsRequestInterestDecliningBalanceSaRRecalculationSameAsRepaymentCompoundingNoneMultiDisbursement);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_DECLINING_BALANCE_SAR_RECALCULATION_SAME_AS_REPAYMENT_COMPOUNDING_NONE_MULTI_DISBURSEMENT,
                 responseInterestDecliningBalanceSaRRecalculationSameAsRepaymentCompoundingNoneMultiDisbursement);
@@ -229,8 +226,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .name(name11)//
                 .transactionProcessingStrategyCode(
                         TransactionProcessingStrategyCode.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST.value);//
-        Response<PostLoanProductsResponse> responseDueInAdvance = loanProductsApi.createLoanProduct(loanProductsRequestDueInAdvance)
-                .execute();
+        PostLoanProductsResponse responseDueInAdvance = createLoanProductIdempotent(loanProductsRequestDueInAdvance);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE,
                 responseDueInAdvance);
 
@@ -243,8 +239,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .name(name12)//
                 .transactionProcessingStrategyCode(
                         TransactionProcessingStrategyCode.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST.value);//
-        Response<PostLoanProductsResponse> responseDueInAdvanceInterestFlat = loanProductsApi
-                .createLoanProduct(loanProductsRequestDueInAdvanceInterestFlat).execute();
+        PostLoanProductsResponse responseDueInAdvanceInterestFlat = createLoanProductIdempotent(
+                loanProductsRequestDueInAdvanceInterestFlat);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_INTEREST_FLAT,
                 responseDueInAdvanceInterestFlat);
 
@@ -255,8 +251,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .name(DefaultLoanProduct.LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE.getName())//
                 .transactionProcessingStrategyCode(
                         TransactionProcessingStrategyCode.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE.value);//
-        Response<PostLoanProductsResponse> responseDueInAdvance2 = loanProductsApi.createLoanProduct(loanProductsRequestDueInAdvance2)
-                .execute();
+        PostLoanProductsResponse responseDueInAdvance2 = createLoanProductIdempotent(loanProductsRequestDueInAdvance2);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE,
                 responseDueInAdvance2);
@@ -269,8 +264,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .name(DefaultLoanProduct.LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_INTEREST_FLAT.getName())//
                 .transactionProcessingStrategyCode(
                         TransactionProcessingStrategyCode.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE.value);//
-        Response<PostLoanProductsResponse> responseDueInAdvanceInterestFlat2 = loanProductsApi
-                .createLoanProduct(loanProductsRequestDueInAdvanceInterestFlat2).execute();
+        PostLoanProductsResponse responseDueInAdvanceInterestFlat2 = createLoanProductIdempotent(
+                loanProductsRequestDueInAdvanceInterestFlat2);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_INTEREST_FLAT,
                 responseDueInAdvanceInterestFlat2);
@@ -284,8 +279,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .defaultLoanProductsRequestLP1InterestFlat()//
                 .name(name13)//
                 .charges(charges);//
-        Response<PostLoanProductsResponse> responseInterestFlatOverdueFeeAmount = loanProductsApi
-                .createLoanProduct(loanProductsRequestInterestFlatOverdueFeeAmount).execute();
+        PostLoanProductsResponse responseInterestFlatOverdueFeeAmount = createLoanProductIdempotent(
+                loanProductsRequestInterestFlatOverdueFeeAmount);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_FLAT_OVERDUE_FROM_AMOUNT,
                 responseInterestFlatOverdueFeeAmount);
 
@@ -298,8 +293,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .defaultLoanProductsRequestLP1InterestFlat()//
                 .name(name14)//
                 .charges(chargesInterest);//
-        Response<PostLoanProductsResponse> responseInterestFlatOverdueFeeAmountInterest = loanProductsApi
-                .createLoanProduct(loanProductsRequestInterestFlatOverdueFeeAmountInterest).execute();
+        PostLoanProductsResponse responseInterestFlatOverdueFeeAmountInterest = createLoanProductIdempotent(
+                loanProductsRequestInterestFlatOverdueFeeAmountInterest);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_FLAT_OVERDUE_FROM_AMOUNT_INTEREST,
                 responseInterestFlatOverdueFeeAmountInterest);
 
@@ -309,8 +304,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         PostLoanProductsRequest loanProductsRequestDownPayment = loanProductsRequestFactory.defaultLoanProductsRequestLP2()//
                 .name(name15)//
                 .enableAutoRepaymentForDownPayment(false);//
-        Response<PostLoanProductsResponse> responseDownPayment = loanProductsApi.createLoanProduct(loanProductsRequestDownPayment)
-                .execute();
+        PostLoanProductsResponse responseDownPayment = createLoanProductIdempotent(loanProductsRequestDownPayment);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT, responseDownPayment);
 
         // LP2 with Down-payment+autopayment
@@ -318,8 +312,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         String name16 = DefaultLoanProduct.LP2_DOWNPAYMENT_AUTO.getName();
         PostLoanProductsRequest loanProductsRequestDownPaymentAuto = loanProductsRequestFactory.defaultLoanProductsRequestLP2()
                 .name(name16);
-        Response<PostLoanProductsResponse> responseDownPaymentAuto = loanProductsApi.createLoanProduct(loanProductsRequestDownPaymentAuto)
-                .execute();
+        PostLoanProductsResponse responseDownPaymentAuto = createLoanProductIdempotent(loanProductsRequestDownPaymentAuto);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO, responseDownPaymentAuto);
 
         // LP2 with Down-payment+autopayment + advanced payment allocation
@@ -335,8 +328,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestDownPaymentAutoAdvPaymentAllocation = loanProductsApi
-                .createLoanProduct(loanProductsRequestDownPaymentAutoAdvPaymentAllocation).execute();
+        PostLoanProductsResponse responseLoanProductsRequestDownPaymentAutoAdvPaymentAllocation = createLoanProductIdempotent(
+                loanProductsRequestDownPaymentAutoAdvPaymentAllocation);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION,
                 responseLoanProductsRequestDownPaymentAutoAdvPaymentAllocation);
 
@@ -354,8 +347,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestDownPaymentAdvPaymentAllocation = loanProductsApi
-                .createLoanProduct(loanProductsRequestDownPaymentAdvPaymentAllocation).execute();
+        PostLoanProductsResponse responseLoanProductsRequestDownPaymentAdvPaymentAllocation = createLoanProductIdempotent(
+                loanProductsRequestDownPaymentAdvPaymentAllocation);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION,
                 responseLoanProductsRequestDownPaymentAdvPaymentAllocation);
 
@@ -366,8 +359,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .defaultLoanProductsRequestLP2InterestFlat()//
                 .name(name18)//
                 .enableAutoRepaymentForDownPayment(false);//
-        Response<PostLoanProductsResponse> responseDownPaymentInterest = loanProductsApi
-                .createLoanProduct(loanProductsRequestDownPaymentInterest).execute();
+        PostLoanProductsResponse responseDownPaymentInterest = createLoanProductIdempotent(loanProductsRequestDownPaymentInterest);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_INTEREST, responseDownPaymentInterest);
 
         // LP2 with Down-payment and interest
@@ -375,8 +367,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         String name19 = DefaultLoanProduct.LP2_DOWNPAYMENT_INTEREST_AUTO.getName();
         PostLoanProductsRequest loanProductsRequestDownPaymentInterestAuto = loanProductsRequestFactory
                 .defaultLoanProductsRequestLP2InterestFlat().name(name19);
-        Response<PostLoanProductsResponse> responseDownPaymentInterestAuto = loanProductsApi
-                .createLoanProduct(loanProductsRequestDownPaymentInterestAuto).execute();
+        PostLoanProductsResponse responseDownPaymentInterestAuto = createLoanProductIdempotent(loanProductsRequestDownPaymentInterestAuto);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_INTEREST_AUTO,
                 responseDownPaymentInterestAuto);
 
@@ -396,8 +387,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanSchedule = loanProductsApi
-                .createLoanProduct(loanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanSchedule).execute();
+        PostLoanProductsResponse responseLoanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanSchedule = createLoanProductIdempotent(
+                loanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanSchedule);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION_PROGRESSIVE_LOAN_SCHEDULE,
                 responseLoanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanSchedule);
@@ -418,8 +409,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanScheduleVertical = loanProductsApi
-                .createLoanProduct(loanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanScheduleVertical).execute();
+        PostLoanProductsResponse responseLoanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanScheduleVertical = createLoanProductIdempotent(
+                loanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanScheduleVertical);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL,
                 responseLoanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanScheduleVertical);
@@ -443,8 +434,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanScheduleInstLvlDelinquency = loanProductsApi
-                .createLoanProduct(loanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanScheduleInstLvlDelinquency).execute();
+        PostLoanProductsResponse responseLoanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanScheduleInstLvlDelinquency = createLoanProductIdempotent(
+                loanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanScheduleInstLvlDelinquency);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION_PROGRESSIVE_LOAN_SCHEDULE_INSTALLMENT_LEVEL_DELINQUENCY,
                 responseLoanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanScheduleInstLvlDelinquency);
@@ -470,8 +461,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestDownPaymentAdvPmtAllocProgSchedInstLvlDelinquencyCreditAllocation = loanProductsApi
-                .createLoanProduct(loanProductsRequestDownPaymentAdvPmtAllocProgSchedInstLvlDelinquencyCreditAllocation).execute();
+        PostLoanProductsResponse responseLoanProductsRequestDownPaymentAdvPmtAllocProgSchedInstLvlDelinquencyCreditAllocation = createLoanProductIdempotent(
+                loanProductsRequestDownPaymentAdvPmtAllocProgSchedInstLvlDelinquencyCreditAllocation);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROG_SCHEDULE_HOR_INST_LVL_DELINQUENCY_CREDIT_ALLOCATION,
                 responseLoanProductsRequestDownPaymentAdvPmtAllocProgSchedInstLvlDelinquencyCreditAllocation);
@@ -497,8 +488,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestDownPaymentAdvPmtAllocFixedLength = loanProductsApi
-                .createLoanProduct(loanProductsRequestDownPaymentAdvPmtAllocFixedLength).execute();
+        PostLoanProductsResponse responseLoanProductsRequestDownPaymentAdvPmtAllocFixedLength = createLoanProductIdempotent(
+                loanProductsRequestDownPaymentAdvPmtAllocFixedLength);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_ADV_PMT_ALLOC_FIXED_LENGTH,
                 responseLoanProductsRequestDownPaymentAdvPmtAllocFixedLength);
 
@@ -516,8 +507,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestDownPaymentAutoAdvPaymentAllocationRepaymentStartSubmitted = loanProductsApi
-                .createLoanProduct(loanProductsRequestDownPaymentAutoAdvPaymentAllocationRepaymentStartSubmitted).execute();
+        PostLoanProductsResponse responseLoanProductsRequestDownPaymentAutoAdvPaymentAllocationRepaymentStartSubmitted = createLoanProductIdempotent(
+                loanProductsRequestDownPaymentAutoAdvPaymentAllocationRepaymentStartSubmitted);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADVANCED_REPAYMENT_ALLOCATION_PAYMENT_START_SUBMITTED,
                 responseLoanProductsRequestDownPaymentAutoAdvPaymentAllocationRepaymentStartSubmitted);
@@ -543,8 +534,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestDownPaymentAdvPaymentAllocationInterestFlatMultiDisbursement = loanProductsApi
-                .createLoanProduct(loanProductsRequestDownPaymentAdvPaymentAllocationInterestFlatMultiDisbursement).execute();
+        PostLoanProductsResponse responseLoanProductsRequestDownPaymentAdvPaymentAllocationInterestFlatMultiDisbursement = createLoanProductIdempotent(
+                loanProductsRequestDownPaymentAdvPaymentAllocationInterestFlatMultiDisbursement);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_INTEREST_FLAT_ADV_PMT_ALLOC_MULTIDISBURSE,
                 responseLoanProductsRequestDownPaymentAdvPaymentAllocationInterestFlatMultiDisbursement);
@@ -560,8 +551,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActual = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmiActualActual).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActual = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmiActualActual);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActual);
 
@@ -578,8 +569,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterest36030 = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterest36030 = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30,
                 responseLoanProductsRequestLP2AdvancedpaymentInterest36030);
 
@@ -600,8 +591,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterest36030MultiDisburse = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030MultiDisburse).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterest36030MultiDisburse = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030MultiDisburse);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_MULTIDISBURSE,
                 responseLoanProductsRequestLP2AdvancedpaymentInterest36030MultiDisburse);
 
@@ -625,8 +616,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterest36030MultiDisburseDownPayment = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030MultiDisburseDownPayment).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterest36030MultiDisburseDownPayment = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030MultiDisburseDownPayment);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_MULTIDISBURSE_DOWNPAYMENT,
                 responseLoanProductsRequestLP2AdvancedpaymentInterest36030MultiDisburseDownPayment);
@@ -644,8 +635,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmi365Actual = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterest365Actual).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmi365Actual = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterest365Actual);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_365_ACTUAL,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmi365Actual);
 
@@ -664,8 +655,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030Downpayment = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterest36030Downpayment).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030Downpayment = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterest36030Downpayment);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_DOWNPAYMENT,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030Downpayment);
 
@@ -682,8 +673,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualAccrualActivity = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualAccrualActivity).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualAccrualActivity = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualAccrualActivity);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualAccrualActivity);
 
@@ -696,8 +687,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .enableAccrualActivityPosting(true)//
                 .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value)//
                 .allowPartialPeriodInterestCalcualtion(false);//
-        Response<PostLoanProductsResponse> responseInterestDecliningPeriodDailyAccrualActivity = loanProductsApi
-                .createLoanProduct(loanProductsRequestInterestDecliningPeriodDailyAccrualActivity).execute();
+        PostLoanProductsResponse responseInterestDecliningPeriodDailyAccrualActivity = createLoanProductIdempotent(
+                loanProductsRequestInterestDecliningPeriodDailyAccrualActivity);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_DECLINING_PERIOD_DAILY_ACCRUAL_ACTIVITY,
                 responseInterestDecliningPeriodDailyAccrualActivity);
 
@@ -711,9 +702,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .enableAccrualActivityPosting(true)//
                 .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value)//
                 .allowPartialPeriodInterestCalcualtion(false);//
-        Response<PostLoanProductsResponse> responseLP1InterestDecliningBalanceDailyRecalculationCompoundingNoneAccrualActivity = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP1InterestDecliningBalanceDailyRecalculationCompoundingNoneAccrualActivity)
-                .execute();
+        PostLoanProductsResponse responseLP1InterestDecliningBalanceDailyRecalculationCompoundingNoneAccrualActivity = createLoanProductIdempotent(
+                loanProductsRequestLP1InterestDecliningBalanceDailyRecalculationCompoundingNoneAccrualActivity);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE_ACCRUAL_ACTIVITY,
                 responseLP1InterestDecliningBalanceDailyRecalculationCompoundingNoneAccrualActivity);
@@ -732,8 +722,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT"), //
                         createPaymentAllocation("INTEREST_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefund = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefund).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefund = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefund);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_REFUND,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefund);
@@ -760,8 +750,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcDailyTillPreCloese = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillPreclose).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcDailyTillPreCloese = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillPreclose);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE,
                 responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcDailyTillPreCloese);
@@ -789,8 +779,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcDailyTillRestFrequencyDate = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillRestFrequencyDate).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcDailyTillRestFrequencyDate = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillRestFrequencyDate);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_REST_FREQUENCY_DATE,
                 responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcDailyTillRestFrequencyDate);
@@ -818,8 +808,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcSameAsRepTillPreCloese = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcSameAsRepTillPreclose).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcSameAsRepTillPreCloese = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcSameAsRepTillPreclose);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_SAME_AS_REP_TILL_PRECLOSE,
                 responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcSameAsRepTillPreCloese);
@@ -848,9 +838,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcSameAsRepTillRestFrequencyDate = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcSameAsRepTillRestFrequencyDate)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcSameAsRepTillRestFrequencyDate = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcSameAsRepTillRestFrequencyDate);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_SAME_AS_REP_TILL_REST_FREQUENCY_DATE,
                 responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcSameAsRepTillRestFrequencyDate);
@@ -869,8 +858,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "NEXT_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "NEXT_INSTALLMENT"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLP1AdvPmtAllocProgressiveLoanScheduleHorizontal = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP1AdvPmtAllocProgressiveLoanScheduleHorizontal).execute();
+        PostLoanProductsResponse responseLP1AdvPmtAllocProgressiveLoanScheduleHorizontal = createLoanProductIdempotent(
+                loanProductsRequestLP1AdvPmtAllocProgressiveLoanScheduleHorizontal);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_ADVANCED_PAYMENT_ALLOCATION_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL,
                 responseLP1AdvPmtAllocProgressiveLoanScheduleHorizontal);
@@ -900,8 +889,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillPrecloseWholeTerm = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillPrecloseWholeTerm).execute();
+        PostLoanProductsResponse responseLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillPrecloseWholeTerm = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillPrecloseWholeTerm);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE_WHOLE_TERM,
                 responseLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillPrecloseWholeTerm);
@@ -932,8 +921,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "REAMORTIZATION"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestAdvCustomPaymentAllocationProgressiveLoanSchedule = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvCustomPaymentAllocationProgressiveLoanSchedule).execute();
+        PostLoanProductsResponse responseLoanProductsRequestAdvCustomPaymentAllocationProgressiveLoanSchedule = createLoanProductIdempotent(
+                loanProductsRequestAdvCustomPaymentAllocationProgressiveLoanSchedule);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADVANCED_CUSTOM_PAYMENT_ALLOCATION_PROGRESSIVE_LOAN_SCHEDULE,
                 responseLoanProductsRequestAdvCustomPaymentAllocationProgressiveLoanSchedule);
@@ -959,8 +948,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "NEXT_INSTALLMENT"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT"), //
                         createPaymentAllocation("INTEREST_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundFull = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundFull).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundFull = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundFull);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_REFUND_FULL,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundFull);
@@ -989,8 +978,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocationPenFeeIntPrincipal("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocationPenFeeIntPrincipal("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocationPenFeeIntPrincipal("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcDailyTillPreCloesePmtAlloc1 = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillPreclosePmtAlloc1).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcDailyTillPreCloesePmtAlloc1 = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillPreclosePmtAlloc1);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE_PMT_ALLOC_1,
                 responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcDailyTillPreCloesePmtAlloc1);
@@ -1015,9 +1004,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .recalculationRestFrequencyInterval(1)//
                 .paymentAllocation(List.of(//
                         createPaymentAllocation("DEFAULT", "LAST_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillPrecloseLastInstallmentResponse = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillPrecloseLastInstallment)
-                .execute();
+        PostLoanProductsResponse loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillPrecloseLastInstallmentResponse = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillPrecloseLastInstallment);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE_LAST_INSTALLMENT,
                 loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillPrecloseLastInstallmentResponse);
@@ -1038,8 +1026,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .supportedInterestRefundTypes(Arrays.asList("MERCHANT_ISSUED_REFUND", "PAYOUT_REFUND"))//
                 .paymentAllocation(List.of(//
                         createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundInterestRecalculation = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundRecalculation).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundInterestRecalculation = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundRecalculation);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_REFUND_INTEREST_RECALCULATION,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundInterestRecalculation);
@@ -1071,8 +1059,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestRecalculation36030MultiDisburseDownPayment = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestRecalculationEmi36030MultiDisburseDownPayment).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestRecalculation36030MultiDisburseDownPayment = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestRecalculationEmi36030MultiDisburseDownPayment);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_DOWNPAYMENT,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestRecalculation36030MultiDisburseDownPayment);
@@ -1113,9 +1101,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvCustomPaymentAllocationInterestRecalculationDaily36030MultiDisburse = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvCustomPaymentAllocationInterestRecalculationDailyEmi36030MultiDisburse)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvCustomPaymentAllocationInterestRecalculationDaily36030MultiDisburse = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvCustomPaymentAllocationInterestRecalculationDailyEmi36030MultiDisburse);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADVANCED_CUSTOM_PAYMENT_ALLOCATION_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE,
                 responseLoanProductsRequestLP2AdvCustomPaymentAllocationInterestRecalculationDaily36030MultiDisburse);
@@ -1145,9 +1132,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcNoCalcOnPastDueDailyTillPreClose = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedPaymentInterestEmi36030InterestRecalcDailyNoCalcOnPastDueTillPreclose)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcNoCalcOnPastDueDailyTillPreClose = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedPaymentInterestEmi36030InterestRecalcDailyNoCalcOnPastDueTillPreclose);
         TestContext.INSTANCE.set(TestContextKey.temp,
                 responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcNoCalcOnPastDueDailyTillPreClose);
 
@@ -1177,9 +1163,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentAllocationInterestRecalculationDailyNoCalcOnPastDue36030MultiDisburse = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvPaymentAllocationInterestRecalculationDailyNoCalcOnPastDueEmi36030MultiDisburse)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvPaymentAllocationInterestRecalculationDailyNoCalcOnPastDue36030MultiDisburse = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvPaymentAllocationInterestRecalculationDailyNoCalcOnPastDueEmi36030MultiDisburse);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADVANCED_PAYMENT_ALLOCATION_INTEREST_RECALCULATION_DAILY_NO_CALC_ON_PAST_DUE_EMI_360_30_MULTIDISBURSE,
                 responseLoanProductsRequestLP2AdvPaymentAllocationInterestRecalculationDailyNoCalcOnPastDue36030MultiDisburse);
@@ -1211,9 +1196,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestRecalculation36030MultiDisburseAutoDownPayment = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestRecalculationEmi36030MultiDisburseAutoDownPayment)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestRecalculation36030MultiDisburseAutoDownPayment = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestRecalculationEmi36030MultiDisburseAutoDownPayment);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestRecalculation36030MultiDisburseAutoDownPayment);
@@ -1229,9 +1213,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .paymentAllocation(List.of(//
                         createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT")))
                 .chargeOffBehaviour("ZERO_INTEREST");//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvInterestRecalculationZeroInterestChargeOffBehaviourProgressiveLoanSchedule = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvInterestRecalculationZeroInterestChargeOffBehaviourProgressiveLoanSchedule)
-                .execute();
+        final PostLoanProductsResponse responseLoanProductsRequestAdvInterestRecalculationZeroInterestChargeOffBehaviourProgressiveLoanSchedule = createLoanProductIdempotent(
+                loanProductsRequestAdvInterestRecalculationZeroInterestChargeOffBehaviourProgressiveLoanSchedule);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_ZERO_INTEREST_CHARGE_OFF_BEHAVIOUR,
                 responseLoanProductsRequestAdvInterestRecalculationZeroInterestChargeOffBehaviourProgressiveLoanSchedule);
@@ -1269,8 +1252,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")))//
                 .chargeOffBehaviour("ZERO_INTEREST");//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvZeroInterestChargeOffBehaviourProgressiveLoanSchedule = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvZeroInterestChargeOffBehaviourProgressiveLoanSchedule).execute();
+        PostLoanProductsResponse responseLoanProductsRequestAdvZeroInterestChargeOffBehaviourProgressiveLoanSchedule = createLoanProductIdempotent(
+                loanProductsRequestAdvZeroInterestChargeOffBehaviourProgressiveLoanSchedule);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_BEHAVIOUR,
                 responseLoanProductsRequestAdvZeroInterestChargeOffBehaviourProgressiveLoanSchedule);
 
@@ -1301,8 +1284,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT"))) //
                 .chargeOffBehaviour("ACCELERATE_MATURITY");//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourProgressiveLoanSchedule = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourProgressiveLoanSchedule).execute();
+        PostLoanProductsResponse responseLoanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourProgressiveLoanSchedule = createLoanProductIdempotent(
+                loanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourProgressiveLoanSchedule);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_ACCELERATE_MATURITY_CHARGE_OFF_BEHAVIOUR,
                 responseLoanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourProgressiveLoanSchedule);
@@ -1335,9 +1318,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .allowPartialPeriodInterestCalcualtion(true)//
                 .paymentAllocation(List.of(//
                         createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLP2AdvancedPaymentInterestEmi36030InterestRecalculationDailyAllowPartialPeriod = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedPaymentInterestEmi36030InterestRecalculationDailyAllowPartialPeriod)
-                .execute();
+        PostLoanProductsResponse responseLP2AdvancedPaymentInterestEmi36030InterestRecalculationDailyAllowPartialPeriod = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedPaymentInterestEmi36030InterestRecalculationDailyAllowPartialPeriod);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_ALLOW_PARTIAL_PERIOD,
                 responseLP2AdvancedPaymentInterestEmi36030InterestRecalculationDailyAllowPartialPeriod);
@@ -1364,8 +1346,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")))//
                 .chargeOffBehaviour("ZERO_INTEREST");//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedPaymentInterestEmi36030InterestRecalculationDailyChargeOff = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedPaymentInterestEmi36030InterestRecalculationDailyChargeOff).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedPaymentInterestEmi36030InterestRecalculationDailyChargeOff = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedPaymentInterestEmi36030InterestRecalculationDailyChargeOff);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_ZERO_INTEREST_CHARGE_OFF,
                 responseLoanProductsRequestLP2AdvancedPaymentInterestEmi36030InterestRecalculationDailyChargeOff);
@@ -1381,8 +1363,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .paymentAllocation(List.of(//
                         createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"))) //
                 .chargeOffBehaviour("ZERO_INTEREST");//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedPaymentNoInterestInterestRecalculationChargeOff = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedPaymentNoInterestInterestRecalculationChargeOff).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedPaymentNoInterestInterestRecalculationChargeOff = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedPaymentNoInterestInterestRecalculationChargeOff);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF,
                 responseLoanProductsRequestLP2AdvancedPaymentNoInterestInterestRecalculationChargeOff);
 
@@ -1403,8 +1385,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestAutoDownpaymentEmiActualActualAccrualActivity = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestAutoDownpaymentEmiActualActualAccrualActivity).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestAutoDownpaymentEmiActualActualAccrualActivity = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestAutoDownpaymentEmiActualActualAccrualActivity);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestAutoDownpaymentEmiActualActualAccrualActivity);
 
@@ -1432,9 +1414,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseloanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyAccrualActivityPosting = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyAccrualActivityPosting)
-                .execute();
+        PostLoanProductsResponse responseloanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyAccrualActivityPosting = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyAccrualActivityPosting);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_ACCRUAL_ACTIVITY_POSTING,
                 responseloanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyAccrualActivityPosting);
@@ -1452,8 +1433,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmi360Actual = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterest360Actual).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmi360Actual = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterest360Actual);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_ACTUAL,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmi360Actual);
 
@@ -1476,8 +1457,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackInterestFeePrincipal = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackInterestFeePrincipal).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackInterestFeePrincipal = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackInterestFeePrincipal);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_CHARGEBACK_INTEREST_FEE_PRINCIPAL,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackInterestFeePrincipal);
@@ -1501,8 +1482,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackPrincipalInterestFee = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackPrincipalInterestFee).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackPrincipalInterestFee = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackPrincipalInterestFee);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_CHARGEBACK_PRINCIPAL_INTEREST_FEE,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackPrincipalInterestFee);
@@ -1526,9 +1507,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackInterestPenaltyFeePrincipal = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackInterestPenaltyFeePrincipal)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackInterestPenaltyFeePrincipal = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackInterestPenaltyFeePrincipal);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_CHARGEBACK_INTEREST_PENALTY_FEE_PRINCIPAL,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackInterestPenaltyFeePrincipal);
@@ -1553,8 +1533,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRecalculationDaily = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRecalculationDaily).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRecalculationDaily = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRecalculationDaily);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALCULATION_DAILY,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRecalculationDaily);
@@ -1578,8 +1558,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedPaymentInterestEmi36030AccrualActivity = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedPaymentInterestEmi36030AccrualActivity).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedPaymentInterestEmi36030AccrualActivity = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedPaymentInterestEmi36030AccrualActivity);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_ACCRUAL_ACTIVITY,
                 responseLoanProductsRequestLP2AdvancedPaymentInterestEmi36030AccrualActivity);
@@ -1617,8 +1597,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")))//
                 .chargeOffBehaviour("ACCELERATE_MATURITY");//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourProgressiveLoanSchedule2 = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourProgressiveLoanSchedule2).execute();
+        PostLoanProductsResponse responseLoanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourProgressiveLoanSchedule2 = createLoanProductIdempotent(
+                loanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourProgressiveLoanSchedule2);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_ACCELERATE_MATURITY_CHARGE_OFF_BEHAVIOUR,
                 responseLoanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourProgressiveLoanSchedule2);
 
@@ -1637,8 +1617,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> loanProductsResponseChargebackAllocation = loanProductsApi
-                .createLoanProduct(loanProductsRequestChargebackAllocation).execute();
+        PostLoanProductsResponse loanProductsResponseChargebackAllocation = createLoanProductIdempotent(
+                loanProductsRequestChargebackAllocation);
         TestContext.INSTANCE.set(TestContextKey.LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_INTEREST_FIRST_RESPONSE,
                 loanProductsResponseChargebackAllocation);
 
@@ -1658,8 +1638,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> loanProductsResponseChargebackAllocationPrincipalFirst = loanProductsApi
-                .createLoanProduct(loanProductsRequestChargebackAllocationPrincipalFirst).execute();
+        PostLoanProductsResponse loanProductsResponseChargebackAllocationPrincipalFirst = createLoanProductIdempotent(
+                loanProductsRequestChargebackAllocationPrincipalFirst);
         TestContext.INSTANCE.set(TestContextKey.LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_PRINCIPAL_FIRST_RESPONSE,
                 loanProductsResponseChargebackAllocationPrincipalFirst);
 
@@ -1689,10 +1669,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestPenaltyFeePrincipal = loanProductsApi
-                .createLoanProduct(
-                        loanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestPenaltyFeePrincipal)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestPenaltyFeePrincipal = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestPenaltyFeePrincipal);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALC_EMI_360_30_CHARGEBACK_INTEREST_PENALTY_FEE_PRINCIPAL,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestPenaltyFeePrincipal);
@@ -1723,9 +1701,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestFeePrincipal = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestFeePrincipal)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestFeePrincipal = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestFeePrincipal);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALC_EMI_360_30_CHARGEBACK_INTEREST_FEE_PRINCIPAL,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestFeePrincipal);
@@ -1756,9 +1733,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackPrincipalInterestFee = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackPrincipalInterestFee)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackPrincipalInterestFee = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackPrincipalInterestFee);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALC_EMI_360_30_CHARGEBACK_PRINCIPAL_INTEREST_FEE,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackPrincipalInterestFee);
@@ -1787,10 +1763,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_INTEREST, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PRINCIPAL))) //
                 .chargeOffBehaviour("ACCELERATE_MATURITY");//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvCustomInterestRecalculationAccelerateMaturityChargeOffBehaviourLastInstallmentStrategyProgressiveLoanSchedule = loanProductsApi
-                .createLoanProduct(
-                        loanProductsRequestAdvCustomInterestRecalculationAccelerateMaturityChargeOffBehaviourLastInstallmentStrategyProgressiveLoanSchedule)
-                .execute();
+        final PostLoanProductsResponse responseLoanProductsRequestAdvCustomInterestRecalculationAccelerateMaturityChargeOffBehaviourLastInstallmentStrategyProgressiveLoanSchedule = createLoanProductIdempotent(
+                loanProductsRequestAdvCustomInterestRecalculationAccelerateMaturityChargeOffBehaviourLastInstallmentStrategyProgressiveLoanSchedule);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_ACCELERATE_MATURITY_CHARGE_OFF_BEHAVIOUR_LAST_INSTALLMENT_STRATEGY,
                 responseLoanProductsRequestAdvCustomInterestRecalculationAccelerateMaturityChargeOffBehaviourLastInstallmentStrategyProgressiveLoanSchedule);
@@ -1826,10 +1800,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_INTEREST, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PRINCIPAL))) //
                 .chargeOffBehaviour("ACCELERATE_MATURITY");//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourLastInstallmentStrategyProgressiveLoanSchedule = loanProductsApi
-                .createLoanProduct(
-                        loanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourLastInstallmentStrategyProgressiveLoanSchedule)
-                .execute();
+        final PostLoanProductsResponse responseLoanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourLastInstallmentStrategyProgressiveLoanSchedule = createLoanProductIdempotent(
+                loanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourLastInstallmentStrategyProgressiveLoanSchedule);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_ACCELERATE_MATURITY_CHARGE_OFF_BEHAVIOUR_LAST_INSTALLMENT_STRATEGY,
                 responseLoanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourLastInstallmentStrategyProgressiveLoanSchedule);
@@ -1855,8 +1827,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedPaymentInterestInterestRecognitionOnDisbursementEmi36030AccrualActivity = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedPaymentInterestRecognitionOnDisbursementEmi36030AccrualActivity).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedPaymentInterestInterestRecognitionOnDisbursementEmi36030AccrualActivity = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedPaymentInterestRecognitionOnDisbursementEmi36030AccrualActivity);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_RECOGNITION_DISBURSEMENT_DAILY_EMI_360_30_ACCRUAL_ACTIVITY,
                 responseLoanProductsRequestLP2AdvancedPaymentInterestInterestRecognitionOnDisbursementEmi36030AccrualActivity);
@@ -1883,9 +1855,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedPaymentInterestInterestRecognitionOnDisbursementEmiActualActualAccrualActivity = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedPaymentInterestRecognitionOnDisbursementEmiActualActual30AccrualActivity)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedPaymentInterestInterestRecognitionOnDisbursementEmiActualActualAccrualActivity = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedPaymentInterestRecognitionOnDisbursementEmiActualActual30AccrualActivity);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_RECOGNITION_DISBURSEMENT_DAILY_EMI_ACTUAL_ACTUAL_ACCRUAL_ACTIVITY,
                 responseLoanProductsRequestLP2AdvancedPaymentInterestInterestRecognitionOnDisbursementEmiActualActualAccrualActivity);
@@ -1912,8 +1883,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcAccountingRuleNone = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcAccountingRuleNone).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcAccountingRuleNone = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcAccountingRuleNone);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_ACCOUNTING_RULE_NONE,
                 responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcAccountingRuleNone);
@@ -1941,8 +1912,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT"))) //
                 .chargeOffBehaviour("ZERO_INTEREST");//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentInterestRecalcDailyZeroIntChargeOffIntRecognitionFromDisbDate = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvPaymentInterestRecalcDailyZeroIntChargeOffIntRecognitionFromDisbDate).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvPaymentInterestRecalcDailyZeroIntChargeOffIntRecognitionFromDisbDate = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvPaymentInterestRecalcDailyZeroIntChargeOffIntRecognitionFromDisbDate);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INT_RECALCULATION_ZERO_INT_CHARGE_OFF_INT_RECOGNITION_FROM_DISB_DATE,
                 responseLoanProductsRequestLP2AdvPaymentInterestRecalcDailyZeroIntChargeOffIntRecognitionFromDisbDate);
@@ -1968,9 +1939,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedPaymentInterestEmiActualActualLeapYearInterestRecalculationDaily = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedPaymentInterestEmiActualActualLeapYearInterestRecalculationDaily)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedPaymentInterestEmiActualActualLeapYearInterestRecalculationDaily = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedPaymentInterestEmiActualActualLeapYearInterestRecalculationDaily);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_LEAP_YEAR_INTEREST_RECALCULATION_DAILY,
                 responseLoanProductsRequestLP2AdvancedPaymentInterestEmiActualActualLeapYearInterestRecalculationDaily);
@@ -1983,8 +1953,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .preClosureInterestCalculationStrategy(1).rescheduleStrategyMethod(1).interestRecalculationCompoundingMethod(0)
                 .recalculationRestFrequencyType(2).recalculationRestFrequencyInterval(1)
                 .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value).allowPartialPeriodInterestCalcualtion(false);
-        final Response<PostLoanProductsResponse> responseInterestDecliningPeriodDailyIntRecalc = loanProductsApi
-                .createLoanProduct(loanProductsRequestInterestDecliningPeriodDailyIntRecalc).execute();
+        final PostLoanProductsResponse responseInterestDecliningPeriodDailyIntRecalc = createLoanProductIdempotent(
+                loanProductsRequestInterestDecliningPeriodDailyIntRecalc);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_DECLINING_PERIOD_DAILY_INT_RECALC,
                 responseInterestDecliningPeriodDailyIntRecalc);
 
@@ -1995,8 +1965,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .defaultLoanProductsRequestLP1InterestDeclining().name(name82).isInterestRecalculationEnabled(false)
                 .daysInYearType(DaysInYearType.DAYS360.value).daysInMonthType(DaysInMonthType.DAYS30.value)
                 .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value).allowPartialPeriodInterestCalcualtion(false);
-        final Response<PostLoanProductsResponse> responseInterest36030DecliningPeriodDailyIntRecalc = loanProductsApi
-                .createLoanProduct(loanProductsRequestInterest36030DecliningPeriodDailyIntRecalc).execute();
+        final PostLoanProductsResponse responseInterest36030DecliningPeriodDailyIntRecalc = createLoanProductIdempotent(
+                loanProductsRequestInterest36030DecliningPeriodDailyIntRecalc);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_360_30__DECLINING_PERIOD_DAILY_INT_RECALC,
                 responseInterest36030DecliningPeriodDailyIntRecalc);
 
@@ -2022,8 +1992,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")))//
                 .chargeOffBehaviour("ZERO_INTEREST");//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvZeroInterestChargeOffProgressiveDelinquentReason = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvZeroInterestChargeOffProgressiveDelinquentReason).execute();
+        PostLoanProductsResponse responseLoanProductsRequestAdvZeroInterestChargeOffProgressiveDelinquentReason = createLoanProductIdempotent(
+                loanProductsRequestAdvZeroInterestChargeOffProgressiveDelinquentReason);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_DELINQUENT_REASON,
                 responseLoanProductsRequestAdvZeroInterestChargeOffProgressiveDelinquentReason);
@@ -2070,8 +2040,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PRINCIPAL, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_FEE) //
                 ));//
-        Response<PostLoanProductsResponse> responseLoanProductsResponseAdvDPCustomPaymentAllocationProgressiveLoanSchedule = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvDPCustomPaymentAllocationProgressiveLoanSchedule).execute();
+        PostLoanProductsResponse responseLoanProductsResponseAdvDPCustomPaymentAllocationProgressiveLoanSchedule = createLoanProductIdempotent(
+                loanProductsRequestAdvDPCustomPaymentAllocationProgressiveLoanSchedule);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADVANCED_DP_CUSTOM_PAYMENT_ALLOCATION_PROGRESSIVE_LOAN_SCHEDULE,
                 responseLoanProductsResponseAdvDPCustomPaymentAllocationProgressiveLoanSchedule);
@@ -2120,8 +2090,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PRINCIPAL, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_FEE) //
                 ));//
-        Response<PostLoanProductsResponse> responseLoanProductsResponseAdvDPIRCustomPaymentAllocationProgressiveLoanSchedule = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvDPIRCustomPaymentAllocationProgressiveLoanSchedule).execute();
+        PostLoanProductsResponse responseLoanProductsResponseAdvDPIRCustomPaymentAllocationProgressiveLoanSchedule = createLoanProductIdempotent(
+                loanProductsRequestAdvDPIRCustomPaymentAllocationProgressiveLoanSchedule);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADVANCED_DP_IR_CUSTOM_PAYMENT_ALLOCATION_PROGRESSIVE_LOAN_SCHEDULE,
                 responseLoanProductsResponseAdvDPIRCustomPaymentAllocationProgressiveLoanSchedule);
@@ -2150,8 +2120,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyDisbursementCharge = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyDisbursementCharge).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyDisbursementCharge = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyDisbursementCharge);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_DISBURSEMENT_CHARGES,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyDisbursementCharge);
@@ -2182,8 +2152,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(false)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburse = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburse).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburse = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburse);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE_EXPECT_TRANCHE,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburse);
@@ -2214,9 +2184,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburseDisbursementCharge = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburseDisbursementCharge)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburseDisbursementCharge = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburseDisbursementCharge);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburseDisbursementCharge);
@@ -2245,9 +2214,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyCashAccountingDisbursementCharge = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyCashAccountingDisbursementCharge)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyCashAccountingDisbursementCharge = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyCashAccountingDisbursementCharge);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CASH_ACCOUNTING_DISBURSEMENT_CHARGES,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyCashAccountingDisbursementCharge);
@@ -2280,8 +2248,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")))//
                 .chargeOffBehaviour("ZERO_INTEREST");//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvZeroInterestChargeOffProgressiveDelinquentReasonIntRecalc = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvZeroInterestChargeOffProgressiveDelinquentReasonIntRecalc).execute();
+        PostLoanProductsResponse responseLoanProductsRequestAdvZeroInterestChargeOffProgressiveDelinquentReasonIntRecalc = createLoanProductIdempotent(
+                loanProductsRequestAdvZeroInterestChargeOffProgressiveDelinquentReasonIntRecalc);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_DELINQUENT_REASON_INTEREST_RECALC,
                 responseLoanProductsRequestAdvZeroInterestChargeOffProgressiveDelinquentReasonIntRecalc);
@@ -2293,8 +2261,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .name(name91)//
                 .shortName(loanProductsRequestFactory.generateShortNameSafely())//
                 .chargeOffBehaviour("ZERO_INTEREST");//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullZeroIntChargeOff = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullZeroIntChargeOff).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullZeroIntChargeOff = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullZeroIntChargeOff);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF,
                 responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullZeroIntChargeOff);
@@ -2308,8 +2276,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .name(name92)//
                 .shortName(loanProductsRequestFactory.generateShortNameSafely())//
                 .chargeOffBehaviour("ACCELERATE_MATURITY");//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullAccelerateMaturityChargeOff = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullAccelerateMaturityChargeOff).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullAccelerateMaturityChargeOff = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullAccelerateMaturityChargeOff);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ACCELERATE_MATURITY_CHARGE_OFF,
                 responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullAccelerateMaturityChargeOff);
@@ -2329,8 +2297,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "NEXT_INSTALLMENT"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT"), //
                         createPaymentAllocation("INTEREST_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualNoInterestRecalcRefundFull = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedPaymentInterestEmiActualActualNoInterestRecalcRefundFull).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualNoInterestRecalcRefundFull = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedPaymentInterestEmiActualActualNoInterestRecalcRefundFull);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_NO_INTEREST_RECALC_REFUND_FULL,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualNoInterestRecalcRefundFull);
@@ -2343,9 +2311,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .name(name94)//
                 .shortName(loanProductsRequestFactory.generateShortNameSafely())//
                 .chargeOffBehaviour("ZERO_INTEREST");//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullZeroIntChargeOff = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullZeroIntChargeOff)
-                .execute();
+        final PostLoanProductsResponse responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullZeroIntChargeOff = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullZeroIntChargeOff);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_NO_INTEREST_RECALC_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF,
                 responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullZeroIntChargeOff);
@@ -2359,10 +2326,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .name(name95)//
                 .shortName(loanProductsRequestFactory.generateShortNameSafely())//
                 .chargeOffBehaviour("ACCELERATE_MATURITY");//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullAccelerateMaturityChargeOff = loanProductsApi
-                .createLoanProduct(
-                        loanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullAccelerateMaturityChargeOff)
-                .execute();
+        final PostLoanProductsResponse responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullAccelerateMaturityChargeOff = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullAccelerateMaturityChargeOff);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_NO_INTEREST_RECALC_INT_REFUND_FULL_ACC_MATUR_CHARGE_OFF,
                 responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullAccelerateMaturityChargeOff);
@@ -2390,10 +2355,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcDailyTillRestFrequencyDateLastInstallment = loanProductsApi
-                .createLoanProduct(
-                        loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillRestFrequencyDateLastInstallment)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcDailyTillRestFrequencyDateLastInstallment = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillRestFrequencyDateLastInstallment);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_IR_DAILY_TILL_REST_FREQUENCY_DATE_LAST_INSTALLMENT,
                 responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcDailyTillRestFrequencyDateLastInstallment);
@@ -2412,8 +2375,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPaymentCapitalizedIncome = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPaymentCapitalizedIncome).execute();
+        final PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPaymentCapitalizedIncome = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPaymentCapitalizedIncome);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_PROGRESSIVE_ADV_PYMNT_CAPITALIZED_INCOME,
                 responseLoanProductsRequestLP2ProgressiveAdvPaymentCapitalizedIncome);
 
@@ -2438,9 +2401,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .supportedInterestRefundTypes(Arrays.asList("MERCHANT_ISSUED_REFUND", "PAYOUT_REFUND"))//
                 .paymentAllocation(List.of(//
                         createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundInterestRecalculationMultidisb = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundRecalculationMultiDisb)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundInterestRecalculationMultidisb = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundRecalculationMultiDisb);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_REFUND_INTEREST_RECALCULATION_MULTIDISB,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundInterestRecalculationMultidisb);
@@ -2465,8 +2427,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcCapitalizedIncome = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcCapitalizedIncome).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcCapitalizedIncome = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcCapitalizedIncome);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME,
                 responseLoanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcCapitalizedIncome);
@@ -2498,8 +2460,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcMultidisbursalCapitalizedIncome = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcMultidisbursalCapitalizedIncome).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcMultidisbursalCapitalizedIncome = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcMultidisbursalCapitalizedIncome);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSAL_CAPITALIZED_INCOME,
                 responseLoanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcMultidisbursalCapitalizedIncome);
@@ -2527,8 +2489,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcCapitalizedIncomeFee = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcCapitalizedIncomeFee).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcCapitalizedIncomeFee = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcCapitalizedIncomeFee);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME_FEE,
                 responseLoanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcCapitalizedIncomeFee);
@@ -2557,8 +2519,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestPrgAdvZeroIntChargeOffDelinquentReasonIntRecalcCapitalizedIncome = loanProductsApi
-                .createLoanProduct(loanProductsRequestPrgAdvZeroIntChargeOffDelinquentReasonIntRecalcCapitalizedIncome).execute();
+        PostLoanProductsResponse responseLoanProductsRequestPrgAdvZeroIntChargeOffDelinquentReasonIntRecalcCapitalizedIncome = createLoanProductIdempotent(
+                loanProductsRequestPrgAdvZeroIntChargeOffDelinquentReasonIntRecalcCapitalizedIncome);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_ZERO_INT_CHARGE_OFF_DELINQUENT_REASON_INT_RECALC_CAPITALIZED_INCOME,
                 responseLoanProductsRequestPrgAdvZeroIntChargeOffDelinquentReasonIntRecalcCapitalizedIncome);
@@ -2587,9 +2549,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("INTEREST_REFUND", "NEXT_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "NEXT_INSTALLMENT"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRefundRecalculationAccrualActivity = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRefundRecalculationAccrualActivity)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRefundRecalculationAccrualActivity = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRefundRecalculationAccrualActivity);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_REFUND_INTEREST_RECALC_ACCRUAL_ACTIVITY,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRefundRecalculationAccrualActivity);
@@ -2625,8 +2586,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRefundInterestRecalculation = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRefundRecalculation).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRefundInterestRecalculation = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRefundRecalculation);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_REFUND_INTEREST_RECALC_DOWNPAYMENT_ACCRUAL_ACTIVITY,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRefundInterestRecalculation);
@@ -2642,8 +2603,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT")))
                 .enableAccrualActivityPosting(true)//
                 .chargeOffBehaviour("ZERO_INTEREST");//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvInterestRecalculationZeroInterestChargeOffBehaviourAccrualActivity = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvInterestRecalculationZeroInterestChargeOffBehaviourAccrualActivity).execute();
+        PostLoanProductsResponse responseLoanProductsRequestAdvInterestRecalculationZeroInterestChargeOffBehaviourAccrualActivity = createLoanProductIdempotent(
+                loanProductsRequestAdvInterestRecalculationZeroInterestChargeOffBehaviourAccrualActivity);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_360_30_INTEREST_RECALCULATION_ZERO_INTEREST_CHARGE_OFF_ACCRUAL_ACTIVITY,
                 responseLoanProductsRequestAdvInterestRecalculationZeroInterestChargeOffBehaviourAccrualActivity);
@@ -2685,8 +2646,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PENALTY), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
 
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcCapitalizedIncomeAdjCustomAlloc = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcCapitalizedIncomeAdjCustomAlloc).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcCapitalizedIncomeAdjCustomAlloc = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPayment36030InterestRecalcCapitalizedIncomeAdjCustomAlloc);
 
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME_ADJ_CUSTOM_ALLOC,
@@ -2717,8 +2678,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvCustomContractTerminationProgressiveLoanScheduleIntRecalc = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvCustomContractTerminationProgressiveLoanScheduleIntRecalc).execute();
+        PostLoanProductsResponse responseLoanProductsRequestAdvCustomContractTerminationProgressiveLoanScheduleIntRecalc = createLoanProductIdempotent(
+                loanProductsRequestAdvCustomContractTerminationProgressiveLoanScheduleIntRecalc);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_CONTRACT_TERMINATION,
                 responseLoanProductsRequestAdvCustomContractTerminationProgressiveLoanScheduleIntRecalc);
@@ -2753,10 +2714,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .allowApprovedDisbursedAmountsOverApplied(true)//
                 .overAppliedCalculationType(OverAppliedCalculationType.PERCENTAGE.value)//
                 .overAppliedNumber(50);//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalApprovedOverAppliedCapitalizedIncome = loanProductsApi
-                .createLoanProduct(
-                        loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalApprovedOverAppliedCapitalizedIncome)
-                .execute();
+        final PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalApprovedOverAppliedCapitalizedIncome = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalApprovedOverAppliedCapitalizedIncome);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_MULTIDISB_OVER_APPLIED_PERCENTAGE_CAPITALIZED_INCOME,
                 responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalApprovedOverAppliedCapitalizedIncome);
@@ -2799,8 +2758,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PRINCIPAL, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_FEE), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestDownPaymentAutoAdvCustomPaymentAllocation = loanProductsApi
-                .createLoanProduct(loanProductsRequestDownPaymentAutoAdvCustomPaymentAllocation).execute();
+        PostLoanProductsResponse responseLoanProductsRequestDownPaymentAutoAdvCustomPaymentAllocation = createLoanProductIdempotent(
+                loanProductsRequestDownPaymentAutoAdvCustomPaymentAllocation);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADVANCED_CUSTOM_PAYMENT_ALLOCATION,
                 responseLoanProductsRequestDownPaymentAutoAdvCustomPaymentAllocation);
@@ -2845,10 +2804,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalCapitalizedIncomeAdjCustomAlloc = loanProductsApi
-                .createLoanProduct(
-                        loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalCapitalizedIncomeAdjCustomAlloc)
-                .execute();
+        final PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalCapitalizedIncomeAdjCustomAlloc = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalCapitalizedIncomeAdjCustomAlloc);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_MULTIDISB_CAPITALIZED_INCOME_ADJ_CUSTOM_ALLOC,
                 responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalCapitalizedIncomeAdjCustomAlloc);
@@ -2883,10 +2840,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .allowApprovedDisbursedAmountsOverApplied(true)//
                 .overAppliedCalculationType(OverAppliedCalculationType.FIXED_SIZE.value)//
                 .overAppliedNumber(1000);//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalApprovedOverAppliedFlatCapitalizedIncome = loanProductsApi
-                .createLoanProduct(
-                        loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalApprovedOverAppliedFlatCapitalizedIncome)
-                .execute();
+        final PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalApprovedOverAppliedFlatCapitalizedIncome = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalApprovedOverAppliedFlatCapitalizedIncome);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_MULTIDISB_OVER_APPLIED_FLAT_CAPITALIZED_INCOME,
                 responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalApprovedOverAppliedFlatCapitalizedIncome);
@@ -2917,9 +2872,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .allowApprovedDisbursedAmountsOverApplied(true)//
                 .overAppliedCalculationType(OverAppliedCalculationType.PERCENTAGE.value)//
                 .overAppliedNumber(50);//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcApprovedOverAppliedCapitalizedIncome = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcApprovedOverAppliedCapitalizedIncome)
-                .execute();
+        final PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcApprovedOverAppliedCapitalizedIncome = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcApprovedOverAppliedCapitalizedIncome);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_APPROVED_OVER_APPLIED_PERCENTAGE_CAPITALIZED_INCOME,
                 responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcApprovedOverAppliedCapitalizedIncome);
@@ -2950,9 +2904,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .allowApprovedDisbursedAmountsOverApplied(true)//
                 .overAppliedCalculationType(OverAppliedCalculationType.FIXED_SIZE.value)//
                 .overAppliedNumber(1000);//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcApprovedOverAppliedFlatCapitalizedIncome = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcApprovedOverAppliedFlatCapitalizedIncome)
-                .execute();
+        final PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcApprovedOverAppliedFlatCapitalizedIncome = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcApprovedOverAppliedFlatCapitalizedIncome);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_APPROVED_OVER_APPLIED_FLAT_CAPITALIZED_INCOME,
                 responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcApprovedOverAppliedFlatCapitalizedIncome);
@@ -2976,8 +2929,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFees = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPaymentBuyDownFees).execute();
+        final PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFees = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPaymentBuyDownFees);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_PROGRESSIVE_ADV_PYMNT_BUYDOWN_FEES,
                 responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFees);
 
@@ -2995,9 +2948,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT")))
                 .enableAccrualActivityPosting(true)//
                 .chargeOffBehaviour("ZERO_INTEREST");//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvInterestRecalculationAutoDownpaymentZeroInterestChargeOffBehaviourAccrualActivity = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvInterestRecalculationAutoDownpaymentZeroInterestChargeOffBehaviourAccrualActivity)
-                .execute();
+        final PostLoanProductsResponse responseLoanProductsRequestAdvInterestRecalculationAutoDownpaymentZeroInterestChargeOffBehaviourAccrualActivity = createLoanProductIdempotent(
+                loanProductsRequestAdvInterestRecalculationAutoDownpaymentZeroInterestChargeOffBehaviourAccrualActivity);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_360_30_INTEREST_RECALC_AUTO_DOWNPAYMENT_ZERO_INTEREST_CHARGE_OFF_ACCRUAL_ACTIVITY,
                 responseLoanProductsRequestAdvInterestRecalculationAutoDownpaymentZeroInterestChargeOffBehaviourAccrualActivity);
@@ -3017,8 +2969,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentInterestRecalcDailyInstallmentFeeFlatCharges = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvPaymentInterestRecalcDailyInstallmentFeeFlatCharges).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvPaymentInterestRecalcDailyInstallmentFeeFlatCharges = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvPaymentInterestRecalcDailyInstallmentFeeFlatCharges);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALC_DAILY_INSTALLMENT_FEE_FLAT_CHARGES,
                 responseLoanProductsRequestLP2AdvPaymentInterestRecalcDailyInstallmentFeeFlatCharges);
@@ -3047,8 +2999,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentInstallmentFeePercentAmountCharges = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvPaymentInstallmentFeePercentAmountCharges).execute();
+        final PostLoanProductsResponse responseLoanProductsRequestLP2AdvPaymentInstallmentFeePercentAmountCharges = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvPaymentInstallmentFeePercentAmountCharges);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INSTALLMENT_FEE_PERCENT_AMOUNT_CHARGES,
                 responseLoanProductsRequestLP2AdvPaymentInstallmentFeePercentAmountCharges);
@@ -3077,8 +3029,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentInstallmentFeePercentInterestCharges = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvPaymentInstallmentFeePercentInterestCharges).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvPaymentInstallmentFeePercentInterestCharges = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvPaymentInstallmentFeePercentInterestCharges);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INSTALLMENT_FEE_PERCENT_INTEREST_CHARGES,
                 responseLoanProductsRequestLP2AdvPaymentInstallmentFeePercentInterestCharges);
@@ -3107,8 +3059,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentInstallmentFeePercentAmountPlusInterestCharges = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvPaymentInstallmentFeePercentAmountPlusInterestCharges).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvPaymentInstallmentFeePercentAmountPlusInterestCharges = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvPaymentInstallmentFeePercentAmountPlusInterestCharges);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INSTALLMENT_FEE_PERCENT_AMOUNT_INTEREST_CHARGES,
                 responseLoanProductsRequestLP2AdvPaymentInstallmentFeePercentAmountPlusInterestCharges);
@@ -3140,8 +3092,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentInstallmentFeeAllCharges = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvPaymentInstallmentFeeAllCharges).execute();
+        final PostLoanProductsResponse responseLoanProductsRequestLP2AdvPaymentInstallmentFeeAllCharges = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvPaymentInstallmentFeeAllCharges);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INSTALLMENT_FEE_ALL_CHARGES,
                 responseLoanProductsRequestLP2AdvPaymentInstallmentFeeAllCharges);
@@ -3161,8 +3113,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentInstallmentFeeFlatPlusInterestChargesMultiDisburse = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvPaymentInstallmentFeeFlatPlusInterestChargesMultiDisburse).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvPaymentInstallmentFeeFlatPlusInterestChargesMultiDisburse = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvPaymentInstallmentFeeFlatPlusInterestChargesMultiDisburse);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INSTALLMENT_FEE_FLAT_INTEREST_CHARGES_TRANCHE,
                 responseLoanProductsRequestLP2AdvPaymentInstallmentFeeFlatPlusInterestChargesMultiDisburse);
@@ -3192,8 +3144,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvPaymentAllocationInterestFlat36030MultiDisbursement = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvPaymentAllocationInterestFlat36030MultiDisbursement).execute();
+        PostLoanProductsResponse responseLoanProductsRequestAdvPaymentAllocationInterestFlat36030MultiDisbursement = createLoanProductIdempotent(
+                loanProductsRequestAdvPaymentAllocationInterestFlat36030MultiDisbursement);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_INTEREST_FLAT_360_30_ADV_PMT_ALLOC_MULTIDISBURSE,
                 responseLoanProductsRequestAdvPaymentAllocationInterestFlat36030MultiDisbursement);
 
@@ -3223,8 +3175,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvInterestFlatMultiDisbPartialPeriodInterestCalculationDisabled = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvInterestFlatMultiDisbPartialPeriodInterestCalculationDisabled).execute();
+        PostLoanProductsResponse responseLoanProductsRequestAdvInterestFlatMultiDisbPartialPeriodInterestCalculationDisabled = createLoanProductIdempotent(
+                loanProductsRequestAdvInterestFlatMultiDisbPartialPeriodInterestCalculationDisabled);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_INTEREST_FLAT_ADV_PMT_ALLOC_MULTIDISBURSE_PART_PERIOD_CALC_DISABLED,
                 responseLoanProductsRequestAdvInterestFlatMultiDisbPartialPeriodInterestCalculationDisabled);
@@ -3257,8 +3209,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvInterestFlat36030MultiDisbPartialPeriodInterestCalculationDisabled = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvInterestFlat36030MultiDisbPartialPeriodInterestCalculationDisabled).execute();
+        PostLoanProductsResponse responseLoanProductsRequestAdvInterestFlat36030MultiDisbPartialPeriodInterestCalculationDisabled = createLoanProductIdempotent(
+                loanProductsRequestAdvInterestFlat36030MultiDisbPartialPeriodInterestCalculationDisabled);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_INTEREST_FLAT_360_30_ADV_PMT_ALLOC_MULTIDISBURSE_PART_PERIOD_CALC_DISABLED,
                 responseLoanProductsRequestAdvInterestFlat36030MultiDisbPartialPeriodInterestCalculationDisabled);
@@ -3286,8 +3238,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvPaymentAllocationInterestFlatMultiDisbursement = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvPaymentAllocationInterestFlatMultiDisbursement).execute();
+        PostLoanProductsResponse responseLoanProductsRequestAdvPaymentAllocationInterestFlatMultiDisbursement = createLoanProductIdempotent(
+                loanProductsRequestAdvPaymentAllocationInterestFlatMultiDisbursement);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_INTEREST_FLAT_ADV_PMT_ALLOC_MULTIDISBURSE,
                 responseLoanProductsRequestAdvPaymentAllocationInterestFlatMultiDisbursement);
 
@@ -3314,8 +3266,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestDownPaymentAdvInterestFlatMultiDisbPartPeriodIntCalcDisabled = loanProductsApi
-                .createLoanProduct(loanProductsRequestDownPaymentAdvInterestFlatMultiDisbPartialPeriodInterestCalcDisabled).execute();
+        PostLoanProductsResponse responseLoanProductsRequestDownPaymentAdvInterestFlatMultiDisbPartPeriodIntCalcDisabled = createLoanProductIdempotent(
+                loanProductsRequestDownPaymentAdvInterestFlatMultiDisbPartialPeriodInterestCalcDisabled);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_INTEREST_FLAT_ADV_PMT_ALLOC_MULTIDISBURSE_PART_PERIOD_CALC_DISABLED,
                 responseLoanProductsRequestDownPaymentAdvInterestFlatMultiDisbPartPeriodIntCalcDisabled);
@@ -3347,8 +3299,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_INTEREST, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PRINCIPAL, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_FEE)));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestNoInterestRecalculationAllocationPenaltyFirst = loanProductsApi
-                .createLoanProduct(loanProductsRequestNoInterestRecalculationAllocationPenaltyFirst).execute();
+        PostLoanProductsResponse responseLoanProductsRequestNoInterestRecalculationAllocationPenaltyFirst = createLoanProductIdempotent(
+                loanProductsRequestNoInterestRecalculationAllocationPenaltyFirst);
         TestContext.INSTANCE.set(TestContextKey.LP2_NO_INTEREST_RECALCULATION_ALLOCATION_PENALTY_FIRST_RESPONSE,
                 responseLoanProductsRequestNoInterestRecalculationAllocationPenaltyFirst);
 
@@ -3372,8 +3324,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesWithChargeOffReason = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesWithChargeOffReason).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesWithChargeOffReason = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesWithChargeOffReason);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_PROGRESSIVE_ADV_PYMNT_BUYDOWN_FEES_CHARGE_OFF_REASON,
                 responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesWithChargeOffReason);
@@ -3408,10 +3360,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbApprovedOverAppliedCapitalizedIncome = loanProductsApi
-                .createLoanProduct(
-                        loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbApprovedOverAppliedCapitalizedIncome)
-                .execute();
+        final PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbApprovedOverAppliedCapitalizedIncome = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbApprovedOverAppliedCapitalizedIncome);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_MULTIDISB_APPROVED_OVER_APPLIED_CAPITALIZED_INCOME,
                 responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbApprovedOverAppliedCapitalizedIncome);
@@ -3426,6 +3376,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 // .interestType(INTEREST_TYPE_DECLINING_BALANCE)//
                 .defaultLoanProductsRequestLP1() //
                 .interestCalculationPeriodType(0)//
+                .allowPartialPeriodInterestCalcualtion(false)//
                 // .allowApprovedDisbursedAmountsOverApplied(false)//
                 .name(name130)//
                 .transactionProcessingStrategyCode(
@@ -3434,8 +3385,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(false)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        Response<PostLoanProductsResponse> responseLoanProductMultidisbursalExpectTranches = loanProductsApi
-                .createLoanProduct(loanProductsRequestMultidisbursalExpectTranches).execute();
+        PostLoanProductsResponse responseLoanProductMultidisbursalExpectTranches = createLoanProductIdempotent(
+                loanProductsRequestMultidisbursalExpectTranches);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_MULTIDISBURSAL_EXPECTS_TRANCHES,
                 responseLoanProductMultidisbursalExpectTranches);
 
@@ -3471,8 +3422,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPmtIntDeclSarpEmi3630IntRecalcDailyMutiDisbPartial = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvPmtIntDeclSarpEmi3630IntRecalcDailyMutiDisbPartial).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvPmtIntDeclSarpEmi3630IntRecalcDailyMutiDisbPartial = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvPmtIntDeclSarpEmi3630IntRecalcDailyMutiDisbPartial);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DECL_BAL_SARP_EMI_360_30_INT_RECALC_DAILY_MULTIDISB_PARTIAL_PERIOD,
                 responseLoanProductsRequestLP2AdvPmtIntDeclSarpEmi3630IntRecalcDailyMutiDisbPartial);
@@ -3504,8 +3455,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPmtIntDeclSarpEmi3630NoIntRecalcMutiDisbPartial = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvPmtIntDeclSarpEmi3630NoIntRecalcMutiDisbPartial).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvPmtIntDeclSarpEmi3630NoIntRecalcMutiDisbPartial = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvPmtIntDeclSarpEmi3630NoIntRecalcMutiDisbPartial);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DECL_BAL_SARP_EMI_360_30_NO_INT_RECALC_MULTIDISB_PARTIAL_PERIOD,
                 responseLoanProductsRequestLP2AdvPmtIntDeclSarpEmi3630NoIntRecalcMutiDisbPartial);
@@ -3537,8 +3488,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPmtIntDeclSarpEmi3630NoIntRecalcMutiDisbNoPartial = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvPmtIntDeclSarpEmi3630NoIntRecalcMutiDisbNoPartial).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvPmtIntDeclSarpEmi3630NoIntRecalcMutiDisbNoPartial = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvPmtIntDeclSarpEmi3630NoIntRecalcMutiDisbNoPartial);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DECL_BAL_SARP_EMI_360_30_NO_INT_RECALC_MULTIDISB_NO_PARTIAL_PERIOD,
                 responseLoanProductsRequestLP2AdvPmtIntDeclSarpEmi3630NoIntRecalcMutiDisbNoPartial);
@@ -3574,9 +3525,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(false)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbApprovedOverAppliedExpectTranches = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbApprovedOverAppliedExpectTranches)
-                .execute();
+        final PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbApprovedOverAppliedExpectTranches = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbApprovedOverAppliedExpectTranches);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_PROGRESSIVE_ADV_PYMNT_INTEREST_RECALC_360_30_MULTIDISB_OVER_APPLIED_EXPECTED_TRANCHES,
                 responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbApprovedOverAppliedExpectTranches);
@@ -3608,9 +3558,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedPaymentInterest36030InterestRecalcDailyTillPreCloseMinInt3MaxInt20 = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillPrecloseMinInt3MaxInt20)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedPaymentInterest36030InterestRecalcDailyTillPreCloseMinInt3MaxInt20 = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyTillPrecloseMinInt3MaxInt20);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE_MIN_INT_3_MAX_INT_20,
                 responseLoanProductsRequestLP2AdvancedPaymentInterest36030InterestRecalcDailyTillPreCloseMinInt3MaxInt20);
@@ -3635,8 +3584,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT"))) //
                 .merchantBuyDownFee(false).buyDownExpenseAccountId(null);//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesNonMerchant = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesNonMerchant).execute();
+        final PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesNonMerchant = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesNonMerchant);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_PROGRESSIVE_ADV_PYMNT_BUYDOWN_FEES_NON_MERCHANT,
                 responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesNonMerchant);
 
@@ -3662,8 +3611,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT"))) //
                 .merchantBuyDownFee(false).buyDownExpenseAccountId(null);//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesNonMerchantWithChargeOffReason = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesNonMerchantWithChargeOffReason).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesNonMerchantWithChargeOffReason = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesNonMerchantWithChargeOffReason);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_PROGRESSIVE_ADV_PYMNT_BUYDOWN_FEES_NON_MERCHANT_CHARGE_OFF_REASON,
                 responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesNonMerchantWithChargeOffReason);
@@ -3698,8 +3647,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .overAppliedNumber(50)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvEmi36030IntRecalcDailyMultiDisbApprovedOverApplied = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvEmi36030IntRecalcDailyMultiDisbApprovedOverApplied).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvEmi36030IntRecalcDailyMultiDisbApprovedOverApplied = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvEmi36030IntRecalcDailyMultiDisbApprovedOverApplied);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INT_DAILY_EMI_360_30_INT_RECALC_DAILY_MULTIDISB_EXPECT_TRANCHE_APPROVED_OVER_APPLIED,
                 responseLoanProductsRequestLP2AdvEmi36030IntRecalcDailyMultiDisbApprovedOverApplied);
@@ -3732,8 +3681,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT"))) //
                 .chargeOffBehaviour("ZERO_INTEREST");//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestAdvCustomPaymentAllocationProgressiveLoanScheduleZeroChargeOff = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvCustomPaymentAllocationProgressiveLoanScheduleZeroChargeOff).execute();
+        PostLoanProductsResponse responseLoanProductsRequestAdvCustomPaymentAllocationProgressiveLoanScheduleZeroChargeOff = createLoanProductIdempotent(
+                loanProductsRequestAdvCustomPaymentAllocationProgressiveLoanScheduleZeroChargeOff);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADVANCED_CUSTOM_PAYMENT_ALLOCATION_PROGRESSIVE_LOAN_SCHEDULE_ZERO_CHARGE_OFF,
                 responseLoanProductsRequestAdvCustomPaymentAllocationProgressiveLoanScheduleZeroChargeOff);
@@ -3768,8 +3717,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")))//
                 .buydownfeeClassificationToIncomeAccountMappings(buydownfeeClassificationToIncomeAccountMappings);//
 
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesClassificationIncomeMap = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesClassificationIncomeMap).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesClassificationIncomeMap = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesClassificationIncomeMap);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_PROGRESSIVE_ADV_PYMNT_BUYDOWN_FEES_CLASSIFICATION_INCOME_MAP,
                 responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesClassificationIncomeMap);
@@ -3820,8 +3769,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")))//
                 .capitalizedIncomeClassificationToIncomeAccountMappings(capitalizedIncomeClassificationToIncomeAccountMappings);//
 
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPaymAllocCapitaizedIncomeClassificationIncomeMap = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPaymAllocCapitaizedIncomeClassificationIncomeMap).execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPaymAllocCapitaizedIncomeClassificationIncomeMap = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPaymAllocCapitaizedIncomeClassificationIncomeMap);
 
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_PROGRESSIVE_ADV_PMNT_ALLOCATION_CAPITALIZED_INCOME_ADJ_CUSTOM_ALLOC_CLASSIFICATION_INCOME_MAP,
@@ -3872,8 +3821,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")))//
                 .writeOffReasonsToExpenseMappings(writeOffReasonToExpenseAccountMappings);//
 
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPaymentWriteOffReasonMap = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2ProgressiveAdvPaymentWriteOffReasonMap).execute();
+        final PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPaymentWriteOffReasonMap = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPaymentWriteOffReasonMap);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_PROGRESSIVE_ADV_PYMNT_WRITE_OFF_REASON_MAP,
                 responseLoanProductsRequestLP2ProgressiveAdvPaymentWriteOffReasonMap);
 
@@ -3895,8 +3844,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .allowApprovedDisbursedAmountsOverApplied(true)//
                 .overAppliedCalculationType(OverAppliedCalculationType.PERCENTAGE.value)//
                 .overAppliedNumber(50);//
-        Response<PostLoanProductsResponse> responseInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursement = loanProductsApi
-                .createLoanProduct(loanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursement).execute();
+        PostLoanProductsResponse responseInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursement = createLoanProductIdempotent(
+                loanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursement);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_FLAT_SAR_RECALCULATION_SAME_AS_REPAYMENT_ACTUAL_ACTUAL_MULTIDISB,
                 responseInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursement);
@@ -3922,8 +3871,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .allowApprovedDisbursedAmountsOverApplied(true)//
                 .overAppliedCalculationType(OverAppliedCalculationType.PERCENTAGE.value)//
                 .overAppliedNumber(50);//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestInterestFlatSaRRecalculationDailyMultiDisbursement = loanProductsApi
-                .createLoanProduct(loanProductsRequestInterestFlatSaRRecalculationDailyMultiDisbursement).execute();
+        PostLoanProductsResponse responseLoanProductsRequestInterestFlatSaRRecalculationDailyMultiDisbursement = createLoanProductIdempotent(
+                loanProductsRequestInterestFlatSaRRecalculationDailyMultiDisbursement);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_FLAT_SAR_RECALCULATION_DAILY_360_30_APPROVED_OVER_APPLIED_MULTIDISB,
                 responseLoanProductsRequestInterestFlatSaRRecalculationDailyMultiDisbursement);
@@ -3946,8 +3895,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestInterestFlatDailyRecalculationDSameAsRepaymentMultiDisbursement = loanProductsApi
-                .createLoanProduct(loanProductsRequestInterestFlatDailyRecalculationDSameAsRepaymentMultiDisbursement).execute();
+        PostLoanProductsResponse responseLoanProductsRequestInterestFlatDailyRecalculationDSameAsRepaymentMultiDisbursement = createLoanProductIdempotent(
+                loanProductsRequestInterestFlatDailyRecalculationDSameAsRepaymentMultiDisbursement);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_FLAT_DAILY_RECALCULATION_DAILY_360_30_MULTIDISB,
                 responseLoanProductsRequestInterestFlatDailyRecalculationDSameAsRepaymentMultiDisbursement);
@@ -3970,9 +3919,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .allowPartialPeriodInterestCalcualtion(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementAUtoDownPayment = loanProductsApi
-                .createLoanProduct(loanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementAUtoDownPayment)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementAUtoDownPayment = createLoanProductIdempotent(
+                loanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementAUtoDownPayment);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_FLAT_SAR_RECALCULATION_SAME_AS_REPAYMENT_MULTIDISB_AUTO_DOWNPAYMENT,
                 responseLoanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementAUtoDownPayment);
@@ -4050,10 +3998,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PENALTY, //
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_FEE) //
                 ));//
-        Response<PostLoanProductsResponse> responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmi36030InterestRecalculationDaily = loanProductsApi
-                .createLoanProduct(
-                        loanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmi36030InterestRecalculationDaily)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmi36030InterestRecalculationDaily = createLoanProductIdempotent(
+                loanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmi36030InterestRecalculationDaily);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY,
                 responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmi36030InterestRecalculationDaily);
@@ -4085,8 +4031,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvCustomContractTerminationProgressiveLoanScheduleIntRecalcRecog = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvCustomContractTerminationProgressiveLoanScheduleIntRecalcRecog).execute();
+        PostLoanProductsResponse responseLoanProductsRequestAdvCustomContractTerminationProgressiveLoanScheduleIntRecalcRecog = createLoanProductIdempotent(
+                loanProductsRequestAdvCustomContractTerminationProgressiveLoanScheduleIntRecalcRecog);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_CONTRACT_TERMINATION_INT_RECOGNITION,
                 responseLoanProductsRequestAdvCustomContractTerminationProgressiveLoanScheduleIntRecalcRecog);
@@ -4111,8 +4057,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         .repaymentEvery(true) //
                         .graceOnPrincipalAndInterestPayment(true) //
                         .graceOnArrearsAgeing(true));
-        final Response<PostLoanProductsResponse> responseWithOverrides = loanProductsApi.createLoanProduct(loanProductsRequestWithOverrides)
-                .execute();
+        final PostLoanProductsResponse responseWithOverrides = createLoanProductIdempotent(loanProductsRequestWithOverrides);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_WITH_OVERRIDES, responseWithOverrides);
 
         // (LP1_NO_OVERRIDES) - Loan product with all attribute overrides DISABLED
@@ -4135,8 +4080,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         .repaymentEvery(false) //
                         .graceOnPrincipalAndInterestPayment(false) //
                         .graceOnArrearsAgeing(false));
-        final Response<PostLoanProductsResponse> responseNoOverrides = loanProductsApi.createLoanProduct(loanProductsRequestNoOverrides)
-                .execute();
+        final PostLoanProductsResponse responseNoOverrides = createLoanProductIdempotent(loanProductsRequestNoOverrides);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_NO_OVERRIDES, responseNoOverrides);
 
         // LP2 advanced custom payment allocation + progressive loan schedule + horizontal + interest recalculation
@@ -4162,10 +4106,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT"))); //
-        Response<PostLoanProductsResponse> responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffAccruals = loanProductsApi
-                .createLoanProduct(
-                        loanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffAccruals)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffAccruals = createLoanProductIdempotent(
+                loanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffAccruals);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_CUSTOM_PMT_ALLOC_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OFF_ACCRUAL,
                 responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffAccruals);
@@ -4188,10 +4130,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .chargeOffBehaviour(ZERO_INTEREST.value)//
                 .paymentAllocation(List.of(//
                         createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"))); //
-        Response<PostLoanProductsResponse> responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals = loanProductsApi
-                .createLoanProduct(
-                        loanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals = createLoanProductIdempotent(
+                loanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OF_ACCRUAL,
                 responseLoanProductsResponseAdvCustomPaymentAllocationProgressiveLoanInterestDailyEmiActualInterestRecalcZeroChargeOffChargebackAccruals);
@@ -4211,9 +4151,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(false)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementExpectsTranches = loanProductsApi
-                .createLoanProduct(loanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementExpectsTranches)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementExpectsTranches = createLoanProductIdempotent(
+                loanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementExpectsTranches);
         TestContext.INSTANCE.set(TestContextKey.LP1_INTEREST_FLAT_DAILY_RECALCULATION_SAR_MULTIDISB_EXPECT_TRANCHES,
                 responseLoanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementExpectsTranches);
 
@@ -4228,8 +4167,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT")))
                 .enableAccrualActivityPosting(true)//
                 .chargeOffBehaviour("ZERO_INTEREST");//
-        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvZeroInterestChargeOffBehaviourAccrualActivity = loanProductsApi
-                .createLoanProduct(loanProductsRequestAdvZeroInterestChargeOffBehaviourAccrualActivity).execute();
+        final PostLoanProductsResponse responseLoanProductsRequestAdvZeroInterestChargeOffBehaviourAccrualActivity = createLoanProductIdempotent(
+                loanProductsRequestAdvZeroInterestChargeOffBehaviourAccrualActivity);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_360_30_ZERO_INTEREST_CHARGE_OFF_ACCRUAL_ACTIVITY,
                 responseLoanProductsRequestAdvZeroInterestChargeOffBehaviourAccrualActivity);
@@ -4250,8 +4189,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(false)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestInterestFlatActualActualMultiDisbursementExpectsTranches = loanProductsApi
-                .createLoanProduct(loanProductsRequestInterestFlatActualActualMultiDisbursementExpectsTranches).execute();
+        PostLoanProductsResponse responseLoanProductsRequestInterestFlatActualActualMultiDisbursementExpectsTranches = createLoanProductIdempotent(
+                loanProductsRequestInterestFlatActualActualMultiDisbursementExpectsTranches);
         TestContext.INSTANCE.set(TestContextKey.LP1_INTEREST_FLAT_DAILY_ACTUAL_ACTUAL_MULTIDISB_EXPECT_TRANCHES,
                 responseLoanProductsRequestInterestFlatActualActualMultiDisbursementExpectsTranches);
 
@@ -4284,9 +4223,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
-        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburseChargeback = loanProductsApi
-                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburseChargeback)
-                .execute();
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburseChargeback = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburseChargeback);
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE_CHARGEBACK,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburseChargeback);
@@ -4387,5 +4325,34 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
             paymentAllocationOrder.setOrder(integer.getAndIncrement());
             return paymentAllocationOrder;
         }).toList();
+    }
+
+    private PostLoanProductsResponse createLoanProductIdempotent(PostLoanProductsRequest loanProductRequest) {
+        String productName = loanProductRequest.getName();
+        log.info("Attempting to create loan product: {}", productName);
+        try {
+            List<GetLoanProductsResponse> existingProducts = fineractClient.loanProducts().retrieveAllLoanProducts(Map.of());
+            GetLoanProductsResponse existingProduct = existingProducts.stream().filter(p -> productName.equals(p.getName())).findFirst()
+                    .orElse(null);
+
+            if (existingProduct != null) {
+                log.info("Loan product '{}' already exists with ID: {}", productName, existingProduct.getId());
+                PostLoanProductsResponse response = new PostLoanProductsResponse();
+                response.setResourceId(existingProduct.getId());
+                return response;
+            }
+        } catch (Exception e) {
+            log.warn("Error checking if loan product '{}' exists", productName, e);
+        }
+
+        log.info("Creating new loan product: {}", productName);
+        try {
+            PostLoanProductsResponse response = ok(() -> fineractClient.loanProducts().createLoanProduct(loanProductRequest, Map.of()));
+            log.info("Successfully created loan product '{}' with ID: {}", productName, response.getResourceId());
+            return response;
+        } catch (Exception e) {
+            log.error("FAILED to create loan product '{}'", productName, e);
+            throw e;
+        }
     }
 }

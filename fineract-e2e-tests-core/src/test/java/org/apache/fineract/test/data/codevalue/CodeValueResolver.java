@@ -18,41 +18,33 @@
  */
 package org.apache.fineract.test.data.codevalue;
 
-import java.io.IOException;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetCodeValuesDataResponse;
-import org.apache.fineract.client.services.CodeValuesApi;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
-import retrofit2.Response;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class CodeValueResolver {
 
-    private final CodeValuesApi codeValuesApi;
+    private final FineractFeignClient fineractClient;
 
     @Cacheable(key = "#codeValue.getName()", value = "codeValuesByName")
     public long resolve(Long codeId, CodeValue codeValue) {
-        try {
-            String codeValueName = codeValue.getName();
+        String codeValueName = codeValue.getName();
 
-            log.debug("Resolving code value by code id and name [{}]", codeValue);
-            Response<List<GetCodeValuesDataResponse>> response = codeValuesApi.retrieveAllCodeValues(codeId).execute();
-            if (!response.isSuccessful()) {
-                throw new IllegalStateException("Unable to get payment types. Status code was HTTP " + response.code());
-            }
+        log.debug("Resolving code value by code id and name [{}]", codeValue);
+        List<GetCodeValuesDataResponse> codeValuesResponses = ok(() -> fineractClient.codeValues().retrieveAllCodeValues(codeId, Map.of()));
+        GetCodeValuesDataResponse foundPtr = codeValuesResponses.stream().filter(ptr -> codeValueName.equals(ptr.getName())).findAny()
+                .orElseThrow(() -> new IllegalArgumentException("Payment type [%s] not found".formatted(codeValueName)));
 
-            List<GetCodeValuesDataResponse> codeValuesResponses = response.body();
-            GetCodeValuesDataResponse foundPtr = codeValuesResponses.stream().filter(ptr -> codeValueName.equals(ptr.getName())).findAny()
-                    .orElseThrow(() -> new IllegalArgumentException("Payment type [%s] not found".formatted(codeValueName)));
-
-            return foundPtr.getId();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return foundPtr.getId();
     }
 }

@@ -18,9 +18,16 @@
  */
 package org.apache.fineract.test.initializer.global;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.GetGLAccountsResponse;
 import org.apache.fineract.client.models.PostGLAccountsRequest;
-import org.apache.fineract.client.services.GeneralLedgerAccountApi;
 import org.apache.fineract.test.data.GLAType;
 import org.apache.fineract.test.data.GLAUsage;
 import org.apache.fineract.test.factory.GLAccountRequestFactory;
@@ -28,6 +35,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -87,82 +95,52 @@ public class GLGlobalInitializerStep implements FineractGlobalInitializerStep {
     public static final String GLA_GL_CODE_23 = "450280";
     public static final String GLA_GL_CODE_24 = "450281";
 
-    private final GeneralLedgerAccountApi glaApi;
+    private final FineractFeignClient fineractClient;
 
     @Override
-    public void initialize() throws Exception {
+    public void initialize() {
+        List<GetGLAccountsResponse> existingAccounts = new ArrayList<>();
+        try {
+            existingAccounts = fineractClient.generalLedgerAccount().retrieveAllAccountsUniversal(Map.of());
+        } catch (Exception e) {
+            log.debug("Could not retrieve existing GL accounts, will create them", e);
+        }
 
-        PostGLAccountsRequest postGLAccountsRequest1 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_1, GLA_GL_CODE_1,
-                GLA_TYPE_ASSET, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest1).execute();
-        PostGLAccountsRequest postGLAccountsRequest2 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_2, GLA_GL_CODE_2,
-                GLA_TYPE_ASSET, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest2).execute();
-        PostGLAccountsRequest postGLAccountsRequest3 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_3, GLA_GL_CODE_3,
-                GLA_TYPE_ASSET, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest3).execute();
-        PostGLAccountsRequest postGLAccountsRequest4 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_4, GLA_GL_CODE_4,
-                GLA_TYPE_ASSET, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest4).execute();
-        PostGLAccountsRequest postGLAccountsRequest5 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_5, GLA_GL_CODE_5,
-                GLA_TYPE_LIABILITY, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest5).execute();
-        PostGLAccountsRequest postGLAccountsRequest6 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_6, GLA_GL_CODE_6,
-                GLA_TYPE_LIABILITY, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest6).execute();
-        PostGLAccountsRequest postGLAccountsRequest7 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_7, GLA_GL_CODE_7,
-                GLA_TYPE_INCOME, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest7).execute();
-        PostGLAccountsRequest postGLAccountsRequest8 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_8, GLA_GL_CODE_8,
-                GLA_TYPE_INCOME, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest8).execute();
-        PostGLAccountsRequest postGLAccountsRequest9 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_9, GLA_GL_CODE_9,
-                GLA_TYPE_INCOME, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest9).execute();
-        PostGLAccountsRequest postGLAccountsRequest10 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_10, GLA_GL_CODE_10,
-                GLA_TYPE_INCOME, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest10).execute();
-        PostGLAccountsRequest postGLAccountsRequest11 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_11, GLA_GL_CODE_11,
-                GLA_TYPE_INCOME, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest11).execute();
-        PostGLAccountsRequest postGLAccountsRequest12 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_12, GLA_GL_CODE_12,
-                GLA_TYPE_EXPENSE, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest12).execute();
-        PostGLAccountsRequest postGLAccountsRequest13 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_13, GLA_GL_CODE_13,
-                GLA_TYPE_EXPENSE, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest13).execute();
-        PostGLAccountsRequest postGLAccountsRequest14 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_14, GLA_GL_CODE_14,
-                GLA_TYPE_ASSET, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest14).execute();
-        PostGLAccountsRequest postGLAccountsRequest15 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_15, GLA_GL_CODE_15,
-                GLA_TYPE_INCOME, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest15).execute();
-        PostGLAccountsRequest postGLAccountsRequest16 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_16, GLA_GL_CODE_16,
-                GLA_TYPE_EXPENSE, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest16).execute();
-        PostGLAccountsRequest postGLAccountsRequest17 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_17, GLA_GL_CODE_17,
-                GLA_TYPE_LIABILITY, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest17).execute();
-        PostGLAccountsRequest postGLAccountsRequest18 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_18, GLA_GL_CODE_18,
-                GLA_TYPE_ASSET, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest18).execute();
-        PostGLAccountsRequest postGLAccountsRequest19 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_19, GLA_GL_CODE_19,
-                GLA_TYPE_EXPENSE, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest19).execute();
-        PostGLAccountsRequest postGLAccountsRequest20 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_20, GLA_GL_CODE_20,
-                GLA_TYPE_INCOME, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest20).execute();
-        PostGLAccountsRequest postGLAccountsRequest21 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_21, GLA_GL_CODE_21,
-                GLA_TYPE_ASSET, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest21).execute();
-        PostGLAccountsRequest postGLAccountsRequest22 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_22, GLA_GL_CODE_22,
-                GLA_TYPE_LIABILITY, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest22).execute();
-        PostGLAccountsRequest postGLAccountsRequest23 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_23, GLA_GL_CODE_23,
-                GLA_TYPE_EXPENSE, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest23).execute();
-        PostGLAccountsRequest postGLAccountsRequest24 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_24, GLA_GL_CODE_24,
-                GLA_TYPE_INCOME, GLA_USAGE_DETAIL, true);
-        glaApi.createGLAccount1(postGLAccountsRequest24).execute();
+        final List<GetGLAccountsResponse> accounts = existingAccounts;
+
+        createGLAccountIfNotExists(accounts, GLA_NAME_1, GLA_GL_CODE_1, GLA_TYPE_ASSET);
+        createGLAccountIfNotExists(accounts, GLA_NAME_2, GLA_GL_CODE_2, GLA_TYPE_ASSET);
+        createGLAccountIfNotExists(accounts, GLA_NAME_3, GLA_GL_CODE_3, GLA_TYPE_ASSET);
+        createGLAccountIfNotExists(accounts, GLA_NAME_4, GLA_GL_CODE_4, GLA_TYPE_ASSET);
+        createGLAccountIfNotExists(accounts, GLA_NAME_5, GLA_GL_CODE_5, GLA_TYPE_LIABILITY);
+        createGLAccountIfNotExists(accounts, GLA_NAME_6, GLA_GL_CODE_6, GLA_TYPE_LIABILITY);
+        createGLAccountIfNotExists(accounts, GLA_NAME_7, GLA_GL_CODE_7, GLA_TYPE_INCOME);
+        createGLAccountIfNotExists(accounts, GLA_NAME_8, GLA_GL_CODE_8, GLA_TYPE_INCOME);
+        createGLAccountIfNotExists(accounts, GLA_NAME_9, GLA_GL_CODE_9, GLA_TYPE_INCOME);
+        createGLAccountIfNotExists(accounts, GLA_NAME_10, GLA_GL_CODE_10, GLA_TYPE_INCOME);
+        createGLAccountIfNotExists(accounts, GLA_NAME_11, GLA_GL_CODE_11, GLA_TYPE_INCOME);
+        createGLAccountIfNotExists(accounts, GLA_NAME_12, GLA_GL_CODE_12, GLA_TYPE_EXPENSE);
+        createGLAccountIfNotExists(accounts, GLA_NAME_13, GLA_GL_CODE_13, GLA_TYPE_EXPENSE);
+        createGLAccountIfNotExists(accounts, GLA_NAME_14, GLA_GL_CODE_14, GLA_TYPE_ASSET);
+        createGLAccountIfNotExists(accounts, GLA_NAME_15, GLA_GL_CODE_15, GLA_TYPE_INCOME);
+        createGLAccountIfNotExists(accounts, GLA_NAME_16, GLA_GL_CODE_16, GLA_TYPE_EXPENSE);
+        createGLAccountIfNotExists(accounts, GLA_NAME_17, GLA_GL_CODE_17, GLA_TYPE_LIABILITY);
+        createGLAccountIfNotExists(accounts, GLA_NAME_18, GLA_GL_CODE_18, GLA_TYPE_ASSET);
+        createGLAccountIfNotExists(accounts, GLA_NAME_19, GLA_GL_CODE_19, GLA_TYPE_EXPENSE);
+        createGLAccountIfNotExists(accounts, GLA_NAME_20, GLA_GL_CODE_20, GLA_TYPE_INCOME);
+        createGLAccountIfNotExists(accounts, GLA_NAME_21, GLA_GL_CODE_21, GLA_TYPE_ASSET);
+        createGLAccountIfNotExists(accounts, GLA_NAME_22, GLA_GL_CODE_22, GLA_TYPE_LIABILITY);
+        createGLAccountIfNotExists(accounts, GLA_NAME_23, GLA_GL_CODE_23, GLA_TYPE_EXPENSE);
+        createGLAccountIfNotExists(accounts, GLA_NAME_24, GLA_GL_CODE_24, GLA_TYPE_INCOME);
+    }
+
+    private void createGLAccountIfNotExists(List<GetGLAccountsResponse> existingAccounts, String name, String glCode, Integer type) {
+        boolean accountExists = existingAccounts.stream().anyMatch(a -> glCode.equals(a.getGlCode()));
+        if (accountExists) {
+            return;
+        }
+
+        PostGLAccountsRequest request = GLAccountRequestFactory.defaultGLAccountRequest(name, glCode, type, GLA_USAGE_DETAIL, true);
+        executeVoid(() -> fineractClient.generalLedgerAccount().createGLAccount1(request, Map.of()));
     }
 }

@@ -18,71 +18,69 @@
  */
 package org.apache.fineract.test.stepdef.loan;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.io.IOException;
+import java.util.Map;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
-import org.apache.fineract.client.services.LoanTransactionsApi;
 import org.apache.fineract.test.factory.LoanRequestFactory;
-import org.apache.fineract.test.helper.ErrorHelper;
 import org.apache.fineract.test.messaging.EventAssertion;
 import org.apache.fineract.test.messaging.event.loan.LoanReAmortizeEvent;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
 import org.springframework.beans.factory.annotation.Autowired;
-import retrofit2.Response;
 
 public class LoanReAmortizationStepDef extends AbstractStepDef {
 
     @Autowired
-    private LoanTransactionsApi loanTransactionsApi;
+    private FineractFeignClient fineractClient;
 
     @Autowired
     private EventAssertion eventAssertion;
 
     @When("When Admin creates a Loan re-amortization transaction on current business date")
     public void createLoanReAmortization() throws IOException {
-        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        long loanId = loanResponse.body().getLoanId();
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
 
         PostLoansLoanIdTransactionsRequest reAmortizationRequest = LoanRequestFactory.defaultLoanReAmortizationRequest();
 
-        Response<PostLoansLoanIdTransactionsResponse> response = loanTransactionsApi
-                .executeLoanTransaction(loanId, reAmortizationRequest, "reAmortize").execute();
-        ErrorHelper.checkSuccessfulApiCall(response);
+        PostLoansLoanIdTransactionsResponse response = ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId,
+                reAmortizationRequest, Map.<String, Object>of("command", "reAmortize")));
         testContext().set(TestContextKey.LOAN_REAMORTIZATION_RESPONSE, response);
     }
 
     @When("When Admin creates a Loan re-amortization transaction on current business date by loan external ID")
     public void createLoanReAmortizationByLoanExternalId() throws IOException {
-        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        String loanExternalId = loanResponse.body().getResourceExternalId();
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        String loanExternalId = loanResponse.getResourceExternalId();
 
         PostLoansLoanIdTransactionsRequest reAmortizationRequest = LoanRequestFactory.defaultLoanReAmortizationRequest();
 
-        Response<PostLoansLoanIdTransactionsResponse> response = loanTransactionsApi
-                .executeLoanTransaction1(loanExternalId, reAmortizationRequest, "reAmortize").execute();
-        ErrorHelper.checkSuccessfulApiCall(response);
+        PostLoansLoanIdTransactionsResponse response = ok(() -> fineractClient.loanTransactions().executeLoanTransaction1(loanExternalId,
+                reAmortizationRequest, Map.<String, Object>of("command", "reAmortize")));
         testContext().set(TestContextKey.LOAN_REAMORTIZATION_RESPONSE, response);
     }
 
     @When("When Admin undo Loan re-amortization transaction on current business date")
     public void undoLoanReAmortization() throws IOException {
-        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        long loanId = loanResponse.body().getLoanId();
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
 
-        Response<PostLoansLoanIdTransactionsResponse> response = loanTransactionsApi
-                .executeLoanTransaction(loanId, new PostLoansLoanIdTransactionsRequest(), "undoReAmortize").execute();
-        ErrorHelper.checkSuccessfulApiCall(response);
+        PostLoansLoanIdTransactionsResponse response = ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId,
+                new PostLoansLoanIdTransactionsRequest(), Map.<String, Object>of("command", "undoReAmortize")));
         testContext().set(TestContextKey.LOAN_REAMORTIZATION_UNDO_RESPONSE, response);
     }
 
     @Then("LoanReAmortizeBusinessEvent is created")
     public void checkLoanReAmortizeBusinessEventCreated() {
-        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        long loanId = loanResponse.body().getLoanId();
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
 
         eventAssertion.assertEventRaised(LoanReAmortizeEvent.class, loanId);
     }

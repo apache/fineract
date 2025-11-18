@@ -18,34 +18,26 @@
  */
 package org.apache.fineract.test.stepdef.common;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import java.io.IOException;
 import java.util.Collections;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.ClientAddressRequest;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.services.ClientApi;
 import org.apache.fineract.test.factory.ClientRequestFactory;
-import org.apache.fineract.test.helper.CodeHelper;
-import org.apache.fineract.test.helper.ErrorHelper;
-import org.apache.fineract.test.helper.ErrorMessageHelper;
-import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.messaging.event.EventCheckHelper;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
 import org.springframework.beans.factory.annotation.Autowired;
-import retrofit2.Response;
 
 public class ClientStepDef extends AbstractStepDef {
 
     @Autowired
-    private ClientApi clientApi;
-
-    @Autowired
-    private CodeHelper codeHelper;
+    private FineractFeignClient fineractClient;
 
     @Autowired
     private ClientRequestFactory clientRequestFactory;
@@ -54,42 +46,38 @@ public class ClientStepDef extends AbstractStepDef {
     private EventCheckHelper eventCheckHelper;
 
     @When("Admin creates a client with random data")
-    public void createClientRandomFirstNameLastName() throws IOException {
+    public void createClientRandomFirstNameLastName() {
         PostClientsRequest clientsRequest = clientRequestFactory.defaultClientCreationRequest();
 
-        Response<PostClientsResponse> response = clientApi.create6(clientsRequest).execute();
-        ErrorHelper.checkSuccessfulApiCall(response);
+        PostClientsResponse response = ok(() -> fineractClient.clients().create6(clientsRequest));
         testContext().set(TestContextKey.CLIENT_CREATE_RESPONSE, response);
 
         eventCheckHelper.clientEventCheck(response);
     }
 
     @When("Admin creates a second client with random data")
-    public void createSecondClientRandomFirstNameLastName() throws IOException {
+    public void createSecondClientRandomFirstNameLastName() {
         PostClientsRequest clientsRequest = clientRequestFactory.defaultClientCreationRequest();
 
-        Response<PostClientsResponse> response = clientApi.create6(clientsRequest).execute();
-        ErrorHelper.checkSuccessfulApiCall(response);
+        PostClientsResponse response = ok(() -> fineractClient.clients().create6(clientsRequest));
         testContext().set(TestContextKey.CLIENT_CREATE_SECOND_CLIENT_RESPONSE, response);
 
         eventCheckHelper.clientEventCheck(response);
     }
 
     @When("Admin creates a client with Firstname {string} and Lastname {string}")
-    public void createClient(String firstName, String lastName) throws IOException {
+    public void createClient(String firstName, String lastName) {
         PostClientsRequest clientsRequest = clientRequestFactory.defaultClientCreationRequest().firstname(firstName).lastname(lastName);
 
-        Response<PostClientsResponse> response = clientApi.create6(clientsRequest).execute();
-        ErrorHelper.checkSuccessfulApiCall(response);
+        PostClientsResponse response = ok(() -> fineractClient.clients().create6(clientsRequest));
         testContext().set(TestContextKey.CLIENT_CREATE_RESPONSE, response);
     }
 
     @When("Admin creates a client with Firstname {string} and Lastname {string} with address")
-    public void createClientWithAddress(String firstName, String lastName) throws IOException {
-        Long addressTypeId = codeHelper.createAddressTypeCodeValue(Utils.randomNameGenerator("Residential address", 4)).body()
-                .getResourceId();
-        Long countryId = codeHelper.createCountryCodeValue(Utils.randomNameGenerator("Hungary", 4)).body().getResourceId();
-        Long stateId = codeHelper.createStateCodeValue(Utils.randomNameGenerator("Budapest", 4)).body().getResourceId();
+    public void createClientWithAddress(String firstName, String lastName) {
+        Long addressTypeId = 15L;
+        Long countryId = 17L;
+        Long stateId = 18L;
         String city = "Budapest";
         boolean addressIsActive = true;
         String postalCode = "1000";
@@ -100,28 +88,26 @@ public class ClientStepDef extends AbstractStepDef {
         PostClientsRequest clientsRequest = clientRequestFactory.defaultClientCreationRequest().firstname(firstName).lastname(lastName)
                 .address(Collections.singletonList(addressRequest));
 
-        Response<PostClientsResponse> response = clientApi.create6(clientsRequest).execute();
-        ErrorHelper.checkSuccessfulApiCall(response);
+        PostClientsResponse response = ok(() -> fineractClient.clients().create6(clientsRequest));
         testContext().set(TestContextKey.CLIENT_CREATE_RESPONSE, response);
 
     }
 
     @When("Admin creates a client with Firstname {string} and Lastname {string} with {string} activation date")
-    public void createClientWithSpecifiedDates(String firstName, String lastName, String activationDate) throws IOException {
+    public void createClientWithSpecifiedDates(String firstName, String lastName, String activationDate) {
 
         PostClientsRequest clientsRequest = clientRequestFactory.defaultClientCreationRequest().firstname(firstName).lastname(lastName)
                 .activationDate(activationDate);
 
-        Response<PostClientsResponse> response = clientApi.create6(clientsRequest).execute();
-        ErrorHelper.checkSuccessfulApiCall(response);
+        PostClientsResponse response = ok(() -> fineractClient.clients().create6(clientsRequest));
         testContext().set(TestContextKey.CLIENT_CREATE_RESPONSE, response);
     }
 
     @Then("Client is created successfully")
-    public void checkClientCreatedSuccessfully() throws IOException {
-        Response<PostClientsResponse> response = testContext().get(TestContextKey.CLIENT_CREATE_RESPONSE);
+    public void checkClientCreatedSuccessfully() {
+        PostClientsResponse response = testContext().get(TestContextKey.CLIENT_CREATE_RESPONSE);
 
-        assertThat(response.isSuccessful()).as(ErrorMessageHelper.requestFailed(response)).isTrue();
+        assertThat(response.getClientId()).isNotNull();
 
         eventCheckHelper.clientEventCheck(response);
     }

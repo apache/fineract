@@ -45,7 +45,9 @@ public abstract class TestContextKey {
     public static final String LOAN_UNDO_DISBURSE_RESPONSE = "loanUndoDisburseResponse";
     public static final String LOAN_REPAYMENT_RESPONSE = "loanRepaymentResponse";
     public static final String LOAN_PAYMENT_TRANSACTION_RESPONSE = "loanPaymentTransactionResponse";
+    public static final String LOAN_PAYMENT_TRANSACTION_HEADERS = "loanPaymentTransactionHeaders";
     public static final String LOAN_REFUND_RESPONSE = "loanRefundResponse";
+    public static final String ERROR_RESPONSE = "errorResponse";
     public static final String LOAN_REAGING_RESPONSE = "loanReAgingResponse";
     public static final String LOAN_REAGING_UNDO_RESPONSE = "loanReAgingUndoResponse";
     public static final String LOAN_REAGING_PREVIEW_RESPONSE = "loanReAgingPreviewResponse";
@@ -239,6 +241,8 @@ public abstract class TestContextKey {
     public static final String LOAN_CHARGE_OFF_UNDO_RESPONSE = "loanChargeOffUndoResponse";
     public static final String CHARGE_FOR_LOAN_TRANCHE_DISBURSEMENT_CHARGE_FLAT_CREATE_RESPONSE = "ChargeForLoanTrancheDisbursementChargeCreateResponse";
     public static final String CREATED_SIMPLE_USER_RESPONSE = "createdSimpleUserResponse";
+    public static final String CREATED_SIMPLE_USER_USERNAME = "createdSimpleUserUsername";
+    public static final String CREATED_SIMPLE_USER_PASSWORD = "createdSimpleUserPassword";
     public static final String ASSET_EXTERNALIZATION_RESPONSE = "assetExternalizationResponse";
     public static final String ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_USER_GENERATED = "assetExternalizationTransferExternalIdUserGenerated";
     public static final String ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_FROM_RESPONSE = "assetExternalizationTransferExternalIdFromResponse";

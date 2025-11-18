@@ -18,66 +18,60 @@
  */
 package org.apache.fineract.test.helper;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
-import org.apache.fineract.client.models.PutGlobalConfigurationsResponse;
-import org.apache.fineract.client.services.GlobalConfigurationApi;
-import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import retrofit2.Response;
 
 @Component
 @RequiredArgsConstructor
 public class GlobalConfigurationHelper {
 
-    private final GlobalConfigurationApi globalConfigurationApi;
+    private final FineractFeignClient fineractClient;
 
-    public void disableGlobalConfiguration(String configKey, Long value) throws IOException {
+    public void disableGlobalConfiguration(String configKey, Long value) {
         switchAndSetGlobalConfiguration(configKey, false, value);
     }
 
-    public void enableGlobalConfiguration(String configKey, Long value) throws IOException {
+    public void enableGlobalConfiguration(String configKey, Long value) {
         switchAndSetGlobalConfiguration(configKey, true, value);
     }
 
-    private void switchAndSetGlobalConfiguration(String configKey, boolean enabled, Long value) throws IOException {
-        Response<GlobalConfigurationPropertyData> configuration = globalConfigurationApi.retrieveOneByName(configKey).execute();
-        ErrorHelper.checkSuccessfulApiCall(configuration);
-        Long configId = configuration.body().getId();
+    private void switchAndSetGlobalConfiguration(String configKey, boolean enabled, Long value) {
+        GlobalConfigurationPropertyData configuration = ok(
+                () -> fineractClient.globalConfiguration().retrieveOneByName(configKey, Map.of()));
+        Long configId = configuration.getId();
 
         PutGlobalConfigurationsRequest updateRequest = new PutGlobalConfigurationsRequest().enabled(enabled).value(value);
 
-        Response<PutGlobalConfigurationsResponse> updateResponse = globalConfigurationApi.updateConfiguration1(configId, updateRequest)
-                .execute();
-        assertThat(updateResponse.code()).isEqualTo(HttpStatus.SC_OK);
-        Response<GlobalConfigurationPropertyData> updatedConfiguration = globalConfigurationApi.retrieveOneByName(configKey).execute();
-        boolean isEnabled = BooleanUtils.toBoolean(updatedConfiguration.body().getEnabled());
+        ok(() -> fineractClient.globalConfiguration().updateConfiguration1(configId, updateRequest, Map.of()));
+        GlobalConfigurationPropertyData updatedConfiguration = ok(
+                () -> fineractClient.globalConfiguration().retrieveOneByName(configKey, Map.of()));
+        boolean isEnabled = BooleanUtils.toBoolean(updatedConfiguration.getEnabled());
         assertThat(isEnabled).isEqualTo(enabled);
     }
 
-    public void setGlobalConfigValueString(String configKey, String value) throws IOException {
-        Response<GlobalConfigurationPropertyData> configuration = globalConfigurationApi.retrieveOneByName(configKey).execute();
-        ErrorHelper.checkSuccessfulApiCall(configuration);
-        Long configId = configuration.body().getId();
+    public void setGlobalConfigValueString(String configKey, String value) {
+        GlobalConfigurationPropertyData configuration = ok(
+                () -> fineractClient.globalConfiguration().retrieveOneByName(configKey, Map.of()));
+        Long configId = configuration.getId();
 
         PutGlobalConfigurationsRequest updateRequest = new PutGlobalConfigurationsRequest().enabled(true).stringValue(value);
 
-        Response<PutGlobalConfigurationsResponse> updateResponse = globalConfigurationApi.updateConfiguration1(configId, updateRequest)
-                .execute();
-        assertThat(updateResponse.code()).isEqualTo(HttpStatus.SC_OK);
-        Response<GlobalConfigurationPropertyData> updatedConfiguration = globalConfigurationApi.retrieveOneByName(configKey).execute();
-        boolean isEnabled = BooleanUtils.toBoolean(updatedConfiguration.body().getEnabled());
+        ok(() -> fineractClient.globalConfiguration().updateConfiguration1(configId, updateRequest, Map.of()));
+        GlobalConfigurationPropertyData updatedConfiguration = ok(
+                () -> fineractClient.globalConfiguration().retrieveOneByName(configKey, Map.of()));
+        boolean isEnabled = BooleanUtils.toBoolean(updatedConfiguration.getEnabled());
         assertThat(isEnabled).isEqualTo(true);
     }
 
-    public GlobalConfigurationPropertyData getGlobalConfiguration(String configKey) throws IOException {
-        Response<GlobalConfigurationPropertyData> configuration = globalConfigurationApi.retrieveOneByName(configKey).execute();
-        ErrorHelper.checkSuccessfulApiCall(configuration);
-        return configuration.body();
+    public GlobalConfigurationPropertyData getGlobalConfiguration(String configKey) {
+        return ok(() -> fineractClient.globalConfiguration().retrieveOneByName(configKey, Map.of()));
     }
 }

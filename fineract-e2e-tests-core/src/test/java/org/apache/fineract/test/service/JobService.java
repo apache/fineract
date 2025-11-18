@@ -18,23 +18,24 @@
  */
 package org.apache.fineract.test.service;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.awaitility.Awaitility.await;
 
-import java.io.IOException;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.ExecuteJobRequest;
 import org.apache.fineract.client.models.GetJobsResponse;
-import org.apache.fineract.client.services.SchedulerJobApi;
 import org.apache.fineract.test.data.job.Job;
 import org.apache.fineract.test.data.job.JobResolver;
-import org.apache.fineract.test.helper.ErrorHelper;
 import org.apache.fineract.test.messaging.config.JobPollingProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import retrofit2.Response;
 
 @Component
 @RequiredArgsConstructor
@@ -42,7 +43,7 @@ import retrofit2.Response;
 public class JobService {
 
     @Autowired
-    private SchedulerJobApi schedulerJobApi;
+    private FineractFeignClient fineractClient;
 
     @Autowired
     private JobPollingProperties jobPollingProperties;
@@ -50,13 +51,10 @@ public class JobService {
     private final JobResolver jobResolver;
 
     public void execute(Job job) {
-        try {
-            Long jobId = jobResolver.resolve(job);
-            Response<Void> response = schedulerJobApi.executeJob(jobId, "executeJob", new ExecuteJobRequest()).execute();
-            ErrorHelper.checkSuccessfulApiCall(response);
-        } catch (IOException e) {
-            throw new RuntimeException("Exception while executing job %s".formatted(job.getName()), e);
-        }
+        Long jobId = jobResolver.resolve(job);
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("command", "executeJob");
+        executeVoid(() -> fineractClient.schedulerJob().executeJob(jobId, new ExecuteJobRequest(), queryParams));
     }
 
     public void executeAndWait(Job job) {
@@ -73,9 +71,8 @@ public class JobService {
                 .until(() -> {
                     log.debug("Waiting for job {} to finish", jobName);
                     Long jobId = jobResolver.resolve(job);
-                    Response<GetJobsResponse> getJobsResponse = schedulerJobApi.retrieveOne5(jobId).execute();
-                    ErrorHelper.checkSuccessfulApiCall(getJobsResponse);
-                    Boolean currentlyRunning = getJobsResponse.body().getCurrentlyRunning();
+                    GetJobsResponse getJobsResponse = ok(() -> fineractClient.schedulerJob().retrieveOne5(jobId));
+                    Boolean currentlyRunning = getJobsResponse.getCurrentlyRunning();
                     return BooleanUtils.isFalse(currentlyRunning);
                 });
     }

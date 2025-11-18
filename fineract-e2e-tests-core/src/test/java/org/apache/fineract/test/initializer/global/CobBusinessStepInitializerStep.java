@@ -29,7 +29,7 @@ public class CobBusinessStepInitializerStep implements FineractGlobalInitializer
     private final WorkFlowJobHelper workFlowJobHelper;
 
     @Override
-    public void initialize() throws Exception {
+    public void initialize() {
         workFlowJobHelper.setWorkflowJobs();
     }
 }

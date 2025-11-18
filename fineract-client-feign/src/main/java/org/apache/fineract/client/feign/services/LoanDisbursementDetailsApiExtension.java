@@ -16,15 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.test.stepdef.loan;
+package org.apache.fineract.client.feign.services;
 
-import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
-import retrofit2.Call;
-import retrofit2.http.GET;
+import feign.Param;
+import feign.RequestLine;
+import org.apache.fineract.client.models.PostAddAndDeleteDisbursementDetailRequest;
 
-public interface LoanProductsCustomApi {
+public interface LoanDisbursementDetailsApiExtension {
 
-    @GET("v1/loanproducts/{productId}")
-    Call<GetLoanProductsProductIdResponse> retrieveLoanProductDetails(@retrofit2.http.Path("productId") Long productId,
-            @retrofit2.http.Query("template") String isTemplate);
+    @RequestLine("PUT /v1/loans/{loanId}/disbursements/editDisbursements")
+    PostAddAndDeleteDisbursementDetailRequest addAndDeleteDisbursementDetail(@Param("loanId") Long loanId,
+            PostAddAndDeleteDisbursementDetailRequest postAddAndDeleteDisbursementDetailRequest);
+
 }

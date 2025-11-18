@@ -18,36 +18,52 @@
  */
 package org.apache.fineract.test.initializer.suite;
 
-import static java.lang.System.lineSeparator;
+import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+import static org.awaitility.Awaitility.await;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.ExternalEventConfigurationItemResponse;
 import org.apache.fineract.client.models.ExternalEventConfigurationResponse;
 import org.apache.fineract.client.models.ExternalEventConfigurationUpdateRequest;
-import org.apache.fineract.client.services.ExternalEventConfigurationApi;
+import org.apache.fineract.test.messaging.config.EventProperties;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.config.JmsListenerEndpointRegistry;
+import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.stereotype.Component;
-import retrofit2.Response;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class ExternalEventSuiteInitializerStep implements FineractSuiteInitializerStep {
 
-    private final ExternalEventConfigurationApi eventConfigurationApi;
+    private static final Duration JMS_STARTUP_TIMEOUT = Duration.ofSeconds(30);
+
+    private final FineractFeignClient fineractClient;
+
+    @Autowired(required = false)
+    private JmsListenerEndpointRegistry registry;
+
+    @Autowired(required = false)
+    private EventProperties eventProperties;
 
     @Override
-    public void initializeForSuite() throws Exception {
+    public void initializeForSuite() throws InterruptedException {
+        log.info("=== ExternalEventSuiteInitializerStep.initializeForSuite() - START ===");
+
+        // Step 1: Enable all external events
         Map<String, Boolean> eventConfigMap = new HashMap<>();
 
-        Response<ExternalEventConfigurationResponse> response = eventConfigurationApi.getExternalEventConfigurations().execute();
-        if (!response.isSuccessful()) {
-            String responseBody = response.errorBody().string();
-            throw new RuntimeException("Cannot configure external events due to " + lineSeparator() + responseBody);
-        }
+        ExternalEventConfigurationResponse response = ok(
+                () -> fineractClient.externalEventConfiguration().getExternalEventConfigurations(Map.of()));
 
-        List<ExternalEventConfigurationItemResponse> externalEventConfiguration = response.body().getExternalEventConfiguration();
+        List<ExternalEventConfigurationItemResponse> externalEventConfiguration = response.getExternalEventConfiguration();
         externalEventConfiguration.forEach(e -> {
             eventConfigMap.put(e.getType(), true);
         });
@@ -55,6 +71,28 @@ public class ExternalEventSuiteInitializerStep implements FineractSuiteInitializ
         ExternalEventConfigurationUpdateRequest request = new ExternalEventConfigurationUpdateRequest()
                 .externalEventConfigurations(eventConfigMap);
 
-        eventConfigurationApi.updateExternalEventConfigurations("", request).execute();
+        executeVoid(() -> fineractClient.externalEventConfiguration().updateExternalEventConfigurations(null, request, Map.of()));
+        log.info("=== External event configuration updated - all events enabled ===");
+
+        // Step 2: Wait for JMS Listener to be ready before proceeding
+        if (eventProperties != null && eventProperties.isEventVerificationEnabled()) {
+            if (registry == null) {
+                log.warn("=== JmsListenerEndpointRegistry not available - skipping JMS listener readiness check ===");
+                log.warn("=== This is expected in CI environments where JMS may not be fully initialized during suite setup ===");
+            } else {
+                log.info("=== Waiting for JMS Listener to connect to ActiveMQ (max {}s) ===", JMS_STARTUP_TIMEOUT.toSeconds());
+                DefaultMessageListenerContainer container = (DefaultMessageListenerContainer) registry
+                        .getListenerContainer("eventStoreListener");
+
+                if (container == null) {
+                    log.warn("=== JMS Listener container 'eventStoreListener' not found - event verification may not work ===");
+                } else {
+                    await().atMost(JMS_STARTUP_TIMEOUT).pollInterval(Duration.ofMillis(200)).until(container::isRunning);
+                    log.info("=== JMS Listener is running and ready to receive events ===");
+                }
+            }
+        }
+
+        log.info("=== ExternalEventSuiteInitializerStep.initializeForSuite() - COMPLETED ===");
     }
 }

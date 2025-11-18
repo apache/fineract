@@ -18,11 +18,17 @@
  */
 package org.apache.fineract.test.initializer.global;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
+
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
-import org.apache.fineract.client.services.MappingFinancialActivitiesToAccountsApi;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class FinancialActivityMappingGlobalInitializerStep implements FineractGlobalInitializerStep {
@@ -30,13 +36,22 @@ public class FinancialActivityMappingGlobalInitializerStep implements FineractGl
     public static final Long FINANCIAL_ACTIVITY_ID_ASSET_TRANSFER = 100L;
     public static final Long GL_ACCOUNT_ID_ASSET_TRANSFER = 21L;
 
-    private final MappingFinancialActivitiesToAccountsApi mappingFinancialActivitiesToAccountsApi;
+    private final FineractFeignClient fineractClient;
 
     @Override
-    public void initialize() throws Exception {
-
+    public void initialize() {
         PostFinancialActivityAccountsRequest request = new PostFinancialActivityAccountsRequest()
                 .financialActivityId(FINANCIAL_ACTIVITY_ID_ASSET_TRANSFER).glAccountId(GL_ACCOUNT_ID_ASSET_TRANSFER);
-        mappingFinancialActivitiesToAccountsApi.createGLAccount(request).execute();
+
+        try {
+            executeVoid(() -> fineractClient.mappingFinancialActivitiesToAccounts().createGLAccount(request, Map.of()));
+            log.info("Financial activity mapping created successfully");
+        } catch (CallFailedRuntimeException e) {
+            if (e.getStatus() == 403 && e.getDeveloperMessage() != null && e.getDeveloperMessage().contains("already exists")) {
+                log.debug("Financial activity mapping already exists, skipping creation");
+                return;
+            }
+            throw e;
+        }
     }
 }

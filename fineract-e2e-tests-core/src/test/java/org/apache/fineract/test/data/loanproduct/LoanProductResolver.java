@@ -18,39 +18,33 @@
  */
 package org.apache.fineract.test.data.loanproduct;
 
-import java.io.IOException;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetLoanProductsResponse;
-import org.apache.fineract.client.services.LoanProductsApi;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
-import retrofit2.Response;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class LoanProductResolver {
 
-    private final LoanProductsApi loanProductsApi;
+    private final FineractFeignClient fineractClient;
 
-    @Cacheable(key = "#loanProduct.getName()", value = "loanProductsByName")
     public long resolve(LoanProduct loanProduct) {
-        try {
-            String loanProductName = loanProduct.getName();
-            log.debug("Resolving loan product by name [{}]", loanProductName);
-            Response<List<GetLoanProductsResponse>> response = loanProductsApi.retrieveAllLoanProducts().execute();
-            if (!response.isSuccessful()) {
-                throw new IllegalStateException("Unable to get loan products. Status code was HTTP " + response.code());
-            }
+        String loanProductName = loanProduct.getName();
+        log.debug("Resolving loan product by name [{}]", loanProductName);
+        List<GetLoanProductsResponse> loanProductsResponses = ok(() -> fineractClient.loanProducts().retrieveAllLoanProducts(Map.of()));
 
-            List<GetLoanProductsResponse> loanProductsResponses = response.body();
-            GetLoanProductsResponse foundLpr = loanProductsResponses.stream().filter(lpr -> loanProductName.equals(lpr.getName())).findAny()
-                    .orElseThrow(() -> new IllegalArgumentException("Loan product [%s] not found".formatted(loanProductName)));
-            return foundLpr.getId();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        log.info("Retrieved {} loan products from API", loanProductsResponses.size());
+        log.info("Available loan products: {}", loanProductsResponses.stream().map(GetLoanProductsResponse::getName).toList());
+
+        GetLoanProductsResponse foundLpr = loanProductsResponses.stream().filter(lpr -> loanProductName.equals(lpr.getName())).findAny()
+                .orElseThrow(() -> new IllegalArgumentException("Loan product [%s] not found".formatted(loanProductName)));
+        return foundLpr.getId();
     }
 }

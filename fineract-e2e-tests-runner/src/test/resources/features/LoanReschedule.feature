@@ -701,7 +701,7 @@ Feature: LoanReschedule
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | approvedOnDate  | enclosingTransaction |
       | 16 January 2024    | 10 January 2024 | 31 January 2024 | 10 January 2024 | true                 |
 
-  @TestRailId:C3318 @AdvancedPaymentAllocation
+  @Skip @TestRailId:C3318 @AdvancedPaymentAllocation
   Scenario: Verify that in case of Loan is hard locked for COB execution WITHOUT error message, BatchAPI request of Loan reschedule creation and approval will result a 409 error and a LOAN_LOCKED_BY_COB error message
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data

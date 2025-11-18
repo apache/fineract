@@ -26,10 +26,8 @@ import org.springframework.stereotype.Component;
 public class SavingsProductGlobalInitializer implements FineractGlobalInitializerStep {
 
     @Override
-    public void initialize() throws Exception {
-        /**
-         * TODO uncomment and check when PS-1088 is done
-         */
+    public void initialize() {
+        // TODO uncomment and check when PS-1088 is done
         // //EUR
         // PostSavingsProductsRequest savingsProductsRequestEUR =
         // SavingsProductRequestFactory.defaultSavingsProductRequest();

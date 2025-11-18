@@ -18,16 +18,21 @@
  */
 package org.apache.fineract.test.initializer.global;
 
-import java.io.IOException;
+import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.FundData;
 import org.apache.fineract.client.models.FundRequest;
-import org.apache.fineract.client.services.FundsApi;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -36,21 +41,30 @@ public class FundGlobalInitializerStep implements FineractGlobalInitializerStep 
     public static final String FUNDS_LENDER_A = "Lender A";
     public static final String FUNDS_LENDER_B = "Lender B";
 
-    private final FundsApi fundsApi;
+    private final FineractFeignClient fineractClient;
 
     @Override
-    public void initialize() throws Exception {
+    public void initialize() {
+        List<FundData> existingFunds = new ArrayList<>();
+        try {
+            existingFunds = fineractClient.funds().retrieveFunds(Map.of());
+        } catch (Exception e) {
+            log.debug("Could not retrieve existing funds, will create them", e);
+        }
+
+        final List<FundData> funds = existingFunds;
         List<String> fundNames = new ArrayList<>();
         fundNames.add(FUNDS_LENDER_A);
         fundNames.add(FUNDS_LENDER_B);
         fundNames.forEach(name -> {
+            boolean fundExists = funds.stream().anyMatch(f -> name.equals(f.getName()));
+            if (fundExists) {
+                return;
+            }
+
             FundRequest postFundsRequest = new FundRequest();
             postFundsRequest.name(name);
-            try {
-                fundsApi.createFund(postFundsRequest).execute();
-            } catch (IOException e) {
-                throw new RuntimeException("Error while creating fund", e);
-            }
+            executeVoid(() -> fineractClient.funds().createFund(postFundsRequest, Map.of()));
         });
 
     }

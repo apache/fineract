@@ -18,38 +18,115 @@
  */
 package org.apache.fineract.test.initializer.suite;
 
-import java.io.IOException;
-import lombok.RequiredArgsConstructor;
+import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.ExecuteJobRequest;
 import org.apache.fineract.client.models.GetJobsResponse;
 import org.apache.fineract.client.models.PutJobsJobIDRequest;
-import org.apache.fineract.client.services.SchedulerJobApi;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
-@RequiredArgsConstructor
 public class JobSuiteInitializerStep implements FineractSuiteInitializerStep {
 
     public static final String SEND_ASYNCHRONOUS_EVENTS_JOB_NAME = "Send Asynchronous Events";
     public static final String EVERY_1_SECONDS = "0/1 * * * * ?";
     public static final String EVERY_60_SECONDS = "0 0/1 * * * ?";
 
-    private final SchedulerJobApi jobApi;
+    private final FineractFeignClient fineractClient;
 
-    @Override
-    public void initializeForSuite() throws Exception {
-        updateExternalEventJobFrequency(EVERY_1_SECONDS);
+    public JobSuiteInitializerStep(FineractFeignClient fineractClient) {
+        log.info("=== JobSuiteInitializerStep: Constructor called - bean is being created ===");
+        this.fineractClient = fineractClient;
+        log.info("=== JobSuiteInitializerStep: FineractFeignClient injected successfully ===");
     }
 
     @Override
-    public void resetAfterSuite() throws Exception {
+    public void initializeForSuite() throws InterruptedException {
+        log.info("=== JobSuiteInitializerStep.initializeForSuite() - START ===");
+        enableAndExecuteEventJob();
+        log.info("=== JobSuiteInitializerStep.initializeForSuite() - COMPLETED successfully ===");
+    }
+
+    private void enableAndExecuteEventJob() throws InterruptedException {
+        log.info("=== Initializing Send Asynchronous Events job ===");
+        Long jobId = updateExternalEventJobFrequency(EVERY_1_SECONDS);
+        log.info("=== Updated cron expression to EVERY_1_SECONDS ===");
+
+        // CRITICAL: SchedulerGlobalInitializerStep stops the scheduler globally
+        // Solution: START the scheduler so the job runs every 1 second automatically
+        log.info("Starting scheduler to enable automatic job execution every 1 second...");
+        executeVoid(() -> fineractClient.scheduler().changeSchedulerStatus("start", Map.of()));
+        log.info("Scheduler started successfully");
+
+        // Manually execute once immediately to publish any queued events from initialization
+        log.info("Manually executing '{}' job once to publish queued events...", SEND_ASYNCHRONOUS_EVENTS_JOB_NAME);
+        executeVoid(() -> fineractClient.schedulerJob().executeJob(jobId, new ExecuteJobRequest(), Map.of("command", "executeJob")));
+
+        // Poll job history to confirm it ran
+        log.info("Polling job history to confirm initial execution...");
+        Long initialRunCount = getJobRunCount(jobId);
+        log.info("Initial job run count: {}", initialRunCount);
+
+        boolean jobRan = false;
+        for (int i = 0; i < 30; i++) {
+            Thread.sleep(200);
+            Long currentRunCount = getJobRunCount(jobId);
+            if (currentRunCount > initialRunCount) {
+                log.info("Job execution confirmed! Run count increased from {} to {}", initialRunCount, currentRunCount);
+                jobRan = true;
+                break;
+            }
+        }
+
+        if (!jobRan) {
+            log.warn("WARNING: Job execution could not be confirmed via history polling");
+        }
+
+        // Wait for events to propagate to ActiveMQ
+        log.info("Waiting 1 second for event propagation to ActiveMQ...");
+        Thread.sleep(1000);
+        log.info("Scheduler is now running - job will execute every 1 second automatically");
+    }
+
+    private Long getJobRunCount(Long jobId) {
+        try {
+            var history = ok(() -> fineractClient.schedulerJob().retrieveHistory(jobId, Map.of()));
+            return (long) history.getTotalFilteredRecords();
+        } catch (Exception e) {
+            log.warn("Failed to retrieve job history: {}", e.getMessage());
+            return 0L;
+        }
+    }
+
+    @Override
+    public void resetAfterSuite() {
+        log.info("=== JobSuiteInitializerStep.resetAfterSuite() - START ===");
+
+        // Stop the scheduler to prevent jobs from running between test suites
+        log.info("Stopping scheduler...");
+        try {
+            executeVoid(() -> fineractClient.scheduler().changeSchedulerStatus(Map.of("command", "stop")));
+            log.info("Scheduler stopped successfully");
+        } catch (Exception e) {
+            log.warn("Failed to stop scheduler: {}", e.getMessage());
+        }
+
+        // Reset cron expression to default
         updateExternalEventJobFrequency(EVERY_60_SECONDS);
+        log.info("=== JobSuiteInitializerStep.resetAfterSuite() - COMPLETED ===");
     }
 
-    private void updateExternalEventJobFrequency(String cronExpression) throws IOException {
-        GetJobsResponse externalEventJobResponse = jobApi.retrieveAll8().execute().body().stream()
+    private Long updateExternalEventJobFrequency(String cronExpression) {
+        GetJobsResponse externalEventJobResponse = ok(() -> fineractClient.schedulerJob().retrieveAll8()).stream()
                 .filter(r -> r.getDisplayName().equals(SEND_ASYNCHRONOUS_EVENTS_JOB_NAME)).findAny()
                 .orElseThrow(() -> new IllegalStateException(SEND_ASYNCHRONOUS_EVENTS_JOB_NAME + " is not found"));
         Long jobId = externalEventJobResponse.getJobId();
-        jobApi.updateJobDetail(jobId, new PutJobsJobIDRequest().cronExpression(cronExpression)).execute();
+        executeVoid(() -> fineractClient.schedulerJob().updateJobDetail(jobId, new PutJobsJobIDRequest().cronExpression(cronExpression)));
+        return jobId;
     }
 }

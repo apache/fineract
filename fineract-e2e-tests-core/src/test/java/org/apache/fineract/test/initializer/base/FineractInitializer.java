@@ -41,6 +41,12 @@ public class FineractInitializer implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        // ALWAYS log initializer counts at INFO level for debugging
+        log.info("=== FineractInitializer.afterPropertiesSet() called ===");
+        log.info("Global initializers count: {}", globalInitializerSteps.size());
+        log.info("Suite initializers count: {}", suiteInitializerSteps.size());
+        log.info("Scenario initializers count: {}", scenarioInitializerSteps.size());
+
         if (log.isDebugEnabled()) {
             String globalInitializers = globalInitializerSteps.stream().map(Object::getClass).map(Class::getName)
                     .collect(Collectors.joining(", "));
@@ -54,6 +60,11 @@ public class FineractInitializer implements InitializingBean {
                     Suite initializers: [{}]
                     Scenario initializers: [{}]
                     """, globalInitializers, suiteInitializers, scenarioInitializers);
+        } else {
+            // Always log the suite initializers at INFO since this is critical
+            String suiteInitializers = suiteInitializerSteps.stream().map(Object::getClass).map(Class::getName)
+                    .collect(Collectors.joining(", "));
+            log.info("Suite initializers: [{}]", suiteInitializers);
         }
     }
 
@@ -65,7 +76,9 @@ public class FineractInitializer implements InitializingBean {
     }
 
     public void setupDefaultsForSuite() throws Exception {
+        log.info("=== setupDefaultsForSuite() called - {} suite initializers to execute ===", suiteInitializerSteps.size());
         for (FineractSuiteInitializerStep initializerStep : suiteInitializerSteps) {
+            log.info("Executing suite initializer: {}", initializerStep.getClass().getName());
             initializerStep.initializeForSuite();
         }
         businessDateHelper.setBusinessDateToday();
