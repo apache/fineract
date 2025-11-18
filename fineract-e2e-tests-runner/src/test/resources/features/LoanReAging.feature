@@ -4273,6 +4273,7 @@ Feature: LoanReAging
     When Loan Pay-off is made on "15 March 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
+  @TestRailId:C4229 @AdvancedPaymentAllocation
   Scenario: Verify allowing Re-aging on interest bearing loan - Interest calculation: Default Behavior - with LAST_INSTALLMENT allocation rule and partial repayment - UC5.1
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
