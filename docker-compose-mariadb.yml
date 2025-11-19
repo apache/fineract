@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements. See the NOTICE file
 # distributed with this work for additional information
@@ -17,9 +16,19 @@
 # under the License.
 #
 
-# NOTE: env vars prefixed "FINERACT_HIKARI_*" are used to configure the database connection pool
-FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME=org.mariadb.jdbc.Driver
-FINERACT_HIKARI_JDBC_URL=jdbc:mariadb://db:3306/fineract_tenants
-# NOTE: env vars prefixed "FINERACT_DEFAULT_TENANTDB_*" are used to create the default tenant database
-FINERACT_DEFAULT_TENANTDB_PORT=3306
-FINERACT_DEFAULT_TENANTDB_UID=root
+services:
+  mariadb:
+    container_name: mariadb
+    image: mariadb:11.4
+    volumes:
+      - ./config/docker/mysql/conf.d/server_collation.cnf:/etc/mysql/conf.d/server_collation.cnf:ro
+      - ./config/docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:Z,ro
+    restart: always
+    env_file:
+      - ./config/docker/env/mariadb.env
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
+      timeout: 10s
+      retries: 10
+    ports:
+      - "3306:3306"
