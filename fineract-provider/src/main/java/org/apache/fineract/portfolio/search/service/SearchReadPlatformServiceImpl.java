@@ -38,12 +38,15 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountStatusEnumData;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.apache.fineract.portfolio.search.SearchConstants;
 import org.apache.fineract.portfolio.search.data.AdHocQuerySearchConditions;
 import org.apache.fineract.portfolio.search.data.AdHocSearchQueryData;
 import org.apache.fineract.portfolio.search.data.SearchConditions;
 import org.apache.fineract.portfolio.search.data.SearchData;
+import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountStatusEnumData;
+import org.apache.fineract.portfolio.shareaccounts.service.SharesEnumerations;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -72,6 +75,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
         } else {
             params.addValue("search", "%" + searchConditions.getSearchQuery() + "%");
         }
+
         return namedParameterJdbcTemplate.query(searchSchema(searchConditions), params, rm);
     }
 
@@ -175,6 +179,16 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                 LoanStatusEnumData loanStatusEnumData = LoanEnumerations.status(entityStatusEnum);
 
                 entityStatus = LoanEnumerations.status(loanStatusEnumData);
+            }
+
+            else if (entityType.equalsIgnoreCase("saving")) {
+                SavingsAccountStatusEnumData savingStatusEnumData = SavingsEnumerations.status(entityStatusEnum);
+                entityStatus = SavingsEnumerations.status(savingStatusEnumData);
+            }
+
+            else if (entityType.equalsIgnoreCase("share")) {
+                ShareAccountStatusEnumData shareStatusEnumData = SharesEnumerations.status(entityStatusEnum);
+                entityStatus = SharesEnumerations.status(shareStatusEnumData);
             }
 
             return new SearchData(entityId, entityAccountNo, entityExternalId, entityName, entityType, parentId, parentName, parentType,

@@ -36,6 +36,14 @@ public final class SharesEnumerations {
         return status(ShareAccountStatusType.fromInt(statusEnum));
     }
 
+    public static EnumOptionData status(final ShareAccountStatusEnumData status) {
+        Long id = status.getId();
+        String code = status.getCode();
+        String value = status.getValue();
+
+        return new EnumOptionData(id, code, value);
+    }
+
     public static ShareAccountStatusEnumData status(final ShareAccountStatusType type) {
         final boolean submittedAndPendingApproval = type.isSubmittedAndPendingApproval();
         final boolean isApproved = type.isApproved();

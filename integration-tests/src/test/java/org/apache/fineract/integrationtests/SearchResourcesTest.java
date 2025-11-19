@@ -102,6 +102,43 @@ public class SearchResourcesTest {
         assertEquals(0, searchResponse.size());
     }
 
+    @Test
+    public void searchSavingsAndSharesHaveEntityStatus() {
+
+        // Create client
+        String jsonPayload = ClientHelper.getBasicClientAsJSON(ClientHelper.DEFAULT_OFFICE_ID, ClientHelper.LEGALFORM_ID_PERSON, null);
+        final PostClientsResponse clientResponse = ClientHelper.addClientAsPerson(requestSpec, responseSpec, jsonPayload);
+        final Long clientId = clientResponse.getClientId();
+        final GetClientsClientIdResponse getClientResponse = ClientHelper.getClient(requestSpec, responseSpec, clientId.intValue());
+
+
+        final List<String> savingsResources = Arrays.asList("savings");
+        final ArrayList<GetSearchResponse> savingsSearchResponse = SearchHelper.getSearch(requestSpec, responseSpec,
+                getClientResponse.getAccountNo(), Boolean.FALSE, getResources(savingsResources));
+        
+        // Verify valid entityStatus
+        savingsSearchResponse.stream()
+                .filter(result -> "SAVING".equalsIgnoreCase(result.getEntityType()))
+                .forEach(result -> {
+                    assertNotNull(result.getEntityStatus(), "SAVING entity should have entityStatus");
+                    assertNotNull(result.getEntityStatus().getId(), "SAVING entityStatus should have id");
+                    assertNotNull(result.getEntityStatus().getCode(), "SAVING entityStatus should have code");
+                });
+
+        final List<String> shareResources = Arrays.asList("shares");
+        final ArrayList<GetSearchResponse> shareSearchResponse = SearchHelper.getSearch(requestSpec, responseSpec,
+                getClientResponse.getAccountNo(), Boolean.FALSE, getResources(shareResources));
+        
+        // Verify valid entityStatus
+        shareSearchResponse.stream()
+                .filter(result -> "SHARE".equalsIgnoreCase(result.getEntityType()))
+                .forEach(result -> {
+                    assertNotNull(result.getEntityStatus(), "SHARE entity should have entityStatus");
+                    assertNotNull(result.getEntityStatus().getId(), "SHARE entityStatus should have id");
+                    assertNotNull(result.getEntityStatus().getCode(), "SHARE entityStatus should have code");
+                });
+    }
+
     private String getResources(final List<String> resources) {
         return String.join(",", resources);
     }
