@@ -26,8 +26,6 @@ licenses
 **/.asciidoctor/diagram/*
 **/images/diag-*.svg
 
-fineract-provider/src/main/generated/
-
 **/out/
 gradleExp/
 
