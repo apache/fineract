@@ -205,10 +205,19 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
         ProgressiveLoanInterestScheduleModel model = savedModel.orElseThrow();
         OutstandingDetails outstandingAmounts = emiCalculator.getOutstandingAmountsTillDate(model, transactionDate);
         // TODO: We should add all the past due outstanding amounts as well
+
         OutstandingAmountsDTO result = new OutstandingAmountsDTO(currency) //
                 .principal(outstandingAmounts.getOutstandingPrincipal()) //
                 .interest(outstandingAmounts.getOutstandingInterest());//
 
+        if (loan.isProgressiveSchedule()) {
+            final LoanRepaymentScheduleInstallment downPaymentInstallment = loan.getRepaymentScheduleInstallments(i -> i.isDownPayment())
+                    .stream().findFirst().orElse(null);
+            if (downPaymentInstallment != null) {
+                result.principal(downPaymentInstallment.getPrincipalOutstanding(loan.getCurrency())
+                        .add(outstandingAmounts.getOutstandingPrincipal()));
+            }
+        }
         // We need to deduct any paid amount if there is no interest recalculation
         if (!loan.isInterestRecalculationEnabled()) {
             BigDecimal paidInterest = installments.stream().map(LoanRepaymentScheduleInstallment::getInterestPaid).reduce(BigDecimal.ZERO,
