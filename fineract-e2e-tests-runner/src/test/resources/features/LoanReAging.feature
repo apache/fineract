@@ -4691,6 +4691,7 @@ Feature: LoanReAging
       | 01 May 2024      | Accrual          | 1.07   | 0.0       | 1.07     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 May 2024      | Accrual Activity | 0.39   | 0.0       | 0.39     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+  @TestRailId:C4233
   Scenario: Verify allowing Re-aging on interest bearing loan - Interest calculation: Default Behavior - with NEXT_INSTALLMENT allocation rule and partial repayment - UC5.3
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
