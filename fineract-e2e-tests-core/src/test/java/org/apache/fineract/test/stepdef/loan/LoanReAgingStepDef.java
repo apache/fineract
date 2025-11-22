@@ -195,18 +195,11 @@ public class LoanReAgingStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         String loanExternalId = loanResponse.body().getResourceExternalId();
 
-        List<String> data = table.asLists().get(1);
-        int frequencyNumber = Integer.parseInt(data.get(0));
-        String frequencyType = data.get(1);
-        String startDate = data.get(2);
-        int numberOfInstallments = Integer.parseInt(data.get(3));
-
-        PostLoansLoanIdTransactionsRequest reAgingRequest = LoanRequestFactory//
-                .defaultReAgingRequest()//
-                .frequencyNumber(frequencyNumber)//
-                .frequencyType(frequencyType)//
-                .startDate(startDate)//
-                .numberOfInstallments(numberOfInstallments);//
+        PostLoansLoanIdTransactionsRequest reAgingRequest = setReAgeingRequestProperties(//
+                LoanRequestFactory.defaultReAgingRequest(), //
+                table.row(0), //
+                table.row(1) //
+        );
 
         Response<PostLoansLoanIdTransactionsResponse> response = loanTransactionsApi
                 .executeLoanTransaction1(loanExternalId, reAgingRequest, "reAge").execute();
@@ -521,4 +514,19 @@ public class LoanReAgingStepDef extends AbstractStepDef {
         return actualValues;
     }
 
+    PostLoansLoanIdTransactionsRequest setReAgeingRequestProperties(PostLoansLoanIdTransactionsRequest request, List<String> headers,
+            List<String> values) {
+        for (int i = 0; i < headers.size(); i++) {
+            String header = headers.get(i).toLowerCase().trim().replaceAll(" ", "");
+            switch (header) {
+                case "frequencynumber" -> request.setFrequencyNumber(Integer.parseInt(values.get(i)));
+                case "frequencytype" -> request.setFrequencyType(values.get(i));
+                case "startdate" -> request.setStartDate(values.get(i));
+                case "numberofinstallments" -> request.setNumberOfInstallments(Integer.parseInt(values.get(i)));
+                case "reageinteresthandling" -> request.setReAgeInterestHandling(values.get(i));
+                default -> throw new IllegalStateException("Unknown header: " + header);
+            }
+        }
+        return request;
+    }
 }

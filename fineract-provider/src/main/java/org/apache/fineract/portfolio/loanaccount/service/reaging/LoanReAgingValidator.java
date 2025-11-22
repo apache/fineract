@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanReAgingApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.request.ReAgePreviewRequest;
@@ -113,6 +114,13 @@ public class LoanReAgingValidator {
     }
 
     private void validateReAgeBusinessRules(Loan loan) {
+        // validate reaging shouldn't happen before maturity
+        // on progressive loans it can
+        if (!loan.isProgressiveSchedule() && DateUtils.isBefore(getBusinessLocalDate(), loan.getMaturityDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.cannot.be.submitted.before.maturity",
+                    "Loan cannot be re-aged before maturity", loan.getId());
+        }
+
         // validate reaging is only available for progressive schedule & advanced payment allocation
         LoanScheduleType loanScheduleType = LoanScheduleType.valueOf(loan.getLoanProductRelatedDetail().getLoanScheduleType().name());
         boolean isProgressiveSchedule = LoanScheduleType.PROGRESSIVE.equals(loanScheduleType);

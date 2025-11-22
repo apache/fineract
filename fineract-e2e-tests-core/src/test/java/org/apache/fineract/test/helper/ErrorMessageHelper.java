@@ -403,6 +403,14 @@ public final class ErrorMessageHelper {
                 actualToStr, expectedToStr);
     }
 
+    public static String wrongAmountInTotalUnpaidPayableNotDueInterest(Double actual, Double expected) {
+        String actualToStr = actual.toString();
+        String expectedToStr = expected.toString();
+        return String.format(
+                "Wrong amount in Loan total unpaid payable not due interest. Actual amount is: %s - But expected amount is: %s",
+                actualToStr, expectedToStr);
+    }
+
     public static String wrongAmountInTotalOverdue(Double actual, Double expected) {
         String actualToStr = actual.toString();
         String expectedToStr = expected.toString();

@@ -1699,7 +1699,6 @@ Feature: Capitalized Income
       | 100.0  | 83.33            | 16.67               | 0.0             | 0.0                |
 
     When Loan Pay-off is made on "26 January 2024"
-    And Customer makes "AUTOPAY" repayment on "26 January 2024" with 225 EUR transaction amount
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3673

@@ -24,11 +24,14 @@ import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelRepaymentPeriod;
+import org.apache.fineract.portfolio.loanproduct.calc.data.EqualAmortizationValues;
 import org.apache.fineract.portfolio.loanproduct.calc.data.OutstandingDetails;
 import org.apache.fineract.portfolio.loanproduct.calc.data.PeriodDueDetails;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
@@ -151,4 +154,18 @@ public interface EMICalculator {
      */
     @NotNull
     Money getOutstandingInterestTillDate(@NotNull ProgressiveLoanInterestScheduleModel scheduleModel, @NotNull LocalDate tillDate);
+
+    OutstandingDetails precalculateReAgeEqualAmortizationAmount(ProgressiveLoanInterestScheduleModel interestSchedule,
+            LocalDate transactionDate, LoanReAgeParameter reageParameter);
+
+    void reAgeEqualAmortization(ProgressiveLoanInterestScheduleModel interestSchedule, LocalDate transactionDate,
+            LoanReAgeParameter reageParameter, Money feesPenaltiesOutstanding,
+            EqualAmortizationValues feesPenaltiesEqualAmortizationValues);
+
+    EqualAmortizationValues calculateEqualAmortizationValues(Money totalOutstanding, Integer numberOfInstallments,
+            Integer installmentAmountInMultiplesOf, MonetaryCurrency currency);
+
+    EqualAmortizationValues calculateAdjustedEqualAmortizationValues(Money outstanding, Money total,
+            Money sumOfOtherEqualAmortizationValues, Integer numberOfInstallments, Integer installmentAmountInMultiplesOf,
+            MonetaryCurrency currency);
 }

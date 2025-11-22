@@ -196,7 +196,11 @@ public class LoanReAgingService {
     }
 
     private void processReAgeTransaction(final Loan loan, final LoanTransaction reAgeTransaction, final boolean withPostTransactionChecks) {
-        if (reAgeTransaction.getTransactionDate().isBefore(reAgeTransaction.getSubmittedOnDate())) {
+        if (reAgeTransaction.getTransactionDate().isBefore(reAgeTransaction.getSubmittedOnDate())
+                || LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST
+                        .equals(reAgeTransaction.getLoanReAgeParameter().getInterestHandlingType())
+                || LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_PAYABLE_INTEREST
+                        .equals(reAgeTransaction.getLoanReAgeParameter().getInterestHandlingType())) {
             final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
             loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
             if (withPostTransactionChecks) {
