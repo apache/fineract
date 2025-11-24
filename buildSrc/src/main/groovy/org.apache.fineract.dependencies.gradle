@@ -221,8 +221,8 @@ dependencyManagement {
             entry 'json-path'
             entry 'xml-path'
         }
-        dependency 'org.apache.groovy:groovy-xml:4.0.26'
-        dependency 'org.apache.groovy:groovy-json:4.0.26'
+        dependency 'org.apache.groovy:groovy-xml:5.0.2'
+        dependency 'org.apache.groovy:groovy-json:5.0.2'
 
         dependency 'org.mapstruct:mapstruct:1.6.3'
         dependency 'org.mapstruct:mapstruct-processor:1.6.3'
