@@ -394,9 +394,16 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
             }
 
             if (dropColumns != null) {
+                // Check if any of the columns to be dropped have non-NULL values
                 if (rowCount > 0) {
-                    throw new GeneralPlatformDomainRuleException("error.msg.non.empty.datatable.column.cannot.be.deleted",
-                            "Non-empty datatable columns can not be deleted.");
+                    for (final JsonElement column : dropColumns) {
+                        JsonObject columnAsJson = column.getAsJsonObject();
+                        final String columnName = columnAsJson.has(API_FIELD_NAME) ? columnAsJson.get(API_FIELD_NAME).getAsString() : null;
+                        if (columnName != null && hasNonNullValues(datatableName, columnName)) {
+                            throw new GeneralPlatformDomainRuleException("error.msg.non.empty.datatable.column.cannot.be.deleted",
+                                    "Non-empty datatable columns can not be deleted. Column '" + columnName + "' has non-null values.");
+                        }
+                    }
                 }
                 StringBuilder sqlBuilder = new StringBuilder(ALTER_TABLE + sqlGenerator.escape(datatableName));
                 final StringBuilder constrainBuilder = new StringBuilder();
@@ -1390,6 +1397,13 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
         final String sql = "select count(*) from " + sqlGenerator.escape(datatableName);
         Integer count = this.jdbcTemplate.queryForObject(sql, Integer.class); // NOSONAR
         return count == null ? 0 : count;
+    }
+
+    private boolean hasNonNullValues(final String datatableName, final String columnName) {
+        final String sql = "select count(*) from " + sqlGenerator.escape(datatableName) + " where " + sqlGenerator.escape(columnName)
+                + " IS NOT NULL";
+        Integer count = this.jdbcTemplate.queryForObject(sql, Integer.class); // NOSONAR
+        return count != null && count > 0;
     }
 
     private static boolean isTechnicalParam(String param) {
