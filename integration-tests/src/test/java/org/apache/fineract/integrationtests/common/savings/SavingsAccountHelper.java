@@ -46,6 +46,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
 
 @SuppressWarnings({ "rawtypes" })
 public class SavingsAccountHelper {
@@ -177,7 +179,7 @@ public class SavingsAccountHelper {
     }
 
     public static Integer applyForGsimApplication(final String clientArrays, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+          final ResponseSpecification responseSpec) {
         return Utils.performServerPost(requestSpec, responseSpec, SAVINGS_ACCOUNT_URL + GSIM_SAVINGS + "?" + Utils.TENANT_IDENTIFIER,
                 clientArrays, "gsimId");
     }
@@ -926,6 +928,23 @@ public class SavingsAccountHelper {
         final String GSIM_URL = "/fineract-provider/api/v1/savingsaccounts/gsim/" + gsimID + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPut(requestSpec, responseSpec, GSIM_URL,
                 updateGsimJSON(clientID.toString(), groupID.toString(), productID.toString()), "");
+    }
+
+    public static List<Map<String, Object>> getSavingsByBirthday(final RequestSpecification requestSpec,
+                                                                 final ResponseSpecification responseSpec, final String birthMonth, final String birthDay) {
+
+        final String url = SAVINGS_ACCOUNT_URL + "?birthMonth=" + birthMonth + "&birthDay=" + birthDay + "&" + Utils.TENANT_IDENTIFIER;
+        final String json = Utils.performServerGet(requestSpec, responseSpec, url);
+        if (json == null) {
+            return null;
+        }
+        return JsonPath.from(json).getList("pageItems");
+    }
+
+    public static Response getSavingsByBirthdayGetRaw(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+                                                      final String birthMonth, final String birthDay) {
+        final String url = SAVINGS_ACCOUNT_URL + "?birthMonth=" + birthMonth + "&birthDay=" + birthDay + "&" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGetRaw(requestSpec, responseSpec, url, req -> req);
     }
 
 }

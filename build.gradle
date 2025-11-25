@@ -51,8 +51,18 @@ buildscript {
     }
     repositories {
         maven { url 'https://plugins.gradle.org/m2/' }
-    }
 
+    }
+    configurations.classpath {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'com.burgstaller' &&
+                    details.requested.name == 'okhttp-digest' &&
+                    details.requested.version == '1.10') {
+                details.useTarget("io.github.rburgst:${details.requested.name}:1.21")
+                details.because('Dependency has moved')
+            }
+        }
+    }
     dependencies {
         classpath 'com.bmuschko:gradle-cargo-plugin:2.9.0'
         classpath 'org.eclipse.persistence:eclipselink:4.0.0'

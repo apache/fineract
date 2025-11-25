@@ -82,6 +82,8 @@ import org.apache.fineract.portfolio.tax.data.TaxComponentData;
 import org.apache.fineract.portfolio.tax.data.TaxDetailsData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -118,6 +120,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     private final EntityDatatableChecksReadService entityDatatableChecksReadService;
     private final ColumnValidator columnValidator;
     private final SavingsAccountAssembler savingAccountAssembler;
+    private static final Logger log = LoggerFactory.getLogger(SavingsAccountReadPlatformServiceImpl.class);
+
 
     @Autowired
     public SavingsAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
@@ -192,7 +196,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         sqlBuilder.append(" join m_office o on o.id = c.office_id");
         sqlBuilder.append(" where o.hierarchy like ?");
 
-        final Object[] objectArray = new Object[2];
+        final Object[] objectArray = new Object[4];
         objectArray[0] = hierarchySearchString;
         int arrayPos = 1;
         if (searchParameters != null) {
@@ -213,6 +217,13 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 objectArray[arrayPos] = searchParameters.getOfficeId();
                 arrayPos = arrayPos + 1;
             }
+            if (StringUtils.isNotBlank(searchParameters.getBirthMonth()) && StringUtils.isNotBlank(searchParameters.getBirthDay())) {
+                sqlBuilder.append(" and MONTH(c.date_of_birth) = ? AND Day(c.date_of_birth) = ?" );
+                objectArray[arrayPos] = Integer.parseInt(searchParameters.getBirthMonth());
+                arrayPos++;
+                objectArray[arrayPos] = Integer.parseInt(searchParameters.getBirthDay());
+                arrayPos++;
+            }
             if (searchParameters.isOrderByRequested()) {
                 sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
@@ -232,6 +243,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 }
             }
         }
+        log.info("Test local SQL: {}", sqlBuilder);
         final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), finalObjectArray, this.savingAccountMapper);
     }

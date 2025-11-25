@@ -68,6 +68,7 @@ import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
+import org.apache.fineract.portfolio.savings.exception.BirthdayValidationException;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -128,16 +129,52 @@ public class SavingsAccountsApiResource {
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
-            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
+            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
+            @QueryParam("birthMonth") @Parameter(description = "birthMonth") final String birthMonth,
+            @QueryParam("birthDay") @Parameter(description = "birthDay") final String birthDay
+                              ) {
 
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
-
-        final SearchParameters searchParameters = SearchParameters.forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder);
+        validateBirthday(birthMonth, birthDay);
+        final SearchParameters searchParameters = SearchParameters.forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder, birthMonth, birthDay);
 
         final Page<SavingsAccountData> products = savingsAccountReadPlatformService.retrieveAll(searchParameters);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return toApiJsonSerializer.serialize(settings, products, SavingsApiSetConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
+    }
+
+    private void validateBirthday(final String birthMonth, String birthDay) {
+        if (StringUtils.isBlank(birthMonth) && StringUtils.isBlank(birthDay)) {
+            return;
+        }
+        if (StringUtils.isBlank(birthMonth)) {
+            throw BirthdayValidationException.incomplete("birthMonth");
+        }
+        if (StringUtils.isBlank(birthDay)) {
+            throw BirthdayValidationException.incomplete("birthDay");
+        }
+        final int month;
+        final int day;
+        try {
+            month = Integer.parseInt(birthMonth.trim());
+        } catch (NumberFormatException e) {
+            throw BirthdayValidationException.invalidMonth(birthMonth);
+        }
+        try {
+            day = Integer.parseInt(birthDay.trim());
+        } catch (NumberFormatException e) {
+            throw BirthdayValidationException.invalidDay(birthDay);
+        }
+
+        if (month < 1 || month > 12) {
+            throw BirthdayValidationException.invalidMonth(String.valueOf(month));
+        }
+
+        final int maxDayForMonth = java.time.Month.of(month).maxLength();
+        if (day < 1 || day > maxDayForMonth) {
+            throw BirthdayValidationException.invalidDayForMonth(String.valueOf(month), String.valueOf(day), String.valueOf(maxDayForMonth));
+        }
     }
 
     @POST

@@ -81,6 +81,7 @@ public class ClientHelper extends IntegrationTest {
     public static final String UNDOREJECT_CLIENT_COMMAND = "undoRejection";
     public static final String UNDOWITHDRAWN_CLIENT_COMMAND = "undoWithdrawal";
     public static final String DEFAULT_OFFICE_ID = "1";
+    public static final String DEFAULT_BIRTHDAY = "10 April 1989";
     public static final Integer LEGALFORM_ID_PERSON = 1;
     public static final Integer LEGALFORM_ID_ENTITY = 2;
     public static final String CREATED_DATE = Utils.getLocalDateOfTenant().minusDays(5).format(Utils.dateFormatter);
@@ -197,6 +198,13 @@ public class ClientHelper extends IntegrationTest {
         log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientAsJSON(activationDate, officeId),
                 "clientId");
+    }
+
+    public static Integer createClientWithBDay(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String activationDate, final String officeId, final String birthday) {
+        log.info("---------------------------------CREATING A CLIENT WITH BIRTHDAY---------------------------------------------");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
+                getTestClientWithBDayAsJSON(activationDate, officeId, birthday), "clientId");
     }
 
     public static PostClientsResponse createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -354,6 +362,16 @@ public class ClientHelper extends IntegrationTest {
         final String testClientAsJson = GSON.toJson(map);
         log.info("TestClient Request :  {}", testClientAsJson);
         return testClientAsJson;
+    }
+
+    public static String getTestClientWithBDayAsJSON(final String dateOfJoining, final String officeId, final String birthday) {
+        HashMap<String, Object> map = setInitialClientValues(officeId, LEGALFORM_ID_PERSON);
+        map.put("active", "true");
+        map.put("activationDate", dateOfJoining);
+        map.put("dateOfBirth", birthday);
+        final String testClientWithBDayAsJson = GSON.toJson(map);
+        log.info("TestClient Request :  {}", testClientWithBDayAsJson);
+        return testClientWithBDayAsJson;
     }
 
     public static String getTestClientAsJSONPending(final String submittedOnDate, final String officeId) {
