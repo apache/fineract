@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.api;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -68,15 +69,13 @@ public class LoanDisbursementDetailApiResource {
     @Path("{disbursementId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateDisbursementDate(@PathParam("loanId") final Long loanId, @PathParam("disbursementId") final Long disbursementId,
-            final String apiRequestBodyAsJson) {
+    public CommandProcessingResult updateDisbursementDate(@PathParam("loanId") final Long loanId,
+            @PathParam("disbursementId") final Long disbursementId, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateDisbusementDate(loanId, disbursementId)
                 .withJson(apiRequestBodyAsJson).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @PUT
@@ -84,14 +83,13 @@ public class LoanDisbursementDetailApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanDisbursementDetailApiResourceSwagger.PostAddAndDeleteDisbursementDetailRequest.class)))
-    public String addAndDeleteDisbursementDetail(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
+    public CommandProcessingResult addAndDeleteDisbursementDetail(@PathParam("loanId") final Long loanId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         CommandWrapper commandRequest = new CommandWrapperBuilder().addAndDeleteDisbursementDetails(loanId).withJson(apiRequestBodyAsJson)
                 .build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @GET

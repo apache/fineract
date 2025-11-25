@@ -41,11 +41,10 @@ public class FineractInitializer implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        // ALWAYS log initializer counts at INFO level for debugging
-        log.info("=== FineractInitializer.afterPropertiesSet() called ===");
-        log.info("Global initializers count: {}", globalInitializerSteps.size());
-        log.info("Suite initializers count: {}", suiteInitializerSteps.size());
-        log.info("Scenario initializers count: {}", scenarioInitializerSteps.size());
+        log.debug("=== FineractInitializer.afterPropertiesSet() called ===");
+        log.debug("Global initializers count: {}", globalInitializerSteps.size());
+        log.debug("Suite initializers count: {}", suiteInitializerSteps.size());
+        log.debug("Scenario initializers count: {}", scenarioInitializerSteps.size());
 
         if (log.isDebugEnabled()) {
             String globalInitializers = globalInitializerSteps.stream().map(Object::getClass).map(Class::getName)
@@ -64,7 +63,7 @@ public class FineractInitializer implements InitializingBean {
             // Always log the suite initializers at INFO since this is critical
             String suiteInitializers = suiteInitializerSteps.stream().map(Object::getClass).map(Class::getName)
                     .collect(Collectors.joining(", "));
-            log.info("Suite initializers: [{}]", suiteInitializers);
+            log.debug("Suite initializers: [{}]", suiteInitializers);
         }
     }
 
@@ -76,9 +75,9 @@ public class FineractInitializer implements InitializingBean {
     }
 
     public void setupDefaultsForSuite() throws Exception {
-        log.info("=== setupDefaultsForSuite() called - {} suite initializers to execute ===", suiteInitializerSteps.size());
+        log.debug("=== setupDefaultsForSuite() called - {} suite initializers to execute ===", suiteInitializerSteps.size());
         for (FineractSuiteInitializerStep initializerStep : suiteInitializerSteps) {
-            log.info("Executing suite initializer: {}", initializerStep.getClass().getName());
+            log.debug("Executing suite initializer: {}", initializerStep.getClass().getName());
             initializerStep.initializeForSuite();
         }
         businessDateHelper.setBusinessDateToday();

@@ -75,6 +75,7 @@ import org.apache.fineract.client.models.ApiResponse;
 import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.BuyDownFeeAmortizationDetails;
 import org.apache.fineract.client.models.CapitalizedIncomeDetails;
+import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.DisbursementDetail;
 import org.apache.fineract.client.models.GetCodeValuesDataResponse;
@@ -1626,8 +1627,8 @@ public class LoanStepDef extends AbstractStepDef {
 
         PostAddAndDeleteDisbursementDetailRequest disbursementDetailRequest = LoanRequestFactory
                 .defaultLoanDisbursementDetailRequest(disbursementData);
-        PostAddAndDeleteDisbursementDetailRequest loanDisburseResponse = ok(
-                () -> fineractClient.loanDisbursementDetailsExtension().addAndDeleteDisbursementDetail(loanId, disbursementDetailRequest));
+        CommandProcessingResult loanDisburseResponse = ok(
+                () -> fineractClient.loanDisbursementDetails().addAndDeleteDisbursementDetail(loanId, disbursementDetailRequest));
         testContext().set(TestContextKey.LOAN_DISBURSEMENT_DETAIL_RESPONSE, loanDisburseResponse);
     }
 

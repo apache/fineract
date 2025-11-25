@@ -89,7 +89,7 @@ import org.springframework.stereotype.Component;
 public class EventCheckHelper {
 
     private static final DateTimeFormatter FORMATTER_EVENTS = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final long TRANSACTION_COMMIT_DELAY_MS = 500L;
+    private static final long TRANSACTION_COMMIT_DELAY_MS = 100L;
 
     @Autowired
     private FineractFeignClient fineractClient;

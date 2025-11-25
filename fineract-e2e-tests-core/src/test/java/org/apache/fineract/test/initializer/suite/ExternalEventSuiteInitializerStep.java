@@ -55,7 +55,7 @@ public class ExternalEventSuiteInitializerStep implements FineractSuiteInitializ
 
     @Override
     public void initializeForSuite() throws InterruptedException {
-        log.info("=== ExternalEventSuiteInitializerStep.initializeForSuite() - START ===");
+        log.debug("=== ExternalEventSuiteInitializerStep.initializeForSuite() - START ===");
 
         // Step 1: Enable all external events
         Map<String, Boolean> eventConfigMap = new HashMap<>();
@@ -72,7 +72,7 @@ public class ExternalEventSuiteInitializerStep implements FineractSuiteInitializ
                 .externalEventConfigurations(eventConfigMap);
 
         executeVoid(() -> fineractClient.externalEventConfiguration().updateExternalEventConfigurations(null, request, Map.of()));
-        log.info("=== External event configuration updated - all events enabled ===");
+        log.debug("=== External event configuration updated - all events enabled ===");
 
         // Step 2: Wait for JMS Listener to be ready before proceeding
         if (eventProperties != null && eventProperties.isEventVerificationEnabled()) {
@@ -93,6 +93,6 @@ public class ExternalEventSuiteInitializerStep implements FineractSuiteInitializ
             }
         }
 
-        log.info("=== ExternalEventSuiteInitializerStep.initializeForSuite() - COMPLETED ===");
+        log.debug("=== ExternalEventSuiteInitializerStep.initializeForSuite() - COMPLETED ===");
     }
 }

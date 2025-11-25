@@ -4329,14 +4329,14 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
 
     private PostLoanProductsResponse createLoanProductIdempotent(PostLoanProductsRequest loanProductRequest) {
         String productName = loanProductRequest.getName();
-        log.info("Attempting to create loan product: {}", productName);
+        log.debug("Attempting to create loan product: {}", productName);
         try {
             List<GetLoanProductsResponse> existingProducts = fineractClient.loanProducts().retrieveAllLoanProducts(Map.of());
             GetLoanProductsResponse existingProduct = existingProducts.stream().filter(p -> productName.equals(p.getName())).findFirst()
                     .orElse(null);
 
             if (existingProduct != null) {
-                log.info("Loan product '{}' already exists with ID: {}", productName, existingProduct.getId());
+                log.debug("Loan product '{}' already exists with ID: {}", productName, existingProduct.getId());
                 PostLoanProductsResponse response = new PostLoanProductsResponse();
                 response.setResourceId(existingProduct.getId());
                 return response;
@@ -4345,10 +4345,10 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
             log.warn("Error checking if loan product '{}' exists", productName, e);
         }
 
-        log.info("Creating new loan product: {}", productName);
+        log.debug("Creating new loan product: {}", productName);
         try {
             PostLoanProductsResponse response = ok(() -> fineractClient.loanProducts().createLoanProduct(loanProductRequest, Map.of()));
-            log.info("Successfully created loan product '{}' with ID: {}", productName, response.getResourceId());
+            log.debug("Successfully created loan product '{}' with ID: {}", productName, response.getResourceId());
             return response;
         } catch (Exception e) {
             log.error("FAILED to create loan product '{}'", productName, e);

@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.LoanAccountLock;
 import org.apache.fineract.client.models.LoanAccountLockResponseDTO;
+import org.apache.fineract.client.models.LockRequest;
 import org.apache.fineract.client.models.OldestCOBProcessedLoanDTO;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
@@ -90,7 +91,8 @@ public class LoanCOBStepDef extends AbstractStepDef {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
 
-        executeVoid(() -> fineractClient.defaultApi().placeLockOnLoanAccount(loanId, "LOAN_COB_CHUNK_PROCESSING", "TestError"));
+        executeVoid(() -> fineractClient.defaultApi().placeLockOnLoanAccount(loanId, "LOAN_COB_CHUNK_PROCESSING",
+                new LockRequest().error("ERROR")));
     }
 
     @When("Admin places a lock on loan account WITHOUT an error message")
@@ -98,6 +100,6 @@ public class LoanCOBStepDef extends AbstractStepDef {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
 
-        executeVoid(() -> fineractClient.defaultApi().placeLockOnLoanAccount(loanId, "LOAN_COB_CHUNK_PROCESSING", ""));
+        executeVoid(() -> fineractClient.defaultApi().placeLockOnLoanAccount(loanId, "LOAN_COB_CHUNK_PROCESSING", new LockRequest()));
     }
 }

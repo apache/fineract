@@ -16,16 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.client.feign.services;
+package org.apache.fineract.cob.api;
 
-import feign.Param;
-import feign.RequestLine;
-import org.apache.fineract.client.models.PostAddAndDeleteDisbursementDetailRequest;
+import lombok.Data;
 
-public interface LoanDisbursementDetailsApiExtension {
+@Data
+public class LockRequest {
 
-    @RequestLine("PUT /v1/loans/{loanId}/disbursements/editDisbursements")
-    PostAddAndDeleteDisbursementDetailRequest addAndDeleteDisbursementDetail(@Param("loanId") Long loanId,
-            PostAddAndDeleteDisbursementDetailRequest postAddAndDeleteDisbursementDetailRequest);
-
+    private String error;
 }

@@ -40,44 +40,44 @@ public class JobSuiteInitializerStep implements FineractSuiteInitializerStep {
     private final FineractFeignClient fineractClient;
 
     public JobSuiteInitializerStep(FineractFeignClient fineractClient) {
-        log.info("=== JobSuiteInitializerStep: Constructor called - bean is being created ===");
+        log.debug("=== JobSuiteInitializerStep: Constructor called - bean is being created ===");
         this.fineractClient = fineractClient;
-        log.info("=== JobSuiteInitializerStep: FineractFeignClient injected successfully ===");
+        log.debug("=== JobSuiteInitializerStep: FineractFeignClient injected successfully ===");
     }
 
     @Override
     public void initializeForSuite() throws InterruptedException {
-        log.info("=== JobSuiteInitializerStep.initializeForSuite() - START ===");
+        log.debug("=== JobSuiteInitializerStep.initializeForSuite() - START ===");
         enableAndExecuteEventJob();
-        log.info("=== JobSuiteInitializerStep.initializeForSuite() - COMPLETED successfully ===");
+        log.debug("=== JobSuiteInitializerStep.initializeForSuite() - COMPLETED successfully ===");
     }
 
     private void enableAndExecuteEventJob() throws InterruptedException {
-        log.info("=== Initializing Send Asynchronous Events job ===");
+        log.debug("=== Initializing Send Asynchronous Events job ===");
         Long jobId = updateExternalEventJobFrequency(EVERY_1_SECONDS);
-        log.info("=== Updated cron expression to EVERY_1_SECONDS ===");
+        log.debug("=== Updated cron expression to EVERY_1_SECONDS ===");
 
         // CRITICAL: SchedulerGlobalInitializerStep stops the scheduler globally
         // Solution: START the scheduler so the job runs every 1 second automatically
-        log.info("Starting scheduler to enable automatic job execution every 1 second...");
+        log.debug("Starting scheduler to enable automatic job execution every 1 second...");
         executeVoid(() -> fineractClient.scheduler().changeSchedulerStatus("start", Map.of()));
-        log.info("Scheduler started successfully");
+        log.debug("Scheduler started successfully");
 
         // Manually execute once immediately to publish any queued events from initialization
-        log.info("Manually executing '{}' job once to publish queued events...", SEND_ASYNCHRONOUS_EVENTS_JOB_NAME);
+        log.debug("Manually executing '{}' job once to publish queued events...", SEND_ASYNCHRONOUS_EVENTS_JOB_NAME);
         executeVoid(() -> fineractClient.schedulerJob().executeJob(jobId, new ExecuteJobRequest(), Map.of("command", "executeJob")));
 
         // Poll job history to confirm it ran
-        log.info("Polling job history to confirm initial execution...");
+        log.debug("Polling job history to confirm initial execution...");
         Long initialRunCount = getJobRunCount(jobId);
-        log.info("Initial job run count: {}", initialRunCount);
+        log.debug("Initial job run count: {}", initialRunCount);
 
         boolean jobRan = false;
         for (int i = 0; i < 30; i++) {
             Thread.sleep(200);
             Long currentRunCount = getJobRunCount(jobId);
             if (currentRunCount > initialRunCount) {
-                log.info("Job execution confirmed! Run count increased from {} to {}", initialRunCount, currentRunCount);
+                log.debug("Job execution confirmed! Run count increased from {} to {}", initialRunCount, currentRunCount);
                 jobRan = true;
                 break;
             }
@@ -88,9 +88,9 @@ public class JobSuiteInitializerStep implements FineractSuiteInitializerStep {
         }
 
         // Wait for events to propagate to ActiveMQ
-        log.info("Waiting 1 second for event propagation to ActiveMQ...");
+        log.debug("Waiting 1 second for event propagation to ActiveMQ...");
         Thread.sleep(1000);
-        log.info("Scheduler is now running - job will execute every 1 second automatically");
+        log.debug("Scheduler is now running - job will execute every 1 second automatically");
     }
 
     private Long getJobRunCount(Long jobId) {
@@ -105,20 +105,20 @@ public class JobSuiteInitializerStep implements FineractSuiteInitializerStep {
 
     @Override
     public void resetAfterSuite() {
-        log.info("=== JobSuiteInitializerStep.resetAfterSuite() - START ===");
+        log.debug("=== JobSuiteInitializerStep.resetAfterSuite() - START ===");
 
         // Stop the scheduler to prevent jobs from running between test suites
-        log.info("Stopping scheduler...");
+        log.debug("Stopping scheduler...");
         try {
             executeVoid(() -> fineractClient.scheduler().changeSchedulerStatus(Map.of("command", "stop")));
-            log.info("Scheduler stopped successfully");
+            log.debug("Scheduler stopped successfully");
         } catch (Exception e) {
             log.warn("Failed to stop scheduler: {}", e.getMessage());
         }
 
         // Reset cron expression to default
         updateExternalEventJobFrequency(EVERY_60_SECONDS);
-        log.info("=== JobSuiteInitializerStep.resetAfterSuite() - COMPLETED ===");
+        log.debug("=== JobSuiteInitializerStep.resetAfterSuite() - COMPLETED ===");
     }
 
     private Long updateExternalEventJobFrequency(String cronExpression) {

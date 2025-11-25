@@ -40,9 +40,6 @@ public class LoanProductResolver {
         log.debug("Resolving loan product by name [{}]", loanProductName);
         List<GetLoanProductsResponse> loanProductsResponses = ok(() -> fineractClient.loanProducts().retrieveAllLoanProducts(Map.of()));
 
-        log.info("Retrieved {} loan products from API", loanProductsResponses.size());
-        log.info("Available loan products: {}", loanProductsResponses.stream().map(GetLoanProductsResponse::getName).toList());
-
         GetLoanProductsResponse foundLpr = loanProductsResponses.stream().filter(lpr -> loanProductName.equals(lpr.getName())).findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Loan product [%s] not found".formatted(loanProductName)));
         return foundLpr.getId();

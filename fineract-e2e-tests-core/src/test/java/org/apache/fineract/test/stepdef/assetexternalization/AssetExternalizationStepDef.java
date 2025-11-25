@@ -46,7 +46,6 @@ import java.io.IOException;
 import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -54,7 +53,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.services.ExternalAssetOwnerLoanProductAttributesApi;
 import org.apache.fineract.client.feign.services.ExternalAssetOwnersApi;
-import org.apache.fineract.client.feign.services.ExternalAssetOwnersApiExtension;
 import org.apache.fineract.client.feign.services.LoanProductsApi;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
@@ -104,10 +102,6 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         return fineractFeignClient.externalAssetOwners();
     }
 
-    private ExternalAssetOwnersApiExtension externalAssetOwnersApiExtension() {
-        return fineractFeignClient.externalAssetOwnersExtension();
-    }
-
     private LoanProductsApi loanProductsApi() {
         return fineractFeignClient.loanProducts();
     }
@@ -152,8 +146,8 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
                     .dateFormat(DATE_FORMAT_ASSET_EXT)//
                     .locale(DEFAULT_LOCALE);//
 
-            PostInitiateTransferResponse response = externalAssetOwnersApi().transferRequestWithLoanId(loanId, request, transferData.get(0),
-                    Collections.emptyMap());
+            PostInitiateTransferResponse response = externalAssetOwnersApi().transferRequestWithLoanId(loanId, request,
+                    Map.of("command", transferData.get(0)));
             testContext().set(TestContextKey.ASSET_EXTERNALIZATION_RESPONSE, response);
             testContext().set(TestContextKey.ASSET_EXTERNALIZATION_BUYBACK_TRANSFER_EXTERNAL_ID_FROM_RESPONSE,
                     response.getResourceExternalId());
@@ -809,9 +803,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         String transferExternalId = testContext()
                 .get(TestContextKey.ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_USER_GENERATED + "_" + type);
 
-        ExternalAssetOwnerRequest request = new ExternalAssetOwnerRequest().dateFormat(DATE_FORMAT_ASSET_EXT).locale(DEFAULT_LOCALE);
-
-        externalAssetOwnersApiExtension().transferRequestWithId1WithBody(transferExternalId, request, Map.of("command", command));
+        externalAssetOwnersApi().transferRequestWithId1(transferExternalId, Map.of("command", command));
     }
 
     @When("Admin send {string} command to the transaction type {string} will throw error")
@@ -819,10 +811,8 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         String transferExternalId = testContext()
                 .get(TestContextKey.ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_USER_GENERATED + "_" + type);
 
-        ExternalAssetOwnerRequest request = new ExternalAssetOwnerRequest().dateFormat(DATE_FORMAT_ASSET_EXT).locale(DEFAULT_LOCALE);
-
-        CallFailedRuntimeException exception = fail(() -> externalAssetOwnersApiExtension()
-                .transferRequestWithId1WithBody(transferExternalId, request, Map.of("command", command)));
+        CallFailedRuntimeException exception = fail(
+                () -> externalAssetOwnersApi().transferRequestWithId1(transferExternalId, Map.of("command", command)));
 
         assertThat(exception.getStatus()).as("Expected status code: 403").isEqualTo(403);
     }
@@ -883,10 +873,8 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
             transferExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_SALES_TRANSFER_EXTERNAL_ID_FROM_RESPONSE);
         }
 
-        ExternalAssetOwnerRequest request = new ExternalAssetOwnerRequest().dateFormat(DATE_FORMAT_ASSET_EXT).locale(DEFAULT_LOCALE);
-
-        CallFailedRuntimeException exception = fail(() -> externalAssetOwnersApiExtension()
-                .transferRequestWithId1WithBody(transferExternalId, request, Map.of("command", command)));
+        CallFailedRuntimeException exception = fail(
+                () -> externalAssetOwnersApi().transferRequestWithId1(transferExternalId, Map.of("command", command)));
 
         assertThat(exception.getStatus()).as("Expected status code: 403").isEqualTo(403);
     }
@@ -900,9 +888,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
             transferExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_SALES_TRANSFER_EXTERNAL_ID_FROM_RESPONSE);
         }
 
-        ExternalAssetOwnerRequest request = new ExternalAssetOwnerRequest().dateFormat(DATE_FORMAT_ASSET_EXT).locale(DEFAULT_LOCALE);
-
-        externalAssetOwnersApiExtension().transferRequestWithId1WithBody(transferExternalId, request, Map.of("command", command));
+        externalAssetOwnersApi().transferRequestWithId1(transferExternalId, Map.of("command", command));
     }
 
     @When("Admin set external asset owner loan product attribute {string} value {string} for loan product {string}")

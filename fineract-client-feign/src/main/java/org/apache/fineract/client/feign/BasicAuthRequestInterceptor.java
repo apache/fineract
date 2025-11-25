@@ -51,6 +51,8 @@ public class BasicAuthRequestInterceptor implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate template) {
-        template.header(AUTHORIZATION_HEADER, BASIC_AUTH_PREFIX + credentials);
+        if (!template.headers().containsKey(AUTHORIZATION_HEADER)) {
+            template.header(AUTHORIZATION_HEADER, BASIC_AUTH_PREFIX + credentials);
+        }
     }
 }

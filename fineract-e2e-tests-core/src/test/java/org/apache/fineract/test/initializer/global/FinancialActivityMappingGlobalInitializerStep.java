@@ -45,7 +45,7 @@ public class FinancialActivityMappingGlobalInitializerStep implements FineractGl
 
         try {
             executeVoid(() -> fineractClient.mappingFinancialActivitiesToAccounts().createGLAccount(request, Map.of()));
-            log.info("Financial activity mapping created successfully");
+            log.debug("Financial activity mapping created successfully");
         } catch (CallFailedRuntimeException e) {
             if (e.getStatus() == 403 && e.getDeveloperMessage() != null && e.getDeveloperMessage().contains("already exists")) {
                 log.debug("Financial activity mapping already exists, skipping creation");

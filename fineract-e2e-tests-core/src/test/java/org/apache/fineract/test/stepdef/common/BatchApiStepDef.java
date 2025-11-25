@@ -27,6 +27,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.fineract.avro.loan.v1.LoanSchedulePeriodDataV1;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.services.BatchApiApi;
@@ -50,6 +52,7 @@ import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
+import org.apache.fineract.client.models.GetUsersUserIdResponse;
 import org.apache.fineract.client.models.Header;
 import org.apache.fineract.client.models.InlineJobRequest;
 import org.apache.fineract.client.models.PostClientsRequest;
@@ -61,6 +64,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PostUsersResponse;
 import org.apache.fineract.test.data.ChargeProductType;
 import org.apache.fineract.test.data.LoanRescheduleErrorMessage;
 import org.apache.fineract.test.data.LoanStatus;
@@ -543,10 +547,18 @@ public class BatchApiStepDef extends AbstractStepDef {
 
         // Feign throws exceptions on errors instead of returning error in response body
         ErrorResponse errorResponse = null;
+        Map<String, String> headerMap = new HashMap<>();
+
+        // Create new user which cannot bypass loan COB execution
+        PostUsersResponse createUserResponse = testContext().get(TestContextKey.CREATED_SIMPLE_USER_RESPONSE);
+        Long createdUserId = createUserResponse.getResourceId();
+        GetUsersUserIdResponse user = fineractFeignClient.users().retrieveOne31(createdUserId);
+        String authorizationString = user.getUsername() + ":" + PWD_USER_WITH_ROLE;
+        Base64 base64 = new Base64();
+        headerMap.put("Authorization",
+                "Basic " + new String(base64.encode(authorizationString.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
         try {
-            // TODO: Feign doesn't support per-request headers - need to use RequestInterceptor
-            batchApiApi().handleBatchRequests(requestList, queryParams);
-            throw new IllegalStateException("Expected Feign exception but call succeeded");
+            batchApiApi().handleBatchRequests(requestList, queryParams, headerMap);
         } catch (org.apache.fineract.client.feign.FeignException e) {
             errorResponse = fromJson(e.responseBodyAsString(), ErrorResponse.class);
         }

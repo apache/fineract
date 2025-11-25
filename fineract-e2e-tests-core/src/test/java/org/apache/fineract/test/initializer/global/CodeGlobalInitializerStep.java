@@ -271,7 +271,7 @@ public class CodeGlobalInitializerStep implements FineractGlobalInitializerStep 
 
             try {
                 executeVoid(() -> fineractClient.codeValues().createCodeValue(codeId, postCodeValuesDataRequest, Map.of()));
-                log.info("Code value '{}' created successfully", name);
+                log.debug("Code value '{}' created successfully", name);
             } catch (CallFailedRuntimeException e) {
                 if (e.getStatus() == 403 && e.getDeveloperMessage() != null && e.getDeveloperMessage().contains("already exists")) {
                     log.debug("Code value '{}' already exists, skipping creation", name);

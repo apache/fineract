@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests.common.loans;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.util.Map;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.Utils;
 
@@ -45,7 +46,7 @@ public class LoanAccountLockHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public String placeSoftLockOnLoanAccount(Integer loanId, String lockOwner) {
-        return placeSoftLockOnLoanAccount(loanId, lockOwner, null);
+        return placeSoftLockOnLoanAccount(loanId, lockOwner, "");
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -54,7 +55,8 @@ public class LoanAccountLockHelper {
     @Deprecated(forRemoval = true)
     public String placeSoftLockOnLoanAccount(Integer loanId, String lockOwner, String error) {
         return Utils.performServerPost(requestSpec, responseSpec,
-                INTERNAL_PLACE_LOCK_ON_LOAN_ACCOUNT_URL + loanId + "/place-lock/" + lockOwner + "?" + Utils.TENANT_IDENTIFIER, error);
+                INTERNAL_PLACE_LOCK_ON_LOAN_ACCOUNT_URL + loanId + "/place-lock/" + lockOwner + "?" + Utils.TENANT_IDENTIFIER,
+                GSON.toJson(Map.of("error", error)));
     }
 
 }
