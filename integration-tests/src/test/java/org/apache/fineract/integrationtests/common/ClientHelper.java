@@ -81,7 +81,6 @@ public class ClientHelper extends IntegrationTest {
     public static final String UNDOREJECT_CLIENT_COMMAND = "undoRejection";
     public static final String UNDOWITHDRAWN_CLIENT_COMMAND = "undoWithdrawal";
     public static final String DEFAULT_OFFICE_ID = "1";
-    public static final String DEFAULT_BIRTHDAY = "10 April 1989";
     public static final Integer LEGALFORM_ID_PERSON = 1;
     public static final Integer LEGALFORM_ID_ENTITY = 2;
     public static final String CREATED_DATE = Utils.getLocalDateOfTenant().minusDays(5).format(Utils.dateFormatter);
