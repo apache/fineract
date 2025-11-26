@@ -82,6 +82,7 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
+import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
@@ -1728,16 +1729,57 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
     @Override
     public LoanTransactionData retrieveLoanReAgeTemplate(final Long loanId) {
-        final LoanAccountData loan = this.retrieveOne(loanId);
+        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.REAGE);
         final BigDecimal totalOutstanding = loan.getSummary() != null ? loan.getSummary().getTotalOutstanding() : null;
         final List<CodeValueData> reAgeReasonOptions = new ArrayList<>(
                 codeValueReadPlatformService.retrieveCodeValuesByCode(LoanApiConstants.REAGE_REASONS));
-        return LoanTransactionData.builder().type(transactionType).currency(loan.getCurrency()).date(DateUtils.getBusinessLocalDate())
-                .amount(totalOutstanding).netDisbursalAmount(loan.getNetDisbursalAmount()).loanId(loanId)
-                .externalLoanId(loan.getExternalId()).periodFrequencyOptions(CommonEnumerations.BASIC_PERIOD_FREQUENCY_TYPES)
-                .reAgeReasonOptions(reAgeReasonOptions)
-                .reAgeInterestHandlingOptions(LoanReAgeInterestHandlingType.getValuesAsEnumOptionDataList()).build();
+
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        final List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
+
+        int futureInstallmentCount = 0;
+        int pastInstallmentCount = 0;
+        LocalDate nextInstallmentDueDate = null;
+
+        for (LoanRepaymentScheduleInstallment installment : installments) {
+            LocalDate dueDate = installment.getDueDate();
+            if (DateUtils.isAfter(dueDate, businessDate)) {
+                futureInstallmentCount++;
+                if (nextInstallmentDueDate == null || DateUtils.isBefore(dueDate, nextInstallmentDueDate)) {
+                    nextInstallmentDueDate = dueDate;
+                }
+            } else {
+                pastInstallmentCount++;
+            }
+        }
+
+        final PeriodFrequencyType frequencyType = loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType();
+        final LocalDate calculatedStartDate = calculateReAgeStartDate(businessDate, frequencyType);
+
+        final CurrencyData currencyData = new CurrencyData(loan.getCurrencyCode(), null, loan.getCurrency().getDigitsAfterDecimal(),
+                loan.getCurrency().getInMultiplesOf(), null, null);
+
+        return LoanTransactionData.builder().type(transactionType).currency(currencyData).date(businessDate).amount(totalOutstanding)
+                .netDisbursalAmount(loan.getNetDisbursalAmount()).loanId(loanId).externalLoanId(loan.getExternalId())
+                .periodFrequencyOptions(CommonEnumerations.BASIC_PERIOD_FREQUENCY_TYPES).reAgeReasonOptions(reAgeReasonOptions)
+                .reAgeInterestHandlingOptions(LoanReAgeInterestHandlingType.getValuesAsEnumOptionDataList())
+                .numberOfFutureInstallments(futureInstallmentCount).numberOfPastInstallments(pastInstallmentCount)
+                .nextInstallmentDueDate(nextInstallmentDueDate).calculatedStartDate(calculatedStartDate).build();
+    }
+
+    private LocalDate calculateReAgeStartDate(LocalDate businessDate, PeriodFrequencyType frequencyType) {
+        if (frequencyType == null) {
+            return null;
+        }
+        // Per PS-2795: calculated start date = current date + 1 unit of original frequency type
+        return switch (frequencyType) {
+            case DAYS -> businessDate.plusDays(1);
+            case WEEKS -> businessDate.plusWeeks(1);
+            case MONTHS -> businessDate.plusMonths(1);
+            case YEARS -> businessDate.plusYears(1);
+            case WHOLE_TERM, INVALID -> null;
+        };
     }
 
     @Override
