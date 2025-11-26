@@ -28,6 +28,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -518,8 +519,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         return this.installmentNumber.compareTo(o.installmentNumber);
     }
 
-    public int compareToByDueDate(LoanRepaymentScheduleInstallment o) {
-        return this.dueDate.compareTo(o.dueDate);
+    public int compareToByFromDueDate(LoanRepaymentScheduleInstallment o) {
+        return Comparator.comparing(LoanRepaymentScheduleInstallment::getDueDate)
+                .thenComparing(LoanRepaymentScheduleInstallment::getFromDate).compare(this, o);
     }
 
     public boolean isPrincipalNotCompleted(final MonetaryCurrency currency) {

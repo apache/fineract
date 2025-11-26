@@ -857,7 +857,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 lastInterestPeriod.addBalanceCorrectionAmount(rp.getOutstandingPrincipal().negated());
             }
             rp.setEmi(rp.getTotalPaidAmount());
-            rp.setOutstandingMoved(true);
+            rp.moveOutstandingDueToReAging();
         });
     }
 
@@ -1697,15 +1697,14 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         EqualAmortizationValues principalEAV = calculateAdjustedEqualAmortizationValues(principal,
                 principal.add(interest).add(feesPenaltiesOutstanding),
                 interestEAV.value().add(feesPenaltiesEqualAmortizationValues.value()), repaymentPeriods.size(), null, currency);
-        RepaymentPeriod last = repaymentPeriods.getLast();
         EqualAmortizationValues emiAEV = principalEAV.add(interestEAV);
-        repaymentPeriods.forEach(rp -> {
-            boolean isLast = last.equals(rp);
-            rp.setReAgedInterest(interestEAV.calculateValue(isLast));
-            Money emi = emiAEV.calculateValue(isLast);
+        for (int i = 0; i < repaymentPeriods.size(); i++) {
+            RepaymentPeriod rp = repaymentPeriods.get(i);
+            rp.setReAgedInterest(interestEAV.calculateValue(i));
+            Money emi = emiAEV.calculateValue(i);
             rp.setEmi(emi);
             rp.setOriginalEmi(emi);
-        });
+        }
     }
 
     @Override
@@ -1722,40 +1721,46 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             LoanReAgeParameter reageParameter, Money feesPenaltiesOutstanding,
             EqualAmortizationValues feesPenaltiesEqualAmortizationValues) {
         LocalDate originalMaturityDate = interestSchedule.getMaturityDate();
-        boolean isAfterOriginalMaturityDate = transactionDate.isAfter(originalMaturityDate);
         List<RepaymentPeriod> reAgedRepaymentPeriods = new ArrayList<>(reageParameter.getNumberOfInstallments());
         OutstandingDetails reAgeingAmounts = precalculateReAgeEqualAmortizationAmount(interestSchedule, transactionDate, reageParameter);
+        Money zero = interestSchedule.zero();
 
         // calculate already paid balances from transaction date
         OutstandingDetails paidBalancesFromTransactionDate = calculatePaidBalancesAfterDate(interestSchedule, transactionDate);
 
+        // find future chargebacks.
+        // find future balance corrections
+        Money futureCreditedPrincipals = interestSchedule.repaymentPeriods().stream()
+                .filter(rp -> !rp.getFromDate().isBefore(transactionDate)).filter(rp -> rp.getDueDate().isAfter(transactionDate))
+                .map(RepaymentPeriod::getCreditedPrincipal).reduce(zero, Money::add);
+
         // set maturity date to transaction date and remove all repayment periods after it.
         accelerateMaturityDateTo(interestSchedule, transactionDate);
+
+        addCredit(interestSchedule, transactionDate, futureCreditedPrincipals, zero);
 
         // close all open repayment period while keep paid amounts
         interestSchedule.repaymentPeriods().forEach(rp -> {
             rp.getInterestPeriods().getLast()
                     .addCreditedInterestAmount(MathUtil.min(rp.getOutstandingInterest(), rp.getCreditedInterest(), false).negated());
             rp.setEmi(rp.getTotalPaidAmount());
-            rp.setOutstandingMoved(true);
+            rp.moveOutstandingDueToReAging();
         });
 
         // stop calculate unrecognised interest at this point because all
         interestSchedule.getLastRepaymentPeriod().setNoUnrecognisedInterest(true);
 
-        if (!paidBalancesFromTransactionDate.getOutstandingInterest().isZero()
-                || !paidBalancesFromTransactionDate.getOutstandingPrincipal().isZero()) {
+        if (!originalMaturityDate.isBefore(transactionDate)) {
             createRepaymentPeriodForEarlyRepaidAmountsDuringReAgeing(interestSchedule,
                     paidBalancesFromTransactionDate.getOutstandingPrincipal(), paidBalancesFromTransactionDate.getOutstandingInterest(),
                     true);
-            addFirstReAgedPeriod(interestSchedule, interestSchedule.getLastRepaymentPeriod());
         }
 
-        updateModelForReageEqualAmortization(interestSchedule, reageParameter, reAgedRepaymentPeriods, isAfterOriginalMaturityDate);
+        updateModelForReageEqualAmortization(interestSchedule, reageParameter, reAgedRepaymentPeriods);
 
         updateEMIForReAgeEqualAmortization(reAgedRepaymentPeriods, reAgeingAmounts.getOutstandingPrincipal(),
                 reAgeingAmounts.getOutstandingInterest(), feesPenaltiesOutstanding, feesPenaltiesEqualAmortizationValues,
-                interestSchedule.zero().getCurrency());
+                zero.getCurrency());
 
         calculateOutstandingBalance(interestSchedule);
 
@@ -1767,31 +1772,17 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     }
 
     private void updateModelForReageEqualAmortization(ProgressiveLoanInterestScheduleModel interestSchedule,
-            LoanReAgeParameter reageParameter, List<RepaymentPeriod> reAgedRepaymentPeriods, boolean isAfterOriginalMaturityDate) {
+            LoanReAgeParameter reageParameter, List<RepaymentPeriod> reAgedRepaymentPeriods) {
         int numberOfInstallmentsToAdd = reageParameter.getNumberOfInstallments();
         LocalDate toDate = reageParameter.getStartDate();
         RepaymentPeriod previous = interestSchedule.getLastRepaymentPeriod();
         int frequency = reageParameter.getFrequencyNumber();
         PeriodFrequencyType frequencyType = reageParameter.getFrequencyType();
 
-        if (!isAfterOriginalMaturityDate) {
-            // merge first reaged period
-            RepaymentPeriod firstReAgedPeriod = interestSchedule.getLastRepaymentPeriod();
-            firstReAgedPeriod.setDueDate(toDate);
-            firstReAgedPeriod.getLastInterestPeriod().setDueDate(toDate);
-            firstReAgedPeriod.setReAged(true);
-            firstReAgedPeriod.getPrevious().ifPresent(prev -> prev.setNoUnrecognisedInterest(true));
-            reAgedRepaymentPeriods.add(firstReAgedPeriod);
-
-            // update params for next reage repayment period calculation
-            numberOfInstallmentsToAdd--;
-            toDate = scheduledDateGenerator.getRepaymentPeriodDate(frequencyType, frequency, toDate);
-        }
-
         // insert new reaged repayment periods
         for (int i = 0; i < numberOfInstallmentsToAdd; i++) {
             RepaymentPeriod repaymentPeriod = RepaymentPeriod.create(previous, previous.getDueDate(), toDate, interestSchedule.zero(),
-                    previous.getMc(), previous.getLoanProductRelatedDetail());
+                    interestSchedule.mc(), previous.getLoanProductRelatedDetail());
             repaymentPeriod.setTotalCapitalizedIncomeAmount(previous.getTotalCapitalizedIncomeAmount());
             repaymentPeriod.setTotalDisbursedAmount(previous.getTotalDisbursedAmount());
             repaymentPeriod.setReAged(true);
@@ -1818,14 +1809,6 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         calculateRateFactorForRepaymentPeriod(targetPeriod, interestSchedule);
     }
 
-    private static void addFirstReAgedPeriod(ProgressiveLoanInterestScheduleModel interestSchedule, RepaymentPeriod targetPeriod) {
-        RepaymentPeriod repaymentPeriodToInsert = RepaymentPeriod.create(targetPeriod, targetPeriod.getDueDate(),
-                interestSchedule.getMaturityDate(), interestSchedule.zero(), interestSchedule.mc(),
-                interestSchedule.loanProductRelatedDetail());
-        repaymentPeriodToInsert.setReAged(true);
-        interestSchedule.repaymentPeriods().add(repaymentPeriodToInsert);
-    }
-
     private OutstandingDetails calculatePaidBalancesAfterDate(ProgressiveLoanInterestScheduleModel interestSchedule,
             LocalDate transactionDate) {
         Money principal = interestSchedule.repaymentPeriods().stream().filter(rp -> !rp.getDueDate().isBefore(transactionDate))
@@ -1844,9 +1827,9 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 equalMonthlyValue = Money.roundToMultiplesOf(equalMonthlyValue, installmentAmountInMultiplesOf);
             }
             Money adjustmentForLastInstallment = totalOutstanding.minus(equalMonthlyValue.multipliedBy(numberOfInstallments));
-            return new EqualAmortizationValues(equalMonthlyValue, adjustmentForLastInstallment);
+            return new EqualAmortizationValues(totalOutstanding, numberOfInstallments, equalMonthlyValue, adjustmentForLastInstallment);
         }
-        return new EqualAmortizationValues(Money.zero(currency), Money.zero(currency));
+        return new EqualAmortizationValues(totalOutstanding, numberOfInstallments, Money.zero(currency), Money.zero(currency));
     }
 
     @Override
@@ -1857,6 +1840,6 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 installmentAmountInMultiplesOf, currency);
         Money value = calculatedEMI.value().minus(sumOfOtherEqualAmortizationValues);
         Money adjust = outstanding.minus(value.multipliedBy(numberOfInstallments));
-        return new EqualAmortizationValues(value, adjust);
+        return new EqualAmortizationValues(outstanding, numberOfInstallments, value, adjust);
     }
 }

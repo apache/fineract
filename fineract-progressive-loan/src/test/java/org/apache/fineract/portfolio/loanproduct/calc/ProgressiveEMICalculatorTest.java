@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
@@ -4239,6 +4240,147 @@ class ProgressiveEMICalculatorTest {
     @Nested
     public class ReAgeEqualAmortization {
 
+        private ProgressiveLoanInterestScheduleModel generateSchedule() {
+            final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
+
+            expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+            expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+            expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+            expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+            expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+            expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+
+            final BigDecimal interestRate = BigDecimal.valueOf(15.678);
+            final Integer installmentAmountInMultiplesOf = null;
+
+            Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(interestRate);
+            Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_365.getValue());
+            Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.ACTUAL.getValue());
+            Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+            Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+            Mockito.when(loanProductRelatedDetail.getCurrencyData()).thenReturn(currency);
+
+            final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator.generatePeriodInterestScheduleModel(
+                    expectedRepaymentPeriods, loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
+
+            final Money disbursedAmount = toMoney(100.0);
+            emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
+
+            checkPeriod(interestSchedule, 0, 0, 17.43, 0.0, 0.0, 1.33, 16.1, 83.9);
+            checkPeriod(interestSchedule, 0, 1, 17.43, 0.013315561644, 1.3315561644, 1.33, 16.1, 83.9);
+            checkPeriod(interestSchedule, 1, 0, 17.43, 0.012456493151, 1.04509977537, 1.05, 16.38, 67.52);
+            checkPeriod(interestSchedule, 2, 0, 17.43, 0.013315561644, 0.899066722202, 0.90, 16.53, 50.99);
+            checkPeriod(interestSchedule, 3, 0, 17.43, 0.012886027397, 0.657058536972, 0.66, 16.77, 34.22);
+            checkPeriod(interestSchedule, 4, 0, 17.43, 0.013315561644, 0.455658519458, 0.46, 16.97, 17.25);
+            checkPeriod(interestSchedule, 5, 0, 17.47, 0.012886027397, 0.222283972598, 0.22, 17.25, 0.0);
+            return interestSchedule;
+        }
+
+        @Test
+        public void test_chargeBackOn2ndRP_ReAgeingOn1stRPsDueDate_EQUAL_AMORTIZATION_FULL_INTEREST() {
+            ProgressiveLoanInterestScheduleModel interestSchedule = generateSchedule();
+
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+                    Money.of(currency, BigDecimal.valueOf(16.1)));
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+                    Money.of(currency, BigDecimal.valueOf(1.33)));
+
+            emiCalculator.creditPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), Money.of(currency, BigDecimal.valueOf(17.43)));
+
+            // No repayment no interest recalculation
+            LocalDate reAgingStartDate = LocalDate.of(2024, 2, 1);
+            LocalDate transactionDate = LocalDate.of(2024, 2, 1);
+
+            OutstandingDetails outstandingAmountsTillDate = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
+                    interestSchedule.getMaturityDate());
+
+            LoanReAgeParameter reageParameter = new LoanReAgeParameter(null, PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
+                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST, null);
+
+            // Update the existing model with re-aged periods
+            emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
+                    new EqualAmortizationValues(Money.zero(currency), 6, Money.zero(currency), Money.zero(currency)));
+
+            OutstandingDetails outstandingAmountsTillDateAfterReage = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
+                    interestSchedule.getMaturityDate());
+
+            Assertions.assertEquals(outstandingAmountsTillDate.getOutstandingInterest().getAmount(),
+                    outstandingAmountsTillDateAfterReage.getOutstandingInterest().getAmount());
+            Assertions.assertEquals(outstandingAmountsTillDate.getOutstandingPrincipal().getAmount(),
+                    outstandingAmountsTillDateAfterReage.getOutstandingPrincipal().getAmount());
+
+        }
+
+        @Test
+        public void test_chargeBackOn2ndRP_ReAgeingOn2stRPsDueDate_EQUAL_AMORTIZATION_FULL_INTEREST() {
+            ProgressiveLoanInterestScheduleModel interestSchedule = generateSchedule();
+
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+                    Money.of(currency, BigDecimal.valueOf(16.1)));
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+                    Money.of(currency, BigDecimal.valueOf(1.33)));
+
+            emiCalculator.creditPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), Money.of(currency, BigDecimal.valueOf(17.43)));
+
+            // No repayment no interest recalculation
+            LocalDate reAgingStartDate = LocalDate.of(2024, 3, 1);
+            LocalDate transactionDate = LocalDate.of(2024, 3, 1);
+
+            OutstandingDetails outstandingAmountsTillDate = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
+                    interestSchedule.getMaturityDate());
+
+            LoanReAgeParameter reageParameter = new LoanReAgeParameter(null, PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
+                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST, null);
+
+            // Update the existing model with re-aged periods
+            emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
+                    new EqualAmortizationValues(Money.zero(currency), 6, Money.zero(currency), Money.zero(currency)));
+
+            OutstandingDetails outstandingAmountsTillDateAfterReage = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
+                    interestSchedule.getMaturityDate());
+
+            Assertions.assertEquals(outstandingAmountsTillDate.getOutstandingInterest().getAmount(),
+                    outstandingAmountsTillDateAfterReage.getOutstandingInterest().getAmount());
+            Assertions.assertEquals(outstandingAmountsTillDate.getOutstandingPrincipal().getAmount(),
+                    outstandingAmountsTillDateAfterReage.getOutstandingPrincipal().getAmount());
+
+        }
+
+        @Test
+        public void test_chargeBackOn2ndRP_ReAgeingDuring2stRP_EQUAL_AMORTIZATION_FULL_INTEREST() {
+            ProgressiveLoanInterestScheduleModel interestSchedule = generateSchedule();
+
+            emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+                    Money.of(currency, BigDecimal.valueOf(16.1)));
+            emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
+                    Money.of(currency, BigDecimal.valueOf(1.33)));
+
+            emiCalculator.creditPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), Money.of(currency, BigDecimal.valueOf(17.43)));
+
+            // No repayment no interest recalculation
+            LocalDate reAgingStartDate = LocalDate.of(2024, 2, 10);
+            LocalDate transactionDate = LocalDate.of(2024, 2, 10);
+
+            OutstandingDetails outstandingAmountsTillDate = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
+                    interestSchedule.getMaturityDate());
+
+            LoanReAgeParameter reageParameter = new LoanReAgeParameter(null, PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
+                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST, null);
+
+            // Update the existing model with re-aged periods
+            emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
+                    new EqualAmortizationValues(Money.zero(currency), 6, Money.zero(currency), Money.zero(currency)));
+
+            OutstandingDetails outstandingAmountsTillDateAfterReage = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
+                    interestSchedule.getMaturityDate());
+
+            Assertions.assertEquals(outstandingAmountsTillDate.getOutstandingInterest().getAmount(),
+                    outstandingAmountsTillDateAfterReage.getOutstandingInterest().getAmount());
+            Assertions.assertEquals(outstandingAmountsTillDate.getOutstandingPrincipal().getAmount(),
+                    outstandingAmountsTillDateAfterReage.getOutstandingPrincipal().getAmount());
+
+        }
+
         @Test
         public void test_transactionInMiddleOfPeriod_EQUAL_AMORTIZATION_FULL_INTEREST_noTransactionTilDate_noInterestRecalc() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
@@ -4291,7 +4433,7 @@ class ProgressiveEMICalculatorTest {
 
             // Update the existing model with re-aged periods
             emiCalculator.reAgeEqualAmortization(interestSchedule, loanTransaction.getTransactionDate(), reageParameter,
-                    Money.zero(currency), new EqualAmortizationValues(Money.zero(currency), Money.zero(currency)));
+                    Money.zero(currency), new EqualAmortizationValues(Money.zero(currency), 6, Money.zero(currency), Money.zero(currency)));
 
             OutstandingDetails outstandingAmountsTillDateAfterReage = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
                     interestSchedule.getMaturityDate());
@@ -4380,7 +4522,7 @@ class ProgressiveEMICalculatorTest {
 
             // Update the existing model with re-aged periods
             emiCalculator.reAgeEqualAmortization(interestSchedule, loanTransaction.getTransactionDate(), reageParameter,
-                    Money.zero(currency), new EqualAmortizationValues(Money.zero(currency), Money.zero(currency)));
+                    Money.zero(currency), new EqualAmortizationValues(Money.zero(currency), 6, Money.zero(currency), Money.zero(currency)));
 
             OutstandingDetails outstandingAmountsTillDateAfterReage = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
                     interestSchedule.getMaturityDate());
@@ -4439,7 +4581,7 @@ class ProgressiveEMICalculatorTest {
 
             // Update the existing model with re-aged periods
             emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
-                    new EqualAmortizationValues(Money.zero(currency), Money.zero(currency)));
+                    new EqualAmortizationValues(Money.zero(currency), 6, Money.zero(currency), Money.zero(currency)));
 
             OutstandingDetails outstandingAmountsTillDateAfterReage = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
                     interestSchedule.getMaturityDate());
@@ -4499,7 +4641,7 @@ class ProgressiveEMICalculatorTest {
 
             // Update the existing model with re-aged periods
             emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
-                    new EqualAmortizationValues(Money.zero(currency), Money.zero(currency)));
+                    new EqualAmortizationValues(Money.zero(currency), 6, Money.zero(currency), Money.zero(currency)));
 
             OutstandingDetails outstandingAmountsTillDateAfterReage = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
                     interestSchedule.getMaturityDate());
@@ -4582,7 +4724,7 @@ class ProgressiveEMICalculatorTest {
 
             // Update the existing model with re-aged periods
             emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
-                    new EqualAmortizationValues(Money.zero(currency), Money.zero(currency)));
+                    new EqualAmortizationValues(Money.zero(currency), 6, Money.zero(currency), Money.zero(currency)));
 
             OutstandingDetails outstandingAmountsTillDateAfterReage = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
                     interestSchedule.getMaturityDate());
@@ -4665,7 +4807,7 @@ class ProgressiveEMICalculatorTest {
 
             // Update the existing model with re-aged periods
             emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
-                    new EqualAmortizationValues(Money.zero(currency), Money.zero(currency)));
+                    new EqualAmortizationValues(Money.zero(currency), 6, Money.zero(currency), Money.zero(currency)));
 
             OutstandingDetails outstandingAmountsTillDateAfterReage = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
                     interestSchedule.getMaturityDate());
@@ -4738,7 +4880,7 @@ class ProgressiveEMICalculatorTest {
 
             // Update the existing model with re-aged periods
             emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
-                    new EqualAmortizationValues(Money.zero(currency), Money.zero(currency)));
+                    new EqualAmortizationValues(Money.zero(currency), 6, Money.zero(currency), Money.zero(currency)));
 
             OutstandingDetails outstandingAmountsTillDateAfterReage = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
                     interestSchedule.getMaturityDate());
@@ -4811,7 +4953,7 @@ class ProgressiveEMICalculatorTest {
 
             // Update the existing model with re-aged periods
             emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
-                    new EqualAmortizationValues(Money.zero(currency), Money.zero(currency)));
+                    new EqualAmortizationValues(Money.zero(currency), 6, Money.zero(currency), Money.zero(currency)));
 
             OutstandingDetails outstandingAmountsTillDateAfterReage = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
                     interestSchedule.getMaturityDate());
@@ -4820,6 +4962,49 @@ class ProgressiveEMICalculatorTest {
                     outstandingAmountsTillDateAfterReage.getOutstandingInterest().getAmount());
             Assertions.assertEquals(outstandingAmountsTillDate.getOutstandingPrincipal().getAmount(),
                     outstandingAmountsTillDateAfterReage.getOutstandingPrincipal().getAmount());
+
+        }
+    }
+
+    @Nested
+    public class EqualAmortizationValue {
+
+        @Test
+        public void test_AmortizationTotalIsLessThanInstallmentNumber() {
+            EqualAmortizationValues actual = emiCalculator.calculateEqualAmortizationValues(Money.of(currency, BigDecimal.valueOf(0.04)), 6,
+                    null, MonetaryCurrency.fromCurrencyData(currency));
+            Assertions.assertEquals(0.01, actual.calculateValueBigDecimal(0).doubleValue());
+            Assertions.assertEquals(0.01, actual.calculateValueBigDecimal(1).doubleValue());
+            Assertions.assertEquals(0.01, actual.calculateValueBigDecimal(2).doubleValue());
+            Assertions.assertEquals(0.01, actual.calculateValueBigDecimal(3).doubleValue());
+            Assertions.assertEquals(0.0, actual.calculateValueBigDecimal(4).doubleValue());
+            Assertions.assertEquals(0.0, actual.calculateValueBigDecimal(5).doubleValue());
+
+        }
+
+        @Test
+        public void test_AmortizationIsJustBiggerThanInstallmentNumber() {
+            EqualAmortizationValues actual = emiCalculator.calculateEqualAmortizationValues(Money.of(currency, BigDecimal.valueOf(0.07)), 6,
+                    null, MonetaryCurrency.fromCurrencyData(currency));
+            Assertions.assertEquals(0.01, actual.calculateValueBigDecimal(0).doubleValue());
+            Assertions.assertEquals(0.01, actual.calculateValueBigDecimal(1).doubleValue());
+            Assertions.assertEquals(0.01, actual.calculateValueBigDecimal(2).doubleValue());
+            Assertions.assertEquals(0.01, actual.calculateValueBigDecimal(3).doubleValue());
+            Assertions.assertEquals(0.01, actual.calculateValueBigDecimal(4).doubleValue());
+            Assertions.assertEquals(0.02, actual.calculateValueBigDecimal(5).doubleValue());
+
+        }
+
+        @Test
+        public void test_AmortizationNonEdgeCase() {
+            EqualAmortizationValues actual = emiCalculator.calculateEqualAmortizationValues(Money.of(currency, BigDecimal.valueOf(0.59)), 6,
+                    null, MonetaryCurrency.fromCurrencyData(currency));
+            Assertions.assertEquals(0.1, actual.calculateValueBigDecimal(0).doubleValue());
+            Assertions.assertEquals(0.1, actual.calculateValueBigDecimal(1).doubleValue());
+            Assertions.assertEquals(0.1, actual.calculateValueBigDecimal(2).doubleValue());
+            Assertions.assertEquals(0.1, actual.calculateValueBigDecimal(3).doubleValue());
+            Assertions.assertEquals(0.1, actual.calculateValueBigDecimal(4).doubleValue());
+            Assertions.assertEquals(0.09, actual.calculateValueBigDecimal(5).doubleValue());
 
         }
     }
