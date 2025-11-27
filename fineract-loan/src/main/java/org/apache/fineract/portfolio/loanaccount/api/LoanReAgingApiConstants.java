@@ -31,4 +31,7 @@ public interface LoanReAgingApiConstants {
 
     String reAgeInterestHandlingParamName = "reAgeInterestHandling";
     String reasonCodeValueIdParamName = "reasonCodeValueId";
+
+    String transactionAmountParamName = "transactionAmount";
+    String noteParamName = "note";
 }

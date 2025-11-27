@@ -1016,6 +1016,11 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
 
     protected void reAgeLoan(Long loanId, String frequencyType, int frequencyNumber, String startDate, Integer numberOfInstallments,
             String reAgeInterestHandling) {
+        reAgeLoan(loanId, frequencyType, frequencyNumber, startDate, numberOfInstallments, reAgeInterestHandling, null);
+    }
+
+    protected void reAgeLoan(Long loanId, String frequencyType, int frequencyNumber, String startDate, Integer numberOfInstallments,
+            String reAgeInterestHandling, Double transactionAmount) {
         PostLoansLoanIdTransactionsRequest request = new PostLoansLoanIdTransactionsRequest();
         request.setDateFormat(DATETIME_PATTERN);
         request.setLocale("en");
@@ -1024,6 +1029,9 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         request.setStartDate(startDate);
         request.setNumberOfInstallments(numberOfInstallments);
         request.setReAgeInterestHandling(reAgeInterestHandling);
+        if (transactionAmount != null) {
+            request.transactionAmount(transactionAmount);
+        }
         loanTransactionHelper.reAge(loanId, request);
     }
 
