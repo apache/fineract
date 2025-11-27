@@ -3019,8 +3019,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         final RepaymentPeriod lastPeriod = periodsBeforeAccelerateMaturity.getLast();
 
-        final List<RepaymentPeriod> periodsToRemove = repaymentPeriods.stream().filter(rp -> rp.getFromDate().isAfter(transactionDate))
-                .toList();
+        final List<RepaymentPeriod> periodsToRemove = repaymentPeriods.stream()
+                .filter(rp -> DateUtils.isAfterInclusive(rp.getFromDate(), transactionDate)).toList();
 
         lastPeriod.setDueDate(transactionDate);
         lastPeriod.getInterestPeriods().removeIf(interestPeriod -> !interestPeriod.getFromDate().isBefore(transactionDate));
