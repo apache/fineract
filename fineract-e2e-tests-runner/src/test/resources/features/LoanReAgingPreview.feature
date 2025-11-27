@@ -1026,6 +1026,7 @@ Feature: LoanReAgingPreview
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+
     When Admin sets the business date to "01 February 2024"
     And Customer makes "AUTOPAY" repayment on "01 February 2024" with 17.01 EUR transaction amount
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
@@ -1044,6 +1045,7 @@ Feature: LoanReAgingPreview
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    |
+
     When Admin sets the business date to "1 March 2024"
     And Admin successfully terminates loan contract
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
@@ -1060,10 +1062,14 @@ Feature: LoanReAgingPreview
       | 01 February 2024 | Repayment            | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 01 March 2024    | Accrual              | 1.07   | 0.0       | 1.07     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Contract Termination | 84.06  | 83.57     | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
+
     When Admin sets the business date to "15 April 2024"
     Then Admin fails to create a Loan re-aging preview with the following data because loan was contract terminated:
       | frequencyNumber | frequencyType | startDate   | numberOfInstallments |
       | 1               | MONTHS        | 01 May 2024 | 6                    |
+
+    When Loan Pay-off is made on "15 April 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4217 @AdvancedPaymentAllocation
   Scenario: Verify Re-aging preview on interest bearing loan - Interest calculation: Default Behavior - Fees and Interest Split after re-aging - UC12
