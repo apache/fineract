@@ -116,7 +116,7 @@ public enum GLAccountType {
 
     @Override
     public String toString() {
-        return name().toString();
+        return name();
     }
 
     public boolean isAssetType() {

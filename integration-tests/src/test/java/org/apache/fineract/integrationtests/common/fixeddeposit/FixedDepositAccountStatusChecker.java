@@ -41,25 +41,25 @@ public final class FixedDepositAccountStatusChecker {
     public static void verifyFixedDepositIsApproved(final HashMap fixedDepositStatusHashMap) {
         LOG.info("-------------------- VERIFYING FIXED DEPOSIT APPLICATION IS APPROVED --------------------");
         assertTrue(getStatus(fixedDepositStatusHashMap, "approved"), "Error in Approving Fixed deposit application");
-        LOG.info("{}", fixedDepositStatusHashMap.toString());
+        LOG.info("{}", fixedDepositStatusHashMap);
     }
 
     public static void verifyFixedDepositIsPending(final HashMap fixedDepositStatusHashMap) {
         LOG.info("-------------------- VERIFYING FIXED DEPOSIT APPLICATION IS PENDING --------------------");
         assertTrue(getStatus(fixedDepositStatusHashMap, "submittedAndPendingApproval"), "FIXED DEPOSIT ACCOUNT IS NOT IN PENDING STATE");
-        LOG.info("{}", fixedDepositStatusHashMap.toString());
+        LOG.info("{}", fixedDepositStatusHashMap);
     }
 
     public static void verifyFixedDepositIsActive(final HashMap fixedDepositStatusHashMap) {
         LOG.info("----------------- VERIFYING FIXED DEPOSIT APPLICATION IS ACTIVE -----------------");
         assertTrue(getStatus(fixedDepositStatusHashMap, "active"), "ERROR IN ACTIVATING THE FIXED DEPOSIT APPLICATION");
-        LOG.info("{}", fixedDepositStatusHashMap.toString());
+        LOG.info("{}", fixedDepositStatusHashMap);
     }
 
     public static void verifyFixedDepositIsRejected(final HashMap fixedDepositStatusHashMap) {
         LOG.info("-------------- VERIFYING FIXED DEPOSIT APPLICATION IS REJECTED ----------------");
         assertTrue(getStatus(fixedDepositStatusHashMap, "rejected"), "ERROR IN REJECTING THE FIXED DEPOSIT APPLICATION");
-        LOG.info("{}", fixedDepositStatusHashMap.toString());
+        LOG.info("{}", fixedDepositStatusHashMap);
     }
 
     public static void verifyFixedDepositIsWithdrawn(final HashMap fixedDepositStatusHashMap) {
@@ -71,13 +71,13 @@ public final class FixedDepositAccountStatusChecker {
     public static void verifyFixedDepositAccountIsClosed(final HashMap fixedDepositStatusHashMap) {
         LOG.info("--------------------- VERIFYING FIXED DEPOSIT APPLICATION IS CLOSED ---------------------");
         assertTrue(getStatus(fixedDepositStatusHashMap, "closed"), "ERROR IN CLOSING THE FIXED DEPOSIT APPLICATION");
-        LOG.info("{}", fixedDepositStatusHashMap.toString());
+        LOG.info("{}", fixedDepositStatusHashMap);
     }
 
     public static void verifyFixedDepositAccountIsNotActive(final HashMap fixedDepositStatusHashMap) {
         LOG.info("------------------ VERIFYING FIXED DEPOSIT APPLICATION IS INACTIVE --------------------");
         Assertions.assertFalse(getStatus(fixedDepositStatusHashMap, "active"));
-        LOG.info("{}", fixedDepositStatusHashMap.toString());
+        LOG.info("{}", fixedDepositStatusHashMap);
     }
 
     public static HashMap getStatusOfFixedDepositAccount(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -90,13 +90,13 @@ public final class FixedDepositAccountStatusChecker {
     public static void verifyFixedDepositAccountIsPrematureClosed(HashMap fixedDepositStatusHashMap) {
         LOG.info("--------------------- VERIFYING FIXED DEPOSIT APPLICATION IS CLOSED ---------------------");
         assertTrue(getStatus(fixedDepositStatusHashMap, "prematureClosed"), "ERROR IN PREMATURELY CLOSING THE FIXED DEPOSIT ACCOUNT");
-        LOG.info("{}", fixedDepositStatusHashMap.toString());
+        LOG.info("{}", fixedDepositStatusHashMap);
     }
 
     public static void verifyFixedDepositAccountIsMatured(HashMap fixedDepositStatusHashMap) {
         LOG.info("--------------------- VERIFYING FIXED DEPOSIT APPLICATION IS MATURED ---------------------");
         assertTrue(getStatus(fixedDepositStatusHashMap, "matured"), "ERROR IN MATURITY JOB OF THE FIXED DEPOSIT ACCOUNT");
-        LOG.info("{}", fixedDepositStatusHashMap.toString());
+        LOG.info("{}", fixedDepositStatusHashMap);
     }
 
     private static boolean getStatus(final HashMap fixedDepositStatusMap, final String fixedDepositStatusString) {
