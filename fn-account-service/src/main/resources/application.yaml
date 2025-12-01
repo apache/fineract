@@ -1,0 +1,19 @@
+server:
+  port: 9001
+spring:
+  application:
+    name: account-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fineract_accounts
+    username: postgres
+    password: vakporize
+
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        connection:provider_disables_autocommit: true
