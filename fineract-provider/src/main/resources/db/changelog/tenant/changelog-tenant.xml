@@ -225,4 +225,5 @@
     <include file="parts/0204_transaction_summary_with_asset_owner_and_from_asset_owner_id_for_buybacks.xml" relativeToChangelogFile="true" />
     <include file="parts/0205_add_read_familymembers_permission.xml" relativeToChangelogFile="true" />
     <include file="parts/0206_transaction_summary_with_asset_owner_classification_name_bug_fix.xml" relativeToChangelogFile="true" />
+    <include file="parts/0207_add_allow_full_term_for_tranche.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

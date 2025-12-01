@@ -38,15 +38,19 @@ public class LoanProductTrancheDetails {
     @Column(name = "max_outstanding_loan_balance", scale = 6, precision = 19)
     private BigDecimal outstandingLoanBalance;
 
+    @Column(name = "allow_full_term_for_tranche")
+    private boolean allowFullTermForTranche;
+
     protected LoanProductTrancheDetails() {
         // TODO Auto-generated constructor stub
     }
 
     public LoanProductTrancheDetails(final boolean multiDisburseLoan, final Integer maxTrancheCount,
-            final BigDecimal outstandingLoanBalance) {
+            final BigDecimal outstandingLoanBalance, final boolean allowFullTermForTranche) {
         this.multiDisburseLoan = multiDisburseLoan;
         this.maxTrancheCount = maxTrancheCount;
         this.outstandingLoanBalance = outstandingLoanBalance;
+        this.allowFullTermForTranche = allowFullTermForTranche;
     }
 
 }

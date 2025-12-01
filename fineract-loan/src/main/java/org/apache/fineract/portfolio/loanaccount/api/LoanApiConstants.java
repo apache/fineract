@@ -195,6 +195,8 @@ public interface LoanApiConstants {
 
     String INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE = "interestRecognitionOnDisbursementDate";
 
+    String ALLOW_FULL_TERM_FOR_TRANCHE = "allowFullTermForTranche";
+
     // Loan Summary Transaction Types
     List<LoanTransactionType> LOAN_SUMMARY_TRANSACTION_TYPES = List.of(LoanTransactionType.CHARGE_ADJUSTMENT, //
             LoanTransactionType.CHARGEBACK, //

@@ -288,7 +288,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy, final LoanCapitalizedIncomeType capitalizedIncomeType,
             final boolean enableBuyDownFee, final LoanBuyDownFeeCalculationType buyDownFeeCalculationType,
             final LoanBuyDownFeeStrategy buyDownFeeStrategy, final LoanBuyDownFeeIncomeType buyDownFeeIncomeType,
-            final boolean merchantBuyDownFee) {
+            final boolean merchantBuyDownFee, final boolean allowFullTermForTranche) {
         this.fund = fund;
         this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
 
@@ -364,7 +364,8 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             loanConfigurableAttributes.updateLoanProduct(this);
         }
 
-        this.loanProductTrancheDetails = new LoanProductTrancheDetails(multiDisburseLoan, maxTrancheCount, outstandingLoanBalance);
+        this.loanProductTrancheDetails = new LoanProductTrancheDetails(multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
+                allowFullTermForTranche);
         this.overdueDaysForNPA = overdueDaysForNPA;
         this.productInterestRecalculationDetails = productInterestRecalculationDetails;
         this.minimumDaysBetweenDisbursalAndFirstRepayment = minimumDaysBetweenDisbursalAndFirstRepayment;
@@ -761,6 +762,10 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
 
     public void updateEnableInstallmentLevelDelinquency(boolean enableInstallmentLevelDelinquency) {
         this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
+    }
+
+    public boolean isAllowFullTermForTranche() {
+        return this.loanProductTrancheDetails != null && this.loanProductTrancheDetails.isAllowFullTermForTranche();
     }
 
 }
