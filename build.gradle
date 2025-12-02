@@ -64,6 +64,17 @@ buildscript {
     }
 }
 
+buildscript {
+    configurations.classpath {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'com.burgstaller' && details.requested.name == 'okhttp-digest' && details.requested.version == '1.10') {
+                details.useTarget "io.github.rburgst:${details.requested.name}:1.21"
+                details.because 'Dependency has moved'
+            }
+        }
+    }
+}
+
 plugins {
     id "org.barfuin.gradle.taskinfo" version "2.1.0"
     id 'com.adarshr.test-logger' version '3.2.0'
