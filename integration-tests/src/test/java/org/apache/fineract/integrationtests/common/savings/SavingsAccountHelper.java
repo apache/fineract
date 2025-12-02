@@ -635,6 +635,18 @@ public class SavingsAccountHelper {
         return Utils.performServerGet(requestSpec, responseSpec, URL, jsonAttribute);
     }
 
+    public HashMap getAllSavingsAccounts() {
+        // Added an unlimited limit here because large amount of tests are not being cleaned up afterward
+        final String URL = SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER + "&limit=-1";
+        return Utils.performServerGet(requestSpec, responseSpec, URL, "");
+    }
+
+    public Object getSavingsAccountsByDateOfBirth(final String dateOfBirth) {
+        // Added an unlimited limit here because large amount of tests are not being cleaned up afterward
+        final String URL = SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER + "&limit=-1&dateOfBirth=" + dateOfBirth;
+        return Utils.performServerGet(requestSpec, responseSpec, URL, "");
+    }
+
     public ArrayList getSavingsCharges(final Integer savingsID) {
         final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "/charges?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, URL, "");

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.integrationtests.common.ClientHelper.DEFAULT_DATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.restassured.builder.RequestSpecBuilder;
@@ -710,7 +711,7 @@ public class ClientSavingsIntegrationTest {
         cal.set(Calendar.YEAR, (Integer) dates.get(0));
         cal.set(Calendar.MONTH, (Integer) dates.get(1) - 1);
         cal.set(Calendar.DAY_OF_MONTH, (Integer) dates.get(2));
-        
+
         /*
          * The for loop below charges $100 per month in this calendar year, so if today is in December, this will charge
          * $1200 (12 months * $100/month), which is more than the $1,000 available balance. Not sure where the initial
@@ -2696,6 +2697,101 @@ public class ClientSavingsIntegrationTest {
 
         HashMap summaryTwo = this.savingsAccountHelper.getSavingsSummary(savingsId);
         assertEquals(balanceAfterChargeTwo, summaryTwo.get("accountBalance"), "Verifying Balance after withdrawal charge two ");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testAccountRetrievalFilteredByDateOfBirth() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        // spotless:off
+        /*
+         * GIVEN: There are three clients with active savings accounts:
+         * - Client 1 with a date of birth of 06/15/1984 - Two savings accounts
+         * - Client 2 with a date of birth of 06/15/1990 - Same Month + Day as Client 1, Different Year
+         * - Client 3 with a date of birth of 05/15/1985 - Same Day of the Month, Different Month as Client 1
+         * - Client 4 with a date of birth of 06/14/1987 - Same Month, Different Day of the Month as Client 1
+         * - Client 5 with no date of birth (since it's optional)
+         */
+        // spotless:on
+        final Integer clientID1 = ClientHelper.createClient(this.requestSpec, this.responseSpec, DEFAULT_DATE, "1", "15 June 1986");
+        final Integer clientID2 = ClientHelper.createClient(this.requestSpec, this.responseSpec, DEFAULT_DATE, "1", "15 June 1990");
+        final Integer clientID3 = ClientHelper.createClient(this.requestSpec, this.responseSpec, DEFAULT_DATE, "1", "15 May 1985");
+        final Integer clientID4 = ClientHelper.createClient(this.requestSpec, this.responseSpec, DEFAULT_DATE, "1", "14 June 1987");
+        final Integer clientID5 = ClientHelper.createClient(this.requestSpec, this.responseSpec, DEFAULT_DATE, "1", null);
+
+        Integer client1SavingsId1 = createActiveSavingsAccount(clientID1);
+        Integer client1SavingsId2 = createActiveSavingsAccount(clientID1);
+        Integer client2SavingsId = createActiveSavingsAccount(clientID2);
+        Integer client3SavingsId = createActiveSavingsAccount(clientID3);
+        Integer client4SavingsId = createActiveSavingsAccount(clientID4);
+        Integer client5SavingsId = createActiveSavingsAccount(clientID5);
+
+        // WHEN: I retrieve all savings accounts by date of birth of 06/15
+        HashMap savingsAccountsBdayOnJune15 = (HashMap) savingsAccountHelper.getSavingsAccountsByDateOfBirth("--06-15");
+
+        // THEN: Client 1 and 2's savings accounts are returned and Client 3, 4, and 5's savings accounts are not
+        // returned
+        Assertions.assertNotNull(savingsAccountsBdayOnJune15);
+        ArrayList<HashMap> records = (ArrayList<HashMap>) savingsAccountsBdayOnJune15.get("pageItems");
+        List<Integer> expectedSavingsAccountIds = new ArrayList<>(Arrays.asList(client1SavingsId1, client1SavingsId2, client2SavingsId));
+        for (HashMap record : records) {
+            Integer recordSavingsId = (Integer) record.get("id");
+            Assertions.assertNotEquals(client3SavingsId, recordSavingsId, "Expected no savings accounts from Client 3, but one was found");
+            Assertions.assertNotEquals(client4SavingsId, recordSavingsId, "Expected no savings accounts from Client 4, but one was found");
+            Assertions.assertNotEquals(client5SavingsId, recordSavingsId, "Expected no savings accounts from Client 5, but one was found");
+            expectedSavingsAccountIds.remove(recordSavingsId);
+        }
+        Assertions.assertTrue(expectedSavingsAccountIds.isEmpty(),
+                "Expected all of client 1 and 2's savings account records, but did not find any or all of them");
+
+        // WHEN: I retrieve all savings accounts without a date of birth filter
+        HashMap allSavingsAccounts = savingsAccountHelper.getAllSavingsAccounts();
+
+        // THEN: All savings accounts from Client 1, 2, 3, 4, and 5 are returned
+        Assertions.assertNotNull(allSavingsAccounts);
+        records = (ArrayList<HashMap>) allSavingsAccounts.get("pageItems");
+        expectedSavingsAccountIds = new ArrayList<>(Arrays.asList(client1SavingsId1, client1SavingsId2, client2SavingsId, client3SavingsId,
+                client4SavingsId, client5SavingsId));
+        for (HashMap record : records) {
+            Integer recordSavingsId = (Integer) record.get("id");
+            expectedSavingsAccountIds.remove(recordSavingsId);
+        }
+        Assertions.assertTrue(expectedSavingsAccountIds.isEmpty(),
+                "Expected all savings accounts from Client 1, 2, 3, 4 and 5, but did not find any or all of them");
+    }
+
+    @Test
+    public void testAccountRetrievalFilteredByDateOfBirth_InvalidDateFormat() {
+        SavingsAccountHelper savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec,
+                new ResponseSpecBuilder().build());
+
+        // WHEN: I retrieve all savings accounts with an invalid ISO 8601 MonthDay format
+        HashMap invalidDateOfBirth = (HashMap) savingsAccountHelperValidationError.getSavingsAccountsByDateOfBirth("invaliddateformat");
+
+        // THEN: an exception json is returned with a monthDayFormat error
+        assertEquals("validation.msg.invalid.monthDayFormat.format",
+                ((HashMap) ((List) invalidDateOfBirth.get("errors")).get(0)).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+    }
+
+    private Integer createActiveSavingsAccount(final Integer clientID) {
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, null, null,
+                "false", false);
+        Assertions.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assertions.assertNotNull(savingsId);
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        return savingsId;
     }
 
     /**

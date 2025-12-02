@@ -195,16 +195,15 @@ public class ClientHelper extends IntegrationTest {
     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String activationDate, final String officeId) {
         log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientAsJSON(activationDate, officeId),
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientAsJSON(activationDate, officeId, null),
                 "clientId");
     }
 
-    public static PostClientsResponse createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String activationDate, final String officeId, final String externalId) {
+    public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String activationDate, final String officeId, final String dateOfBirth) {
         log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
-        final String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
-                getTestClientAsJSON(activationDate, officeId));
-        return GSON.fromJson(response, PostClientsResponse.class);
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
+                getTestClientAsJSON(activationDate, officeId, dateOfBirth), "clientId");
     }
 
     public static PostClientClientIdAddressesResponse createClientAddress(final RequestSpecification requestSpec,
@@ -351,6 +350,16 @@ public class ClientHelper extends IntegrationTest {
         HashMap<String, Object> map = setInitialClientValues(officeId, LEGALFORM_ID_PERSON);
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
+        final String testClientAsJson = GSON.toJson(map);
+        log.info("TestClient Request :  {}", testClientAsJson);
+        return testClientAsJson;
+    }
+
+    public static String getTestClientAsJSON(final String dateOfJoining, final String officeId, final String dateOfBirth) {
+        HashMap<String, Object> map = setInitialClientValues(officeId, LEGALFORM_ID_PERSON);
+        map.put("active", "true");
+        map.put("activationDate", dateOfJoining);
+        map.put("dateOfBirth", dateOfBirth);
         final String testClientAsJson = GSON.toJson(map);
         log.info("TestClient Request :  {}", testClientAsJson);
         return testClientAsJson;
