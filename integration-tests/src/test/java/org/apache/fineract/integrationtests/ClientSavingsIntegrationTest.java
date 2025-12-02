@@ -710,6 +710,16 @@ public class ClientSavingsIntegrationTest {
         cal.set(Calendar.YEAR, (Integer) dates.get(0));
         cal.set(Calendar.MONTH, (Integer) dates.get(1) - 1);
         cal.set(Calendar.DAY_OF_MONTH, (Integer) dates.get(2));
+        
+        /*
+         * The for loop below charges $100 per month in this calendar year, so if today is in December, this will charge
+         * $1200 (12 months * $100/month), which is more than the $1,000 available balance. Not sure where the initial
+         * $1,000 deposit is happening, but added $200 to make this test work, no matter which month the test is run.
+         * Would change this to run a consistent 2 times, which is all it needs to test the amountPaid, but unsure of
+         * the goal of the owner of this test.
+         */
+        this.savingsAccountHelper.depositToSavingsAccount(savingsId, "200", SavingsAccountHelper.TRANSACTION_DATE,
+                CommonConstants.RESPONSE_RESOURCE_ID);
 
         for (int i = 1; i <= n; i++) {
             this.savingsAccountHelper.payCharge((Integer) savingsChargeForPay.get("id"), savingsId,
