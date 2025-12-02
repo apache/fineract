@@ -1,0 +1,435 @@
+= Loan Re-Aging
+:doctype: book
+:icons: font
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Overview
+
+Re-aging also known as Settlement Plan is to assist customers who are in duress around repaying their loans;
+
+The goal is to create a new set of Installments for the same loan account from the principal outstanding pending on the loan account
+
+For example, for a customer who is severely behind on payments, they could agree to a settlement plan where instead of having to pay now, it could be spread over the next 12 months, paying back the remaining 750 euro balance but over 10 equal payments.
+
+== Introduction
+
+=== Purpose
+
+This document specifies the functional and business requirements for the Re-Aging feature for Progressive loan products in Fineract.
+It defines rules for interest handling, schedule regeneration, charge/fee mapping, special installments, and reversal logic to ensure consistent behavior across different interest handling methods.
+
+=== Scope
+
+The scope of this document includes:
+* Re-Aging for Progressive, interest-bearing loans * Handling of Default, Equal Amortization scenarios * Support for backdated transactions * Schedule regeneration and installment remapping * Special collected installment creation * Reversal and replay of Re-Age transactions * User-driven configuration of re-aged schedule (start date, number of installments, period type/frequency)
+
+This document does **not** cover:
+* Non-Progressive loan strategies * Charge-off loan accounts * Interest-bearing loans outside the scope of Fineract Progressive product definition * External API documentation (covered separately)
+
+=== Applicability
+
+The requirements described apply to:
+* Progressive loan products * Non-interest-nearing and Interest-bearing accounts with or without interest recalculation enabled * Loan accounts where re-aging may occur at any date ≥ last repayment date
+
+=== Definitions and Key Concepts
+
+*Re-Age:* The process of recalculating and adjusting the remaining loan schedule, including principal, interest, fees, and penalties, starting from a specified start date.
+*Transaction Date:* The accounting/event date when re-aging is applied.
+*Start Date:* The due date of the first re-aged installment (re-age start date).
+*Special Collected Installment:* A single installment created to capture paid portions from installments with due-date after the transaction date.
+*N+1 Installment:* Any additional installment added to the schedule before or after re-aging to balance principal, interest, and fees.
+*Interest Handling:* The method applied during re-aging — Default, Equal Amortization.
+*Chargeback:* A partial or full reversal of a previously posted repayment, adjusting principal, interest, and/or fees back to their prior state.
+
+== General Re-Aging Rules
+
+=== Eligibility Criteria
+
+* Re-Aging is allowed only for Progressive loan products.
+* The re-age transaction date must be **greater than or equal to the last repayment date**.
+* Re-Aging can be applied **anywhere in the loan lifecycle**, including before maturity.
+
+=== Transaction Date vs Start Date
+
+* **Transaction Date**: The accounting/event date when re-aging is applied.
+* **Start Date**: The due date of the first re-aged installment.
+* In backdated scenarios, **transaction date = start date**.
+* In non-backdated scenarios, **transaction date ≤ start date**.
+* The re-aged schedule begins from the start date, irrespective of past due installments.
+
+=== Partial Payments Handling
+
+* Any installment with a **partially paid amount** before the transaction date:
+- The **paid portion remains** allocated to the original installment.
+- The **unpaid portion** is included in the re-aged schedule.
+* Installments fully paid before transaction date remain unchanged.
+
+=== Down-Payment Handling
+
+* Down-payments are **not affected** by re-aging.
+* They remain linked to the original installment and are excluded from the re-age calculations.
+
+=== Chargebacks
+
+* Charge-back amounts (principal, interest, fees) are processed according to the selected interest handling scenario:
+- Equal Amortization: split across new installments.
+- Default: principal re-aged, interest moved to first new installment.
+* Only **unpaid** are affected.
+
+=== Special Collected Installments
+
+* Any installment with **due-date > transaction date** that has payments posted before the transaction date:
+- Paid portions are **merged into a single special collected installment**.
+- Due date = transaction date.
+- GL postings must remain identical to original payments.
+- The special installment does not participate in interest/principal redistribution.
+* Supports reverse and replay logic for backdated transactions.
+
+=== Reversal and Replay Rules
+
+* Re-Age transactions can be **reversed only if they are the latest transaction** on the loan account.
+* Any backdated repayment or reversal triggers **reverse + replay**:
+- Reverts schedule to original state before re-age.
+- Removes special collected installment if it exists.
+- Restores charge/fee mapping.
+* Backdated transaction posting or reversals triggers **reverse + replay**
+
+
+=== User Input Parameters
+
+Users must provide the following inputs when applying re-aging:
+* **Start Date**: first due date of the re-aged schedule.
+* **Number of Re-aged Installments**: total installments to generate.
+* **Period Type**: Daily, Weekly, Monthly, or Yearly.
+* **Period Frequency**: number of units per period type.
+* **Interest Handling Method**: Default, Equal Amortization.
+* These inputs drive the schedule generation, replacement of future installments, and calculation of N+1 installment.
+* In case of non-interest-bearing loans interest handling strategy is omitted
+
+=== Implementation details
+
+Implementation core is located in AdvancedPaymentScheduleTransactionProcessor.
+the entrypoint of the feature is handleReAge.
+handleReAge function is the purpose of configure the different re-age strategies and handle both interest bearing and non interest bearing scenarios.
+There is no real handling, and all the different specific handlers are described in the related interest handling scenarios dev notes chapters.
+
+== Non-Interest-Bearing Scenario
+
+=== Background and Context
+
+Re-aging functionality for **Non-Interest-Bearing Progressive loans** existed only **after maturity date**.
+This means Fineract now supports re-aging before maturity date.
+
+This enhancement introduces the ability to:
+* Apply re-aging at **any point after the first disbursement**
+* Apply re-aging **before or after maturity**
+* Override installment schedule when necessary * Handle partially paid installments via **special installment creation**
+
+Principal-only amortization — no future interest calculation involved.
+
+=== General Re-Aging Rules
+
+* Re-aging date **may be before last repayment date**
+* Only **outstanding principal + outstanding fees/penalties** are redistributed
+* Re-aging transaction remains **non-monetary**
+* GL entries are not created
+
+Fees/Penalties behavior:
+* Fees/penalties **retain their due dates**
+* Re-mapped to appropriate new installment when impacted by re-aging
+
+=== Schedule Modification Requirements
+
+When the re-aging transaction occurs before maturity date or overlaps future repayment periods:
+
+* **Installments before the re-aging transaction date**
+- Only **paid portions** are retained
+- Any **unpaid portion** is included in re-aging redistribution
+
+* **Installments on or after the re-aging transaction date**
+- Replaced with newly generated re-aged installments
+- New due dates and installment structure are based on re-aging configuration (period count, period type, frequency)
+
+=== Handling of N+1 Installments (Post-Maturity Items)
+
+N+1 installments exist to hold items that occur **after** the core repayment term — typically post-maturity fees and penalties (and in some contexts, post-maturity interest; interest is out of scope for this document but noted here for context).
+
+Business rule:
+* After re-aging, an existing N+1 installment is **kept only if its due date is strictly after the new maturity date** produced by the re-aged schedule.
+* If an N+1 installment's due date is **on or before** the new maturity date, it is **removed** and any underlying items are handled as part of the regenerated re-aged schedule.
+
+=== Special Installment Handling
+
+Special installments are created when **the re-aging transaction date** is before or on previous maturity date.
+In this case:
+* Any installment occurring after the re-aging date that has a paid portion is **collected and converted into special installments** to preserve historical repayment accuracy.
+* Transactions already posted remain mapped to these special installments.
+* All general ledger entries remain unchanged — no reversals are introduced because the payments were already consumed by the loan.
+
+This ensures:
+* Historical repayment activity is represented accurately.
+* Only unpaid obligations are restructured in the new re-aged repayment plan.
+
+=== Developer's Note
+
+Implementation is found in AdvancedPaymentScheduleTransactionProcessor Entry point for non-interest-bearing loans is `handleReAgeWithCommonStrategy`.
+
+This implementation also contains solution for interest-bearing but not EMICalculator compatible loan schedules.
+Implementation-wise it has the same logic, the only exception is the interest related calculations ends in zero amounts.
+
+Core Logic steps:
+
+* determine outstanding balances
+* update transaction amounts to outstanding balances
+* handle reversal if total amount is zero
+* calculate EqualAmortizationValues for attributes recalculated by re-age
+* handle charges if needed
+* collect paidInAdvanceBalances - to move them into the special installment if required
+* create special installment for early repaid balances.
+* create first re-aged installment
+- try to merge or insert it depending on the existing schedule
+- add charge mapping
+* create other re-aged installments if needed
+- try to merge or insert it depending on the existing schedule
+- add charge mapping
+
+Note: merging the re-aged installments depends on the existing installment due-date and index.
+Also, it keeps the charge mapping correct, in case charges (fees and penalties) should not be affected by re-age.
+
+== Interest Handling Scenarios
+
+=== Scenario #1 — Equal Amortization
+
+==== Core Logic
+
+* Outstanding unpaid amounts (principal, interest, fees/penalties ≤ transaction date) are **split equally** across the newly generated installments.
+* No new interest accrues after re-age — interest recalculation and declining balance logic are **turned off**.
+* User-selected interest scope determines which interest is included:
+- **Outstanding Payable Interest**: only interest due to date.
+- **Outstanding Full Interest**: all accrued interest, including future installments if applicable.
+
+==== Outstanding Principal, Interest, Fees/Penalties
+
+* **Principal**: only unpaid portion included in equal split.
+* **Interest**: split according to user-selected interest scope.
+* **Fees/Penalties**: unpaid portions with due-date ≤ transaction date are included in the equal split; due-date > transaction date remain mapped to original installments.
+
+==== Special Collected Installment
+
+Same to non-interest-bearing scenario
+
+==== Schedule Generation & N+1 Installment Adjustment
+
+* Re-aged installments start from the **user-provided start date**.
+* The number of installments, period type, and frequency are **user-defined**.
+* N+1 installment may be adjusted to balance rounding differences in principal/interest/fees.
+* Fully paid installments before start date remain unchanged; partially paid installments retain the paid portion, with unpaid portion included in re-age.
+
+==== GL / Transaction Recording
+
+* A **non-monetary re-age transaction** is posted with amount = total outstanding principal + interest + fees/penalties included in equal split.
+* Special collected installment GL postings match original repayments.
+* Reversal of re-age removes non-monetary transaction and restores original schedule and mappings.
+
+==== Developer's Note
+
+Entrypoint: `AdvancedPaymentScheduleTransactionProcessor:handleReAgeEqualAmortizationEMICalculator`
+
+Core Logic steps:
+
+* determine outstanding balances
+* update transaction amounts to outstanding balances
+* handle reversal if total amount is zero
+* calculate EqualAmortizationValues for non progressive model handled attributes
+* handle charges
+* collect paidInAdvanceBalances - to move them into the special installment if required
+* update model with EMICalculator - see corresponding steps in next chapter
+* remove installments after transaction date
+** keep N+1 installments and update it's from date if it has a due date after the new maturity date, otherwise it is removed
+* create special and re-aged installments according to model and update by EqualAmortizationValues calculated values
+* update installments index
+
+
+===== ProgressiveEMICalculator
+
+Entry point: reAgeEqualAmortization
+
+* **Determine original maturity and check if transaction is after it**
+* **Calculate outstanding principal, interest for re-age**
+* **Calculate already paid balances since transaction date**
+- Also sets moved credited principal & interest balances to handle not paid credited portions post re-age correctly which will be added back to fist re-age repayment period
+* **Accelerate maturity date**
+- this step is actually modifies existing model by removing interest and repayment periods from re-age transaction date
+* **Close existing repayment periods**
+- Marks **outstanding interest as moved due to re-aging**.
+- Sets EMI of each period to **total paid amount**.
+- Stops further unrecognised interest calculation.
+* **Handle early repaid installments**
+- If any principal or interest has been paid beyond the transaction date:
+- Preserves paid amounts in a **special collected repayment period**.
+* **Update model for re-aged periods**
+- Generates empty repayment periods according to the number of new installments.
+* **Calculate EMI for new periods**
+- Splits principal, interest, and fees/penalties equally across new installments.
+- Ensures **rounding differences** are applied to the last installment.
+* **Recalculate outstanding balance**
+* **Add zero-interest period**
+- Ensures interest rate after re-age start is handled correctly.
+- If transaction is posted before original maturity date, we apply 0 interest from the transaction date
+- If transaction is posted after maturity date, we should add zero interest period from the original maturity date.
+* **Calculate last unpaid repayment period EMI**
+- Ensures final installment balances the loan fully.
+
+=== Scenario #2 — Default Behavior
+
+==== Core Logic
+
+* Overdue principal and charge-back principal are **re-aged** across new installments.
+* Overdue interest and charge-back interest are moved **100% to the first new re-aged installment**.
+* Future interest continues to accrue according to loan product rules (only past-due interest may be included in re-age calculation if applicable).
+* Overdue fees and penalties are moved to the **first new re-aged installment**.
+* Future fees and penalties remain on their original installments and are adjusted externally (not part of re-age logic).
+
+==== Overdue vs Future Interest Handling
+
+* Only **past-due interest** may be included in the re-age calculation.
+* Overdue interest is **not split** — it goes entirely to the first re-aged installment.
+* Future interest is calculated normally per the interest model.
+* Charge-back interest follows the same rule: moved entirely to the first re-aged installment.
+
+==== Overwriting Existing Future Installments
+
+* Existing installments with due-date ≥ start date are replaced by **re-aged installments**.
+* New installments are generated according to user-provided **start date, number of installments, period type, and frequency**.
+* If re-age reduces total installments, any installments beyond new maturity date are removed.
+* N+1 installments are recalculated to balance principal, interest, and fees.
+
+==== Special Collected Installment
+
+Same to non-interest-bearing scenario
+
+==== Fees/Penalties Handling
+
+* Overdue fees and penalties are moved to the **first re-aged installment**.
+* Fees/penalties with due-date > start date remain on their original installments; mappings adjusted if installment numbering changes.
+* Recalculation of future fees and penalties is handled outside re-age logic.
+
+==== Schedule Generation & N+1 Installment Adjustment
+
+* Schedule starts from **start date** provided by user.
+* Number of installments, period type, and frequency are **user-defined**.
+* Fully paid installments before start date remain unchanged.
+* Partially paid installments: paid portion retained, unpaid portion included in re-aged principal.
+
+==== Reversal / Backdated Transaction Handling
+
+* Re-age can be reversed **only if it is the latest transaction**.
+* Any backdated repayment or reversal triggers **reverse + replay**:
+- Removes special collected installment.
+- Restores original installment schedule.
+- Restores original charge/fee mappings and GL postings.
+- Re-applies re-age if necessary.
+
+== Schedule & Installment Mapping
+
+=== Charge/Fee → Installment Mapping
+
+* All fees and penalties are linked to specific installments in the schedule.
+* After re-aging, the mapping must be updated to point fees/penalties to the correct new installment IDs.
+* For fees/penalties with due-date > start date:
+- Preserve original due-date.
+- Adjust installment mapping only if installment IDs are shifted due to schedule regeneration.
+* Overdue fees/penalties moved to first re-aged installment must have their mapping updated to the new installment ID.
+
+=== Due Date Recalculation Rules
+
+* Re-aged installments start from **user-provided start date**.
+* Subsequent installment due-dates are calculated based on:
+- **Period Type**: Daily, Weekly, Monthly, Yearly
+- **Period Frequency**: number of periods between installments
+* Fully paid installments before start date remain unchanged.
+* Partial payments are preserved for principal and fees; only unpaid portions are re-aged.
+* Any installment after the new maturity date is deleted if the re-age reduces total number of installments.
+
+=== N+1 Installment Adjustment
+
+* After generating re-aged installments, the **N+1 installment** is adjusted to balance rounding differences in principal, interest, and fees.
+* Applies to all interest handling scenarios.
+* Ensures total outstanding principal, interest, and fees are fully allocated across the new schedule.
+
+=== Edge Cases
+
+* Special collected installment:
+- Created if transaction date is before or on maturity date.
+- Merges all paid portions into a single installment.
+- GL postings must match original payments.
+- Does not participate in principal/interest redistribution.
+* Reversal of re-age:
+- Only allowed if it is the latest transaction.
+- Removes special collected installment.
+- Restores original installment schedule, charge/fee mappings, and GL postings.
+* Backdated re-age:
+- Transaction date = start date.
+- Reverse + replay logic applied to rebuild schedule correctly.
+
+== Validation Rules
+
+=== Transaction Date Validation
+
+* Transaction date cannot be before the start of the loan lifecycle.
+* For backdated re-age, transaction date = start date.
+
+=== Start Date Validation
+
+* Start date cannot be earlier than the loan disbursement date.
+* Start date drives the first installment of the re-aged schedule.
+
+=== Re-Age Eligibility
+
+* Re-aging is allowed only for Progressive loan strategy.
+* Charge-off loan accounts are **not eligible** for re-aging.
+
+== Summary Comparison Table For Interest Handling Scenarios
+
+[cols="1,2,2,2",options="header"]
+|===
+| Feature | Equal Amortization | Default Behavior | Notes
+
+| Outstanding Principal
+| Equally split across new installments
+| Re-aged according to schedule
+| Only unpaid portion is considered; paid portion preserved
+
+| Outstanding Interest
+| Equally split (full or payable) among new installments
+| Overdue interest moved 100% to first re-aged installment; future interest continues normally
+| —
+
+| Charge-back Principal
+| Equally split
+| Re-aged according to schedule
+| —
+
+| Charge-back Interest
+| Equally split
+| Moved 100% to first re-aged installment
+| —
+
+| Overdue Fees / Penalties
+| Equally split
+| Moved to first re-aged installment
+| Future fees handled externally, not part of re-age
+
+| Special Collected Installment
+| Created if installments after transaction date are partially paid; due date = transaction date; GL postings preserved
+| Same as Equal Amortization
+| Not included in principal/interest redistribution
+
+| User Input Parameters
+| Start date, number of installments, period type/frequency, interest handling method
+| Same as Equal Amortization
+| Inputs drive new schedule generation
+
+|===
