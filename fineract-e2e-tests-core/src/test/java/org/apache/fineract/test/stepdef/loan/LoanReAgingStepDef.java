@@ -538,4 +538,21 @@ public class LoanReAgingStepDef extends AbstractStepDef {
         }
         return request;
     }
+
+    @When("Admin creates a Loan re-aging transaction by Loan external ID with the following data, but fails with {int} error code:")
+    public void adminCreatesALoanReAgingTransactionByLoanExternalIDWithTheFollowingDataButFailsWithErrorCode(int errorCode,
+            DataTable table) {
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        String loanExternalId = loanResponse.getResourceExternalId();
+
+        PostLoansLoanIdTransactionsRequest reAgingRequest = setReAgeingRequestProperties(//
+                LoanRequestFactory.defaultReAgingRequest(), //
+                table.row(0), //
+                table.row(1) //
+        );
+
+        CallFailedRuntimeException response = fail(() -> fineractClient.loanTransactions().executeLoanTransaction1(loanExternalId,
+                reAgingRequest, Map.<String, Object>of("command", "reAge")));
+        assertThat(response.getStatus()).isEqualTo(errorCode);
+    }
 }

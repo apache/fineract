@@ -61,7 +61,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -164,34 +163,34 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     protected Money handleTransactionThatIsALateRepaymentOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
             List<LoanRepaymentScheduleInstallment> installments, LoanTransaction loanTransaction, Money transactionAmountUnprocessed,
             List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected Money handleTransactionThatIsPaymentInAdvanceOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
             List<LoanRepaymentScheduleInstallment> installments, LoanTransaction loanTransaction, Money paymentInAdvance,
             List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected Money handleTransactionThatIsOnTimePaymentOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
             LoanTransaction loanTransaction, Money transactionAmountUnprocessed,
             List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected Money handleRefundTransactionPaymentOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
             LoanTransaction loanTransaction, Money transactionAmountUnprocessed,
             List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Money handleRepaymentSchedule(List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> loanCharges) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     // only for progressive loans
@@ -2875,12 +2874,12 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     handleReAgeWithInterestRecalculationEnabled(loanTransaction, progressiveTransactionCtx);
                 } else if (loanTransaction.getLoan().isInterestBearing() && !loanTransaction.getLoan().isInterestRecalculationEnabled()) {
                     // TODO: implement interestRecalculation = false logic
-                    throw new NotImplementedException(
+                    throw new UnsupportedOperationException(
                             "Logic for re-aging when interest bearing loan has interestRecalculation disabled is not implemented");
                 }
 
             } else if (LoanReAgeInterestHandlingType.WAIVE_INTEREST.equals(loanReAgeParameter.getInterestHandlingType())) {
-                throw new NotImplementedException("WAIVE_INTEREST interest handling strategy for re-aging is not implemented");
+                throw new UnsupportedOperationException("WAIVE_INTEREST interest handling strategy for re-aging is not implemented");
             } else {
                 if (LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST.equals(loanReAgeParameter.getInterestHandlingType())) {
                     CommonReAgeSettings settings = new CommonReAgeSettings(false, true, true, true);
