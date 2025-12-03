@@ -28,6 +28,7 @@
         </sql>
     </changeSet>
     <changeSet author="fineract" id="2">
+        <validCheckSum>9:161fdb8b4eaab8b34dc5239e7546d65f</validCheckSum>
         <insert tableName="c_configuration">
             <column name="name" value="purge-processed-commands-older-than-days"/>
             <column name="value" valueNumeric="30"/>
