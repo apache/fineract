@@ -375,6 +375,7 @@ configure(project.fineractJavaProjects) {
             eclipse().configFile "$rootDir/config/fineractdev-formatter.xml"
             endWithNewline()
             trimTrailingWhitespace()
+            toggleOffOn()
 
             // Enforce style modifier order
             custom 'Modifier ordering', {
