@@ -170,4 +170,6 @@ public interface EMICalculator {
 
     void changeDueDate(ProgressiveLoanInterestScheduleModel scheduleModel, LoanApplicationTerms loanApplicationTerms,
             LocalDate targetRepaymentPeriodDueDate, LocalDate newDueDate);
+
+    void updateModelRepaymentPeriodsDuringReAmortization(ProgressiveLoanInterestScheduleModel model, LocalDate transactionDate);
 }

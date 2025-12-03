@@ -570,7 +570,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     public void updateModelRepaymentPeriodsDuringReAge(final ProgressiveLoanInterestScheduleModel scheduleModel,
             final LocalDate reAgePeriodStartDate, final LocalDate reAgeFirstDueDate, final LocalDate targetDate,
             final LoanApplicationTerms loanApplicationTerms, final MathContext mc) {
-        moveOutstandingAmountsFromPeriodsBeforeReAging(scheduleModel.repaymentPeriods(), targetDate);
+        moveOutstandingAmountsFromPeriodsBeforeTransactionDate(scheduleModel.repaymentPeriods(), targetDate);
 
         // calculate already paid balances from transaction date
         final OutstandingDetails paidBalancesFromTransactionDate = calculatePaidBalancesAfterDate(scheduleModel, targetDate);
@@ -671,6 +671,18 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         calculateRateFactorForPeriods(relatedRepaymentPeriods, scheduleModel);
         calculateOutstandingBalance(scheduleModel);
         calculateLastUnpaidRepaymentPeriodEMI(scheduleModel, targetRepaymentPeriodDueDate);
+    }
+
+    @Override
+    public void updateModelRepaymentPeriodsDuringReAmortization(final ProgressiveLoanInterestScheduleModel model,
+            final LocalDate transactionDate) {
+        moveOutstandingAmountsFromPeriodsBeforeTransactionDate(model.repaymentPeriods(), transactionDate);
+        final List<RepaymentPeriod> reAmortizedPeriods = model.repaymentPeriods().stream()
+                .filter(rp -> rp.getDueDate().isAfter(transactionDate)).toList();
+        calculateEMIOnActualModel(reAmortizedPeriods, model);
+        calculateOutstandingBalance(model);
+        calculateLastUnpaidRepaymentPeriodEMI(model, transactionDate);
+        checkAndAdjustEmiIfNeededOnRelatedRepaymentPeriods(model, reAmortizedPeriods);
     }
 
     private LocalDate calculateDateForFixedLength(final ProgressiveLoanInterestScheduleModel scheduleModel,
@@ -825,16 +837,16 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     }
 
     /**
-     * * Zeroing out the EMI of the repayment periods, that are before re-aging and not been fully paid. And decreases
-     * the balance correction amount (added during interest recalculation for the business date) by the amount of the
-     * principal that was moved.
+     * * Zeroing out the EMI of the repayment periods, that are before the transaction date and not been fully paid. And
+     * decreases the balance correction amount (added during interest recalculation for the business date) by the amount
+     * of the principal that was moved.
      */
-    private static void moveOutstandingAmountsFromPeriodsBeforeReAging(final List<RepaymentPeriod> existingRepaymentPeriods,
+    private static void moveOutstandingAmountsFromPeriodsBeforeTransactionDate(final List<RepaymentPeriod> existingRepaymentPeriods,
             final LocalDate transactionDate) {
-        final List<RepaymentPeriod> periodsBeforeReAging = existingRepaymentPeriods.stream()
+        final List<RepaymentPeriod> periodsBeforeTransactionDate = existingRepaymentPeriods.stream()
                 .filter(rp -> !rp.getFromDate().isAfter(transactionDate) && !rp.isFullyPaid()).toList();
 
-        periodsBeforeReAging.forEach(rp -> {
+        periodsBeforeTransactionDate.forEach(rp -> {
             rp.getInterestPeriods().stream().filter(ip -> ip.getDueDate().isEqual(transactionDate)).forEach(ip -> {
                 if (!ip.getBalanceCorrectionAmount().isZero()) {
                     ip.addBalanceCorrectionAmount(ip.getBalanceCorrectionAmount().negated());
@@ -845,7 +857,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 lastInterestPeriod.addBalanceCorrectionAmount(rp.getOutstandingPrincipal().negated());
             }
             rp.setEmi(rp.getTotalPaidAmount());
-            rp.setOutstandingMovedDueToReAging(true);
+            rp.setOutstandingMoved(true);
         });
     }
 
@@ -1725,7 +1737,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             rp.getInterestPeriods().getLast()
                     .addCreditedInterestAmount(MathUtil.min(rp.getOutstandingInterest(), rp.getCreditedInterest(), false).negated());
             rp.setEmi(rp.getTotalPaidAmount());
-            rp.setOutstandingMovedDueToReAging(true);
+            rp.setOutstandingMoved(true);
         });
 
         // stop calculate unrecognised interest at this point because all

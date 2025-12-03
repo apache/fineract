@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -43,17 +44,14 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanReAmortizationApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.reamortization.LoanReAmortizationInterestHandlingType;
 import org.apache.fineract.portfolio.loanaccount.domain.reamortization.LoanReAmortizationParameter;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
+import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleService;
 import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,36 +59,30 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class LoanReAmortizationServiceImpl {
+public class LoanReAmortizationService {
 
     private final LoanAssembler loanAssembler;
     private final LoanReAmortizationValidator reAmortizationValidator;
     private final ExternalIdFactory externalIdFactory;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanTransactionRepository loanTransactionRepository;
-    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final LoanChargeValidator loanChargeValidator;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final CodeValueRepository codeValueRepository;
+    private final LoanScheduleService loanScheduleService;
 
-    public CommandProcessingResult reAmortize(Long loanId, JsonCommand command) {
-        Loan loan = loanAssembler.assembleFrom(loanId);
+    public CommandProcessingResult reAmortize(final Long loanId, final JsonCommand command) {
+        final Loan loan = loanAssembler.assembleFrom(loanId);
         reAmortizationValidator.validateReAmortize(loan, command);
 
-        Map<String, Object> changes = new LinkedHashMap<>();
+        final LoanTransaction reAmortizeTransaction = createReAmortizeTransaction(loan, command);
+        reAmortizeTransaction.setLoanReAmortizationParameter(createReAmortizationParameter(reAmortizeTransaction, command));
+        processReAmortizationTransaction(loan, reAmortizeTransaction);
+        loanTransactionRepository.saveAndFlush(reAmortizeTransaction);
+
+        final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put(LoanReAmortizationApiConstants.localeParameterName, command.locale());
         changes.put(LoanReAmortizationApiConstants.dateFormatParameterName, command.dateFormat());
-
-        LoanTransaction reAmortizeTransaction = createReAmortizeTransaction(loan, command);
-
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
-                .determineProcessor(loan.transactionProcessingStrategy());
-        loanRepaymentScheduleTransactionProcessor.processLatestTransaction(reAmortizeTransaction, new TransactionCtx(loan.getCurrency(),
-                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
-
-        reAmortizeTransaction.setLoanReAmortizationParameter(createReAmortizationParameter(reAmortizeTransaction, command));
-
-        loanTransactionRepository.saveAndFlush(reAmortizeTransaction);
 
         // delinquency recalculation will be triggered by the event in a decoupled way via a listener
         businessEventNotifierService.notifyPostBusinessEvent(new LoanReAmortizeBusinessEvent(loan));
@@ -117,6 +109,9 @@ public class LoanReAmortizationServiceImpl {
         LoanTransaction reAmortizeTransaction = findLatestNonReversedReAmortizeTransaction(loan);
         if (reAmortizeTransaction == null) {
             // TODO: when validations implemented; throw exception if there isn't a reamortize transaction available
+        }
+        if (loan.isProgressiveSchedule()) {
+            loanScheduleService.regenerateRepaymentSchedule(loan);
         }
         reverseReAmortizeTransaction(reAmortizeTransaction, command);
         loanTransactionRepository.saveAndFlush(reAmortizeTransaction);
@@ -182,5 +177,14 @@ public class LoanReAmortizationServiceImpl {
         }
 
         return new LoanReAmortizationParameter(reAmortizationTransaction, reAmortizationInterestHandlingType, reasonCodeValue);
+    }
+
+    private void processReAmortizationTransaction(final Loan loan, final LoanTransaction reAmortizationTransaction) {
+        if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
+            loanScheduleService.regenerateRepaymentSchedule(loan);
+            reprocessLoanTransactionsService.reprocessTransactions(loan, List.of(reAmortizationTransaction));
+        } else {
+            reprocessLoanTransactionsService.processLatestTransaction(reAmortizationTransaction, loan);
+        }
     }
 }
