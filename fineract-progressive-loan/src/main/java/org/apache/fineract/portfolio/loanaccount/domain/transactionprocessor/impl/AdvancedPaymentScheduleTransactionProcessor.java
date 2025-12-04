@@ -620,10 +620,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         if (transactionCtx instanceof ProgressiveTransactionCtx progressiveTransactionCtx
                 && loanTransaction.getLoan().isInterestBearingAndInterestRecalculationEnabled()) {
             handleReAmortizationWithInterestRecalculationEnabled(loanTransaction, progressiveTransactionCtx);
+        } else {
+            // TODO: implement interestRecalculation = false logic
+            throw new UnsupportedOperationException(
+                    "Logic for re-amortization when interest bearing loan has interestRecalculation disabled is not implemented");
         }
-        // TODO: implement interestRecalculation = false logic
-        throw new UnsupportedOperationException(
-                "Logic for re-amortization when interest bearing loan has interestRecalculation disabled is not implemented");
     }
 
     private static void reamortizationOnNonInterestBearingLoan(LoanTransaction loanTransaction, TransactionCtx transactionCtx) {
