@@ -55,6 +55,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -78,6 +79,9 @@ import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Configuration
@@ -121,6 +125,10 @@ public class AuthorizationServerConfig {
         http.securityMatcher("/swagger-ui/**", "/fineract.json", "/actuator/**", "/legacy-docs/apiLive.htm")
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()).csrf(AbstractHttpConfigurer::disable);
 
+        if (fineractProperties.getSecurity().getCors().isEnabled()) {
+            http.cors(Customizer.withDefaults());
+        }
+
         return http.build();
     }
 
@@ -137,6 +145,10 @@ public class AuthorizationServerConfig {
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
                 .apply(authorizationServerConfigurer);
 
+        if (fineractProperties.getSecurity().getCors().isEnabled()) {
+            http.cors(Customizer.withDefaults());
+        }
+
         return http.build();
     }
 
@@ -144,7 +156,6 @@ public class AuthorizationServerConfig {
     @Order(3)
     public SecurityFilterChain protectedEndpoints(HttpSecurity http) throws Exception {
         http
-                // .securityMatcher(new AntPathRequestMatcher("/api/**"))
                 // TODO: Make it configurable
                 .csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(auth -> {
                     auth.anyRequest().authenticated();
@@ -171,7 +182,25 @@ public class AuthorizationServerConfig {
         if (fineractProperties.getSecurity().getTwoFactor().isEnabled()) {
             http.addFilterAfter(twoFactorAuthenticationFilter(), CorrelationHeaderFilter.class);
         }
+        if (fineractProperties.getSecurity().getCors().isEnabled()) {
+            http.cors(Customizer.withDefaults());
+        }
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        FineractProperties.CorsProperties corsConfiguration = fineractProperties.getSecurity().getCors();
+        config.setAllowedOrigins(corsConfiguration.getAllowedOrigins());
+        config.setAllowedMethods(corsConfiguration.getAllowedMethods());
+        config.setAllowedHeaders(corsConfiguration.getAllowedHeaders());
+        config.setExposedHeaders(corsConfiguration.getExposedHeaders());
+        config.setAllowCredentials(corsConfiguration.isAllowCredentials()); // if you use cookies / Authorization header
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 
     @Bean

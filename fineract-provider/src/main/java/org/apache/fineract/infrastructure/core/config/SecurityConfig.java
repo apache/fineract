@@ -160,8 +160,8 @@ public class SecurityConfig {
                             .requestMatchers(antMatcher("/api/**"))
                             .access(allOf(authorizationManagers.toArray(new AuthorizationManager[0]))); //
                 }).httpBasic((httpBasic) -> httpBasic.authenticationEntryPoint(basicAuthenticationEntryPoint())) //
-                .cors(Customizer.withDefaults()).csrf(AbstractHttpConfigurer::disable) // NOSONAR only creating a
-                                                                                       // service that
+                .csrf(AbstractHttpConfigurer::disable) // NOSONAR only creating a
+                                                       // service that
                 // is used by non-browser clients
                 .sessionManagement((smc) -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //
                 .addFilterBefore(tenantAwareBasicAuthenticationFilter(), SecurityContextHolderFilter.class) //
@@ -188,6 +188,9 @@ public class SecurityConfig {
         if (fineractProperties.getSecurity().getHsts().isEnabled()) {
             http.requiresChannel(channel -> channel.anyRequest().requiresSecure()).headers(
                     headers -> headers.httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000)));
+        }
+        if (fineractProperties.getSecurity().getCors().isEnabled()) {
+            http.cors(Customizer.withDefaults());
         }
         return http.build();
     }
@@ -258,13 +261,16 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
-        configuration.setAllowedMethods(List.of("*"));
-        configuration.setAllowCredentials(true);
-        configuration.setAllowedHeaders(List.of("*"));
+        CorsConfiguration config = new CorsConfiguration();
+        FineractProperties.CorsProperties corsConfiguration = fineractProperties.getSecurity().getCors();
+        config.setAllowedOrigins(corsConfiguration.getAllowedOrigins());
+        config.setAllowedMethods(corsConfiguration.getAllowedMethods());
+        config.setAllowedHeaders(corsConfiguration.getAllowedHeaders());
+        config.setExposedHeaders(corsConfiguration.getExposedHeaders());
+        config.setAllowCredentials(corsConfiguration.isAllowCredentials()); // if you use cookies / Authorization header
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 }
