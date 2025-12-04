@@ -66,6 +66,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.api.request.ReAgePreviewRequest;
+import org.apache.fineract.portfolio.loanaccount.api.request.ReAmortizationPreviewRequest;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
@@ -76,6 +77,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleD
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.reaging.LoanReAgingService;
+import org.apache.fineract.portfolio.loanaccount.service.reamortization.LoanReAmortizationService;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.springframework.data.domain.Page;
@@ -111,6 +113,7 @@ public class LoanTransactionsApiResource {
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
     private final LoanChargePaidByReadService loanChargePaidByReadService;
     private final LoanReAgingService loanReAgingService;
+    private final LoanReAmortizationService loanReAmortizationService;
 
     @GET
     @Path("{loanId}/transactions/template")
@@ -804,6 +807,28 @@ public class LoanTransactionsApiResource {
             @Valid @BeanParam final ReAgePreviewRequest reAgePreviewRequest) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         return loanReAgingService.previewReAge(null, loanExternalId, reAgePreviewRequest);
+    }
+
+    @GET
+    @Path("{loanId}/transactions/reamortized-preview")
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Preview Re-Amortized Schedule", description = "Generates a preview of the re-amortized loan schedule based on the provided parameters without creating any transactions or modifying the loan.")
+    public LoanScheduleData previewReAmortizationSchedule(
+            @PathParam("loanId") @Parameter(description = "loanId", required = true) final Long loanId,
+            @Valid @BeanParam final ReAmortizationPreviewRequest reAmortizationPreviewRequest) {
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
+        return loanReAmortizationService.previewReAmortization(loanId, null, reAmortizationPreviewRequest);
+    }
+
+    @GET
+    @Path("external-id/{loanExternalId}/transactions/reamortized-preview")
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Preview Re-amortized Schedule", description = "Generates a preview of the re-amortized loan schedule based on the provided parameters without creating any transactions or modifying the loan.")
+    public LoanScheduleData previewReAmortizationSchedule(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId", required = true) final String loanExternalId,
+            @Valid @BeanParam final ReAmortizationPreviewRequest reAmortizationPreviewRequest) {
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
+        return loanReAmortizationService.previewReAmortization(null, loanExternalId, reAmortizationPreviewRequest);
     }
 
 }

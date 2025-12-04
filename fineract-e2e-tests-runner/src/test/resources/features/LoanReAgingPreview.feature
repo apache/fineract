@@ -34,7 +34,7 @@ Feature: LoanReAgingPreview
       | 5  | 14   | 15 April 2025    |               | 666.67          | 333.33        | 0.0      | 0.0  | 0.0       | 333.33 | 0.0  | 0.0        | 0.0  | 333.33      |
       | 6  | 30   | 15 May 2025      |               | 333.34          | 333.33        | 0.0      | 0.0  | 0.0       | 333.33 | 0.0  | 0.0        | 0.0  | 333.33      |
       | 7  | 31   | 15 June 2025     |               | 0.0             | 333.34        | 0.0      | 0.0  | 0.0       | 333.34 | 0.0  | 0.0        | 0.0  | 333.34      |
-    Then Loan Repayment schedule preview has the following data in Total row:
+    Then Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 0.0  | 0.0        | 0.0  | 1000.0      |
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -149,7 +149,7 @@ Feature: LoanReAgingPreview
       | 3  | 28   | 01 March 2025    | 01 April 2025 | 1000.0          | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0  | 0.0        | 0.0  | 0.0         |
       | 4  | 31   | 01 April 2025    |               | 0.0             | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 0.0  | 0.0        | 0.0  | 1000.0      |
       | 5  | 32   | 03 May 2025      |               | 0.0             | 0.0           | 0.0      | 0.0  | 10.0      | 10.0   | 0.0  | 0.0        | 0.0  | 10.0        |
-    And Loan Repayment schedule preview has the following data in Total row:
+    And Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 10.0      | 1010.0 | 0.0  | 0.0        | 0.0  | 1010.0      |
     And Loan Repayment schedule has 5 periods, with the following data for periods:
@@ -201,7 +201,7 @@ Feature: LoanReAgingPreview
       | 3  | 28   | 01 March 2025    | 01 April 2025 | 750.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0   | 0.0         |
       | 4  | 31   | 01 April 2025    |               | 0.0             | 750.0         | 0.0      | 0.0  | 0.0       | 750.0 | 0.0   | 0.0        | 0.0   | 750.0       |
       | 5  | 32   | 03 May 2025      |               | 0.0             | 0.0           | 0.0      | 0.0  | 10.0      | 10.0  | 0.0   | 0.0        | 0.0   | 10.0        |
-    And Loan Repayment schedule preview has the following data in Total row:
+    And Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 10.0      | 1010.0 | 250.0 | 0.0        | 250.0 | 760.0       |
     And Loan Repayment schedule has 5 periods, with the following data for periods:
@@ -254,7 +254,7 @@ Feature: LoanReAgingPreview
       | 3  | 15   | 31 January 2025  | 15 February 2025 | 750.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0   | 0.0         |
       | 4  | 15   | 15 February 2025 | 20 March 2025    | 0.0             | 750.0         | 0.0      | 0.0  | 0.0       | 750.0 | 750.0 | 0.0        | 750.0 | 0.0         |
       | 5  | 33   | 20 March 2025    |                  | 0.0             | 0.0           | 0.0      | 0.0  | 10.0      | 10.0  | 0.0   | 0.0        | 0.0   | 10.0        |
-    And Loan Repayment schedule preview has the following data in Total row:
+    And Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late  | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 10.0      | 1010.0 | 1000.0 | 0.0        | 750.0 | 10.0        |
     And Loan Repayment schedule has 5 periods, with the following data for periods:
@@ -307,7 +307,7 @@ Feature: LoanReAgingPreview
       | 3  | 28   | 01 March 2025    | 01 April 2025 | 750.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0   | 0.0         |
       | 4  | 31   | 01 April 2025    |               | 0.0             | 750.0         | 0.0      | 0.0  | 0.0       | 750.0 | 0.0   | 0.0        | 0.0   | 750.0       |
       | 5  | 32   | 03 May 2025      |               | 0.0             | 125.0         | 0.0      | 0.0  | 10.0      | 135.0 | 0.0   | 0.0        | 0.0   | 135.0       |
-    And Loan Repayment schedule preview has the following data in Total row:
+    And Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
       | 1125.0        | 0.0      | 0.0  | 10.0      | 1135.0 | 250.0 | 0.0        | 250.0 | 885.0       |
     And Loan Repayment schedule has 5 periods, with the following data for periods:
@@ -361,7 +361,7 @@ Feature: LoanReAgingPreview
       | 3  | 28   | 01 March 2025    | 01 April 2025 | 750.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0   | 0.0         |
       | 4  | 31   | 01 April 2025    |               | 0.0             | 750.0         | 0.0      | 0.0  | 0.0       | 750.0 | 20.0  | 0.0        | 20.0  | 730.0       |
       | 5  | 32   | 03 May 2025      |               | 0.0             | 0.0           | 0.0      | 0.0  | 20.0      | 20.0  | 0.0   | 0.0        | 0.0   | 20.0        |
-    Then Loan Repayment schedule preview has the following data in Total row:
+    Then Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 20.0      | 1020.0 | 270.0 | 0.0        | 270.0 | 750.0       |
     And Loan Repayment schedule has 5 periods, with the following data for periods:
@@ -413,7 +413,7 @@ Feature: LoanReAgingPreview
       | 3  | 28   | 01 March 2025    | 01 April 2025 | 900.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0   | 0.0         |
       | 4  | 31   | 01 April 2025    |               | 0.0             | 900.0         | 0.0      | 0.0  | 0.0       | 900.0 | 0.0   | 0.0        | 0.0   | 900.0       |
       | 5  | 32   | 03 May 2025      |               | 0.0             | 0.0           | 0.0      | 0.0  | 20.0      | 20.0  | 0.0   | 0.0        | 0.0   | 20.0        |
-    And Loan Repayment schedule preview has the following data in Total row:
+    And Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 20.0      | 1020.0 | 100.0 | 0.0        | 100.0 | 920.0       |
     And Loan Repayment schedule has 5 periods, with the following data for periods:
@@ -469,7 +469,7 @@ Feature: LoanReAgingPreview
       | 4  | 28   | 01 March 2025    | 01 April 2025 | 600.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
       | 5  | 31   | 01 April 2025    |               | 0.0             | 600.0         | 0.0      | 0.0  | 0.0       | 600.0 | 0.0  | 0.0        | 0.0  | 600.0       |
       | 6  | 30   | 01 May 2025      |               | 0.0             | 0.0           | 0.0      | 0.0  | 20.0      | 20.0  | 0.0  | 0.0        | 0.0  | 20.0        |
-    Then Loan Repayment schedule preview has the following data in Total row:
+    Then Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       | 600.0         | 0.0      | 0.0  | 20.0      | 620.0 | 0.0  | 0.0        | 0.0  | 620.0       |
     And Loan Repayment schedule has 6 periods, with the following data for periods:
@@ -547,7 +547,7 @@ Feature: LoanReAgingPreview
       | 7  | 30   | 01 July 2024     |                  | 28.34           | 14.05         | 0.25     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
       | 8  | 31   | 01 August 2024   |                  | 14.21           | 14.13         | 0.17     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
       | 9  | 31   | 01 September 2024|                  | 0.0             | 14.21         | 0.08     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
-    Then Loan Repayment schedule preview has the following data in Total row:
+    Then Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       | 100.0         | 2.8      | 0.0  | 0.0       | 102.8 | 17.01 | 0.0        | 0.0  | 85.79       |
 
@@ -617,7 +617,7 @@ Feature: LoanReAgingPreview
       | 7  | 30   | 01 July 2024     |                  | 28.34           | 14.05         | 0.25     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
       | 8  | 31   | 01 August 2024   |                  | 14.21           | 14.13         | 0.17     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
       | 9  | 31   | 01 September 2024|                  | 0.0             | 14.21         | 0.08     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
-    Then Loan Repayment schedule preview has the following data in Total row:
+    Then Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       | 100.0         | 2.8      | 10.0 | 0.0       | 112.8 | 17.01 | 0.0        | 0.0  | 95.79       |
 
@@ -685,7 +685,7 @@ Feature: LoanReAgingPreview
       | 7  | 30   | 01 July 2024     |                  | 28.34           | 14.05         | 0.25     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
       | 8  | 31   | 01 August 2024   |                  | 14.21           | 14.13         | 0.17     | 10.0 | 0.0       | 24.3  | 0.0   | 0.0        | 0.0  | 24.3        |
       | 9  | 31   | 01 September 2024|                  | 0.0             | 14.21         | 0.08     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
-    Then Loan Repayment schedule preview has the following data in Total row:
+    Then Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       | 100.0         | 2.8      | 10.0 | 0.0       | 112.8 | 17.01 | 0.0        | 0.0  | 95.79       |
 
@@ -750,7 +750,7 @@ Feature: LoanReAgingPreview
       | 7  | 30   | 01 July 2024     |                  | 25.63           | 12.71         | 0.22     | 0.0  | 0.0       | 12.93 | 0.0   | 0.0        | 0.0  | 12.93       |
       | 8  | 31   | 01 August 2024   |                  | 12.85           | 12.78         | 0.15     | 0.0  | 0.0       | 12.93 | 0.0   | 0.0        | 0.0  | 12.93       |
       | 9  | 31   | 01 September 2024|                  | 0.0             | 12.85         | 0.07     | 0.0  | 0.0       | 12.92 | 0.0   | 0.0        | 0.0  | 12.92       |
-    Then Loan Repayment schedule preview has the following data in Total row:
+    Then Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100.0         | 2.57     | 0.0  | 0.0       | 102.57 | 25.0 | 7.99       | 0.0  | 77.57       |
 
@@ -821,7 +821,7 @@ Feature: LoanReAgingPreview
       | 8  | 30   | 01 July 2024      |                  | 21.25           | 10.54         | 0.19     | 0.0  | 0.0       | 10.73 | 0.0   | 0.0        | 0.0  | 10.73       |
       | 9  | 31   | 01 August 2024    |                  | 10.64           | 10.61         | 0.12     | 0.0  | 0.0       | 10.73 | 0.0   | 0.0        | 0.0  | 10.73       |
       | 10 | 31   | 01 September 2024 |                  | 0.0             | 10.64         | 0.06     | 0.0  | 0.0       | 10.7  | 0.0   | 0.0        | 0.0  | 10.7        |
-    Then Loan Repayment schedule preview has the following data in Total row:
+    Then Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 100.0         | 2.11     | 0.0  | 0.0       | 102.11 | 37.76 | 0.0        | 0.0  | 64.35       |
 
@@ -930,7 +930,7 @@ Feature: LoanReAgingPreview
       | 7  | 30   | 01 July 2024     |                  | 28.34           | 14.05         | 0.25     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
       | 8  | 31   | 01 August 2024   |                  | 14.21           | 14.13         | 0.17     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
       | 9  | 31   | 01 September 2024|                  | 0.0             | 14.21         | 0.08     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
-    Then Loan Repayment schedule preview has the following data in Total row:
+    Then Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       | 100.0         | 2.8      | 0.0  | 0.0       | 102.8 | 17.01 | 0.0        | 0.0  | 85.79       |
 
@@ -1158,7 +1158,7 @@ Feature: LoanReAgingPreview
       | 7  | 30   | 01 July 2024     |                  | 28.34           | 14.05         | 0.25     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
       | 8  | 31   | 01 August 2024   |                  | 14.21           | 14.13         | 0.17     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
       | 9  | 31   | 01 September 2024|                  | 0.0             | 14.21         | 0.08     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
-    Then Loan Repayment schedule preview has the following data in Total row:
+    Then Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       | 100.0         | 2.8      | 10.0 | 0.0       | 112.8 | 17.01 | 0.0        | 0.0  | 95.79       |
 

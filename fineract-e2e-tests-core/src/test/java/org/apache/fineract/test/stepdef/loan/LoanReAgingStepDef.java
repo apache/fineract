@@ -413,7 +413,7 @@ public class LoanReAgingStepDef extends AbstractStepDef {
         }
     }
 
-    @Then("Loan Repayment schedule preview has the following data in Total row:")
+    @Then("Loan Re-Aged Repayment schedule preview has the following data in Total row:")
     public void loanRepaymentScheduleAmountCheck(DataTable table) {
         List<List<String>> data = table.asLists();
         List<String> header = data.get(0);
