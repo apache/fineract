@@ -605,10 +605,74 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
     }
 
-    private void handleReamortizationWithEqualAmortizationInterestSplitHandlingType(LoanTransaction loanTransaction,
-            TransactionCtx transactionCtx) {
-        throw new UnsupportedOperationException(
-                "EQUAL_AMORTIZATION_INTEREST_SPLIT interest handling strategy for re-amortization is not implemented");
+    private void handleReamortizationWithEqualAmortizationInterestSplitHandlingType(final LoanTransaction loanTransaction,
+            final TransactionCtx transactionCtx) {
+        if (transactionCtx instanceof ProgressiveTransactionCtx progressiveTransactionCtx
+                && loanTransaction.getLoan().isInterestBearingAndInterestRecalculationEnabled()) {
+            final LocalDate transactionDate = loanTransaction.getTransactionDate();
+            final MonetaryCurrency currency = progressiveTransactionCtx.getCurrency();
+
+            final List<LoanRepaymentScheduleInstallment> previousInstallments = progressiveTransactionCtx.getInstallments().stream()
+                    .filter(installment -> !installment.getDueDate().isAfter(transactionDate)).toList();
+
+            final List<LoanRepaymentScheduleInstallment> futureInstallments = progressiveTransactionCtx.getInstallments().stream()
+                    .filter(installment -> installment.getDueDate().isAfter(transactionDate))
+                    .filter(installment -> !installment.isAdditional() && !installment.isDownPayment() && !installment.isReAged()).toList();
+
+            Money totalOverDuePrincipal = Money.zero(currency);
+            Money totalOverDueFee = Money.zero(currency);
+            for (LoanRepaymentScheduleInstallment installment : previousInstallments) {
+                final Money outstandingPrincipal = emiCalculator
+                        .findRepaymentPeriod(progressiveTransactionCtx.getModel(), installment.getFromDate(), installment.getDueDate())
+                        .map(RepaymentPeriod::getOutstandingPrincipal).map(amount -> Money.of(currency, amount.getAmount()))
+                        .orElse(Money.zero(currency));
+                totalOverDuePrincipal = totalOverDuePrincipal.add(outstandingPrincipal);
+                totalOverDueFee = totalOverDueFee.add(installment.getFeeChargesOutstanding(currency));
+                installment.setFeeChargesCharged(installment.getFeeChargesPaid(currency).getAmount());
+            }
+
+            final Money totalOverDueInterest = emiCalculator.getOutstandingInterestTillDate(progressiveTransactionCtx.getModel(),
+                    previousInstallments.getLast().getDueDate());
+
+            loanTransaction.resetDerivedComponents();
+            loanTransaction.updateComponentsAndTotal(totalOverDuePrincipal, totalOverDueInterest, Money.zero(currency),
+                    Money.zero(currency));
+
+            emiCalculator.updateModelRepaymentPeriodsDuringReAmortizationWithEqualInterestSplit(progressiveTransactionCtx.getModel(),
+                    transactionDate);
+            updateInstallmentsByRepaymentPeriods(loanTransaction, progressiveTransactionCtx);
+
+            distributeFeeAmongFutureInstallments(totalOverDueFee, futureInstallments);
+        } else {
+            // TODO: implement interestRecalculation = false logic
+            throw new UnsupportedOperationException(
+                    "Logic for re-amortization when interest bearing loan has interestRecalculation disabled is not implemented");
+        }
+    }
+
+    private void distributeFeeAmongFutureInstallments(final Money totalOverDueFee,
+            final List<LoanRepaymentScheduleInstallment> futureInstallments) {
+        if (totalOverDueFee.isZero() || futureInstallments.isEmpty()) {
+            return;
+        }
+
+        final int numberOfFutureInstallments = futureInstallments.size();
+        final MonetaryCurrency currency = totalOverDueFee.getCurrency();
+        BigDecimal feePortionPerInstallment = totalOverDueFee.getAmount().divide(BigDecimal.valueOf(numberOfFutureInstallments),
+                MoneyHelper.getMathContext());
+
+        final LoanRepaymentScheduleInstallment lastFutureInstallment = futureInstallments.stream()
+                .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getDueDate)).get();
+
+        BigDecimal remainingFee = totalOverDueFee.getAmount();
+        for (final LoanRepaymentScheduleInstallment installment : futureInstallments) {
+            if (lastFutureInstallment.equals(installment)) {
+                installment.addToFeeCharges(Money.of(currency, remainingFee));
+            } else {
+                installment.addToFeeCharges(Money.of(currency, feePortionPerInstallment));
+                remainingFee = remainingFee.subtract(feePortionPerInstallment);
+            }
+        }
     }
 
     private void handleReamortizationWithWaiveInterestHandlingType(LoanTransaction loanTransaction, TransactionCtx transactionCtx) {

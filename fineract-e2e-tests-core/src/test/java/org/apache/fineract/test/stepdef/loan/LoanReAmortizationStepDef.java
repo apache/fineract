@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.LoanScheduleData;
 import org.apache.fineract.client.models.LoanSchedulePeriodData;
@@ -45,18 +46,15 @@ import org.apache.fineract.test.messaging.EventAssertion;
 import org.apache.fineract.test.messaging.event.loan.LoanReAmortizeEvent;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
-import org.springframework.beans.factory.annotation.Autowired;
 
+@RequiredArgsConstructor
 public class LoanReAmortizationStepDef extends AbstractStepDef {
 
     private static final String DATE_FORMAT = "dd MMMM yyyy";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
-    @Autowired
-    private FineractFeignClient fineractClient;
-
-    @Autowired
-    private EventAssertion eventAssertion;
+    private final FineractFeignClient fineractClient;
+    private final EventAssertion eventAssertion;
 
     @When("When Admin creates a Loan re-amortization transaction on current business date")
     public void createLoanReAmortization() {
@@ -66,20 +64,20 @@ public class LoanReAmortizationStepDef extends AbstractStepDef {
         PostLoansLoanIdTransactionsRequest reAmortizationRequest = LoanRequestFactory.defaultLoanReAmortizationRequest();
 
         PostLoansLoanIdTransactionsResponse response = ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId,
-                reAmortizationRequest, Map.<String, Object>of("command", "reAmortize")));
+                reAmortizationRequest, Map.of("command", "reAmortize")));
         testContext().set(TestContextKey.LOAN_REAMORTIZATION_RESPONSE, response);
     }
 
     @When("Admin creates a Loan re-amortization transaction on current business date with reAmortizationInterestHandling {string}")
-    public void createLoanReAmortizationWithInterestHandling(String reAmortizationInterestHandling) throws IOException {
-        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        long loanId = loanResponse.body().getLoanId();
+    public void createLoanReAmortizationWithInterestHandling(final String reAmortizationInterestHandling) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final Long loanId = loanResponse.getLoanId();
 
-        PostLoansLoanIdTransactionsRequest reAmortizationRequest = LoanRequestFactory.defaultLoanReAmortizationRequest().reAmortizationInterestHandling(reAmortizationInterestHandling);
+        final PostLoansLoanIdTransactionsRequest reAmortizationRequest = LoanRequestFactory.defaultLoanReAmortizationRequest()
+                .reAmortizationInterestHandling(reAmortizationInterestHandling);
 
-        Response<PostLoansLoanIdTransactionsResponse> response = loanTransactionsApi
-                .executeLoanTransaction(loanId, reAmortizationRequest, "reAmortize").execute();
-        ErrorHelper.checkSuccessfulApiCall(response);
+        final PostLoansLoanIdTransactionsResponse response = ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId,
+                reAmortizationRequest, Map.of("command", "reAmortize")));
         testContext().set(TestContextKey.LOAN_REAMORTIZATION_RESPONSE, response);
     }
 
@@ -91,7 +89,7 @@ public class LoanReAmortizationStepDef extends AbstractStepDef {
         PostLoansLoanIdTransactionsRequest reAmortizationRequest = LoanRequestFactory.defaultLoanReAmortizationRequest();
 
         PostLoansLoanIdTransactionsResponse response = ok(() -> fineractClient.loanTransactions().executeLoanTransaction1(loanExternalId,
-                reAmortizationRequest, Map.<String, Object>of("command", "reAmortize")));
+                reAmortizationRequest, Map.of("command", "reAmortize")));
         testContext().set(TestContextKey.LOAN_REAMORTIZATION_RESPONSE, response);
     }
 
@@ -101,7 +99,7 @@ public class LoanReAmortizationStepDef extends AbstractStepDef {
         long loanId = loanResponse.getLoanId();
 
         PostLoansLoanIdTransactionsResponse response = ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId,
-                new PostLoansLoanIdTransactionsRequest(), Map.<String, Object>of("command", "undoReAmortize")));
+                new PostLoansLoanIdTransactionsRequest(), Map.of("command", "undoReAmortize")));
         testContext().set(TestContextKey.LOAN_REAMORTIZATION_UNDO_RESPONSE, response);
     }
 

@@ -685,6 +685,83 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         checkAndAdjustEmiIfNeededOnRelatedRepaymentPeriods(model, reAmortizedPeriods);
     }
 
+    @Override
+    public void updateModelRepaymentPeriodsDuringReAmortizationWithEqualInterestSplit(final ProgressiveLoanInterestScheduleModel model,
+            final LocalDate transactionDate) {
+        final MathContext mc = model.mc();
+        final List<RepaymentPeriod> periodsBeforeTransactionDate = model.repaymentPeriods().stream()
+                .filter(rp -> !rp.getDueDate().isAfter(transactionDate) && !rp.isFullyPaid()).toList();
+
+        Money totalAmortizedInterest = model.zero();
+        for (RepaymentPeriod rp : periodsBeforeTransactionDate) {
+            totalAmortizedInterest = totalAmortizedInterest.add(rp.getDueInterest().minus(rp.getPaidInterest(), mc), mc);
+        }
+
+        final List<RepaymentPeriod> futurePeriods = model.repaymentPeriods().stream().filter(rp -> rp.getDueDate().isAfter(transactionDate))
+                .toList();
+
+        final int numberOfFuturePeriods = futurePeriods.size();
+
+        Money interestPortionPerPeriod = model.zero();
+        if (numberOfFuturePeriods > 0 && totalAmortizedInterest.isGreaterThanZero()) {
+            interestPortionPerPeriod = totalAmortizedInterest.dividedBy(numberOfFuturePeriods, mc);
+        }
+
+        model.repaymentPeriods().forEach(rp -> rp.getInterestPeriods().forEach(ip -> {
+            if (!ip.getBalanceCorrectionAmount().isZero()) {
+                ip.addBalanceCorrectionAmount(ip.getBalanceCorrectionAmount().negated());
+            }
+        }));
+
+        final List<RepaymentPeriod> allPeriods = model.repaymentPeriods();
+        for (int i = 0; i < allPeriods.size(); i++) {
+            final RepaymentPeriod rp = allPeriods.get(i);
+            if (rp.isFullyPaid() && !rp.getDueDate().isAfter(transactionDate)) {
+                Money nextPeriodCreditedPrincipal = model.zero();
+                if (i + 1 < allPeriods.size()) {
+                    nextPeriodCreditedPrincipal = allPeriods.get(i + 1).getCreditedPrincipal();
+                }
+                final Money effectivePaidPrincipal = rp.getPaidPrincipal().minus(nextPeriodCreditedPrincipal, mc);
+                if (effectivePaidPrincipal.isGreaterThanZero()) {
+                    final InterestPeriod lastInterestPeriod = rp.getInterestPeriods().getLast();
+                    lastInterestPeriod.addBalanceCorrectionAmount(effectivePaidPrincipal.negated());
+                }
+            }
+        }
+
+        moveOutstandingAmountsFromPeriodsBeforeTransactionDateForEqualInterestSplit(periodsBeforeTransactionDate, transactionDate);
+
+        calculateRateFactorForPeriods(futurePeriods, model);
+
+        for (final RepaymentPeriod futurePeriod : futurePeriods) {
+            futurePeriod.setReAgedInterest(MathUtil.plus(futurePeriod.getReAgedInterest(), interestPortionPerPeriod, mc));
+        }
+
+        calculateEMIOnActualModel(futurePeriods, model);
+        calculateOutstandingBalance(model);
+        calculateLastUnpaidRepaymentPeriodEMI(model, transactionDate);
+        checkAndAdjustEmiIfNeededOnRelatedRepaymentPeriods(model, futurePeriods);
+    }
+
+    private void moveOutstandingAmountsFromPeriodsBeforeTransactionDateForEqualInterestSplit(
+            final List<RepaymentPeriod> periodsBeforeTransactionDate, final LocalDate transactionDate) {
+        periodsBeforeTransactionDate.forEach(rp -> {
+            rp.getInterestPeriods().stream().filter(ip -> ip.getDueDate().isEqual(transactionDate)).forEach(ip -> {
+                if (!ip.getBalanceCorrectionAmount().isZero()) {
+                    ip.addBalanceCorrectionAmount(ip.getBalanceCorrectionAmount().negated());
+                }
+            });
+            final InterestPeriod lastInterestPeriod = rp.getInterestPeriods().getLast();
+            Money paidPrincipal = rp.getPaidPrincipal();
+            if (paidPrincipal.isGreaterThanZero()) {
+                lastInterestPeriod.addBalanceCorrectionAmount(paidPrincipal.negated());
+            }
+            rp.setEmi(rp.getTotalPaidAmount());
+            rp.moveOutstandingDueToReAging();
+            rp.setNoUnrecognisedInterest(true);
+        });
+    }
+
     private LocalDate calculateDateForFixedLength(final ProgressiveLoanInterestScheduleModel scheduleModel,
             final LoanApplicationTerms loanApplicationTerms, final LocalDate targetRepaymentPeriodDueDate, final LocalDate newDueDate) {
         final long variationDays = DateUtils.getDifferenceInDays(targetRepaymentPeriodDueDate, newDueDate);

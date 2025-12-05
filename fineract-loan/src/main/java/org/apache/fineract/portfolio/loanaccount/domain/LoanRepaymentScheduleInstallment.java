@@ -905,6 +905,14 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         checkIfRepaymentPeriodObligationsAreMet(transactionDate, transactionAmount.getCurrency());
     }
 
+    public void addToFeeCharges(final Money transactionAmount) {
+        if (this.feeChargesCharged == null) {
+            setFeeChargesCharged(transactionAmount.getAmount());
+        } else {
+            setFeeChargesCharged(this.feeChargesCharged.add(transactionAmount.getAmount()));
+        }
+    }
+
     public void addToCreditedInterest(final BigDecimal amount) {
         if (this.creditedInterest == null) {
             setCreditedInterest(amount);
