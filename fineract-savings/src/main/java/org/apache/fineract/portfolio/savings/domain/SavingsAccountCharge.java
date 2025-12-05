@@ -373,13 +373,14 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
         amountOutstanding = amountOutstanding.minus(amountPaid);
         this.amountPaid = amountPaidToDate.getAmount();
         this.amountOutstanding = amountOutstanding.getAmount();
-        this.paid = determineIfFullyPaid();
 
         if (BigDecimal.ZERO.compareTo(this.amountOutstanding) == 0) {
             // full outstanding is paid, update to next due date
             updateNextDueDateForRecurringFees();
             resetPropertiesForRecurringFees();
         }
+
+        this.paid = determineIfFullyPaid();
 
         return Money.of(currency, this.amountOutstanding);
     }
@@ -528,7 +529,8 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
     }
 
     private boolean determineIfFullyPaid() {
-        return BigDecimal.ZERO.compareTo(calculateOutstanding()) == 0;
+        // outstanding might've been already subtracted so let's check if it's negative or zero
+        return BigDecimal.ZERO.compareTo(calculateOutstanding()) >= 0;
     }
 
     private BigDecimal calculateOutstanding() {

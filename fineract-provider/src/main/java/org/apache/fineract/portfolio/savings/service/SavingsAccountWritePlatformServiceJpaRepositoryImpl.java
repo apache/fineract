@@ -1377,13 +1377,15 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public void applyChargeDue(final Long savingsAccountChargeId, final Long accountId) {
         // always use current date as transaction date for batch job
         final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
-        final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository
-                .findOneWithNotFoundDetection(savingsAccountChargeId, accountId);
+        SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository.findOneWithNotFoundDetection(savingsAccountChargeId,
+                accountId);
 
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd MM yyyy").withZone(DateUtils.getDateTimeZoneOfTenant());
 
         while (savingsAccountCharge.isNotFullyPaid() && DateUtils.isBefore(savingsAccountCharge.getDueDate(), transactionDate)) {
             payCharge(savingsAccountCharge, transactionDate, savingsAccountCharge.amoutOutstanding(), fmt, false);
+            // refetch the savings account charge so changes are visible
+            savingsAccountCharge = this.savingsAccountChargeRepository.findOneWithNotFoundDetection(savingsAccountChargeId, accountId);
         }
     }
 
