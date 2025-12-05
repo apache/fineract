@@ -2288,7 +2288,7 @@ Feature: LoanReAging
     When Admin creates a Loan re-aging preview by Loan external ID with the following data:
       | frequencyNumber | frequencyType | startDate     | numberOfInstallments |
       | 1               | MONTHS        | 15 March 2024 | 6                    |
-    Then Loan Repayment schedule preview has 9 periods, with the following data for periods:
+    Then Loan Re-Aged Repayment schedule preview has 9 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |               | 1000.0          |   0.0         | 0.0      | 0.0  | 0.0       | 0.0    | 0.0  |            |      |             |
       | 1  | 0    | 01 January 2024  | 09 March 2024 | 1000.0          |   0.0         | 0.0      | 0.0  | 0.0       | 0.0    | 0.0  | 0.0        | 0.0  | 0.0         |
@@ -2426,7 +2426,7 @@ Feature: LoanReAging
     When Admin creates a Loan re-aging preview by Loan external ID with the following data:
       | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
       | 1               | MONTHS        | 15 February 2025 | 6                    |
-    Then Loan Repayment schedule preview has 7 periods, with the following data for periods:
+    Then Loan Re-Aged Repayment schedule preview has 7 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
       |    |      | 01 January 2025   |                  | 1000.0          | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   |            |       |             |
       | 1  | 31   | 01 February 2025  | 03 February 2025 | 833.0           | 167.0         | 0.0      | 0.0  | 0.0       | 167.0 | 167.0 | 0.0        | 167.0 |   0.0       |
@@ -2516,7 +2516,7 @@ Feature: LoanReAging
     When Admin creates a Loan re-aging preview by Loan external ID with the following data:
       | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
       | 1               | MONTHS        | 15 February 2025 | 1                    |
-    Then Loan Repayment schedule preview has 2 periods, with the following data for periods:
+    Then Loan Re-Aged Repayment schedule preview has 2 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
       |    |      | 01 January 2025   |                  | 1000.0          | 0.0           |  0.0     | 0.0  |  0.0      | 0.0   | 0.0   |            |       |             |
       | 1  | 31   | 01 February 2025  | 03 February 2025 | 833.0           | 167.0         | 0.0      | 0.0  | 0.0       | 167.0 | 167.0 | 0.0        | 167.0 |   0.0       |
@@ -2646,7 +2646,7 @@ Feature: LoanReAging
     When Admin creates a Loan re-aging preview by Loan external ID with the following data:
       | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
       | 1               | MONTHS        | 15 February 2025 | 2                    |
-    Then Loan Repayment schedule preview has 3 periods, with the following data for periods:
+    Then Loan Re-Aged Repayment schedule preview has 3 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2025   |                  | 1000.0          | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2025  | 10 February 2025 | 1000.0          | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  |   0.0       |
@@ -3229,7 +3229,7 @@ Feature: LoanReAging
     When Admin creates a Loan re-aging preview by Loan external ID with the following data:
       | frequencyNumber | frequencyType | startDate     | numberOfInstallments |
       | 1               | MONTHS        | 15 March 2024 | 10                   |
-    Then Loan Repayment schedule preview has 13 periods, with the following data for periods:
+    Then Loan Re-Aged Repayment schedule preview has 13 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |               | 1000.0          | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0  |            |      |             |
       | 1  | 0    | 01 January 2024  | 09 March 2024 | 1000.0          |   0.0         | 0.0      | 0.0  | 0.0       | 0.0    | 0.0  | 0.0        | 0.0  | 0.0         |
@@ -3319,7 +3319,7 @@ Feature: LoanReAging
     When Admin creates a Loan re-aging preview by Loan external ID with the following data:
       | frequencyNumber | frequencyType | startDate     | numberOfInstallments |
       | 1               | MONTHS        | 15 March 2024 | 2                    |
-    Then Loan Repayment schedule preview has 6 periods, with the following data for periods:
+    Then Loan Re-Aged Repayment schedule preview has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |               | 1000.0          | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0  |            |      |             |
       | 1  | 0    | 01 January 2024  | 09 March 2024 | 1000.0          |   0.0         | 0.0      | 0.0  | 0.0       | 0.0    | 0.0  | 0.0        | 0.0  | 0.0         |

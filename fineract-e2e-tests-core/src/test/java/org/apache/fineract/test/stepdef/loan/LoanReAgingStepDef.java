@@ -384,7 +384,7 @@ public class LoanReAgingStepDef extends AbstractStepDef {
         assertThat(exception.getDeveloperMessage()).contains(ErrorMessageHelper.reAgeContractTerminatedLoanFailure());
     }
 
-    @Then("Loan Repayment schedule preview has {int} periods, with the following data for periods:")
+    @Then("Loan Re-Aged Repayment schedule preview has {int} periods, with the following data for periods:")
     public void loanRepaymentSchedulePreviewPeriodsCheck(int linesExpected, DataTable table) {
         LoanScheduleData scheduleResponse = testContext().get(TestContextKey.LOAN_REAGING_PREVIEW_RESPONSE);
 

@@ -810,7 +810,7 @@ public class LoanTransactionsApiResource {
     }
 
     @GET
-    @Path("{loanId}/transactions/reamortized-preview")
+    @Path("{loanId}/transactions/reamortization-preview")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Preview Re-Amortized Schedule", description = "Generates a preview of the re-amortized loan schedule based on the provided parameters without creating any transactions or modifying the loan.")
     public LoanScheduleData previewReAmortizationSchedule(
@@ -821,7 +821,7 @@ public class LoanTransactionsApiResource {
     }
 
     @GET
-    @Path("external-id/{loanExternalId}/transactions/reamortized-preview")
+    @Path("external-id/{loanExternalId}/transactions/reamortization-preview")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Preview Re-amortized Schedule", description = "Generates a preview of the re-amortized loan schedule based on the provided parameters without creating any transactions or modifying the loan.")
     public LoanScheduleData previewReAmortizationSchedule(
