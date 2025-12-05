@@ -44,8 +44,9 @@ public class RepaymentPeriod {
 
     @JsonExclude
     private final RepaymentPeriod previous;
+    @Setter
     @Getter
-    private final LocalDate fromDate;
+    private LocalDate fromDate;
     @Setter
     @Getter
     private LocalDate dueDate;
@@ -97,10 +98,10 @@ public class RepaymentPeriod {
     private boolean noUnrecognisedInterest;
     @Setter
     @Getter
-    private boolean reAged = false;
+    private boolean reAged;
     @Setter
     @Getter
-    private boolean reAgedEarlyRepaymentHolder = false;
+    private boolean reAgedEarlyRepaymentHolder;
     @Getter
     @Setter
     private Money reAgedInterest;

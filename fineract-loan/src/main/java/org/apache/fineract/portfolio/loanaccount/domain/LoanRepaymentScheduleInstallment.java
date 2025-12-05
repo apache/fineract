@@ -278,6 +278,13 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
                 null, null, null, false, false, true);
     }
 
+    public static LoanRepaymentScheduleInstallment newInstallmentWithMovedPaidAmountDuringReAging(final Loan loan,
+            final Integer installmentNumber, final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal,
+            final BigDecimal interest) {
+        return new LoanRepaymentScheduleInstallment(loan, installmentNumber, fromDate, dueDate, principal, interest, null, null, null, null,
+                null, null, false, false, false);
+    }
+
     public static LoanRepaymentScheduleInstallment getLastNonDownPaymentInstallment(List<LoanRepaymentScheduleInstallment> installments) {
         return installments.stream().filter(i -> !i.isDownPayment()).reduce((first, second) -> second).orElseThrow();
     }

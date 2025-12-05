@@ -24,6 +24,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.common.ContentTypes.CONTENT_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
@@ -75,14 +76,14 @@ class ImagesApiIntegrationTest {
     void testRetrieveClientImage() throws IOException {
         byte[] imageData = new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, 0x10, 0x11, 0x12 };
         wireMockServer.stubFor(get(urlEqualTo("/v1/clients/123/images"))
-                .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "image/jpeg").withBody(imageData)));
+                .willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, "image/jpeg").withBody(imageData)));
 
         ImagesApi api = config.createClient(ImagesApi.class);
         Response response = api.get("clients", 123L, new HashMap<>());
 
         assertThat(response.status()).isEqualTo(200);
-        assertThat(response.headers()).containsKey("Content-Type");
-        assertThat(response.headers().get("Content-Type")).contains("image/jpeg");
+        assertThat(response.headers()).containsKey(CONTENT_TYPE);
+        assertThat(response.headers().get(CONTENT_TYPE)).contains("image/jpeg");
         assertThat(response.body().asInputStream().readAllBytes()).isEqualTo(imageData);
     }
 
@@ -91,7 +92,7 @@ class ImagesApiIntegrationTest {
         byte[] resizedImage = new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, 0x20, 0x21 };
         wireMockServer.stubFor(get(urlPathEqualTo("/v1/clients/123/images")).withQueryParam("maxWidth", equalTo("100"))
                 .withQueryParam("maxHeight", equalTo("100"))
-                .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "image/jpeg").withBody(resizedImage)));
+                .willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, "image/jpeg").withBody(resizedImage)));
 
         ImagesApi api = config.createClient(ImagesApi.class);
         Map<String, Object> params = new HashMap<>();
@@ -108,7 +109,7 @@ class ImagesApiIntegrationTest {
     void testRetrieveClientImageWithMaxWidthOnly() throws IOException {
         byte[] resizedImage = new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, 0x30 };
         wireMockServer.stubFor(get(urlPathEqualTo("/v1/clients/123/images")).withQueryParam("maxWidth", equalTo("200"))
-                .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "image/jpeg").withBody(resizedImage)));
+                .willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, "image/jpeg").withBody(resizedImage)));
 
         ImagesApi api = config.createClient(ImagesApi.class);
         Map<String, Object> params = new HashMap<>();
@@ -123,7 +124,7 @@ class ImagesApiIntegrationTest {
     @Test
     void testDeleteClientImage() {
         wireMockServer.stubFor(delete(urlEqualTo("/v1/clients/123/images"))
-                .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody("{\"resourceId\":123}")));
+                .willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, "application/json").withBody("{\"resourceId\":123}")));
 
         ImagesApi api = config.createClient(ImagesApi.class);
         Response response = api.delete("clients", 123L);
@@ -134,7 +135,7 @@ class ImagesApiIntegrationTest {
     @Test
     void testDeleteStaffImage() {
         wireMockServer.stubFor(delete(urlEqualTo("/v1/staff/456/images"))
-                .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody("{\"resourceId\":456}")));
+                .willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, "application/json").withBody("{\"resourceId\":456}")));
 
         ImagesApi api = config.createClient(ImagesApi.class);
         Response response = api.delete("staff", 456L);
@@ -146,13 +147,13 @@ class ImagesApiIntegrationTest {
     void testRetrieveImageWithPngFormat() throws IOException {
         byte[] pngImage = new byte[] { (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A };
         wireMockServer.stubFor(get(urlEqualTo("/v1/clients/123/images"))
-                .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "image/png").withBody(pngImage)));
+                .willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, "image/png").withBody(pngImage)));
 
         ImagesApi api = config.createClient(ImagesApi.class);
         Response response = api.get("clients", 123L, new HashMap<>());
 
         assertThat(response.status()).isEqualTo(200);
-        assertThat(response.headers().get("Content-Type")).contains("image/png");
+        assertThat(response.headers().get(CONTENT_TYPE)).contains("image/png");
         assertThat(response.body().asInputStream().readAllBytes()).isEqualTo(pngImage);
     }
 
@@ -166,7 +167,7 @@ class ImagesApiIntegrationTest {
             Long entityId = entityIds[i];
 
             wireMockServer.stubFor(get(urlEqualTo("/v1/" + entityType + "/" + entityId + "/images"))
-                    .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "image/jpeg").withBody(new byte[] { 0x01 })));
+                    .willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, "image/jpeg").withBody(new byte[] { 0x01 })));
         }
 
         ImagesApi api = config.createClient(ImagesApi.class);

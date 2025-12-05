@@ -58,7 +58,7 @@ public class InterestScheduleModelServiceGsonContext {
     public ProgressiveLoanInterestScheduleModel createProgressiveLoanInterestScheduleModelInstance(Type type) {
         if (type == ProgressiveLoanInterestScheduleModel.class) {
             setPrev(null);
-            return new ProgressiveLoanInterestScheduleModel(new ArrayList<>(), getLoanProductRelatedDetail(), new ArrayList<>(),
+            return new ProgressiveLoanInterestScheduleModel(new ArrayList<>(), getLoanProductRelatedDetail(),
                     installmentAmountInMultipliesOf, getMc());
         }
         throw new IllegalArgumentException("Unsupported ProgressiveLoanInterestScheduleModel type: " + type);

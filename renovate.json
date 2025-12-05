@@ -76,6 +76,11 @@
     "description": "Postgres JDBC driver 42.7.5 has a performance bug: https://github.com/pgjdbc/pgjdbc/issues/3511#issuecomment-2637277977"
   },
   {
+    "matchPackageNames": ["org.liquibase:liquibase-core", "org.liquibase.ext:liquibase-postgresql"],
+    "allowedVersions": "<=4.33.0",
+    "description": "Liquibase 5.0.0 was changing licence from Apache License Version 2.0 to FSL-1.1-ALv2 which is incompatible with Apache License 2.0: https://issues.apache.org/jira/browse/LEGAL-721"
+  },
+  {
     "depTypeList": ["dependencies"],
     "updateTypes": ["patch", "minor"],
     "groupName": "non-major"

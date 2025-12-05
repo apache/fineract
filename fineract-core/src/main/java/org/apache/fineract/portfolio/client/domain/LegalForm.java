@@ -41,16 +41,11 @@ public enum LegalForm {
 
     public static LegalForm fromInt(final Integer type) {
 
-        LegalForm legalForm = null;
-        switch (type) {
-            case 1:
-                legalForm = LegalForm.PERSON;
-            break;
-            case 2:
-                legalForm = LegalForm.ENTITY;
-            break;
-        }
-        return legalForm;
+        return switch (type) {
+            case 1 -> LegalForm.PERSON;
+            case 2 -> LegalForm.ENTITY;
+            default -> null;
+        };
     }
 
     public boolean isPerson() {
