@@ -117,8 +117,6 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
     }
 
     private List<EmailCampaign> retrieveEmailCampaigns(String paramValue) {
-        List<EmailCampaign> emailCampaigns = emailCampaignRepository.findActiveEmailCampaigns("%" + paramValue + "%",
-                SmsCampaignTriggerType.TRIGGERED.getValue());
-        return emailCampaigns;
+        return emailCampaignRepository.findActiveEmailCampaigns("%" + paramValue + "%", SmsCampaignTriggerType.TRIGGERED.getValue());
     }
 }

@@ -127,7 +127,7 @@ public class DelinquencyWritePlatformServiceHelper {
                 changes.put("current", loanDelinquencyTag.getDelinquencyRange());
             }
         }
-        if (loanDelinquencyTagHistory.size() > 0) {
+        if (!loanDelinquencyTagHistory.isEmpty()) {
             this.loanDelinquencyTagRepository.saveAllAndFlush(loanDelinquencyTagHistory);
             // if installment level delinquency is enabled event will be raised at installment level calculation, no
             // need to raise the event here
@@ -173,10 +173,10 @@ public class DelinquencyWritePlatformServiceHelper {
     private void removeDelinquencyTagsForNonExistingInstallments(Long loanId) {
         List<LoanInstallmentDelinquencyTag> currentLoanInstallmentDelinquencyTags = loanInstallmentDelinquencyTagRepository
                 .findByLoanId(loanId);
-        if (currentLoanInstallmentDelinquencyTags != null && currentLoanInstallmentDelinquencyTags.size() > 0) {
+        if (currentLoanInstallmentDelinquencyTags != null && !currentLoanInstallmentDelinquencyTags.isEmpty()) {
             List<Long> loanInstallmentTagsForDelete = currentLoanInstallmentDelinquencyTags.stream()
                     .filter(tag -> tag.getInstallment() == null).map(tag -> tag.getId()).toList();
-            if (loanInstallmentTagsForDelete.size() > 0) {
+            if (!loanInstallmentTagsForDelete.isEmpty()) {
                 loanInstallmentDelinquencyTagRepository.deleteAllLoanInstallmentsTagsByIds(loanInstallmentTagsForDelete);
             }
         }
@@ -260,7 +260,7 @@ public class DelinquencyWritePlatformServiceHelper {
 
         }
 
-        if (installmentDelinquencyTags.size() > 0) {
+        if (!installmentDelinquencyTags.isEmpty()) {
             loanInstallmentDelinquencyTagRepository.saveAllAndFlush(installmentDelinquencyTags);
         }
         return isDelinquencyRangeChanged;

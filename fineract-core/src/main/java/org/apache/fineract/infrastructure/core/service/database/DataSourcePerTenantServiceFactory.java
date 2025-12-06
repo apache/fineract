@@ -98,9 +98,8 @@ public class DataSourcePerTenantServiceFactory {
 
         // https://github.com/brettwooldridge/HikariCP/wiki/MBean-(JMX)-Monitoring-and-Management
         config.setRegisterMbeans(true);
-        meterRegistry.ifPresent(registry -> {
-            config.setMetricsTrackerFactory(new TenantConnectionPoolMetricsTrackerFactory(tenant.getTenantIdentifier(), registry));
-        });
+        meterRegistry.ifPresent(registry -> config
+                .setMetricsTrackerFactory(new TenantConnectionPoolMetricsTrackerFactory(tenant.getTenantIdentifier(), registry)));
 
         // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
         // These are the properties for each Tenant DB; the same configuration

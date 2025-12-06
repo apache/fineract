@@ -299,10 +299,7 @@ public class DepositProductAssembler {
             }
         }
 
-        DepositPreClosureDetail preClosureDetail = DepositPreClosureDetail.createFrom(preClosurePenalApplicable, preClosurePenalInterest,
-                preClosurePenalInterestType);
-
-        return preClosureDetail;
+        return DepositPreClosureDetail.createFrom(preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestType);
     }
 
     public DepositPreClosureDetail assemblePreClosureDetail(final JsonCommand command, DepositPreClosureDetail produPreClosureDetail) {
@@ -334,10 +331,7 @@ public class DepositProductAssembler {
         preClosurePenalInterestType = preClosurePenalInterestOnTypeId == null ? null
                 : PreClosurePenalInterestOnType.fromInt(preClosurePenalInterestOnTypeId);
 
-        DepositPreClosureDetail preClosureDetail1 = DepositPreClosureDetail.createFrom(preClosurePenalApplicable, preClosurePenalInterest,
-                preClosurePenalInterestType);
-
-        return preClosureDetail1;
+        return DepositPreClosureDetail.createFrom(preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestType);
     }
 
     public DepositTermDetail assembleDepositTermDetail(final JsonCommand command) {
@@ -355,10 +349,8 @@ public class DepositProductAssembler {
         final SavingsPeriodFrequencyType inMultiplesOfDepositTermType = (inMultiplesOfDepositTermTypeId == null) ? null
                 : SavingsPeriodFrequencyType.fromInt(inMultiplesOfDepositTermTypeId);
 
-        final DepositTermDetail depositTermDetail = DepositTermDetail.createFrom(minDepositTerm, maxDepositTerm, minDepositTermType,
-                maxDepositTermType, inMultiplesOfDepositTerm, inMultiplesOfDepositTermType);
-
-        return depositTermDetail;
+        return DepositTermDetail.createFrom(minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
+                inMultiplesOfDepositTerm, inMultiplesOfDepositTermType);
     }
 
     public DepositTermDetail assembleDepositTermDetail(final JsonCommand command, final DepositTermDetail prodDepositTermDetail) {
@@ -415,10 +407,8 @@ public class DepositProductAssembler {
         final SavingsPeriodFrequencyType inMultiplesOfDepositTermType = (inMultiplesOfDepositTermTypeId == null) ? null
                 : SavingsPeriodFrequencyType.fromInt(inMultiplesOfDepositTermTypeId);
 
-        final DepositTermDetail depositTermDetail = DepositTermDetail.createFrom(minDepositTerm, maxDepositTerm, minDepositTermType,
-                maxDepositTermType, inMultiplesOfDepositTerm, inMultiplesOfDepositTermType);
-
-        return depositTermDetail;
+        return DepositTermDetail.createFrom(minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
+                inMultiplesOfDepositTerm, inMultiplesOfDepositTermType);
     }
 
     public DepositRecurringDetail assembleRecurringDetail(final JsonCommand command) {
@@ -438,10 +428,7 @@ public class DepositProductAssembler {
             adjustAdvanceTowardsFuturePayments = false;
         }
 
-        final DepositRecurringDetail depositRecurringDetail = DepositRecurringDetail.createFrom(isMandatoryDeposit, allowWithdrawal,
-                adjustAdvanceTowardsFuturePayments);
-
-        return depositRecurringDetail;
+        return DepositRecurringDetail.createFrom(isMandatoryDeposit, allowWithdrawal, adjustAdvanceTowardsFuturePayments);
     }
 
     public Set<Charge> assembleListOfSavingsProductCharges(final JsonCommand command, final String savingsProductCurrencyCode) {
@@ -510,10 +497,7 @@ public class DepositProductAssembler {
             depositAmount = command.bigDecimalValueOfParameterNamed(depositAmountParamName);
         }
 
-        final DepositProductAmountDetails depositRecurringDetail = new DepositProductAmountDetails(minDepositAmount, depositAmount,
-                maxDepositAmount);
-
-        return depositRecurringDetail;
+        return new DepositProductAmountDetails(minDepositAmount, depositAmount, maxDepositAmount);
     }
 
     public TaxGroup assembleTaxGroup(final JsonCommand command) {

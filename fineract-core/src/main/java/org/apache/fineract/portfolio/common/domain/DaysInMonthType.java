@@ -59,15 +59,11 @@ public enum DaysInMonthType {
     public static DaysInMonthType fromInt(final Integer type) {
         DaysInMonthType repaymentFrequencyType = DaysInMonthType.INVALID;
         if (type != null) {
-            switch (type) {
-                case 1:
-                    repaymentFrequencyType = DaysInMonthType.ACTUAL;
-                break;
-                case 30:
-                    repaymentFrequencyType = DaysInMonthType.DAYS_30;
-                break;
-
-            }
+            repaymentFrequencyType = switch (type) {
+                case 1 -> DaysInMonthType.ACTUAL;
+                case 30 -> DaysInMonthType.DAYS_30;
+                default -> repaymentFrequencyType;
+            };
         }
         return repaymentFrequencyType;
     }

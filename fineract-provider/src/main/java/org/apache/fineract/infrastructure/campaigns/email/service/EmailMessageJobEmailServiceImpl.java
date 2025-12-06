@@ -62,7 +62,7 @@ public final class EmailMessageJobEmailServiceImpl implements EmailMessageJobEma
             mimeMessageHelper.setText(emailMessageWithAttachmentData.getText(), true);
             mimeMessageHelper.setSubject(emailMessageWithAttachmentData.getSubject());
             final List<File> attachments = emailMessageWithAttachmentData.getAttachments();
-            if (attachments != null && attachments.size() > 0) {
+            if (attachments != null && !attachments.isEmpty()) {
                 for (final File attachment : attachments) {
                     if (attachment != null) {
                         mimeMessageHelper.addAttachment(attachment.getName(), attachment);

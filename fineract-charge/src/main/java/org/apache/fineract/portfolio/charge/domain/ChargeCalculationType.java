@@ -70,25 +70,14 @@ public enum ChargeCalculationType {
     }
 
     public static ChargeCalculationType fromInt(final Integer chargeCalculation) {
-        ChargeCalculationType chargeCalculationType = ChargeCalculationType.INVALID;
-        switch (chargeCalculation) {
-            case 1:
-                chargeCalculationType = FLAT;
-            break;
-            case 2:
-                chargeCalculationType = PERCENT_OF_AMOUNT;
-            break;
-            case 3:
-                chargeCalculationType = PERCENT_OF_AMOUNT_AND_INTEREST;
-            break;
-            case 4:
-                chargeCalculationType = PERCENT_OF_INTEREST;
-            break;
-            case 5:
-                chargeCalculationType = PERCENT_OF_DISBURSEMENT_AMOUNT;
-            break;
-        }
-        return chargeCalculationType;
+        return switch (chargeCalculation) {
+            case 1 -> FLAT;
+            case 2 -> PERCENT_OF_AMOUNT;
+            case 3 -> PERCENT_OF_AMOUNT_AND_INTEREST;
+            case 4 -> PERCENT_OF_INTEREST;
+            case 5 -> PERCENT_OF_DISBURSEMENT_AMOUNT;
+            default -> INVALID;
+        };
     }
 
     public boolean isPercentageOfAmount() {
