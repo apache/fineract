@@ -13,9 +13,11 @@ import org.springframework.stereotype.Service;
 public class WalletServiceImpl implements  WalletService{
 
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final AuditPublisherService auditPublisherService;
     @Override
     public void topupWallet(WalletTopupRequest request) {
         log.info("Top up Wallet");
         applicationEventPublisher.publishEvent(new WalletTopupEvent(this, request));
+        auditPublisherService.publishWalletTopup(request.getClientId(), request.getAmount(), request.getPhone());
     }
 }
