@@ -108,6 +108,7 @@ import org.slf4j.LoggerFactory;
 public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoanIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(AdvancedPaymentAllocationLoanRepaymentScheduleTest.class);
+    private static final String LOCALE = "en";
     private static final String DATETIME_PATTERN = "dd MMMM yyyy";
     private static ResponseSpecification responseSpec;
     private static RequestSpecification requestSpec;
@@ -6317,6 +6318,67 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     8.75, 0.00, 8.75, 0.00, 0.00);
             validatePeriod(loanDetails, 4, LocalDate.of(2024, 4, 1), null, 0.00, 500.00, 0.00, 500.00, 0.0, 0.0, 0.00, 0.00, 0.00, 0.00,
                     8.75, 0.00, 8.75, 0.00, 0.00);
+        });
+    }
+
+    // UC159: Accounts with total disbursements of $0.50 and below result in improper allocations
+    @Test
+    public void uc159() {
+        AtomicLong loanIdRef = new AtomicLong();
+        Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final BigDecimal principalAmount = BigDecimal.valueOf(100.0);
+
+        runAt("26 October 2025", () -> {
+            // Create a Cumulative Multidisbursal and Flat Interest Type
+            PostLoanProductsResponse loanProductResponse = loanProductHelper
+                    .createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                            .interestType(InterestType.DECLINING_BALANCE).daysInMonthType(1)//
+                            .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                            .interestRateFrequencyType(YEARS).daysInYearType(1).loanScheduleType(LoanScheduleType.PROGRESSIVE.toString())
+                            .repaymentEvery(30).repaymentFrequencyType(RepaymentFrequencyType.DAYS.longValue())
+                            .installmentAmountInMultiplesOf(1).isEqualAmortization(false).repaymentFrequencyType(2L)
+                            .loanScheduleProcessingType("HORIZONTAL").multiDisburseLoan(true)//
+                            .maxTrancheCount(10).outstandingLoanBalance(1000.0).disallowExpectedDisbursements(true)//
+                            .enableBuyDownFee(true).merchantBuyDownFee(false)
+                            .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY).allowPartialPeriodInterestCalcualtion(false)//
+                            .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)
+                            .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)
+                            .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE)
+                            .buyDownExpenseAccountId(buyDownExpenseAccount.getAccountID().longValue())
+                            .incomeFromBuyDownAccountId(feeIncomeAccount.getAccountID().longValue())
+                            .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue()));
+            assertNotNull(loanProductResponse.getResourceId());
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), "26 October 2025",
+                    principalAmount.doubleValue(), 1)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .interestRatePerPeriod(BigDecimal.valueOf(0.0))//
+                    .repaymentEvery(30)//
+                    .repaymentFrequencyType(DAYS)//
+                    .loanTermFrequency(30)//
+                    .loanTermFrequencyType(DAYS);
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            loanIdRef.set(loanResponse.getLoanId());
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().approvedLoanAmount(principalAmount)
+                    .dateFormat(DATETIME_PATTERN).approvedOnDate("26 October 2025").locale(LOCALE));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("26 October 2025").dateFormat(DATETIME_PATTERN).locale(LOCALE)
+                            .transactionAmount(BigDecimal.valueOf(0.50)));
+        });
+
+        runAt("27 October 2025", () -> {
+            final Long loanId = loanIdRef.get();
+
+            loanTransactionHelper.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest() //
+                    .transactionDate("27 October 2025") //
+                    .transactionAmount(0.50) //
+                    .locale(LOCALE) //
+                    .dateFormat(DATETIME_PATTERN)); //
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertTrue(loanDetails.getStatus().getClosedObligationsMet());
         });
     }
 

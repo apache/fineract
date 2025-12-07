@@ -25,7 +25,8 @@ public record EmiAdjustment(//
         Money originalEmi, //
         Money emiDifference, //
         List<RepaymentPeriod> relatedRepaymentPeriods, //
-        long uncountablePeriods//
+        long uncountablePeriods, //
+        Money nonRoundAmount //
 ) {
 
     public boolean shouldBeAdjusted() {
@@ -43,8 +44,8 @@ public record EmiAdjustment(//
         return originalEmi.plus(adjustment());
     }
 
-    public boolean hasLessEmiDifference(EmiAdjustment previousAdjustment) {
-        return emiDifference.abs().isLessThan(previousAdjustment.emiDifference.abs());
+    public boolean hasLessEmiDifference(Money previousEmiDifference) {
+        return emiDifference.abs().isLessThan(previousEmiDifference.abs());
     }
 
     public boolean hasUncountablePeriods() {
@@ -53,5 +54,9 @@ public record EmiAdjustment(//
 
     private int numberOfRelatedPeriods() {
         return relatedRepaymentPeriods.size();
+    }
+
+    public boolean isZero() {
+        return originalEmi().isZero();
     }
 }
