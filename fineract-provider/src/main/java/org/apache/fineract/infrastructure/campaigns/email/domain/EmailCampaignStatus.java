@@ -36,17 +36,12 @@ public enum EmailCampaignStatus {
     public static EmailCampaignStatus fromInt(final Integer statusValue) {
 
         EmailCampaignStatus enumeration = EmailCampaignStatus.INVALID;
-        switch (statusValue) {
-            case 100:
-                enumeration = EmailCampaignStatus.PENDING;
-            break;
-            case 300:
-                enumeration = EmailCampaignStatus.ACTIVE;
-            break;
-            case 600:
-                enumeration = EmailCampaignStatus.CLOSED;
-            break;
-        }
+        enumeration = switch (statusValue) {
+            case 100 -> EmailCampaignStatus.PENDING;
+            case 300 -> EmailCampaignStatus.ACTIVE;
+            case 600 -> EmailCampaignStatus.CLOSED;
+            default -> enumeration;
+        };
         return enumeration;
     }
 

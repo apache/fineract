@@ -18,25 +18,23 @@
  */
 package org.apache.fineract.test.stepdef.loan;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+
 import io.cucumber.java.en.When;
-import java.io.IOException;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.PutChargesChargeIdResponse;
-import org.apache.fineract.client.services.ChargesApi;
 import org.apache.fineract.test.data.ChargeCalculationType;
 import org.apache.fineract.test.data.ChargeProductType;
-import org.apache.fineract.test.helper.ErrorHelper;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.springframework.beans.factory.annotation.Autowired;
-import retrofit2.Response;
 
 public class ChargeStepDef extends AbstractStepDef {
 
     @Autowired
-    private ChargesApi chargesApi;
+    private FineractFeignClient fineractClient;
 
     @When("Admin updates charge {string} with {string} calculation type and {double} % of transaction amount")
-    public void updateCharge(String chargeType, String chargeCalculationType, double amount) throws IOException {
+    public void updateCharge(String chargeType, String chargeCalculationType, double amount) {
         ChargeRequest disbursementChargeUpdateRequest = new ChargeRequest();
         ChargeCalculationType chargeProductTypeValue = ChargeCalculationType.valueOf(chargeCalculationType);
         disbursementChargeUpdateRequest.chargeCalculationType(chargeProductTypeValue.value).amount(amount).locale("en");
@@ -44,13 +42,11 @@ public class ChargeStepDef extends AbstractStepDef {
         ChargeProductType chargeProductType = ChargeProductType.valueOf(chargeType);
         Long chargeId = chargeProductType.getValue();
 
-        Response<PutChargesChargeIdResponse> responseDisbursementCharge = chargesApi.updateCharge(chargeId, disbursementChargeUpdateRequest)
-                .execute();
-        ErrorHelper.checkSuccessfulApiCall(responseDisbursementCharge);
+        ok(() -> fineractClient.charges().updateCharge(chargeId, disbursementChargeUpdateRequest));
     }
 
     @When("Admin updates charge {string} with {string} calculation type and {double} EUR amount")
-    public void updateChargeWithFlatAmount(String chargeType, String chargeCalculationType, double flatAmount) throws IOException {
+    public void updateChargeWithFlatAmount(String chargeType, String chargeCalculationType, double flatAmount) {
         ChargeRequest disbursementChargeUpdateRequest = new ChargeRequest();
         ChargeCalculationType chargeProductTypeValue = ChargeCalculationType.valueOf(chargeCalculationType);
         disbursementChargeUpdateRequest.chargeCalculationType(chargeProductTypeValue.value).amount(flatAmount).locale("en");
@@ -58,8 +54,6 @@ public class ChargeStepDef extends AbstractStepDef {
         ChargeProductType chargeProductType = ChargeProductType.valueOf(chargeType);
         Long chargeId = chargeProductType.getValue();
 
-        Response<PutChargesChargeIdResponse> responseDisbursementCharge = chargesApi.updateCharge(chargeId, disbursementChargeUpdateRequest)
-                .execute();
-        ErrorHelper.checkSuccessfulApiCall(responseDisbursementCharge);
+        ok(() -> fineractClient.charges().updateCharge(chargeId, disbursementChargeUpdateRequest));
     }
 }

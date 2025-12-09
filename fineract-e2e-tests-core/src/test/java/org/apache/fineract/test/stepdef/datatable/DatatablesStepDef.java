@@ -19,29 +19,28 @@
 package org.apache.fineract.test.stepdef.datatable;
 
 import static java.util.function.Function.identity;
-import static org.apache.fineract.test.helper.ErrorHelper.checkSuccessfulApiCall;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.fineract.client.feign.FeignException;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetDataTablesResponse;
 import org.apache.fineract.client.models.PostColumnHeaderData;
 import org.apache.fineract.client.models.PostDataTablesRequest;
 import org.apache.fineract.client.models.PostDataTablesResponse;
 import org.apache.fineract.client.models.ResultsetColumnHeaderData;
-import org.apache.fineract.client.services.DataTablesApi;
 import org.apache.fineract.test.data.datatable.DatatableColumnType;
 import org.apache.fineract.test.data.datatable.DatatableEntityType;
 import org.apache.fineract.test.data.datatable.DatatableNameGenerator;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.springframework.beans.factory.annotation.Autowired;
-import retrofit2.Response;
 
 public class DatatablesStepDef extends AbstractStepDef {
 
@@ -50,39 +49,35 @@ public class DatatablesStepDef extends AbstractStepDef {
     public static final String DATATABLE_QUERY_RESPONSE = "DatatableQueryResponse";
 
     @Autowired
-    private DataTablesApi dataTablesApi;
+    private FineractFeignClient fineractClient;
 
     @Autowired
     private DatatableNameGenerator datatableNameGenerator;
 
     @When("A datatable for {string} is created")
-    public void whenDatatableCreated(String entityTypeStr) throws IOException {
+    public void whenDatatableCreated(String entityTypeStr) {
         DatatableEntityType entityType = DatatableEntityType.fromString(entityTypeStr);
         List<PostColumnHeaderData> columns = createRandomDatatableColumnsRequest();
         PostDataTablesRequest request = createDatatableRequest(entityType, columns);
 
-        Response<PostDataTablesResponse> response = dataTablesApi.createDatatable(request).execute();
-        checkSuccessfulApiCall(response);
+        PostDataTablesResponse response = ok(() -> fineractClient.dataTables().createDatatable(request, Map.of()));
 
-        PostDataTablesResponse responseBody = response.body();
-        testContext().set(CREATE_DATATABLE_RESULT_KEY, responseBody);
-        testContext().set(DATATABLE_NAME, responseBody.getResourceIdentifier());
+        testContext().set(CREATE_DATATABLE_RESULT_KEY, response);
+        testContext().set(DATATABLE_NAME, response.getResourceIdentifier());
     }
 
     @When("A datatable for {string} is created with the following extra columns:")
-    public void whenDatatableCreatedWithFollowingExtraColumns(String entityTypeStr, DataTable dataTable) throws IOException {
+    public void whenDatatableCreatedWithFollowingExtraColumns(String entityTypeStr, DataTable dataTable) {
         DatatableEntityType entityType = DatatableEntityType.fromString(entityTypeStr);
         List<List<String>> rows = dataTable.asLists();
         List<List<String>> rowsWithoutHeader = rows.subList(1, rows.size());
         List<PostColumnHeaderData> columns = createDatatableColumnsRequest(rowsWithoutHeader);
         PostDataTablesRequest request = createDatatableRequest(entityType, columns);
 
-        Response<PostDataTablesResponse> response = dataTablesApi.createDatatable(request).execute();
-        checkSuccessfulApiCall(response);
+        PostDataTablesResponse response = ok(() -> fineractClient.dataTables().createDatatable(request, Map.of()));
 
-        PostDataTablesResponse responseBody = response.body();
-        testContext().set(CREATE_DATATABLE_RESULT_KEY, responseBody);
-        testContext().set(DATATABLE_NAME, responseBody.getResourceIdentifier());
+        testContext().set(CREATE_DATATABLE_RESULT_KEY, response);
+        testContext().set(DATATABLE_NAME, response.getResourceIdentifier());
     }
 
     private List<PostColumnHeaderData> createDatatableColumnsRequest(List<List<String>> rowsWithoutHeader) {
@@ -104,17 +99,15 @@ public class DatatablesStepDef extends AbstractStepDef {
     }
 
     @When("A multirow datatable for {string} is created")
-    public void whenMultirowDatatableCreated(String entityTypeStr) throws IOException {
+    public void whenMultirowDatatableCreated(String entityTypeStr) {
         DatatableEntityType entityType = DatatableEntityType.fromString(entityTypeStr);
         List<PostColumnHeaderData> columns = createRandomDatatableColumnsRequest();
         PostDataTablesRequest request = createDatatableRequest(entityType, columns, true);
 
-        Response<PostDataTablesResponse> response = dataTablesApi.createDatatable(request).execute();
-        checkSuccessfulApiCall(response);
+        PostDataTablesResponse response = ok(() -> fineractClient.dataTables().createDatatable(request, Map.of()));
 
-        PostDataTablesResponse responseBody = response.body();
-        testContext().set(CREATE_DATATABLE_RESULT_KEY, responseBody);
-        testContext().set(DATATABLE_NAME, responseBody.getResourceIdentifier());
+        testContext().set(CREATE_DATATABLE_RESULT_KEY, response);
+        testContext().set(DATATABLE_NAME, response.getResourceIdentifier());
     }
 
     private List<PostColumnHeaderData> createRandomDatatableColumnsRequest() {
@@ -145,12 +138,10 @@ public class DatatablesStepDef extends AbstractStepDef {
     }
 
     @Then("The following column definitions match:")
-    public void thenColumnsMatch(DataTable dataTable) throws IOException {
+    public void thenColumnsMatch(DataTable dataTable) {
         String datatableName = testContext().get(DATATABLE_NAME);
-        Response<GetDataTablesResponse> httpResponse = dataTablesApi.getDatatable(datatableName).execute();
-        checkSuccessfulApiCall(httpResponse);
+        GetDataTablesResponse response = ok(() -> fineractClient.dataTables().getDatatable(datatableName, Map.of()));
 
-        GetDataTablesResponse response = httpResponse.body();
         Map<String, ResultsetColumnHeaderData> columnMap = response.getColumnHeaderData().stream()
                 .collect(Collectors.toMap(ResultsetColumnHeaderData::getColumnName, identity()));
 
@@ -176,22 +167,25 @@ public class DatatablesStepDef extends AbstractStepDef {
     }
 
     @When("The client calls the query endpoint for the created datatable with {string} column filter, and {string} value filter")
-    public void thenColum23nsMatch(String columnFilter, String valueFilter) throws IOException {
-        Response<String> response = dataTablesApi.queryValues(testContext().get(DATATABLE_NAME), columnFilter, valueFilter, columnFilter)
-                .execute();
-        testContext().set(DATATABLE_QUERY_RESPONSE, response);
+    public void thenColum23nsMatch(String columnFilter, String valueFilter) {
+        try {
+            fineractClient.dataTables().queryValues(testContext().get(DATATABLE_NAME),
+                    Map.of("columnFilter", columnFilter, "valueFilter", valueFilter, "resultColumns", columnFilter));
+        } catch (FeignException e) {
+            testContext().set(DATATABLE_QUERY_RESPONSE, e);
+        }
     }
 
     @Then("The status of the HTTP response should be {int}")
     public void thenStatusCodeMatch(int statusCode) {
-        Response<String> response = testContext().get(DATATABLE_QUERY_RESPONSE);
-        assertThat(response.code()).isEqualTo(statusCode);
+        FeignException exception = testContext().get(DATATABLE_QUERY_RESPONSE);
+        assertThat(exception.status()).isEqualTo(statusCode);
     }
 
     @Then("The response body should contain the following message: {string}")
-    public void thenColumnsMatch(String json) throws IOException {
-        Response<String> response = testContext().get(DATATABLE_QUERY_RESPONSE);
-        String jsonResponse = response.errorBody().string();
+    public void thenColumnsMatch(String json) {
+        FeignException exception = testContext().get(DATATABLE_QUERY_RESPONSE);
+        String jsonResponse = exception.responseBodyAsString();
         assertThat(jsonResponse).contains(json);
     }
 }

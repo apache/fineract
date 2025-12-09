@@ -19,6 +19,7 @@
 package org.apache.fineract.test.support;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.function.Function;
 
 public final class EnumResolver {
@@ -31,6 +32,6 @@ public final class EnumResolver {
     }
 
     public static <T extends Enum<T>> T fromString(Class<T> clazz, String str) {
-        return Enum.valueOf(clazz, str.trim().toUpperCase());
+        return Enum.valueOf(clazz, str.trim().toUpperCase(Locale.ROOT));
     }
 }

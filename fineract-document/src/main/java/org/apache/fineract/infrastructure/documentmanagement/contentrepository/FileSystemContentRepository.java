@@ -128,7 +128,7 @@ public class FileSystemContentRepository implements ContentRepository {
      */
     private String generateFileParentDirectory(final String entityType, final Long entityId) {
         return fineractProperties.getContent().getFilesystem().getRootFolder() + File.separator
-                + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim() + File.separator + "documents" + File.separator
+                + ThreadLocalContextUtil.getTenant().getName().replace(" ", "").trim() + File.separator + "documents" + File.separator
                 + entityType + File.separator + entityId + File.separator + ContentRepositoryUtils.generateRandomString();
     }
 
@@ -138,7 +138,7 @@ public class FileSystemContentRepository implements ContentRepository {
      */
     private String generateClientImageParentDirectory(final Long resourceId) {
         return fineractProperties.getContent().getFilesystem().getRootFolder() + File.separator
-                + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim() + File.separator + "images" + File.separator
+                + ThreadLocalContextUtil.getTenant().getName().replace(" ", "").trim() + File.separator + "images" + File.separator
                 + "clients" + File.separator + resourceId;
     }
 

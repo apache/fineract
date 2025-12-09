@@ -427,6 +427,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @Column(name = "enable_installment_level_delinquency", nullable = false)
     private boolean enableInstallmentLevelDelinquency = false;
 
+    @Column(name = "allow_full_term_for_tranche", nullable = false)
+    private boolean allowFullTermForTranche = false;
+
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final AccountType loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final LoanRepaymentScheduleTransactionProcessor transactionProcessingStrategy,
@@ -436,12 +439,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,
             final BigDecimal interestRateDifferential, final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment,
             final ExternalId externalId, final LoanApplicationTerms loanApplicationTerms, final Boolean enableInstallmentLevelDelinquency,
-            final LocalDate submittedOnDate) {
+            final LocalDate submittedOnDate, final Boolean allowFullTermForTranche) {
         return new Loan(accountNo, client, null, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, null, loanCharges, collateral, null, fixedEmiAmount, disbursementDetails,
                 maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
                 fixedPrincipalPercentagePerInstallment, externalId, loanApplicationTerms, enableInstallmentLevelDelinquency,
-                submittedOnDate);
+                submittedOnDate, allowFullTermForTranche);
     }
 
     public static Loan newGroupLoanApplication(final String accountNo, final Group group, final AccountType loanType,
@@ -453,12 +456,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,
             final BigDecimal interestRateDifferential, final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment,
             final ExternalId externalId, final LoanApplicationTerms loanApplicationTerms, final Boolean enableInstallmentLevelDelinquency,
-            final LocalDate submittedOnDate) {
+            final LocalDate submittedOnDate, final Boolean allowFullTermForTranche) {
         return new Loan(accountNo, null, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, null, loanCharges, null, syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails,
                 maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
                 fixedPrincipalPercentagePerInstallment, externalId, loanApplicationTerms, enableInstallmentLevelDelinquency,
-                submittedOnDate);
+                submittedOnDate, allowFullTermForTranche);
     }
 
     public static Loan newIndividualLoanApplicationFromGroup(final String accountNo, final Client client, final Group group,
@@ -470,12 +473,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,
             final BigDecimal interestRateDifferential, final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment,
             final ExternalId externalId, final LoanApplicationTerms loanApplicationTerms, final Boolean enableInstallmentLevelDelinquency,
-            final LocalDate submittedOnDate) {
+            final LocalDate submittedOnDate, final Boolean allowFullTermForTranche) {
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, null, loanCharges, null, syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails,
                 maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
                 fixedPrincipalPercentagePerInstallment, externalId, loanApplicationTerms, enableInstallmentLevelDelinquency,
-                submittedOnDate);
+                submittedOnDate, allowFullTermForTranche);
     }
 
     protected Loan() {
@@ -491,7 +494,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,
             final BigDecimal interestRateDifferential, final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment,
             final ExternalId externalId, final LoanApplicationTerms loanApplicationTerms, final Boolean enableInstallmentLevelDelinquency,
-            final LocalDate submittedOnDate) {
+            final LocalDate submittedOnDate, final Boolean allowFullTermForTranche) {
         this.loanRepaymentScheduleDetail = loanRepaymentScheduleDetail;
 
         this.isFloatingInterestRate = isFloatingInterestRate;
@@ -572,6 +575,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             this.loanInterestRecalculationDetails.updateLoan(this);
         }
         this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
+        this.allowFullTermForTranche = allowFullTermForTranche;
         this.getLoanProductRelatedDetail()
                 .setEnableAccrualActivityPosting(loanProduct.getLoanProductRelatedDetail().isEnableAccrualActivityPosting());
     }
@@ -1781,6 +1785,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public void updateEnableInstallmentLevelDelinquency(boolean enableInstallmentLevelDelinquency) {
         this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
+    }
+
+    public boolean isAllowFullTermForTranche() {
+        return this.allowFullTermForTranche;
+    }
+
+    public void updateAllowFullTermForTranche(boolean allowFullTermForTranche) {
+        this.allowFullTermForTranche = allowFullTermForTranche;
     }
 
     public void deductFromNetDisbursalAmount(final BigDecimal subtrahend) {

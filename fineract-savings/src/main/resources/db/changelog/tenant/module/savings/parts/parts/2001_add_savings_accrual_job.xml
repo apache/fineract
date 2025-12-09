@@ -23,6 +23,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
     <changeSet author="fineract" id="1">
+        <validCheckSum>9:c953679cc7c64cd9902c5bbca932a369</validCheckSum>
         <insert tableName="job">
             <column name="name" value="Add Accrual Transactions For Savings"/>
             <column name="display_name" value="Add Accrual Transactions For Savings"/>

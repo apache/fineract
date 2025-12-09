@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.test.data.datatable;
 
+import java.util.Locale;
 import org.apache.fineract.test.helper.Utils;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,6 @@ import org.springframework.stereotype.Component;
 public class DatatableNameGenerator {
 
     public String generate(DatatableEntityType entityType) {
-        return Utils.randomStringGenerator("dt_%s_".formatted(entityType.getReferencedTableName()), 5).toLowerCase();
+        return Utils.randomStringGenerator("dt_%s_".formatted(entityType.getReferencedTableName()), 5).toLowerCase(Locale.ROOT);
     }
 }

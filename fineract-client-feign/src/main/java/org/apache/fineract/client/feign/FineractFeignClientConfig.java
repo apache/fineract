@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import org.apache.fineract.client.feign.support.ApiResponseDecoder;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -95,7 +96,8 @@ public final class FineractFeignClientConfig {
         Encoder multipartEncoder = new FineractMultipartEncoder(jacksonEncoder);
 
         return Feign.builder().client(getOrCreateHttpClient()).encoder(multipartEncoder)
-                .decoder(new JacksonDecoder(ObjectMapperFactory.getShared())).errorDecoder(new FineractErrorDecoder())
+                .decoder(new ApiResponseDecoder(new JacksonDecoder(ObjectMapperFactory.getShared())))
+                .errorDecoder(new FineractErrorDecoder())
                 .options(new Request.Options(connectTimeout, TimeUnit.MILLISECONDS, readTimeout, TimeUnit.MILLISECONDS, true))
                 .retryer(Retryer.NEVER_RETRY).requestInterceptor(new BasicAuthRequestInterceptor(username, password))
                 .requestInterceptor(new TenantIdRequestInterceptor(tenantId)).logger(new Slf4jLogger(apiType))

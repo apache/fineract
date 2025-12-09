@@ -24,6 +24,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
     <property name="current_datetime" value="NOW()"/>
     <changeSet id="1" author="fineract">
+        <validCheckSum>9:232e6a0baf425531c3dc2723179d458b</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(1) from job where short_name = 'JRNL_ENTRY_AGG'</sqlCheck>
         </preConditions>

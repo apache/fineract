@@ -309,6 +309,8 @@ public final class LoanProductsApiResourceSwagger {
         // Multi Disburse
         @Schema(example = "true")
         public Boolean multiDisburseLoan;
+        @Schema(example = "false", description = "Allow full term length for each tranche disbursement. Only available for PROGRESSIVE schedule type with multi-disbursement enabled.")
+        public Boolean allowFullTermForTranche;
         @Schema(example = "50")
         public Integer principalThresholdForLastInstallment;
         @Schema(example = "true")
@@ -1481,6 +1483,8 @@ public final class LoanProductsApiResourceSwagger {
         public Boolean isRatesEnabled;
         @Schema(example = "true")
         public Boolean multiDisburseLoan;
+        @Schema(example = "false", description = "Allow full term length for each tranche disbursement. Only available for PROGRESSIVE schedule type with multi-disbursement enabled.")
+        public Boolean allowFullTermForTranche;
         @Schema(example = "3")
         public Integer maxTrancheCount;
         @Schema(example = "36000.000000")
@@ -1794,6 +1798,8 @@ public final class LoanProductsApiResourceSwagger {
         // Multi Disburse
         @Schema(example = "true")
         public Boolean multiDisburseLoan;
+        @Schema(example = "false", description = "Allow full term length for each tranche disbursement. Only available for PROGRESSIVE schedule type with multi-disbursement enabled.")
+        public Boolean allowFullTermForTranche;
         @Schema(example = "50")
         public Integer principalThresholdForLastInstallment;
         @Schema(example = "true")

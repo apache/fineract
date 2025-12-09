@@ -24,6 +24,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.common.ContentTypes.APPLICATION_JSON;
+import static com.github.tomakehurst.wiremock.common.ContentTypes.AUTHORIZATION;
+import static com.github.tomakehurst.wiremock.common.ContentTypes.CONTENT_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -66,9 +69,8 @@ class FineractFeignClientIntegrationTest {
 
     @Test
     void testJsonEncoding() {
-        wireMockServer
-                .stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json")
-                        .withBody("{\"id\":1,\"message\":\"success\",\"timestamp\":\"2024-01-15T10:30:00\"}")));
+        wireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                .withBody("{\"id\":1,\"message\":\"success\",\"timestamp\":\"2024-01-15T10:30:00\"}")));
 
         TestApi client = config.createClient(TestApi.class);
         TestRequest request = new TestRequest();
@@ -85,9 +87,8 @@ class FineractFeignClientIntegrationTest {
 
     @Test
     void testJsonDecoding() {
-        wireMockServer
-                .stubFor(get(urlEqualTo("/test")).willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json")
-                        .withBody("{\"id\":42,\"message\":\"decoded-message\",\"timestamp\":\"2024-12-25T18:45:30\"}")));
+        wireMockServer.stubFor(get(urlEqualTo("/test")).willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                .withBody("{\"id\":42,\"message\":\"decoded-message\",\"timestamp\":\"2024-12-25T18:45:30\"}")));
 
         TestApi client = config.createClient(TestApi.class);
         TestResponse response = client.getTest();
@@ -101,7 +102,7 @@ class FineractFeignClientIntegrationTest {
     @Test
     void testJava8DateTimeSerialization() {
         wireMockServer.stubFor(post(urlEqualTo("/test")).withRequestBody(containing("2024-06-30"))
-                .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json")
+                .willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody("{\"id\":99,\"message\":\"date-test\",\"timestamp\":\"2024-06-30T12:00:00\"}")));
 
         TestApi client = config.createClient(TestApi.class);
@@ -131,7 +132,7 @@ class FineractFeignClientIntegrationTest {
     @Test
     void testErrorDecoderWithServerError() {
         wireMockServer.stubFor(
-                get(urlEqualTo("/error")).willReturn(aResponse().withStatus(500).withHeader("Content-Type", "application/json").withBody(
+                get(urlEqualTo("/error")).willReturn(aResponse().withStatus(500).withHeader(CONTENT_TYPE, APPLICATION_JSON).withBody(
                         "{\"developerMessage\":\"Internal server error occurred\",\"httpStatusCode\":\"500\",\"defaultUserMessage\":\"Server Error\"}")));
 
         TestApi client = config.createClient(TestApi.class);
@@ -144,9 +145,8 @@ class FineractFeignClientIntegrationTest {
         FineractFeignClientConfig ttlConfig = FineractFeignClientConfig.builder().baseUrl(baseUrl).credentials("testuser", "testpass")
                 .connectionTimeToLive(5, TimeUnit.MINUTES).build();
 
-        wireMockServer
-                .stubFor(get(urlEqualTo("/test")).willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json")
-                        .withBody("{\"id\":1,\"message\":\"ttl-test\",\"timestamp\":\"2024-01-01T00:00:00\"}")));
+        wireMockServer.stubFor(get(urlEqualTo("/test")).willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                .withBody("{\"id\":1,\"message\":\"ttl-test\",\"timestamp\":\"2024-01-01T00:00:00\"}")));
 
         TestApi client = ttlConfig.createClient(TestApi.class);
         TestResponse response = client.getTest();
@@ -157,8 +157,8 @@ class FineractFeignClientIntegrationTest {
 
     @Test
     void testBasicAuthentication() {
-        wireMockServer.stubFor(get(urlEqualTo("/test")).withHeader("Authorization", equalTo("Basic dGVzdHVzZXI6dGVzdHBhc3M="))
-                .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json")
+        wireMockServer.stubFor(get(urlEqualTo("/test")).withHeader(AUTHORIZATION, equalTo("Basic dGVzdHVzZXI6dGVzdHBhc3M="))
+                .willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody("{\"id\":1,\"message\":\"authenticated\",\"timestamp\":\"2024-01-01T00:00:00\"}")));
 
         TestApi client = config.createClient(TestApi.class);
@@ -170,9 +170,8 @@ class FineractFeignClientIntegrationTest {
 
     @Test
     void testNullValueHandling() {
-        wireMockServer
-                .stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json")
-                        .withBody("{\"id\":1,\"message\":null,\"timestamp\":\"2024-01-01T00:00:00\"}")));
+        wireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                .withBody("{\"id\":1,\"message\":null,\"timestamp\":\"2024-01-01T00:00:00\"}")));
 
         TestApi client = config.createClient(TestApi.class);
         TestRequest request = new TestRequest();

@@ -36,9 +36,11 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.reaging.LoanReAgeBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.reaging.LoanUndoReAgeBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.reaging.LoanReAgeTransactionBusinessEvent;
@@ -55,7 +57,6 @@ import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLo
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepaymentPeriodData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
@@ -66,12 +67,10 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFou
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
-import org.apache.fineract.portfolio.loanaccount.service.InterestScheduleModelRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanRepaymentScheduleService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleService;
-import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
 import org.apache.fineract.portfolio.note.domain.Note;
@@ -89,7 +88,6 @@ public class LoanReAgingService {
     private final ExternalIdFactory externalIdFactory;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanTransactionRepository loanTransactionRepository;
-    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final NoteRepository noteRepository;
     private final LoanChargeValidator loanChargeValidator;
     private final LoanUtilService loanUtilService;
@@ -99,8 +97,6 @@ public class LoanReAgingService {
     private final LoanRepaymentScheduleService loanRepaymentScheduleService;
     private final LoanReadPlatformService loanReadPlatformService;
     private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
-    private final InterestScheduleModelRepositoryWrapper modelRepository;
-    private final LoanTransactionService loanTransactionService;
 
     public CommandProcessingResult reAge(final Long loanId, final JsonCommand command) {
         final Loan loan = loanAssembler.assembleFrom(loanId);
@@ -240,7 +236,15 @@ public class LoanReAgingService {
         }
         // in case of a reaging transaction, only the outstanding principal amount until the business date is considered
         Money txPrincipal = loan.getTotalPrincipalOutstandingUntil(transactionDate);
-        BigDecimal txPrincipalAmount = txPrincipal.getAmount();
+        final BigDecimal txPrincipalAmount = txPrincipal.getAmount();
+        if (command.hasParameter(LoanReAgingApiConstants.transactionAmountParamName)) {
+            final BigDecimal transactionAmount = command
+                    .bigDecimalValueOfParameterNamed(LoanReAgingApiConstants.transactionAmountParamName);
+            if (!MathUtil.isEqualTo(txPrincipalAmount, transactionAmount)) {
+                throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.amount.not.match.with.calculated.reage.amount",
+                        "re-age amount is not matching with the calculated re-age amount", txPrincipalAmount);
+            }
+        }
 
         final LoanTransaction reAgeTransaction = new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.REAGE, transactionDate,
                 txPrincipalAmount, txPrincipalAmount, ZERO, ZERO, ZERO, null, false, null, txExternalId);
@@ -275,10 +279,10 @@ public class LoanReAgingService {
     }
 
     private void persistNote(Loan loan, JsonCommand command, Map<String, Object> changes) {
-        if (command.hasParameter("note")) {
-            final String note = command.stringValueOfParameterNamed("note");
+        if (command.hasParameter(LoanReAgingApiConstants.noteParamName)) {
+            final String note = command.stringValueOfParameterNamed(LoanReAgingApiConstants.noteParamName);
             final Note newNote = Note.loanNote(loan, note);
-            changes.put("note", note);
+            changes.put(LoanReAgingApiConstants.noteParamName, note);
 
             this.noteRepository.saveAndFlush(newNote);
         }

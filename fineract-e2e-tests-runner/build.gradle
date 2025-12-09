@@ -32,6 +32,7 @@ repositories {
 dependencies {
     testImplementation(project(':fineract-avro-schemas'))
     testImplementation(project(':fineract-client'))
+    testImplementation(project(':fineract-client-feign'))
     testImplementation(project(':fineract-e2e-tests-core').sourceSets.test.output)
 
     testImplementation 'org.springframework:spring-context'

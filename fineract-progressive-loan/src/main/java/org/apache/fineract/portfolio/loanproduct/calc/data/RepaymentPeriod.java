@@ -44,8 +44,9 @@ public class RepaymentPeriod {
 
     @JsonExclude
     private final RepaymentPeriod previous;
+    @Setter
     @Getter
-    private final LocalDate fromDate;
+    private LocalDate fromDate;
     @Setter
     @Getter
     private LocalDate dueDate;
@@ -90,17 +91,17 @@ public class RepaymentPeriod {
 
     @Getter
     @Setter
-    private boolean isOutstandingMovedDueToReAging = false;
+    private boolean isOutstandingMoved = false;
 
     @Setter
     @Getter
     private boolean noUnrecognisedInterest;
     @Setter
     @Getter
-    private boolean reAged = false;
+    private boolean reAged;
     @Setter
     @Getter
-    private boolean reAgedEarlyRepaymentHolder = false;
+    private boolean reAgedEarlyRepaymentHolder;
     @Getter
     @Setter
     private Money reAgedInterest;
@@ -147,7 +148,7 @@ public class RepaymentPeriod {
                 repaymentPeriod.getPaidPrincipal(), repaymentPeriod.getPaidInterest(), repaymentPeriod.getFutureUnrecognizedInterest(), mc,
                 repaymentPeriod.getLoanProductRelatedDetail(), repaymentPeriod.isNoUnrecognisedInterest(), repaymentPeriod.isReAged(),
                 repaymentPeriod.isReAgedEarlyRepaymentHolder(), repaymentPeriod.getReAgedInterest());
-        newRepaymentPeriod.setOutstandingMovedDueToReAging(repaymentPeriod.isOutstandingMovedDueToReAging());
+        newRepaymentPeriod.setOutstandingMoved(repaymentPeriod.isOutstandingMoved());
         // There is always at least 1 interest period, by default with same from-due date as repayment period
         for (InterestPeriod interestPeriod : repaymentPeriod.getInterestPeriods()) {
             newRepaymentPeriod.getInterestPeriods().add(InterestPeriod.copy(newRepaymentPeriod, interestPeriod, mc));
@@ -161,7 +162,7 @@ public class RepaymentPeriod {
                 repaymentPeriod.getDueDate(), new ArrayList<>(), repaymentPeriod.getEmi(), repaymentPeriod.getOriginalEmi(), zero, zero,
                 zero, mc, repaymentPeriod.getLoanProductRelatedDetail(), repaymentPeriod.isNoUnrecognisedInterest(),
                 repaymentPeriod.isReAged(), repaymentPeriod.isReAgedEarlyRepaymentHolder(), repaymentPeriod.getReAgedInterest());
-        newRepaymentPeriod.setOutstandingMovedDueToReAging(repaymentPeriod.isOutstandingMovedDueToReAging());
+        newRepaymentPeriod.setOutstandingMoved(repaymentPeriod.isOutstandingMoved());
         // There is always at least 1 interest period, by default with same from-due date as repayment period
         for (InterestPeriod interestPeriod : repaymentPeriod.getInterestPeriods()) {
             var interestPeriodCopy = InterestPeriod.copy(newRepaymentPeriod, interestPeriod);
@@ -310,8 +311,7 @@ public class RepaymentPeriod {
      * @return
      */
     public Money getTotalCreditedAmount() {
-        return isOutstandingMovedDueToReAging ? Money.zero(getCurrency(), getMc())
-                : getCreditedPrincipal().plus(getCreditedInterest(), getMc());
+        return isOutstandingMoved ? Money.zero(getCurrency(), getMc()) : getCreditedPrincipal().plus(getCreditedInterest(), getMc());
     }
 
     /**

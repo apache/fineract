@@ -33,15 +33,19 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdDisbursementDetails;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -53,6 +57,8 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
+import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -692,5 +698,186 @@ public class LoanDisbursementDetailsIntegrationTest {
                 .expectBody("errors[0].userMessageGlobalisationCode",
                         equalTo("error.msg.loan.disbursal.amount.can't.be.greater.than.maximum.applied.loan.amount.calculation"))
                 .expectStatusCode(403).build();
+    }
+
+    private AdvancedPaymentData createDefaultPaymentAllocation(String futureInstallmentAllocationRule) {
+        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
+        advancedPaymentData.setTransactionType("DEFAULT");
+        advancedPaymentData.setFutureInstallmentAllocationRule(futureInstallmentAllocationRule);
+
+        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
+                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_PRINCIPAL, PaymentAllocationType.PAST_DUE_INTEREST,
+                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_PRINCIPAL,
+                PaymentAllocationType.DUE_INTEREST, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
+                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
+
+        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
+        return advancedPaymentData;
+    }
+
+    private List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
+        AtomicInteger integer = new AtomicInteger(1);
+        return Arrays.stream(paymentAllocationTypes).map(pat -> {
+            PaymentAllocationOrder paymentAllocationOrder = new PaymentAllocationOrder();
+            paymentAllocationOrder.setPaymentAllocationRule(pat.name());
+            paymentAllocationOrder.setOrder(integer.getAndIncrement());
+            return paymentAllocationOrder;
+        }).toList();
+    }
+
+    @Test
+    public void testCreateLoanProductWithFullTermTrancheEnabled() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withInterestTypeAsDecliningBalance().withMultiDisburse().withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
+                .addAdvancedPaymentAllocation(defaultAllocation).withAllowFullTermForTranche(true).build(null);
+
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        log.info("------------------LOAN PRODUCT CREATED WITH ID----------- {}", loanProductId);
+
+        GetLoanProductsProductIdResponse loanProduct = this.loanTransactionHelper.getLoanProduct(loanProductId);
+        assertNotNull(loanProduct);
+        assertEquals(true, loanProduct.getMultiDisburseLoan());
+        assertEquals(true, loanProduct.getAllowFullTermForTranche());
+        log.info("-------------------LOAN PRODUCT WITH allowFullTermForTranche CREATED SUCCESSFULLY-------");
+    }
+
+    @Test
+    public void testCreateLoanProductWithFullTermTrancheOnCumulativeShouldFail() {
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder()
+                .expectBody("userMessageGlobalisationCode", equalTo("validation.msg.validation.errors.exist"))
+                .expectBody("errors[0].userMessageGlobalisationCode",
+                        equalTo("validation.msg.loanproduct.allowFullTermForTranche.requires.progressive.schedule.type"))
+                .expectStatusCode(400).build();
+
+        final LoanTransactionHelper validationErrorHelper = new LoanTransactionHelper(this.requestSpec, errorResponse);
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withInterestTypeAsDecliningBalance().withMultiDisburse().withLoanScheduleType(LoanScheduleType.CUMULATIVE)
+                .withAllowFullTermForTranche(true).build(null);
+
+        validationErrorHelper.getLoanProductId(loanProductJSON);
+        log.info("-------------------LOAN PRODUCT WITH allowFullTermForTranche ON CUMULATIVE FAILED AS EXPECTED-------");
+    }
+
+    @Test
+    public void testCreateLoanProductWithFullTermTrancheOnSingleDisburseShouldFail() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder()
+                .expectBody("userMessageGlobalisationCode", equalTo("validation.msg.validation.errors.exist"))
+                .expectBody("errors[0].userMessageGlobalisationCode",
+                        equalTo("validation.msg.loanproduct.allowFullTermForTranche.requires.multi.disburse.loan"))
+                .expectStatusCode(400).build();
+
+        final LoanTransactionHelper validationErrorHelper = new LoanTransactionHelper(this.requestSpec, errorResponse);
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withInterestTypeAsDecliningBalance().withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
+                .addAdvancedPaymentAllocation(defaultAllocation).withAllowFullTermForTranche(true).build(null);
+
+        validationErrorHelper.getLoanProductId(loanProductJSON);
+        log.info("-------------------LOAN PRODUCT WITH allowFullTermForTranche ON SINGLE DISBURSE FAILED AS EXPECTED-------");
+    }
+
+    @Test
+    public void testUpdateLoanProductPreservesAllowFullTermForTranche() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withInterestTypeAsDecliningBalance().withMultiDisburse().withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
+                .addAdvancedPaymentAllocation(defaultAllocation).withAllowFullTermForTranche(true).build(null);
+
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        log.info("------------------LOAN PRODUCT CREATED WITH ID----------- {}", loanProductId);
+
+        GetLoanProductsProductIdResponse loanProduct = this.loanTransactionHelper.getLoanProduct(loanProductId);
+        assertNotNull(loanProduct);
+        assertEquals(true, loanProduct.getAllowFullTermForTranche());
+
+        org.apache.fineract.client.models.PutLoanProductsProductIdRequest updateRequest = new org.apache.fineract.client.models.PutLoanProductsProductIdRequest();
+        updateRequest.setDescription("Updated description");
+        this.loanTransactionHelper.updateLoanProduct((long) loanProductId, updateRequest);
+
+        GetLoanProductsProductIdResponse updatedProduct = this.loanTransactionHelper.getLoanProduct(loanProductId);
+        assertNotNull(updatedProduct);
+        assertEquals(true, updatedProduct.getAllowFullTermForTranche());
+        assertEquals("Updated description", updatedProduct.getDescription());
+        log.info("-------------------LOAN PRODUCT UPDATE PRESERVED allowFullTermForTranche FLAG-------");
+    }
+
+    @Test
+    public void testLoanInheritsAllowFullTermForTrancheFromProduct() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withInterestTypeAsDecliningBalance().withMultiDisburse().withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
+                .addAdvancedPaymentAllocation(defaultAllocation).withAllowFullTermForTranche(true).build(null);
+
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        log.info("------------------LOAN PRODUCT CREATED WITH ID----------- {}", loanProductId);
+
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        log.info("------------------CLIENT CREATED WITH ID----------- {}", clientId);
+
+        List<HashMap> createTranches = new ArrayList<>();
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 March 2014", "5000"));
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 April 2014", "5000"));
+
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("10000").withLoanTermFrequency("12")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("12").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("1").withExpectedDisbursementDate("01 March 2014")
+                .withTranches(createTranches).withSubmittedOnDate("01 March 2014")
+                .withRepaymentStrategy(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .build(clientId.toString(), loanProductId.toString(), null);
+
+        final Integer loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        log.info("------------------LOAN CREATED WITH ID----------- {}", loanId);
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        assertNotNull(loanDetails);
+        assertEquals(true, loanDetails.getAllowFullTermForTranche());
+        log.info("-------------------LOAN INHERITED allowFullTermForTranche FROM PRODUCT SUCCESSFULLY-------");
+    }
+
+    @Test
+    public void testLoanLevelOverrideOfAllowFullTermForTranche() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withInterestTypeAsDecliningBalance().withMultiDisburse().withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
+                .addAdvancedPaymentAllocation(defaultAllocation).withAllowFullTermForTranche(true).build(null);
+
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        log.info("------------------LOAN PRODUCT CREATED WITH ID----------- {}", loanProductId);
+
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        log.info("------------------CLIENT CREATED WITH ID----------- {}", clientId);
+
+        List<HashMap> createTranches = new ArrayList<>();
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 March 2014", "5000"));
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 April 2014", "5000"));
+
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("10000").withLoanTermFrequency("12")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("12").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("1").withExpectedDisbursementDate("01 March 2014")
+                .withTranches(createTranches).withSubmittedOnDate("01 March 2014")
+                .withRepaymentStrategy(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY).withAllowFullTermForTranche(false)
+                .build(clientId.toString(), loanProductId.toString(), null);
+
+        final Integer loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        log.info("------------------LOAN CREATED WITH ID----------- {}", loanId);
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        assertNotNull(loanDetails);
+        assertEquals(false, loanDetails.getAllowFullTermForTranche());
+        log.info("-------------------LOAN LEVEL OVERRIDE OF allowFullTermForTranche WORKED SUCCESSFULLY-------");
     }
 }

@@ -70,6 +70,9 @@ class LoanReAgingValidatorTest {
     @Mock
     private LoanTransactionRepository loanTransactionRepository;
 
+    @Mock
+    private FromJsonHelper fromApiJsonHelper;
+
     @InjectMocks
     private LoanReAgingValidator underTest;
 
@@ -286,6 +289,32 @@ class LoanReAgingValidatorTest {
         assertThat(result.getGlobalisationMessageCode()).isEqualTo("validation.msg.validation.errors.exist");
         assertThat(result.getErrors().getFirst().getUserMessageGlobalisationCode())
                 .isEqualTo("validation.msg.loan.reAge.numberOfInstallments.not.greater.than.zero");
+    }
+
+    @Test
+    public void testValidateReAge_ShouldThrowException_WhenTransactionAmountIsZero() {
+        // given
+        Loan loan = loan();
+        JsonCommand command = makeJsonCommand("""
+                {
+                    "externalId": "12345",
+                    "dateFormat": "%s",
+                    "locale": "en",
+                    "startDate": "%s",
+                    "frequencyType": "MONTHS",
+                    "frequencyNumber": 1,
+                    "numberOfInstallments": 1,
+                    "transactionAmount": 0
+                }
+                """.formatted(DATE_FORMAT, formatDate(afterMaturity)));
+        // when
+        PlatformApiDataValidationException result = assertThrows(PlatformApiDataValidationException.class,
+                () -> underTest.validateReAge(loan, command));
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getGlobalisationMessageCode()).isEqualTo("validation.msg.validation.errors.exist");
+        assertThat(result.getErrors().getFirst().getUserMessageGlobalisationCode())
+                .isEqualTo("validation.msg.loan.reAge.transactionAmount.not.greater.than.zero");
     }
 
     @Test

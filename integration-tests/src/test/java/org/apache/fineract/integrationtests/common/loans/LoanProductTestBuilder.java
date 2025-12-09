@@ -113,6 +113,7 @@ public class LoanProductTestBuilder {
     private Account feeAndPenaltyAssetAccount;
 
     private Boolean multiDisburseLoan = false;
+    private Boolean allowFullTermForTranche = false;
     private final String outstandingLoanBalance = "35000";
     private String maxTrancheCount = "3";
     private Boolean disallowExpectedDisbursements = false;
@@ -225,6 +226,7 @@ public class LoanProductTestBuilder {
         }
         if (this.multiDisburseLoan) {
             map.put("multiDisburseLoan", this.multiDisburseLoan);
+            map.put("allowFullTermForTranche", this.allowFullTermForTranche);
             map.put("maxTrancheCount", this.maxTrancheCount);
             map.put("outstandingLoanBalance", this.outstandingLoanBalance);
             map.put("disallowExpectedDisbursements", this.disallowExpectedDisbursements);
@@ -241,6 +243,10 @@ public class LoanProductTestBuilder {
             map.put("multiDisburseLoan", this.multiDisburseLoan);
             map.put("maxTrancheCount", this.maxTrancheCount);
             map.put("outstandingLoanBalance", this.outstandingLoanBalance);
+        }
+        // Always send allowFullTermForTranche when it's true (for validation testing of single-disburse scenarios)
+        if (this.allowFullTermForTranche && !this.multiDisburseLoan) {
+            map.put("allowFullTermForTranche", this.allowFullTermForTranche);
         }
 
         if (this.fullAccountingConfig != null) {
@@ -739,6 +745,11 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withMaxTrancheCount(String maxTrancheCount) {
         this.maxTrancheCount = maxTrancheCount;
+        return this;
+    }
+
+    public LoanProductTestBuilder withAllowFullTermForTranche(boolean allowFullTermForTranche) {
+        this.allowFullTermForTranche = allowFullTermForTranche;
         return this;
     }
 

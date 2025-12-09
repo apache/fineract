@@ -86,7 +86,7 @@ public class CreditAllocationsValidator {
     }
 
     private boolean hasLoanProductCreditAllocationRule(List<LoanProductCreditAllocationRule> rules) {
-        return rules != null && rules.size() > 0;
+        return rules != null && !rules.isEmpty();
     }
 
     private void raiseValidationError(String globalisationMessageCode, String msg) {

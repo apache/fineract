@@ -43,7 +43,7 @@ configurations.all {
     resolutionStrategy {
         // Force specific versions of dependencies to avoid conflicts
         force 'org.yaml:snakeyaml:2.5',
-              'org.jruby:jruby-complete:9.4.5.0'
+              'org.jruby:jruby-complete:10.0.2.0'
     }
 }
 

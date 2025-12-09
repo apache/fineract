@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
@@ -46,8 +45,7 @@ public interface EMICalculator {
      */
     @NotNull
     ProgressiveLoanInterestScheduleModel generatePeriodInterestScheduleModel(@NotNull List<LoanScheduleModelRepaymentPeriod> periods,
-            @NotNull ILoanConfigurationDetails loanProductRelatedDetail, List<LoanTermVariationsData> loanTermVariations,
-            Integer installmentAmountInMultiplesOf, MathContext mc);
+            @NotNull ILoanConfigurationDetails loanProductRelatedDetail, Integer installmentAmountInMultiplesOf, MathContext mc);
 
     /**
      * This method creates an Interest model with repayment periods from the installments which retrieved from the
@@ -56,12 +54,13 @@ public interface EMICalculator {
     @NotNull
     ProgressiveLoanInterestScheduleModel generateInstallmentInterestScheduleModel(
             @NotNull List<LoanRepaymentScheduleInstallment> installments, @NotNull ILoanConfigurationDetails loanProductRelatedDetail,
-            List<LoanTermVariationsData> loanTermVariations, Integer installmentAmountInMultiplesOf, MathContext mc);
+            Integer installmentAmountInMultiplesOf, MathContext mc);
 
     /**
      * Find repayment period based on Due Date.
      */
-    Optional<RepaymentPeriod> findRepaymentPeriod(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate dueDate);
+    Optional<RepaymentPeriod> findRepaymentPeriod(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate fromDate,
+            LocalDate dueDate);
 
     /**
      * Applies the disbursement on the interest model. This method recalculates the EMI amounts from the action date.
@@ -95,14 +94,14 @@ public interface EMICalculator {
     /**
      * This method used for pay interest portion during the repayment transaction.
      */
-    void payInterest(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate repaymentPeriodDueDate, LocalDate transactionDate,
-            Money interestAmount);
+    void payInterest(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate repaymentPeriodFromDate,
+            LocalDate repaymentPeriodDueDate, LocalDate transactionDate, Money interestAmount);
 
     /**
      * This method used for pay principal portion during the repayment transaction.
      */
-    void payPrincipal(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate repaymentPeriodDueDate, LocalDate transactionDate,
-            Money principalAmount);
+    void payPrincipal(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate repaymentPeriodFromDate,
+            LocalDate repaymentPeriodDueDate, LocalDate transactionDate, Money principalAmount);
 
     /**
      * This method used for credit principal portion. This method increases the outstanding balance. This method creates
@@ -120,15 +119,15 @@ public interface EMICalculator {
      * This method gives back the maximum of the due principal and maximum of the due interest for a requested day.
      */
     @NotNull
-    PeriodDueDetails getDueAmounts(@NotNull ProgressiveLoanInterestScheduleModel scheduleModel, @NotNull LocalDate periodDueDate,
-            @NotNull LocalDate targetDate);
+    PeriodDueDetails getDueAmounts(@NotNull ProgressiveLoanInterestScheduleModel scheduleModel, @NotNull LocalDate periodFromDate,
+            @NotNull LocalDate periodDueDate, @NotNull LocalDate targetDate);
 
     /**
      * Gives back the sum of the interest from the whole model on the given date.
      */
     @NotNull
-    Money getPeriodInterestTillDate(@NotNull ProgressiveLoanInterestScheduleModel scheduleModel, @NotNull LocalDate periodDueDate,
-            @NotNull LocalDate targetDate, boolean includeChargebackInterest);
+    Money getPeriodInterestTillDate(@NotNull ProgressiveLoanInterestScheduleModel scheduleModel, @NotNull LocalDate periodFromDate,
+            @NotNull LocalDate periodDueDate, @NotNull LocalDate targetDate, boolean includeChargebackInterest);
 
     Money getOutstandingLoanBalanceOfPeriod(ProgressiveLoanInterestScheduleModel interestScheduleModel, LocalDate targetDate);
 
@@ -168,4 +167,9 @@ public interface EMICalculator {
     EqualAmortizationValues calculateAdjustedEqualAmortizationValues(Money outstanding, Money total,
             Money sumOfOtherEqualAmortizationValues, Integer numberOfInstallments, Integer installmentAmountInMultiplesOf,
             MonetaryCurrency currency);
+
+    void changeDueDate(ProgressiveLoanInterestScheduleModel scheduleModel, LoanApplicationTerms loanApplicationTerms,
+            LocalDate targetRepaymentPeriodDueDate, LocalDate newDueDate);
+
+    void updateModelRepaymentPeriodsDuringReAmortization(ProgressiveLoanInterestScheduleModel model, LocalDate transactionDate);
 }

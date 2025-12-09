@@ -267,6 +267,9 @@ public class LoanProductAssembler {
 
         final Integer overAppliedNumber = command.integerValueOfParameterNamed(LoanProductConstants.OVER_APPLIED_NUMBER);
 
+        final boolean allowFullTermForTranche = command.parameterExists(LoanProductConstants.ALLOW_FULL_TERM_FOR_TRANCHE_PARAM_NAME)
+                && command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ALLOW_FULL_TERM_FOR_TRANCHE_PARAM_NAME);
+
         final Integer dueDaysForRepaymentEvent = command.integerValueOfParameterNamed(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT);
         final Integer overDueDaysForRepaymentEvent = command
                 .integerValueOfParameterNamed(LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT);
@@ -353,7 +356,7 @@ public class LoanProductAssembler {
                 enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour, interestRecognitionOnDisbursementDate,
                 daysInYearCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy,
                 capitalizedIncomeType, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType,
-                merchantBuyDownFee);
+                merchantBuyDownFee, allowFullTermForTranche);
 
     }
 

@@ -94,9 +94,7 @@ public final class EmailConfigurationValidator {
 
     public boolean isValidEmail(String email) {
         // this is the easiest check
-        if (email == null) {
-            return false;
-        } else if (email.endsWith(".")) {
+        if (email == null || email.endsWith(".")) {
             return false;
         }
 
@@ -104,10 +102,6 @@ public final class EmailConfigurationValidator {
         Matcher emailMatcher = EMAIL_PATTERN.matcher(email);
 
         // check if the Matcher matches the email pattern
-        if (!emailMatcher.matches()) {
-            return false;
-        }
-
-        return true;
+        return emailMatcher.matches();
     }
 }

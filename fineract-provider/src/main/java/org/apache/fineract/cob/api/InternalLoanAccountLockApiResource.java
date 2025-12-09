@@ -70,7 +70,7 @@ public class InternalLoanAccountLockApiResource implements InitializingBean {
     @Produces({ MediaType.APPLICATION_JSON })
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public Response placeLockOnLoanAccount(@Context final UriInfo uriInfo, @PathParam("loanId") Long loanId,
-            @PathParam("lockOwner") String lockOwner, @RequestBody(required = false) String error) {
+            @PathParam("lockOwner") String lockOwner, @RequestBody(required = false) LockRequest request) {
         log.warn("------------------------------------------------------------");
         log.warn("                                                            ");
         log.warn("Placing lock on loan: {}", loanId);
@@ -80,11 +80,10 @@ public class InternalLoanAccountLockApiResource implements InitializingBean {
         LoanAccountLock loanAccountLock = new LoanAccountLock(loanId, LockOwner.valueOf(lockOwner),
                 ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE));
 
-        if (StringUtils.isNotBlank(error)) {
-            loanAccountLock.setError(error, error);
+        if (StringUtils.isNotBlank(request.getError())) {
+            loanAccountLock.setError(request.getError(), request.getError());
         }
         loanAccountLockRepository.save(loanAccountLock);
         return Response.status(Response.Status.ACCEPTED).build();
     }
-
 }

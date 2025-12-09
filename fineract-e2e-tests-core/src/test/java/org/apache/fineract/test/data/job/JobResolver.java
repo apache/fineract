@@ -18,34 +18,28 @@
  */
 package org.apache.fineract.test.data.job;
 
-import java.io.IOException;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetJobsResponse;
-import org.apache.fineract.client.services.SchedulerJobApi;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
-import retrofit2.Response;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class JobResolver {
 
-    private final SchedulerJobApi schedulerJobApi;
+    private final FineractFeignClient fineractClient;
 
     @Cacheable(key = "#job.getShortName()", value = "jobsByShortName")
     public long resolve(Job job) {
-        try {
-            String shortName = job.getShortName();
-            log.debug("Resolving job by short-name [{}]", shortName);
-            Response<GetJobsResponse> response = schedulerJobApi.retrieveByShortName(shortName).execute();
-            if (!response.isSuccessful()) {
-                throw new IllegalStateException("Unable to get job. Status code was HTTP " + response.code());
-            }
-            return response.body().getJobId();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        String shortName = job.getShortName();
+        log.debug("Resolving job by short-name [{}]", shortName);
+        GetJobsResponse response = ok(() -> fineractClient.schedulerJob().retrieveByShortName(shortName, Map.of()));
+        return response.getJobId();
     }
 }

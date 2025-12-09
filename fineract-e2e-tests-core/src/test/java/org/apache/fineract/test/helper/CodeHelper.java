@@ -18,16 +18,15 @@
  */
 package org.apache.fineract.test.helper;
 
-import java.io.IOException;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetCodesResponse;
 import org.apache.fineract.client.models.PostCodeValueDataResponse;
 import org.apache.fineract.client.models.PostCodeValuesDataRequest;
-import org.apache.fineract.client.services.CodeValuesApi;
-import org.apache.fineract.client.services.CodesApi;
 import org.springframework.stereotype.Component;
-import retrofit2.Response;
 
 @Component
 @RequiredArgsConstructor
@@ -37,31 +36,30 @@ public class CodeHelper {
     private static final String STATE_CODE_NAME = "STATE";
     private static final String ADDRESS_TYPE_CODE_NAME = "ADDRESS_TYPE";
 
-    private final CodesApi codesApi;
-    private final CodeValuesApi codeValuesApi;
+    private final FineractFeignClient fineractClient;
 
-    public Response<PostCodeValueDataResponse> createAddressTypeCodeValue(String addressTypeName) throws IOException {
+    public PostCodeValueDataResponse createAddressTypeCodeValue(String addressTypeName) {
         Long codeId = retrieveCodeByName(ADDRESS_TYPE_CODE_NAME).getId();
-        return codeValuesApi.createCodeValue(codeId, new PostCodeValuesDataRequest().name(addressTypeName)).execute();
+        return ok(
+                () -> fineractClient.codeValues().createCodeValue(codeId, new PostCodeValuesDataRequest().name(addressTypeName), Map.of()));
     }
 
-    public Response<PostCodeValueDataResponse> createCountryCodeValue(String countryName) throws IOException {
+    public PostCodeValueDataResponse createCountryCodeValue(String countryName) {
         Long codeId = retrieveCodeByName(COUNTRY_CODE_NAME).getId();
-        return codeValuesApi.createCodeValue(codeId, new PostCodeValuesDataRequest().name(countryName)).execute();
+        return ok(() -> fineractClient.codeValues().createCodeValue(codeId, new PostCodeValuesDataRequest().name(countryName), Map.of()));
     }
 
-    public Response<PostCodeValueDataResponse> createStateCodeValue(String stateName) throws IOException {
+    public PostCodeValueDataResponse createStateCodeValue(String stateName) {
         Long codeId = retrieveCodeByName(STATE_CODE_NAME).getId();
-        return codeValuesApi.createCodeValue(codeId, new PostCodeValuesDataRequest().name(stateName)).execute();
+        return ok(() -> fineractClient.codeValues().createCodeValue(codeId, new PostCodeValuesDataRequest().name(stateName), Map.of()));
     }
 
-    @SneakyThrows
     public GetCodesResponse retrieveCodeByName(String name) {
-        return codesApi.retrieveCodes().execute().body().stream().filter(r -> name.equals(r.getName())).findAny()
+        return ok(() -> fineractClient.codes().retrieveCodes(Map.of())).stream().filter(r -> name.equals(r.getName())).findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Code with name " + name + " has not been found"));
     }
 
-    public Response<PostCodeValueDataResponse> createCodeValue(Long codeId, PostCodeValuesDataRequest request) throws IOException {
-        return codeValuesApi.createCodeValue(codeId, request).execute();
+    public PostCodeValueDataResponse createCodeValue(Long codeId, PostCodeValuesDataRequest request) {
+        return ok(() -> fineractClient.codeValues().createCodeValue(codeId, request, Map.of()));
     }
 }

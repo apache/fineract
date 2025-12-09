@@ -45,7 +45,7 @@ public class FeignBusinessDateHelper {
                 .dateFormat("yyyy-MM-dd")//
                 .locale(LoanTestData.LOCALE);
 
-        ok(() -> fineractClient.businessDateManagement().updateBusinessDate(request, Collections.emptyMap()));
+        ok(() -> fineractClient.businessDateManagement().updateBusinessDate(null, request, Collections.emptyMap()));
     }
 
     public void runAt(String date, Runnable action) {

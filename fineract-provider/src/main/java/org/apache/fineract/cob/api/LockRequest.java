@@ -16,15 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.test.stepdef.loan;
+package org.apache.fineract.cob.api;
 
-import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
-import retrofit2.Call;
-import retrofit2.http.GET;
+import lombok.Data;
 
-public interface LoanProductsCustomApi {
+@Data
+public class LockRequest {
 
-    @GET("v1/loanproducts/{productId}")
-    Call<GetLoanProductsProductIdResponse> retrieveLoanProductDetails(@retrofit2.http.Path("productId") Long productId,
-            @retrofit2.http.Query("template") String isTemplate);
+    private String error;
 }

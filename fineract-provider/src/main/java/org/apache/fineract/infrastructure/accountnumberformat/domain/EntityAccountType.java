@@ -68,8 +68,7 @@ public enum EntityAccountType {
     }
 
     public static EntityAccountType fromInt(final int i) {
-        final EntityAccountType type = intToEnumMap.get(Integer.valueOf(i));
-        return type;
+        return intToEnumMap.get(i);
     }
 
     public static int getMinValue() {
@@ -82,7 +81,7 @@ public enum EntityAccountType {
 
     @Override
     public String toString() {
-        return name().toString();
+        return name();
     }
 
     public boolean isClientAccount() {

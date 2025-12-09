@@ -94,9 +94,7 @@ public class CreditAllocationsJsonParserTest {
 
     private static List<Pair<Integer, AllocationType>> createAllocationTypeList() {
         AtomicInteger i = new AtomicInteger(1);
-        List<Pair<Integer, AllocationType>> list = EnumSet.allOf(AllocationType.class).stream().map(p -> Pair.of(i.getAndIncrement(), p))
-                .toList();
-        return list;
+        return EnumSet.allOf(AllocationType.class).stream().map(p -> Pair.of(i.getAndIncrement(), p)).toList();
     }
 
     public Map<String, Object> createCreditAllocationEntry(String transactionType, List<String> orderedRules) {
@@ -117,9 +115,8 @@ public class CreditAllocationsJsonParserTest {
     private JsonCommand createJsonCommand(Map<String, Object> jsonMap) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonMap);
-        JsonCommand command = JsonCommand.from(json, JsonParser.parseString(json), fromJsonHelper, null, 1L, 2L, 3L, 4L, null, null, null,
-                null, null, null, null, null, null);
-        return command;
+        return JsonCommand.from(json, JsonParser.parseString(json), fromJsonHelper, null, 1L, 2L, 3L, 4L, null, null, null, null, null,
+                null, null, null, null);
     }
 
 }
