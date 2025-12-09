@@ -695,7 +695,7 @@ public class FineractProperties {
     public static class CorsProperties {
 
         private boolean enabled;
-        private List<String> allowedOrigins;
+        private List<String> allowedOriginPatterns;
         private List<String> allowedMethods;
         private List<String> allowedHeaders;
         private List<String> exposedHeaders;

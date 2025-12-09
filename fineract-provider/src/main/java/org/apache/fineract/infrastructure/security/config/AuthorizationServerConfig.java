@@ -192,7 +192,7 @@ public class AuthorizationServerConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         FineractProperties.CorsProperties corsConfiguration = fineractProperties.getSecurity().getCors();
-        config.setAllowedOrigins(corsConfiguration.getAllowedOrigins());
+        config.setAllowedOriginPatterns(corsConfiguration.getAllowedOriginPatterns());
         config.setAllowedMethods(corsConfiguration.getAllowedMethods());
         config.setAllowedHeaders(corsConfiguration.getAllowedHeaders());
         config.setExposedHeaders(corsConfiguration.getExposedHeaders());
