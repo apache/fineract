@@ -12,6 +12,9 @@ institutions and innovators to reach underserved and unbanked populations.
 
 Have a look at the [documentation](https://fineract.apache.org/docs/current), the [wiki](https://cwiki.apache.org/confluence/display/FINERACT) or at the [FAQ](https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=91554327), if this README does not answer what you are looking for.
 
+---
+Este README foi atualizado para refletir a versão mais recente do repositório original (apache/fineract).
+---
 
 COMMUNITY
 =========
