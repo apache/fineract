@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -307,14 +308,14 @@ public class LoanReAgingService {
     private LoanReAgeParameter createReAgeParameterFromPreviewRequest(final LoanTransaction reAgeTransaction,
             final ReAgePreviewRequest reAgePreviewRequest) {
         final PeriodFrequencyType periodFrequencyType = PeriodFrequencyType.valueOf(reAgePreviewRequest.getFrequencyType());
-        final Locale locale = reAgePreviewRequest.getLocale() != null ? Locale.forLanguageTag(reAgePreviewRequest.getLocale())
-                : Locale.getDefault();
+        final Locale locale = Optional.ofNullable(reAgePreviewRequest.getLocale()).map(Locale::forLanguageTag).orElse(Locale.getDefault());
         final LocalDate startDate = JsonParserHelper.convertFrom(reAgePreviewRequest.getStartDate(), LoanReAgingApiConstants.startDate,
                 reAgePreviewRequest.getDateFormat(), locale);
         final Integer numberOfInstallments = reAgePreviewRequest.getNumberOfInstallments();
         final Integer periodFrequencyNumber = reAgePreviewRequest.getFrequencyNumber();
 
-        final LoanReAgeInterestHandlingType reAgeInterestHandlingType = LoanReAgeInterestHandlingType.DEFAULT;
+        final LoanReAgeInterestHandlingType reAgeInterestHandlingType = Optional.ofNullable(reAgePreviewRequest.getReAgeInterestHandling())
+                .map(LoanReAgeInterestHandlingType::valueOf).orElse(LoanReAgeInterestHandlingType.DEFAULT);
 
         return new LoanReAgeParameter(reAgeTransaction, periodFrequencyType, periodFrequencyNumber, startDate, numberOfInstallments,
                 reAgeInterestHandlingType, null);
