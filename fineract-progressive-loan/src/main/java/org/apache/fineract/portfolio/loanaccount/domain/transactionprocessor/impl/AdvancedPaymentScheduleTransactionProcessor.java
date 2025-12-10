@@ -568,12 +568,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         .filter(LoanTransaction::isNotReversed).map(AbstractPersistableCustom::getId).toList();
                 final List<LoanTransaction> modifiedTransactions = new ArrayList<>(progCtx.getAlreadyProcessedTransactions().stream()
                         .filter(LoanTransaction::isNotReversed).filter(tr -> tr.getId() == null).toList());
-                if (!modifiedTransactions.isEmpty()) {
-                    final Money interestAfterRefund = interestRefundService.totalInterestByTransactions(this, loan.getId(), targetDate,
-                            modifiedTransactions, unmodifiedTransactionIds);
-                    final Money newAmount = interestBeforeRefund.minus(progCtx.getSumOfInterestRefundAmount()).minus(interestAfterRefund);
-                    loanTransaction.updateAmount(newAmount.getAmount());
-                }
+                final Money interestAfterRefund = interestRefundService.totalInterestByTransactions(this, loan.getId(), targetDate,
+                        modifiedTransactions, unmodifiedTransactionIds);
+                final Money newAmount = interestBeforeRefund.minus(progCtx.getSumOfInterestRefundAmount()).minus(interestAfterRefund);
+                loanTransaction.updateAmount(newAmount.getAmount());
                 progCtx.setSumOfInterestRefundAmount(progCtx.getSumOfInterestRefundAmount().add(loanTransaction.getAmount()));
             }
         }
