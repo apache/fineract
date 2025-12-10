@@ -1398,9 +1398,21 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     private Money applyInstallmentAmountInMultiplesOf(final ProgressiveLoanInterestScheduleModel scheduleModel,
             final Money equalMonthlyInstallment) {
-        return scheduleModel.installmentAmountInMultiplesOf() != null
-                ? Money.roundToMultiplesOf(equalMonthlyInstallment, scheduleModel.installmentAmountInMultiplesOf())
+        return scheduleModel.installmentAmountInMultiplesOf() != null && scheduleModel.installmentAmountInMultiplesOf() > 0
+                ? safeRoundingForEMI(equalMonthlyInstallment, scheduleModel.installmentAmountInMultiplesOf())
                 : equalMonthlyInstallment;
+    }
+
+    /**
+     * Rounds the EMI to the nearest multiple of the given number. If the rounded EMI is zero, it adds one multiple of
+     * the given number to it.
+     */
+    private Money safeRoundingForEMI(Money unRoundedEMI, Integer multiplesOf) {
+        Money roundedEMI = Money.roundToMultiplesOf(unRoundedEMI, multiplesOf);
+        if (roundedEMI.isZero()) {
+            roundedEMI = roundedEMI.add(BigDecimal.ONE.multiply(BigDecimal.valueOf(multiplesOf)));
+        }
+        return roundedEMI;
     }
 
     public EmiAdjustment getEmiAdjustment(final List<RepaymentPeriod> repaymentPeriods) {
