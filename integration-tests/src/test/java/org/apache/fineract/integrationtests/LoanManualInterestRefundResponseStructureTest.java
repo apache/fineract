@@ -96,7 +96,7 @@ public class LoanManualInterestRefundResponseStructureTest extends BaseLoanInteg
             targetTransactionIdRef.set(refundResponse.getResourceId());
 
             // Create manual interest refund via API
-            PostLoansLoanIdTransactionsResponse interestRefundResponse = createManualInterestRefund(loanId, refundResponse.getResourceId(),
+            PostLoansLoanIdTransactionsResponse interestRefundResponse = loanTransactionHelper.createManualInterestRefund(loanId, refundResponse.getResourceId(),
                     "15 January 2024", 5.0, null);
 
             assertNotNull(interestRefundResponse, "Interest refund response should not be null");
@@ -157,7 +157,7 @@ public class LoanManualInterestRefundResponseStructureTest extends BaseLoanInteg
 
             // Create manual interest refund with external ID
             String interestRefundExternalId = UUID.randomUUID().toString();
-            PostLoansLoanIdTransactionsResponse interestRefundResponse = createManualInterestRefund(loanId, refundResponse.getResourceId(),
+            PostLoansLoanIdTransactionsResponse interestRefundResponse = loanTransactionHelper.createManualInterestRefund(loanId, refundResponse.getResourceId(),
                     "15 February 2024", 5.0, interestRefundExternalId);
 
             assertNotNull(interestRefundResponse, "Interest refund response should not be null");
@@ -178,22 +178,6 @@ public class LoanManualInterestRefundResponseStructureTest extends BaseLoanInteg
 
             assertNull(interestRefundResponse.getSubResourceExternalId(), "subEntityExternalId should be null");
         });
-    }
-
-    /**
-     * Helper method to create manual interest refund transaction
-     */
-    private PostLoansLoanIdTransactionsResponse createManualInterestRefund(Long loanId, Long targetTransactionId, String transactionDate,
-            Double amount, String externalId) {
-
-        PostLoansLoanIdTransactionsTransactionIdRequest request = new PostLoansLoanIdTransactionsTransactionIdRequest()
-                .transactionAmount(amount).dateFormat("dd MMMM yyyy").locale("en");
-
-        if (externalId != null) {
-            request.externalId(externalId);
-        }
-
-        return loanTransactionHelper.manualInterestRefund(loanId, targetTransactionId, request);
     }
 
     /**
