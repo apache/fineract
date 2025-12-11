@@ -637,3 +637,61 @@ Feature: MerchantIssuedRefund
       | 02 October 2025  | Interest Refund        | 17.07  |   0.0     | 0.0      | 0.0  | 0.0       |   0.0        | false    | false    |
       | 02 October 2025  | Accrual                | 18.33  |   0.0     | 18.33    | 0.0  | 0.0       |   0.0        | false    | false    |
       | 02 October 2025  | Accrual Activity       |  8.97  |   0.0     | 8.97     | 0.0  | 0.0       |   0.0        | false    | false    |
+
+  @TestRailId:C4355
+  Scenario: Verify manual Interest Refund is recalculated during reprocessing even if no prior transaction was reverse-replayed
+    When Admin sets the business date to "01 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PMT_ALLOC_ACTUAL_ACTUAL_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 January 2025   | 100            | 26                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "100" amount and expected disbursement date on "01 January 2025"
+    And Admin successfully disburse the loan on "01 January 2025" with "100" EUR transaction amount
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+    # MIR with interestRefundCalculation=false (no auto Interest Refund)
+    When Admin sets the business date to "01 February 2025"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "01 February 2025" with 66.41 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation false
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement           | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 01 February 2025 | Merchant Issued Refund | 66.41  | 64.2      | 2.21     | 0.0  | 0.0       | 35.8         | false    | false    |
+    # Manually create Interest Refund with arbitrary amount (0.47 EUR)
+    When Admin manually adds Interest Refund for "MERCHANT_ISSUED_REFUND" transaction made on "01 February 2025" with 0.47 EUR interest refund amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement           | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 01 February 2025 | Merchant Issued Refund | 66.41  | 64.2      | 2.21     | 0.0  | 0.0       | 35.8         | false    | false    |
+      | 01 February 2025 | Interest Refund        | 0.47   | 0.47      | 0.0      | 0.0  | 0.0       | 35.33         | false    | false    |
+    # Backdated repayment on 20 January (before MIR) - triggers replay of MIR
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "20 January 2025" with 17.94 EUR transaction amount and system-generated Idempotency key
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement           | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 20 January 2025  | Repayment              | 17.94  | 16.59     | 1.35     | 0.0  | 0.0       | 83.41        | false    | false    |
+      | 01 February 2025 | Merchant Issued Refund | 66.41  | 66.41     | 0.0      | 0.0  | 0.0       | 17.0         | false    | true     |
+      | 01 February 2025 | Interest Refund        | 1.48   | 1.48      | 0.0      | 0.0  | 0.0       | 15.52        | false    | true     |
+#   Step 4: Make another repayment on 25 January (also before MIR)
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "25 January 2025" with 10.94 EUR transaction amount and system-generated Idempotency key
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement           | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 20 January 2025  | Repayment              | 17.94  | 16.59     | 1.35     | 0.0  | 0.0       | 83.41        | false    | false    |
+      | 25 January 2025  | Repayment              | 10.94  | 10.94     | 0.0      | 0.0  | 0.0       | 72.47        | false    | false    |
+      | 01 February 2025 | Merchant Issued Refund | 66.41  | 66.41     | 0.0      | 0.0  | 0.0       | 6.06         | false    | true     |
+      | 01 February 2025 | Interest Refund        | 1.47   | 1.47      | 0.0      | 0.0  | 0.0       | 4.59         | false    | true     |
+#   Step 5: Reverse the 1st repayment (20 Jan) - this triggers full transaction reprocessing
+#   Key expectation: Interest Refund should be RECALCULATED even though MIR wasn't modified
+#   Before fix: Interest Refund kept 1.47 because no txn before it was changed
+#   After fix: Interest Refund recalculated to correct value
+    When Customer undo "1"th "Repayment" transaction made on "20 January 2025"
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement           | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 20 January 2025  | Repayment              | 17.94  | 16.59     | 1.35     | 0.0  | 0.0       | 83.41        | true     | false    |
+      | 25 January 2025  | Repayment              | 10.94  | 10.94     | 0.0      | 0.0  | 0.0       | 89.06        | false    | false     |
+      | 01 February 2025 | Merchant Issued Refund | 66.41  | 64.26     | 2.15     | 0.0  | 0.0       | 24.8         | false    | true     |
+      | 01 February 2025 | Interest Refund        | 1.46   | 1.46      | 0.0      | 0.0  | 0.0       | 23.34        | false    | true     |
+    #following steps will fail if Interest Refund is not recalculated properly
+    Then Loan has 23.97 outstanding amount

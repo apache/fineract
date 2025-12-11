@@ -36,7 +36,6 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
-import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
@@ -96,8 +95,8 @@ public class LoanManualInterestRefundResponseStructureTest extends BaseLoanInteg
             targetTransactionIdRef.set(refundResponse.getResourceId());
 
             // Create manual interest refund via API
-            PostLoansLoanIdTransactionsResponse interestRefundResponse = loanTransactionHelper.createManualInterestRefund(loanId, refundResponse.getResourceId(),
-                    "15 January 2024", 5.0, null);
+            PostLoansLoanIdTransactionsResponse interestRefundResponse = loanTransactionHelper.createManualInterestRefund(loanId,
+                    refundResponse.getResourceId(), "15 January 2024", 5.0, null);
 
             assertNotNull(interestRefundResponse, "Interest refund response should not be null");
             assertNotNull(interestRefundResponse.getResourceId(), "Interest refund resource ID should not be null");
@@ -157,8 +156,8 @@ public class LoanManualInterestRefundResponseStructureTest extends BaseLoanInteg
 
             // Create manual interest refund with external ID
             String interestRefundExternalId = UUID.randomUUID().toString();
-            PostLoansLoanIdTransactionsResponse interestRefundResponse = loanTransactionHelper.createManualInterestRefund(loanId, refundResponse.getResourceId(),
-                    "15 February 2024", 5.0, interestRefundExternalId);
+            PostLoansLoanIdTransactionsResponse interestRefundResponse = loanTransactionHelper.createManualInterestRefund(loanId,
+                    refundResponse.getResourceId(), "15 February 2024", 5.0, interestRefundExternalId);
 
             assertNotNull(interestRefundResponse, "Interest refund response should not be null");
             assertNotNull(interestRefundResponse.getResourceId(), "Interest refund resource ID should not be null");
