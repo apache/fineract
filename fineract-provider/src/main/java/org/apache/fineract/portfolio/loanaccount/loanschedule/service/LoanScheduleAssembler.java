@@ -533,6 +533,11 @@ public class LoanScheduleAssembler {
                     .extractBooleanNamed(LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, element);
         }
 
+        boolean allowFullTermForTranche = loanProduct.isAllowFullTermForTranche();
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE, element)) {
+            allowFullTermForTranche = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE, element);
+        }
+
         return LoanApplicationTerms.assembleFrom(applicationCurrency.toData(), loanTermFrequency, loanTermPeriodFrequencyType,
                 numberOfRepayments, repaymentEvery, repaymentPeriodFrequencyType, nthDay, weekDayType, amortizationMethod, interestMethod,
                 interestRatePerPeriod, interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod,
@@ -561,7 +566,7 @@ public class LoanScheduleAssembler {
                 loanProduct.getLoanProductRelatedDetail().getBuyDownFeeCalculationType(),
                 loanProduct.getLoanProductRelatedDetail().getBuyDownFeeStrategy(),
                 loanProduct.getLoanProductRelatedDetail().getBuyDownFeeIncomeType(),
-                loanProduct.getLoanProductRelatedDetail().isMerchantBuyDownFee());
+                loanProduct.getLoanProductRelatedDetail().isMerchantBuyDownFee(), allowFullTermForTranche);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,

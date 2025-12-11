@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.organisation.workingdays.data.AdjustedDateDetailsDTO;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.OutstandingAmountsDTO;
@@ -112,6 +113,18 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
 
         prepareDisbursementsOnLoanApplicationTerms(loanApplicationTerms);
         final List<DisbursementData> disbursementDataList = getSortedDisbursementList(loanApplicationTerms);
+
+        if (loanApplicationTerms.isAllowFullTermForTranche() && loanApplicationTerms.isMultiDisburseLoan()) {
+            ScheduleExtensionResult extensionResult = calculateAdditionalPeriodsForFullTermTranches(disbursementDataList,
+                    expectedRepaymentPeriods, loanApplicationTerms);
+            if (extensionResult.additionalPeriods > 0) {
+                List<LoanScheduleModelRepaymentPeriod> extensionPeriods = generateAdditionalPeriods(mc, extensionResult.additionalPeriods,
+                        expectedRepaymentPeriods, loanApplicationTerms, holidayDetailDTO);
+                expectedRepaymentPeriods.addAll(extensionPeriods);
+                emiCalculator.addRepaymentPeriods(interestScheduleModel, extensionResult.disbursementDate,
+                        extensionResult.additionalPeriods);
+            }
+        }
 
         for (LoanScheduleModelRepaymentPeriod repaymentPeriod : expectedRepaymentPeriods) {
             scheduleParams.setPeriodStartDate(repaymentPeriod.getFromDate());
@@ -501,5 +514,76 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
             loanCharges.removeAll(interestCharges);
         }
         return interestCharges;
+    }
+
+    private ScheduleExtensionResult calculateAdditionalPeriodsForFullTermTranches(final List<DisbursementData> disbursementDataList,
+            final List<LoanScheduleModelRepaymentPeriod> existingPeriods, final LoanApplicationTerms loanApplicationTerms) {
+        if (disbursementDataList.size() <= 1) {
+            return new ScheduleExtensionResult(0, null);
+        }
+
+        int maxAdditionalPeriods = 0;
+        LocalDate maxDisbursementDate = null;
+        final int numberOfRepayments = loanApplicationTerms.getNumberOfRepayments();
+
+        for (int i = 1; i < disbursementDataList.size(); i++) {
+            LocalDate disbursementDate = disbursementDataList.get(i).disbursementDate();
+            int periodIndex = findPeriodIndexForDate(disbursementDate, existingPeriods);
+            int additionalPeriodsForThisTranche = periodIndex;
+            if (additionalPeriodsForThisTranche > maxAdditionalPeriods) {
+                maxAdditionalPeriods = additionalPeriodsForThisTranche;
+                maxDisbursementDate = disbursementDate;
+            }
+        }
+
+        return new ScheduleExtensionResult(maxAdditionalPeriods, maxDisbursementDate);
+    }
+
+    private record ScheduleExtensionResult(int additionalPeriods, LocalDate disbursementDate) {
+    }
+
+    private int findPeriodIndexForDate(final LocalDate date, final List<LoanScheduleModelRepaymentPeriod> periods) {
+        for (int i = 0; i < periods.size(); i++) {
+            LoanScheduleModelRepaymentPeriod period = periods.get(i);
+            if (!date.isBefore(period.getFromDate()) && date.isBefore(period.getDueDate())) {
+                return i;
+            }
+        }
+        return periods.size() - 1;
+    }
+
+    private List<LoanScheduleModelRepaymentPeriod> generateAdditionalPeriods(final MathContext mc, final int additionalPeriods,
+            final List<LoanScheduleModelRepaymentPeriod> existingPeriods, final LoanApplicationTerms loanApplicationTerms,
+            final HolidayDetailDTO holidayDetailDTO) {
+        final Money zeroAmount = Money.zero(loanApplicationTerms.getCurrency(), mc);
+        final List<LoanScheduleModelRepaymentPeriod> extensionPeriods = new ArrayList<>(additionalPeriods);
+
+        LoanScheduleModelRepaymentPeriod lastPeriod = existingPeriods.get(existingPeriods.size() - 1);
+        LocalDate lastRepaymentDate = lastPeriod.getDueDate();
+        int startingPeriodNumber = existingPeriods.size() + 1;
+
+        for (int i = 0; i < additionalPeriods; i++) {
+            LocalDate nextRepaymentDate = generateNextRepaymentDate(lastRepaymentDate, loanApplicationTerms, false);
+
+            if (i == additionalPeriods - 1) {
+                nextRepaymentDate = adjustRepaymentDate(nextRepaymentDate, loanApplicationTerms, holidayDetailDTO).getChangedScheduleDate();
+            }
+
+            extensionPeriods.add(LoanScheduleModelRepaymentPeriod.repayment(startingPeriodNumber + i, lastRepaymentDate, nextRepaymentDate,
+                    zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, false, mc));
+            lastRepaymentDate = nextRepaymentDate;
+        }
+
+        return extensionPeriods;
+    }
+
+    private LocalDate generateNextRepaymentDate(final LocalDate lastRepaymentDate, final LoanApplicationTerms loanApplicationTerms,
+            final boolean isFirstRepayment) {
+        return scheduledDateGenerator.generateNextRepaymentDate(lastRepaymentDate, loanApplicationTerms, isFirstRepayment);
+    }
+
+    private AdjustedDateDetailsDTO adjustRepaymentDate(final LocalDate repaymentDate, final LoanApplicationTerms loanApplicationTerms,
+            final HolidayDetailDTO holidayDetailDTO) {
+        return scheduledDateGenerator.adjustRepaymentDate(repaymentDate, loanApplicationTerms, holidayDetailDTO);
     }
 }
