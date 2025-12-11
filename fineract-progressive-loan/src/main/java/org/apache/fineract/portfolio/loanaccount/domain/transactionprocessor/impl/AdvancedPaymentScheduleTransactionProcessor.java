@@ -568,14 +568,20 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         .filter(LoanTransaction::isNotReversed).map(AbstractPersistableCustom::getId).toList();
                 final List<LoanTransaction> modifiedTransactions = new ArrayList<>(progCtx.getAlreadyProcessedTransactions().stream()
                         .filter(LoanTransaction::isNotReversed).filter(tr -> tr.getId() == null).toList());
-                final Money interestAfterRefund = interestRefundService.totalInterestByTransactions(this, loan.getId(), targetDate,
-                        modifiedTransactions, unmodifiedTransactionIds);
-                final Money newAmount = interestBeforeRefund.minus(progCtx.getSumOfInterestRefundAmount()).minus(interestAfterRefund);
-                loanTransaction.updateAmount(newAmount.getAmount());
+                if (validateInterestRefundTransactionRelation(loanTransaction)) {
+                    final Money interestAfterRefund = interestRefundService.totalInterestByTransactions(this, loan.getId(), targetDate,
+                            modifiedTransactions, unmodifiedTransactionIds);
+                    final Money newAmount = interestBeforeRefund.minus(progCtx.getSumOfInterestRefundAmount()).minus(interestAfterRefund);
+                    loanTransaction.updateAmount(newAmount.getAmount());
+                }
                 progCtx.setSumOfInterestRefundAmount(progCtx.getSumOfInterestRefundAmount().add(loanTransaction.getAmount()));
             }
         }
         handleRepayment(loanTransaction, ctx);
+    }
+
+    private boolean validateInterestRefundTransactionRelation(final LoanTransaction interestRefundTransaction) {
+        return interestRefundTransaction.getLoanTransactionRelations(tr -> tr.getToTransaction().getId() != null).isEmpty();
     }
 
     private boolean chargeOffIsInEffect(TransactionCtx ctx, LoanTransaction chargeOffTransaction, LoanTransaction loanTransaction) {

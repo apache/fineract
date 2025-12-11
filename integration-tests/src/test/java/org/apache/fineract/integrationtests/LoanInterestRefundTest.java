@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.portfolio.loanaccount.domain.Loan.DATE_FORMAT;
 import static org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum.REPLAYED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -47,7 +46,6 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
-import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
@@ -64,7 +62,6 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
     private static RequestSpecification requestSpec;
     private static LoanTransactionHelper loanTransactionHelper;
     private static PostClientsResponse client;
-    private static BusinessStepHelper businessStepHelper;
 
     @BeforeAll
     public static void setup() {
@@ -1646,9 +1643,9 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
             disburseLoan(loanId, BigDecimal.valueOf(100.0), "1 January 2025");
 
             final String transactionExternalId = UUID.randomUUID().toString();
-            final PostLoansLoanIdTransactionsResponse refundResponse = loanTransactionHelper
-                    .makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
-                        .transactionDate("1 February 2025").locale("en").transactionAmount(66.41).externalId(transactionExternalId).interestRefundCalculation(false));
+            final PostLoansLoanIdTransactionsResponse refundResponse = loanTransactionHelper.makeMerchantIssuedRefund(loanId,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("1 February 2025").locale("en")
+                            .transactionAmount(66.41).externalId(transactionExternalId).interestRefundCalculation(false));
             Assertions.assertNotNull(refundResponse.getResourceId());
 
             verifyTransactions(loanId, //
@@ -1657,16 +1654,16 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
             );
 
             // Create manual interest refund via API
-            PostLoansLoanIdTransactionsResponse interestRefundResponse = loanTransactionHelper.createManualInterestRefund(loanId, refundResponse.getResourceId(),
-                    "1 February 2025", 1.47, null);
+            loanTransactionHelper.createManualInterestRefund(loanId, refundResponse.getResourceId(), "1 February 2025", 0.47, null);
 
             verifyTransactions(loanId, //
                     transaction(100.0, "Disbursement", "01 January 2025"), //
                     transaction(66.41, "Merchant Issued Refund", "01 February 2025"), //
-                    transaction(1.47, "Interest Refund", "01 February 2025") //
+                    transaction(0.47, "Interest Refund", "01 February 2025") //
             );
 
-            PostLoansLoanIdTransactionsResponse repaymentResponse = loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "20 January 2025", 17.94);
+            PostLoansLoanIdTransactionsResponse repaymentResponse = loanTransactionHelper.makeLoanRepayment(loanId, "Repayment",
+                    "20 January 2025", 17.94);
             loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "25 January 2025", 10.94);
 
             verifyTransactions(loanId, //
@@ -1678,12 +1675,20 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
             );
 
             loanTransactionHelper.reverseLoanTransaction(loanId, repaymentResponse.getResourceId(),
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN)
-                    .transactionDate("25 January 2021").transactionAmount(0.0).locale("en"));
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("25 January 2025")
+                            .transactionAmount(0.0).locale("en"));
+
+            verifyTransactions(loanId, //
+                    transaction(100.0, "Disbursement", "01 January 2025"), //
+                    reversedTransaction(17.94, "Repayment", "20 January 2025"), //
+                    transaction(10.94, "Repayment", "25 January 2025"), //
+                    transaction(66.41, "Merchant Issued Refund", "01 February 2025"), //
+                    transaction(1.47, "Interest Refund", "01 February 2025") //
+            );
 
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
-            verifyLoanStatus(loanDetails, LoanStatus.OVERPAID);
-            Assertions.assertEquals(0.36, Utils.getDoubleValue(loanDetails.getTotalOverpaid()));
+            verifyLoanStatus(loanDetails, LoanStatus.ACTIVE);
+            Assertions.assertEquals(23.97, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
         });
     }
 
