@@ -3163,6 +3163,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         installment.setReAged(true);
                     }
                     installment.setAdditional(false);
+                    installment.setCreditedPrincipal(rp.getCreditedPrincipal().getAmount());
                     installment.updateObligationsMet(ctx.getCurrency(), transactionDate);
                 }
             } else {
@@ -3178,6 +3179,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         newInstallment.addToInterest(transactionDate, rp.getDueInterest());
                     }
 
+                    newInstallment.setCreditedPrincipal(rp.getCreditedPrincipal().getAmount());
                     newInstallment.updateObligationsMet(ctx.getCurrency(), transactionDate);
                     iterator.add(newInstallment);
                 }
@@ -3227,6 +3229,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         newInstallment.setTotalPaidInAdvance(paidInAdvanceBalances.getPaidInAdvance().getAmount());
         newInstallment.setTotalPaidLate(paidInAdvanceBalances.getPaidLate());
         paidInAdvanceBalances.loanTransactionToRepaymentScheduleMappings.forEach(m -> m.setInstallment(newInstallment));
+        newInstallment.setCreditedPrincipal(rp.getCreditedPrincipal().getAmount());
         newInstallment.updateObligationsMet(currency, transactionDate);
 
         return newInstallment;

@@ -570,12 +570,18 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     public void updateModelRepaymentPeriodsDuringReAge(final ProgressiveLoanInterestScheduleModel scheduleModel,
             final LocalDate reAgePeriodStartDate, final LocalDate reAgeFirstDueDate, final LocalDate targetDate,
             final LoanApplicationTerms loanApplicationTerms, final MathContext mc) {
-        moveOutstandingAmountsFromPeriodsBeforeTransactionDate(scheduleModel.repaymentPeriods(), targetDate);
+        final Money futureCreditedPrincipals = scheduleModel.repaymentPeriods().stream()
+                .filter(rp -> !rp.getFromDate().isBefore(targetDate)).filter(rp -> rp.getDueDate().isAfter(targetDate))
+                .map(RepaymentPeriod::getCreditedPrincipal).reduce(scheduleModel.zero(), Money::add);
 
         // calculate already paid balances from transaction date
         final OutstandingDetails paidBalancesFromTransactionDate = calculatePaidBalancesAfterDate(scheduleModel, targetDate);
 
         accelerateMaturityDateTo(scheduleModel, targetDate);
+
+        addCredit(scheduleModel, targetDate, futureCreditedPrincipals, scheduleModel.zero());
+
+        moveOutstandingAmountsFromPeriodsBeforeTransactionDate(scheduleModel.repaymentPeriods(), targetDate);
 
         final ProgressiveLoanInterestScheduleModel temporaryReAgedScheduleModel = generateTemporaryReAgedScheduleModel(loanApplicationTerms,
                 mc, reAgePeriodStartDate);
