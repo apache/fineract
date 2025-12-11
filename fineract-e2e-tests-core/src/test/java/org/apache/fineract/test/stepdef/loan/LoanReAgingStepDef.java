@@ -33,6 +33,7 @@ import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -296,43 +297,35 @@ public class LoanReAgingStepDef extends AbstractStepDef {
         assertThat(exception.getDeveloperMessage()).contains(ErrorMessageHelper.reAgeContractTerminatedLoanFailure());
     }
 
+    private Map<String, Object> resolveReAgingQueryParams(DataTable table) {
+        List<String> header = table.asLists().get(0);
+        List<String> data = table.asLists().get(1);
+        Map<String, Object> queryParams = new HashMap<>(Map.of("dateFormat", DATE_FORMAT, "locale", "en"));
+        for (int i = 0; i < header.size(); i++) {
+            queryParams.put(header.get(i), data.get(i));
+        }
+        return queryParams;
+    }
+
     @When("Admin creates a Loan re-aging preview with the following data:")
     public void createReAgingPreview(DataTable table) throws IOException {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
 
-        List<String> data = table.asLists().get(1);
-        int frequencyNumber = Integer.parseInt(data.get(0));
-        String frequencyType = data.get(1);
-        String startDate = data.get(2);
-        int numberOfInstallments = Integer.parseInt(data.get(3));
-
-        Map<String, Object> queryParams = Map.of("frequencyNumber", frequencyNumber, "frequencyType", frequencyType, "startDate", startDate,
-                "numberOfInstallments", numberOfInstallments, "dateFormat", DATE_FORMAT, "locale", "en");
+        Map<String, Object> queryParams = resolveReAgingQueryParams(table);
         LoanScheduleData response = ok(() -> fineractClient.loanTransactions().previewReAgeSchedule(loanId, queryParams));
         testContext().set(TestContextKey.LOAN_REAGING_PREVIEW_RESPONSE, response);
 
-        log.info(
-                "Re-aging preview created for loan ID: {} with parameters: frequencyNumber={}, frequencyType={}, startDate={}, numberOfInstallments={}",
-                loanId, frequencyNumber, frequencyType, startDate, numberOfInstallments);
+        log.info("Re-aging preview created for loan ID: {} with parameters: {}", loanId, queryParams);
     }
 
     public LoanScheduleData reAgingPreviewByLoanExternalId(DataTable table) throws IOException {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         String loanExternalId = loanResponse.getResourceExternalId();
 
-        List<String> data = table.asLists().get(1);
-        int frequencyNumber = Integer.parseInt(data.get(0));
-        String frequencyType = data.get(1);
-        String startDate = data.get(2);
-        int numberOfInstallments = Integer.parseInt(data.get(3));
-
-        Map<String, Object> queryParams = Map.of("frequencyNumber", frequencyNumber, "frequencyType", frequencyType, "startDate", startDate,
-                "numberOfInstallments", numberOfInstallments, "dateFormat", DATE_FORMAT, "locale", "en");
+        Map<String, Object> queryParams = resolveReAgingQueryParams(table);
         LoanScheduleData result = ok(() -> fineractClient.loanTransactions().previewReAgeSchedule1(loanExternalId, queryParams));
-        log.info(
-                "Re-aging preview is requested to be created with loan external ID: {} with parameters: frequencyNumber={}, frequencyType={}, startDate={}, numberOfInstallments={}",
-                loanExternalId, frequencyNumber, frequencyType, startDate, numberOfInstallments);
+        log.info("Re-aging preview is requested to be created with loan external ID: {} with parameters: {}", loanExternalId, queryParams);
         return result;
     }
 
