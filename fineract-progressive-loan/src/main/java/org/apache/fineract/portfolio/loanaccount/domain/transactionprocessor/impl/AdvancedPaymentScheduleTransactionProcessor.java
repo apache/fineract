@@ -3188,6 +3188,38 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             loanChargeRepaymentScheduleProcessing.reprocess(ctx.getCurrency(), loanTransaction.getLoan().getDisbursementDate(),
                     installments, loanCharge);
         }
+
+        reApplyInterestPauseOnReAgedInstallments(loanTransaction, ctx, reAgePeriodStartDate, installments);
+    }
+
+    private void reApplyInterestPauseOnReAgedInstallments(final LoanTransaction loanTransaction, final ProgressiveTransactionCtx ctx,
+            final LocalDate reAgePeriodStartDate, final List<LoanRepaymentScheduleInstallment> installments) {
+        final List<LoanRepaymentScheduleInstallment> reAgedInstallments = installments.stream()
+                .filter(LoanRepaymentScheduleInstallment::isReAged).toList();
+        if (!reAgedInstallments.isEmpty()) {
+            final LocalDate reAgeEndDate = reAgedInstallments.getLast().getDueDate();
+
+            final List<LoanTermVariationsData> loanTermVariationsToReprocess = loanTransaction.getLoan().getActiveLoanTermVariations()
+                    .stream().filter(ltv -> {
+                        if (!ltv.getTermType().isInterestPauseVariation()) {
+                            return false;
+                        }
+
+                        final LocalDate termFromFrom = ltv.getTermApplicableFrom();
+                        final LocalDate termEndFrom = ltv.getDateValue();
+
+                        if (termEndFrom == null) {
+                            return !termFromFrom.isBefore(reAgePeriodStartDate) && termFromFrom.isBefore(reAgeEndDate);
+                        }
+
+                        return (!termFromFrom.isAfter(reAgePeriodStartDate) && !termEndFrom.isBefore(reAgePeriodStartDate))
+                                || (termFromFrom.isAfter(reAgePeriodStartDate) && termFromFrom.isBefore(reAgeEndDate));
+                    }).map(LoanTermVariations::toData).collect(Collectors.toCollection(ArrayList::new));
+
+            for (LoanTermVariationsData termVariationsData : loanTermVariationsToReprocess) {
+                processLoanTermVariation(installments, termVariationsData, ctx.getModel());
+            }
+        }
     }
 
     /**
