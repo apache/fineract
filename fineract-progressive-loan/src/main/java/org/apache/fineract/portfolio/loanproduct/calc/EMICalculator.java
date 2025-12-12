@@ -124,11 +124,17 @@ public interface EMICalculator {
             @NotNull LocalDate periodDueDate, @NotNull LocalDate targetDate);
 
     /**
-     * Gives back the sum of the interest from the whole model on the given date.
+     * Gives back the sum of the interest from the whole model on the given date. Fixed interest till date calculation
+     * flag indicates that the fixed interest should be calculated only till date or not. This flag should be true for
+     * accrual calculation. It should be false for repayment or repayment schedule related calculation.
+     *
+     * @param fixedInterestTillDate
+     *            indicates that fixed interest should be calculated till the date.
      */
     @NotNull
     Money getPeriodInterestTillDate(@NotNull ProgressiveLoanInterestScheduleModel scheduleModel, @NotNull LocalDate periodFromDate,
-            @NotNull LocalDate periodDueDate, @NotNull LocalDate targetDate, boolean includeChargebackInterest);
+            @NotNull LocalDate periodDueDate, @NotNull LocalDate targetDate, boolean includeChargebackInterest,
+            boolean fixedInterestTillDate);
 
     Money getOutstandingLoanBalanceOfPeriod(ProgressiveLoanInterestScheduleModel interestScheduleModel, LocalDate targetDate);
 

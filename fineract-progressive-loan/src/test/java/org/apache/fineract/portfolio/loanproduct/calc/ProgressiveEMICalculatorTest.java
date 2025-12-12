@@ -5090,9 +5090,9 @@ class ProgressiveEMICalculatorTest {
     private static void checkDailyInterest(final ProgressiveLoanInterestScheduleModel interestModel, final LocalDate repaymentPeriodDueDate,
             final LocalDate interestStartDay, final int dayOffset, final double dailyInterest, final double interest) {
         Money previousInterest = emiCalculator.getPeriodInterestTillDate(interestModel, interestStartDay, repaymentPeriodDueDate,
-                interestStartDay.plusDays(dayOffset - 1), true);
+                interestStartDay.plusDays(dayOffset - 1), true, true);
         Money currentInterest = emiCalculator.getPeriodInterestTillDate(interestModel, interestStartDay, repaymentPeriodDueDate,
-                interestStartDay.plusDays(dayOffset), true);
+                interestStartDay.plusDays(dayOffset), true, true);
         Assertions.assertEquals(dailyInterest, toDouble(currentInterest.minus(previousInterest)));
         Assertions.assertEquals(interest, toDouble(currentInterest));
     }

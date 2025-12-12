@@ -519,15 +519,21 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     @Override
     @NotNull
-    public Money getPeriodInterestTillDate(@NotNull ProgressiveLoanInterestScheduleModel scheduleModel, @NotNull LocalDate periodFromDate,
-            @NotNull LocalDate periodDueDate, @NotNull LocalDate targetDate, boolean includeCreditedInterest) {
-        ProgressiveLoanInterestScheduleModel recalculatedScheduleModelTillDate = recalculateScheduleModelTillDate(scheduleModel,
+    public Money getPeriodInterestTillDate(@NotNull final ProgressiveLoanInterestScheduleModel scheduleModel,
+            @NotNull final LocalDate periodFromDate, @NotNull final LocalDate periodDueDate, @NotNull final LocalDate targetDate,
+            final boolean includeCreditedInterest, final boolean fixedInterestTillDate) {
+        final ProgressiveLoanInterestScheduleModel recalculatedScheduleModelTillDate = recalculateScheduleModelTillDate(scheduleModel,
                 targetDate);
-        RepaymentPeriod repaymentPeriod = recalculatedScheduleModelTillDate
+        final MathContext mc = recalculatedScheduleModelTillDate.mc();
+        final RepaymentPeriod repaymentPeriod = recalculatedScheduleModelTillDate
                 .findRepaymentPeriodByFromAndDueDate(periodFromDate, periodDueDate).orElseThrow();
-        return includeCreditedInterest ? repaymentPeriod.getCalculatedDueInterest()
-                : repaymentPeriod.getCalculatedDueInterest().minus(repaymentPeriod.getCreditedInterest(),
-                        recalculatedScheduleModelTillDate.mc());
+        Money calculatedDueInterest = repaymentPeriod.getCalculatedDueInterest();
+        if (fixedInterestTillDate) {
+            calculatedDueInterest = MathUtil.negativeToZero(
+                    calculatedDueInterest.minus(repaymentPeriod.getFixedInterest()).add(repaymentPeriod.calculateFixedInterestTillDate()),
+                    mc);
+        }
+        return includeCreditedInterest ? calculatedDueInterest : calculatedDueInterest.minus(repaymentPeriod.getCreditedInterest(), mc);
     }
 
     @Override
@@ -853,7 +859,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         calculateRateFactorForPeriods(futurePeriods, model);
 
         for (final RepaymentPeriod futurePeriod : futurePeriods) {
-            futurePeriod.setReAgedInterest(MathUtil.plus(futurePeriod.getReAgedInterest(), interestPortionPerPeriod, mc));
+            futurePeriod.setFixedInterest(MathUtil.plus(futurePeriod.getFixedInterest(), interestPortionPerPeriod, mc));
         }
 
         calculateEMIOnActualModel(futurePeriods, model);
@@ -1908,7 +1914,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         EqualAmortizationValues emiAEV = principalEAV.add(interestEAV);
         for (int i = 0; i < repaymentPeriods.size(); i++) {
             RepaymentPeriod rp = repaymentPeriods.get(i);
-            rp.setReAgedInterest(interestEAV.calculateValue(i));
+            rp.setFixedInterest(interestEAV.calculateValue(i));
             Money emi = emiAEV.calculateValue(i);
             rp.setEmi(emi);
             rp.setOriginalEmi(emi);
@@ -1953,6 +1959,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                     .addCreditedInterestAmount(MathUtil.min(rp.getOutstandingInterest(), rp.getCreditedInterest(), false).negated());
             rp.setEmi(rp.getTotalPaidAmount());
             rp.moveOutstandingDueToReAging();
+            rp.setNoUnrecognisedInterest(true);
         });
 
         // stop calculate unrecognised interest at this point because all
