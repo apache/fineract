@@ -121,7 +121,7 @@ Feature: LoanCharge
     When Admin sets the business date to "23 October 2022"
     And Admin adds an NSF fee because of payment bounce with "23 October 2022" transaction date
     Then Loan has 1010 outstanding amount
-    And Admin runs the Add Periodic Accrual Transactions job
+    When Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 22 October 2022  |           | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
@@ -149,7 +149,7 @@ Feature: LoanCharge
     When Admin sets the business date to "04 November 2022"
     When Admin makes a charge adjustment for the last "LOAN_NSF_FEE" type charge which is due on "23 October 2022" with 3 EUR transaction amount and externalId ""
     Then Loan has 1007 outstanding amount
-    And Admin runs the Add Periodic Accrual Transactions job
+    When Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 22 October 2022  |           | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
@@ -181,7 +181,7 @@ Feature: LoanCharge
 #   --- Backdated repayment with 8 EUR ---
     And Customer makes "AUTOPAY" repayment on "25 October 2022" with 8 EUR transaction amount
     Then Loan has 999 outstanding amount
-    And Admin runs the Add Periodic Accrual Transactions job
+    When Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 22 October 2022  |           | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
@@ -221,7 +221,7 @@ Feature: LoanCharge
 #   --- revert last charge adjustment (was amount 3) ---
     When Admin reverts the charge adjustment which was raised on "04 November 2022" with 3 EUR transaction amount
     Then Loan has 1002 outstanding amount
-    And Admin runs the Add Periodic Accrual Transactions job
+    When Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 22 October 2022  |           | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
@@ -262,7 +262,7 @@ Feature: LoanCharge
 #   --- Add snooze fee on 10/27/2022 with amount 9 ---
     And Admin adds "LOAN_SNOOZE_FEE" due date charge with "27 October 2022" due date and 9 EUR transaction amount
     Then Loan has 1011 outstanding amount
-    And Admin runs the Add Periodic Accrual Transactions job
+    When Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 22 October 2022  |           | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
@@ -309,7 +309,7 @@ Feature: LoanCharge
 #   --- charge adjustment for snooze fee with 4 ---
     When Admin makes a charge adjustment for the last "LOAN_SNOOZE_FEE" type charge which is due on "27 October 2022" with 4 EUR transaction amount and externalId ""
     Then Loan has 1007 outstanding amount
-    And Admin runs the Add Periodic Accrual Transactions job
+    When Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 22 October 2022  |           | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
@@ -359,7 +359,7 @@ Feature: LoanCharge
 #   --- Backdated repayment with 507 EUR ---
     And Customer makes "AUTOPAY" repayment on "31 October 2022" with 507 EUR transaction amount
     Then Loan has 500 outstanding amount
-    And Admin runs the Add Periodic Accrual Transactions job
+    When Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 22 October 2022  |                  | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -415,7 +415,7 @@ Feature: LoanCharge
 #   --- charge adjustment for nsf fee with 5 ---
     When Admin makes a charge adjustment for the last "LOAN_NSF_FEE" type charge which is due on "23 October 2022" with 5 EUR transaction amount and externalId ""
     Then Loan has 495 outstanding amount
-    And Admin runs the Add Periodic Accrual Transactions job
+    When Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 22 October 2022  |                  | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -474,7 +474,7 @@ Feature: LoanCharge
 #  --- Backdated repayment with 494 EUR ---
     And Customer makes "AUTOPAY" repayment on "1 November 2022" with 494 EUR transaction amount
     Then Loan has 1 outstanding amount
-    And Admin runs the Add Periodic Accrual Transactions job
+    When Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 22 October 2022  |                  | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -539,7 +539,7 @@ Feature: LoanCharge
     When Admin makes a charge adjustment for the last "LOAN_SNOOZE_FEE" type charge which is due on "27 October 2022" with 1 EUR transaction amount and externalId ""
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Loan has 0 outstanding amount
-    And Admin runs the Add Periodic Accrual Transactions job
+    When Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 22 October 2022  |                  | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -607,7 +607,7 @@ Feature: LoanCharge
     When Admin reverts the charge adjustment which was raised on "04 November 2022" with 1 EUR transaction amount
     Then Loan status will be "ACTIVE"
     Then Loan has 1 outstanding amount
-    And Admin runs the Add Periodic Accrual Transactions job
+    When Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 22 October 2022  |                  | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -677,7 +677,7 @@ Feature: LoanCharge
     When Admin makes a charge adjustment for the last "LOAN_NSF_FEE" type charge which is due on "23 October 2022" with 1 EUR transaction amount and externalId ""
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Loan has 0 outstanding amount
-    And Admin runs the Add Periodic Accrual Transactions job
+    When Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 22 October 2022  |                  | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -750,7 +750,7 @@ Feature: LoanCharge
     When Admin makes a charge adjustment for the last "LOAN_NSF_FEE" type charge which is due on "23 October 2022" with 2 EUR transaction amount and externalId ""
     Then Loan status will be "OVERPAID"
     Then Loan has 0 outstanding amount
-    And Admin runs the Add Periodic Accrual Transactions job
+    When Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 22 October 2022  |                  | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -826,7 +826,7 @@ Feature: LoanCharge
     When Admin reverts the charge adjustment which was raised on "04 November 2022" with 2 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Loan has 0 outstanding amount
-    And Admin runs the Add Periodic Accrual Transactions job
+    When Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 22 October 2022  |                  | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -5188,11 +5188,7 @@ Feature: LoanCharge
       | INCOME    | 404007       | Fee Income                |       | 1.0    |
       | LIABILITY | 145023       | Suspense/Clearing account | 1.0   |        |
     # Run income recognition for accrual test
-    And Admin runs the Accrual Activity Posting job
-    And Admin runs the Add Accrual Transactions job
-    And Admin runs the Add Accrual Transactions For Loans With Income Posted As Transactions job
-    And Admin runs the Add Periodic Accrual Transactions job
-    And Admin runs the Recalculate Interest for Loans job
+    When Admin runs inline COB job for Loan
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                    | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement                        | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -5319,11 +5315,7 @@ Feature: LoanCharge
       | LIABILITY | 145023       | Suspense/Clearing account | 5.0   |        |
     # Run income recognition for accrual test
     When Admin sets the business date to "03 March 2024"
-    And Admin runs the Accrual Activity Posting job
-    And Admin runs the Add Accrual Transactions job
-    And Admin runs the Add Accrual Transactions For Loans With Income Posted As Transactions job
-    And Admin runs the Add Periodic Accrual Transactions job
-    And Admin runs the Recalculate Interest for Loans job
+    When Admin runs inline COB job for Loan
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                    | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement                        | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -5467,11 +5459,7 @@ Feature: LoanCharge
       | LIABILITY | 145023       | Suspense/Clearing account | 5.0   |        |
     # Run income recognition for accrual test
     When Admin sets the business date to "03 March 2024"
-    And Admin runs the Accrual Activity Posting job
-    And Admin runs the Add Accrual Transactions job
-    And Admin runs the Add Accrual Transactions For Loans With Income Posted As Transactions job
-    And Admin runs the Add Periodic Accrual Transactions job
-    And Admin runs the Recalculate Interest for Loans job
+    When Admin runs inline COB job for Loan
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                    | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement                        | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |

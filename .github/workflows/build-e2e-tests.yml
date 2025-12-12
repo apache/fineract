@@ -1,180 +1,84 @@
 name: Fineract E2E Tests
 
-on: [push, pull_request]
+on:
+  workflow_call:
+    inputs:
+      image_artifact:
+        required: true
+        type: string
+      image_name:
+        required: true
+        type: string
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   test:
-    name: E2E Tests (Shard ${{ matrix.shard_index }} of ${{ matrix.total_shards }})
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
-
-    strategy:
-      fail-fast: false
-      matrix:
-        # Define the number of shards (1-based indexing)
-        shard_index: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        total_shards: [10]
+    timeout-minutes: 90
 
     env:
-      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
-      IMAGE_NAME: fineract
-      BASE_URL: https://localhost:8443
-      TEST_USERNAME: mifos
-      TEST_PASSWORD: password
-      TEST_STRONG_PASSWORD: A1b2c3d4e5f$
-      TEST_TENANT_ID: default
-      INITIALIZATION_ENABLED: true
-      EVENT_VERIFICATION_ENABLED: true
-      ACTIVEMQ_BROKER_URL: tcp://localhost:61616
+      ACTIVEMQ_USER: admin
+      ACTIVEMQ_PASSWORD: admin
       ACTIVEMQ_TOPIC_NAME: events
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5
+      - name: Setup CI
+        uses: ./.github/actions/setup-ci.yml
         with:
           fetch-depth: 0
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
-        with:
+          fetch-tags: true
           java-version: '21'
           distribution: 'zulu'
+          cache-read-only: true
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
+      - name: Download image artifact
+        uses: actions/download-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v4
+        with:
+          name: "${{ inputs.image_artifact }}"
 
-      - name: Make scripts executable
-        run: chmod +x scripts/split-features.sh
-
-      - name: Split feature files into shards
-        id: split-features
+      - name: Load image
         run: |
-          ./scripts/split-features.sh ${{ matrix.total_shards }} ${{ matrix.shard_index }}
-          echo "Shard ${{ matrix.shard_index }} feature files:"
-          cat feature_shard_${{ matrix.shard_index }}.txt
+          docker load -i fineract-image.tar
+          docker images | head -n 20
 
-      - name: Build the image
-        run: ./gradlew --no-daemon --console=plain :fineract-provider:jibDockerBuild -Djib.to.image=$IMAGE_NAME -x test -x cucumber
-
-      - name: Start the Fineract stack
+      - name: Start PostgreSQL + ActiveMQ E2E stack
         run: docker compose -f docker-compose-postgresql-test-activemq.yml up -d
 
-      - name: Check the stack
-        run: docker ps
-
-      - name: Wait for Manager to be ready
+      - name: Wait for Manager health
         run: |
-          # Wait for the container to be running
-          echo "Waiting for Manager container to be ready..."
-          timeout 300 bash -c 'until docker ps --filter "health=healthy" --filter "name=fineract" --format "{{.Status}}" | grep -q "healthy"; do
-            if docker ps --filter "name=fineract" --format "{{.Status}}" | grep -q "unhealthy"; then
-              echo "Container is unhealthy. Stopping..."
-              docker ps -a
-              docker logs $(docker ps -q --filter name=fineract) || true
-              exit 1
+          set -e
+          for i in $(seq 1 60); do
+            if curl -fsSk https://localhost:8443/fineract-provider/actuator/health >/dev/null; then
+              echo "Manager is healthy"
+              exit 0
             fi
-            echo "Waiting for Manager to be ready..."
-            sleep 5
-          done'
+            echo "Waiting for Manager... ($i/60)"
+            sleep 10
+          done
+          echo "Manager did not become healthy in time"
+          docker ps -a
+          docker logs $(docker ps -q --filter name=fineract) || true
+          exit 1
 
-          # Check the health endpoint
-          echo "Checking Manager health endpoint..."
-          curl -f -k --retry 30 --retry-all-errors --connect-timeout 10 --retry-delay 10 \
-            https://localhost:8443/fineract-provider/actuator/health
-
-      - name: Execute tests for shard ${{ matrix.shard_index }}
-        id: tests
+      - name: Run E2E tests
         run: |
-          # Initialize failure flag
-          FAILED=0
+          ./gradlew --no-daemon --console=plain :fineract-e2e-tests-runner:cucumber
 
-          # Create necessary directories
-          mkdir -p "allure-results-shard-${{ matrix.shard_index }}"
-          mkdir -p "allure-results-merged"
-
-          # Read feature files from the shard file
-          if [ ! -s "feature_shard_${{ matrix.shard_index }}.txt" ]; then
-            echo "No features to test in this shard. Skipping..."
-            exit 0
-          fi
-
-          # Read each feature file path and run tests one by one
-          while IFS= read -r feature_file || [ -n "$feature_file" ]; do
-            # Skip empty lines
-            [ -z "$feature_file" ] && continue
-
-            # Create a safe filename for the results
-            safe_name=$(echo "$feature_file" | tr '/' '-' | tr ' ' '_')
-
-            echo "::group::Testing feature: $feature_file"
-
-            # Run tests with individual allure results directory
-            if ! ./gradlew --no-daemon --console=plain \
-              :fineract-e2e-tests-runner:cucumber \
-              -Pcucumber.features="$feature_file" \
-              -Dallure.results.directory="allure-results-shard-${{ matrix.shard_index }}/$safe_name" \
-              allureReport; then
-
-              echo "::error::Test failed for $feature_file"
-              FAILED=1
-            fi
-
-            echo "::endgroup::"
-
-            # Copy the results to a merged directory
-            if [ -d "allure-results-shard-${{ matrix.shard_index }}/$safe_name" ]; then
-              cp -r "allure-results-shard-${{ matrix.shard_index }}/$safe_name/." "allure-results-merged/" || true
-            fi
-          done < "feature_shard_${{ matrix.shard_index }}.txt"
-
-          # Generate individual report for this shard
-          if [ -d "allure-results-merged" ] && [ "$(ls -A allure-results-merged)" ]; then
-            echo "Generating Allure report..."
-            mkdir -p "allure-report-shard-${{ matrix.shard_index }}"
-            ./fineract-e2e-tests-runner/build/allure/commandline/bin/allure generate "allure-results-merged" --clean -o "allure-report-shard-${{ matrix.shard_index }}" || \
-              echo "::warning::Failed to generate Allure report for shard ${{ matrix.shard_index }}"
-          fi
-
-          # Exit with failure status if any test failed
-          if [ "$FAILED" -eq 1 ]; then
-            echo "::error::Some tests failed in this shard"
-            exit 1
-          fi
-
-      - name: Upload test results
+      - name: Archive logs & reports
         if: always()
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v4
         with:
-          name: allure-results-shard-${{ matrix.shard_index }}
-          path: |
-            allure-results-shard-${{ matrix.shard_index }}
-            allure-results-merged
-            **/build/allure-results
-            **/build/reports/tests/test
-            **/build/test-results/test
-          retention-days: 5
-
-      - name: Upload Allure Report
-        if: always()
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v4
-        with:
-          name: allure-report-shard-${{ matrix.shard_index }}
-          path: allure-report-shard-${{ matrix.shard_index }}
-          retention-days: 5
-
-      - name: Upload logs
-        if: always()
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v4
-        with:
-          name: logs-shard-${{ matrix.shard_index }}
+          name: e2e-logs-and-reports
           path: |
             **/build/reports/tests/
+            **/build/reports/
             **/logs/
             **/out/
           retention-days: 5
+          if-no-files-found: ignore
 
       - name: Clean up
         if: always()

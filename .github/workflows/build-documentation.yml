@@ -1,5 +1,10 @@
 name: Fineract Documentation build
-on: [push, pull_request]
+on:
+  workflow_run:
+    workflows: ["Fineract Build & Cucumber tests (without E2E tests)"]
+    types: [completed]
+  workflow_dispatch:
+
 permissions:
   contents: read
 jobs:

@@ -1,18 +1,66 @@
 name: Fineract Docker Builds
 
-on: [push, pull_request]
+on:
+  workflow_run:
+    workflows: ["Fineract Build & Cucumber tests (without E2E tests)"]
+    types: [completed]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  build:
+  build-image:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+
+    outputs:
+      image_name: ${{ steps.meta.outputs.image_name }}
+      image_artifact: ${{ steps.meta.outputs.image_artifact }}
+
+    steps:
+      - name: Setup CI
+        uses: ./.github/actions/setup-ci.yml
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          java-version: '21'
+          distribution: 'zulu'
+          cache-read-only: false
+
+      - name: Define image metadata
+        id: meta
+        run: |
+          IMAGE_NAME="fineract:local-${{ github.sha }}"
+          IMAGE_ARTIFACT="fineract-image-${{ github.sha }}"
+          echo "image_name=$IMAGE_NAME" >> "$GITHUB_OUTPUT"
+          echo "image_artifact=$IMAGE_ARTIFACT" >> "$GITHUB_OUTPUT"
+
+      - name: Build Docker image (Jib)
+        run: |
+          ./gradlew --no-daemon --console=plain :fineract-provider:jibDockerBuild -Djib.to.image="${{ steps.meta.outputs.image_name }}" -x test -x cucumber
+
+      - name: Save image to artifact
+        run: |
+          docker save "${{ steps.meta.outputs.image_name }}" -o fineract-image.tar
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v4
+        with:
+          name: "${{ steps.meta.outputs.image_artifact }}"
+          path: fineract-image.tar
+          retention-days: 2
+
+  smoke:
+    name: Smoke (${{ matrix.db_type }})
+    needs: build-image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
     strategy:
       fail-fast: false
       matrix:
-        db_type: [mariadb, postgresql]
         include:
           - db_type: mariadb
             compose_file: docker-compose.yml
@@ -21,35 +69,77 @@ jobs:
             compose_file: docker-compose-postgresql.yml
             check_worker_health: false
 
-    env:
-      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
-      IMAGE_NAME: fineract
-
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5
         with:
           fetch-depth: 0
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
+      - name: Download image artifact
+        uses: actions/download-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v4
         with:
-          java-version: '21'
-          distribution: 'zulu'
+          name: "${{ needs.build-image.outputs.image_artifact }}"
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
-
-      - name: Build the image
-        run: ./gradlew --no-daemon --console=plain :fineract-provider:jibDockerBuild -Djib.to.image=$IMAGE_NAME -x test -x cucumber
+      - name: Load image
+        run: |
+          docker load -i fineract-image.tar
+          docker images | head -n 20
 
       - name: Start the ${{ matrix.db_type }} stack
-        run: docker compose -f ${{ matrix.compose_file }} up -d
+        run: docker compose -f "${{ matrix.compose_file }}" up -d
 
-      - name: Check the stack
-        run: docker ps
+      - name: Check containers
+        run: docker ps -a
 
-      - name: Check health Manager
-        run: curl -f -k --retry 60 --retry-all-errors --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health
+      - name: Wait for Manager health
+        run: |
+          set -e
+          for i in $(seq 1 60); do
+            if curl -fsSk https://localhost:8443/fineract-provider/actuator/health >/dev/null; then
+              echo "Manager is healthy"
+              exit 0
+            fi
+            echo "Waiting for Manager... ($i/60)"
+            sleep 10
+          done
+          echo "Manager did not become healthy in time"
+          docker compose -f "${{ matrix.compose_file }}" ps || true
+          docker logs $(docker ps -q --filter name=fineract) || true
+          exit 1
 
-      - name: Check info Manager
-        run: (( $(curl -f -k --retry 5 --retry-all-errors --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/info | wc --chars) > 100 ))
+      - name: Optional - wait for Worker health
+        if: ${{ matrix.check_worker_health }}
+        run: |
+          set -e
+          for i in $(seq 1 60); do
+            if docker ps --filter "name=fineract-worker" --format "{{.Names}}: {{.Status}}" | grep -qi "healthy"; then
+              echo "Worker is healthy"
+              exit 0
+            fi
+            echo "Waiting for Worker... ($i/60)"
+            sleep 10
+          done
+          echo "Worker did not become healthy in time"
+          docker ps -a
+          exit 1
+
+      - name: Check Manager info payload
+        run: |
+          BYTES=$(curl -fsSk https://localhost:8443/fineract-provider/actuator/info | wc --bytes)
+          echo "Info payload size: $BYTES bytes"
+          test "$BYTES" -gt 100
+
+      - name: Clean up stack
+        if: always()
+        run: |
+          docker compose -f "${{ matrix.compose_file }}" down -v
+          docker system prune -f
+
+  e2e:
+    name: E2E Tests
+    needs: build-image
+    uses: ./.github/workflows/build-e2e-tests.optimized.yml
+    with:
+      image_artifact: "${{ needs.build-image.outputs.image_artifact }}"
+      image_name: "${{ needs.build-image.outputs.image_name }}"
+    secrets: inherit

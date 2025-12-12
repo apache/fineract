@@ -1,12 +1,17 @@
 name: Fineract Messaging Smoke Tests
 
-on: [push, pull_request]
+on:
+  workflow_run:
+    workflows: ["Fineract Build & Cucumber tests (without E2E tests)"]
+    types: [completed]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   smoke-test:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     name: Smoke Test with ${{ matrix.messaging }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60

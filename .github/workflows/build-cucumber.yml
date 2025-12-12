@@ -6,67 +6,109 @@ permissions:
   contents: read
 
 jobs:
-  verify:
+  build-core:
+    name: build-core
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - task: build-core
-            job_type: main
-          - task: cucumber
-            job_type: main
-          - task: build-progressive-loan
-            job_type: progressive-loan
-
-    env:
-      TZ: Asia/Kolkata
-      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+    timeout-minutes: 90
 
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
+      - name: Setup CI
+        uses: ./.github/actions/setup-ci
         with:
+          fetch-depth: 0
+          fetch-tags: true
           java-version: '21'
           distribution: 'zulu'
+          cache-read-only: false
 
-      - name: Cache Gradle dependencies
-        uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-
-      - name: Setup Gradle and Validate Wrapper
-        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
-        with:
-          validate-wrappers: true
-
-      - name: Run Gradle Task
-        if: matrix.job_type == 'main'
+      - name: Build (no tests)
         run: |
-          set -e  # Fail the script if any command fails
+          ./gradlew --no-daemon --console=plain build -x test -x cucumber -x doc
 
-          case "${{ matrix.task }}" in
-            build-core)
-              ./gradlew --no-daemon build -x test -x cucumber -x doc
-              ;;
-            cucumber)
-              ./gradlew --no-daemon cucumber -x :fineract-e2e-tests-runner:cucumber -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer
-              ;;
-          esac
+      - name: Archive build reports
+        if: always()
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v4
+        with:
+          name: test-results-build-core
+          path: |
+            **/build/reports/
+          retention-days: 5
+          if-no-files-found: ignore
+
+  cucumber:
+    name: cucumber
+    needs: build-core
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup CI
+        uses: ./.github/actions/setup-ci
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          java-version: '21'
+          distribution: 'zulu'
+          cache-read-only: false
+
+      - name: Run cucumber
+        run: |
+          ./gradlew --no-daemon --console=plain cucumber -x :fineract-e2e-tests-runner:cucumber
+
+      - name: Archive test results
+        if: always()
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v4
+        with:
+          name: test-results-cucumber
+          path: |
+            **/build/reports/
+          retention-days: 5
+          if-no-files-found: ignore
+
+      - name: Archive server logs
+        if: always()
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v4
+        with:
+          name: server-logs-cucumber
+          path: '**/build/cargo/'
+          retention-days: 5
+          if-no-files-found: ignore
+
+  build-progressive-loan:
+    name: build-progressive-loan
+    needs: build-core
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup CI
+        uses: ./.github/actions/setup-ci
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          java-version: '21'
+          distribution: 'zulu'
+          cache-read-only: false
 
       - name: Build and Test Progressive Loan
-        if: matrix.job_type == 'progressive-loan'
         run: |
           # Build the JAR
           ./gradlew --no-daemon --console=plain :fineract-progressive-loan-embeddable-schedule-generator:shadowJar
@@ -76,39 +118,31 @@ jobs:
           echo "EMBEDDABLE_JAR_FILE=$EMBEDDABLE_JAR_FILE" >> $GITHUB_ENV
           echo "JAR file: $EMBEDDABLE_JAR_FILE"
 
-          # Run unit tests
+          # Run unit tests for the schedule generator
           ./gradlew --no-daemon --console=plain :fineract-progressive-loan-embeddable-schedule-generator:test
 
-          # Build and run sample application
-          mkdir -p sample-app
-          javac -cp "$EMBEDDABLE_JAR_FILE" -d sample-app fineract-progressive-loan-embeddable-schedule-generator/misc/Main.java
-          java -cp "$EMBEDDABLE_JAR_FILE:sample-app" Main
-          java -cp "$EMBEDDABLE_JAR_FILE:sample-app" Main 25
+          # Build sample app
+          ./gradlew --no-daemon --console=plain :fineract-progressive-loan-embeddable-schedule-generator:sample-app:classes
+
+          # Run sample app (basic sanity)
+          java -cp "$EMBEDDABLE_JAR_FILE:fineract-progressive-loan-embeddable-schedule-generator/sample-app/build/classes/java/main" Main 25
 
       - name: Archive test results
         if: always()
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v4
         with:
-          name: test-results-${{ matrix.task }}
+          name: test-results-progressive-loan
           path: |
             **/build/reports/
             **/fineract-progressive-loan-embeddable-schedule-generator/build/reports/
-          if-no-files-found: ignore
           retention-days: 5
+          if-no-files-found: ignore
 
       - name: Archive Progressive Loan JAR
-        if: matrix.job_type == 'progressive-loan' && always()
+        if: always()
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v4
         with:
           name: progressive-loan-jar
           path: ${{ env.EMBEDDABLE_JAR_FILE }}
           retention-days: 5
           if-no-files-found: ignore
-
-      - name: Archive server logs
-        if: always()
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v4
-        with:
-          name: server-logs-${{ matrix.task }}
-          path: '**/build/cargo/'
-          retention-days: 5

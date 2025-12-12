@@ -1,0 +1,49 @@
+name: "Setup CI (Checkout + JDK + Gradle)"
+description: "Standard CI environment setup"
+
+inputs:
+  fetch-depth:
+    description: "Checkout fetch depth"
+    required: false
+    default: "1"
+
+  fetch-tags:
+    description: "Fetch git tags"
+    required: false
+    default: "false"
+
+  java-version:
+    description: "Java version"
+    required: false
+    default: "21"
+
+  distribution:
+    description: "Java distribution"
+    required: false
+    default: "zulu"
+
+  cache-read-only:
+    description: "Gradle cache read-only mode"
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+        fetch-tags: ${{ inputs.fetch-tags }}
+
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ inputs.java-version }}
+        distribution: ${{ inputs.distribution }}
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        cache-read-only: ${{ inputs.cache-read-only }}
+        gradle-home-cache-cleanup: true
