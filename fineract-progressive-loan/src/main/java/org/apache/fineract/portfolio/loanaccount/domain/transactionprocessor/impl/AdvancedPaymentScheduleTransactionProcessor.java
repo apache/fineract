@@ -2034,7 +2034,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         && loan.isInterestBearingAndInterestRecalculationEnabled()) {
                     final BigDecimal interestOutstanding = currentInstallment.getInterestOutstanding(loan.getCurrency()).getAmount();
                     final BigDecimal newInterest = emiCalculator.getPeriodInterestTillDate(progressiveTransactionCtx.getModel(),
-                            currentInstallment.getFromDate(), currentInstallment.getDueDate(), transactionDate, true).getAmount();
+                            currentInstallment.getFromDate(), currentInstallment.getDueDate(), transactionDate, true, false).getAmount();
                     if (interestOutstanding.compareTo(BigDecimal.ZERO) > 0 || newInterest.compareTo(BigDecimal.ZERO) > 0) {
                         currentInstallment.updateInterestCharged(newInterest);
                     }
@@ -2146,8 +2146,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 installments.stream().filter(installment -> !installment.getFromDate().isAfter(transactionDate)
                         && installment.getDueDate().isAfter(transactionDate)).forEach(installment -> {
                             final BigDecimal interestOutstanding = installment.getInterestOutstanding(currency).getAmount();
+
                             final BigDecimal newInterest = emiCalculator.getPeriodInterestTillDate(progressiveTransactionCtx.getModel(),
-                                    installment.getFromDate(), installment.getDueDate(), transactionDate, true).getAmount();
+                                    installment.getFromDate(), installment.getDueDate(), transactionDate, true, false).getAmount();
                             if (MathUtil.isGreaterThanZero(interestOutstanding) || MathUtil.isGreaterThanZero(newInterest)) {
                                 final BigDecimal interestRemoved = MathUtil.subtract(MathUtil.nullToZero(installment.getInterestCharged()),
                                         newInterest);
@@ -3390,7 +3391,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 BigDecimal::add);
 
         final BigDecimal newInterest = emiCalculator.getPeriodInterestTillDate(transactionCtx.getModel(), lastPeriod.getFromDate(),
-                lastPeriod.getDueDate(), transactionDate, false).getAmount();
+                lastPeriod.getDueDate(), transactionDate, false, false).getAmount();
 
         lastPeriod.setEmi(lastPeriod.getDuePrincipal().add(totalPrincipal).add(newInterest));
 
@@ -3434,7 +3435,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 if (transactionCtx instanceof ProgressiveTransactionCtx progressiveTransactionCtx
                         && loan.isInterestBearingAndInterestRecalculationEnabled()) {
                     interest = emiCalculator.getPeriodInterestTillDate(progressiveTransactionCtx.getModel(), installment.getFromDate(),
-                            installment.getDueDate(), chargeOffDate, true).getAmount();
+                            installment.getDueDate(), chargeOffDate, true, false).getAmount();
                 } else {
                     final BigDecimal totalInterest = installment.getInterestOutstanding(currency).getAmount();
                     if (LoanChargeOffBehaviour.ZERO_INTEREST.equals(loan.getLoanProductRelatedDetail().getChargeOffBehaviour())
