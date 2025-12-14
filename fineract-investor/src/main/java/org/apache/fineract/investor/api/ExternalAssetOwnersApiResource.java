@@ -29,7 +29,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -93,9 +92,8 @@ public class ExternalAssetOwnersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ExternalAssetOwnerRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated") })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class)))
+    @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated")
     public CommandProcessingResult transferRequestWithLoanId(@PathParam("loanId") final Long loanId,
             @Parameter ExternalAssetOwnerRequest assetOwnerReq,
             @QueryParam(COMMAND_PARAM) @Parameter(description = COMMAND_PARAM) final String commandParam) {
@@ -111,9 +109,8 @@ public class ExternalAssetOwnersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ExternalAssetOwnerRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated") })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class)))
+    @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated")
     public CommandProcessingResult transferRequestWithLoanExternalId(@PathParam("loanExternalId") final String externalLoanId,
             @Parameter ExternalAssetOwnerRequest assetOwnerReq,
             @QueryParam(COMMAND_PARAM) @Parameter(description = COMMAND_PARAM) final String commandParam) {
@@ -130,9 +127,8 @@ public class ExternalAssetOwnersApiResource {
     @Path("/transfers/{id}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated") })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class)))
+    @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated")
     public CommandProcessingResult transferRequestWithId(@PathParam("id") final Long id,
             @QueryParam(COMMAND_PARAM) @Parameter(description = COMMAND_PARAM) final String commandParam) {
         platformUserRightsContext.isAuthenticated();
@@ -145,9 +141,8 @@ public class ExternalAssetOwnersApiResource {
     @Path("/transfers/external-id/{externalId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated") })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class)))
+    @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated")
     public CommandProcessingResult transferRequestWithId(@PathParam("externalId") final String externalId,
             @QueryParam(COMMAND_PARAM) @Parameter(description = COMMAND_PARAM) final String commandParam) {
         platformUserRightsContext.isAuthenticated();

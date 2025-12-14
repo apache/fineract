@@ -31,17 +31,11 @@ public enum AccountTransferRecurrenceType {
     private final String code;
 
     public static AccountTransferRecurrenceType fromInt(final Integer statusValue) {
-
-        AccountTransferRecurrenceType enumeration = AccountTransferRecurrenceType.INVALID;
-        switch (statusValue) {
-            case 1:
-                enumeration = AccountTransferRecurrenceType.PERIODIC;
-            break;
-            case 2:
-                enumeration = AccountTransferRecurrenceType.AS_PER_DUES;
-            break;
-        }
-        return enumeration;
+        return switch (statusValue) {
+            case 1 -> AccountTransferRecurrenceType.PERIODIC;
+            case 2 -> AccountTransferRecurrenceType.AS_PER_DUES;
+            default -> AccountTransferRecurrenceType.INVALID;
+        };
     }
 
     AccountTransferRecurrenceType(final Integer value, final String code) {

@@ -44,26 +44,14 @@ public enum AccountType {
     }
 
     public static AccountType fromInt(final Integer accountTypeValue) {
-
-        AccountType enumeration = AccountType.INVALID;
-        switch (accountTypeValue) {
-            case 1:
-                enumeration = AccountType.INDIVIDUAL;
-            break;
-            case 2:
-                enumeration = AccountType.GROUP;
-            break;
-            case 3:
-                enumeration = AccountType.JLG;
-            break;
-            case 4:
-                enumeration = AccountType.GLIM;
-            break;
-            case 5:
-                enumeration = AccountType.GSIM;
-            break;
-        }
-        return enumeration;
+        return switch (accountTypeValue) {
+            case 1 -> AccountType.INDIVIDUAL;
+            case 2 -> AccountType.GROUP;
+            case 3 -> AccountType.JLG;
+            case 4 -> AccountType.GLIM;
+            case 5 -> AccountType.GSIM;
+            default -> AccountType.INVALID;
+        };
     }
 
     public static AccountType fromName(final String name) {
