@@ -24,7 +24,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -52,9 +51,13 @@ public class AccrualAccountingApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Executes Periodic Accrual Accounting", method = "POST", description = "Mandatory Fields\n" + "\n" + "tillDate\n")
+    @Operation(summary = "Executes Periodic Accrual Accounting", method = "POST", description = """
+            Mandatory Fields
+
+            tillDate
+            """)
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccrualAccountingApiResourceSwagger.PostRunaccrualsRequest.class)))
-    @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK") })
+    @ApiResponse(responseCode = "200", description = "OK")
     public CommandProcessingResult executePeriodicAccrualAccounting(@Parameter(hidden = true) AccrualAccountRequest accrualAccountRequest) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().excuteAccrualAccounting()
                 .withJson(apiJsonSerializerService.serialize(accrualAccountRequest)).build();

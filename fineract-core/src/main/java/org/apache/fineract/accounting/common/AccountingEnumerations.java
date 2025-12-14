@@ -37,9 +37,7 @@ public final class AccountingEnumerations {
     }
 
     public static EnumOptionData gLAccountType(final GLAccountType accountType) {
-        final EnumOptionData optionData = new EnumOptionData(accountType.getValue().longValue(), accountType.getCode(),
-                accountType.toString());
-        return optionData;
+        return new EnumOptionData(accountType.getValue().longValue(), accountType.getCode(), accountType.toString());
     }
 
     public static List<EnumOptionData> gLAccountType(final GLAccountType[] accountTypes) {
@@ -55,9 +53,7 @@ public final class AccountingEnumerations {
     }
 
     public static EnumOptionData gLAccountUsage(final GLAccountUsage accountUsage) {
-        final EnumOptionData optionData = new EnumOptionData(accountUsage.getValue().longValue(), accountUsage.getCode(),
-                accountUsage.toString());
-        return optionData;
+        return new EnumOptionData(accountUsage.getValue().longValue(), accountUsage.getCode(), accountUsage.toString());
     }
 
     public static List<EnumOptionData> gLAccountUsage(final GLAccountUsage[] accountUsages) {
@@ -73,9 +69,7 @@ public final class AccountingEnumerations {
     }
 
     public static EnumOptionData journalEntryType(final JournalEntryType journalEntryType) {
-        final EnumOptionData optionData = new EnumOptionData(journalEntryType.getValue().longValue(), journalEntryType.getCode(),
-                journalEntryType.toString());
-        return optionData;
+        return new EnumOptionData(journalEntryType.getValue().longValue(), journalEntryType.getCode(), journalEntryType.toString());
     }
 
     public static List<EnumOptionData> journalEntryTypes(final JournalEntryType[] journalEntryTypes) {
@@ -91,9 +85,8 @@ public final class AccountingEnumerations {
     }
 
     public static EnumOptionData portfolioProductType(final PortfolioProductType portfolioProductType) {
-        final EnumOptionData optionData = new EnumOptionData(portfolioProductType.getValue().longValue(), portfolioProductType.getCode(),
+        return new EnumOptionData(portfolioProductType.getValue().longValue(), portfolioProductType.getCode(),
                 portfolioProductType.toString());
-        return optionData;
     }
 
     public static EnumOptionData accountingRuleType(final int id) {
@@ -101,8 +94,7 @@ public final class AccountingEnumerations {
     }
 
     public static EnumOptionData accountingRuleType(final AccountingRuleType type) {
-        final EnumOptionData optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), type.toString());
-        return optionData;
+        return new EnumOptionData(type.getValue().longValue(), type.getCode(), type.toString());
     }
 
     public static List<EnumOptionData> accountingRuleTypes(final AccountingRuleType[] accountingRuleTypes) {
