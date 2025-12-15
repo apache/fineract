@@ -68,6 +68,18 @@ public class LoanReAmortizationStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_REAMORTIZATION_RESPONSE, response);
     }
 
+    @When("Admin creates a Loan re-amortization transaction on {string} date")
+    public void createLoanReAmortization(final String date) {
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
+
+        PostLoansLoanIdTransactionsRequest reAmortizationRequest = LoanRequestFactory.defaultLoanReAmortizationRequest().startDate(date);
+
+        PostLoansLoanIdTransactionsResponse response = ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId,
+                reAmortizationRequest, Map.of("command", "reAmortize")));
+        testContext().set(TestContextKey.LOAN_REAMORTIZATION_RESPONSE, response);
+    }
+
     @When("Admin creates a Loan re-amortization transaction on current business date with reAmortizationInterestHandling {string}")
     public void createLoanReAmortizationWithInterestHandling(final String reAmortizationInterestHandling) {
         final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
@@ -75,6 +87,19 @@ public class LoanReAmortizationStepDef extends AbstractStepDef {
 
         final PostLoansLoanIdTransactionsRequest reAmortizationRequest = LoanRequestFactory.defaultLoanReAmortizationRequest()
                 .reAmortizationInterestHandling(reAmortizationInterestHandling);
+
+        final PostLoansLoanIdTransactionsResponse response = ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId,
+                reAmortizationRequest, Map.of("command", "reAmortize")));
+        testContext().set(TestContextKey.LOAN_REAMORTIZATION_RESPONSE, response);
+    }
+
+    @When("Admin creates a Loan re-amortization transaction on {string} date with reAmortizationInterestHandling {string}")
+    public void createLoanReAmortizationWithInterestHandling(final String date, final String reAmortizationInterestHandling) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final Long loanId = loanResponse.getLoanId();
+
+        final PostLoansLoanIdTransactionsRequest reAmortizationRequest = LoanRequestFactory.defaultLoanReAmortizationRequest()
+                .reAmortizationInterestHandling(reAmortizationInterestHandling).startDate(date);
 
         final PostLoansLoanIdTransactionsResponse response = ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId,
                 reAmortizationRequest, Map.of("command", "reAmortize")));
