@@ -46,6 +46,7 @@ import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeInterestHandlingType;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
@@ -185,18 +186,24 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     @Override
     public void addRepaymentPeriods(final ProgressiveLoanInterestScheduleModel scheduleModel, final LocalDate submittedOnDate,
-            final int numberOfRepaymentPeriodsToAdd) {
+            final int numberOfRepaymentPeriodsToAdd, final List<LoanTransaction> alreadyProcessedTransactions) {
         addRepaymentPeriods(scheduleModel,
-                EmiChangeOperation.addRepaymentPeriods(submittedOnDate, scheduleModel.zero(), numberOfRepaymentPeriodsToAdd));
+                EmiChangeOperation.addRepaymentPeriods(submittedOnDate, scheduleModel.zero(), numberOfRepaymentPeriodsToAdd),
+                alreadyProcessedTransactions);
     }
 
-    public void addRepaymentPeriods(final ProgressiveLoanInterestScheduleModel scheduleModel, final EmiChangeOperation operation) {
-        LocalDate disbursementDate = scheduleModel.getStartDate();
-        int repaymentPeriodCount = scheduleModel.repaymentPeriods().size();
+    private void addRepaymentPeriods(final ProgressiveLoanInterestScheduleModel scheduleModel, final EmiChangeOperation operation,
+            final List<LoanTransaction> alreadyProcessedTransactions) {
+        final Optional<LoanReAgeParameter> reAgeTransactionParameter = alreadyProcessedTransactions.stream()
+                .filter(t -> t.isReAge() && !t.isReversed()).findFirst().map(LoanTransaction::getLoanReAgeParameter);
+        final LocalDate seedDate = reAgeTransactionParameter.map(LoanReAgeParameter::getStartDate).orElse(scheduleModel.getStartDate());
+        final int repaymentPeriodCount = reAgeTransactionParameter.map(param -> param.getNumberOfInstallments() - 1)
+                .orElse(scheduleModel.repaymentPeriods().size());
+
         final LocalDate interestRateChangeEffectiveDate = operation.getSubmittedOnDate().minusDays(1);
 
-        List<LocalDateInterval> periods2 = generateAdditionalRepaymentPeriodDueDates(scheduleModel, operation.getPeriodsToAdd(),
-                repaymentPeriodCount, scheduleModel.resolveRepaymentPEriodLengthGeneratorFunction(disbursementDate));
+        final List<LocalDateInterval> periods2 = generateAdditionalRepaymentPeriodDueDates(scheduleModel, operation.getPeriodsToAdd(),
+                repaymentPeriodCount, scheduleModel.resolveRepaymentPeriodLengthGeneratorFunction(seedDate));
         updateModel(scheduleModel, periods2, LocalDateInterval::startDate, LocalDateInterval::endDate);
 
         scheduleModel

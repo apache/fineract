@@ -4049,14 +4049,14 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 2, 340.03, 3.37, 336.66, 0.00, false); //
 
             // add extra repayment period 1
-            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 7, 2), 1);
+            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 7, 2), 1, List.of());
 
             checkPeriod(interestSchedule, 0, 340.02, 10.00, 330.02, 669.98, false); //
             checkPeriod(interestSchedule, 1, 227.81, 6.70, 221.11, 448.87, false); //
             checkPeriod(interestSchedule, 2, 227.81, 4.49, 223.32, 225.55, false); //
             checkPeriod(interestSchedule, 3, 227.81, 2.26, 225.55, 0.00, false); //
 
-            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 8, 2), 2);
+            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 8, 2), 2, List.of());
 
             checkPeriod(interestSchedule, 0, 340.02, 10.00, 330.02, 669.98, false); //
             checkPeriod(interestSchedule, 1, 227.81, 6.70, 221.11, 448.87, false); //
@@ -4088,14 +4088,14 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 2, 343.34, 10.00, 333.34, 0.00, false); //
 
             // add extra repayment period 1
-            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 7, 2), 1);
+            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 7, 2), 1, List.of());
 
             checkPeriod(interestSchedule, 0, 343.33, 10.00, 333.33, 666.67, false); //
             checkPeriod(interestSchedule, 1, 232.22, 10.00, 222.22, 444.45, false); //
             checkPeriod(interestSchedule, 2, 232.22, 10.00, 222.22, 222.23, false); //
             checkPeriod(interestSchedule, 3, 232.23, 10.00, 222.23, 0.00, false); //
 
-            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 8, 2), 2);
+            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 8, 2), 2, List.of());
 
             checkPeriod(interestSchedule, 0, 343.33, 10.00, 333.33, 666.67, false); //
             checkPeriod(interestSchedule, 1, 232.22, 10.00, 222.22, 444.45, false); //
@@ -4140,7 +4140,7 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 3, 256.29, 0.00, 256.29, 0.00, true); //
 
             // add extra repayment period 1
-            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 6, 15), 1);
+            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 6, 15), 1, List.of());
 
             // verify 1st and 4th installments are not modified, additional principal paid are substract from last
             // period
@@ -4150,7 +4150,7 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 3, 256.29, 0.00, 256.29, 88.00, true); //
             checkPeriod(interestSchedule, 4, 89.76, 1.76, 88.00, 0.00, false); //
 
-            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 6, 15), 2);
+            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 6, 15), 2, List.of());
 
             // verify 1st and 4th installments are not modified, additional principal paid are substract from last
             // periods
@@ -4210,7 +4210,7 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 3, 260.00, 10.00, 250.00, 0.00, true); //
 
             // add extra repayment period 1
-            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 6, 15), 1);
+            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 6, 15), 1, List.of());
 
             // verify 1st and 4th installments are not modified, additional principal paid are substract from last
             // period
@@ -4221,7 +4221,7 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 4, 110.00, 10.00, 100.00, 0.00, false); //
 
             // add extra repayment period 2
-            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 6, 15), 2);
+            emiCalculator.addRepaymentPeriods(interestSchedule, LocalDate.of(2024, 6, 15), 2, List.of());
 
             // verify 1st and 4th installments are not modified, additional principal paid are substract from last
             // periods

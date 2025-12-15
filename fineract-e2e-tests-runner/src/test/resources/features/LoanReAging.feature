@@ -1814,7 +1814,7 @@ Feature: LoanReAging
       | 1  | 0    | 01 January 2025  | 01 April 2025 | 500.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
       |    |      | 16 January 2025  |               | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 2  | 0    | 16 January 2025  | 01 April 2025 | 600.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
-      | 3  | 31   | 01 February 2025 | 01 April 2025 | 600.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 3  | 16   | 01 February 2025 | 01 April 2025 | 600.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
       | 4  | 28   | 01 March 2025    | 01 April 2025 | 600.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
       | 5  | 31   | 01 April 2025    | 01 April 2025 | 600.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
       | 6  | 0    | 01 April 2025    |               | 0.0             | 600.0         | 0.0      | 0.0  | 0.0       | 600.0 | 0.0  | 0.0        | 0.0  | 600.0       |
@@ -8885,8 +8885,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
     When Loan Pay-off is made on "16 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-#    TODO check and unSkip when PS-2937 is done
-  @Skip @TestRailId:C4286
+  @TestRailId:C4286
   Scenario: Verify Re-aging with loan reschedule: UC1.1: Interest handling: DEFAULT, reschedule - extra terms
     When Admin sets the business date to "01 January 2024"
     And Admin creates a client with random data
@@ -9002,8 +9001,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
       | 01 July 2024       | 02 April 2024   |                 |                  |                 | 2          |                 |
-# TODO check numbers
-    Then Loan Repayment schedule has 9 periods, with the following data for periods:
+    Then Loan Repayment schedule has 11 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024  | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
@@ -9012,14 +9010,14 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 4  | 17   | 01 April 2024     |                  | 70.25           | 13.32         | 0.98     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
       | 5  | 30   | 01 May 2024       |                  | 56.36           | 13.89         | 0.41     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
       | 6  | 31   | 01 June 2024      |                  | 42.39           | 13.97         | 0.33     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 7  | 30   | 01 July 2024      |                  | 28.34           | 14.05         | 0.25     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 8  | 31   | 01 August 2024    |                  | 14.21           | 14.13         | 0.17     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 9  | 31   | 01 September 2024 |                  | 0.0             | 14.21         | 0.08     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
-      | 10 | 30   | 01 October 2024   |                  | 0.0             | 14.21         | 0.08     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
-      | 11 | 31   | 01 November 2024  |                  | 0.0             | 14.21         | 0.08     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
+      | 7  | 30   | 01 July 2024      |                  | 34.01           | 8.38          | 0.25     | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
+      | 8  | 31   | 01 August 2024    |                  | 25.58           | 8.43          | 0.2      | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
+      | 9  | 31   | 01 September 2024 |                  | 17.1            | 8.48          | 0.15     | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
+      | 10 | 30   | 01 October 2024   |                  | 8.57            | 8.53          | 0.1      | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
+      | 11 | 31   | 01 November 2024  |                  | 0.0             | 8.57          | 0.05     | 0.0  | 0.0       | 8.62  | 0.0   | 0.0        | 0.0  | 8.62        |
     And Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 2.8      | 0.0  | 0.0       | 102.8 | 17.01 | 0.0        | 0.0  | 85.79       |
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 100.0         | 3.05     | 0.0  | 0.0       | 103.05 | 17.01 | 0.0        | 0.0  | 86.04       |
     And Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -9029,7 +9027,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
     When Loan Pay-off is made on "02 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-    #    TODO check and unSkip when PS-2937 is done
+    #    TODO check and unSkip when WAIVE_INTEREST strategy is implemented
   @Skip @TestRailId:C4287
   Scenario: Verify Re-aging with loan reschedule: UC1.2: Interest handling: WAIVE_INTEREST, reschedule - extra terms
     When Admin sets the business date to "01 January 2024"

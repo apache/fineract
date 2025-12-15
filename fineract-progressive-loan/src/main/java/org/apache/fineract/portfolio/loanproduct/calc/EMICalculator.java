@@ -27,6 +27,7 @@ import java.util.Optional;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelRepaymentPeriod;
@@ -81,7 +82,7 @@ public interface EMICalculator {
             BigDecimal newInterestRate);
 
     void addRepaymentPeriods(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate submittedOnDate,
-            int numberOfRepaymentPeriodsToAdd);
+            int numberOfRepaymentPeriodsToAdd, List<LoanTransaction> alreadyProcessedTransactions);
 
     /**
      * This method applies outstanding balance correction on the interest model. Negative amount decreases the
