@@ -1,0 +1,31 @@
+server:
+  port: 9007
+spring:
+  application:
+    name: customer-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fineract_customer
+    username: postgres
+    password: vakporize
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        connection:provider_disables_autocommit: true
+
+customer:
+  events:
+    exchange: domain.exchange
+    routing:
+      created: customer.created
+      bvnVerified: customer.bvn.verified

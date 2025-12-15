@@ -1,0 +1,47 @@
+server:
+  port: 9011
+spring:
+  application:
+    name: investment-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fineract_investment
+    username: postgres
+    password: vakporize
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+cloud:
+  consul:
+    host: localhost
+    port: 8500
+    discovery:
+      register: true
+
+fineract:
+  url: http://localhost:8080/fineract-provider/api/v1
+  tenant: default
+  auth:
+    username: mifos
+    password: password
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        connection:provider_disables_autocommit: true
+
+
+rabbit:
+  exchange:
+    name: audit.exchange
+  queue:
+    name: audit.accounting.queue
+  routing:
+    key: audit.accounting

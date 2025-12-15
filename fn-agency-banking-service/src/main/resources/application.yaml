@@ -1,0 +1,37 @@
+server:
+  port: 9010
+spring:
+  application:
+    name: posting-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fineract_agency_banking
+    username: postgres
+    password: vakporize
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        connection:provider_disables_autocommit: true
+
+agency:
+  events:
+    exchange: domain.exchange
+    routing:
+      tillTransfer: agency.till.transfer
+      posTxn: agency.pos.txn
+      ussdTxn: agency.ussd.txn
+      atmTxn: agency.atm.txn
+
+posting:
+  service:
+    url: http://localhost:9009

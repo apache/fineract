@@ -1,0 +1,31 @@
+server:
+  port: 9009
+spring:
+  application:
+    name: posting-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fineract_postings
+    username: postgres
+    password: vakporize
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        connection:provider_disables_autocommit: true
+
+posting:
+  events:
+    exchange: posting.exchange
+    routing:
+      key: posting.event
+      name: posting.event.queue
