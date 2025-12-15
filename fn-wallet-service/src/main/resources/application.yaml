@@ -7,6 +7,11 @@ spring:
     url: jdbc:postgresql://localhost:5432/fineract_wallets
     username: postgres
     password: vakporize
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 
 
   jpa:
