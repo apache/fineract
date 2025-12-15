@@ -638,6 +638,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             loanTransaction.updateComponentsAndTotal(totalOverDuePrincipal, totalOverDueInterest, Money.zero(currency),
                     Money.zero(currency));
 
+            if (totalOverDuePrincipal.isZero() && totalOverDueInterest.isZero() && loanTransaction.isNotReversed()) {
+                loanTransaction.reverse();
+                return;
+            }
+
             emiCalculator.updateModelRepaymentPeriodsDuringReAmortizationWithEqualInterestSplit(progressiveTransactionCtx.getModel(),
                     transactionDate);
             updateInstallmentsByRepaymentPeriods(loanTransaction, progressiveTransactionCtx);
@@ -715,6 +720,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 Money.zero(transactionCtx.getCurrency()), Money.zero(transactionCtx.getCurrency()),
                 Money.zero(transactionCtx.getCurrency()));
 
+        if (MathUtil.isEqualTo(overallOverDuePrincipal, ZERO) && loanTransaction.isNotReversed()) {
+            loanTransaction.reverse();
+            return;
+        }
+
         LoanRepaymentScheduleInstallment lastFutureInstallment = futureInstallments.stream()
                 .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getDueDate)).get();
         BigDecimal reAmortizationAmountPerInstallment = overallOverDuePrincipal.divide(BigDecimal.valueOf(futureInstallments.size()),
@@ -756,6 +766,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         loanTransaction.resetDerivedComponents();
         loanTransaction.updateComponentsAndTotal(totalOverDuePrincipal, totalOverDueInterest, Money.zero(currency), Money.zero(currency));
+
+        if (totalOverDuePrincipal.isZero() && totalOverDueInterest.isZero() && loanTransaction.isNotReversed()) {
+            loanTransaction.reverse();
+            return;
+        }
 
         // Update the existing model with re-amortized periods
         emiCalculator.updateModelRepaymentPeriodsDuringReAmortization(ctx.getModel(), transactionDate);
