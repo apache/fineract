@@ -203,6 +203,26 @@ git clone https://github.com/apache/fineract.git
 cd fineract/kubernetes
 minikube start
 ./kubectl-startup.sh
+```
+
+Wait for all pods to be ready:
+```bash
+kubectl get pods -w
+```
+
+Once all pods are running, access the Mifos web application:
+```bash
+minikube service mifos-community
+```
+
+This opens the Mifos X web application in your browser. The nginx reverse proxy in the mifos-community pod forwards API requests to the fineract-server backend.
+
+**Default credentials:**
+- Username: `mifos`
+- Password: `password`
+
+You can also access the Fineract API directly:
+```bash
 minikube service fineract-server --url --https
 ```
 
@@ -210,14 +230,22 @@ Fineract is now running at the printed URL, which you can check e.g. using:
 ```bash
 http --verify=no --timeout 240 --check-status get $(minikube service fineract-server --url --https)/fineract-provider/actuator/health
 ```
+
 To check the status of your containers on your local minikube Kubernetes cluster, run:
 ```bash
 minikube dashboard
 ```
+
 You can check Fineract logs using:
 ```bash
 kubectl logs deployment/fineract-server
 ```
+
+You can check Mifos web app logs using:
+```bash
+kubectl logs deployment/mifos-community
+```
+
 To shutdown and reset your cluster, run:
 ```bash
 ./kubectl-shutdown.sh
