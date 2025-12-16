@@ -103,7 +103,7 @@ spec:
                   key: password
           livenessProbe:
             exec:
-              command: ["sh","-c","mysqladmin ping -h localhost -uroot -p${MARIADB_ROOT_PASSWORD}"]
+              command: ["sh","-c","mariadb -uroot -p${MARIADB_ROOT_PASSWORD} -e 'SELECT 1'"]
             failureThreshold: 10
             timeoutSeconds: 10
           readinessProbe:
@@ -111,7 +111,7 @@ spec:
               command:
                 - sh
                 - -c
-                - mysqladmin ping -uroot -p${MARIADB_ROOT_PASSWORD}
+                - mariadb -uroot -p${MARIADB_ROOT_PASSWORD} -e 'SELECT 1'
             failureThreshold: 10
             initialDelaySeconds: 5
             periodSeconds: 5
