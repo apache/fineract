@@ -18,6 +18,45 @@
 
 
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-app-config
+data:
+  environment.json: |
+    {
+      "fineractApiUrls": ["/fineract-provider"],
+      "oauth": {
+        "enabled": false
+      },
+      "defaultLanguage": "en-US",
+      "supportedLanguages": ["en-US", "es-MX"],
+      "preloadClients": true
+    }
+  nginx.conf: |
+    server {
+        listen 80;
+        server_name localhost;
+        root /usr/share/nginx/html;
+        index index.html;
+
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+
+        location /fineract-provider/ {
+            proxy_pass https://fineract-server:8443/fineract-provider/;
+            proxy_ssl_verify off;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_redirect https:// http://;
+        }
+    }
+
+---
+
+apiVersion: v1
 kind: Service
 metadata:
   labels:
@@ -60,7 +99,7 @@ spec:
           command: ['sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "fineract-server" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";']
       containers:
       - name: mifos-community
-        image: openmf/community-app:latest
+        image: openmf/web-app:master
         resources:
           limits:
             cpu: "1000m"
@@ -68,18 +107,35 @@ spec:
           requests:
             cpu: "200m"
             memory: "0.5Gi"
+        volumeMounts:
+        - name: web-app-config
+          mountPath: /usr/share/nginx/html/assets/configuration
+          readOnly: true
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: nginx.conf
+          readOnly: true
         livenessProbe:
           httpGet:
             path: /
             port: 80
-          initialDelaySeconds: 90
-          periodSeconds: 1
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 3
         readinessProbe:
           httpGet:
             path: /
             port: 80
-          initialDelaySeconds: 90
-          periodSeconds: 1
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
         ports:
         - containerPort: 80
           name: mifos-community
+      volumes:
+      - name: web-app-config
+        configMap:
+          name: web-app-config
+      - name: nginx-config
+        configMap:
+          name: web-app-config
