@@ -93,7 +93,7 @@ public class LoanReAmortizationStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_REAMORTIZATION_RESPONSE, response);
     }
 
-    @When("When Admin undo Loan re-amortization transaction on current business date")
+    @When("Admin undo Loan re-amortization transaction on current business date")
     public void undoLoanReAmortization() {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();

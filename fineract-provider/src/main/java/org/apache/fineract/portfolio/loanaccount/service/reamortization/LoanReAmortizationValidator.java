@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.loanaccount.service.reamortization;
 import static org.apache.fineract.infrastructure.core.service.DateUtils.getBusinessLocalDate;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +38,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.reamortization.LoanReAmortizationInterestHandlingType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.ChangeOperation;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.springframework.stereotype.Component;
 
@@ -123,26 +121,18 @@ public class LoanReAmortizationValidator {
         }
     }
 
-    public void validateUndoReAmortize(Loan loan, JsonCommand command) {
-        validateUndoReAmortizeBusinessRules(loan);
-    }
-
-    private void validateUndoReAmortizeBusinessRules(Loan loan) {
-        // validate if there's a reamortization transaction already
-        Optional<LoanTransaction> optionalReAmortizationTx = loan.getLoanTransactions().stream().filter(tx -> tx.getTypeOf().isReAmortize())
-                .min(Comparator.comparing(LoanTransaction::getTransactionDate));
+    public LoanTransaction findAndValidateReAmortizeTransactionForUndo(Loan loan) {
+        // validate if there's a non-reversed reamortization transaction already
+        final Optional<LoanTransaction> optionalReAmortizationTx = loan.getLoanTransactions().stream() //
+                .filter(LoanTransaction::isNotReversed) //
+                .filter(tx -> tx.getTypeOf().isReAmortize()) //
+                .findAny();
         if (optionalReAmortizationTx.isEmpty()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.reamortize.reamortization.transaction.missing",
-                    "Undoing a reamortization can only be done if there was a reamortization already", loan.getId());
+                    "Undoing a reamortization can only be done if there was a non-reversed reamortization already", loan.getId());
         }
 
-        // validate if there's no payment between the reamortization and today
-        boolean repaymentExistsAfterReAmortization = loan.getLoanTransactions().stream().anyMatch(tx -> tx.getTypeOf().isRepaymentType()
-                && !tx.isReversed() && transactionHappenedAfterOther(tx, optionalReAmortizationTx.get()));
-        if (repaymentExistsAfterReAmortization) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.reamortize.repayment.exists.after.reamortization",
-                    "Undoing a reamortization can only be done if there hasn't been any repayment afterwards", loan.getId());
-        }
+        return optionalReAmortizationTx.get();
     }
 
     private void throwExceptionIfValidationErrorsExist(List<ApiParameterError> dataValidationErrors) {
@@ -152,7 +142,4 @@ public class LoanReAmortizationValidator {
         }
     }
 
-    private boolean transactionHappenedAfterOther(LoanTransaction transaction, LoanTransaction otherTransaction) {
-        return new ChangeOperation(transaction).compareTo(new ChangeOperation(otherTransaction)) > 0;
-    }
 }
