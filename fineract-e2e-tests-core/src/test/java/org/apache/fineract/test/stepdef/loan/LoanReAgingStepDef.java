@@ -297,6 +297,42 @@ public class LoanReAgingStepDef extends AbstractStepDef {
         assertThat(exception.getDeveloperMessage()).contains(ErrorMessageHelper.reAgeContractTerminatedLoanFailure());
     }
 
+    @Then("Admin fails to create a Loan re-aging transaction with the following data because loan was written-off:")
+    public void reAgeWrittenOffLoanFailure(final DataTable table) throws IOException {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        Assertions.assertNotNull(loanResponse);
+        final long loanId = loanResponse.getLoanId();
+
+        List<List<String>> tableRows = table.asLists();
+        List<String> headers = tableRows.get(0);
+        List<String> values = tableRows.get(1);
+
+        Map<String, String> rowData = new LinkedHashMap<>();
+        int columnCount = Math.min(headers.size(), values.size());
+        for (int i = 0; i < columnCount; i++) {
+            rowData.put(headers.get(i), values.get(i));
+        }
+
+        int frequencyNumber = Integer.parseInt(resolveValue(rowData, values, 0, "frequencyNumber"));
+        String frequencyType = resolveValue(rowData, values, 1, "frequencyType");
+        String startDate = resolveValue(rowData, values, 2, "startDate");
+        int numberOfInstallments = Integer.parseInt(resolveValue(rowData, values, 3, "numberOfInstallments"));
+
+        final PostLoansLoanIdTransactionsRequest reAgingRequest = LoanRequestFactory//
+                .defaultReAgingRequest()//
+                .frequencyNumber(frequencyNumber)//
+                .frequencyType(frequencyType)//
+                .startDate(startDate)//
+                .numberOfInstallments(numberOfInstallments);//
+
+        applyAdditionalFields(reAgingRequest, rowData, Set.of("frequencyNumber", "frequencyType", "startDate", "numberOfInstallments"));
+
+        CallFailedRuntimeException exception = fail(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, reAgingRequest,
+                Map.<String, Object>of("command", "reAge")));
+        assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(403);
+        assertThat(exception.getDeveloperMessage()).contains(ErrorMessageHelper.reAgeWrittenOffLoanFailure());
+    }
+
     private Map<String, Object> resolveReAgingQueryParams(DataTable table) {
         List<String> header = table.asLists().get(0);
         List<String> data = table.asLists().get(1);
