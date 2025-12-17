@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.test.stepdef.loan;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -28,37 +29,36 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
-import org.apache.fineract.client.services.LoansApi;
 import org.apache.fineract.test.data.loanproduct.DefaultLoanProduct;
 import org.apache.fineract.test.data.loanproduct.LoanProductResolver;
 import org.apache.fineract.test.factory.LoanRequestFactory;
-import org.apache.fineract.test.helper.ErrorHelper;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
-import retrofit2.Response;
 
 @RequiredArgsConstructor
 public class LoanOverrideFieldsStepDef extends AbstractStepDef {
 
+    private final FineractFeignClient fineractClient;
     private final LoanRequestFactory loanRequestFactory;
     private final LoanProductResolver loanProductResolver;
-    private final LoansApi loansApi;
 
     @Then("LoanDetails has {string} field with value: {string}")
     public void checkLoanDetailsFieldWithValue(final String fieldName, final String expectedValue) throws IOException {
-        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        assertNotNull(loanResponse.body());
-        final Long loanId = loanResponse.body().getLoanId();
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assertNotNull(loanResponse);
+        final Long loanId = loanResponse.getLoanId();
 
-        final Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
-        ErrorHelper.checkSuccessfulApiCall(loanDetails);
-        assertNotNull(loanDetails.body());
+        final GetLoansLoanIdResponse loanDetails = ok(
+                () -> fineractClient.loans().retrieveLoan(loanId, Map.of("staffInSelectedOfficeOnly", "false")));
 
-        verifyFieldValue(loanDetails.body(), fieldName, expectedValue);
+        assertNotNull(loanDetails);
+
+        verifyFieldValue(loanDetails, fieldName, expectedValue);
     }
 
     private void verifyFieldValue(final GetLoansLoanIdResponse loanDetails, final String fieldName, final String expectedValue) {
@@ -79,9 +79,9 @@ public class LoanOverrideFieldsStepDef extends AbstractStepDef {
 
     @When("Admin creates a new Loan with the following override data:")
     public void createLoanWithOverrideData(final DataTable dataTable) throws IOException {
-        final Response<PostClientsResponse> clientResponse = testContext().get(TestContextKey.CLIENT_CREATE_RESPONSE);
-        assertNotNull(clientResponse.body());
-        final Long clientId = clientResponse.body().getClientId();
+        final PostClientsResponse clientResponse = testContext().get(TestContextKey.CLIENT_CREATE_RESPONSE);
+        assertNotNull(clientResponse);
+        final Long clientId = clientResponse.getClientId();
 
         final Map<String, String> overrideData = dataTable.asMap(String.class, String.class);
 
@@ -100,9 +100,10 @@ public class LoanOverrideFieldsStepDef extends AbstractStepDef {
             }
         });
 
-        final Response<PostLoansResponse> response = loansApi.calculateLoanScheduleOrSubmitLoanApplication(loansRequest, "").execute();
+        final PostLoansResponse response = ok(
+                () -> fineractClient.loans().calculateLoanScheduleOrSubmitLoanApplication(loansRequest, Map.of()));
         testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, response);
-        ErrorHelper.checkSuccessfulApiCall(response);
+
     }
 
     private void applyOverrideField(final PostLoansRequest request, final String fieldName, final String value) {

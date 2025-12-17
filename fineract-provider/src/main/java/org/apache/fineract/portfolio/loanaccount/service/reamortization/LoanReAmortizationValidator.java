@@ -54,6 +54,10 @@ public class LoanReAmortizationValidator {
         validateReAmortizeBusinessRules(loan);
     }
 
+    public void validateReAmortize(final Loan loan) {
+        validateReAmortizeBusinessRules(loan);
+    }
+
     private void validateReAmortizeRequest(JsonCommand command) {
         List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.reAmortization");

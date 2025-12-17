@@ -36,7 +36,9 @@ Tomcat (min. v10) is only required, if you wish to deploy the Fineract WAR to a 
 
 SECURITY
 ============
-If you believe you have found a security vulnerability, [let us know privately](https://fineract.apache.org/#contribute).
+For a list of known vulnerabilities, see [Apache Fineract Security Reports](https://fineract.apache.org/security.html).
+
+If you believe you have found a new vulnerability, [let us know privately](https://fineract.apache.org/#contribute).
 
 For details about security during development and deployment, see the documentation [here](https://fineract.apache.org/docs/current/#_security).
 

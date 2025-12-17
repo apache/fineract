@@ -137,17 +137,21 @@ public class InterestRateChart extends AbstractPersistableCustom<Long> {
                 if (iSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)
                         && nextSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)) {
                     if (iSlabs.slabFields().isRateChartOverlapping(nextSlabs.slabFields(), isPrimaryGroupingByAmount)) {
-                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.overlapping",
-                                iSlabs.slabFields().fromPeriod(), iSlabs.slabFields().toPeriod(), nextSlabs.slabFields().fromPeriod(),
-                                nextSlabs.slabFields().toPeriod(), iSlabs.slabFields().getAmountRangeFrom(),
-                                iSlabs.slabFields().getAmountRangeTo(), nextSlabs.slabFields().getAmountRangeFrom(),
-                                nextSlabs.slabFields().getAmountRangeTo());
+                        // Use DataValidatorBuilder with resource/parameter context for clean error codes
+                        DataValidatorBuilder v = new DataValidatorBuilder(baseDataValidator.getDataValidationErrors())
+                                .resource("savings.interestRateChart").parameter("slabs");
+                        v.failWithCode("overlap", iSlabs.slabFields().fromPeriod(), iSlabs.slabFields().toPeriod(),
+                                nextSlabs.slabFields().fromPeriod(), nextSlabs.slabFields().toPeriod(),
+                                iSlabs.slabFields().getAmountRangeFrom(), iSlabs.slabFields().getAmountRangeTo(),
+                                nextSlabs.slabFields().getAmountRangeFrom(), nextSlabs.slabFields().getAmountRangeTo());
                     } else if (iSlabs.slabFields().isRateChartHasGap(nextSlabs.slabFields(), isPrimaryGroupingByAmount)) {
-                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.has.gap",
-                                iSlabs.slabFields().fromPeriod(), iSlabs.slabFields().toPeriod(), nextSlabs.slabFields().fromPeriod(),
-                                nextSlabs.slabFields().toPeriod(), iSlabs.slabFields().getAmountRangeFrom(),
-                                iSlabs.slabFields().getAmountRangeTo(), nextSlabs.slabFields().getAmountRangeFrom(),
-                                nextSlabs.slabFields().getAmountRangeTo());
+                        // Use DataValidatorBuilder with resource/parameter context for clean error codes
+                        DataValidatorBuilder v = new DataValidatorBuilder(baseDataValidator.getDataValidationErrors())
+                                .resource("savings.interestRateChart").parameter("slabs");
+                        v.failWithCode("gap", iSlabs.slabFields().fromPeriod(), iSlabs.slabFields().toPeriod(),
+                                nextSlabs.slabFields().fromPeriod(), nextSlabs.slabFields().toPeriod(),
+                                iSlabs.slabFields().getAmountRangeFrom(), iSlabs.slabFields().getAmountRangeTo(),
+                                nextSlabs.slabFields().getAmountRangeFrom(), nextSlabs.slabFields().getAmountRangeTo());
                     }
                     if (isPrimaryGroupingByAmount) {
                         if (!iSlabs.slabFields().isAmountSame(nextSlabs.slabFields())) {

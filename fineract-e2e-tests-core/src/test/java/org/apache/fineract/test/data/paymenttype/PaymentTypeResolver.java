@@ -18,40 +18,33 @@
  */
 package org.apache.fineract.test.data.paymenttype;
 
-import java.io.IOException;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.PaymentTypeData;
-import org.apache.fineract.client.services.PaymentTypeApi;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
-import retrofit2.Response;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class PaymentTypeResolver {
 
-    private final PaymentTypeApi paymentTypeApi;
+    private final FineractFeignClient fineractClient;
 
     @Cacheable(key = "#paymentType.getName()", value = "paymentTypesByName")
     public long resolve(PaymentType paymentType) {
-        try {
-            String paymentTypeName = paymentType.getName();
-            log.debug("Resolving payment type by name [{}]", paymentTypeName);
-            Response<List<PaymentTypeData>> response = paymentTypeApi.getAllPaymentTypes(false).execute();
-            if (!response.isSuccessful()) {
-                throw new IllegalStateException("Unable to get payment types. Status code was HTTP " + response.code());
-            }
+        String paymentTypeName = paymentType.getName();
+        log.debug("Resolving payment type by name [{}]", paymentTypeName);
+        List<PaymentTypeData> paymentTypesResponses = ok(() -> fineractClient.paymentType().getAllPaymentTypesUniversal(Map.of()));
 
-            List<PaymentTypeData> paymentTypesResponses = response.body();
-            PaymentTypeData foundPtr = paymentTypesResponses.stream().filter(ptr -> paymentTypeName.equals(ptr.getName())).findAny()
-                    .orElseThrow(() -> new IllegalArgumentException("Payment type [%s] not found".formatted(paymentTypeName)));
+        PaymentTypeData foundPtr = paymentTypesResponses.stream().filter(ptr -> paymentTypeName.equals(ptr.getName())).findAny()
+                .orElseThrow(() -> new IllegalArgumentException("Payment type [%s] not found".formatted(paymentTypeName)));
 
-            return foundPtr.getId();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return foundPtr.getId();
     }
 }

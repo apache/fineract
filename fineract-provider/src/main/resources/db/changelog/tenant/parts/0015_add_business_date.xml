@@ -80,6 +80,7 @@
     </changeSet>
     <changeSet id="4" author="fineract">
         <validCheckSum>8:f7e5e697680e1e81eca6566f2481b879</validCheckSum>
+        <validCheckSum>9:b718cd8075633322b555191f622ea0c4</validCheckSum>
         <insert tableName="job">
             <column name="name" value="Increase Business Date by 1 day"/>
             <column name="display_name" value="Increase Business Date by 1 day"/>
@@ -101,6 +102,7 @@
     </changeSet>
     <changeSet id="5" author="fineract">
         <validCheckSum>8:cb7f67c27941deda1e83d317bd78dabd</validCheckSum>
+        <validCheckSum>9:35ea9353e59b365b919b9982d16529ae</validCheckSum>
         <insert tableName="job">
             <column name="name" value="Increase COB Date by 1 day"/>
             <column name="display_name" value="Increase COB Date by 1 day"/>

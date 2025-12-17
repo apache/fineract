@@ -1,0 +1,186 @@
+= Downpayment
+
+== Overview
+
+Downpayment is a feature that allows a customer to make a partial payment at the time of loan application.
+It is an initial instalment due the same day as the disbursement. Every disbursement initiates a downpayment.
+The downpayment amount is then used to reduce the loan amount.
+
+== Configuration
+
+Downpayment can be configured in the loan product settings.
+
+On the Settings tab there is a checkbox called 'Enable downpayment'.
+Clicking on it brings up two attributes which can be set on downpayment:
+
+* ‘Disbursed Amount percentage Down Payment’ - mandatory field. Here can be set that how many percent of the Disbursed amount will be the actual downpayment.
+* ‘Enable Auto Repayment for Down Payment’ - optional, checkbox. If enabled, downpayment will be automatically paid on raising.
+
+== Scope
+
+Downpayment can be applied both for Loan products with Loan schedule type: cumulative and progressive.
+
+Loans with or without interest can have downpayment.
+
+== Usage
+
+Downpayment can be used in the loan application process.
+
+When a new Loan is created with a Loan Product that has downpayment enabled, the downpayment amount is calculated based on the 'Disbursed Amount percentage Down Payment' attribute.
+
+In the Repayment schedule the downpayment is shown as a separate instalment due on the same day as the disbursement. If 'Enable Auto Repayment for Down Payment' is enabled, the downpayment will be automatically paid on raising.
+
+Downpayment does not count as an installment in the context that upon loan creation if X installments set, then the downpayment will be the first (initial) installment followed by X regular installments.
+
+If the downpayment is not paid on time, it will be marked as overdue the same way as a regular installment.
+
+Reversing a disbursement also rolls back the associated downpayment transaction.
+
+Charges due on dowpayment date will be added to the first installment, not to the downpayment.
+
+In case of interest bearing loan, interest will not be realised on downpayment.
+
+== Example
+
+We have a progressive Loan product, with disbursed amount 100, 7% annual interest rate, 6 installments and 25% downpayment with auto repayment enabled.
+
+Repayment schedule on disbursement day:
+
+[cols="1,1,3,3,2,2,2,1,1,1,1,1,1,1", options="header"]
+|===
+| Nr
+| Days
+| Date
+| Paid date
+| Balance of loan
+| Principal due
+| Interest
+| Fees
+| Penalties
+| Due
+| Paid
+| In advance
+| Late
+| Outstanding
+
+| 
+| 
+| 01 January 2024
+| 
+| 100.0
+| 
+| 
+| 0.0
+| 
+| 0.0
+| 0.0
+| 
+| 
+| 
+
+| 1
+| 0
+| 01 January 2024
+| 01 January 2024
+| 75.0
+| 25.0
+| 0.0
+| 0.0
+| 0.0
+| 25.0
+| 25.0
+| 0.0
+| 0.0
+| 0.0
+
+| 2
+| 31
+| 01 February 2024
+| 
+| 62.68
+| 12.32
+| 0.44
+| 0.0
+| 0.0
+| 12.76
+| 0.0
+| 0.0
+| 0.0
+| 12.76
+
+| 3
+| 29
+| 01 March 2024
+| 
+| 50.29
+| 12.39
+| 0.37
+| 0.0
+| 0.0
+| 12.76
+| 0.0
+| 0.0
+| 0.0
+| 12.76
+
+| 4
+| 31
+| 01 April 2024
+| 
+| 37.82
+| 12.47
+| 0.29
+| 0.0
+| 0.0
+| 12.76
+| 0.0
+| 0.0
+| 0.0
+| 12.76
+
+| 5
+| 30
+| 01 May 2024
+| 
+| 25.28
+| 12.54
+| 0.22
+| 0.0
+| 0.0
+| 12.76
+| 0.0
+| 0.0
+| 0.0
+| 12.76
+
+| 6
+| 31
+| 01 June 2024
+| 
+| 12.67
+| 12.61
+| 0.15
+| 0.0
+| 0.0
+| 12.76
+| 0.0
+| 0.0
+| 0.0
+| 12.76
+
+| 7
+| 30
+| 01 July 2024
+| 
+| 0.0
+| 12.67
+| 0.07
+| 0.0
+| 0.0
+| 12.74
+| 0.0
+| 0.0
+| 0.0
+| 12.74
+|===
+

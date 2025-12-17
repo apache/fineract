@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.data.OutstandingAmountsDTO;
@@ -47,8 +46,6 @@ public interface LoanTransactionProcessingService {
             List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Set<LoanCharge> charges);
 
     LoanRepaymentScheduleTransactionProcessor getTransactionProcessor(String transactionProcessingStrategyCode);
-
-    Optional<ChangedTransactionDetail> processPostDisbursementTransactions(Loan loan);
 
     LoanScheduleDTO getRecalculatedSchedule(ScheduleGeneratorDTO generatorDTO, Loan loan);
 

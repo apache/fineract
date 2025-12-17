@@ -208,7 +208,8 @@ public final class LoanProductDataValidator {
             LoanProductAccountingParams.BUY_DOWN_EXPENSE.getValue(), LoanProductAccountingParams.INCOME_FROM_BUY_DOWN.getValue(),
             LoanProductConstants.MERCHANT_BUY_DOWN_FEE_PARAM_NAME,
             LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS.getValue(), //
-            LoanProductAccountingParams.BUYDOWN_FEE_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS.getValue() //
+            LoanProductAccountingParams.BUYDOWN_FEE_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS.getValue(), //
+            LoanProductConstants.ALLOW_FULL_TERM_FOR_TRANCHE_PARAM_NAME //
     ));
 
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
@@ -1060,6 +1061,43 @@ public final class LoanProductDataValidator {
             final Integer interestType = this.fromApiJsonHelper.extractIntegerNamed(INTEREST_TYPE, element, Locale.getDefault());
 
             baseDataValidator.reset().parameter(INTEREST_TYPE).value(interestType).ignoreIfNull().inMinMaxRange(0, 1);
+        }
+
+        // Determine effective values for allowFullTermForTranche validation
+        // For updates, fall back to existing product values if not in request
+        Boolean effectiveMultiDisburseLoan = multiDisburseLoan;
+        if (!this.fromApiJsonHelper.parameterExists(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME, element)
+                && loanProduct != null) {
+            effectiveMultiDisburseLoan = loanProduct.isMultiDisburseLoan();
+        }
+
+        String effectiveLoanScheduleType = LoanScheduleType.CUMULATIVE.toString();
+        if (fromApiJsonHelper.parameterExists(LoanProductConstants.LOAN_SCHEDULE_TYPE, element)) {
+            effectiveLoanScheduleType = fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element);
+        } else if (loanProduct != null) {
+            effectiveLoanScheduleType = loanProduct.getLoanProductRelatedDetail().getLoanScheduleType().toString();
+        }
+
+        Boolean effectiveAllowFullTermForTranche = false;
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ALLOW_FULL_TERM_FOR_TRANCHE_PARAM_NAME, element)) {
+            effectiveAllowFullTermForTranche = this.fromApiJsonHelper
+                    .extractBooleanNamed(LoanProductConstants.ALLOW_FULL_TERM_FOR_TRANCHE_PARAM_NAME, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.ALLOW_FULL_TERM_FOR_TRANCHE_PARAM_NAME)
+                    .value(effectiveAllowFullTermForTranche).ignoreIfNull().validateForBooleanValue();
+        } else if (loanProduct != null && loanProduct.getLoanProductTrancheDetails() != null) {
+            effectiveAllowFullTermForTranche = loanProduct.getLoanProductTrancheDetails().isAllowFullTermForTranche();
+        }
+
+        // Validate: allowFullTermForTranche requires multi-disburse and PROGRESSIVE schedule
+        if (Boolean.TRUE.equals(effectiveAllowFullTermForTranche)) {
+            if (!Boolean.TRUE.equals(effectiveMultiDisburseLoan)) {
+                baseDataValidator.reset().parameter(LoanProductConstants.ALLOW_FULL_TERM_FOR_TRANCHE_PARAM_NAME).failWithCode(
+                        "requires.multi.disburse.loan", "Full term tranche can only be enabled for multi-disbursement loan products");
+            }
+            if (!LoanScheduleType.PROGRESSIVE.toString().equals(effectiveLoanScheduleType)) {
+                baseDataValidator.reset().parameter(LoanProductConstants.ALLOW_FULL_TERM_FOR_TRANCHE_PARAM_NAME).failWithCode(
+                        "requires.progressive.schedule.type", "Full term tranche can only be enabled for PROGRESSIVE loan schedule type");
+            }
         }
 
         final String overAppliedCalculationType = this.fromApiJsonHelper.extractStringNamed(OVER_APPLIED_CALCULATION_TYPE, element);

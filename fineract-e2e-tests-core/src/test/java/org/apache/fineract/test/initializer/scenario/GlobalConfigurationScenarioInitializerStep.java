@@ -34,14 +34,10 @@ public class GlobalConfigurationScenarioInitializerStep implements FineractScena
 
     @Override
     public void initializeForScenario() throws Exception {
-        /**
-         * Enable-address set to false
-         */
+        // Enable-address set to false
         globalConfigurationHelper.disableGlobalConfiguration(CONFIG_KEY_ENABLE_ADDRESS, 0L);
 
-        /**
-         * Enable business date and COB date
-         */
+        // Enable business date and COB date
         globalConfigurationHelper.enableGlobalConfiguration(CONFIG_KEY_ENABLE_BUSINESS_DATE, 0L);
         globalConfigurationHelper.enableGlobalConfiguration(CONFIG_KEY_ENABLE_RECALCULATE_COB_DATE, 0L);
     }

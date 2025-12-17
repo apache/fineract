@@ -440,9 +440,7 @@ public class DepositAccountAssembler {
 
         final DepositRecurringDetail depositRecurringDetail = DepositRecurringDetail.createFrom(isMandatoryDeposit, allowWithdrawal,
                 adjustAdvanceTowardsFuturePayments);
-        final DepositAccountRecurringDetail depositAccountRecurringDetail = DepositAccountRecurringDetail.createNew(recurringDepositAmount,
-                depositRecurringDetail, null, isCalendarInherited);
-        return depositAccountRecurringDetail;
+        return DepositAccountRecurringDetail.createNew(recurringDepositAmount, depositRecurringDetail, null, isCalendarInherited);
     }
 
     public Collection<SavingsAccountTransactionDTO> assembleBulkMandatorySavingsAccountTransactionDTOs(final JsonCommand command,

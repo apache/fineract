@@ -45,9 +45,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<JournalEntryCommand> {
+public class JournalEntryCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<JournalEntryCommand> {
 
     private final FromJsonHelper fromApiJsonHelper;
+
+    protected Set<String> getSupportedParameters() {
+        return JournalEntryJsonInputParams.getAllValues();
+    }
 
     @Override
     public JournalEntryCommand commandFromApiJson(final String json) {
@@ -56,7 +60,7 @@ public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFr
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        final Set<String> supportedParameters = JournalEntryJsonInputParams.getAllValues();
+        final Set<String> supportedParameters = this.getSupportedParameters();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);

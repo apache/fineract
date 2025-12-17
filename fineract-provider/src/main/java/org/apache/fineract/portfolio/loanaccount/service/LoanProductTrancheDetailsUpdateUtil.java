@@ -54,9 +54,18 @@ public class LoanProductTrancheDetailsUpdateUtil {
                 actualChanges.put(LoanProductConstants.OUTSTANDING_LOAN_BALANCE_PARAMETER_NAME, newValue);
                 loanProductTrancheDetails.setOutstandingLoanBalance(newValue);
             }
+
+            if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ALLOW_FULL_TERM_FOR_TRANCHE_PARAM_NAME,
+                    loanProductTrancheDetails.isAllowFullTermForTranche())) {
+                final boolean newValue = command
+                        .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ALLOW_FULL_TERM_FOR_TRANCHE_PARAM_NAME);
+                actualChanges.put(LoanProductConstants.ALLOW_FULL_TERM_FOR_TRANCHE_PARAM_NAME, newValue);
+                loanProductTrancheDetails.setAllowFullTermForTranche(newValue);
+            }
         } else {
             loanProductTrancheDetails.setMaxTrancheCount(null);
             loanProductTrancheDetails.setOutstandingLoanBalance(null);
+            loanProductTrancheDetails.setAllowFullTermForTranche(false);
         }
     }
 }

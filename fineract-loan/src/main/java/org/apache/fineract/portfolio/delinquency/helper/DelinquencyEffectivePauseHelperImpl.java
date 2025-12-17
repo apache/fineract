@@ -42,7 +42,7 @@ public class DelinquencyEffectivePauseHelperImpl implements DelinquencyEffective
                 .collect(Collectors.groupingBy(LoanDelinquencyAction::getAction));
         List<LoanDelinquencyActionData> effective = new ArrayList<>();
         List<LoanDelinquencyAction> pauses = partitioned.get(DelinquencyAction.PAUSE);
-        if (pauses != null && pauses.size() > 0) {
+        if (pauses != null && !pauses.isEmpty()) {
             for (LoanDelinquencyAction loanDelinquencyAction : pauses) {
                 Optional<LoanDelinquencyAction> resume = findMatchingResume(loanDelinquencyAction, partitioned.get(RESUME));
                 LoanDelinquencyActionData loanDelinquencyActionData = new LoanDelinquencyActionData(loanDelinquencyAction);
@@ -91,7 +91,7 @@ public class DelinquencyEffectivePauseHelperImpl implements DelinquencyEffective
     }
 
     private Optional<LoanDelinquencyAction> findMatchingResume(LoanDelinquencyAction pause, List<LoanDelinquencyAction> resumes) {
-        if (resumes != null && resumes.size() > 0) {
+        if (resumes != null && !resumes.isEmpty()) {
             for (LoanDelinquencyAction resume : resumes) {
                 if (!pause.getStartDate().isAfter(resume.getStartDate()) && !resume.getStartDate().isAfter(pause.getEndDate())) {
                     return Optional.of(resume);

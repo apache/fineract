@@ -46,7 +46,7 @@ public class GenerateAdhocClientScheduleTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         final Collection<AdHocData> adhocs = adHocReadPlatformService.retrieveAllActiveAdHocQuery();
-        if (adhocs.size() > 0) {
+        if (!adhocs.isEmpty()) {
             adhocs.forEach(adhoc -> {
                 boolean run = true;
                 LocalDate next = null;
@@ -83,7 +83,7 @@ public class GenerateAdhocClientScheduleTasklet implements Tasklet {
                     final StringBuilder insertSqlBuilder = new StringBuilder(900);
                     insertSqlBuilder.append("INSERT INTO ").append(adhoc.getTableName()).append("(").append(adhoc.getTableFields())
                             .append(") ").append(adhoc.getQuery());
-                    if (insertSqlBuilder.length() > 0) {
+                    if (!insertSqlBuilder.isEmpty()) {
                         final int result = jdbcTemplate.update(insertSqlBuilder.toString());
                         log.debug("{}: Records affected by generateClientSchedule: {}", ThreadLocalContextUtil.getTenant().getName(),
                                 result);

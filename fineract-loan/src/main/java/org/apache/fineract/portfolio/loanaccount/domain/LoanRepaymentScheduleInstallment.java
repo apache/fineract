@@ -28,6 +28,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -261,9 +262,28 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     public static LoanRepaymentScheduleInstallment newReAgedInstallment(final Loan loan, final Integer installmentNumber,
-            final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal) {
-        return new LoanRepaymentScheduleInstallment(loan, installmentNumber, fromDate, dueDate, principal, null, null, null, null, null,
-                null, null, false, false, true);
+            final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal fees,
+            final BigDecimal penalties, final BigDecimal interestAccrued, final BigDecimal feeAccrued, final BigDecimal penaltyAccrued) {
+        LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan, installmentNumber, fromDate, dueDate,
+                principal, interest, fees, penalties, null, null, null, null, false, false, true);
+        installment.setInterestAccrued(interestAccrued);
+        installment.setFeeAccrued(feeAccrued);
+        installment.setPenaltyAccrued(penaltyAccrued);
+        return installment;
+    }
+
+    public static LoanRepaymentScheduleInstallment newReAgedInstallment(final Loan loan, final Integer installmentNumber,
+            final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal fees,
+            final BigDecimal penalties) {
+        return new LoanRepaymentScheduleInstallment(loan, installmentNumber, fromDate, dueDate, principal, interest, fees, penalties, null,
+                null, null, null, false, false, true);
+    }
+
+    public static LoanRepaymentScheduleInstallment newInstallmentWithMovedPaidAmountDuringReAging(final Loan loan,
+            final Integer installmentNumber, final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal,
+            final BigDecimal interest) {
+        return new LoanRepaymentScheduleInstallment(loan, installmentNumber, fromDate, dueDate, principal, interest, null, null, null, null,
+                null, null, false, false, false);
     }
 
     public static LoanRepaymentScheduleInstallment getLastNonDownPaymentInstallment(List<LoanRepaymentScheduleInstallment> installments) {
@@ -499,8 +519,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         return this.installmentNumber.compareTo(o.installmentNumber);
     }
 
-    public int compareToByDueDate(LoanRepaymentScheduleInstallment o) {
-        return this.dueDate.compareTo(o.dueDate);
+    public int compareToByFromDueDate(LoanRepaymentScheduleInstallment o) {
+        return Comparator.comparing(LoanRepaymentScheduleInstallment::getDueDate)
+                .thenComparing(LoanRepaymentScheduleInstallment::getFromDate).compare(this, o);
     }
 
     public boolean isPrincipalNotCompleted(final MonetaryCurrency currency) {
@@ -884,6 +905,14 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         checkIfRepaymentPeriodObligationsAreMet(transactionDate, transactionAmount.getCurrency());
     }
 
+    public void addToFeeCharges(final Money transactionAmount) {
+        if (this.feeChargesCharged == null) {
+            setFeeChargesCharged(transactionAmount.getAmount());
+        } else {
+            setFeeChargesCharged(this.feeChargesCharged.add(transactionAmount.getAmount()));
+        }
+    }
+
     public void addToCreditedInterest(final BigDecimal amount) {
         if (this.creditedInterest == null) {
             setCreditedInterest(amount);
@@ -1216,8 +1245,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         return value.setScale(6, MoneyHelper.getRoundingMode());
     }
 
-    public boolean isFirstNormalInstallment() {
-        return loan.getRepaymentScheduleInstallments().stream().filter(rp -> !rp.isDownPayment()).findFirst().stream()
-                .anyMatch(rp -> rp.equals(this));
+    public boolean isFirstNormalInstallment(List<LoanRepaymentScheduleInstallment> installments) {
+        return installments.stream().filter(rp -> !rp.isDownPayment()).findFirst().stream().anyMatch(rp -> rp.equals(this));
     }
 }

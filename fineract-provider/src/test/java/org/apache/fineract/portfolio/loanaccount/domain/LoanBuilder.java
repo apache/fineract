@@ -80,6 +80,7 @@ public class LoanBuilder {
     private ExternalId externalId = ExternalId.empty();
     private LoanApplicationTerms loanApplicationTerms = mock(LoanApplicationTerms.class);
     private Boolean enableInstallmentLevelDelinquency = false;
+    private Boolean allowFullTermForTranche = false;
     private LocalDate submittedOnDate = LocalDate.now(ZoneId.systemDefault());
     private LocalDate approvedOnDate;
     private LocalDate expectedDisbursementDate;
@@ -115,7 +116,7 @@ public class LoanBuilder {
                     transactionProcessor, loanRepaymentScheduleDetail, charges, collateral, fixedEmiAmount, disbursementDetails,
                     maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential,
                     rates, fixedPrincipalPercentagePerInstallment, externalId, loanApplicationTerms, enableInstallmentLevelDelinquency,
-                    submittedOnDate);
+                    submittedOnDate, allowFullTermForTranche);
 
             if (id != null) {
                 loan.setId(id);
@@ -335,6 +336,11 @@ public class LoanBuilder {
 
     public LoanBuilder withEnableInstallmentLevelDelinquency(Boolean enableInstallmentLevelDelinquency) {
         this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
+        return this;
+    }
+
+    public LoanBuilder withAllowFullTermForTranche(Boolean allowFullTermForTranche) {
+        this.allowFullTermForTranche = allowFullTermForTranche;
         return this;
     }
 

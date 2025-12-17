@@ -53,7 +53,7 @@ import org.springframework.util.CollectionUtils;
  */
 @Getter
 @JsonLocalDateArrayFormat
-public final class SavingsAccountTransactionData implements Serializable {
+public class SavingsAccountTransactionData implements Serializable {
 
     private Long id;
     private final SavingsAccountTransactionEnumData transactionType;
@@ -110,7 +110,7 @@ public final class SavingsAccountTransactionData implements Serializable {
     private Long accountCredit;
     private Long accountDebit;
 
-    private SavingsAccountTransactionData(final Long id, final SavingsAccountTransactionEnumData transactionType,
+    protected SavingsAccountTransactionData(final Long id, final SavingsAccountTransactionEnumData transactionType,
             final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate transactionDate,
             final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
             final boolean reversed, final AccountTransferData transfer, final Collection<PaymentTypeData> paymentTypeOptions,

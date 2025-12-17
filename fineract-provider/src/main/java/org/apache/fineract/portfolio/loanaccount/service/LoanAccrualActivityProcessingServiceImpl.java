@@ -109,8 +109,8 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
 
     @Override
     public void recalculateAccrualActivityTransaction(Loan loan, ChangedTransactionDetail changedTransactionDetail) {
-        List<LoanTransaction> accrualActivities = loanTransactionRepository.findNonReversedByLoanAndType(loan,
-                LoanTransactionType.ACCRUAL_ACTIVITY);
+        List<LoanTransaction> accrualActivities = loan.getLoanTransactions().stream()
+                .filter(lt -> lt.isNotReversed() && lt.isAccrualActivity()).toList();
         accrualActivities.forEach(accrualActivity -> {
             final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(accrualActivity);
 

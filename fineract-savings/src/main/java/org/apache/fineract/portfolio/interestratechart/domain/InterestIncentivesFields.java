@@ -150,7 +150,7 @@ public class InterestIncentivesFields {
     public void validateIncentiveData(final DataValidatorBuilder baseDataValidator) {
 
         switch (attributeName()) {
-            case GENDER:
+            case GENDER, CLIENT_CLASSIFICATION, CLIENT_TYPE:
                 baseDataValidator.reset().parameter(attributeValueParamName).value(this.attributeValue).longGreaterThanZero();
                 baseDataValidator.reset().parameter(conditionTypeParamName).value(this.conditionType)
                         .isOneOfTheseValues(ConditionType.EQUAL.getValue(), ConditionType.NOT_EQUAL.getValue());
@@ -158,17 +158,6 @@ public class InterestIncentivesFields {
             case AGE:
                 baseDataValidator.reset().parameter(attributeValueParamName).value(this.attributeValue).longGreaterThanZero();
             break;
-            case CLIENT_CLASSIFICATION:
-                baseDataValidator.reset().parameter(attributeValueParamName).value(this.attributeValue).longGreaterThanZero();
-                baseDataValidator.reset().parameter(conditionTypeParamName).value(this.conditionType)
-                        .isOneOfTheseValues(ConditionType.EQUAL.getValue(), ConditionType.NOT_EQUAL.getValue());
-            break;
-            case CLIENT_TYPE:
-                baseDataValidator.reset().parameter(attributeValueParamName).value(this.attributeValue).longGreaterThanZero();
-                baseDataValidator.reset().parameter(conditionTypeParamName).value(this.conditionType)
-                        .isOneOfTheseValues(ConditionType.EQUAL.getValue(), ConditionType.NOT_EQUAL.getValue());
-            break;
-
             default:
             break;
         }

@@ -53,7 +53,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 @Embeddable
 @Getter
 @Setter
-public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentScheduleRelatedDetail {
+public class LoanProductRelatedDetail {
 
     @Embedded
     private MonetaryCurrency currency;
@@ -329,7 +329,6 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         return this.currency.copy();
     }
 
-    @Override
     public CurrencyData getCurrencyData() {
         return currency.toData();
     }
@@ -342,27 +341,20 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         return Money.of(getCurrencyData(), this.inArrearsTolerance);
     }
 
-    // TODO: REVIEW
-    @Override
     public BigDecimal getNominalInterestRatePerPeriod() {
         return this.nominalInterestRatePerPeriod == null ? null
                 : BigDecimal.valueOf(Double.parseDouble(this.nominalInterestRatePerPeriod.stripTrailingZeros().toString()));
     }
 
-    // TODO: REVIEW
-    @Override
     public PeriodFrequencyType getInterestPeriodFrequencyType() {
         return this.interestPeriodFrequencyType == null ? PeriodFrequencyType.INVALID : this.interestPeriodFrequencyType;
     }
 
-    // TODO: REVIEW
-    @Override
     public BigDecimal getAnnualNominalInterestRate() {
         return this.annualNominalInterestRate == null ? null
                 : BigDecimal.valueOf(Double.parseDouble(this.annualNominalInterestRate.stripTrailingZeros().toString()));
     }
 
-    @Override
     public DaysInYearCustomStrategyType getDaysInYearCustomStrategy() {
         return daysInYearCustomStrategy;
     }

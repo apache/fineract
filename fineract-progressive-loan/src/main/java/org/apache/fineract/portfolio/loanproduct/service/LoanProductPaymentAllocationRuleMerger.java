@@ -46,22 +46,18 @@ public class LoanProductPaymentAllocationRuleMerger {
         Set<PaymentAllocationTransactionType> existing = new HashSet<>(originalItems.keySet());
         Set<PaymentAllocationTransactionType> newSet = new HashSet<>(newItems.keySet());
         existing.removeAll(newSet);
-        if (existing.size() > 0) {
+        if (!existing.isEmpty()) {
             updated = true;
-            existing.forEach(type -> {
-                loanProduct.getPaymentAllocationRules().remove(originalItems.get(type));
-            });
+            existing.forEach(type -> loanProduct.getPaymentAllocationRules().remove(originalItems.get(type)));
         }
 
         // elements to be added
         existing = new HashSet<>(originalItems.keySet());
         newSet = new HashSet<>(newItems.keySet());
         newSet.removeAll(existing);
-        if (newSet.size() > 0) {
+        if (!newSet.isEmpty()) {
             updated = true;
-            newSet.forEach(type -> {
-                loanProduct.getPaymentAllocationRules().add(newItems.get(type));
-            });
+            newSet.forEach(type -> loanProduct.getPaymentAllocationRules().add(newItems.get(type)));
         }
 
         // elements to be merged

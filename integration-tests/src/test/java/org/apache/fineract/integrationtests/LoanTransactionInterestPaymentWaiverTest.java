@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static com.jayway.jsonpath.internal.path.PathCompiler.fail;
+import static org.apache.fineract.integrationtests.BaseLoanIntegrationTest.TransactionProcessingStrategyCode.ADVANCED_PAYMENT_ALLOCATION_STRATEGY;
 import static org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder.DEFAULT_STRATEGY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -25,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -35,6 +38,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
@@ -95,6 +99,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
     private static PostClientsResponse client;
     private static LoanRescheduleRequestHelper loanRescheduleRequestHelper;
     private static ChargesHelper chargesHelper;
+    private static final Gson GSON = new Gson();
 
     @BeforeAll
     public static void setup() {
@@ -1615,6 +1620,422 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
                     transaction(250.0, "Interest Payment Waiver", "02 January 2023", 750.0, 250.0, 0.0, 0.0, 0, 0.0, 0.0, true),
                     transaction(200.0, "Interest Payment Waiver", "03 January 2023", 800.0, 200.0, 0.0, 0.0, 0, 0.0, 0.0));
         });
+    }
+
+    @Test
+    public void testInterestPaymentWaiverBatchExternalIdOnChargedOffLoan() {
+        Long[] loanIdContainer = new Long[1];
+        String[] loanExternalIdContainer = new String[1];
+
+        runAt("01 January 2025", () -> {
+            PostLoanProductsRequest loanProductRequest = create4IProgressiveWithChargeOffBehaviour();
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductRequest);
+            Long loanProductId = loanProductResponse.getResourceId();
+            assertNotNull(loanProductId);
+
+            PostClientsResponse clientResponse = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            Long clientId = clientResponse.getClientId();
+            assertNotNull(clientId);
+
+            String loanExternalId = UUID.randomUUID().toString();
+            Long createdLoanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2022", 1500.0, 3,
+                    req -> req.numberOfRepayments(3).loanTermFrequency(3).loanTermFrequencyType(RepaymentFrequencyType.MONTHS)
+                            .repaymentEvery(1).repaymentFrequencyType(RepaymentFrequencyType.MONTHS)
+                            .interestRatePerPeriod(BigDecimal.valueOf(9.99))
+                            .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY).externalId(loanExternalId)
+                            .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
+            disburseLoan(createdLoanId, BigDecimal.valueOf(1500.0), "01 January 2022");
+
+            Long chargeOffTransactionId = chargeOffLoan(createdLoanId, "15 June 2022");
+            assertNotNull(chargeOffTransactionId);
+
+            loanIdContainer[0] = createdLoanId;
+            loanExternalIdContainer[0] = loanExternalId;
+        });
+
+        Long loanId = loanIdContainer[0];
+        String loanExternalId = loanExternalIdContainer[0];
+
+        runAt("01 January 2025", () -> {
+            String transactionExternalId = UUID.randomUUID().toString();
+            LocalDate waiverDate = LocalDate.of(2022, 9, 24);
+            BigDecimal waiverAmount = new BigDecimal("46.56");
+
+            String waiverBodyJson = GSON.toJson(Map.of("transactionDate", waiverDate.toString(), "dateFormat", "yyyy-MM-dd", "locale",
+                    "de_DE", "transactionAmount", waiverAmount.toString(), "externalId", transactionExternalId));
+
+            BatchRequest waiverRequest = new BatchRequest();
+            waiverRequest.setRequestId(1L);
+            waiverRequest.setRelativeUrl("loans/external-id/" + loanExternalId + "/transactions?command=interestPaymentWaiver");
+            waiverRequest.setMethod("POST");
+            waiverRequest.setBody(waiverBodyJson);
+
+            BatchRequest getRequest = new BatchRequest();
+            getRequest.setRequestId(2L);
+            getRequest.setRelativeUrl("loans/external-id/" + loanExternalId + "/transactions/external-id/$.resourceExternalId");
+            getRequest.setMethod("GET");
+            getRequest.setReference(1L);
+
+            List<BatchRequest> batchRequests = new ArrayList<>();
+            batchRequests.add(waiverRequest);
+            batchRequests.add(getRequest);
+
+            List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
+                    BatchHelper.toJsonString(batchRequests));
+
+            assertEquals(2, responses.size());
+
+            BatchResponse waiverResponse = responses.get(0);
+            assertEquals(200, waiverResponse.getStatusCode());
+            assertNotNull(waiverResponse.getBody());
+
+            Map<String, Object> waiverResponseBody = GSON.fromJson(waiverResponse.getBody(), Map.class);
+            Object resourceExternalId = waiverResponseBody.get("resourceExternalId");
+
+            BatchResponse getResponse = responses.get(1);
+
+            if (resourceExternalId == null) {
+                fail("POST response missing resourceExternalId field. GET Response: " + getResponse.getBody());
+            }
+
+            if (getResponse.getStatusCode() != 200) {
+                fail(String.format(
+                        "GET transaction by external ID failed. Status: %d, Expected externalId: %s, "
+                                + "Actual resourceExternalId: %s, GET Response: %s",
+                        getResponse.getStatusCode(), transactionExternalId, resourceExternalId, getResponse.getBody()));
+            }
+
+            assertNotNull(getResponse.getBody());
+            Map<String, Object> getResponseBody = GSON.fromJson(getResponse.getBody(), Map.class);
+            Object retrievedExternalId = getResponseBody.get("externalId");
+            assertEquals(transactionExternalId, retrievedExternalId);
+        });
+    }
+
+    /**
+     * Test case that reproduces backdated charge-off followed by backdated interest waiver.
+     *
+     * This is the CRITICAL scenario from production: "backbook migrations" where transactions are created TODAY but
+     * with backdated transaction dates. This triggers reverse-replays and reprocessing that causes the external ID
+     * clearing bug.
+     *
+     * Key difference from forward-dated scenario: - All transactions created in PRESENT (today) - But with PAST
+     * transaction dates (backdated) - This triggers different reprocessing logic - Charge-off creates missing accruals
+     * → config query → premature flush
+     */
+    @Test
+    public void testInterestPaymentWaiverBackbookBatchExternalId() {
+        runAt("01 January 2025", () -> {
+            PostLoanProductsRequest loanProductRequest = create4IProgressiveWithChargeOffBehaviour();
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductRequest);
+            Long loanProductId = loanProductResponse.getResourceId();
+            assertNotNull(loanProductId);
+
+            PostClientsResponse clientResponse = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            Long clientId = clientResponse.getClientId();
+            assertNotNull(clientId);
+
+            String loanExternalId = UUID.randomUUID().toString();
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "18 January 2022", 431.98, 3,
+                    req -> req.numberOfRepayments(3).loanTermFrequency(3).loanTermFrequencyType(RepaymentFrequencyType.MONTHS)
+                            .repaymentEvery(1).repaymentFrequencyType(RepaymentFrequencyType.MONTHS)
+                            .interestRatePerPeriod(BigDecimal.valueOf(9.99))
+                            .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY).externalId(loanExternalId)
+                            .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
+
+            disburseLoan(loanId, BigDecimal.valueOf(431.98), "18 January 2022");
+
+            loanTransactionHelper.makeLoanRepayment("28 February 2022", 19.83f, loanId.intValue());
+            PostLoansLoanIdTransactionsResponse txn2 = loanTransactionHelper.makeLoanRepayment("18 March 2022", 19.83f, loanId.intValue());
+            loanTransactionHelper.reverseRepayment(loanId.intValue(), txn2.getResourceId().intValue(), "18 March 2022");
+
+            Long chargeOffTxnId = chargeOffLoan(loanId, "16 September 2022");
+            assertNotNull(chargeOffTxnId);
+
+            String transactionExternalId = UUID.randomUUID().toString();
+            LocalDate waiverDate = LocalDate.of(2022, 9, 24);
+            BigDecimal waiverAmount = new BigDecimal("46.56");
+
+            String waiverBodyJson = GSON.toJson(Map.of("transactionDate", waiverDate.toString(), "dateFormat", "yyyy-MM-dd", "locale",
+                    "de_DE", "transactionAmount", waiverAmount.toString(), "externalId", transactionExternalId));
+
+            BatchRequest waiverRequest = new BatchRequest();
+            waiverRequest.setRequestId(1L);
+            waiverRequest.setRelativeUrl("loans/external-id/" + loanExternalId + "/transactions?command=interestPaymentWaiver");
+            waiverRequest.setMethod("POST");
+            waiverRequest.setBody(waiverBodyJson);
+
+            BatchRequest getRequest = new BatchRequest();
+            getRequest.setRequestId(2L);
+            getRequest.setRelativeUrl("loans/external-id/" + loanExternalId + "/transactions/external-id/$.resourceExternalId");
+            getRequest.setMethod("GET");
+            getRequest.setReference(1L);
+
+            List<BatchRequest> batchRequests = new ArrayList<>();
+            batchRequests.add(waiverRequest);
+            batchRequests.add(getRequest);
+
+            List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
+                    BatchHelper.toJsonString(batchRequests));
+
+            assertEquals(2, responses.size());
+
+            BatchResponse waiverResponse = responses.get(0);
+            assertEquals(200, waiverResponse.getStatusCode());
+            assertNotNull(waiverResponse.getBody());
+
+            Map<String, Object> waiverResponseBody = GSON.fromJson(waiverResponse.getBody(), Map.class);
+            Object resourceExternalId = waiverResponseBody.get("resourceExternalId");
+
+            BatchResponse getResponse = responses.get(1);
+
+            if (resourceExternalId == null) {
+                fail("POST response missing resourceExternalId with backbook scenario. GET Response: " + getResponse.getBody());
+            }
+
+            if (getResponse.getStatusCode() != 200) {
+                fail(String.format("GET failed. Status: %d, Expected externalId: %s, Actual resourceExternalId: %s, GET Response: %s",
+                        getResponse.getStatusCode(), transactionExternalId, resourceExternalId, getResponse.getBody()));
+            }
+
+            assertNotNull(getResponse.getBody());
+            Map<String, Object> getResponseBody = GSON.fromJson(getResponse.getBody(), Map.class);
+            Object retrievedExternalId = getResponseBody.get("externalId");
+            assertEquals(transactionExternalId, retrievedExternalId);
+        });
+    }
+
+    @Test
+    public void testInterestPaymentWaiverComplexTransactionHistoryBatchExternalId() {
+        Long[] loanIdContainer = new Long[1];
+        String[] loanExternalIdContainer = new String[1];
+
+        runAt("18 January 2022", () -> {
+            PostLoanProductsRequest loanProductRequest = create4IProgressiveWithChargeOffBehaviour();
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductRequest);
+            Long loanProductId = loanProductResponse.getResourceId();
+            assertNotNull(loanProductId);
+
+            PostClientsResponse clientResponse = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            Long clientId = clientResponse.getClientId();
+            assertNotNull(clientId);
+
+            String loanExternalId = UUID.randomUUID().toString();
+
+            Long createdLoanId = applyAndApproveLoan(clientId, loanProductId, "18 January 2022", 431.98, 3,
+                    req -> req.numberOfRepayments(3).loanTermFrequency(3).loanTermFrequencyType(RepaymentFrequencyType.MONTHS)
+                            .repaymentEvery(1).repaymentFrequencyType(RepaymentFrequencyType.MONTHS)
+                            .interestRatePerPeriod(BigDecimal.valueOf(9.99))
+                            .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY).externalId(loanExternalId)
+                            .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
+            disburseLoan(createdLoanId, BigDecimal.valueOf(431.98), "18 January 2022");
+            loanIdContainer[0] = createdLoanId;
+            loanExternalIdContainer[0] = loanExternalId;
+        });
+
+        Long loanId = loanIdContainer[0];
+        String loanExternalId = loanExternalIdContainer[0];
+
+        runAt("28 February 2022", () -> {
+            loanTransactionHelper.makeLoanRepayment("28 February 2022", 19.83f, loanId.intValue());
+        });
+
+        runAt("18 March 2022", () -> {
+            PostLoansLoanIdTransactionsResponse txn = loanTransactionHelper.makeLoanRepayment("18 March 2022", 19.83f, loanId.intValue());
+            loanTransactionHelper.reverseRepayment(loanId.intValue(), txn.getResourceId().intValue(), "18 March 2022");
+        });
+
+        runAt("31 March 2022", () -> {
+            PostLoansLoanIdTransactionsResponse txn = loanTransactionHelper.makeLoanRepayment("31 March 2022", 19.83f, loanId.intValue());
+            loanTransactionHelper.reverseRepayment(loanId.intValue(), txn.getResourceId().intValue(), "31 March 2022");
+        });
+
+        runAt("18 April 2022", () -> {
+            PostLoansLoanIdTransactionsResponse txn = loanTransactionHelper.makeLoanRepayment("18 April 2022", 39.66f, loanId.intValue());
+            loanTransactionHelper.reverseRepayment(loanId.intValue(), txn.getResourceId().intValue(), "18 April 2022");
+        });
+
+        runAt("16 September 2022", () -> {
+            Long chargeOffTransactionId = chargeOffLoan(loanId, "16 September 2022");
+            assertNotNull(chargeOffTransactionId);
+        });
+
+        runAt("24 September 2022", () -> {
+            String transactionExternalId = UUID.randomUUID().toString();
+            LocalDate waiverDate = LocalDate.of(2022, 9, 24);
+            BigDecimal waiverAmount = new BigDecimal("46.56");
+
+            String waiverBodyJson = GSON.toJson(Map.of("transactionDate", waiverDate.toString(), "dateFormat", "yyyy-MM-dd", "locale",
+                    "de_DE", "transactionAmount", waiverAmount.toString(), "externalId", transactionExternalId));
+
+            BatchRequest waiverRequest = new BatchRequest();
+            waiverRequest.setRequestId(1L);
+            waiverRequest.setRelativeUrl("loans/external-id/" + loanExternalId + "/transactions?command=interestPaymentWaiver");
+            waiverRequest.setMethod("POST");
+            waiverRequest.setBody(waiverBodyJson);
+
+            BatchRequest getRequest = new BatchRequest();
+            getRequest.setRequestId(2L);
+            getRequest.setRelativeUrl("loans/external-id/" + loanExternalId + "/transactions/external-id/$.resourceExternalId");
+            getRequest.setMethod("GET");
+            getRequest.setReference(1L);
+
+            List<BatchRequest> batchRequests = new ArrayList<>();
+            batchRequests.add(waiverRequest);
+            batchRequests.add(getRequest);
+
+            List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
+                    BatchHelper.toJsonString(batchRequests));
+
+            assertEquals(2, responses.size());
+
+            BatchResponse waiverResponse = responses.get(0);
+            assertEquals(200, waiverResponse.getStatusCode());
+            assertNotNull(waiverResponse.getBody());
+
+            Map<String, Object> waiverResponseBody = GSON.fromJson(waiverResponse.getBody(), Map.class);
+            Object resourceExternalId = waiverResponseBody.get("resourceExternalId");
+
+            BatchResponse getResponse = responses.get(1);
+
+            if (resourceExternalId == null) {
+                fail("POST response missing resourceExternalId with complex scenario. GET Response: " + getResponse.getBody());
+            }
+
+            if (getResponse.getStatusCode() != 200) {
+                fail(String.format("GET failed. Status: %d, Expected externalId: %s, Actual resourceExternalId: %s, GET Response: %s",
+                        getResponse.getStatusCode(), transactionExternalId, resourceExternalId, getResponse.getBody()));
+            }
+
+            assertNotNull(getResponse.getBody());
+            Map<String, Object> getResponseBody = GSON.fromJson(getResponse.getBody(), Map.class);
+            Object retrievedExternalId = getResponseBody.get("externalId");
+            assertEquals(transactionExternalId, retrievedExternalId);
+        });
+    }
+
+    @Test
+    public void testInterestPaymentWaiverProductionScenarioBatchExternalId() {
+        runAt("01 January 2025", () -> {
+            PostLoanProductsRequest loanProductRequest = create4IProgressiveWithChargeOffBehaviour();
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductRequest);
+            Long loanProductId = loanProductResponse.getResourceId();
+            assertNotNull(loanProductId);
+
+            PostClientsResponse clientResponse = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            Long clientId = clientResponse.getClientId();
+            assertNotNull(clientId);
+
+            String loanExternalId = UUID.randomUUID().toString();
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "18 January 2022", 431.98, 3,
+                    req -> req.numberOfRepayments(3).loanTermFrequency(3).loanTermFrequencyType(RepaymentFrequencyType.MONTHS)
+                            .repaymentEvery(1).repaymentFrequencyType(RepaymentFrequencyType.MONTHS)
+                            .interestRatePerPeriod(BigDecimal.valueOf(9.99))
+                            .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY).externalId(loanExternalId)
+                            .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
+
+            disburseLoan(loanId, BigDecimal.valueOf(431.98), "18 January 2022");
+
+            loanTransactionHelper.makeLoanRepayment("28 February 2022", 19.83f, loanId.intValue());
+
+            PostLoansLoanIdTransactionsResponse txn2 = loanTransactionHelper.makeLoanRepayment("18 March 2022", 19.83f, loanId.intValue());
+            loanTransactionHelper.reverseRepayment(loanId.intValue(), txn2.getResourceId().intValue(), "18 March 2022");
+
+            PostLoansLoanIdTransactionsResponse txn3 = loanTransactionHelper.makeLoanRepayment("31 March 2022", 19.83f, loanId.intValue());
+            loanTransactionHelper.reverseRepayment(loanId.intValue(), txn3.getResourceId().intValue(), "31 March 2022");
+
+            PostLoansLoanIdTransactionsResponse txn4 = loanTransactionHelper.makeLoanRepayment("18 April 2022", 39.66f, loanId.intValue());
+            loanTransactionHelper.reverseRepayment(loanId.intValue(), txn4.getResourceId().intValue(), "18 April 2022");
+
+            PostLoansLoanIdTransactionsResponse txn5 = loanTransactionHelper.makeLoanRepayment("18 May 2022", 59.49f, loanId.intValue());
+            loanTransactionHelper.reverseRepayment(loanId.intValue(), txn5.getResourceId().intValue(), "18 May 2022");
+
+            PostLoansLoanIdTransactionsResponse txn6 = loanTransactionHelper.makeLoanRepayment("18 June 2022", 64.83f, loanId.intValue());
+            loanTransactionHelper.reverseRepayment(loanId.intValue(), txn6.getResourceId().intValue(), "18 June 2022");
+
+            PostLoansLoanIdTransactionsResponse txn7 = loanTransactionHelper.makeLoanRepayment("18 July 2022", 65.32f, loanId.intValue());
+            loanTransactionHelper.reverseRepayment(loanId.intValue(), txn7.getResourceId().intValue(), "18 July 2022");
+
+            PostLoansLoanIdTransactionsResponse txn8 = loanTransactionHelper.makeLoanRepayment("18 August 2022", 65.83f, loanId.intValue());
+            loanTransactionHelper.reverseRepayment(loanId.intValue(), txn8.getResourceId().intValue(), "18 August 2022");
+
+            Long chargeOffTxnId = chargeOffLoan(loanId, "16 September 2022");
+            assertNotNull(chargeOffTxnId);
+
+            String transactionExternalId = UUID.randomUUID().toString();
+            LocalDate waiverDate = LocalDate.of(2022, 9, 24);
+            String waiverAmount = "46,56";
+
+            String waiverBodyJson = GSON.toJson(Map.of("transactionDate", waiverDate.toString(), "dateFormat", "yyyy-MM-dd", "locale",
+                    "de_DE", "transactionAmount", waiverAmount, "externalId", transactionExternalId));
+
+            BatchRequest waiverRequest = new BatchRequest();
+            waiverRequest.setRequestId(1L);
+            waiverRequest.setRelativeUrl("loans/external-id/" + loanExternalId + "/transactions?command=interestPaymentWaiver");
+            waiverRequest.setMethod("POST");
+            waiverRequest.setBody(waiverBodyJson);
+
+            BatchRequest getRequest = new BatchRequest();
+            getRequest.setRequestId(2L);
+            getRequest.setRelativeUrl("loans/external-id/" + loanExternalId + "/transactions/external-id/$.resourceExternalId");
+            getRequest.setMethod("GET");
+            getRequest.setReference(1L);
+
+            List<BatchRequest> batchRequests = new ArrayList<>();
+            batchRequests.add(waiverRequest);
+            batchRequests.add(getRequest);
+
+            List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
+                    BatchHelper.toJsonString(batchRequests));
+
+            if (responses.size() != 2) {
+                fail("Batch API returned " + responses.size() + " responses instead of 2.");
+            }
+
+            assertEquals(2, responses.size());
+
+            BatchResponse waiverResponse = responses.get(0);
+            assertEquals(200, waiverResponse.getStatusCode());
+
+            Map<String, Object> waiverResponseBody = GSON.fromJson(waiverResponse.getBody(), Map.class);
+            Object resourceExternalId = waiverResponseBody.get("resourceExternalId");
+
+            if (resourceExternalId == null) {
+                fail("POST response missing resourceExternalId with production scenario.");
+            }
+
+            BatchResponse getResponse = responses.get(1);
+            if (getResponse.getStatusCode() != 200) {
+                fail(String.format("GET failed. Status: %d, Expected externalId: %s, Actual resourceExternalId: %s, GET Response: %s",
+                        getResponse.getStatusCode(), transactionExternalId, resourceExternalId, getResponse.getBody()));
+            }
+
+            assertNotNull(getResponse.getBody());
+            Map<String, Object> getResponseBody = GSON.fromJson(getResponse.getBody(), Map.class);
+            Object retrievedExternalId = getResponseBody.get("externalId");
+            assertEquals(transactionExternalId, retrievedExternalId);
+        });
+    }
+
+    private PostLoanProductsRequest create4IProgressiveWithChargeOffBehaviour() {
+        return create4IProgressive().principal(1500.0) // Production uses 1500, not 1000
+                .minPrincipal(1.0) // Production min
+                .maxPrincipal(10000.0) // Keep same
+                .numberOfRepayments(3) // Production uses 3, not 4
+                .minNumberOfRepayments(3) // Production min
+                .maxNumberOfRepayments(24) // Production max
+                .daysInMonthType(1) // ACTUAL, not 30 - matches production
+                .daysInYearType(1) // ACTUAL, not 360 - matches production
+                .enableAccrualActivityPosting(true) // CRITICAL: enables accrual transaction generation
+                .chargeOffBehaviour("ZERO_INTEREST").enableInstallmentLevelDelinquency(true).interestRecognitionOnDisbursementDate(true)
+                .daysInYearCustomStrategy(DaysInYearCustomStrategy.FEB_29_PERIOD_ONLY).disallowInterestCalculationOnPastDue(true)
+                .supportedInterestRefundTypes(List.of("MERCHANT_ISSUED_REFUND", "PAYOUT_REFUND"))
+                .paymentAllocation(List.of(createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"),
+                        createPaymentAllocation("REPAYMENT", "NEXT_INSTALLMENT"),
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "LAST_INSTALLMENT"),
+                        createPaymentAllocation("PAYOUT_REFUND", "LAST_INSTALLMENT"),
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"),
+                        createPaymentAllocation("INTEREST_PAYMENT_WAIVER", "NEXT_INSTALLMENT")));
     }
 
     private void chargeFee(Long loanId, Double amount, String dueDate) {

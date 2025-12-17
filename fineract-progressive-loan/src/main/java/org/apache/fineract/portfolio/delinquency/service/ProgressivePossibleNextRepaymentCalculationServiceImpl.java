@@ -51,11 +51,10 @@ public class ProgressivePossibleNextRepaymentCalculationServiceImpl extends Abst
         Optional<ProgressiveLoanModel> progressiveLoanModel = interestScheduleModelRepository.findOneByLoan(loan);
         Optional<ProgressiveLoanInterestScheduleModel> optionalScheduleModel = interestScheduleModelRepository
                 .extractModel(progressiveLoanModel);
-        ProgressiveLoanInterestScheduleModel scheduleModel = optionalScheduleModel.orElseGet(
-                () -> advancedPaymentScheduleTransactionProcessor.calculateInterestScheduleModel(loan.getId(), nextPaymentDueDate));
-        if (scheduleModel == null) {
+        if (optionalScheduleModel.isEmpty()) {
             return BigDecimal.ZERO;
         }
+        ProgressiveLoanInterestScheduleModel scheduleModel = optionalScheduleModel.get();
         List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();
         ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(loan.getCurrency(), repaymentScheduleInstallments, Set.of(),
                 new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail(), scheduleModel);
@@ -63,7 +62,8 @@ public class ProgressivePossibleNextRepaymentCalculationServiceImpl extends Abst
         ctx.setWrittenOff(loan.isClosedWrittenOff());
         ctx.setContractTerminated(loan.isContractTermination());
         advancedPaymentScheduleTransactionProcessor.recalculateInterestForDate(nextPaymentDueDate, ctx, false);
-        RepaymentPeriod repaymentPeriod = scheduleModel.findRepaymentPeriodByDueDate(nextPaymentDueDate)
+        RepaymentPeriod repaymentPeriod = scheduleModel
+                .findRepaymentPeriodByFromAndDueDate(nextInstallment.getFromDate(), nextInstallment.getDueDate())
                 .orElseGet(scheduleModel::getLastRepaymentPeriod);
 
         return repaymentPeriod.getOutstandingPrincipal().add(repaymentPeriod.getOutstandingInterest())

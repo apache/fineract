@@ -27,7 +27,7 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanproduct.calc.data.InterestPeriod;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanproduct.calc.data.RepaymentPeriod;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
+import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 
 @Data
 @RequiredArgsConstructor
@@ -35,7 +35,7 @@ public class InterestScheduleModelServiceGsonContext {
 
     private final MonetaryCurrency currency;
     private final MathContext mc;
-    private final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail;
+    private final ILoanConfigurationDetails loanProductRelatedDetail;
     private RepaymentPeriod prev = null;
     private final Integer installmentAmountInMultipliesOf;
 
@@ -58,7 +58,7 @@ public class InterestScheduleModelServiceGsonContext {
     public ProgressiveLoanInterestScheduleModel createProgressiveLoanInterestScheduleModelInstance(Type type) {
         if (type == ProgressiveLoanInterestScheduleModel.class) {
             setPrev(null);
-            return new ProgressiveLoanInterestScheduleModel(new ArrayList<>(), getLoanProductRelatedDetail(), new ArrayList<>(),
+            return new ProgressiveLoanInterestScheduleModel(new ArrayList<>(), getLoanProductRelatedDetail(),
                     installmentAmountInMultipliesOf, getMc());
         }
         throw new IllegalArgumentException("Unsupported ProgressiveLoanInterestScheduleModel type: " + type);

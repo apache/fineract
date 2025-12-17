@@ -94,6 +94,7 @@ public class LoanBalanceService {
 
     public void updateLoanSummaryDerivedFields(final Loan loan) {
         flushModeHandler.withFlushMode(FlushModeType.COMMIT, () -> {
+            loan.updateLoanScheduleDependentDerivedFields();
             if (loan.isNotDisbursed()) {
                 if (loan.getSummary() != null) {
                     loan.getSummary().zeroFields();

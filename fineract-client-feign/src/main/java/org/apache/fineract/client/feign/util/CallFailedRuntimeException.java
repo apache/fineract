@@ -18,13 +18,9 @@
  */
 package org.apache.fineract.client.feign.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.FeignException;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.FeignException;
 
 /**
  * Exception thrown by {@link FeignCalls} utility when Feign calls fail.
@@ -49,7 +45,7 @@ public class CallFailedRuntimeException extends RuntimeException {
             sb.append(", request=").append(e.request().url());
         }
 
-        String contentString = e.contentUTF8();
+        String contentString = e.responseBodyAsString();
         if (contentString != null && !contentString.isEmpty()) {
             sb.append(", errorBody=").append(contentString);
         }
@@ -58,34 +54,9 @@ public class CallFailedRuntimeException extends RuntimeException {
     }
 
     private static String extractDeveloperMessage(FeignException e) {
-        try {
-            byte[] content = e.content();
-            if (content == null || content.length == 0) {
-                return e.getMessage();
-            }
-
-            String contentString = new String(content, StandardCharsets.UTF_8);
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(contentString);
-
-            if (root.has("developerMessage")) {
-                return root.get("developerMessage").asText();
-            }
-
-            if (root.has("errors")) {
-                JsonNode errors = root.get("errors");
-                if (errors.isArray() && errors.size() > 0) {
-                    JsonNode firstError = errors.get(0);
-                    if (firstError.has("developerMessage")) {
-                        return firstError.get("developerMessage").asText();
-                    }
-                }
-            }
-
-            return contentString;
-        } catch (IOException ex) {
-            log.warn("Failed to extract developer message from error response", ex);
-            return e.getMessage();
+        if (e.getDeveloperMessage() != null) {
+            return e.getDeveloperMessage();
         }
+        return e.getMessage();
     }
 }

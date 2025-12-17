@@ -67,8 +67,7 @@ public class DeviceRegistrationApiResource {
         Long clientId = json.get(DeviceRegistrationApiConstants.clientIdParamName).getAsLong();
         String registrationId = json.get(DeviceRegistrationApiConstants.registrationIdParamName).getAsString();
         DeviceRegistration deviceRegistration = this.deviceRegistrationWritePlatformService.registerDevice(clientId, registrationId);
-        String response = gson.toJson(deviceRegistration.getId());
-        return response;
+        return gson.toJson(deviceRegistration.getId());
     }
 
     @GET
@@ -125,8 +124,7 @@ public class DeviceRegistrationApiResource {
         String registrationId = json.get(DeviceRegistrationApiConstants.registrationIdParamName).getAsString();
         DeviceRegistration deviceRegistration = this.deviceRegistrationWritePlatformService.updateDeviceRegistration(id, clientId,
                 registrationId);
-        String response = gson.toJson(deviceRegistration.getId());
-        return response;
+        return gson.toJson(deviceRegistration.getId());
     }
 
     @DELETE

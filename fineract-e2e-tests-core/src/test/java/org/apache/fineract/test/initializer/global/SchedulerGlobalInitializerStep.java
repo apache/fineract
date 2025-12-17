@@ -18,8 +18,11 @@
  */
 package org.apache.fineract.test.initializer.global;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
+
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.client.services.SchedulerApi;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -31,10 +34,10 @@ public class SchedulerGlobalInitializerStep implements FineractGlobalInitializer
 
     private static final String SCHEDULER_STATUS_STOP = "stop";
 
-    private final SchedulerApi schedulerApi;
+    private final FineractFeignClient fineractClient;
 
     @Override
     public void initialize() throws Exception {
-        schedulerApi.changeSchedulerStatus(SCHEDULER_STATUS_STOP);
+        executeVoid(() -> fineractClient.scheduler().changeSchedulerStatus(Map.of("command", SCHEDULER_STATUS_STOP)));
     }
 }

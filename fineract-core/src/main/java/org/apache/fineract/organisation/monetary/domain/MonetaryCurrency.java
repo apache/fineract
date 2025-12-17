@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.monetary.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
@@ -36,6 +37,7 @@ public class MonetaryCurrency {
     @Column(name = "currency_multiplesof")
     private Integer inMultiplesOf;
 
+    @Getter(AccessLevel.PRIVATE)
     private transient CurrencyData currencyData;
 
     protected MonetaryCurrency() {

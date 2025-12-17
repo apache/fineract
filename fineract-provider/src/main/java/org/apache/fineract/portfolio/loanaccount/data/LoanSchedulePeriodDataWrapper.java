@@ -29,4 +29,5 @@ public class LoanSchedulePeriodDataWrapper {
     private final LoanPrincipalRelatedDataHolder data;
     private final LocalDate date;
     private final boolean isDisbursement;
+    private final boolean isDisbursed;
 }

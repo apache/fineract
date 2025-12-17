@@ -56,36 +56,21 @@ public final class FeignParts {
         }
         String ext = fileName.substring(dotPos + 1).toLowerCase();
 
-        switch (ext) {
-            case "jpg":
-            case "jpeg":
-                return "image/jpeg";
-            case "png":
-                return "image/png";
-            case "tif":
-            case "tiff":
-                return "image/tiff";
-            case "gif":
-                return "image/gif";
-            case "pdf":
-                return "application/pdf";
-            case "docx":
-                return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-            case "doc":
-                return "application/msword";
-            case "xlsx":
-                return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            case "xls":
-                return "application/vnd.ms-excel";
-            case "odt":
-                return "application/vnd.oasis.opendocument.text";
-            case "ods":
-                return "application/vnd.oasis.opendocument.spreadsheet";
-            case "txt":
-                return "text/plain";
-            default:
-                return "application/octet-stream";
-        }
+        return switch (ext) {
+            case "jpg", "jpeg" -> "image/jpeg";
+            case "png" -> "image/png";
+            case "tif", "tiff" -> "image/tiff";
+            case "gif" -> "image/gif";
+            case "pdf" -> "application/pdf";
+            case "docx" -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            case "doc" -> "application/msword";
+            case "xlsx" -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            case "xls" -> "application/vnd.ms-excel";
+            case "odt" -> "application/vnd.oasis.opendocument.text";
+            case "ods" -> "application/vnd.oasis.opendocument.spreadsheet";
+            case "txt" -> "text/plain";
+            default -> "application/octet-stream";
+        };
     }
 
     /**

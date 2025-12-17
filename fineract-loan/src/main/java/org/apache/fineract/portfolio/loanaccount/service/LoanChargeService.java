@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.configuration.service.TemporaryConfigu
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
@@ -899,6 +900,53 @@ public class LoanChargeService {
             }
         }
         return amount;
+    }
+
+    public void removeLoanCharge(final Loan loan, final LoanCharge loanCharge) {
+        final boolean removed = loanCharge.isActive();
+        if (removed) {
+            loanCharge.setActive(false);
+            final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
+            wrapper.reprocess(loan.getCurrency(), loan.getDisbursementDate(), loan.getRepaymentScheduleInstallments(),
+                    loan.getActiveCharges());
+            loan.updateSummaryWithTotalFeeChargesDueAtDisbursement(loan.deriveSumTotalOfChargesDueAtDisbursement());
+        }
+
+        removeOrModifyTransactionAssociatedWithLoanChargeIfDueAtDisbursement(loan, loanCharge);
+        loan.getLoanCharges().remove(loanCharge);
+    }
+
+    private void removeOrModifyTransactionAssociatedWithLoanChargeIfDueAtDisbursement(final Loan loan, final LoanCharge loanCharge) {
+        if (loanCharge.isDueAtDisbursement()) {
+            LoanTransaction transactionToRemove = null;
+            List<LoanTransaction> transactions = loan.getLoanTransactions();
+            for (final LoanTransaction transaction : transactions) {
+                if (transaction.isRepaymentAtDisbursement()
+                        && doesLoanChargePaidByContainLoanCharge(transaction.getLoanChargesPaid(), loanCharge)) {
+                    final MonetaryCurrency currency = loan.getCurrency();
+                    final Money chargeAmount = Money.of(currency, loanCharge.amount());
+                    if (transaction.isGreaterThan(chargeAmount)) {
+                        final Money principalPortion = Money.zero(currency);
+                        final Money interestPortion = Money.zero(currency);
+                        final Money penaltyChargesPortion = Money.zero(currency);
+
+                        transaction.updateComponentsAndTotal(principalPortion, interestPortion, chargeAmount, penaltyChargesPortion);
+
+                    } else {
+                        transactionToRemove = transaction;
+                    }
+                }
+            }
+
+            if (transactionToRemove != null) {
+                loan.removeLoanTransaction(transactionToRemove);
+            }
+        }
+    }
+
+    private boolean doesLoanChargePaidByContainLoanCharge(Set<LoanChargePaidBy> loanChargePaidBys, LoanCharge loanCharge) {
+        return loanChargePaidBys.stream() //
+                .anyMatch(loanChargePaidBy -> loanChargePaidBy.getLoanCharge().equals(loanCharge));
     }
 
 }

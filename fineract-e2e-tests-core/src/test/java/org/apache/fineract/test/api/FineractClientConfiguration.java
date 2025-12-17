@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.test.api;
 
-import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.util.FineractClient;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,15 +33,18 @@ public class FineractClientConfiguration {
     private final ApiProperties apiProperties;
 
     @Bean
-    public FineractClient fineractClient() {
+    public FineractFeignClient fineractFeignClient() {
         String baseUrl = apiProperties.getBaseUrl();
         String username = apiProperties.getUsername();
         String password = apiProperties.getPassword();
         String tenantId = apiProperties.getTenantId();
         long readTimeout = apiProperties.getReadTimeout();
         String apiBaseUrl = baseUrl + "/fineract-provider/api/";
-        log.info("Using base URL '{}'", apiBaseUrl);
-        return FineractClient.builder().readTimeout(Duration.ofSeconds(readTimeout)).basicAuth(username, password).tenant(tenantId)
-                .baseURL(apiBaseUrl).insecure(true).build();
+        boolean debugEnabled = Boolean.parseBoolean(System.getProperty("fineract.feign.debug", "false"));
+
+        FineractFeignClient client = FineractFeignClient.builder().baseUrl(apiBaseUrl).credentials(username, password).tenantId(tenantId)
+                .disableSslVerification(true).debug(debugEnabled).connectTimeout(60, TimeUnit.SECONDS)
+                .readTimeout((int) readTimeout, TimeUnit.SECONDS).build();
+        return client;
     }
 }

@@ -66,7 +66,6 @@ public class LoanDisbursementService {
 
     private final LoanChargeValidator loanChargeValidator;
     private final LoanDisbursementValidator loanDisbursementValidator;
-    private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final LoanChargeService loanChargeService;
     private final LoanBalanceService loanBalanceService;
     private final LoanJournalEntryPoster loanJournalEntryPoster;
@@ -326,7 +325,7 @@ public class LoanDisbursementService {
             for (LoanCharge loanCharge : tempCharges) {
                 loanChargeValidator.validateLoanIsNotClosed(loan, loanCharge);
                 loanChargeValidator.validateLoanChargeIsNotWaived(loan, loanCharge);
-                reprocessLoanTransactionsService.removeLoanCharge(loan, loanCharge);
+                loanChargeService.removeLoanCharge(loan, loanCharge);
             }
             loan.getTrancheCharges().clear();
         } else {
@@ -336,7 +335,7 @@ public class LoanDisbursementService {
                     if (loan.getCharges().contains(deleteCharge)) {
                         loanChargeValidator.validateLoanIsNotClosed(loan, deleteCharge);
                         loanChargeValidator.validateLoanChargeIsNotWaived(loan, deleteCharge);
-                        reprocessLoanTransactionsService.removeLoanCharge(loan, deleteCharge);
+                        loanChargeService.removeLoanCharge(loan, deleteCharge);
                     }
                 }
             }
@@ -359,7 +358,7 @@ public class LoanDisbursementService {
                     loanChargeValidator.validateLoanChargeIsNotWaived(loan, charge); //
                     return true; //
                 }) //
-                .forEach(loanCharge -> reprocessLoanTransactionsService.removeLoanCharge(loan, loanCharge));
+                .forEach(loanCharge -> loanChargeService.removeLoanCharge(loan, loanCharge));
     }
 
     // This method returns date format and locale if present in the JsonCommand

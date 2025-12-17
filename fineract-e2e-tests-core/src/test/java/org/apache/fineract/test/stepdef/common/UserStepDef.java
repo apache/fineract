@@ -18,57 +18,47 @@
  */
 package org.apache.fineract.test.stepdef.common;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+
 import io.cucumber.java.en.When;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.fineract.client.models.GetRolesResponse;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.PostRolesRequest;
 import org.apache.fineract.client.models.PostRolesResponse;
 import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.client.models.PostUsersResponse;
 import org.apache.fineract.client.models.PutRolesRoleIdPermissionsRequest;
-import org.apache.fineract.client.models.PutRolesRoleIdPermissionsResponse;
-import org.apache.fineract.client.services.RolesApi;
-import org.apache.fineract.client.services.UsersApi;
-import org.apache.fineract.test.helper.ErrorHelper;
 import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
 import org.springframework.beans.factory.annotation.Autowired;
-import retrofit2.Response;
 
 public class UserStepDef extends AbstractStepDef {
 
     private static final String EMAIL = "test@test.com";
 
     @Autowired
-    private RolesApi rolesApi;
-
-    @Autowired
-    private UsersApi usersApi;
+    private FineractFeignClient fineractClient;
 
     private static final String PWD_USER_WITH_ROLE = "1234567890Aa!";
 
     @When("Admin creates new user with {string} username, {string} role name and given permissions:")
-    public void createUserWithUsernameAndRoles(String username, String roleName, List<String> permissions) throws IOException {
-        Response<List<GetRolesResponse>> retrieveAllRolesResponse = rolesApi.retrieveAllRoles().execute();
-        ErrorHelper.checkSuccessfulApiCall(retrieveAllRolesResponse);
+    public void createUserWithUsernameAndRoles(String username, String roleName, List<String> permissions) {
+        ok(() -> fineractClient.roles().retrieveAllRoles());
         PostRolesRequest newRoleRequest = new PostRolesRequest().name(Utils.randomNameGenerator(roleName, 8)).description(roleName);
-        Response<PostRolesResponse> createNewRole = rolesApi.createRole(newRoleRequest).execute();
-        ErrorHelper.checkSuccessfulApiCall(createNewRole);
-        Long roleId = createNewRole.body().getResourceId();
+        PostRolesResponse createNewRole = ok(() -> fineractClient.roles().createRole(newRoleRequest));
+        Long roleId = createNewRole.getResourceId();
         Map<String, Boolean> permissionMap = new HashMap<>();
         permissions.forEach(role -> permissionMap.put(role, true));
         PutRolesRoleIdPermissionsRequest putRolesRoleIdPermissionsRequest = new PutRolesRoleIdPermissionsRequest()
                 .permissions(permissionMap);
-        Response<PutRolesRoleIdPermissionsResponse> updateRolePermissionResponse = rolesApi
-                .updateRolePermissions(roleId, putRolesRoleIdPermissionsRequest).execute();
-        ErrorHelper.checkSuccessfulApiCall(updateRolePermissionResponse);
+        ok(() -> fineractClient.roles().updateRolePermissions(roleId, putRolesRoleIdPermissionsRequest));
 
+        String generatedUsername = Utils.randomNameGenerator(username, 8);
         PostUsersRequest postUsersRequest = new PostUsersRequest() //
-                .username(Utils.randomNameGenerator(username, 8)) //
+                .username(generatedUsername) //
                 .email(EMAIL) //
                 .firstname(username) //
                 .lastname(username) //
@@ -78,8 +68,9 @@ public class UserStepDef extends AbstractStepDef {
                 .repeatPassword(PWD_USER_WITH_ROLE) //
                 .roles(List.of(roleId));
 
-        Response<PostUsersResponse> createUserResponse = usersApi.create15(postUsersRequest).execute();
-        ErrorHelper.checkSuccessfulApiCall(createUserResponse);
+        PostUsersResponse createUserResponse = ok(() -> fineractClient.users().create15(postUsersRequest));
         testContext().set(TestContextKey.CREATED_SIMPLE_USER_RESPONSE, createUserResponse);
+        testContext().set(TestContextKey.CREATED_SIMPLE_USER_USERNAME, generatedUsername);
+        testContext().set(TestContextKey.CREATED_SIMPLE_USER_PASSWORD, PWD_USER_WITH_ROLE);
     }
 }

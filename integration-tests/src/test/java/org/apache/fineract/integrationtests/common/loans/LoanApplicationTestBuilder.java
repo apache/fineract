@@ -88,6 +88,7 @@ public class LoanApplicationTestBuilder {
     private boolean enableDownPayment = false;
     private boolean enableAutoRepaymentForDownPayment = false;
     private String disbursedAmountPercentageDownPayment;
+    private Boolean allowFullTermForTranche = null;
 
     public String build(final String clientID, final String groupID, final String loanProductId, final String savingsID) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -219,6 +220,9 @@ public class LoanApplicationTestBuilder {
         }
         if (disbursedAmountPercentageDownPayment != null) {
             map.put("disbursedAmountPercentageDownPayment", disbursedAmountPercentageDownPayment);
+        }
+        if (allowFullTermForTranche != null) {
+            map.put("allowFullTermForTranche", allowFullTermForTranche);
         }
         LOG.info("Loan Application request : {} ", map);
         return new Gson().toJson(map);
@@ -465,6 +469,11 @@ public class LoanApplicationTestBuilder {
 
     public LoanApplicationTestBuilder withDisbursedAmountPercentageDownPayment(final String amount) {
         this.disbursedAmountPercentageDownPayment = amount;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withAllowFullTermForTranche(final Boolean allowFullTermForTranche) {
+        this.allowFullTermForTranche = allowFullTermForTranche;
         return this;
     }
 

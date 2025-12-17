@@ -642,7 +642,7 @@ public class JsonParserHelper {
                 // http://bugs.sun.com/view_bug.do?bug_id=4510618
                 final char groupingSeparator = symbols.getGroupingSeparator();
                 if (groupingSeparator == '\u00a0') {
-                    source = source.replaceAll(" ", Character.toString('\u00a0'));
+                    source = source.replace(" ", Character.toString('\u00a0'));
                 }
 
                 final Number parsedNumber = df.parse(source);
@@ -727,9 +727,8 @@ public class JsonParserHelper {
                 // http://bugs.sun.com/view_bug.do?bug_id=4510618
                 final char groupingSeparator = symbols.getGroupingSeparator();
                 if (groupingSeparator == '\u00a0') {
-                    source = source.replaceAll(" ", Character.toString('\u00a0'));
+                    source = source.replace(" ", Character.toString('\u00a0'));
                 }
-
                 final NumberStyleFormatter numberFormatter = new NumberStyleFormatter();
                 final Number parsedNumber = numberFormatter.parse(source, clientApplicationLocale);
                 if (parsedNumber instanceof BigDecimal) {

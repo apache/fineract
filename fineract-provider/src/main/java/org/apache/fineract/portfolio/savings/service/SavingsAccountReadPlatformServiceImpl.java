@@ -91,7 +91,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
     // mappers
     private final SavingsAccountTransactionTemplateMapper transactionTemplateMapper;
-    private final SavingsAccountTransactionsMapper transactionsMapper;
+    protected SavingsAccountTransactionsMapper transactionsMapper;
     private final SavingsAccountTransactionsForBatchMapper savingsAccountTransactionsForBatchMapper;
     private final SavingAccountMapper savingAccountMapper;
     private final SavingAccountMapperForInterestPosting savingAccountMapperForInterestPosting;
@@ -1088,7 +1088,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
      * return this.jdbcTemplate.query(sql, this.annualFeeMapper, new Object[] {}); }
      */
 
-    public static final class SavingsAccountTransactionsMapper implements RowMapper<SavingsAccountTransactionData> {
+    public static class SavingsAccountTransactionsMapper implements RowMapper<SavingsAccountTransactionData> {
 
         private static final String SELECT = buildSelect();
         private static final String FROM = buildFrom();
@@ -1096,7 +1096,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
         public SavingsAccountTransactionsMapper() {}
 
-        private static String buildSelect() {
+        protected static String buildSelect() {
             return "tr.id as transactionId, tr.transaction_type_enum as transactionType, "
                     + "tr.transaction_date as transactionDate, tr.amount as transactionAmount, "
                     + "tr.release_id_of_hold_amount as releaseTransactionId, tr.reason_for_block as reasonForBlock, "
@@ -1116,7 +1116,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     + "curr.display_symbol as currencyDisplaySymbol, pt.value as paymentTypeName, " + "tr.is_manual as postInterestAsOn ";
         }
 
-        private static String buildFrom() {
+        protected static String buildFrom() {
             return " FROM m_savings_account_transaction tr join m_savings_account sa on tr.savings_account_id = sa.id "
                     + "join m_currency curr on curr.code = sa.currency_code "
                     + "left join m_account_transfer_transaction fromtran on fromtran.from_savings_transaction_id = tr.id "

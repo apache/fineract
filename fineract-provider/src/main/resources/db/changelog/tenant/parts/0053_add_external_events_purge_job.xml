@@ -28,6 +28,7 @@
         </sql>
     </changeSet>
     <changeSet author="fineract" id="2">
+        <validCheckSum>9:cc131e03908e195ec202018431087e61</validCheckSum>
         <insert tableName="c_configuration">
             <column name="name" value="purge-external-events-older-than-days"/>
             <column name="value" valueNumeric="30"/>

@@ -262,11 +262,7 @@ public final class EmailDataValidator {
         Matcher emailMatcher = EMAIL_PATTERN.matcher(email);
 
         // check if the Matcher matches the email pattern
-        if (!emailMatcher.matches()) {
-            return false;
-        }
-
-        return true;
+        return emailMatcher.matches();
     }
 
     /**

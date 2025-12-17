@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.test.stepdef.loan;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.cucumber.java.en.Then;
@@ -25,14 +28,13 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.InterestPauseRequestDto;
 import org.apache.fineract.client.models.PostLoansResponse;
-import org.apache.fineract.client.services.LoanInterestPauseApi;
 import org.apache.fineract.test.factory.LoanRequestFactory;
-import org.apache.fineract.test.helper.ErrorHelper;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
-import org.apache.fineract.test.helper.ErrorResponse;
 import org.apache.fineract.test.messaging.EventAssertion;
 import org.apache.fineract.test.messaging.event.loan.LoanBalanceChangedEvent;
 import org.apache.fineract.test.messaging.event.loan.LoanScheduleVariationsAddedEvent;
@@ -40,7 +42,6 @@ import org.apache.fineract.test.messaging.event.loan.LoanScheduleVariationsDelet
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
 import org.junit.jupiter.api.Assertions;
-import retrofit2.Response;
 
 @RequiredArgsConstructor
 public class LoanInterestPauseStepDef extends AbstractStepDef {
@@ -49,95 +50,85 @@ public class LoanInterestPauseStepDef extends AbstractStepDef {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
     private static final int INTEREST_PAUSE_TERM_TYPE_ID = 11;
 
-    private final LoanInterestPauseApi loanInterestPauseApi;
     private final EventAssertion eventAssertion;
+    private final FineractFeignClient fineractClient;
 
     @Then("Create an interest pause period with start date {string} and end date {string}")
     public void interestPauseCreate(final String startDate, final String endDate) throws IOException {
-        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Assertions.assertNotNull(loanResponse.body());
-        final Long loanId = loanResponse.body().getLoanId();
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
 
         final InterestPauseRequestDto interestPauseRequest = LoanRequestFactory.defaultInterestPauseRequest().startDate(startDate)
                 .endDate(endDate);
-        final Response<CommandProcessingResult> interestPauseResponse = loanInterestPauseApi
-                .createInterestPause(loanId, interestPauseRequest).execute();
-        ErrorHelper.checkSuccessfulApiCall(interestPauseResponse);
+        final CommandProcessingResult interestPauseResponse = ok(
+                () -> fineractClient.loanInterestPause().createInterestPause(loanId, interestPauseRequest));
 
-        Assertions.assertNotNull(interestPauseResponse.body());
-        final Long variationId = interestPauseResponse.body().getResourceId();
+        Assertions.assertNotNull(interestPauseResponse);
+        final Long variationId = interestPauseResponse.getResourceId();
         testContext().set(TestContextKey.INTEREST_PAUSE_VARIATION_ID, variationId);
     }
 
     @Then("Delete the interest pause period")
     public void interestPauseDelete() throws IOException {
-        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Assertions.assertNotNull(loanResponse.body());
-        final Long loanId = loanResponse.body().getLoanId();
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        Assertions.assertNotNull(loanResponse);
+        final Long loanId = loanResponse.getLoanId();
 
         final Long variationId = testContext().get(TestContextKey.INTEREST_PAUSE_VARIATION_ID);
         Assertions.assertNotNull(variationId, "Interest pause variation ID must be set before deletion");
 
-        final Response<Void> deleteResponse = loanInterestPauseApi.deleteInterestPause(loanId, variationId).execute();
-        ErrorHelper.checkSuccessfulApiCall(deleteResponse);
+        executeVoid(() -> fineractClient.loanInterestPause().deleteInterestPause(loanId, variationId));
     }
 
     @Then("Update the interest pause period with start date {string} and end date {string}")
     public void interestPauseUpdate(final String startDate, final String endDate) throws IOException {
-        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Assertions.assertNotNull(loanResponse.body());
-        final Long loanId = loanResponse.body().getLoanId();
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        Assertions.assertNotNull(loanResponse);
+        final Long loanId = loanResponse.getLoanId();
 
         final Long variationId = testContext().get(TestContextKey.INTEREST_PAUSE_VARIATION_ID);
         Assertions.assertNotNull(variationId, "Interest pause variation ID must be set before update");
 
         final InterestPauseRequestDto interestPauseRequest = LoanRequestFactory.defaultInterestPauseRequest().startDate(startDate)
                 .endDate(endDate);
-        final Response<CommandProcessingResult> updateResponse = loanInterestPauseApi
-                .updateInterestPause(loanId, variationId, interestPauseRequest).execute();
-        ErrorHelper.checkSuccessfulApiCall(updateResponse);
+        ok(() -> fineractClient.loanInterestPause().updateInterestPause(loanId, variationId, interestPauseRequest));
     }
 
     @Then("Admin is not able to add an interest pause period with start date {string} and end date {string}")
     public void createInterestPauseFailure(final String startDate, final String endDate) throws IOException {
-        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Assertions.assertNotNull(loanResponse.body());
-        final Long loanId = loanResponse.body().getLoanId();
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        Assertions.assertNotNull(loanResponse);
+        final Long loanId = loanResponse.getLoanId();
 
         final InterestPauseRequestDto interestPauseRequest = LoanRequestFactory.defaultInterestPauseRequest().startDate(startDate)
                 .endDate(endDate);
-        final Response<CommandProcessingResult> interestPauseResponse = loanInterestPauseApi
-                .createInterestPause(loanId, interestPauseRequest).execute();
 
-        ErrorResponse errorDetails = ErrorResponse.from(interestPauseResponse);
-        assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.addInterestPauseForNotInterestBearingLoanFailure())
-                .isEqualTo(403);
-        assertThat(errorDetails.getSingleError().getDeveloperMessage())
-                .isEqualTo(ErrorMessageHelper.addInterestPauseForNotInterestBearingLoanFailure());
+        CallFailedRuntimeException exception = fail(
+                () -> fineractClient.loanInterestPause().createInterestPause(loanId, interestPauseRequest));
+        assertThat(exception.getStatus()).as(ErrorMessageHelper.addInterestPauseForNotInterestBearingLoanFailure()).isEqualTo(403);
+        assertThat(exception.getDeveloperMessage()).contains(ErrorMessageHelper.addInterestPauseForNotInterestBearingLoanFailure());
     }
 
     @Then("Admin is not able to add an interest pause period with start date {string} and end date {string} due to inactive loan status")
     public void createInterestPauseForInactiveLoanFailure(final String startDate, final String endDate) throws IOException {
-        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Assertions.assertNotNull(loanResponse.body());
-        final Long loanId = loanResponse.body().getLoanId();
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        Assertions.assertNotNull(loanResponse);
+        final Long loanId = loanResponse.getLoanId();
 
         final InterestPauseRequestDto interestPauseRequest = LoanRequestFactory.defaultInterestPauseRequest().startDate(startDate)
                 .endDate(endDate);
-        final Response<CommandProcessingResult> interestPauseResponse = loanInterestPauseApi
-                .createInterestPause(loanId, interestPauseRequest).execute();
 
-        final ErrorResponse errorDetails = ErrorResponse.from(interestPauseResponse);
-        assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.addInterestPauseForNotInactiveLoanFailure()).isEqualTo(403);
-        assertThat(errorDetails.getSingleError().getDeveloperMessage())
-                .isEqualTo(ErrorMessageHelper.addInterestPauseForNotInactiveLoanFailure());
+        CallFailedRuntimeException exception = fail(
+                () -> fineractClient.loanInterestPause().createInterestPause(loanId, interestPauseRequest));
+        assertThat(exception.getStatus()).as(ErrorMessageHelper.addInterestPauseForNotInactiveLoanFailure()).isEqualTo(403);
+        assertThat(exception.getDeveloperMessage()).contains(ErrorMessageHelper.addInterestPauseForNotInactiveLoanFailure());
     }
 
     @Then("LoanScheduleVariationsAddedBusinessEvent is created for interest pause from {string} to {string}")
     public void checkLoanScheduleVariationsAddedBusinessEvent(final String start, final String end) {
-        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Assertions.assertNotNull(loanResponse.body());
-        final Long loanId = loanResponse.body().getLoanId();
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        Assertions.assertNotNull(loanResponse);
+        final Long loanId = loanResponse.getLoanId();
 
         final LocalDate startDateParsed = LocalDate.parse(start, FORMATTER);
         final LocalDate endDateParsed = LocalDate.parse(end, FORMATTER);
@@ -164,9 +155,9 @@ public class LoanInterestPauseStepDef extends AbstractStepDef {
 
     @Then("LoanScheduleVariationsDeletedBusinessEvent is created for interest pause from {string} to {string}")
     public void checkLoanScheduleVariationsDeletedBusinessEvent(final String start, final String end) {
-        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Assertions.assertNotNull(loanResponse.body());
-        final Long loanId = loanResponse.body().getLoanId();
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        Assertions.assertNotNull(loanResponse);
+        final Long loanId = loanResponse.getLoanId();
 
         final LocalDate startDateParsed = LocalDate.parse(start, FORMATTER);
         final LocalDate endDateParsed = LocalDate.parse(end, FORMATTER);
@@ -191,9 +182,9 @@ public class LoanInterestPauseStepDef extends AbstractStepDef {
     @Then("LoanScheduleVariationsAddedBusinessEvent is created for interest pause update from {string} and {string} to {string} and {string}")
     public void checkLoanScheduleVariationsAddedBusinessEventForUpdate(final String oldStart, final String oldEnd, final String newStart,
             final String newEnd) {
-        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Assertions.assertNotNull(loanResponse.body());
-        final Long loanId = loanResponse.body().getLoanId();
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        Assertions.assertNotNull(loanResponse);
+        final Long loanId = loanResponse.getLoanId();
 
         final LocalDate oldStartDateParsed = LocalDate.parse(oldStart, FORMATTER);
         final LocalDate oldEndDateParsed = LocalDate.parse(oldEnd, FORMATTER);
@@ -226,9 +217,9 @@ public class LoanInterestPauseStepDef extends AbstractStepDef {
 
     @Then("LoanBalanceChangedBusinessEvent is created on {string}")
     public void checkLoanBalanceChangedBusinessEvent(final String date) {
-        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Assertions.assertNotNull(loanResponse.body());
-        final Long loanId = loanResponse.body().getLoanId();
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        Assertions.assertNotNull(loanResponse);
+        final Long loanId = loanResponse.getLoanId();
 
         final LocalDate expectedBusinessDateParsed = LocalDate.parse(date, FORMATTER);
         eventAssertion.assertEvent(LoanBalanceChangedEvent.class, loanId).isRaisedOnBusinessDate(expectedBusinessDateParsed);

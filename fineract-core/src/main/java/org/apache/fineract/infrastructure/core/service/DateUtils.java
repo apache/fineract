@@ -461,4 +461,17 @@ public final class DateUtils {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", errors, e);
         }
     }
+
+    /**
+     * Returns the earlier date. If date1 is before date2 it return date1 otherwise date2.
+     *
+     * @param date1
+     *            non null date1
+     * @param date2
+     *            non null date2
+     * @return earlier date
+     */
+    public static LocalDate min(@NonNull LocalDate date1, @NonNull LocalDate date2) {
+        return date1.isBefore(date2) ? date1 : date2;
+    }
 }

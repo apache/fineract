@@ -337,11 +337,9 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
                 isCurrentDateBeforeInstallmentAndLoanPeriod = DateUtils.isEqual(currentBusinessDate, installment.getDueDate())
                         && DateUtils.isBefore(currentBusinessDate, expectedMaturityDate);
             }
-            if (isCurrentDateBeforeInstallmentAndLoanPeriod) {
-                if (installment.isNotFullyPaidOff()) {
-                    nextUnpaidInstallmentDate = installment.getDueDate();
-                    break;
-                }
+            if (isCurrentDateBeforeInstallmentAndLoanPeriod && installment.isNotFullyPaidOff()) {
+                nextUnpaidInstallmentDate = installment.getDueDate();
+                break;
             }
         }
         return nextUnpaidInstallmentDate;

@@ -312,11 +312,11 @@ public class LoanReschedulingWithinCenterTest extends BaseLoanIntegrationTest {
 
         ArrayList loanRepaymnetSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, generalResponseSpec, loanID);
         // VERIFY RESCHEDULED DATE
-        ArrayList dueDateLoanSchedule = (ArrayList) ((HashMap) loanRepaymnetSchedule.get(2)).get("dueDate");
+        ArrayList dueDateLoanSchedule = (ArrayList) ((HashMap) loanRepaymnetSchedule.get(3)).get("dueDate");
         assertEquals(getDateAsArray(todaysdate, 0), dueDateLoanSchedule);
 
         // VERIFY THE INTEREST
-        Float interestDue = (Float) ((HashMap) loanRepaymnetSchedule.get(2)).get("interestDue");
+        Float interestDue = (Float) ((HashMap) loanRepaymnetSchedule.get(3)).get("interestDue");
         assertEquals("41.05", String.valueOf(interestDue));
 
         // DISBURSE THE SECOND TRANCHE (for let the loan test lifecycle callback to close the loan

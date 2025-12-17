@@ -291,7 +291,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     @Override
     public void cleanLoanDelinquencyTags(Loan loan) {
         List<LoanDelinquencyTagHistory> loanDelinquencyTags = this.loanDelinquencyTagRepository.findByLoan(loan);
-        if (loanDelinquencyTags != null && loanDelinquencyTags.size() > 0) {
+        if (loanDelinquencyTags != null && !loanDelinquencyTags.isEmpty()) {
             this.loanDelinquencyTagRepository.deleteAll(loanDelinquencyTags);
         }
     }
@@ -362,9 +362,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
 
     private void setDelinquencyBucketMappings(DelinquencyBucket delinquencyBucket, DelinquencyBucketData data) {
         List<Long> rangeIds = new ArrayList<>();
-        data.getRanges().forEach(dataRange -> {
-            rangeIds.add(dataRange.getId());
-        });
+        data.getRanges().forEach(dataRange -> rangeIds.add(dataRange.getId()));
 
         List<DelinquencyRange> ranges = repositoryRange.findAllById(rangeIds);
         validateDelinquencyRanges(ranges);
@@ -383,11 +381,9 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
 
         DelinquencyRange prevDelinquencyRange = null;
         for (DelinquencyRange delinquencyRange : ranges) {
-            if (prevDelinquencyRange != null) {
-                if (isOverlapped(prevDelinquencyRange, delinquencyRange)) {
-                    final String errorMessage = "The delinquency ranges age days values are overlaped";
-                    throw new DelinquencyBucketAgesOverlapedException(errorMessage, prevDelinquencyRange, delinquencyRange);
-                }
+            if (prevDelinquencyRange != null && isOverlapped(prevDelinquencyRange, delinquencyRange)) {
+                final String errorMessage = "The delinquency ranges age days values are overlaped";
+                throw new DelinquencyBucketAgesOverlapedException(errorMessage, prevDelinquencyRange, delinquencyRange);
             }
             prevDelinquencyRange = delinquencyRange;
         }

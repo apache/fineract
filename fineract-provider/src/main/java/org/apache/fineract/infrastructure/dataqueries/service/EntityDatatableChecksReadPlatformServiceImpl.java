@@ -121,10 +121,10 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
             tableRequiredBeforeAction = this.entityDatatableChecksRepository.findByEntityStatusAndProduct(entity, status, productId);
         }
 
-        if (tableRequiredBeforeAction == null || tableRequiredBeforeAction.size() < 1) {
+        if (tableRequiredBeforeAction == null || tableRequiredBeforeAction.isEmpty()) {
             tableRequiredBeforeAction = this.entityDatatableChecksRepository.findByEntityStatusAndNoProduct(entity, status);
         }
-        if (tableRequiredBeforeAction != null && tableRequiredBeforeAction.size() > 0) {
+        if (tableRequiredBeforeAction != null && !tableRequiredBeforeAction.isEmpty()) {
             List<DatatableData> ret = new ArrayList<>();
             for (EntityDatatableChecks t : tableRequiredBeforeAction) {
                 ret.add(this.datatableReadService.retrieveDatatable(t.getDatatableName()));

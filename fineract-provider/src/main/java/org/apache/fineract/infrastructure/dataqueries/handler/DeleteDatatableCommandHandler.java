@@ -36,7 +36,7 @@ public class DeleteDatatableCommandHandler implements NewCommandSourceHandler {
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        final String datatableName = command.getUrl().replaceAll("/datatables/", "");
+        final String datatableName = command.getUrl().replace("/datatables/", "");
         datatableWriteService.deleteDatatable(datatableName);
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withResourceIdAsString(datatableName).build();
     }

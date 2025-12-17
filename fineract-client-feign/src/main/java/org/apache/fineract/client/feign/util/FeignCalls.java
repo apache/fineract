@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.client.feign.util;
 
-import feign.FeignException;
 import java.util.function.Supplier;
+import org.apache.fineract.client.feign.FeignException;
 
 /**
  * Extension methods for Feign calls. This class is recommended to be statically imported.
@@ -76,5 +76,42 @@ public final class FeignCalls {
      */
     public static <T> T execute(Supplier<T> feignCall) throws FeignException {
         return feignCall.get();
+    }
+
+    /**
+     * Execute a Feign call expecting failure (for negative tests). Returns the exception with error details.
+     *
+     * @param feignCall
+     *            the Feign call to execute
+     * @return CallFailedRuntimeException containing status code and error message
+     * @throws AssertionError
+     *             if the call succeeds when failure was expected
+     */
+    public static CallFailedRuntimeException fail(Supplier<?> feignCall) {
+        try {
+            Object result = feignCall.get();
+            throw new AssertionError("Expected call to fail, but it succeeded with result: " + result);
+        } catch (FeignException e) {
+            return new CallFailedRuntimeException(e);
+        }
+    }
+
+    /**
+     * Execute a Feign call expecting failure with void return (for negative tests). Returns the exception with error
+     * details.
+     *
+     * @param feignCall
+     *            the Feign call to execute
+     * @return CallFailedRuntimeException containing status code and error message
+     * @throws AssertionError
+     *             if the call succeeds when failure was expected
+     */
+    public static CallFailedRuntimeException failVoid(Runnable feignCall) {
+        try {
+            feignCall.run();
+            throw new AssertionError("Expected call to fail, but it succeeded");
+        } catch (FeignException e) {
+            return new CallFailedRuntimeException(e);
+        }
     }
 }
