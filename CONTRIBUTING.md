@@ -126,7 +126,7 @@ IntelliJ IDEA provides strong Gradle integration and is recommended for most new
 
 ### Prerequisites
 - IntelliJ IDEA (Community Edition is sufficient)
-- Java 17 (as required by Fineract)
+- Java 21 (as required by Fineract)
 - Gradle (wrapper included in the repository)
 
 ### Steps
