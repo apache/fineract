@@ -95,6 +95,15 @@ This is useful for repeated test runs (say, for timing) when gradle would otherw
 
 See the next section for testing in Eclipse and [here](https://fineract-academy.com) for testing in IntelliJ.
 
+## Recommended IDEs
+
+Apache Fineract can be developed using multiple IDEs. The most commonly used and supported IDEs are:
+
+- **Eclipse IDE** – Fully supported and commonly used within the community.
+- **IntelliJ IDEA (Community or Ultimate)** – Recommended for most developers due to excellent Gradle support and debugging experience.
+
+The sections below provide setup guidance for each IDE.
+
 ### How to run and debug in Eclipse IDE
 
 It is possible to run Fineract in Eclipse IDE and also to debug Fineract using Eclipse's debugging facilities.
@@ -110,6 +119,29 @@ If you change the project settings (dependencies etc) in Gradle, you should redo
 You can also use Eclipse JUnit support to run tests in Eclipse (Run As->JUnit Test)
 
 Finally, modifying source code in Eclipse automatically triggers hot code replace to a running instance, allowing you to immediately test your changes
+
+## How to run and debug in IntelliJ IDEA
+
+IntelliJ IDEA provides strong Gradle integration and is recommended for most new contributors.
+
+### Prerequisites
+- IntelliJ IDEA (Community Edition is sufficient)
+- Java 17 (as required by Fineract)
+- Gradle (wrapper included in the repository)
+
+### Steps
+
+1. Open IntelliJ IDEA and select **Open**
+2. Choose the root `fineract` directory
+3. When prompted, import the project as a **Gradle project**
+4. Use the Gradle wrapper (`gradlew`) when asked
+5. Ensure the correct JDK is selected (**Java 17**)
+6. After import completes, run:
+   - `org.apache.fineract.ServerApplication` as a **Java Application**
+
+### Notes
+- IntelliJ may take several minutes to index the project on first open
+- If you encounter build issues, try running `./gradlew clean build` from the terminal
 
 How to download Gradle wrapper
 ---
