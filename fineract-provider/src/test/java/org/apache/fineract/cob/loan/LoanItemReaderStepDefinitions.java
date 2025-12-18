@@ -59,8 +59,7 @@ public class LoanItemReaderStepDefinitions implements En {
 
     private LoanLockingService lockingService = mock(LoanLockingService.class);
 
-    private LoanItemReader loanItemReader = new LoanItemReader(loanRepository, retrieveLoanIdService, customJobParameterResolver,
-            lockingService);
+    private LoanItemReader loanItemReader = new LoanItemReader(loanRepository, retrieveLoanIdService, lockingService);
 
     private Loan loan = mock(Loan.class);
 

@@ -24,11 +24,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.converter.COBParameterConverter;
 import org.apache.fineract.cob.data.COBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LockOwner;
+import org.apache.fineract.cob.resolver.CatchUpFlagResolver;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
@@ -39,14 +39,12 @@ import org.springframework.lang.NonNull;
 public class LoanItemReader extends AbstractLoanItemReader {
 
     private final RetrieveLoanIdService retrieveLoanIdService;
-    private final CustomJobParameterResolver customJobParameterResolver;
     private final LoanLockingService loanLockingService;
 
     public LoanItemReader(LoanRepository loanRepository, RetrieveLoanIdService retrieveLoanIdService,
-            CustomJobParameterResolver customJobParameterResolver, LoanLockingService loanLockingService) {
+            LoanLockingService loanLockingService) {
         super(loanRepository);
         this.retrieveLoanIdService = retrieveLoanIdService;
-        this.customJobParameterResolver = customJobParameterResolver;
         this.loanLockingService = loanLockingService;
     }
 
@@ -56,15 +54,15 @@ public class LoanItemReader extends AbstractLoanItemReader {
         ExecutionContext executionContext = stepExecution.getExecutionContext();
         COBParameter loanCOBParameter = COBParameterConverter.convert(executionContext.get(LoanCOBConstant.LOAN_COB_PARAMETER));
         List<Long> loanIds;
+        boolean isCatchUp = CatchUpFlagResolver.resolve(stepExecution);
         if (Objects.isNull(loanCOBParameter)
                 || (Objects.isNull(loanCOBParameter.getMinAccountId()) && Objects.isNull(loanCOBParameter.getMaxAccountId()))
                 || (loanCOBParameter.getMinAccountId().equals(0L) && loanCOBParameter.getMaxAccountId().equals(0L))) {
             loanIds = Collections.emptyList();
         } else {
             loanIds = retrieveLoanIdService.retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter,
-                    customJobParameterResolver.getCustomJobParameterById(stepExecution, LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME)
-                            .map(Boolean::parseBoolean).orElse(false));
-            if (loanIds.size() > 0) {
+                    isCatchUp);
+            if (!loanIds.isEmpty()) {
                 List<Long> lockedByCOBChunkProcessingAccountIds = getLoanIdsLockedWithChunkProcessingLock(loanIds);
                 loanIds.retainAll(lockedByCOBChunkProcessingAccountIds);
             }
@@ -73,8 +71,8 @@ public class LoanItemReader extends AbstractLoanItemReader {
     }
 
     private List<Long> getLoanIdsLockedWithChunkProcessingLock(List<Long> loanIds) {
-        List<LoanAccountLock> accountLocks = new ArrayList<>();
-        accountLocks.addAll(loanLockingService.findAllByLoanIdInAndLockOwner(loanIds, LockOwner.LOAN_COB_CHUNK_PROCESSING));
+        List<LoanAccountLock> accountLocks = new ArrayList<>(
+                loanLockingService.findAllByLoanIdInAndLockOwner(loanIds, LockOwner.LOAN_COB_CHUNK_PROCESSING));
         return accountLocks.stream().map(LoanAccountLock::getLoanId).toList();
     }
 }

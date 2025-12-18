@@ -32,8 +32,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
-import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.data.COBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LockOwner;
@@ -44,6 +42,7 @@ import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
@@ -62,9 +61,8 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
     private RetrieveLoanIdService retrieveLoanIdService = mock(RetrieveLoanIdService.class);
     private TransactionTemplate transactionTemplate = spy(TransactionTemplate.class);
 
-    private CustomJobParameterResolver customJobParameterResolver = mock(CustomJobParameterResolver.class);
     private ApplyLoanLockTasklet applyLoanLockTasklet = new ApplyLoanLockTasklet(fineractProperties, loanLockingService,
-            retrieveLoanIdService, customJobParameterResolver, transactionTemplate);
+            retrieveLoanIdService, transactionTemplate);
     private RepeatStatus resultItem;
     private StepContribution stepContribution;
 
@@ -74,7 +72,8 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
             HashMap<BusinessDateType, LocalDate> businessDateMap = new HashMap<>();
             businessDateMap.put(BusinessDateType.COB_DATE, LocalDate.now(ZoneId.systemDefault()));
             ThreadLocalContextUtil.setBusinessDates(businessDateMap);
-            StepExecution stepExecution = new StepExecution("test", null);
+            JobExecution jobExecution = new JobExecution(1L, null);
+            StepExecution stepExecution = new StepExecution("test", jobExecution);
             ExecutionContext executionContext = new ExecutionContext();
             COBParameter loanCOBParameter = new COBParameter(1L, 4L);
             executionContext.put(LoanCOBConstant.LOAN_COB_PARAMETER, loanCOBParameter);
@@ -117,7 +116,6 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
                 lenient().when(loanLockingService.findAllByLoanIdIn(Mockito.anyList())).thenReturn(accountLocks);
             }
             transactionTemplate.setTransactionManager(mock(PlatformTransactionManager.class));
-            lenient().when(customJobParameterResolver.getCustomJobParameterSet(any())).thenReturn(Optional.empty());
 
         });
 
