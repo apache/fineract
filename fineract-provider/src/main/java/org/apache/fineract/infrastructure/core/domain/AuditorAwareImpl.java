@@ -21,12 +21,14 @@ package org.apache.fineract.infrastructure.core.domain;
 import static org.apache.fineract.useradministration.service.AppUserConstants.ADMIN_USER_ID;
 
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+@Slf4j
 public class AuditorAwareImpl implements AuditorAware<Long> {
 
     @Override
@@ -35,7 +37,7 @@ public class AuditorAwareImpl implements AuditorAware<Long> {
         final SecurityContext securityContext = SecurityContextHolder.getContext();
         if (securityContext != null) {
             final Authentication authentication = securityContext.getAuthentication();
-            if (authentication != null && authentication.getPrincipal() instanceof AppUser) {
+            if (authentication != null && authentication.getPrincipal() != "anonymousUser"){
                 currentUserId = Optional.ofNullable(((AppUser) authentication.getPrincipal()).getId());
             } else {
                 currentUserId = retrieveSuperUser();

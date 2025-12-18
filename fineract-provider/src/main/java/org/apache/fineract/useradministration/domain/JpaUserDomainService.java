@@ -18,12 +18,14 @@
  */
 package org.apache.fineract.useradministration.domain;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.PlatformEmailService;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 public class JpaUserDomainService implements UserDomainService {
 

@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.campaigns.sms.data.SmsProviderData;
@@ -59,6 +60,7 @@ import org.apache.fineract.portfolio.self.registration.domain.SelfServiceRegistr
 import org.apache.fineract.portfolio.self.registration.domain.SelfServiceRegistrationRepository;
 import org.apache.fineract.portfolio.self.registration.exception.SelfServiceRegistrationNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.apache.fineract.useradministration.domain.AppUserClientMapping;
 import org.apache.fineract.useradministration.domain.PasswordValidationPolicy;
 import org.apache.fineract.useradministration.domain.PasswordValidationPolicyRepository;
 import org.apache.fineract.useradministration.domain.Role;
@@ -71,7 +73,9 @@ import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.apache.fineract.useradministration.domain.AppUserClientMappingRepository;
 
+@Slf4j
 @RequiredArgsConstructor
 public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServiceRegistrationWritePlatformService {
 
@@ -88,6 +92,7 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
     private final AppUserReadPlatformService appUserReadPlatformService;
     private final RoleRepository roleRepository;
     private static final SecureRandom secureRandom = new SecureRandom();
+    private final AppUserClientMappingRepository appUserClientMappingRepository;
 
     @Override
     public SelfServiceRegistration createRegistrationRequest(String apiRequestBodyAsJson) {
@@ -142,10 +147,14 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
 
         String authenticationToken = randomAuthorizationTokenGeneration();
         Client client = this.clientRepository.getClientByAccountNumber(accountNumber);
+
         SelfServiceRegistration selfServiceRegistration = SelfServiceRegistration.instance(client, accountNumber, firstName, lastName,
                 mobileNumber, email, authenticationToken, username, password);
+
         this.selfServiceRegistrationRepository.saveAndFlush(selfServiceRegistration);
+
         sendAuthorizationToken(selfServiceRegistration, isEmailAuthenticationMode);
+
         return selfServiceRegistration;
 
     }
@@ -260,11 +269,14 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
             } else {
                 throw new RoleNotFoundException(SelfServiceApiConstants.SELF_SERVICE_USER_ROLE);
             }
-            List<Client> clients = new ArrayList<>(Arrays.asList(client));
+            List<Client> clients = new ArrayList<>();
             User user = new User(selfServiceRegistration.getUsername(), selfServiceRegistration.getPassword(), authorities);
             AppUser appUser = new AppUser(client.getOffice(), user, allRoles, selfServiceRegistration.getEmail(), client.getFirstname(),
                     client.getLastname(), null, passwordNeverExpire, isSelfServiceUser, clients, null);
+            AppUserClientMapping appUserClientMapping = this.appUserClientMappingRepository.fetchByClientId(client.getId());
             this.userDomainService.create(appUser, true);
+            appUserClientMapping = new AppUserClientMapping(appUser,client);
+            this.appUserClientMappingRepository.saveClientUserMapping(appUser.getId(),client.getId());            
             return appUser;
 
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
