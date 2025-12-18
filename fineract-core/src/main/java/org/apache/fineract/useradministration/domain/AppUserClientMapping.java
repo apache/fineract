@@ -20,6 +20,7 @@ package org.apache.fineract.useradministration.domain;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -31,11 +32,11 @@ import org.apache.fineract.portfolio.client.domain.Client;
 public class AppUserClientMapping extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false, cascade = CascadeType.ALL)
-    @JoinColumn(name = "appuser_id", nullable = false)
+    @JoinColumn(name = "appuser_id", nullable = false, foreignKey = @ForeignKey(name = "users_appusers"))
     private AppUser appUser;
 
-    @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "client_id", nullable = false)
+    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @JoinColumn(name = "client_id", nullable = false, foreignKey = @ForeignKey(name = "clients_appusers"))
     private Client client;
 
     public AppUserClientMapping() {
