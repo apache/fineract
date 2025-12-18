@@ -41,6 +41,9 @@ import org.apache.fineract.portfolio.loanaccount.data.OutstandingAmountsDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeInterestHandlingType;
+import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
@@ -243,10 +246,14 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
         Loan loan = installment.getLoan();
         LoanRepaymentScheduleTransactionProcessor transactionProcessor = loanTransactionProcessingService
                 .getTransactionProcessor(loan.getTransactionProcessingStrategyCode());
+        final LoanTransaction reAgeTransaction = loan.findReAgeTransaction();
+        final LoanReAgeParameter loanReAgeParameter = reAgeTransaction != null ? reAgeTransaction.getLoanReAgeParameter() : null;
+
         if (!(transactionProcessor instanceof AdvancedPaymentScheduleTransactionProcessor processor)) {
             throw new IllegalStateException("Expected an AdvancedPaymentScheduleTransactionProcessor");
         }
-        if (installment.isAdditional() || installment.isDownPayment() || installment.isReAged()) {
+        if (installment.isAdditional() || installment.isDownPayment() || (installment.isReAged() && loanReAgeParameter != null
+                && !LoanReAgeInterestHandlingType.DEFAULT.equals(loanReAgeParameter.getInterestHandlingType()))) {
             return Money.zero(loan.getCurrency());
         }
         Optional<ProgressiveLoanInterestScheduleModel> savedModel = interestScheduleModelRepositoryWrapper.getSavedModel(loan, targetDate);
