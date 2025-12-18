@@ -58,6 +58,8 @@ public class JmsBatchWorkerMessageListener implements MessageListener, Initializ
             stepExecutionRequestHandler.handle(requestMessage.getPayload());
         } catch (Exception e) {
             log.error("Exception while processing JMS message", e);
+        } finally {
+            inputInterceptor.afterHandleMessage();
         }
 
         try {

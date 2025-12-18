@@ -25,22 +25,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
 import org.apache.fineract.cob.data.COBParameter;
 import org.apache.fineract.cob.data.COBPartition;
-import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.cob.resolver.BusinessDateResolver;
+import org.apache.fineract.cob.resolver.CatchUpFlagResolver;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StopWatch;
 
@@ -54,16 +52,8 @@ public class LoanCOBPartitioner implements Partitioner {
     private final COBBusinessStepService cobBusinessStepService;
     private final RetrieveLoanIdService retrieveLoanIdService;
     private final JobOperator jobOperator;
-    private final JobExplorer jobExplorer;
-
+    private final StepExecution stepExecution;
     private final Long numberOfDays;
-
-    @Value("#{stepExecutionContext['BusinessDate']}")
-    @Setter
-    private LocalDate businessDate;
-    @Value("#{stepExecutionContext['IS_CATCH_UP']}")
-    @Setter
-    private Boolean isCatchUp;
 
     @NonNull
     @Override
@@ -79,45 +69,49 @@ public class LoanCOBPartitioner implements Partitioner {
             stopJobExecution();
             return Map.of();
         }
+        LocalDate businessDate = BusinessDateResolver.resolve(stepExecution);
+        boolean isCatchUp = CatchUpFlagResolver.resolve(stepExecution);
         StopWatch sw = new StopWatch();
         sw.start();
         List<COBPartition> loanCOBPartitions = new ArrayList<>(
-                retrieveLoanIdService.retrieveLoanCOBPartitions(numberOfDays, businessDate, isCatchUp != null && isCatchUp, partitionSize));
+                retrieveLoanIdService.retrieveLoanCOBPartitions(numberOfDays, businessDate, isCatchUp, partitionSize));
         sw.stop();
         // if there is no loan to be closed, we still would like to create at least one partition
 
-        if (loanCOBPartitions.size() == 0) {
+        if (loanCOBPartitions.isEmpty()) {
             loanCOBPartitions.add(new COBPartition(0L, 0L, 1L, 0L));
         }
         log.info(
                 "LoanCOBPartitioner found {} loans to be processed as part of COB. {} partitions were created using partition size {}. RetrieveLoanCOBPartitions was executed in {} ms.",
                 getLoanCount(loanCOBPartitions), loanCOBPartitions.size(), partitionSize, sw.getTotalTimeMillis());
-        return loanCOBPartitions.stream()
-                .collect(Collectors.toMap(l -> PARTITION_PREFIX + l.getPageNo(), l -> createNewPartition(cobBusinessSteps, l)));
+        return loanCOBPartitions.stream().collect(Collectors.toMap(l -> PARTITION_PREFIX + l.getPageNo(),
+                l -> createNewPartition(cobBusinessSteps, l, businessDate, isCatchUp)));
     }
 
     private long getLoanCount(List<COBPartition> loanCOBPartitions) {
         return loanCOBPartitions.stream().map(COBPartition::getCount).reduce(0L, Long::sum);
     }
 
-    private ExecutionContext createNewPartition(Set<BusinessStepNameAndOrder> cobBusinessSteps, COBPartition loanCOBPartition) {
+    private ExecutionContext createNewPartition(Set<BusinessStepNameAndOrder> cobBusinessSteps, COBPartition loanCOBPartition,
+            LocalDate businessDate, boolean isCatchUp) {
         ExecutionContext executionContext = new ExecutionContext();
         executionContext.put(LoanCOBConstant.BUSINESS_STEPS, cobBusinessSteps);
         executionContext.put(LoanCOBConstant.LOAN_COB_PARAMETER,
                 new COBParameter(loanCOBPartition.getMinId(), loanCOBPartition.getMaxId()));
-        executionContext.put("partition", PARTITION_PREFIX + loanCOBPartition.getPageNo());
+        executionContext.put(LoanCOBConstant.PARTITION_KEY, PARTITION_PREFIX + loanCOBPartition.getPageNo());
+        executionContext.put(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME, businessDate.toString());
+        executionContext.put(LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME, Boolean.toString(isCatchUp));
         return executionContext;
     }
 
     private void stopJobExecution() {
-        Set<JobExecution> runningJobExecutions = jobExplorer.findRunningJobExecutions(JobName.LOAN_COB.name());
-        for (JobExecution jobExecution : runningJobExecutions) {
-            try {
-                jobOperator.stop(jobExecution.getId());
-            } catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
-                log.error("There is no running execution for the given execution ID. Execution ID: {}", jobExecution.getId());
-                throw new RuntimeException(e);
-            }
+        Long jobId = stepExecution.getJobExecution().getId();
+        try {
+            jobOperator.stop(jobId);
+        } catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
+            log.error("There is no running execution for the given execution ID. Execution ID: {}", jobId);
+            throw new RuntimeException(e);
         }
+
     }
 }

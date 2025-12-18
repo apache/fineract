@@ -36,23 +36,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @Slf4j
 public class LoanLockingServiceImpl implements LoanLockingService {
 
-    private static final String NORMAL_LOAN_INSERT = """
-                INSERT INTO m_loan_account_locks (loan_id, version, lock_owner, lock_placed_on, lock_placed_on_cob_business_date)
-                SELECT loan.id, ?, ?, ?, ? FROM m_loan loan
-                    WHERE loan.id NOT IN (SELECT loan_id FROM m_loan_account_locks)
-                    AND loan.id BETWEEN ? AND ?
-                    AND loan.loan_status_id IN (100,200,300,303,304)
-                    AND (? = loan.last_closed_business_date OR loan.last_closed_business_date IS NULL)
-            """;
-    private static final String CATCH_UP_LOAN_INSERT = """
-                INSERT INTO m_loan_account_locks (loan_id, version, lock_owner, lock_placed_on, lock_placed_on_cob_business_date)
-                SELECT loan.id, ?, ?, ?, ? FROM m_loan loan
-                    WHERE loan.id NOT IN (SELECT loan_id FROM m_loan_account_locks)
-                    AND loan.id BETWEEN ? AND ?
-                    AND loan.loan_status_id IN (100,200,300,303,304)
-                    AND (? = loan.last_closed_business_date)
-            """;
-
     private static final String BATCH_LOAN_LOCK_INSERT = """
                 INSERT INTO m_loan_account_locks (loan_id, version, lock_owner, lock_placed_on, lock_placed_on_cob_business_date) VALUES (?,?,?,?,?)
             """;
