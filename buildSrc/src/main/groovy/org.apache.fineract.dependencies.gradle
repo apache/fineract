@@ -25,12 +25,12 @@ dependencyManagement {
         mavenBom 'com.squareup.okhttp3:okhttp-bom:4.12.0'
         mavenBom 'org.slf4j:slf4j-bom:2.0.17'
         mavenBom 'io.micrometer:micrometer-bom:1.13.6'
-        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.5.5'
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.5.6'
         mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:3.2.1'
         mavenBom 'io.opentelemetry:opentelemetry-bom:1.44.1'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:2.0.21'
         mavenBom 'org.junit:junit-bom:5.11.3'
-        mavenBom 'com.fasterxml.jackson:jackson-bom:2.18.3'
+        mavenBom 'com.fasterxml.jackson:jackson-bom:2.19.2'
         mavenBom 'io.cucumber:cucumber-bom:7.20.1'
         mavenBom 'org.mockito:mockito-bom:5.14.2'
         mavenBom 'software.amazon.awssdk:bom:2.29.9'
@@ -44,8 +44,8 @@ dependencyManagement {
         // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
         // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
 
-        dependency 'ch.qos.logback:logback-core:1.5.17'
-        dependency 'ch.qos.logback:logback-classic:1.5.17'
+        dependency 'ch.qos.logback:logback-core:1.5.19'
+        dependency 'ch.qos.logback:logback-classic:1.5.19'
         dependency 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
         dependency 'ch.qos.logback.contrib:logback-jackson:0.1.5'
         dependency 'org.codehaus.janino:janino:3.1.12'
@@ -55,7 +55,7 @@ dependencyManagement {
         dependency 'com.google.code.gson:gson:2.11.0'
         dependency 'com.google.googlejavaformat:google-java-format:1.24.0'
         dependency 'org.apache.commons:commons-collections4:4.4'
-        dependency 'org.apache.commons:commons-compress:1.26.0'
+        dependency 'org.apache.commons:commons-compress:1.28.0'
         dependency ('software.amazon.msk:aws-msk-iam-auth:2.2.0') {
             exclude 'commons-logging:commons-logging:'
         }
@@ -74,17 +74,17 @@ dependencyManagement {
         dependency 'org.ehcache:ehcache:3.10.8'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.14'
         dependency 'com.jayway.jsonpath:json-path:2.9.0'
-        dependency ('org.apache.tika:tika-core:2.9.3') {
+        dependency ('org.apache.tika:tika-core:3.2.3') {
             exclude 'commons-logging:commons-logging'
         }
-        dependency ('org.apache.tika:tika-core:2.9.3') {
+        dependency ('org.apache.tika:tika-core:3.2.3') {
             exclude 'commons-logging:commons-logging'
         }
-        dependency ('org.apache.tika:tika-parser-miscoffice-module:2.9.3') {
+        dependency ('org.apache.tika:tika-parser-miscoffice-module:3.2.3') {
             exclude 'org.bouncycastle:bcprov-jdk15on'
-            exclude 'org.bouncycastle:bcmail-jdk15on'
+            exclude 'org.bouncycastle:bcjmail-jdk15on'
             exclude 'org.bouncycastle:bcprov-jdk18on'
-            exclude 'org.bouncycastle:bcmail-jdk18on'
+            exclude 'org.bouncycastle:bcjmail-jdk18on'
             exclude 'commons-logging:commons-logging'
             exclude 'org.apache.logging.log4j:log4j-api'
             exclude 'org.slf4j:slf4j-api'
@@ -97,11 +97,11 @@ dependencyManagement {
             exclude 'org.apache.commons:commons-compress'
             exclude 'xml-apis:xml-apis'
         }
-        dependency ('org.apache.tika:tika-parser-microsoft-module:2.9.3') {
+        dependency ('org.apache.tika:tika-parser-microsoft-module:3.2.3') {
             exclude 'org.bouncycastle:bcprov-jdk15on'
-            exclude 'org.bouncycastle:bcmail-jdk15on'
+            exclude 'org.bouncycastle:bcjmail-jdk15on'
             exclude 'org.bouncycastle:bcprov-jdk18on'
-            exclude 'org.bouncycastle:bcmail-jdk18on'
+            exclude 'org.bouncycastle:bcjmail-jdk18on'
             exclude 'commons-logging:commons-logging'
             exclude 'org.apache.logging.log4j:log4j-api'
             exclude 'org.slf4j:slf4j-api'
@@ -152,10 +152,10 @@ dependencyManagement {
         dependency "commons-codec:commons-codec:1.17.1"
         dependency "org.projectlombok:lombok:1.18.36"
 
-        dependency 'org.bouncycastle:bcpkix-jdk18on:1.80'
-        dependency 'org.bouncycastle:bcprov-jdk18on:1.80'
-        dependency 'org.bouncycastle:bcutil-jdk18on:1.80'
-        dependency 'org.bouncycastle:bcpg-jdk18on:1.80'
+        dependency 'org.bouncycastle:bcpkix-jdk18on:1.81'
+        dependency 'org.bouncycastle:bcprov-jdk18on:1.81'
+        dependency 'org.bouncycastle:bcutil-jdk18on:1.81'
+        dependency 'org.bouncycastle:bcpg-jdk18on:1.81'
 
         dependency 'org.eclipse.jgit:org.eclipse.jgit:7.2.0.202503040940-r'
         dependency 'org.eclipse.jgit:org.eclipse.jgit.gpg.bc:7.2.0.202503040940-r'
@@ -185,7 +185,7 @@ dependencyManagement {
 
         dependency 'jakarta.annotation:jakarta.annotation-api:3.0.0'
         dependency 'jakarta.activation:jakarta.activation-api:2.1.3'
-        dependency ('com.sun.mail:jakarta.mail:2.0.1') {
+        dependency ('com.sun.mail:jakarta.mail:2.0.2') {
             // Spring needs this version
             exclude 'com.sun.activation:jakarta.activation'
         }
@@ -273,9 +273,11 @@ dependencyManagement {
         dependency 'org.springframework:spring-core:6.2.11'
         // Force Spring Framework version: CVE-2025-41248
         dependency 'org.springframework.security:spring-security-core:6.5.4'
-        // Force netty-codec version: CVE-2025-58057
-        dependency 'io.netty:netty-codec:4.1.125.Final'
+        // Force netty-codec version: CVE-2025-67735
+        dependency 'io.netty:netty-codec:4.1.129.Final'
         // Force netty-codec version: CVE-2025-58056
         dependency 'io.netty:netty-codec-http:4.1.125.Final'
+        // Force lz4-java version: CVE-2025-12183
+        dependency 'at.yawk.lz4:lz4-java:1.10.1'
     }
 }

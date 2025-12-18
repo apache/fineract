@@ -33,7 +33,6 @@ dependencies {
             'jakarta.annotation:jakarta.annotation-api:3.0.0',
             'io.swagger.core.v3:swagger-annotations-jakarta:2.2.15',
             'org.apache.commons:commons-lang3:3.12.0',
-            'org.slf4j:slf4j-api:1.7.36',
             'org.projectlombok:lombok'
             )
 
@@ -43,7 +42,6 @@ dependencies {
             'org.junit.jupiter:junit-jupiter-engine:5.11.3',
             'org.mockito:mockito-core:5.14.2',
             'org.assertj:assertj-core:3.26.3',
-            'org.slf4j:slf4j-simple:1.7.36',
             'org.wiremock:wiremock-standalone'
             )
 }
