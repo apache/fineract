@@ -19,23 +19,38 @@
 package org.apache.fineract.portfolio.loanproduct.calc.data;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
-public record EqualAmortizationValues(Money value, Money adjustment) {
+public record EqualAmortizationValues(Money totalOutstanding, Integer numberOfInstallments, Money value, Money adjustment) {
 
     public Money getAdjustedValue() {
         return value.add(adjustment);
     }
 
-    public Money calculateValue(boolean isLast) {
-        return (isLast ? getAdjustedValue() : value);
+    /**
+     * calculates value according to the index of the installments
+     *
+     * @param index
+     *            index accepted 0 to number of (installments - 1)
+     * @return calculated value for the given index
+     */
+    public Money calculateValue(Integer index) {
+        if (getAdjustedValue().isLessThanZero()) {
+            return totalOutstanding.minus(value.multipliedBy(index + 1)).isLessThanZero() ? value.zero() : value;
+        }
+        return (index == numberOfInstallments - 1 ? getAdjustedValue() : value);
     }
 
-    public BigDecimal calculateValueBigDecimal(boolean isLast) {
-        return calculateValue(isLast).getAmount();
+    public BigDecimal calculateValueBigDecimal(Integer index) {
+        return calculateValue(index).getAmount();
     }
 
     public EqualAmortizationValues add(EqualAmortizationValues other) {
-        return new EqualAmortizationValues(value.add(other.value), adjustment.add(other.adjustment));
+        if (!Objects.equals(numberOfInstallments, other.numberOfInstallments)) {
+            throw new RuntimeException("Incompatible EqualAmortizationValues. numberOfInstallments parameter should match.");
+        }
+        return new EqualAmortizationValues(totalOutstanding.add(other.totalOutstanding), numberOfInstallments, value.add(other.value),
+                adjustment.add(other.adjustment));
     }
 }

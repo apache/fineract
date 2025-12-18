@@ -34,26 +34,14 @@ public enum AccountTransferType {
     private final String code;
 
     public static AccountTransferType fromInt(final Integer statusValue) {
-
-        AccountTransferType enumeration = AccountTransferType.INVALID;
-        switch (statusValue) {
-            case 1:
-                enumeration = AccountTransferType.ACCOUNT_TRANSFER;
-            break;
-            case 2:
-                enumeration = AccountTransferType.LOAN_REPAYMENT;
-            break;
-            case 3:
-                enumeration = AccountTransferType.CHARGE_PAYMENT;
-            break;
-            case 4:
-                enumeration = AccountTransferType.INTEREST_TRANSFER;
-            break;
-            case 5:
-                enumeration = AccountTransferType.LOAN_DOWN_PAYMENT;
-            break;
-        }
-        return enumeration;
+        return switch (statusValue) {
+            case 1 -> AccountTransferType.ACCOUNT_TRANSFER;
+            case 2 -> AccountTransferType.LOAN_REPAYMENT;
+            case 3 -> AccountTransferType.CHARGE_PAYMENT;
+            case 4 -> AccountTransferType.INTEREST_TRANSFER;
+            case 5 -> AccountTransferType.LOAN_DOWN_PAYMENT;
+            default -> AccountTransferType.INVALID;
+        };
     }
 
     AccountTransferType(final Integer value, final String code) {

@@ -102,7 +102,7 @@ plugins {
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.9' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.2.0' apply false
-    id 'org.springframework.boot' version '3.5.5' apply false
+    id 'org.springframework.boot' version '3.5.6' apply false
     id 'net.ltgt.errorprone' version '4.1.0' apply false
     id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.23' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.2' apply false
@@ -161,6 +161,15 @@ allprojects  {
 
     repositories {
         mavenCentral()
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            dependencySubstitution {
+                // Substitution is to resolve CVE-2025-12183
+                substitute module('org.lz4:lz4-java') using module('at.yawk.lz4:lz4-java:1.10.1')
+            }
+        }
     }
 
     configurations {

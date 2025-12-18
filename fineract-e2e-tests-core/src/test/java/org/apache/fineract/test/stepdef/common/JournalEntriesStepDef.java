@@ -165,7 +165,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
     }
 
     public List<List<JournalEntryTransactionItem>> getJournalLinesActualList(List<GetLoansLoanIdTransactions> transactionsMatch) {
-        List<List<JournalEntryTransactionItem>> journalLinesActualList = transactionsMatch.stream().map(t -> {
+        return transactionsMatch.stream().map(t -> {
             String transactionId = "L" + t.getId();
             GetJournalEntriesTransactionIdResponse journalEntryDataResponse = null;
             try {
@@ -179,8 +179,6 @@ public class JournalEntriesStepDef extends AbstractStepDef {
 
             return journalEntryDataResponse.getPageItems();
         }).collect(Collectors.toList());
-
-        return journalLinesActualList;
     }
 
     @Then("Loan Transactions tab has {int} a {string} transactions with date {string} which has the following Journal entries:")

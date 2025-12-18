@@ -31,18 +31,11 @@ public enum AccountAssociationType {
     private final String code;
 
     public static AccountAssociationType fromInt(final Integer statusValue) {
-
-        AccountAssociationType enumeration = AccountAssociationType.INVALID;
-        switch (statusValue) {
-            case 1:
-                enumeration = AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION;
-            break;
-            case 2:
-                enumeration = AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION;
-            break;
-
-        }
-        return enumeration;
+        return switch (statusValue) {
+            case 1 -> AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION;
+            case 2 -> AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION;
+            default -> AccountAssociationType.INVALID;
+        };
     }
 
     AccountAssociationType(final Integer value, final String code) {

@@ -61,8 +61,8 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok:1.18.36'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
 
-    testImplementation "ch.qos.logback:logback-core:1.5.17"
-    testImplementation "ch.qos.logback:logback-classic:1.5.17"
+    testImplementation "ch.qos.logback:logback-core:1.5.19"
+    testImplementation "ch.qos.logback:logback-classic:1.5.19"
 
     testImplementation 'org.apache.activemq:activemq-client:6.1.6'
     testImplementation "org.apache.avro:avro:1.12.0"

@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.acme.fineract.event.starter;
+package org.apache.fineract.portfolio.savings.domain;
 
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
+import org.apache.fineract.portfolio.savings.DepositAccountType;
 
-@AutoConfiguration
-@ComponentScan("com.acme.fineract.event.externalevent")
-public class AcmeEventAutoConfiguration {}
+public interface IDepositAccountType {
+
+    DepositAccountType depositAccountType();
+}

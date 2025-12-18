@@ -78,4 +78,8 @@ public class ReAgePreviewRequest implements Serializable {
     @Locale
     private String locale;
 
+    @QueryParam("reAgeInterestHandling")
+    @Parameter(description = "The interest handling type. Applied only for progressive interest-bearing loans. DEFAULT if not provided.")
+    private String reAgeInterestHandling;
+
 }

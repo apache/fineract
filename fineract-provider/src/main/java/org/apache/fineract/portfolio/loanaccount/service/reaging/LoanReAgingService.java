@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -101,9 +102,11 @@ public class LoanReAgingService {
     public CommandProcessingResult reAge(final Long loanId, final JsonCommand command) {
         final Loan loan = loanAssembler.assembleFrom(loanId);
         reAgingValidator.validateReAge(loan, command);
+        BigDecimal userProvidedTxnAmount = command.bigDecimalValueOfParameterNamed(LoanReAgingApiConstants.transactionAmountParamName);
 
         final LoanTransaction reAgeTransaction = createReAgeTransaction(loan, command);
         processReAgeTransaction(loan, reAgeTransaction, true);
+        validateUserProvidedTransactionAmount(userProvidedTxnAmount, reAgeTransaction);
         loanTransactionRepository.saveAndFlush(reAgeTransaction);
         loan.updateLoanScheduleDependentDerivedFields();
 
@@ -236,15 +239,7 @@ public class LoanReAgingService {
         }
         // in case of a reaging transaction, only the outstanding principal amount until the business date is considered
         Money txPrincipal = loan.getTotalPrincipalOutstandingUntil(transactionDate);
-        final BigDecimal txPrincipalAmount = txPrincipal.getAmount();
-        if (command.hasParameter(LoanReAgingApiConstants.transactionAmountParamName)) {
-            final BigDecimal transactionAmount = command
-                    .bigDecimalValueOfParameterNamed(LoanReAgingApiConstants.transactionAmountParamName);
-            if (!MathUtil.isEqualTo(txPrincipalAmount, transactionAmount)) {
-                throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.amount.not.match.with.calculated.reage.amount",
-                        "re-age amount is not matching with the calculated re-age amount", txPrincipalAmount);
-            }
-        }
+        BigDecimal txPrincipalAmount = txPrincipal.getAmount();
 
         final LoanTransaction reAgeTransaction = new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.REAGE, transactionDate,
                 txPrincipalAmount, txPrincipalAmount, ZERO, ZERO, ZERO, null, false, null, txExternalId);
@@ -313,17 +308,29 @@ public class LoanReAgingService {
     private LoanReAgeParameter createReAgeParameterFromPreviewRequest(final LoanTransaction reAgeTransaction,
             final ReAgePreviewRequest reAgePreviewRequest) {
         final PeriodFrequencyType periodFrequencyType = PeriodFrequencyType.valueOf(reAgePreviewRequest.getFrequencyType());
-        final Locale locale = reAgePreviewRequest.getLocale() != null ? Locale.forLanguageTag(reAgePreviewRequest.getLocale())
-                : Locale.getDefault();
+        final Locale locale = Optional.ofNullable(reAgePreviewRequest.getLocale()).map(Locale::forLanguageTag).orElse(Locale.getDefault());
         final LocalDate startDate = JsonParserHelper.convertFrom(reAgePreviewRequest.getStartDate(), LoanReAgingApiConstants.startDate,
                 reAgePreviewRequest.getDateFormat(), locale);
         final Integer numberOfInstallments = reAgePreviewRequest.getNumberOfInstallments();
         final Integer periodFrequencyNumber = reAgePreviewRequest.getFrequencyNumber();
 
-        final LoanReAgeInterestHandlingType reAgeInterestHandlingType = LoanReAgeInterestHandlingType.DEFAULT;
+        final LoanReAgeInterestHandlingType reAgeInterestHandlingType = Optional.ofNullable(reAgePreviewRequest.getReAgeInterestHandling())
+                .map(LoanReAgeInterestHandlingType::valueOf).orElse(LoanReAgeInterestHandlingType.DEFAULT);
 
         return new LoanReAgeParameter(reAgeTransaction, periodFrequencyType, periodFrequencyNumber, startDate, numberOfInstallments,
                 reAgeInterestHandlingType, null);
     }
 
+    private void validateUserProvidedTransactionAmount(BigDecimal userProvidedTxnAmount, LoanTransaction reAgeTransaction) {
+        if (userProvidedTxnAmount != null) {
+            final BigDecimal calculatedReageTxnAmount = reAgeTransaction.getAmount();
+            if (!MathUtil.isEqualTo(calculatedReageTxnAmount, userProvidedTxnAmount)) {
+                String errorMessage = String.format(
+                        "User provided re-age amount (%s) is not matching with the calculated re-age amount (%s)", userProvidedTxnAmount,
+                        calculatedReageTxnAmount);
+                throw new GeneralPlatformDomainRuleException("error.msg.loan.reage.amount.not.match.with.calculated.reage.amount",
+                        errorMessage, userProvidedTxnAmount, calculatedReageTxnAmount);
+            }
+        }
+    }
 }

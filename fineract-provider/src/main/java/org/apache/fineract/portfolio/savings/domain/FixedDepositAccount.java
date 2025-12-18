@@ -55,6 +55,7 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChart;
 import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartAssembler;
 import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
+import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.PreClosurePenalInterestOnType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
@@ -794,7 +795,7 @@ public class FixedDepositAccount extends SavingsAccount {
         return this.accountTermAndPreClosure.getTransferToSavingsAccountId();
     }
 
-    public FixedDepositAccount reInvest(BigDecimal depositAmount) {
+    public FixedDepositAccount reInvest(BigDecimal depositAmount, ExternalId externalId) {
 
         final DepositAccountTermAndPreClosure newAccountTermAndPreClosure = this.accountTermAndPreClosure.copy(depositAmount);
         final SavingsProduct product = this.product;
@@ -884,5 +885,10 @@ public class FixedDepositAccount extends SavingsAccount {
 
     public void setClosedOnDate(final LocalDate closedOnDate) {
         this.closedOnDate = closedOnDate;
+    }
+
+    @Override
+    public DepositAccountType depositAccountType() {
+        return DepositAccountType.fromInt(200);
     }
 }

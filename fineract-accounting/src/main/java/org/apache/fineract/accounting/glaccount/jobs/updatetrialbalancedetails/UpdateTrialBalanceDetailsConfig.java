@@ -19,7 +19,9 @@
 package org.apache.fineract.accounting.glaccount.jobs.updatetrialbalancedetails;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.accounting.glaccount.domain.TrialBalanceRepository;
 import org.apache.fineract.accounting.glaccount.domain.TrialBalanceRepositoryWrapper;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSourceServiceFactory;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.springframework.batch.core.Job;
@@ -40,6 +42,8 @@ public class UpdateTrialBalanceDetailsConfig {
     private final PlatformTransactionManager transactionManager;
     private final RoutingDataSourceServiceFactory dataSourceServiceFactory;
     private final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper;
+    private final TrialBalanceRepository trialBalanceRepository;
+    private final JournalEntryRepository journalEntryRepository;
 
     @Bean
     protected Step updateTrialBalanceDetailsStep() {
@@ -55,6 +59,7 @@ public class UpdateTrialBalanceDetailsConfig {
 
     @Bean
     public UpdateTrialBalanceDetailsTasklet updateTrialBalanceDetailsTasklet() {
-        return new UpdateTrialBalanceDetailsTasklet(dataSourceServiceFactory, trialBalanceRepositoryWrapper);
+        return new UpdateTrialBalanceDetailsTasklet(dataSourceServiceFactory, trialBalanceRepositoryWrapper, trialBalanceRepository,
+                journalEntryRepository);
     }
 }
