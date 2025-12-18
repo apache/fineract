@@ -276,7 +276,7 @@ dependencyManagement {
         // Force netty-codec version: CVE-2025-67735
         dependency 'io.netty:netty-codec:4.1.129.Final'
         // Force netty-codec version: CVE-2025-58056
-        dependency 'io.netty:netty-codec-http:4.1.125.Final'
+        dependency 'io.netty:netty-codec-http:4.1.129.Final'
         // Force lz4-java version: CVE-2025-12183
         dependency 'at.yawk.lz4:lz4-java:1.10.1'
     }
