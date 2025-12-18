@@ -967,7 +967,7 @@ public final class ErrorMessageHelper {
         return "Loan re-aging is not allowed on contract terminated loan.";
     }
 
-    public static String reAgeWrittenOffLoanFailure() {
+    public static String reAgeClosedLoanFailure() {
         return "Loan reaging can only be done on active loans";
     }
 }
