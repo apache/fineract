@@ -135,7 +135,7 @@ IntelliJ IDEA provides strong Gradle integration and is recommended for most new
 2. Choose the root `fineract` directory
 3. When prompted, import the project as a **Gradle project**
 4. Use the Gradle wrapper (`gradlew`) when asked
-5. Ensure the correct JDK is selected (**Java 17**)
+5. Ensure the correct JDK is selected (**Java 21**)
 6. After import completes, run:
    - `org.apache.fineract.ServerApplication` as a **Java Application**
 
