@@ -131,15 +131,100 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     }
 
     private void addDisbursement(final ProgressiveLoanInterestScheduleModel scheduleModel, final EmiChangeOperation operation) {
-        scheduleModel.repaymentPeriods().stream().filter(rp -> !operation.getSubmittedOnDate().isAfter(rp.getFromDate()))
-                .forEach(rp -> rp.setTotalDisbursedAmount(rp.getTotalDisbursedAmount().add(operation.getAmount())));
+        scheduleModel.repaymentPeriods().stream().filter(rp -> !operation.getSubmittedOnDate().isAfter(rp.getFromDate())).forEach(rp -> {
+            rp.setTotalDisbursedAmount(rp.getTotalDisbursedAmount().add(operation.getAmount()));
+        });
 
-        scheduleModel
-                .changeOutstandingBalanceAndUpdateInterestPeriods(operation.getSubmittedOnDate(), operation.getAmount(),
-                        scheduleModel.zero(), scheduleModel.zero())
-                .ifPresent((repaymentPeriod) -> calculateEMIValueAndRateFactors(
-                        getEffectiveRepaymentDueDate(scheduleModel, repaymentPeriod, operation.getSubmittedOnDate()), scheduleModel,
-                        operation));
+        if (scheduleModel.allowFullTermForTranche() && scheduleModel.originalNumberOfRepayments() > 0) {
+            addFullTermTrancheDisbursement(scheduleModel, operation);
+        } else {
+            scheduleModel
+                    .changeOutstandingBalanceAndUpdateInterestPeriods(operation.getSubmittedOnDate(), operation.getAmount(),
+                            scheduleModel.zero(), scheduleModel.zero())
+                    .ifPresent((repaymentPeriod) -> calculateEMIValueAndRateFactors(
+                            getEffectiveRepaymentDueDate(scheduleModel, repaymentPeriod, operation.getSubmittedOnDate()), scheduleModel,
+                            operation));
+        }
+    }
+
+    private void addFullTermTrancheDisbursement(final ProgressiveLoanInterestScheduleModel scheduleModel,
+            final EmiChangeOperation operation) {
+        final MathContext mc = scheduleModel.mc();
+        final LocalDate disbursementDate = operation.getSubmittedOnDate();
+        final Money disbursedAmount = operation.getAmount();
+        final int originalNumberOfRepayments = scheduleModel.originalNumberOfRepayments();
+
+        scheduleModel.changeOutstandingBalanceAndUpdateInterestPeriods(disbursementDate, disbursedAmount, scheduleModel.zero(),
+                scheduleModel.zero());
+
+        int disbursementPeriodIndex = findDisbursementPeriodIndex(scheduleModel, disbursementDate);
+        if (disbursementPeriodIndex < 0) {
+            disbursementPeriodIndex = 0;
+        }
+
+        int requiredEndIndex = disbursementPeriodIndex + originalNumberOfRepayments;
+        int currentPeriodCount = scheduleModel.repaymentPeriods().size();
+        if (requiredEndIndex > currentPeriodCount) {
+            extendScheduleForFullTermTranche(scheduleModel, requiredEndIndex - currentPeriodCount);
+        }
+
+        List<RepaymentPeriod> trancheRepaymentPeriods = scheduleModel.repaymentPeriods().subList(disbursementPeriodIndex,
+                disbursementPeriodIndex + originalNumberOfRepayments);
+
+        if (trancheRepaymentPeriods.isEmpty()) {
+            return;
+        }
+
+        calculateRateFactorForPeriods(trancheRepaymentPeriods, scheduleModel);
+
+        RepaymentPeriod firstTranchePeriod = trancheRepaymentPeriods.get(0);
+        boolean isMidPeriodDisbursement = disbursementDate.isAfter(firstTranchePeriod.getFromDate());
+
+        final BigDecimal rateFactorN;
+        final BigDecimal fnResult;
+        if (isMidPeriodDisbursement) {
+            // Mid-period disbursement: filter rate factors to only include interest from disbursement date
+            rateFactorN = MathUtil.stripTrailingZeros(calculateRateFactorPlus1NFromDate(trancheRepaymentPeriods, disbursementDate, mc));
+            // fnResult skips the first period, so no filtering needed
+            fnResult = MathUtil.stripTrailingZeros(calculateFnResult(trancheRepaymentPeriods, mc));
+        } else {
+            // Period-start disbursement: use regular calculation
+            rateFactorN = MathUtil.stripTrailingZeros(calculateRateFactorPlus1N(trancheRepaymentPeriods, mc));
+            fnResult = MathUtil.stripTrailingZeros(calculateFnResult(trancheRepaymentPeriods, mc));
+        }
+
+        final Money trancheEmi = Money.of(disbursedAmount.getCurrencyData(),
+                calculateEMIValue(rateFactorN, disbursedAmount.getAmount(), fnResult, mc), mc);
+        final Money finalTrancheEmi = applyInstallmentAmountInMultiplesOf(scheduleModel, trancheEmi);
+
+        for (RepaymentPeriod period : trancheRepaymentPeriods) {
+            Money existingEmi = period.getEmi() != null ? period.getEmi() : scheduleModel.zero();
+            Money newEmi = existingEmi.plus(finalTrancheEmi, mc);
+            period.setEmi(newEmi);
+            period.setOriginalEmi(newEmi);
+        }
+
+        calculateOutstandingBalance(scheduleModel);
+        calculateLastUnpaidRepaymentPeriodEMI(scheduleModel, disbursementDate);
+    }
+
+    private void extendScheduleForFullTermTranche(final ProgressiveLoanInterestScheduleModel scheduleModel, int periodsToAdd) {
+        final int existingCount = scheduleModel.repaymentPeriods().size();
+        final LocalDate startDate = scheduleModel.getStartDate();
+        final List<LocalDateInterval> newPeriodDates = generateAdditionalRepaymentPeriodDueDates(scheduleModel, periodsToAdd, existingCount,
+                scheduleModel.resolveRepaymentPeriodLengthGeneratorFunction(startDate));
+        updateModel(scheduleModel, newPeriodDates, LocalDateInterval::startDate, LocalDateInterval::endDate);
+    }
+
+    private int findDisbursementPeriodIndex(final ProgressiveLoanInterestScheduleModel scheduleModel, final LocalDate disbursementDate) {
+        List<RepaymentPeriod> periods = scheduleModel.repaymentPeriods();
+        for (int i = 0; i < periods.size(); i++) {
+            RepaymentPeriod period = periods.get(i);
+            if (!disbursementDate.isBefore(period.getFromDate()) && disbursementDate.isBefore(period.getDueDate())) {
+                return i;
+            }
+        }
+        return periods.size() - 1;
     }
 
     private LocalDate getEffectiveRepaymentDueDate(final ProgressiveLoanInterestScheduleModel scheduleModel,
@@ -1559,6 +1644,24 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 .skip(1)//
                 .map(RepaymentPeriod::getRateFactorPlus1)//
                 .reduce(BigDecimal.ONE, (previousFnValue, currentRateFactor) -> fnValue(previousFnValue, currentRateFactor, mc));//
+    }
+
+    /**
+     * Calculate Rate Factor Product from rate factors, filtering the first period's interest periods by date. For Full
+     * Term Tranche calculations where a disbursement occurs mid-period, this ensures only interest periods from the
+     * disbursement date are included.
+     */
+    private BigDecimal calculateRateFactorPlus1NFromDate(final List<RepaymentPeriod> periods, final LocalDate fromDate,
+            final MathContext mc) {
+        if (periods.isEmpty()) {
+            return BigDecimal.ONE;
+        }
+        // First period uses filtered rate factor (only interest periods from disbursement date)
+        BigDecimal firstPeriodRateFactor = periods.get(0).getRateFactorPlus1FromDate(fromDate);
+        // Remaining periods use full rate factor
+        BigDecimal remainingRateFactors = periods.stream().skip(1).map(RepaymentPeriod::getRateFactorPlus1).reduce(BigDecimal.ONE,
+                (BigDecimal acc, BigDecimal value) -> acc.multiply(value, mc));
+        return firstPeriodRateFactor.multiply(remainingRateFactors, mc);
     }
 
     /**

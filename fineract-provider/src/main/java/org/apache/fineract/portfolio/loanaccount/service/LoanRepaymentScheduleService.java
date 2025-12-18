@@ -134,7 +134,7 @@ public class LoanRepaymentScheduleService {
             combinedDataList.addAll(collectEligibleCapitalizedIncomeData(capitalizedIncomeData, fromDate, dueDate, disbursementPeriodIds));
             combinedDataList.sort(this::sortPeriodDataHolders);
             outstandingLoanPrincipalBalance = fillLoanSchedulePeriodData(periods, combinedDataList, disbursementChargeAmount,
-                    waivedChargeAmount, outstandingLoanPrincipalBalance);
+                    waivedChargeAmount, outstandingLoanPrincipalBalance, repaymentScheduleRelatedLoanData.isAllowFullTermForTranche());
 
             BigDecimal disbursedAmount = calculateDisbursedAmount(combinedDataList);
 
@@ -353,23 +353,33 @@ public class LoanRepaymentScheduleService {
 
     private BigDecimal fillLoanSchedulePeriodData(List<LoanSchedulePeriodData> periods,
             List<LoanSchedulePeriodDataWrapper> combinedDataList, BigDecimal disbursementChargeAmount, BigDecimal waivedChargeAmount,
-            BigDecimal outstandingLoanPrincipalBalance) {
+            BigDecimal outstandingLoanPrincipalBalance, boolean allowFullTermForTranche) {
         // Process all collected data in chronological order
         for (LoanSchedulePeriodDataWrapper dataItem : combinedDataList) {
             LoanSchedulePeriodData periodData;
             if (dataItem.isDisbursement()) {
                 // Process disbursement data
                 DisbursementData data = (DisbursementData) dataItem.getData();
-                periodData = createLoanSchedulePeriodData(data, disbursementChargeAmount, waivedChargeAmount);
+                // For FTT: only add disbursed tranches to cumulative balance
+                // For EXPECT_TRANCHE: add all tranches to balance tracking
+                boolean shouldAddToBalance = !allowFullTermForTranche || data.isDisbursed();
+                if (shouldAddToBalance) {
+                    outstandingLoanPrincipalBalance = outstandingLoanPrincipalBalance.add(data.getPrincipal());
+                }
+                // For FTT: show cumulative balance of disbursed tranches
+                // For EXPECT_TRANCHE: show just tranche principal
+                BigDecimal balanceToShow = allowFullTermForTranche ? outstandingLoanPrincipalBalance : data.getPrincipal();
+                periodData = createLoanSchedulePeriodData(data, disbursementChargeAmount, waivedChargeAmount, balanceToShow);
             } else {
                 // Process capitalized income data
                 LoanTransactionRepaymentPeriodData data = (LoanTransactionRepaymentPeriodData) dataItem.getData();
-                periodData = createLoanSchedulePeriodData(data);
+                BigDecimal balanceToShow = data.getAmount();
+                outstandingLoanPrincipalBalance = outstandingLoanPrincipalBalance.add(data.getAmount());
+                periodData = createLoanSchedulePeriodData(data, balanceToShow);
             }
 
-            // Common processing for both data types
+            // Add period to the list
             periods.add(periodData);
-            outstandingLoanPrincipalBalance = outstandingLoanPrincipalBalance.add(periodData.getPrincipalDisbursed());
         }
         return outstandingLoanPrincipalBalance;
     }
@@ -395,16 +405,18 @@ public class LoanRepaymentScheduleService {
     }
 
     private LoanSchedulePeriodData createLoanSchedulePeriodData(final DisbursementData data, BigDecimal disbursementChargeAmount,
-            BigDecimal waivedChargeAmount) {
+            BigDecimal waivedChargeAmount, BigDecimal outstandingBalance) {
         BigDecimal chargeAmount = data.getChargeAmount() == null ? disbursementChargeAmount
                 : disbursementChargeAmount.add(data.getChargeAmount()).subtract(waivedChargeAmount);
-        return LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.getPrincipal(), chargeAmount,
-                data.isDisbursed());
+        return LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.getPrincipal(), chargeAmount, data.isDisbursed(),
+                outstandingBalance);
     }
 
-    private LoanSchedulePeriodData createLoanSchedulePeriodData(final LoanTransactionRepaymentPeriodData data) {
+    private LoanSchedulePeriodData createLoanSchedulePeriodData(final LoanTransactionRepaymentPeriodData data,
+            BigDecimal outstandingBalance) {
         BigDecimal feeCharges = Objects.isNull(data.getFeeChargesPortion()) ? BigDecimal.ZERO : data.getFeeChargesPortion();
-        return LoanSchedulePeriodData.disbursementOnlyPeriod(data.getDate(), data.getAmount(), feeCharges, !data.isReversed());
+        return LoanSchedulePeriodData.disbursementOnlyPeriod(data.getDate(), data.getAmount(), feeCharges, !data.isReversed(),
+                outstandingBalance);
     }
 
     private boolean canAddDisbursementData(DisbursementData data, boolean isDueForDisbursement, boolean excludePastUnDisbursed) {

@@ -5152,4 +5152,73 @@ class ProgressiveEMICalculatorTest {
         return interestScheduleModelService.fromJson(json, toCopy.loanProductRelatedDetail(), toCopy.mc(),
                 toCopy.installmentAmountInMultiplesOf());
     }
+
+    @Test
+    public void test_fullTermTranche_disbursedAmt200_2ndOnDueDate_dayInYears360_daysInMonth30_repayEvery1Month() {
+        // Create 7 periods (6 original + 1 extension for second tranche)
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
+
+        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(repayment(7, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 8, 1)));
+
+        final BigDecimal interestRate = BigDecimal.valueOf(9.4822);
+        final Integer installmentAmountInMultiplesOf = null;
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(interestRate);
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getCurrencyData()).thenReturn(currency);
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator.generatePeriodInterestScheduleModel(
+                expectedRepaymentPeriods, loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
+
+        // Enable full term tranche feature
+        interestSchedule.allowFullTermForTranche(true);
+        interestSchedule.originalNumberOfRepayments(6);
+
+        // First disbursement: 100 on Jan 1 -> should set EMI ~17.13 on periods 0-5
+        final Money disbursedAmount1 = toMoney(100.0);
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount1);
+
+        // Check EMI after first disbursement - periods 0-5 should have ~17.13
+        Assertions.assertEquals(17.13, toDouble(interestSchedule.repaymentPeriods().get(0).getEmi()), 0.01,
+                "Period 0 EMI after first disbursement");
+        Assertions.assertEquals(17.13, toDouble(interestSchedule.repaymentPeriods().get(1).getEmi()), 0.01,
+                "Period 1 EMI after first disbursement");
+        Assertions.assertEquals(17.13, toDouble(interestSchedule.repaymentPeriods().get(2).getEmi()), 0.01,
+                "Period 2 EMI after first disbursement");
+        Assertions.assertEquals(17.13, toDouble(interestSchedule.repaymentPeriods().get(3).getEmi()), 0.01,
+                "Period 3 EMI after first disbursement");
+        Assertions.assertEquals(17.13, toDouble(interestSchedule.repaymentPeriods().get(4).getEmi()), 0.01,
+                "Period 4 EMI after first disbursement");
+        Assertions.assertEquals(17.13, toDouble(interestSchedule.repaymentPeriods().get(5).getEmi()), 0.01,
+                "Period 5 EMI after first disbursement");
+        Assertions.assertEquals(0.0, toDouble(interestSchedule.repaymentPeriods().get(6).getEmi()), 0.01,
+                "Period 6 EMI after first disbursement (should be 0)");
+
+        // Second disbursement: 100 on Feb 1 -> should ADD EMI ~17.13 to periods 1-6
+        final Money disbursedAmount2 = toMoney(100.0);
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 2, 1), disbursedAmount2);
+
+        // Verify EMI values:
+        // Period 0: EMI = 17.13 (only first tranche)
+        // Periods 1-5: EMI = 34.26 (both tranches)
+        // Period 6: EMI = 17.13 (only second tranche)
+        Assertions.assertEquals(17.13, toDouble(interestSchedule.repaymentPeriods().get(0).getEmi()), 0.01,
+                "Period 0 EMI (single tranche)");
+        Assertions.assertEquals(34.26, toDouble(interestSchedule.repaymentPeriods().get(1).getEmi()), 0.01, "Period 1 EMI (aggregated)");
+        Assertions.assertEquals(34.26, toDouble(interestSchedule.repaymentPeriods().get(2).getEmi()), 0.01, "Period 2 EMI (aggregated)");
+        Assertions.assertEquals(34.26, toDouble(interestSchedule.repaymentPeriods().get(3).getEmi()), 0.01, "Period 3 EMI (aggregated)");
+        Assertions.assertEquals(34.26, toDouble(interestSchedule.repaymentPeriods().get(4).getEmi()), 0.01, "Period 4 EMI (aggregated)");
+        Assertions.assertEquals(34.26, toDouble(interestSchedule.repaymentPeriods().get(5).getEmi()), 0.01, "Period 5 EMI (aggregated)");
+        Assertions.assertEquals(17.13, toDouble(interestSchedule.repaymentPeriods().get(6).getEmi()), 0.01,
+                "Period 6 EMI (single tranche)");
+    }
 }

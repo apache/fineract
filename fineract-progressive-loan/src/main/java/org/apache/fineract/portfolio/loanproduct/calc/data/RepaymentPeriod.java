@@ -201,6 +201,19 @@ public class RepaymentPeriod {
     }
 
     /**
+     * This method gives back sum of (Rate Factor + 1) from interest periods that start on or after the given date. Used
+     * for Full Term Tranche calculations where a disbursement occurs mid-period.
+     *
+     * @param fromDate
+     *            the date from which to include interest periods
+     * @return rate factor plus 1 for filtered interest periods
+     */
+    public BigDecimal getRateFactorPlus1FromDate(LocalDate fromDate) {
+        return interestPeriods.stream().filter(ip -> !ip.getFromDate().isBefore(fromDate)).map(InterestPeriod::getRateFactor)
+                .reduce(BigDecimal.ONE, BigDecimal::add);
+    }
+
+    /**
      * Gives back calculated due interest + credited interest
      *
      * @return
@@ -351,6 +364,9 @@ public class RepaymentPeriod {
     public Money getOutstandingLoanBalance() {
         if (outstandingBalanceCalculation == null) {
             outstandingBalanceCalculation = Memo.of(() -> {
+                if (getInterestPeriods().isEmpty()) {
+                    return getZero();
+                }
                 InterestPeriod lastInterestPeriod = getInterestPeriods().getLast();
                 Money calculatedOutStandingLoanBalance = lastInterestPeriod.getOutstandingLoanBalance() //
                         .plus(lastInterestPeriod.getBalanceCorrectionAmount(), getMc()) //

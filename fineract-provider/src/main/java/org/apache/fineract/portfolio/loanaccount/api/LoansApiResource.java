@@ -527,7 +527,8 @@ public class LoansApiResource {
 
                     RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData = new RepaymentScheduleRelatedLoanData(
                             i.getTimeline().getExpectedDisbursementDate(), i.getTimeline().getActualDisbursementDate(), i.getCurrency(),
-                            i.getPrincipal(), i.getInArrearsTolerance(), i.getFeeChargesAtDisbursementCharged());
+                            i.getPrincipal(), i.getInArrearsTolerance(), i.getFeeChargesAtDisbursementCharged(),
+                            Boolean.TRUE.equals(i.getAllowFullTermForTranche()));
                     LoanScheduleData repaymentSchedule = loanReadPlatformService.retrieveRepaymentSchedule(loanId,
                             repaymentScheduleRelatedData, disbursementData, capitalizedIncomeData, i.isInterestRecalculationEnabled(),
                             LoanScheduleType.fromEnumOptionData(i.getLoanScheduleType()));
@@ -1098,7 +1099,8 @@ public class LoansApiResource {
                         loanBasicDetails.getTimeline().getExpectedDisbursementDate(),
                         loanBasicDetails.getTimeline().getActualDisbursementDate(), loanBasicDetails.getCurrency(),
                         loanBasicDetails.getPrincipal(), loanBasicDetails.getInArrearsTolerance(),
-                        loanBasicDetails.getFeeChargesAtDisbursementCharged());
+                        loanBasicDetails.getFeeChargesAtDisbursementCharged(),
+                        Boolean.TRUE.equals(loanBasicDetails.getAllowFullTermForTranche()));
                 repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(resolvedLoanId, repaymentScheduleRelatedData,
                         disbursementData, capitalizedIncomeData, loanBasicDetails.isInterestRecalculationEnabled(),
                         LoanScheduleType.fromEnumOptionData(loanBasicDetails.getLoanScheduleType()));

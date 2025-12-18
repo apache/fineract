@@ -69,6 +69,12 @@ public class ProgressiveLoanInterestScheduleModel {
     @Setter
     private LocalDate lastOverdueBalanceChange;
 
+    @Setter
+    private boolean allowFullTermForTranche = false;
+
+    @Setter
+    private int originalNumberOfRepayments;
+
     public ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods,
             final ILoanConfigurationDetails loanProductRelatedDetail, final Integer installmentAmountInMultiplesOf, final MathContext mc) {
         this.repaymentPeriods = new ArrayList<>(repaymentPeriods);
@@ -96,15 +102,21 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     public ProgressiveLoanInterestScheduleModel deepCopy(MathContext mc) {
-        return new ProgressiveLoanInterestScheduleModel(repaymentPeriods, interestRates, loanProductRelatedDetail,
-                installmentAmountInMultiplesOf, mc, false);
+        ProgressiveLoanInterestScheduleModel copy = new ProgressiveLoanInterestScheduleModel(repaymentPeriods, interestRates,
+                loanProductRelatedDetail, installmentAmountInMultiplesOf, mc, false);
+        copy.allowFullTermForTranche(this.allowFullTermForTranche);
+        copy.originalNumberOfRepayments(this.originalNumberOfRepayments);
+        return copy;
     }
 
     public ProgressiveLoanInterestScheduleModel copyWithoutPaidAmounts() {
         final List<RepaymentPeriod> repaymentPeriodCopies = copyRepaymentPeriods(repaymentPeriods,
                 (previousPeriod, repaymentPeriod) -> RepaymentPeriod.copyWithoutPaidAmounts(previousPeriod, repaymentPeriod, mc));
-        return new ProgressiveLoanInterestScheduleModel(repaymentPeriodCopies, interestRates, loanProductRelatedDetail,
-                installmentAmountInMultiplesOf, mc, true);
+        ProgressiveLoanInterestScheduleModel copy = new ProgressiveLoanInterestScheduleModel(repaymentPeriodCopies, interestRates,
+                loanProductRelatedDetail, installmentAmountInMultiplesOf, mc, true);
+        copy.allowFullTermForTranche(this.allowFullTermForTranche);
+        copy.originalNumberOfRepayments(this.originalNumberOfRepayments);
+        return copy;
     }
 
     private List<RepaymentPeriod> copyRepaymentPeriods(final List<RepaymentPeriod> repaymentPeriods,

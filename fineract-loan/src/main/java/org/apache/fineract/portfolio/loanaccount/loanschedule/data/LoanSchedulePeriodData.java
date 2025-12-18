@@ -81,9 +81,16 @@ public final class LoanSchedulePeriodData {
 
     public static LoanSchedulePeriodData disbursementOnlyPeriod(final LocalDate disbursementDate, final BigDecimal principalDisbursed,
             final BigDecimal feeChargesDueAtTimeOfDisbursement, final boolean isDisbursed) {
+        return disbursementOnlyPeriod(disbursementDate, principalDisbursed, feeChargesDueAtTimeOfDisbursement, isDisbursed,
+                principalDisbursed);
+    }
+
+    public static LoanSchedulePeriodData disbursementOnlyPeriod(final LocalDate disbursementDate, final BigDecimal principalDisbursed,
+            final BigDecimal feeChargesDueAtTimeOfDisbursement, final boolean isDisbursed,
+            final BigDecimal principalLoanBalanceOutstanding) {
         return builder().dueDate(disbursementDate) //
                 .principalDisbursed(principalDisbursed) //
-                .principalLoanBalanceOutstanding(principalDisbursed) //
+                .principalLoanBalanceOutstanding(principalLoanBalanceOutstanding) //
                 .feeChargesDue(feeChargesDueAtTimeOfDisbursement) //
                 .feeChargesPaid(isDisbursed ? feeChargesDueAtTimeOfDisbursement : null) //
                 .feeChargesOutstanding(isDisbursed ? null : feeChargesDueAtTimeOfDisbursement) //

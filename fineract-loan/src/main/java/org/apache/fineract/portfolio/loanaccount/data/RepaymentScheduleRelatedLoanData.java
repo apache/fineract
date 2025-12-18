@@ -34,10 +34,18 @@ public class RepaymentScheduleRelatedLoanData {
     private final BigDecimal netDisbursalAmount;
     private final BigDecimal inArrearsTolerance;
     private final BigDecimal totalFeeChargesAtDisbursement;
+    private final boolean allowFullTermForTranche;
 
     public RepaymentScheduleRelatedLoanData(final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate,
             final CurrencyData currency, final BigDecimal principal, final BigDecimal inArrearsTolerance,
             final BigDecimal totalFeeChargesAtDisbursement) {
+        this(expectedDisbursementDate, actualDisbursementDate, currency, principal, inArrearsTolerance, totalFeeChargesAtDisbursement,
+                false);
+    }
+
+    public RepaymentScheduleRelatedLoanData(final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate,
+            final CurrencyData currency, final BigDecimal principal, final BigDecimal inArrearsTolerance,
+            final BigDecimal totalFeeChargesAtDisbursement, final boolean allowFullTermForTranche) {
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.actualDisbursementDate = actualDisbursementDate;
         this.currency = currency;
@@ -45,6 +53,7 @@ public class RepaymentScheduleRelatedLoanData {
         this.inArrearsTolerance = inArrearsTolerance;
         this.totalFeeChargesAtDisbursement = totalFeeChargesAtDisbursement;
         this.netDisbursalAmount = this.principal.subtract(this.totalFeeChargesAtDisbursement);
+        this.allowFullTermForTranche = allowFullTermForTranche;
     }
 
     public LocalDate disbursementDate() {
@@ -79,5 +88,9 @@ public class RepaymentScheduleRelatedLoanData {
         BigDecimal waivedChargeAmount = null;
         return new DisbursementData(null, null, this.expectedDisbursementDate, this.actualDisbursementDate, this.principal,
                 this.netDisbursalAmount, null, null, waivedChargeAmount);
+    }
+
+    public boolean isAllowFullTermForTranche() {
+        return this.allowFullTermForTranche;
     }
 }

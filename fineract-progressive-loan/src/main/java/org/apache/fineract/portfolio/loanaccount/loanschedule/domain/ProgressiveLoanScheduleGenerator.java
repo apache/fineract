@@ -109,6 +109,10 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
         final ProgressiveLoanInterestScheduleModel interestScheduleModel = emiCalculator.generatePeriodInterestScheduleModel(
                 expectedRepaymentPeriods, loanApplicationTerms.toLoanConfigurationDetails(),
                 loanApplicationTerms.getInstallmentAmountInMultiplesOf(), mc);
+
+        interestScheduleModel.allowFullTermForTranche(loanApplicationTerms.isAllowFullTermForTranche());
+        interestScheduleModel.originalNumberOfRepayments(loanApplicationTerms.getNumberOfRepayments());
+
         final List<LoanScheduleModelPeriod> periods = new ArrayList<>(expectedRepaymentPeriods.size());
 
         prepareDisbursementsOnLoanApplicationTerms(loanApplicationTerms);
@@ -122,7 +126,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
                         expectedRepaymentPeriods, loanApplicationTerms, holidayDetailDTO);
                 expectedRepaymentPeriods.addAll(extensionPeriods);
                 emiCalculator.addRepaymentPeriods(interestScheduleModel, extensionResult.disbursementDate,
-                        extensionResult.additionalPeriods);
+                        extensionResult.additionalPeriods, List.of());
             }
         }
 
@@ -309,7 +313,17 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
             final List<LoanScheduleModelPeriod> periods, final BigDecimal chargesDueAtTimeOfDisbursement,
             final boolean includeDisbursementsAfterMaturityDate, final MathContext mc) {
 
+        // Check if any disbursement has actually occurred (only relevant for Full Term Tranche)
+        boolean hasAnyDisbursement = loanApplicationTerms.isAllowFullTermForTranche()
+                && disbursementDataList.stream().anyMatch(DisbursementData::isDisbursed);
+
         for (DisbursementData disbursementData : disbursementDataList) {
+            // For Full Term Tranche loans only: if at least one disbursement has occurred,
+            // skip expected (undisbursed) tranches. For EXPECT_TRANCHE loans, always include
+            // all expected tranches for EMI calculation.
+            if (hasAnyDisbursement && !disbursementData.isDisbursed()) {
+                continue;
+            }
             final LocalDate disbursementDate = disbursementData.disbursementDate();
             final LocalDate periodFromDate = scheduleParams.getPeriodStartDate();
             final LocalDate periodDueDate = scheduleParams.getActualRepaymentDate();
@@ -525,11 +539,20 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
         int maxAdditionalPeriods = 0;
         LocalDate maxDisbursementDate = null;
         final int numberOfRepayments = loanApplicationTerms.getNumberOfRepayments();
+        final int currentPeriodCount = existingPeriods.size();
 
+        // For each subsequent tranche, calculate how many additional periods are needed
+        // Each tranche needs 'numberOfRepayments' periods starting from its disbursement period
         for (int i = 1; i < disbursementDataList.size(); i++) {
-            LocalDate disbursementDate = disbursementDataList.get(i).disbursementDate();
+            DisbursementData disbursementData = disbursementDataList.get(i);
+            // Skip expected disbursements that haven't actually been disbursed yet
+            if (!disbursementData.isDisbursed()) {
+                continue;
+            }
+            LocalDate disbursementDate = disbursementData.disbursementDate();
             int periodIndex = findPeriodIndexForDate(disbursementDate, existingPeriods);
-            int additionalPeriodsForThisTranche = periodIndex;
+            int lastRequiredPeriodIndex = periodIndex + numberOfRepayments - 1;
+            int additionalPeriodsForThisTranche = Math.max(0, lastRequiredPeriodIndex - currentPeriodCount + 1);
             if (additionalPeriodsForThisTranche > maxAdditionalPeriods) {
                 maxAdditionalPeriods = additionalPeriodsForThisTranche;
                 maxDisbursementDate = disbursementDate;
