@@ -80,6 +80,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionComparato
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeInterestHandlingType;
+import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
@@ -468,7 +470,11 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     private void addInterestAccrual(@NonNull final Loan loan, @NonNull final LocalDate tillDate,
             final LoanScheduleGenerator scheduleGenerator, @NonNull final LoanRepaymentScheduleInstallment installment,
             @NonNull final AccrualPeriodsData accrualPeriods) {
-        if (installment.isAdditional() || installment.isReAged()) {
+        final LoanTransaction reAgeTransaction = loan.findReAgeTransaction();
+        final LoanReAgeParameter loanReAgeParameter = reAgeTransaction != null ? reAgeTransaction.getLoanReAgeParameter() : null;
+
+        if (installment.isAdditional() || (installment.isReAged() && loanReAgeParameter != null
+                && !LoanReAgeInterestHandlingType.DEFAULT.equals(loanReAgeParameter.getInterestHandlingType()))) {
             return;
         }
         final AccrualPeriodData period = accrualPeriods.getPeriodByInstallmentNumber(installment.getInstallmentNumber());
