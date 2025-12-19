@@ -538,6 +538,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
 
         Loan loan = mock(Loan.class);
         when(loan.getLoanRepaymentScheduleDetail()).thenReturn(loanProductRelatedDetail);
+        when(loan.isInterestBearing()).thenReturn(true);
 
         LoanRepaymentScheduleInstallment installment1 = spy(
                 new LoanRepaymentScheduleInstallment(loan, 1, disbursementDate, disbursementDate.plusMonths(1), BigDecimal.valueOf(200.0),
@@ -566,6 +567,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Mockito.doNothing().when(loan).addLoanRepaymentScheduleInstallment(installmentCaptor.capture());
 
         ProgressiveLoanInterestScheduleModel model = mock(ProgressiveLoanInterestScheduleModel.class);
+        when(model.getMaturityDate()).thenReturn(LocalDate.of(2023, 12, 31));
 
         TransactionCtx ctx = new ProgressiveTransactionCtx(currency, spyInstallments, Set.of(), new MoneyHolder(Money.zero(currency)),
                 mock(ChangedTransactionDetail.class), model, Money.zero(currency));
