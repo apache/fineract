@@ -1172,6 +1172,7 @@ Feature: LoanReschedule
     And Customer makes "AUTOPAY" repayment on "29 June 2025" with 60 EUR transaction amount
     Then In Loan Transactions the "1"th Transaction of "Accrual Activity" on "31 October 2025" has "1" relationship with type="REPLAYED"
 
+  @TestRailId:C4391
   Scenario: Verify progressive loan due date reschedule maintains EMI
     When Admin sets the business date to "05 September 2025"
     And Admin creates a client with random data
@@ -1264,6 +1265,7 @@ Feature: LoanReschedule
       | 23 | 31   | 31 January 2027   |                  | 96.08           | 56.03         | 3.23     | 0.0  | 0.0       | 59.26 | 0.0   | 0.0        | 0.0   | 59.26       |
       | 24 | 28   | 28 February 2027  |                  | 0.0             | 96.08         | 1.84     | 0.0  | 0.0       | 97.92 | 0.0   | 0.0        | 0.0   | 97.92       |
 
+  @TestRailId:C4392
   Scenario: Verify basic loan rescheduling
     When Admin sets the business date to "1 January 2024"
     When Admin creates a client with random data
@@ -1319,6 +1321,7 @@ Feature: LoanReschedule
       | 5  | 31   | 15 June 2024     |                  | 17.3            | 16.86         | 0.27     | 0.0  | 0.0       | 17.13 | 0.0   | 0.0        | 0.0  | 17.13       |
       | 6  | 30   | 15 July 2024     |                  | 0.0             | 17.3          | 0.14     | 0.0  | 0.0       | 17.44 | 0.0   | 0.0        | 0.0  | 17.44       |
 
+  @TestRailId:C4393
   Scenario: Verify loan rescheduling with N+1 period
     When Admin sets the business date to "1 January 2024"
     When Admin creates a client with random data
@@ -1377,6 +1380,7 @@ Feature: LoanReschedule
       | 5  | 31   | 30 June 2024     |                  | 17.63           | 16.86         | 0.27     | 0.0  | 0.0       | 17.13 | 0.0   | 0.0        | 0.0  | 17.13       |
       | 6  | 30   | 30 July 2024     |                  | 0.0             | 17.63         | 0.14     | 10.0 | 0.0       | 27.77 | 0.0   | 0.0        | 0.0  | 27.77       |
 
+  @TestRailId:C4394
   Scenario: Verify loan rescheduling with automatic down payment
     When Admin sets the business date to "1 January 2024"
     When Admin creates a client with random data
@@ -1434,6 +1438,7 @@ Feature: LoanReschedule
       | 5  | 30   | 15 May 2024      |                  | 15.44           | 15.12         | 0.24     | 0.0  | 0.0       | 15.36 | 0.0   | 0.0        | 0.0  | 15.36       |
       | 6  | 31   | 15 June 2024     |                  | 0.0             | 15.44         | 0.12     | 0.0  | 0.0       | 15.56 | 0.0   | 0.0        | 0.0  | 15.56       |
 
+  @TestRailId:C4395
   Scenario: Verify Progressive Loan reschedule with non-existing installment due date results in validation error
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
