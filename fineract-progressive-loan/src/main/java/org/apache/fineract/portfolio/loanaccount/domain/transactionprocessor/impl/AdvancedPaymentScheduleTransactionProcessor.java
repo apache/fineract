@@ -1517,7 +1517,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     private void handleDisbursement(LoanTransaction disbursementTransaction, TransactionCtx transactionCtx) {
-        // TODO: Fix this and enhance EMICalculator to support reamortization and reaging
         if (shouldUseEmiCalculation(transactionCtx, disbursementTransaction.getTransactionDate())) {
             handleDisbursementWithEMICalculator(disbursementTransaction, transactionCtx);
         } else {
@@ -1649,7 +1648,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     private void handleCapitalizedIncome(LoanTransaction capitalizedIncomeTransaction, TransactionCtx transactionCtx) {
-        // TODO: Fix this and enhance EMICalculator to support reamortization and reaging
         if (shouldUseEmiCalculation(transactionCtx, capitalizedIncomeTransaction.getTransactionDate())) {
             handleCapitalizedIncomeWithEMICalculator(capitalizedIncomeTransaction, transactionCtx);
         } else {
@@ -1793,21 +1791,19 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     private boolean shouldUseEmiCalculation(TransactionCtx transactionCtx, LocalDate transactionDate) {
-        if (transactionCtx instanceof ProgressiveTransactionCtx progressiveTransactionCtx) {
-            boolean hasActiveReAmortization = progressiveTransactionCtx.getAlreadyProcessedTransactions().stream()
-                    .anyMatch(t -> t.getTypeOf().isReAmortize() && t.isNotReversed());
-            boolean hasActiveReAge = progressiveTransactionCtx.getAlreadyProcessedTransactions().stream()
-                    .anyMatch(t -> t.getTypeOf().isReAge() && t.isNotReversed());
-            if (hasActiveReAmortization) {
-                return false;
-            } else {
-                return !hasActiveReAge || !DateUtils.isAfter(transactionDate, progressiveTransactionCtx.getModel().getMaturityDate());
-            }
+        if (!(transactionCtx instanceof ProgressiveTransactionCtx progressiveTransactionCtx)) {
+            return true;
         }
-        // From now on we are defaulting to using the EMICalculator on all progressive loans. However currently the
-        // model is not aware of re-aging and re-amortization. So only these specific cases should ignore this
-        // requirement. This method can be removed once these operations are supported by the EMI model.
-        return true;
+
+        final Loan loan = progressiveTransactionCtx.getInstallments().getFirst().getLoan();
+        final boolean hasActiveReAmortizeOrReAge = progressiveTransactionCtx.getAlreadyProcessedTransactions().stream()
+                .anyMatch(t -> (t.getTypeOf().isReAmortize() || t.getTypeOf().isReAge()) && t.isNotReversed());
+
+        if (!loan.isInterestBearing() && hasActiveReAmortizeOrReAge) {
+            return false;
+        }
+
+        return !DateUtils.isAfter(transactionDate, progressiveTransactionCtx.getModel().getMaturityDate());
     }
 
     protected void handleWriteOff(final LoanTransaction transaction, TransactionCtx ctx) {
