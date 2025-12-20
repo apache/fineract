@@ -24,12 +24,11 @@ import org.apache.fineract.cob.domain.BatchBusinessStep;
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
 
 @Mapper(config = MapstructMapperConfig.class)
 public interface BusinessStepMapper {
 
-    @Mappings({ @Mapping(target = "order", source = "source.stepOrder") })
+    @Mapping(target = "order", source = "source.stepOrder")
     BusinessStep map(BatchBusinessStep source);
 
     List<BusinessStep> map(List<BatchBusinessStep> source);

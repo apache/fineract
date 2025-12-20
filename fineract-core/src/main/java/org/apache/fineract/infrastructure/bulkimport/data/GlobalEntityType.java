@@ -20,7 +20,9 @@ package org.apache.fineract.infrastructure.bulkimport.data;
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
 
+@Getter
 public enum GlobalEntityType {
 
     INVALID(0, "invalid"), //
@@ -91,27 +93,17 @@ public enum GlobalEntityType {
         this.code = code;
     }
 
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
     public static GlobalEntityType fromInt(final int i) {
-        final GlobalEntityType entityType = intToEnumMap.get(Integer.valueOf(i));
-        return entityType;
+        return intToEnumMap.get(i);
     }
 
     public static GlobalEntityType fromCode(final String key) {
-        final GlobalEntityType entityType = stringToEnumMap.get(key);
-        return entityType;
+        return stringToEnumMap.get(key);
     }
 
     @Override
     public String toString() {
-        return name().toString();
+        return name();
     }
 
 }

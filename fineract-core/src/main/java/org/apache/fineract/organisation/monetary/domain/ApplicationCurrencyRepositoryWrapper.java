@@ -50,10 +50,7 @@ public class ApplicationCurrencyRepositoryWrapper {
             throw new CurrencyNotFoundException(currency.getCode());
         }
 
-        final ApplicationCurrency applicationCurrency = ApplicationCurrency.from(defaultApplicationCurrency,
-                currency.getDigitsAfterDecimal(), currency.getInMultiplesOf());
-
-        return applicationCurrency;
+        return ApplicationCurrency.from(defaultApplicationCurrency, currency.getDigitsAfterDecimal(), currency.getInMultiplesOf());
     }
 
     /**

@@ -45,7 +45,6 @@ public class BatchRequestJsonHelper extends FromJsonHelper {
      */
     public List<BatchRequest> extractList(final String json) {
         final Type listType = new TypeToken<List<BatchRequest>>() {}.getType();
-        final List<BatchRequest> requests = super.getGsonConverter().fromJson(json, listType);
-        return requests;
+        return super.getGsonConverter().fromJson(json, listType);
     }
 }
