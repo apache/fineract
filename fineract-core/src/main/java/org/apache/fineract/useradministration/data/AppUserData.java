@@ -20,7 +20,10 @@ package org.apache.fineract.useradministration.data;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.portfolio.client.data.ClientData;
@@ -43,6 +46,7 @@ public final class AppUserData {
     private List<Long> roles;
     private Boolean sendPasswordToEmail;
     private Long staffId;
+    @Getter
     private transient Integer rowIndex;
 
     @SuppressWarnings("unused")
@@ -53,6 +57,7 @@ public final class AppUserData {
     private final StaffData staff;
     private final Boolean isSelfServiceUser;
 
+    @Setter
     @SuppressWarnings("unused")
     private Set<ClientData> clients;
 
@@ -83,10 +88,6 @@ public final class AppUserData {
         this.staff = null;
         this.isSelfServiceUser = null;
         this.clients = null;
-    }
-
-    public Integer getRowIndex() {
-        return rowIndex;
     }
 
     public static AppUserData template(final AppUserData user, final Collection<OfficeData> officesForDropdown) {
@@ -146,17 +147,11 @@ public final class AppUserData {
         if (this == o) {
             return true;
         }
-        if (o == null || !(o instanceof AppUserData)) {
+        if (!(o instanceof AppUserData that)) {
             return false;
         }
 
-        AppUserData that = (AppUserData) o;
-
-        if (id != null ? !id.equals(that.id) : that.id != null) {
-            return false;
-        }
-
-        return true;
+        return Objects.equals(id, that.id);
     }
 
     @Override
@@ -164,12 +159,8 @@ public final class AppUserData {
         return id != null ? id.hashCode() : 0;
     }
 
-    public void setClients(Set<ClientData> clients) {
-        this.clients = clients;
-    }
-
     public boolean isSelfServiceUser() {
-        return this.isSelfServiceUser == null ? false : this.isSelfServiceUser;
+        return this.isSelfServiceUser != null && this.isSelfServiceUser;
     }
 
 }

@@ -645,11 +645,8 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
 
         PageExternalTransferData transfersResponse = externalAssetOwnersApi().getTransfers(Map.of("loanId", loanId));
         List<ExternalTransferData> content = transfersResponse.getContent();
-        ExternalTransferData result = content.stream().filter(bizEvent -> bizEvent.getTransferExternalId().equals(transferExternalId))
-                .toList().stream().reduce((first, second) -> second)
-                .orElseThrow(() -> new IllegalStateException("transfersResponse.getContent() is empty"));
-
-        return result;
+        return content.stream().filter(bizEvent -> bizEvent.getTransferExternalId().equals(transferExternalId)).toList().stream()
+                .reduce((first, second) -> second).orElseThrow(() -> new IllegalStateException("transfersResponse.getContent() is empty"));
     }
 
     @Then("The asset external owner has the following OWNER Journal entries:")

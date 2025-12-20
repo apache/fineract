@@ -27,12 +27,12 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDate;
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
 
 @Mapper(config = MapstructMapperConfig.class)
 public interface BusinessDateMapper {
 
-    @Mappings({ @Mapping(target = "description", source = "type.description"), @Mapping(target = "changes", ignore = true) })
+    @Mapping(target = "description", source = "type.description")
+    @Mapping(target = "changes", ignore = true)
     BusinessDateDTO mapEntity(BusinessDate source);
 
     List<BusinessDateDTO> mapEntity(List<BusinessDate> sources);

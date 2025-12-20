@@ -72,7 +72,7 @@ public class AppUserClientMapping extends AbstractPersistableCustom<Long> {
 
         AppUserClientMapping that = (AppUserClientMapping) obj;
 
-        return null == this.client.getId() ? false : this.client.getId().equals(that.client.getId());
+        return null != this.client.getId() && this.client.getId().equals(that.client.getId());
     }
 
     @Override

@@ -258,12 +258,12 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(loan.getPaymentAllocationRules()).thenReturn(List.of(loanPaymentAllocationRule));
         when(loanPaymentAllocationRule.getTransactionType()).thenReturn(PaymentAllocationTransactionType.DEFAULT);
         when(loanPaymentAllocationRule.getAllocationTypes()).thenReturn(List.of(PaymentAllocationType.DUE_PRINCIPAL));
-        when(loanTransaction.isOn(eq(transactionDate))).thenReturn(true);
+        when(loanTransaction.isOn(transactionDate)).thenReturn(true);
 
         underTest.processLatestTransaction(loanTransaction,
                 new TransactionCtx(currency, List.of(installment), Set.of(charge), new MoneyHolder(overpaidAmount), null));
 
-        Mockito.verify(installment, times(1)).payFeeChargesComponent(eq(transactionDate), eq(chargeAmountMoney));
+        Mockito.verify(installment, times(1)).payFeeChargesComponent(transactionDate, chargeAmountMoney);
         Mockito.verify(loanTransaction, times(1)).updateComponents(refEq(zero), refEq(zero), refEq(chargeAmountMoney), refEq(zero));
         assertEquals(0, BigDecimal.valueOf(20).compareTo(loanTransaction.getAmount(currency).minus(chargeAmountMoney).getAmount()));
         assertEquals(0, chargeAmount.compareTo(installment.getFeeChargesCharged(currency).getAmount()));

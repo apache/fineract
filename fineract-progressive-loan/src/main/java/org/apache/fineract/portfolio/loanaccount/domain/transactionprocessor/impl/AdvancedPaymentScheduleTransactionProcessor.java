@@ -3150,9 +3150,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 .orElse(null);
 
         final List<LoanCharge> liftedLoanCharges = new ArrayList<>();
-        installments.stream().filter(installment -> !installment.getDueDate().isBefore(transactionDate)).forEach(i -> {
-            liftedLoanCharges.addAll(getLoanChargesOfInstallment(ctx.getCharges(), i, 1));
-        });
+        installments.stream().filter(installment -> !installment.getDueDate().isBefore(transactionDate))
+                .forEach(i -> liftedLoanCharges.addAll(getLoanChargesOfInstallment(ctx.getCharges(), i, 1)));
 
         installments.removeIf(i -> i.getInstallmentNumber() != null && !i.isDownPayment() && !i.getDueDate().isBefore(transactionDate));
 
@@ -3308,10 +3307,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     private LocalDate calculateReAgedNextDate(final PeriodFrequencyType frequencyType, final LocalDate dueDate,
             final Integer frequencyNumber) {
         return switch (frequencyType) {
-            case DAYS -> dueDate.plusDays((long) frequencyNumber);
-            case WEEKS -> dueDate.plusWeeks((long) frequencyNumber);
-            case MONTHS -> dueDate.plusMonths((long) frequencyNumber);
-            case YEARS -> dueDate.plusYears((long) frequencyNumber);
+            case DAYS -> dueDate.plusDays(frequencyNumber);
+            case WEEKS -> dueDate.plusWeeks(frequencyNumber);
+            case MONTHS -> dueDate.plusMonths(frequencyNumber);
+            case YEARS -> dueDate.plusYears(frequencyNumber);
             default -> throw new UnsupportedOperationException();
         };
     }
@@ -3799,10 +3798,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     private void createChargeMappingsForInstallment(final LoanRepaymentScheduleInstallment installment,
             List<ReAgedChargeEqualAmortizationValues> reAgedChargeEqualAmortizationValues, Integer index) {
-        reAgedChargeEqualAmortizationValues.forEach(amortizationValue -> {
-            installment.getInstallmentCharges().add(new LoanInstallmentCharge(
-                    amortizationValue.equalAmortizationValues.calculateValueBigDecimal(index), amortizationValue.charge, installment));
-        });
+        reAgedChargeEqualAmortizationValues.forEach(amortizationValue -> installment.getInstallmentCharges().add(new LoanInstallmentCharge(
+                amortizationValue.equalAmortizationValues.calculateValueBigDecimal(index), amortizationValue.charge, installment)));
     }
 
     private FirstReAgeInstallmentProps calculateFirstReAgeInstallmentProps(List<LoanRepaymentScheduleInstallment> installments,

@@ -78,9 +78,8 @@ public class AdvancedPaymentAllocationsValidator {
             AtomicInteger pastDueRuleInteger = new AtomicInteger();
             AtomicInteger dueRuleInteger = new AtomicInteger();
             AtomicInteger inAdvanceRuleInteger = new AtomicInteger();
-            paymentAllocationRule.getAllocationTypes().forEach(paymentAllocationType -> {
-                validateAllocationType(paymentAllocationType, pastDueRuleInteger, dueRuleInteger, inAdvanceRuleInteger);
-            });
+            paymentAllocationRule.getAllocationTypes().forEach(paymentAllocationType -> validateAllocationType(paymentAllocationType,
+                    pastDueRuleInteger, dueRuleInteger, inAdvanceRuleInteger));
         });
     }
 
@@ -122,14 +121,14 @@ public class AdvancedPaymentAllocationsValidator {
     }
 
     private boolean hasAtLeastOneDefaultPaymentAllocation(List<LoanProductPaymentAllocationRule> rules) {
-        return rules != null && rules.stream() //
+        return rules != null && !rules.stream() //
                 .filter(r -> PaymentAllocationTransactionType.DEFAULT.equals(r.getTransactionType())) //
                 .toList() //
-                .size() > 0;
+                .isEmpty();
     }
 
     private boolean hasLoanProductPaymentAllocationRule(List<LoanProductPaymentAllocationRule> rules) {
-        return rules != null && rules.size() > 0;
+        return rules != null && !rules.isEmpty();
     }
 
     private void raiseValidationError(String globalisationMessageCode, String msg) {
