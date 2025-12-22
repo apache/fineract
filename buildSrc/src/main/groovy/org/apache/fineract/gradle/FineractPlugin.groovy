@@ -432,36 +432,7 @@ class FineractPlugin implements Plugin<Project> {
             doFirst {
                 log.warn("Release step 15: send email to announcement mailing list")
 
-                FineractPluginExtension.FineractPluginStep step = step(extension, "step15")
-
-                String version = project.properties?['fineract.release.version']
-
-                if(!version) {
-                    TextIO textIO = TextIoFactory.getTextIO()
-
-                    version = textIO.newStringInputReader()
-                            .withPattern("\\d+.\\d+.\\d+")
-                            .read("Release Version");
-                }
-
-                // TODO: input validation, see FINERACT-1610
-
-                FineractPluginExtension.FineractPluginJiraParams issues = jiraService.search(step.jira)
-
-                def versions = jiraService.getProjectVersions(step.jira.projectId)
-                def filteredVersions = versions.findAll {
-                    log.warn(">>>> VERSION: ${it.id} - ${it.name} - ${it.description}")
-                    it.name == version
-                }
-
-                this.context?.project?['fineract.release.version'] = version
-                this.context?.project?['fineract.release.issues'] = issues.result
-                this.context?.project?['fineract.release.projectId'] = step.jira.projectId
-                this.context?.project?['fineract.release.versionId'] = filteredVersions[0]?.id
-
-                if(step.email) {
-                    emailService.send( processEmailParams(step.email, this.context) )
-                }
+                printInstructions(project, "step15")
             }
         }
     }

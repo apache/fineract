@@ -12,4 +12,4 @@ Conclude voting with https://release-test.apache.org[the ATR (ASF Trusted Releas
 ./gradlew fineractReleaseStep11
 ----
 
-INFO: Use the ATR for this task.
+NOTE: Use the ATR for this task.
