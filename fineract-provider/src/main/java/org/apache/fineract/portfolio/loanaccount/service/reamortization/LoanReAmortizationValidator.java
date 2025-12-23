@@ -105,10 +105,10 @@ public class LoanReAmortizationValidator {
                     loan.getId());
         }
 
-        // validate reamortization is only done on an active loan
+        // validate re-amortization is only done on an active loan
         if (!loan.getStatus().isActive()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.reamortize.supported.only.for.active.loans",
-                    "Loan reamortization can only be done on active loans", loan.getId());
+                    "Loan re-amortization can only be done on active loans", loan.getId());
         }
 
         // validate if there's already a re-amortization transaction for today
@@ -118,6 +118,18 @@ public class LoanReAmortizationValidator {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.reamortize.reamortize.transaction.already.present.for.today",
                     "Loan reamortization can only be done once a day. There has already been a reamortization done for today",
                     loan.getId());
+        }
+
+        // validate loan is not charged-off
+        if (loan.isChargedOff()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.reamortize.not.allowed.on.charged.off",
+                    "Loan re-amortization is not allowed on charged-off loan.", loan.getId());
+        }
+
+        // validate loan is not contract terminated
+        if (loan.isContractTermination()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.reamortize.not.allowed.on.contract.terminated",
+                    "Loan re-amortization is not allowed on contract terminated loan.", loan.getId());
         }
     }
 
