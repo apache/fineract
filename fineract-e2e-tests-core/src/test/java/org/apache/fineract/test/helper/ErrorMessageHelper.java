@@ -970,4 +970,16 @@ public final class ErrorMessageHelper {
     public static String reAgeClosedLoanFailure() {
         return "Loan reaging can only be done on active loans";
     }
+
+    public static String reAmortizeChargedOffLoanFailure() {
+        return "Loan re-amortization is not allowed on charged-off loan.";
+    }
+
+    public static String reAmortizeContractTerminatedLoanFailure() {
+        return "Loan re-amortization is not allowed on contract terminated loan.";
+    }
+
+    public static String reAmortizeClosedLoanFailure() {
+        return "Loan re-amortization can only be done on active loans";
+    }
 }
