@@ -2222,18 +2222,103 @@ public class LoanStepDef extends AbstractStepDef {
                 Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions")));
         List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.getTransactions();
         List<List<String>> data = table.asLists();
+        List<String> header = table.row(0);
+        checkLoanTransactionTab(data, transactions, header, resourceId);
+    }
+
+    @Then("Loan Transactions tab has the following new accrual data:")
+    public void loanTransactionsTabCheckNewAccruals(DataTable table) {
+        PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        List<List<String>> expectedAccruals = testContext().get(TestContextKey.VERIFIED_LOAN_ACCRUALS);
+        if (expectedAccruals == null) {
+            expectedAccruals = new ArrayList<>();
+            testContext().set(TestContextKey.VERIFIED_LOAN_ACCRUALS, expectedAccruals);
+        }
+        long loanId = loanCreateResponse.getLoanId();
+        String resourceId = String.valueOf(loanId);
+        List<GetLoansLoanIdTransactions> transactions = getAccrualTransactions(loanId);
+        List<List<String>> data = table.asLists();
+        expectedAccruals.addAll(data.subList(1, data.size()));
+        List<String> header = table.row(0);
+
+        checkLoanTransactionTabRows(expectedAccruals, transactions, header, resourceId);
+        assertThat(transactions.size())
+                .as(ErrorMessageHelper.nrOfLinesWrongInTransactionsTab(resourceId, transactions.size(), expectedAccruals.size()))
+                .isEqualTo(expectedAccruals.size());
+    }
+
+    @Then("Loan Transactions tab has no new accrual data")
+    public void loanTransactionsTabCheckNoNewAccruals() {
+        PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        List<List<String>> expectedAccruals = testContext().get(TestContextKey.VERIFIED_LOAN_ACCRUALS);
+        if (expectedAccruals == null) {
+            expectedAccruals = new ArrayList<>();
+            testContext().set(TestContextKey.VERIFIED_LOAN_ACCRUALS, expectedAccruals);
+        }
+        long loanId = loanCreateResponse.getLoanId();
+        String resourceId = String.valueOf(loanId);
+
+        List<GetLoansLoanIdTransactions> transactions = getAccrualTransactions(loanId);
+        assertThat(transactions.size())
+                .as(ErrorMessageHelper.nrOfLinesWrongInTransactionsTab(resourceId, transactions.size(), expectedAccruals.size()))
+                .isEqualTo(expectedAccruals.size());
+    }
+
+    @Then("Loan Transactions tab has the following accrual data:")
+    public void loanTransactionsTabCheckAccruals(DataTable table) {
+        PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.getLoanId();
+        String resourceId = String.valueOf(loanId);
+        List<GetLoansLoanIdTransactions> transactions = getAccrualTransactions(loanId);
+        List<List<String>> data = table.asLists();
+        List<String> header = table.row(0);
+
+        checkLoanTransactionTab(data, transactions, header, resourceId);
+    }
+
+    @Then("Loan Transactions tab has the following data without accruals:")
+    public void loanTransactionsTabCheckWithoutAccruals(DataTable table) {
+        PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.getLoanId();
+        String resourceId = String.valueOf(loanId);
+
+        GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions")));
+        List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.getTransactions().stream()
+                .filter(lt -> !lt.getType().getAccrual() && !"Accrual Adjustment".equalsIgnoreCase(lt.getType().getValue())).toList();
+        List<List<String>> data = table.asLists();
+        List<String> header = table.row(0);
+
+        checkLoanTransactionTab(data, transactions, header, resourceId);
+    }
+
+    public List<GetLoansLoanIdTransactions> getAccrualTransactions(Long loanId) {
+        GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions")));
+        return loanDetailsResponse.getTransactions().stream().filter(
+                lt -> "Accrual".equalsIgnoreCase(lt.getType().getValue()) || "Accrual Adjustment".equalsIgnoreCase(lt.getType().getValue()))
+                .toList();
+    }
+
+    public void checkLoanTransactionTabRows(List<List<String>> data, List<GetLoansLoanIdTransactions> transactions, List<String> header,
+            String resourceId) {
         for (int i = 1; i < data.size(); i++) {
             List<String> expectedValues = data.get(i);
             String transactionDateExpected = expectedValues.get(0);
             List<List<String>> actualValuesList = transactions.stream()//
                     .filter(t -> transactionDateExpected.equals(FORMATTER.format(t.getDate())))//
-                    .map(t -> fetchValuesOfTransaction(table.row(0), t))//
+                    .map(t -> fetchValuesOfTransaction(header, t))//
                     .collect(Collectors.toList());//
             boolean containsExpectedValues = actualValuesList.stream()//
                     .anyMatch(actualValues -> actualValues.equals(expectedValues));//
             assertThat(containsExpectedValues)
                     .as(ErrorMessageHelper.wrongValueInLineInTransactionsTab(resourceId, i, actualValuesList, expectedValues)).isTrue();
         }
+    }
+
+    public void checkLoanTransactionTab(List<List<String>> data, List<GetLoansLoanIdTransactions> transactions, List<String> header,
+            String resourceId) {
+        checkLoanTransactionTabRows(data, transactions, header, resourceId);
         assertThat(transactions.size())
                 .as(ErrorMessageHelper.nrOfLinesWrongInTransactionsTab(resourceId, transactions.size(), data.size() - 1))
                 .isEqualTo(data.size() - 1);
