@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.MathContext;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
+import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 
 public interface ProgressiveLoanInterestScheduleModelParserService {
 
@@ -32,6 +32,6 @@ public interface ProgressiveLoanInterestScheduleModelParserService {
     /**
      * Restore a ProgressiveLoanInterestScheduleModel from a JSON string.
      */
-    ProgressiveLoanInterestScheduleModel fromJson(String s, LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail,
-            MathContext mc, Integer installmentAmountInMultipliesOf);
+    ProgressiveLoanInterestScheduleModel fromJson(String s, ILoanConfigurationDetails loanProductRelatedDetail, MathContext mc,
+            Integer installmentAmountInMultipliesOf);
 }

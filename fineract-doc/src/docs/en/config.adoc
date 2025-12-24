@@ -20,6 +20,7 @@
 :checkedbox: pass:normal[{startsb}&#10004;{endsb}]
 :table-stripes: even
 :hardbreaks:
+:sectlinks:
 
 // ifeval::["{draft}"=="true"]
 // :title-page-background-image: image:{commondir}/images/draft.svg[position=top]

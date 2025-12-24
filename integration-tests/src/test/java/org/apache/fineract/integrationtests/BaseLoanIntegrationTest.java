@@ -886,7 +886,8 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                 .repaymentEvery(1)//
                 .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
                 .interestType(interestType)//
-                .amortizationType(amortizationType);
+                .amortizationType(amortizationType)//
+                .graceOnArrearsAgeing(0);
     }
 
     private RequestSpecification createRequestSpecification(String authKey) {
@@ -1013,7 +1014,13 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
     }
 
-    protected void reAgeLoan(Long loanId, String frequencyType, int frequencyNumber, String startDate, Integer numberOfInstallments) {
+    protected void reAgeLoan(Long loanId, String frequencyType, int frequencyNumber, String startDate, Integer numberOfInstallments,
+            String reAgeInterestHandling) {
+        reAgeLoan(loanId, frequencyType, frequencyNumber, startDate, numberOfInstallments, reAgeInterestHandling, null);
+    }
+
+    protected void reAgeLoan(Long loanId, String frequencyType, int frequencyNumber, String startDate, Integer numberOfInstallments,
+            String reAgeInterestHandling, Double transactionAmount) {
         PostLoansLoanIdTransactionsRequest request = new PostLoansLoanIdTransactionsRequest();
         request.setDateFormat(DATETIME_PATTERN);
         request.setLocale("en");
@@ -1021,11 +1028,16 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         request.setFrequencyNumber(frequencyNumber);
         request.setStartDate(startDate);
         request.setNumberOfInstallments(numberOfInstallments);
+        request.setReAgeInterestHandling(reAgeInterestHandling);
+        if (transactionAmount != null) {
+            request.transactionAmount(transactionAmount);
+        }
         loanTransactionHelper.reAge(loanId, request);
     }
 
-    protected void reAmortizeLoan(Long loanId) {
+    protected void reAmortizeLoan(Long loanId, String reAmortizationInterestHandling) {
         PostLoansLoanIdTransactionsRequest request = new PostLoansLoanIdTransactionsRequest();
+        request.setReAmortizationInterestHandling(reAmortizationInterestHandling);
         request.setDateFormat(DATETIME_PATTERN);
         request.setLocale("en");
         loanTransactionHelper.reAmortize(loanId, request);
@@ -1350,13 +1362,26 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     protected PostLoansRequest applyLoanRequest(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
             int numberOfRepayments, Consumer<PostLoansRequest> customizer) {
 
-        PostLoansRequest postLoansRequest = new PostLoansRequest().clientId(clientId).productId(loanProductId)
-                .expectedDisbursementDate(loanDisbursementDate).dateFormat(DATETIME_PATTERN)
-                .transactionProcessingStrategyCode(DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY)
-                .locale("en").submittedOnDate(loanDisbursementDate).amortizationType(1).interestRatePerPeriod(BigDecimal.ZERO)
-                .interestCalculationPeriodType(1).interestType(0).repaymentEvery(30).repaymentFrequencyType(0)
-                .numberOfRepayments(numberOfRepayments).loanTermFrequency(numberOfRepayments * 30).loanTermFrequencyType(0)
-                .maxOutstandingLoanBalance(BigDecimal.valueOf(amount)).principal(BigDecimal.valueOf(amount)).loanType("individual");
+        PostLoansRequest postLoansRequest = new PostLoansRequest().clientId(clientId) //
+                .productId(loanProductId) //
+                .expectedDisbursementDate(loanDisbursementDate) //
+                .dateFormat(DATETIME_PATTERN) //
+                .transactionProcessingStrategyCode(DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY) //
+                .locale("en") //
+                .submittedOnDate(loanDisbursementDate) //
+                .amortizationType(1) //
+                .interestRatePerPeriod(BigDecimal.ZERO) //
+                .interestCalculationPeriodType(1) //
+                .interestType(0) //
+                .repaymentEvery(30) //
+                .repaymentFrequencyType(0) //
+                .numberOfRepayments(numberOfRepayments) //
+                .loanTermFrequency(numberOfRepayments * 30) //
+                .loanTermFrequencyType(0) //
+                .maxOutstandingLoanBalance(BigDecimal.valueOf(amount)) //
+                .principal(BigDecimal.valueOf(amount)) //
+                .loanType("individual") //
+                .graceOnArrearsAgeing(0);
         if (customizer != null) {
             customizer.accept(postLoansRequest);
         }

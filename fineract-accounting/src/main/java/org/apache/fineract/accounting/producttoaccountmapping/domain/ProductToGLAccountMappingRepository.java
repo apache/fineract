@@ -106,4 +106,8 @@ public interface ProductToGLAccountMappingRepository
     ProductToGLAccountMapping findCapitalizedIncomeClassificationMapping(@Param("productId") Long productId,
             @Param("productType") Integer productType, @Param("classificationId") Long classificationId);
 
+    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.writeOffReason.id = :writeOffReasonId AND mapping.productId = :productId AND mapping.productType = :productType")
+    ProductToGLAccountMapping findWriteOffReasonMapping(@Param("productId") Long productId, @Param("productType") Integer productType,
+            @Param("writeOffReasonId") Long writeOffReasonId);
+
 }

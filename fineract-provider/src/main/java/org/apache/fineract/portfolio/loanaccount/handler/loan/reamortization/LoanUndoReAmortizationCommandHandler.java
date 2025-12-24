@@ -24,7 +24,7 @@ import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.DataIntegrityErrorHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.loanaccount.service.reamortization.LoanReAmortizationServiceImpl;
+import org.apache.fineract.portfolio.loanaccount.service.reamortization.LoanReAmortizationService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "LOAN", action = "UNDO_REAMORTIZE")
 public class LoanUndoReAmortizationCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanReAmortizationServiceImpl loanReAmortizationService;
+    private final LoanReAmortizationService loanReAmortizationService;
     private final DataIntegrityErrorHandler dataIntegrityErrorHandler;
 
     @Override

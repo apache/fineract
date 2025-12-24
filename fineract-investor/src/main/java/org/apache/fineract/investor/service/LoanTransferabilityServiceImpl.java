@@ -55,12 +55,9 @@ public class LoanTransferabilityServiceImpl implements LoanTransferabilityServic
             return true;
         }
 
-        if (ExternalTransferStatus.PENDING_INTERMEDIATE == externalAssetOwnerTransfer.getStatus()) {
-            // When delayed settlement is enabled and asset is sold to intermediate. Need to validate.
-            return true;
-        }
+        // When delayed settlement is enabled and asset is sold to intermediate. Need to validate.
+        return ExternalTransferStatus.PENDING_INTERMEDIATE == externalAssetOwnerTransfer.getStatus();
 
         // When delayed settlement is enabled and asset is sold from intermediate to investor. No need to validate.
-        return false;
     }
 }

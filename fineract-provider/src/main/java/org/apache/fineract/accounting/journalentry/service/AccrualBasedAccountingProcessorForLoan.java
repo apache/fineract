@@ -1913,8 +1913,20 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
          * Single DEBIT transaction for write-offs
          ***/
         if (MathUtil.isGreaterThanZero(totalDebitAmount)) {
-            this.helper.createDebitJournalEntryForLoan(office, currencyCode, AccrualAccountsForLoan.LOSSES_WRITTEN_OFF.getValue(),
-                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount);
+            final AdvancedMappingtDTO writeAdvancedMappingtDTO = loanDTO.getWriteOffReasonAdvancedMappingData();
+            final ProductToGLAccountMapping mapping = (writeAdvancedMappingtDTO != null
+                    && writeAdvancedMappingtDTO.getReferenceValueId() != null)
+                            ? helper.getWriteOffMappingByCodeValue(loanProductId, PortfolioProductType.LOAN,
+                                    writeAdvancedMappingtDTO.getReferenceValueId())
+                            : null;
+
+            if (mapping == null) {
+                this.helper.createDebitJournalEntryForLoan(office, currencyCode, AccrualAccountsForLoan.LOSSES_WRITTEN_OFF.getValue(),
+                        loanProductId, paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount);
+            } else {
+                this.helper.createDebitJournalEntryForLoan(office, currencyCode, mapping.getGlAccount(), loanId, transactionId,
+                        transactionDate, totalDebitAmount);
+            }
         }
     }
 

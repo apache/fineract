@@ -61,11 +61,8 @@ public class InvestorAccountingHelper {
          * check if an accounting closure has happened for this branch after the transaction Date
          **/
         GLClosure gLClosure = getLatestClosureByBranch(officeId);
-        if (gLClosure != null) {
-            if (!DateUtils.isAfter(transactionDate, gLClosure.getClosingDate())) {
-                throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.ACCOUNTING_CLOSED, gLClosure.getClosingDate(), null,
-                        null);
-            }
+        if (gLClosure != null && !DateUtils.isAfter(transactionDate, gLClosure.getClosingDate())) {
+            throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.ACCOUNTING_CLOSED, gLClosure.getClosingDate(), null, null);
         }
     }
 

@@ -549,3 +549,91 @@ Feature: MerchantIssuedRefund
     When Admin sets the business date to "16 July 2024"
     #mismatch date for Interest Refund
     When Admin manually adds Interest Refund for "MERCHANT_ISSUED_REFUND" transaction made on invalid date "16 July 2024" with 2.42 EUR interest refund amount
+
+
+  @TestRailId:C4127
+  Scenario: High interest rate in advance paid Repayment + Merchant Issued Refund
+    When Admin sets the business date to "10 July 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 10 July 2025      | 1000           | 24.99                  | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 24                | MONTHS                | 1              | MONTHS                 | 24                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "10 July 2025" with "1000" amount and expected disbursement date on "10 July 2025"
+    And Admin successfully disburse the loan on "10 July 2025" with "733.56" EUR transaction amount
+    When Admin sets the business date to "29 July 2025"
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "29 July 2025" with 540.0 EUR transaction amount and system-generated Idempotency key
+    Then Loan Repayment schedule has 24 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date    | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 10 July 2025      |              | 733.56          |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 31   | 10 August 2025    | 29 July 2025 | 703.77          | 29.79         |  9.36    | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 2  | 31   | 10 September 2025 | 29 July 2025 | 664.62          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 3  | 30   | 10 October 2025   | 29 July 2025 | 625.47          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 4  | 31   | 10 November 2025  | 29 July 2025 | 586.32          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 5  | 30   | 10 December 2025  | 29 July 2025 | 547.17          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 6  | 31   | 10 January 2026   | 29 July 2025 | 508.02          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 7  | 31   | 10 February 2026  | 29 July 2025 | 468.87          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 8  | 28   | 10 March 2026     | 29 July 2025 | 429.72          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 9  | 31   | 10 April 2026     | 29 July 2025 | 390.57          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 10 | 30   | 10 May 2026       | 29 July 2025 | 351.42          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 11 | 31   | 10 June 2026      | 29 July 2025 | 312.27          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 12 | 30   | 10 July 2026      | 29 July 2025 | 273.12          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 13 | 31   | 10 August 2026    | 29 July 2025 | 233.97          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 14 | 31   | 10 September 2026 |              | 194.82          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 31.05 | 31.05      | 0.0  |  8.1        |
+      | 15 | 30   | 10 October 2026   |              | 194.82          |  0.0          | 39.15    | 0.0  | 0.0       | 39.15  |  0.0  |  0.0       | 0.0  | 39.15       |
+      | 16 | 31   | 10 November 2026  |              | 181.27          | 13.55         | 25.6     | 0.0  | 0.0       | 39.15  |  0.0  |  0.0       | 0.0  | 39.15       |
+      | 17 | 30   | 10 December 2026  |              | 145.89          | 35.38         |  3.77    | 0.0  | 0.0       | 39.15  |  0.0  |  0.0       | 0.0  | 39.15       |
+      | 18 | 31   | 10 January 2027   |              | 109.78          | 36.11         |  3.04    | 0.0  | 0.0       | 39.15  |  0.0  |  0.0       | 0.0  | 39.15       |
+      | 19 | 31   | 10 February 2027  |              |  72.92          | 36.86         |  2.29    | 0.0  | 0.0       | 39.15  |  0.0  |  0.0       | 0.0  | 39.15       |
+      | 20 | 28   | 10 March 2027     |              |  35.29          | 37.63         |  1.52    | 0.0  | 0.0       | 39.15  |  0.0  |  0.0       | 0.0  | 39.15       |
+      | 21 | 31   | 10 April 2027     |              |   0.0           | 35.29         |  0.73    | 0.0  | 0.0       | 36.02  |  0.0  |  0.0       | 0.0  | 36.02       |
+      | 22 | 30   | 10 May 2027       | 29 July 2025 |   0.0           |  0.0          |  0.0     | 0.0  | 0.0       |  0.0   |  0.0  |  0.0       | 0.0  |  0.0        |
+      | 23 | 31   | 10 June 2027      | 29 July 2025 |   0.0           |  0.0          |  0.0     | 0.0  | 0.0       |  0.0   |  0.0  |  0.0       | 0.0  |  0.0        |
+      | 24 | 30   | 10 July 2027      | 29 July 2025 |   0.0           |  0.0          |  0.0     | 0.0  | 0.0       |  0.0   |  0.0  |  0.0       | 0.0  |  0.0        |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
+      | 733.56        | 85.46    | 0.0  | 0.0       | 819.02  | 540.0  | 540.0      | 0.0  | 279.02      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 10 July 2025     | Disbursement           | 733.56 | 0.0       | 0.0      | 0.0  | 0.0       | 733.56       | false    | false    |
+      | 29 July 2025     | Repayment              | 540.0  | 530.64    | 9.36     | 0.0  | 0.0       | 202.92       | false    | false    |
+    When Admin sets the business date to "02 October 2025"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "02 October 2025" with 635.23 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation true
+    Then Loan Repayment schedule has 24 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 10 July 2025      |                 | 733.56          |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 31   | 10 August 2025    | 29 July 2025    | 703.77          | 29.79         |  9.36    | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 2  | 31   | 10 September 2025 | 29 July 2025    | 664.62          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 3  | 30   | 10 October 2025   | 29 July 2025    | 625.47          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 4  | 31   | 10 November 2025  | 29 July 2025    | 586.32          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 5  | 30   | 10 December 2025  | 29 July 2025    | 547.17          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 6  | 31   | 10 January 2026   | 29 July 2025    | 508.02          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 7  | 31   | 10 February 2026  | 29 July 2025    | 468.87          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 8  | 28   | 10 March 2026     | 29 July 2025    | 429.72          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 9  | 31   | 10 April 2026     | 29 July 2025    | 390.57          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 10 | 30   | 10 May 2026       | 29 July 2025    | 351.42          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 11 | 31   | 10 June 2026      | 29 July 2025    | 312.27          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 12 | 30   | 10 July 2026      | 29 July 2025    | 273.12          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 13 | 31   | 10 August 2026    | 29 July 2025    | 233.97          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 14 | 31   | 10 September 2026 | 02 October 2025 | 202.92          | 31.05         |  0.0     | 0.0  | 0.0       | 31.05  | 31.05 | 31.05      | 0.0  |  0.0        |
+      | 15 | 30   | 10 October 2026   | 02 October 2025 | 202.92          |  0.0          |  8.97    | 0.0  | 0.0       |  8.97  |  8.97 |  8.97      | 0.0  |  0.0        |
+      | 16 | 31   | 10 November 2026  | 02 October 2025 | 202.92          |  0.0          |  0.0     | 0.0  | 0.0       |  0.0   |  0.0  |  0.0       | 0.0  |  0.0        |
+      | 17 | 30   | 10 December 2026  | 02 October 2025 | 202.92          |  0.0          |  0.0     | 0.0  | 0.0       |  0.0   |  0.0  |  0.0       | 0.0  |  0.0        |
+      | 18 | 31   | 10 January 2027   | 02 October 2025 | 202.92          |  0.0          |  0.0     | 0.0  | 0.0       |  0.0   |  0.0  |  0.0       | 0.0  |  0.0        |
+      | 19 | 31   | 10 February 2027  | 02 October 2025 | 195.75          |  7.17         |  0.0     | 0.0  | 0.0       |  7.17  |  7.17 |  7.17      | 0.0  |  0.0        |
+      | 20 | 28   | 10 March 2027     | 02 October 2025 | 156.6           | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 21 | 31   | 10 April 2027     | 02 October 2025 | 117.45          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 22 | 30   | 10 May 2027       | 02 October 2025 |  78.3           | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 23 | 31   | 10 June 2027      | 02 October 2025 |  39.15          | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+      | 24 | 30   | 10 July 2027      | 02 October 2025 |   0.0           | 39.15         |  0.0     | 0.0  | 0.0       | 39.15  | 39.15 | 39.15      | 0.0  |  0.0        |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
+      | 733.56        | 18.33    | 0.0  | 0.0       | 751.89  | 751.89 | 751.89     | 0.0  | 0.0         |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 10 July 2025     | Disbursement           | 733.56 |   0.0     | 0.0      | 0.0  | 0.0       | 733.56       | false    | false    |
+      | 29 July 2025     | Repayment              | 540.0  | 530.64    | 9.36     | 0.0  | 0.0       | 202.92       | false    | false    |
+      | 10 August 2025   | Accrual Activity       | 9.36   |   0.0     | 9.36     | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 02 October 2025  | Merchant Issued Refund | 635.23 | 202.92    | 8.97     | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 02 October 2025  | Interest Refund        | 17.07  |   0.0     | 0.0      | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 02 October 2025  | Accrual                | 18.33  |   0.0     | 18.33    | 0.0  | 0.0       |   0.0        | false    | false    |
+      | 02 October 2025  | Accrual Activity       |  8.97  |   0.0     | 8.97     | 0.0  | 0.0       |   0.0        | false    | false    |

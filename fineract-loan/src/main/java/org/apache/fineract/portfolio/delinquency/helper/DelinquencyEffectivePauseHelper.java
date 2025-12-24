@@ -28,4 +28,7 @@ public interface DelinquencyEffectivePauseHelper {
     List<LoanDelinquencyActionData> calculateEffectiveDelinquencyList(List<LoanDelinquencyAction> savedDelinquencyActions);
 
     Long getPausedDaysBeforeDate(List<LoanDelinquencyActionData> effectiveDelinquencyList, LocalDate date);
+
+    Long getPausedDaysWithinRange(List<LoanDelinquencyActionData> effectiveDelinquencyList, LocalDate startInclusive,
+            LocalDate endExclusive);
 }

@@ -53,13 +53,21 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @SuppressFBWarnings({ "VA_FORMAT_STRING_USES_NEWLINE" })
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class LoanReAmortizationValidatorTest {
 
     private final LocalDate actualDate = LocalDate.now(Clock.systemUTC());
 
-    private LoanReAmortizationValidator underTest = new LoanReAmortizationValidator();
+    @InjectMocks
+    private LoanReAmortizationValidator underTest;
 
     @BeforeEach
     public void setUp() {
@@ -141,20 +149,6 @@ class LoanReAmortizationValidatorTest {
     }
 
     @Test
-    public void testValidateReAmortize_ShouldThrowException_WhenLoanIsInterestBearing() {
-        // given
-        Loan loan = loan();
-        given(loan.isInterestBearing()).willReturn(true);
-        JsonCommand command = jsonCommand();
-        // when
-        GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
-                () -> underTest.validateReAmortize(loan, command));
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reamortize.supported.only.for.non.interest.loans");
-    }
-
-    @Test
     public void testValidateReAmortize_ShouldThrowException_WhenLoanIsNotActive() {
         // given
         Loan loan = loan();
@@ -191,53 +185,16 @@ class LoanReAmortizationValidatorTest {
         List<LoanTransaction> transactions = List.of(loanTransaction(LoanTransactionType.DISBURSEMENT, actualDate.minusDays(3)));
         Loan loan = loan();
         given(loan.getLoanTransactions()).willReturn(transactions);
-        JsonCommand command = jsonCommand();
         // when
         GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
-                () -> underTest.validateUndoReAmortize(loan, command));
+                () -> underTest.findAndValidateReAmortizeTransactionForUndo(loan));
         // then
         assertThat(result).isNotNull();
         assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reamortize.reamortization.transaction.missing");
     }
 
     @Test
-    public void testValidateUndoReAmortize_ShouldThrowException_WhenLoanAlreadyHasRepaymentAfterReAmortization() {
-        // given
-        List<LoanTransaction> transactions = List.of(loanTransaction(LoanTransactionType.DISBURSEMENT, actualDate.minusDays(3)),
-                loanTransaction(LoanTransactionType.REAMORTIZE, actualDate.minusDays(2)),
-                loanTransaction(LoanTransactionType.REPAYMENT, actualDate.minusDays(1)));
-        Loan loan = loan();
-        given(loan.getLoanTransactions()).willReturn(transactions);
-        JsonCommand command = jsonCommand();
-        // when
-        GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
-                () -> underTest.validateUndoReAmortize(loan, command));
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reamortize.repayment.exists.after.reamortization");
-    }
-
-    @Test
-    public void testValidateUndoReAmortize_ShouldThrowException_WhenLoanAlreadyHasRepaymentAfterReAmortization_SameDay() {
-        // given
-        List<LoanTransaction> transactions = List.of(loanTransaction(LoanTransactionType.DISBURSEMENT, actualDate.minusDays(2)),
-                loanTransaction(LoanTransactionType.REAMORTIZE, actualDate.minusDays(1),
-                        OffsetDateTime.of(actualDate, LocalTime.of(10, 0), ZoneOffset.UTC)),
-                loanTransaction(LoanTransactionType.REPAYMENT, actualDate.minusDays(1),
-                        OffsetDateTime.of(actualDate, LocalTime.of(11, 0), ZoneOffset.UTC)));
-        Loan loan = loan();
-        given(loan.getLoanTransactions()).willReturn(transactions);
-        JsonCommand command = jsonCommand();
-        // when
-        GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
-                () -> underTest.validateUndoReAmortize(loan, command));
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reamortize.repayment.exists.after.reamortization");
-    }
-
-    @Test
-    public void testValidateUndoReAmortize_ShouldNotThrowException_WhenLoanAlreadyHasRepaymentAfterReAmortization_SameDay_RepaymentBeforeReAmortization() {
+    public void testValidateUndoReAmortize_ShouldNotThrowException() {
         // given
         List<LoanTransaction> transactions = List.of(loanTransaction(LoanTransactionType.DISBURSEMENT, actualDate.minusDays(2)),
                 loanTransaction(LoanTransactionType.REAMORTIZE, actualDate.minusDays(1),
@@ -246,9 +203,8 @@ class LoanReAmortizationValidatorTest {
                         OffsetDateTime.of(actualDate, LocalTime.of(9, 0), ZoneOffset.UTC)));
         Loan loan = loan();
         given(loan.getLoanTransactions()).willReturn(transactions);
-        JsonCommand command = jsonCommand();
         // when
-        underTest.validateUndoReAmortize(loan, command);
+        underTest.findAndValidateReAmortizeTransactionForUndo(loan);
         // then no exception thrown
     }
 
@@ -277,6 +233,7 @@ class LoanReAmortizationValidatorTest {
         given(loanTransaction.getTypeOf()).willReturn(type);
         given(loanTransaction.getTransactionDate()).willReturn(txDate);
         given(loanTransaction.getSubmittedOnDate()).willReturn(txDate);
+        given(loanTransaction.isNotReversed()).willReturn(true);
         return loanTransaction;
     }
 

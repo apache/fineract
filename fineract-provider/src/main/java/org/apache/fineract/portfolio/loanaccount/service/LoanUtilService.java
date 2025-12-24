@@ -21,11 +21,9 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepository;
@@ -51,18 +49,16 @@ import org.apache.fineract.portfolio.floatingrates.exception.FloatingRateNotFoun
 import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
-import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
-import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 
 @RequiredArgsConstructor
-public class LoanUtilService {
+public class LoanUtilService implements ILoanUtilService {
 
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
     private final CalendarInstanceRepository calendarInstanceRepository;
@@ -74,17 +70,20 @@ public class LoanUtilService {
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final NoteRepository noteRepository;
 
+    @Override
     public ScheduleGeneratorDTO buildScheduleGeneratorDTO(final Loan loan, final LocalDate recalculateFrom) {
         final HolidayDetailDTO holidayDetailDTO = null;
         return buildScheduleGeneratorDTO(loan, recalculateFrom, null, holidayDetailDTO);
     }
 
+    @Override
     public ScheduleGeneratorDTO buildScheduleGeneratorDTO(final Loan loan, final LocalDate recalculateFrom,
             final LocalDate rescheduleTill) {
         final HolidayDetailDTO holidayDetailDTO = null;
         return buildScheduleGeneratorDTO(loan, recalculateFrom, rescheduleTill, holidayDetailDTO);
     }
 
+    @Override
     public ScheduleGeneratorDTO buildScheduleGeneratorDTO(final Loan loan, final LocalDate recalculateFrom, final LocalDate recalculateTill,
             final HolidayDetailDTO holidayDetailDTO) {
         HolidayDetailDTO holidayDetails = holidayDetailDTO;
@@ -147,6 +146,7 @@ public class LoanUtilService {
         return scheduleGeneratorDTO;
     }
 
+    @Override
     public Boolean isLoanRepaymentsSyncWithMeeting(final Group group, final Calendar calendar) {
         Boolean isSkipRepaymentOnFirstMonth = false;
         Long entityId = null;
@@ -170,6 +170,7 @@ public class LoanUtilService {
         return isSkipRepaymentOnFirstMonth;
     }
 
+    @Override
     public LocalDate getCalculatedRepaymentsStartingFromDate(final Loan loan) {
         final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstanceByEntityId(loan.getId(),
                 CalendarEntityType.LOANS.getValue());
@@ -190,6 +191,7 @@ public class LoanUtilService {
         return holidayDetailDTO;
     }
 
+    @Override
     public HolidayDetailDTO constructHolidayDTO(final Long officeId, LocalDate localDate) {
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId, localDate,
@@ -223,16 +225,6 @@ public class LoanUtilService {
             final CalendarInstance calendarInstance, final CalendarHistoryDataWrapper calendarHistoryDataWrapper) {
         final Calendar calendar = calendarInstance == null ? null : calendarInstance.getCalendar();
         return calculateRepaymentStartingFromDate(actualDisbursementDate, loan, calendar, calendarHistoryDataWrapper);
-    }
-
-    public LocalDate getCalculatedRepaymentsStartingFromDate(final LocalDate actualDisbursementDate, final Loan loan,
-            final Calendar calendar) {
-        final CalendarHistoryDataWrapper calendarHistoryDataWrapper = null;
-        if (calendar == null) {
-            return getCalculatedRepaymentsStartingFromDate(loan);
-        }
-        return calculateRepaymentStartingFromDate(actualDisbursementDate, loan, calendar, calendarHistoryDataWrapper);
-
     }
 
     private LocalDate calculateRepaymentStartingFromDate(final LocalDate actualDisbursementDate, final Loan loan, final Calendar calendar,
@@ -305,6 +297,7 @@ public class LoanUtilService {
         return calculatedRepaymentsStartingFromDate;
     }
 
+    @Override
     public void validateRepaymentTransactionType(LoanTransactionType repaymentTransactionType) {
         if (!repaymentTransactionType.isRepaymentType()) {
             throw new PlatformServiceUnavailableException("error.msg.repaymentTransactionType.provided.not.a.repayment.type",
@@ -313,6 +306,7 @@ public class LoanUtilService {
         }
     }
 
+    @Override
     public void checkClientOrGroupActive(final Loan loan) {
         final Client client = loan.client();
         if (client != null && client.isNotActive()) {
@@ -321,16 +315,6 @@ public class LoanUtilService {
         final Group group = loan.group();
         if (group != null && group.isNotActive()) {
             throw new GroupNotActiveException(group.getId());
-        }
-    }
-
-    public void persistNote(Loan loan, JsonCommand command, Map<String, Object> changes) {
-        if (command.hasParameter(LoanApiConstants.noteParameterName)) {
-            final String note = command.stringValueOfParameterNamed(LoanApiConstants.noteParameterName);
-            final Note newNote = Note.loanNote(loan, note);
-            changes.put(LoanApiConstants.noteParameterName, note);
-
-            noteRepository.save(newNote);
         }
     }
 

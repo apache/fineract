@@ -223,7 +223,7 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
         List<ExternalAssetOwnerTransfer> effectiveTransfers = externalAssetOwnerTransferRepository
                 .findEffectiveTransfersOrderByIdDesc(loanDataForExternalTransfer.getId(), DateUtils.getBusinessLocalDate());
 
-        if (effectiveTransfers.size() == 0) {
+        if (effectiveTransfers.isEmpty()) {
             throw new ExternalAssetOwnerInitiateTransferException(
                     "This loan cannot be bought back, it is not owned by an external asset owner");
         } else if (effectiveTransfers.size() == 2) {

@@ -63,20 +63,13 @@ public enum DaysInYearType {
     public static DaysInYearType fromInt(final Integer type) {
         DaysInYearType repaymentFrequencyType = DaysInYearType.INVALID;
         if (type != null) {
-            switch (type) {
-                case 1:
-                    repaymentFrequencyType = DaysInYearType.ACTUAL;
-                break;
-                case 360:
-                    repaymentFrequencyType = DaysInYearType.DAYS_360;
-                break;
-                case 364:
-                    repaymentFrequencyType = DaysInYearType.DAYS_364;
-                break;
-                case 365:
-                    repaymentFrequencyType = DaysInYearType.DAYS_365;
-                break;
-            }
+            repaymentFrequencyType = switch (type) {
+                case 1 -> DaysInYearType.ACTUAL;
+                case 360 -> DaysInYearType.DAYS_360;
+                case 364 -> DaysInYearType.DAYS_364;
+                case 365 -> DaysInYearType.DAYS_365;
+                default -> repaymentFrequencyType;
+            };
         }
         return repaymentFrequencyType;
     }

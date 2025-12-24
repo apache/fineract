@@ -28,18 +28,16 @@ import org.apache.fineract.portfolio.loanaccount.service.InterestScheduleModelRe
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
 import org.apache.fineract.portfolio.loanproduct.calc.ProgressiveEMICalculator;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
+import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 
 @SuppressWarnings("unused")
 public class EmbeddableProgressiveLoanScheduleGenerator {
 
     private final ProgressiveLoanScheduleGenerator scheduleGenerator;
-    private final ScheduledDateGenerator scheduledDateGenerator;
-    private final EMICalculator emiCalculator;
 
     public EmbeddableProgressiveLoanScheduleGenerator() {
-        this.emiCalculator = new ProgressiveEMICalculator();
-        this.scheduledDateGenerator = new DefaultScheduledDateGenerator();
+        final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
+        final EMICalculator emiCalculator = new ProgressiveEMICalculator(scheduledDateGenerator);
         this.scheduleGenerator = new ProgressiveLoanScheduleGenerator(scheduledDateGenerator, emiCalculator,
                 new NoopInterestScheduleModelRepositoryWrapper());
     }
@@ -72,7 +70,7 @@ public class EmbeddableProgressiveLoanScheduleGenerator {
 
         @Override
         public Optional<ProgressiveLoanInterestScheduleModel> readProgressiveLoanInterestScheduleModel(Long loanId,
-                LoanProductMinimumRepaymentScheduleRelatedDetail detail, Integer installmentAmountInMultipliesOf) {
+                ILoanConfigurationDetails detail, Integer installmentAmountInMultipliesOf) {
             return Optional.empty();
         }
 

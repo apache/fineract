@@ -26,7 +26,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -112,11 +111,19 @@ public class FixedDepositAccountsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve Fixed Deposit Account Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for fixed deposit applications. The template data returned consists of any or all of:\n\n"
-            + "\n\n" + "Field Defaults\n\n" + "Allowed Value Lists" + "Example Requests:\n\n" + "\n\n"
-            + "fixeddepositaccounts/template?clientId=1")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.GetFixedDepositAccountsTemplateResponse.class))) })
+    @Operation(summary = "Retrieve Fixed Deposit Account Template", description = """
+            This is a convenience resource. It can be useful when building maintenance user interface screens for fixed deposit applications. The template data returned consists of any or all of:
+
+
+
+            Field Defaults
+
+            Allowed Value ListsExample Requests:
+
+
+
+            fixeddepositaccounts/template?clientId=1""")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.GetFixedDepositAccountsTemplateResponse.class)))
     public String template(@QueryParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @QueryParam("groupId") @Parameter(description = "groupId") final Long groupId,
             @QueryParam("productId") @Parameter(description = "productId") final Long productId,
@@ -135,10 +142,19 @@ public class FixedDepositAccountsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List Fixed deposit applications/accounts", description = "Lists Fixed Deposit Accounts\n\n"
-            + "Example Requests:\n\n" + "\n\n" + "fixeddepositaccounts\n\n" + "\n\n" + "fixeddepositaccounts?fields=name")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.GetFixedDepositAccountsResponse.class)))) })
+    @Operation(summary = "List Fixed deposit applications/accounts", description = """
+            Lists Fixed Deposit Accounts
+
+            Example Requests:
+
+
+
+            fixeddepositaccounts
+
+
+
+            fixeddepositaccounts?fields=name""")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.GetFixedDepositAccountsResponse.class))))
     public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("paged") @Parameter(description = "paged") final Boolean paged,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
@@ -168,12 +184,13 @@ public class FixedDepositAccountsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Submit new fixed deposit application", description = "Submits a new fixed deposit application"
-            + "Mandatory Fields: clientId or groupId, productId, submittedOnDate, depositAmount, depositPeriod, depositPeriodFrequencyId\n\n"
-            + "Optional Fields: accountNo, externalId, fieldOfficerId,linkAccountId(if provided initial deposit amount will be collected from this account),transferInterestToSavings(By enabling this flag all interest postings will be transferred to linked saving account )")
+    @Operation(summary = "Submit new fixed deposit application", description = """
+            Submits a new fixed deposit application
+            Mandatory Fields: clientId or groupId, productId, submittedOnDate, depositAmount, depositPeriod, depositPeriodFrequencyId
+
+            Optional Fields: accountNo, externalId, fieldOfficerId,linkAccountId(if provided initial deposit amount will be collected from this account),transferInterestToSavings(By enabling this flag all interest postings will be transferred to linked saving account )""")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.PostFixedDepositAccountsRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.PostFixedDepositAccountsResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.PostFixedDepositAccountsResponse.class)))
     public String submitApplication(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createFixedDepositAccount().withJson(apiRequestBodyAsJson)
@@ -188,10 +205,17 @@ public class FixedDepositAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a fixed deposit application/account", description = "Retrieves a fixed deposit application/account\n\n"
-            + "Example Requests :\n\n" + "\n\n" + "fixeddepositaccounts/1" + "\n\n" + "fixeddepositaccounts/1?associations=all")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.GetFixedDepositAccountsAccountIdResponse.class))) })
+    @Operation(summary = "Retrieve a fixed deposit application/account", description = """
+            Retrieves a fixed deposit application/account
+
+            Example Requests :
+
+
+
+            fixeddepositaccounts/1
+
+            fixeddepositaccounts/1?associations=all""")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.GetFixedDepositAccountsAccountIdResponse.class)))
     public String retrieveOne(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @DefaultValue("all") @QueryParam("chargeStatus") @Parameter(description = "chargeStatus") final String chargeStatus,
@@ -220,8 +244,7 @@ public class FixedDepositAccountsApiResource {
     @Path("calculate-fd-interest")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.CalculateFixedDepositInterestResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.CalculateFixedDepositInterestResponse.class)))
     public String calculateFixedDepositInterest(@Context final UriInfo uriInfo,
             @QueryParam("principalAmount") @Parameter(description = "BigDecimal principalAmount") final BigDecimal principalAmount,
             @QueryParam("annualInterestRate") @Parameter(description = "annualInterestRate") final BigDecimal annualInterestRate,
@@ -320,8 +343,7 @@ public class FixedDepositAccountsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Modify a fixed deposit application", description = "Fixed deposit application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.PutFixedDepositAccountsAccountIdRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.PutFixedDepositAccountsAccountIdResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.PutFixedDepositAccountsAccountIdResponse.class)))
     public String update(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -357,8 +379,7 @@ public class FixedDepositAccountsApiResource {
             + "Calculates and Posts interest earned on a fixed deposit account based on today's date and whether an interest posting or crediting event is due.\n\n"
             + "Showing request/response for Calculate Interest on Fixed Deposit Account")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.PostFixedDepositAccountsAccountIdRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.PostFixedDepositAccountsAccountIdResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.PostFixedDepositAccountsAccountIdResponse.class)))
     public String handleCommands(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam, @Context final UriInfo uriInfo,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -426,8 +447,7 @@ public class FixedDepositAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a fixed deposit application", description = "At present we support hard delete of fixed deposit application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the fixed deposit account.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.DeleteFixedDepositAccountsAccountIdResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.DeleteFixedDepositAccountsAccountIdResponse.class)))
     public String delete(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteFixedDepositAccount(accountId).build();

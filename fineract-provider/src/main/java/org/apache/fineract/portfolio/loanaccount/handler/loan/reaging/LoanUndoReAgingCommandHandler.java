@@ -24,7 +24,7 @@ import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.DataIntegrityErrorHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.loanaccount.service.reaging.LoanReAgingServiceImpl;
+import org.apache.fineract.portfolio.loanaccount.service.reaging.LoanReAgingService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "LOAN", action = "UNDO_REAGE")
 public class LoanUndoReAgingCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanReAgingServiceImpl loanReAgingService;
+    private final LoanReAgingService loanReAgingService;
     private final DataIntegrityErrorHandler dataIntegrityErrorHandler;
 
     @Override

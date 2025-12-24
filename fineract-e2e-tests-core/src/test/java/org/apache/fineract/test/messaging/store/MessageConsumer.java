@@ -29,7 +29,7 @@ public class MessageConsumer {
 
     private final EventStore eventStore;
 
-    @JmsListener(destination = "${fineract-test.messaging.jms.topic-name}")
+    @JmsListener(id = "eventStoreListener", destination = "${fineract-test.messaging.jms.topic-name}")
     public void receiveMessage(ActiveMQBytesMessage message) {
         try {
             byte[] buffer = new byte[(int) message.getBodyLength()];

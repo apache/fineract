@@ -20,11 +20,11 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.time.LocalDate;
 import java.util.Set;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
-public interface LoanAccrualActivityRepository extends Repository<Loan, Long> {
+public interface LoanAccrualActivityRepository extends JpaRepository<Loan, Long> {
 
     @Query("select loan.id from Loan loan left join LoanTransaction lt on lt.loan = loan and lt.typeOf = :loanType and lt.reversed = false and lt.dateOf = :currentDate inner join LoanRepaymentScheduleInstallment rs on rs.loan = loan and rs.isDownPayment = false and rs.additional = false and rs.dueDate = :currentDate where loan.loanRepaymentScheduleDetail.enableAccrualActivityPosting = true and loan.loanStatus = :loanStatus and lt.id is null ")
     Set<Long> fetchLoanIdsForAccrualActivityPosting(@Param("currentDate") LocalDate currentDate,

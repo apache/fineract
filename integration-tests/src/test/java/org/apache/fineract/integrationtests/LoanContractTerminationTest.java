@@ -18,13 +18,17 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -115,6 +119,33 @@ public class LoanContractTerminationTest extends BaseLoanIntegrationTest {
 
             Assertions.assertTrue(callFailedRuntimeException.getMessage()
                     .contains("Contract termination can not be applied, Loan product schedule type is not Progressive"));
+        });
+    }
+
+    @Test
+    public void testLoanContractTerminationSameDisbursementDate() {
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final GlobalConfigurationHelper globalConfigurationHelper = new GlobalConfigurationHelper();
+
+        runAt("1 January 2024", () -> {
+
+            PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                    .createLoanProduct(create4IProgressive().interestRecognitionOnDisbursementDate(false));
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
+                    500.0, 7.0, 6, (request) -> request.interestRecognitionOnDisbursementDate(false));
+
+            disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
+
+            loanTransactionHelper.moveLoanState(loanId,
+                    new PostLoansLoanIdRequest().note("Contract Termination Test").externalId(Utils.randomStringGenerator("", 20)),
+                    "contractTermination");
+
+            verifyTransactions(loanId, //
+                    transaction(100.0, "Disbursement", "01 January 2024"), //
+                    transaction(100.0, "Contract Termination", "01 January 2024"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertEquals(BigDecimal.ZERO.stripTrailingZeros(), loanDetails.getSummary().getInterestCharged().stripTrailingZeros());
         });
     }
 

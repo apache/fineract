@@ -349,7 +349,7 @@ Feature:Feature: Buy Down Fees
       | 01 February 2024 | Repayment        | 33.72  | 33.14     | 0.58     | 0.0  | 0.0       | 66.86        | false    |
     When Admin sets the business date to "1 March 2024"
     When Loan Pay-off is made on "1 March 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
@@ -420,7 +420,7 @@ Feature:Feature: Buy Down Fees
     When Admin sets the business date to "1 March 2024"
     When Admin runs inline COB job for Loan
     When Loan Pay-off is made on "1 March 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     And Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
@@ -629,8 +629,9 @@ Feature:Feature: Buy Down Fees
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 50.0       | 33.52            | 0.0                      | 0.0             | 16.48              |
     And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "01 March 2024"
+
     When Loan Pay-off is made on "1 March 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3829
   Scenario: Verify loan with Buy Down fees and charge-off transaction - daily amortization and amortization in case of loan charge-off event - UC3.2
@@ -835,7 +836,7 @@ Feature:Feature: Buy Down Fees
       | 01 January 2024 | 50.0       | 33.52            | 0.0                      | 0.0             | 16.48              |
     And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "01 March 2024"
     When Loan Pay-off is made on "1 March 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3848
   Scenario: Verify loan with Buy Down fees and undo the charge-off transaction - amortization in case of loan charge-off event should also be reversed  - UC3.3
@@ -935,7 +936,7 @@ Feature:Feature: Buy Down Fees
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 50.0       | 17.58            | 32.42                    | 0.0             | 0.0                |
     When Loan Pay-off is made on "1 February 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3849
   Scenario: Verify loan with Buy Down fees and undo the charge-off a fraud loan - amortization in case of loan charge-off event should also be reversed  - UC3.4
@@ -1036,7 +1037,7 @@ Feature:Feature: Buy Down Fees
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 50.0       | 17.58            | 32.42                    | 0.0             | 0.0                |
     When Loan Pay-off is made on "1 February 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3850
   Scenario: Verify loan with Buy Down fees and charge-off with "delinquent" reason - amortization in case of loan charge-off event - UC3.5
@@ -1099,7 +1100,7 @@ Feature:Feature: Buy Down Fees
       | 01 January 2024 | 50.0       | 13.74            | 0.0                      | 0.0             | 36.26              |
     And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "25 January 2024"
     When Loan Pay-off is made on "25 January 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3851
   Scenario: Verify loan with Buy Down fees and charge-off a fraud loan - amortization in case of loan charge-off event - UC3.6
@@ -1161,7 +1162,7 @@ Feature:Feature: Buy Down Fees
       | 01 January 2024 | 50.0       | 13.74            | 0.0                      | 0.0             | 36.26              |
     And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "25 January 2024"
     When Loan Pay-off is made on "25 January 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3852
   Scenario: Verify loan with Buy Down fees and undo the charge-off transaction with "delinquent" reason - amortization in case of loan charge-off event should also be reversed - UC3.7
@@ -1248,7 +1249,7 @@ Feature:Feature: Buy Down Fees
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 50.0       | 13.74            | 36.26                    | 0.0             | 0.0                |
     When Loan Pay-off is made on "25 January 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3886
   Scenario: Verify loan with with a few Buy Down fees with adjustment and charge-off transaction - amortization in case of loan charge-off event - UC3.8
@@ -1335,7 +1336,7 @@ Feature:Feature: Buy Down Fees
       | 01 February 2024 | 50.0       | 25.0             | 0.0                     | 0.0              | 25.0               |
     And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "01 March 2024"
     When Loan Pay-off is made on "1 March 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:С3825
   Scenario: Verify loan with Buy Down Fee adjustment trn and repayment trns - UC4
@@ -1431,7 +1432,7 @@ Feature:Feature: Buy Down Fees
       | 01 January 2024 | 50.0       | 40.0             | 0.0                      | 10.0            | 0.0                |
     And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
     When Loan Pay-off is made on "1 April 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
@@ -1548,7 +1549,7 @@ Feature:Feature: Buy Down Fees
       | 01 January 2024 | 50.0       | 35.0             | 0.0                      | 15.0            | 0.0                |
     And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "31 March 2024"
     When Loan Pay-off is made on "1 April 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
@@ -1597,6 +1598,7 @@ Feature:Feature: Buy Down Fees
     And LoanBuyDownFeeTransactionCreatedBusinessEvent is created on "02 January 2024"
 # --- make write-off --- #
     And Admin does write-off the loan on "02 January 2024"
+    Then Loan has 0 outstanding amount
     Then Loan status will be "CLOSED_WRITTEN_OFF"
     Then Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
@@ -2179,6 +2181,9 @@ Feature:Feature: Buy Down Fees
       | 01 January 2024 | 50.0       | 34.07            | 15.93                    | 0.0             | 0.0                |
     And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "02 March 2024"
 
+    When Loan Pay-off is made on "03 March 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3887
   Scenario: Verify Buy Down Fee reversal - UC6
     When Admin sets the business date to "01 January 2024"
@@ -2459,6 +2464,9 @@ Feature:Feature: Buy Down Fees
       | LIABILITY | 145024       | Deferred Capitalized Income | 50.0  |        |
     And LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent is created on "16 February 2024"
 
+    When Loan Pay-off is made on "17 February 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3888
   Scenario: Verify Buy Down Fee reversal on same business date
     When Admin sets the business date to "01 January 2024"
@@ -2518,6 +2526,9 @@ Feature:Feature: Buy Down Fees
       | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
       | EXPENSE   | 450280       | Buy Down Expense            |       | 50.0   |
       | LIABILITY | 145024       | Deferred Capitalized Income | 50.0  |        |
+
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3889
   Scenario: Verify Buy Down Fee reversal forbidden when adjustment exists
@@ -2658,6 +2669,9 @@ Feature:Feature: Buy Down Fees
       | 11 January 2024  | Accrual                              | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    |
     And LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent is created on "11 January 2024"
 
+    When Loan Pay-off is made on "12 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C3981
   Scenario: Verify loan with Buy Down fees and full payment for non-merchant - UC1
     When Admin sets the business date to "01 January 2024"
@@ -2782,6 +2796,8 @@ Feature:Feature: Buy Down Fees
       | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
       | LIABILITY | 145023       | Suspense/Clearing account   |       | 50.0   |
       | LIABILITY | 145024       | Deferred Capitalized Income | 50.0  |        |
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3983
   Scenario: Verify loan with Buy Down fees and undo the charge-off transaction for non merchant - amortization in case of loan charge-off event is also reversed - UC3.1
@@ -2880,8 +2896,9 @@ Feature:Feature: Buy Down Fees
     And Buy down fee by external-id contains the following data:
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 50.0       | 17.58            | 32.42                    | 0.0             | 0.0                |
-    When Loan Pay-off is made on "1 February 2024"
-    Then Loan's all installments have obligations met
+
+    When Loan Pay-off is made on "01 February 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3984
   Scenario: Verify loan with Buy Down fees and undo the charge-off a fraud loan for non-merchant - amortization in case of loan charge-off event is also reversed - UC3.2
@@ -2981,8 +2998,8 @@ Feature:Feature: Buy Down Fees
     And Buy down fee by external-id contains the following data:
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 50.0       | 17.58            | 32.42                    | 0.0             | 0.0                |
-    When Loan Pay-off is made on "1 February 2024"
-    Then Loan's all installments have obligations met
+    When Loan Pay-off is made on "01 February 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3985
   Scenario: Verify loan with Buy Down fees and undo the charge-off transaction with "delinquent" reason for non-merchant - amortization in case of loan charge-off event is also reversed - UC3.3
@@ -3069,7 +3086,7 @@ Feature:Feature: Buy Down Fees
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 50.0       | 13.74            | 36.26                    | 0.0             | 0.0                |
     When Loan Pay-off is made on "25 January 2024"
-    Then Loan's all installments have obligations met
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:С3986
   Scenario: Verify loan with Buy Down Fee adjustment trn and repayment trns for non-merchant - UC4
@@ -3241,6 +3258,9 @@ Feature:Feature: Buy Down Fees
     And Admin adds buy down fee adjustment with "AUTOPAY" payment type to the loan on "01 January 2024" with "25" EUR transaction amount
     And Loan Transactions tab has a "Buy Down Fee Adjustment" transaction with date "01 January 2024" which has classification code value "buydown_fee_transaction_classification_value"
 
+    When Loan Pay-off is made on "01 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C4009
   Scenario: Verify Buy Down Fee amortization allocation mappings
     When Admin sets the business date to "1 January 2024"
@@ -3290,6 +3310,9 @@ Feature:Feature: Buy Down Fees
     And Loan Amortization Allocation Mapping for "BUY_DOWN_FEE" transaction created on "02 January 2024" contains the following data:
       | Date            | Type | Amount |
       | 02 January 2024 | AM   | 1.11   |
+
+    When Loan Pay-off is made on "03 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4019
   Scenario: Verify Buy Down Fee amortization allocation mappings when buy down fee transaction is reversed
@@ -3386,6 +3409,9 @@ Feature:Feature: Buy Down Fees
       | 02 January 2024 | AM   | 2.22   |
       | 03 January 2024 | AM   | 2.22   |
       | 04 January 2024 | AM   | 2.23   |
+
+    When Loan Pay-off is made on "05 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4022
   Scenario: Verify Buy Down Fee amortization allocation mappings when buy down fee adjustment occurs
@@ -3555,6 +3581,9 @@ Feature:Feature: Buy Down Fees
       | 05 January 2024 | AM_ADJ | 0.25   |
       | 06 January 2024 | AM     | 0.43   |
 
+    When Loan Pay-off is made on "07 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C4040
   Scenario: Verify Buy Down Fee amortization allocation mapping when already amortized amount is greater than should be after buy down fee adjustment
     When Admin sets the business date to "1 January 2024"
@@ -3633,6 +3662,9 @@ Feature:Feature: Buy Down Fees
     And Buy down fee by external-id contains the following data:
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 1.0        | 0.3              | 0.0                      | 0.7             | 0.0                |
+
+    When Loan Pay-off is made on "25 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4043
   Scenario: Verify Buy Down Fee amortization allocation mapping when after buy down fee adjustment and charge-off
@@ -3773,6 +3805,9 @@ Feature:Feature: Buy Down Fees
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 1.0        | 0.5              | 0.0                      | 0.3             | 0.2                |
 
+    When Loan Pay-off is made on "16 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C4092
   Scenario: Verify GL entries for Buydown Fee Amortization - UC1: Amortization for Buydown fee with NO classification rule
     When Admin sets the business date to "01 January 2024"
@@ -3794,6 +3829,9 @@ Feature:Feature: Buy Down Fees
       | INCOME    | 450281       | Income From Buy Down        |       | 0.55   |
       | LIABILITY | 145024       | Deferred Capitalized Income | 0.55  |        |
 
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C4093
   Scenario: Verify GL entries for Buydown Fee Amortization - UC2: Amortization for Buydown fee with classification rule: pending_bankruptcy
     When Admin sets the business date to "01 January 2024"
@@ -3814,6 +3852,9 @@ Feature:Feature: Buy Down Fees
       | Type      | Account code | Account name                | Debit | Credit |
       | INCOME    | 404007       | Fee Income                  |       | 0.55   |
       | LIABILITY | 145024       | Deferred Capitalized Income | 0.55  |        |
+
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4094
   Scenario: Verify GL entries for Buydown Fee Amortization - UC3: Amortization for Buydown fees with NO classification and with classification rule: pending_bankruptcy
@@ -3847,6 +3888,9 @@ Feature:Feature: Buy Down Fees
       | INCOME    | 404007       | Fee Income                  |       | 0.22   |
       | INCOME    | 450281       | Income From Buy Down        |       | 0.55   |
       | LIABILITY | 145024       | Deferred Capitalized Income | 0.77  |        |
+
+    When Loan Pay-off is made on "02 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4116
   Scenario: Verify Buy Down Fee journal entries values when backdated new buy down fee with no classification and buy down fee adjustment for existing one with classification occurs on the same day
@@ -3939,6 +3983,9 @@ Feature:Feature: Buy Down Fees
       | LIABILITY | 145024       | Deferred Capitalized Income | 30.0  |        |
       | INCOME    | 404007       | Fee Income                  | 5.0   |        |
 
+    When Loan Pay-off is made on "16 April 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C4117
   Scenario: Verify Buy Down Fee journal entries values when backdated new buy down fee and buy down fee adjustment for existing one occurs on the same day, no classification
     When Admin sets the business date to "01 January 2024"
@@ -4028,3 +4075,6 @@ Feature:Feature: Buy Down Fees
       | LIABILITY | 145024       | Deferred Capitalized Income |       | 5.0    |
       | LIABILITY | 145024       | Deferred Capitalized Income | 30.0  |        |
       | INCOME    | 450281       | Income From Buy Down        | 5.0   |        |
+
+    When Loan Pay-off is made on "16 April 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met

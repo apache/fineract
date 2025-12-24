@@ -20,13 +20,13 @@
 -->
 Hello everyone,
 
-... as previously announced, I've just created the release branch for our upcoming ${project['fineract.release.version']} release.
+... as previously announced, I've created the branch for our upcoming ${project['fineract.release.version']} release. The branch name is release/${project['fineract.release.version']}.
 
-You can continue working and merging PRs to the develop branch for future releases, as always.
+You can continue working and merging PRs into the develop branch for future releases, as always.
 
-The DRAFT release notes are on https://cwiki.apache.org/confluence/display/FINERACT/${project['fineract.release.version']}+-+Apache+Fineract . Does anyone see anything missing?
+I started the DRAFT release notes at https://cwiki.apache.org/confluence/display/FINERACT/${project['fineract.release.version']}+-+Apache+Fineract . Please help me by filling in "Summary of changes". Does anyone see anything else missing?
 
-Does anyone have any last minutes changes they would like to see cherry-picked to branch ${project['fineract.release.version']}, or are we good go and actually cut the release based on this branch as it is?
+Does anyone have any last minute changes for the release branch, or are we good to go and actually cut the release based on this branch as it is?
 
 I'll initiate the final stage of actually creating the release on ${project['fineract.release.date']} if nobody objects.
 

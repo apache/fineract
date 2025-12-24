@@ -175,7 +175,8 @@ public final class LoanApplicationValidator {
             LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, LoanProductConstants.FIXED_LENGTH,
             LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, LoanProductConstants.ENABLE_DOWN_PAYMENT,
             LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT,
-            LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, LoanApiConstants.daysInYearCustomStrategyParameterName));
+            LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, LoanApiConstants.daysInYearCustomStrategyParameterName,
+            LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE));
     public static final String LOANAPPLICATION_UNDO = "loanapplication.undo";
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -214,8 +215,6 @@ public final class LoanApplicationValidator {
                     expectedFirstRepaymentOnDate);
         }
 
-        validateCumulativeMultiDisburse(loan);
-
         validateLoanTermAndRepaidEveryValues(loan.getTermFrequency(), loan.getTermPeriodFrequencyType().getValue(),
                 loan.getLoanProductRelatedDetail().getNumberOfRepayments(), loan.getLoanProductRelatedDetail().getRepayEvery(),
                 loan.getLoanProductRelatedDetail().getRepaymentPeriodFrequencyType().getValue(), loan);
@@ -229,8 +228,6 @@ public final class LoanApplicationValidator {
                     "submittedOnDate cannot be after the loans  expectedFirstRepaymentOnDate.", submittedOnDate,
                     expectedFirstRepaymentOnDate);
         }
-
-        validateCumulativeMultiDisburse(loan);
 
         validateLoanTermAndRepaidEveryValues(loan.getTermFrequency(), loan.getTermPeriodFrequencyType().getValue(),
                 loan.getLoanProductRelatedDetail().getNumberOfRepayments(), loan.getLoanProductRelatedDetail().getRepayEvery(),
@@ -325,6 +322,18 @@ public final class LoanApplicationValidator {
                         .validateForBooleanValue();
                 if (isEqualAmortization && loanProduct.isInterestRecalculationEnabled()) {
                     throw new EqualAmortizationUnsupportedFeatureException("interest.recalculation", "interest recalculation");
+                }
+            }
+
+            if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE, element)) {
+                final Boolean allowFullTermForTranche = this.fromApiJsonHelper
+                        .extractBooleanNamed(LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE, element);
+                baseDataValidator.reset().parameter(LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE).value(allowFullTermForTranche)
+                        .ignoreIfNull().validateForBooleanValue();
+
+                if (Boolean.TRUE.equals(allowFullTermForTranche) && !loanProduct.isAllowFullTermForTranche()) {
+                    baseDataValidator.reset().parameter(LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE).failWithCode("not.allowed.by.product",
+                            "Full term tranche cannot be enabled because the loan product does not allow it");
                 }
             }
 
@@ -947,6 +956,18 @@ public final class LoanApplicationValidator {
                         .ignoreIfNull().validateForBooleanValue();
                 if (isEqualAmortization && loanProduct.isInterestRecalculationEnabled()) {
                     throw new EqualAmortizationUnsupportedFeatureException("interest.recalculation", "interest recalculation");
+                }
+            }
+
+            if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE, element)) {
+                final Boolean allowFullTermForTranche = this.fromApiJsonHelper
+                        .extractBooleanNamed(LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE, element);
+                baseDataValidator.reset().parameter(LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE).value(allowFullTermForTranche)
+                        .ignoreIfNull().validateForBooleanValue();
+
+                if (Boolean.TRUE.equals(allowFullTermForTranche) && !loanProduct.isAllowFullTermForTranche()) {
+                    baseDataValidator.reset().parameter(LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE).failWithCode("not.allowed.by.product",
+                            "Full term tranche cannot be enabled because the loan product does not allow it");
                 }
             }
 
@@ -1742,16 +1763,8 @@ public final class LoanApplicationValidator {
                     if (transactionProcessingStrategyCode != null) {
                         final Integer interestType = this.fromApiJsonHelper.extractIntegerNamed(LoanApiConstants.interestTypeParameterName,
                                 element, Locale.getDefault());
-                        String processorCode = loanRepaymentScheduleTransactionProcessorFactory
-                                .determineProcessor(transactionProcessingStrategyCode).getCode();
-                        boolean isProgressive = "advanced-payment-allocation-strategy".equals(processorCode);
-                        if (isProgressive) {
-                            baseDataValidator.reset().parameter(LoanApiConstants.interestTypeParameterName).value(interestType)
-                                    .ignoreIfNull().inMinMaxRange(0, 1);
-                        } else {
-                            baseDataValidator.reset().parameter(LoanApiConstants.interestTypeParameterName).value(interestType)
-                                    .ignoreIfNull().integerSameAsNumber(InterestMethod.DECLINING_BALANCE.getValue());
-                        }
+                        baseDataValidator.reset().parameter(LoanApiConstants.interestTypeParameterName).value(interestType).ignoreIfNull()
+                                .inMinMaxRange(0, 1);
                     }
                 } else {
                     if (loan.isCumulativeSchedule()) {
@@ -2205,19 +2218,6 @@ public final class LoanApplicationValidator {
         if (calendar != null && !calendar.isValidRecurringDate(expectedDisbursementDate, isSkipRepaymentOnFirstMonth, numberOfDays)) {
             final String errorMessage = "Expected disbursement date '" + expectedDisbursementDate + "' do not fall on a meeting date";
             throw new LoanApplicationDateException("disbursement.date.do.not.match.meeting.date", errorMessage, expectedDisbursementDate);
-        }
-    }
-
-    private static void validateCumulativeMultiDisburse(Loan loan) {
-        if (loan.isCumulativeSchedule() && loan.isMultiDisburmentLoan()
-                && loan.getLoanProductRelatedDetail().getInterestMethod().isFlat()) {
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            final ApiParameterError error = ApiParameterError.generalError(
-                    "validation.msg.loan.cumulative.multidisburse.does.not.support.flat.interest.mode",
-                    "Cumulative multidisburse loan does NOT support FLAT interest mode.");
-            dataValidationErrors.add(error);
-            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors);
         }
     }
 

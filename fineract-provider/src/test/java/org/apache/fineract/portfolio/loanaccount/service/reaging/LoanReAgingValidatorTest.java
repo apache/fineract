@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
@@ -68,6 +69,9 @@ class LoanReAgingValidatorTest {
 
     @Mock
     private LoanTransactionRepository loanTransactionRepository;
+
+    @Mock
+    private FromJsonHelper fromApiJsonHelper;
 
     @InjectMocks
     private LoanReAgingValidator underTest;
@@ -112,7 +116,7 @@ class LoanReAgingValidatorTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getGlobalisationMessageCode()).isEqualTo("validation.msg.validation.errors.exist");
-        assertThat(result.getErrors().get(0).getUserMessageGlobalisationCode())
+        assertThat(result.getErrors().getFirst().getUserMessageGlobalisationCode())
                 .isEqualTo("validation.msg.loan.reAge.externalId.exceeds.max.length");
     }
 
@@ -136,7 +140,7 @@ class LoanReAgingValidatorTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getGlobalisationMessageCode()).isEqualTo("validation.msg.validation.errors.exist");
-        assertThat(result.getErrors().get(0).getUserMessageGlobalisationCode())
+        assertThat(result.getErrors().getFirst().getUserMessageGlobalisationCode())
                 .isEqualTo("validation.msg.loan.reAge.startDate.cannot.be.blank");
     }
 
@@ -160,7 +164,7 @@ class LoanReAgingValidatorTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getGlobalisationMessageCode()).isEqualTo("validation.msg.validation.errors.exist");
-        assertThat(result.getErrors().get(0).getUserMessageGlobalisationCode())
+        assertThat(result.getErrors().getFirst().getUserMessageGlobalisationCode())
                 .isEqualTo("validation.msg.loan.reAge.frequencyType.cannot.be.blank");
     }
 
@@ -184,7 +188,7 @@ class LoanReAgingValidatorTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getGlobalisationMessageCode()).isEqualTo("validation.msg.validation.errors.exist");
-        assertThat(result.getErrors().get(0).getUserMessageGlobalisationCode())
+        assertThat(result.getErrors().getFirst().getUserMessageGlobalisationCode())
                 .isEqualTo("validation.msg.loan.reAge.frequencyNumber.cannot.be.blank");
     }
 
@@ -209,7 +213,7 @@ class LoanReAgingValidatorTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getGlobalisationMessageCode()).isEqualTo("validation.msg.validation.errors.exist");
-        assertThat(result.getErrors().get(0).getUserMessageGlobalisationCode())
+        assertThat(result.getErrors().getFirst().getUserMessageGlobalisationCode())
                 .isEqualTo("validation.msg.loan.reAge.frequencyNumber.not.greater.than.zero");
     }
 
@@ -233,7 +237,7 @@ class LoanReAgingValidatorTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getGlobalisationMessageCode()).isEqualTo("validation.msg.validation.errors.exist");
-        assertThat(result.getErrors().get(0).getUserMessageGlobalisationCode())
+        assertThat(result.getErrors().getFirst().getUserMessageGlobalisationCode())
                 .isEqualTo("validation.msg.loan.reAge.numberOfInstallments.cannot.be.blank");
     }
 
@@ -258,7 +262,7 @@ class LoanReAgingValidatorTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getGlobalisationMessageCode()).isEqualTo("validation.msg.validation.errors.exist");
-        assertThat(result.getErrors().get(0).getUserMessageGlobalisationCode())
+        assertThat(result.getErrors().getFirst().getUserMessageGlobalisationCode())
                 .isEqualTo("validation.msg.loan.reAge.numberOfInstallments.not.greater.than.zero");
     }
 
@@ -283,22 +287,34 @@ class LoanReAgingValidatorTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getGlobalisationMessageCode()).isEqualTo("validation.msg.validation.errors.exist");
-        assertThat(result.getErrors().get(0).getUserMessageGlobalisationCode())
+        assertThat(result.getErrors().getFirst().getUserMessageGlobalisationCode())
                 .isEqualTo("validation.msg.loan.reAge.numberOfInstallments.not.greater.than.zero");
     }
 
     @Test
-    public void testValidateReAge_ShouldThrowException_WhenLoanIsBeforeMaturity() {
+    public void testValidateReAge_ShouldThrowException_WhenTransactionAmountIsZero() {
         // given
-        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, actualDate)));
         Loan loan = loan();
-        JsonCommand command = jsonCommand();
+        JsonCommand command = makeJsonCommand("""
+                {
+                    "externalId": "12345",
+                    "dateFormat": "%s",
+                    "locale": "en",
+                    "startDate": "%s",
+                    "frequencyType": "MONTHS",
+                    "frequencyNumber": 1,
+                    "numberOfInstallments": 1,
+                    "transactionAmount": 0
+                }
+                """.formatted(DATE_FORMAT, formatDate(afterMaturity)));
         // when
-        GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
+        PlatformApiDataValidationException result = assertThrows(PlatformApiDataValidationException.class,
                 () -> underTest.validateReAge(loan, command));
         // then
         assertThat(result).isNotNull();
-        assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reage.cannot.be.submitted.before.maturity");
+        assertThat(result.getGlobalisationMessageCode()).isEqualTo("validation.msg.validation.errors.exist");
+        assertThat(result.getErrors().getFirst().getUserMessageGlobalisationCode())
+                .isEqualTo("validation.msg.loan.reAge.transactionAmount.not.greater.than.zero");
     }
 
     @Test
@@ -314,7 +330,7 @@ class LoanReAgingValidatorTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getGlobalisationMessageCode()).isEqualTo("validation.msg.validation.errors.exist");
-        assertThat(result.getErrors().get(0).getUserMessageGlobalisationCode())
+        assertThat(result.getErrors().getFirst().getUserMessageGlobalisationCode())
                 .isEqualTo("validation.msg.loan.reAge.startDate.is.less.than.date");
     }
 
@@ -347,20 +363,6 @@ class LoanReAgingValidatorTest {
         assertThat(result).isNotNull();
         assertThat(result.getGlobalisationMessageCode())
                 .isEqualTo("error.msg.loan.reage.supported.only.for.progressive.loan.schedule.type");
-    }
-
-    @Test
-    public void testValidateReAge_ShouldThrowException_WhenLoanIsInterestBearing() {
-        // given
-        Loan loan = loan();
-        given(loan.isInterestBearing()).willReturn(true);
-        JsonCommand command = jsonCommand();
-        // when
-        GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
-                () -> underTest.validateReAge(loan, command));
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reage.supported.only.for.non.interest.loans");
     }
 
     @Test
@@ -398,49 +400,12 @@ class LoanReAgingValidatorTest {
         List<LoanTransaction> transactions = List.of(loanTransaction(LoanTransactionType.DISBURSEMENT, actualDate.minusDays(3)));
         Loan loan = loan();
         given(loan.getLoanTransactions()).willReturn(transactions);
-        JsonCommand command = jsonCommand();
         // when
         GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
-                () -> underTest.validateUndoReAge(loan, command));
+                () -> underTest.validateUndoReAge(loan));
         // then
         assertThat(result).isNotNull();
         assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reage.reaging.transaction.missing");
-    }
-
-    @Test
-    public void testValidateUndoReAge_ShouldThrowException_WhenLoanAlreadyHasRepaymentAfterReAge() {
-        // given
-        List<LoanTransaction> transactions = List.of(loanTransaction(LoanTransactionType.DISBURSEMENT, actualDate.minusDays(3)),
-                loanTransaction(LoanTransactionType.REAGE, actualDate.minusDays(2)),
-                loanTransaction(LoanTransactionType.REPAYMENT, actualDate.minusDays(1)));
-        Loan loan = loan();
-        given(loan.getLoanTransactions()).willReturn(transactions);
-        JsonCommand command = jsonCommand();
-        // when
-        GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
-                () -> underTest.validateUndoReAge(loan, command));
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reage.repayment.exists.after.reaging");
-    }
-
-    @Test
-    public void testValidateUndoReAge_ShouldThrowException_WhenLoanAlreadyHasRepaymentAfterReAge_SameDay() {
-        // given
-        List<LoanTransaction> transactions = List.of(loanTransaction(LoanTransactionType.DISBURSEMENT, actualDate.minusDays(2)),
-                loanTransaction(LoanTransactionType.REAGE, actualDate.minusDays(1),
-                        OffsetDateTime.of(actualDate, LocalTime.of(10, 0), ZoneOffset.UTC)),
-                loanTransaction(LoanTransactionType.REPAYMENT, actualDate.minusDays(1),
-                        OffsetDateTime.of(actualDate, LocalTime.of(11, 0), ZoneOffset.UTC)));
-        Loan loan = loan();
-        given(loan.getLoanTransactions()).willReturn(transactions);
-        JsonCommand command = jsonCommand();
-        // when
-        GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
-                () -> underTest.validateUndoReAge(loan, command));
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reage.repayment.exists.after.reaging");
     }
 
     @Test
@@ -453,9 +418,8 @@ class LoanReAgingValidatorTest {
                         OffsetDateTime.of(actualDate, LocalTime.of(9, 0), ZoneOffset.UTC)));
         Loan loan = loan();
         given(loan.getLoanTransactions()).willReturn(transactions);
-        JsonCommand command = jsonCommand();
         // when
-        underTest.validateUndoReAge(loan, command);
+        underTest.validateUndoReAge(loan);
         // then no exception thrown
     }
 
@@ -516,6 +480,9 @@ class LoanReAgingValidatorTest {
         given(loanProductRelatedDetail.getLoanScheduleType()).willReturn(LoanScheduleType.PROGRESSIVE);
         given(loan.isInterestBearing()).willReturn(false);
         given(loan.getLoanTransactions()).willReturn(List.of());
+        LoanSummary loanSummary = mock(LoanSummary.class);
+        given(loan.getSummary()).willReturn(loanSummary);
+        given(loanSummary.getTotalPrincipalOutstanding()).willReturn(java.math.BigDecimal.valueOf(1000));
         return loan;
     }
 

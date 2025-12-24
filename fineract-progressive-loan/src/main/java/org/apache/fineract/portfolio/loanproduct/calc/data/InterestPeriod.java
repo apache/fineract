@@ -60,6 +60,7 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
     private Money creditedPrincipal;
     /** Stores credited interest. Related transaction: Chargeback */
     private Money creditedInterest;
+    @Setter
     private Money disbursementAmount;
     private Money balanceCorrectionAmount;
     private Money outstandingLoanBalance;
@@ -137,7 +138,7 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
     }
 
     public BigDecimal getCalculatedDueInterest() {
-        if (isPaused()) {
+        if (isPaused() || getRepaymentPeriod().isReAged()) {
             return getCreditedInterest().getAmount();
         }
 

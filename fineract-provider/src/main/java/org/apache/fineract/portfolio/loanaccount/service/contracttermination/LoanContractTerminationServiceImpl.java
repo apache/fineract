@@ -76,7 +76,7 @@ public class LoanContractTerminationServiceImpl {
     private final LoanTransactionService loanTransactionService;
 
     public CommandProcessingResult applyContractTermination(final JsonCommand command) {
-        final Loan loan = loanAssembler.assembleFrom(command.getLoanId());
+        Loan loan = loanAssembler.assembleFrom(command.getLoanId());
         // validate client or group is active
         loanUtilService.checkClientOrGroupActive(loan);
 
@@ -87,7 +87,19 @@ public class LoanContractTerminationServiceImpl {
         final Map<String, Object> changes = new LinkedHashMap<>();
 
         final LoanTransaction contractTermination = LoanTransaction.contractTermination(loan, DateUtils.getBusinessLocalDate(), externalId);
-        loanTransactionRepository.save(contractTermination);
+
+        // Mark Contract Termination, Update Loan SubStatus
+        loan.setLoanSubStatus(LoanSubStatus.CONTRACT_TERMINATION);
+        changes.put(LoanApiConstants.subStatusAttributeName, loan.getLoanSubStatus().getCode());
+
+        if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
+            loanScheduleService.regenerateRepaymentSchedule(loan);
+            reprocessLoanTransactionsService.reprocessTransactions(loan, List.of(contractTermination));
+            loan.addLoanTransaction(contractTermination);
+        } else {
+            reprocessLoanTransactionsService.processLatestTransaction(contractTermination, loan);
+            loan.addLoanTransaction(contractTermination);
+        }
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
@@ -95,22 +107,7 @@ public class LoanContractTerminationServiceImpl {
             final Note note = Note.loanTransactionNote(loan, contractTermination, noteText);
             noteRepository.save(note);
         }
-
-        // Mark Contract Termination, Update Loan SubStatus
-        loan.setLoanSubStatus(LoanSubStatus.CONTRACT_TERMINATION);
-        loanRepository.save(loan);
-        changes.put(LoanApiConstants.subStatusAttributeName, loan.getLoanSubStatus().getCode());
-
-        if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
-            final List<LoanTransaction> loanTransactions = loanTransactionService.retrieveListOfTransactionsForReprocessing(loan);
-            loanTransactions.add(contractTermination);
-            reprocessLoanTransactionsService.reprocessParticularTransactions(loan, loanTransactions);
-            loan.addLoanTransaction(contractTermination);
-        } else {
-            reprocessLoanTransactionsService.processLatestTransaction(contractTermination, loan);
-            loan.addLoanTransaction(contractTermination);
-        }
-
+        loanTransactionRepository.saveAndFlush(contractTermination);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanTransactionContractTerminationPostBusinessEvent(contractTermination));
 

@@ -41,6 +41,15 @@ repositories {
     mavenCentral()
 }
 
+configurations.all {
+    resolutionStrategy {
+        dependencySubstitution {
+            // Substitution is to resolve CVE-2025-12183
+            substitute module('org.lz4:lz4-java') using module('at.yawk.lz4:lz4-java:1.10.1')
+        }
+    }
+}
+
 dependencies {
     implementation 'com.sun.activation:jakarta.activation'
     implementation 'com.sun.mail:jakarta.mail'

@@ -59,6 +59,7 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChart;
 import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
+import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositAccountUtils;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.PreClosurePenalInterestOnType;
@@ -1259,5 +1260,10 @@ public class RecurringDepositAccount extends SavingsAccount {
 
     public BigDecimal getDepositAmount() {
         return this.accountTermAndPreClosure.depositAmount();
+    }
+
+    @Override
+    public DepositAccountType depositAccountType() {
+        return DepositAccountType.fromInt(300);
     }
 }

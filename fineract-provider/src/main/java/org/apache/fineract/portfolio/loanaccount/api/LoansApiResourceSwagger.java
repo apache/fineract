@@ -603,6 +603,8 @@ final class LoansApiResourceSwagger {
             public String writeoffReason;
             public GetLoansLoanIdLinkedAccount linkedAccount;
             public Set<GetLoansLoanIdDisbursementDetails> disbursementDetails;
+            @Schema(example = "false", description = "Allow full term length for each tranche disbursement")
+            public Boolean allowFullTermForTranche;
             @Schema(example = "1100.000000")
             public BigDecimal fixedEmiAmount;
             @Schema(example = "35000.000000")
@@ -1198,6 +1200,8 @@ final class LoansApiResourceSwagger {
         public List<GetLoansLoanIdTransactions> transactions;
         @Schema(description = "Set of GetLoansLoanIdDisbursementDetails")
         public Set<GetLoansLoanIdDisbursementDetails> disbursementDetails;
+        @Schema(example = "false", description = "Allow full term length for each tranche disbursement")
+        public Boolean allowFullTermForTranche;
         @Schema(description = "Delinquent data")
         public GetLoansLoanIdDelinquencySummary delinquent;
         @Schema(description = "Set of charges")
@@ -1216,6 +1220,14 @@ final class LoansApiResourceSwagger {
         public Boolean chargedOff;
         @Schema(example = "3")
         public Integer inArrearsTolerance;
+        @Schema(example = "0")
+        public Integer graceOnPrincipalPayment;
+        @Schema(example = "0")
+        public Integer graceOnInterestPayment;
+        @Schema(example = "0")
+        public Integer graceOnInterestCharged;
+        @Schema(example = "3")
+        public Integer graceOnArrearsAgeing;
         @Schema(example = "false")
         public Boolean enableDownPayment;
         @Schema(example = "0.000000")
@@ -1336,6 +1348,8 @@ final class LoansApiResourceSwagger {
         public String externalId;
         @Schema(description = "List of PostLoansDisbursementData")
         public List<PostLoansDisbursementData> disbursementData;
+        @Schema(example = "false", description = "Allow full term length for each tranche disbursement")
+        public Boolean allowFullTermForTranche;
         @Schema(description = "Maximum allowed outstanding balance")
         public BigDecimal maxOutstandingLoanBalance;
         @Schema(example = "[2011, 10, 20]")
@@ -1348,6 +1362,8 @@ final class LoansApiResourceSwagger {
         public Integer graceOnInterestPayment;
         @Schema(example = "1")
         public Integer graceOnArrearsAgeing;
+        @Schema(example = "10")
+        public BigDecimal inArrearsTolerance;
         @Schema(example = "HORIZONTAL")
         public String loanScheduleProcessingType;
         @Schema(example = "false")
@@ -1540,6 +1556,8 @@ final class LoansApiResourceSwagger {
         public List<PutLoansLoanIdChanges> charges;
         public List<PutLoansLoanIdCollateral> collateral;
         public List<PutLoansLoanIdDisbursementData> disbursementData;
+        @Schema(example = "false", description = "Allow full term length for each tranche disbursement")
+        public Boolean allowFullTermForTranche;
         @Schema(example = "HORIZONTAL")
         public String loanScheduleProcessingType;
         @Schema(example = "false")

@@ -1,0 +1,194 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+apply plugin: 'org.openapi.generator'
+apply plugin: 'jacoco'
+description = 'Fineract Client with Feign'
+
+apply from: 'dependencies.gradle'
+
+openApiMeta {
+    generatorName = 'Fineract-Feign'
+    packageName = 'org.apache.fineract.client.feign'
+    outputFolder = "$buildDir/meta".toString()
+}
+
+openApiValidate {
+    inputSpec = "file:///$swaggerFile"
+    recommend = true
+}
+
+tasks.register('buildJavaSdk', org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+    generatorName = 'java'
+    library = 'feign'
+    verbose = false
+    validateSpec = false
+    skipValidateSpec = true
+    inputSpec = "file:///$swaggerFile"
+    outputDir = "$buildDir/generated/temp-java".toString()
+    templateDir = "$projectDir/src/main/resources/templates/java"
+    groupId = 'org.apache.fineract'
+    apiPackage = 'org.apache.fineract.client.feign.services'
+    invokerPackage = 'org.apache.fineract.client.feign'
+    modelPackage = 'org.apache.fineract.client.models'
+    generateModelTests = false
+    generateApiTests = false
+    ignoreFileOverride = "$projectDir/.openapi-generator-ignore"
+    configOptions = [
+            dateLibrary                : 'java8',
+            library                    : 'feign',
+            feignVersion               : '13.6',
+            feignApacheHttpClient      : 'true',
+            useFeign13                 : 'true',
+            useFeignApacheHttpClient   : 'true',
+            hideGenerationTimestamp    : 'true',
+            containerDefaultToNull     : 'true',
+            oauth2Implementation       : 'none',
+            useJakartaEe               : 'true'
+
+    ]
+    dependsOn(':fineract-provider:resolve')
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = [
+                new File(buildDir, "generated/java/src/main/java"),
+                "$projectDir/src/main/java"
+            ]
+            destinationDirectory = layout.buildDirectory.dir('classes/java/main').get().asFile
+        }
+        output.resourcesDir = layout.buildDirectory.dir('resources/main').get().asFile
+    }
+    test {
+        java {
+            destinationDirectory = layout.buildDirectory.dir('classes/java/test').get().asFile
+        }
+        output.resourcesDir = layout.buildDirectory.dir('resources/test').get().asFile
+    }
+}
+
+tasks.withType(Jar).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+task cleanupGeneratedJavaFiles() {
+    def tempDir = file("$buildDir/generated/temp-java")
+    def targetDir = file("$buildDir/generated/java")
+
+    inputs.dir(tempDir)
+    outputs.dir(targetDir)
+
+    doLast {
+        copy {
+            from tempDir
+            into targetDir
+            filter { line ->
+                line
+                    .replaceAll(", \\)", ")")
+                    .replaceAll(", , @HeaderMap", ", @HeaderMap")
+                    .replaceAll("\\(, ", "(")
+            }
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
+    }
+    dependsOn("buildJavaSdk")
+}
+
+tasks.named('compileJava') {
+    outputs.cacheIf { true }
+    dependsOn(buildJavaSdk, cleanupGeneratedJavaFiles, licenseFormatMain, spotlessMiscApply)
+    mustRunAfter(licenseFormatMain, cleanupGeneratedJavaFiles)
+}
+
+tasks.named('sourcesJar') {
+    dependsOn(cleanupGeneratedJavaFiles)
+    mustRunAfter(cleanupGeneratedJavaFiles)
+
+    from(sourceSets.main.java.srcDirs) {
+        include "**/*.java"
+    }
+}
+
+tasks.named('licenseFormatMain') {
+    dependsOn(cleanupGeneratedJavaFiles)
+    mustRunAfter(cleanupGeneratedJavaFiles)
+    source = sourceSets.main.java.srcDirs
+}
+
+tasks.named('licenseMain') {
+    dependsOn(licenseFormatMain)
+    mustRunAfter(licenseFormatMain)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+    options.errorprone {
+        excludedPaths = '.*/build/generated/java/src/main/java/.*'
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+configurations {
+    generatedCompileClasspath.extendsFrom implementation
+    generatedRuntimeClasspath.extendsFrom runtimeClasspath
+}
+
+javadoc {
+    options.encoding = 'UTF-8'
+}
+
+spotbugsMain {
+    enabled = false
+}
+
+spotbugsTest {
+    enabled = false
+}
+
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/build/generated/**',
+                '**/org/apache/fineract/client/models/**',
+                '**/org/apache/fineract/client/services/**Api.class',
+                '**/org/apache/fineract/client/auth/**'
+            ])
+        }))
+    }
+}
+
+test {
+    finalizedBy jacocoTestReport
+}

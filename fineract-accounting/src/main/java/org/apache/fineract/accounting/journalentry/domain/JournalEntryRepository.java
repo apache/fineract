@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.accounting.journalentry.domain;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -40,5 +41,28 @@ public interface JournalEntryRepository extends JpaRepository<JournalEntry, Long
 
     @Query("select journalEntry from JournalEntry journalEntry where journalEntry.transactionId= :transactionId and journalEntry.reversed=false and journalEntry.entityType = :entityType order by journalEntry.transactionDate asc, journalEntry.createdDate asc, journalEntry.id asc")
     List<JournalEntry> findJournalEntries(@Param("transactionId") String transactionId, @Param("entityType") Integer entityType);
+
+    @Query("""
+            SELECT DISTINCT je.transactionDate
+            FROM JournalEntry je
+            WHERE je.transactionDate>:afterDate
+            """)
+    List<LocalDate> findTransactionDatesAfter(LocalDate afterDate);
+
+    @Query("""
+                SELECT je.office.id,
+                       je.glAccount.id,
+                       SUM(CASE WHEN je.type = 1
+                                THEN -1 * je.amount
+                                ELSE je.amount
+                       END),
+                       je.transactionDate,
+                       je.createdDate,
+                       SUM(je.amount)
+                FROM JournalEntry je
+                WHERE je.transactionDate = :transactionDate
+                GROUP BY je.office.id, je.glAccount.id, je.transactionDate, je.createdDate
+            """)
+    List<Object[]> findTrialBalanceLinesForDate(@Param("transactionDate") LocalDate transactionDate);
 
 }

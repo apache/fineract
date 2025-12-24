@@ -393,6 +393,7 @@ When writing new Cucumber tests:
 1. *Create Feature File*: Add new `.feature` file in `fineract-e2e-tests-runner/src/test/resources/features/`
 
 2. *Use Gherkin Syntax*:
++
 [source,gherkin]
 ----
 Feature: Loan Disbursement
@@ -409,6 +410,7 @@ Feature: Loan Disbursement
 3. *Implement Step Definitions*: Add corresponding step definitions in `fineract-e2e-tests-core/src/test/java/org/apache/fineract/test/stepdef/`
 
 4. *Add Tags*: Tag scenarios appropriately:
++
 [source,gherkin]
 ----
 @TestRailId:C1234 @Smoke
@@ -416,6 +418,7 @@ Scenario: Critical loan test
 ----
 
 5. *Verify with Gradle*:
++
 [source,bash]
 ----
 cd fineract-e2e-tests-runner

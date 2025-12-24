@@ -24,7 +24,9 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.glaccount.domain.TrialBalance;
+import org.apache.fineract.accounting.glaccount.domain.TrialBalanceRepository;
 import org.apache.fineract.accounting.glaccount.domain.TrialBalanceRepositoryWrapper;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSourceServiceFactory;
@@ -41,59 +43,87 @@ public class UpdateTrialBalanceDetailsTasklet implements Tasklet {
 
     private final RoutingDataSourceServiceFactory dataSourceServiceFactory;
     private final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper;
+    private final TrialBalanceRepository trialBalanceRepository;
+    private final JournalEntryRepository journalEntryRepository;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
-        final StringBuilder tbGapSqlBuilder = new StringBuilder(500);
-        tbGapSqlBuilder.append("select distinct(je.transaction_date) ").append("from acc_gl_journal_entry je ")
-                .append("where je.transaction_date > (select coalesce(MAX(created_date),'2010-01-01') from m_trial_balance)");
-        final List<LocalDate> tbGaps = jdbcTemplate.queryForList(tbGapSqlBuilder.toString(), LocalDate.class);
+
+        processTrialBalanceGaps(jdbcTemplate);
+        updateClosingBalances(jdbcTemplate);
+
+        return RepeatStatus.FINISHED;
+    }
+
+    private void processTrialBalanceGaps(JdbcTemplate jdbcTemplate) {
+        LocalDate maxCreatedDate = trialBalanceRepository.findMaxCreatedDate();
+        LocalDate baselineDate = maxCreatedDate != null ? maxCreatedDate : LocalDate.of(2010, 1, 1);
+        List<LocalDate> tbGaps = journalEntryRepository.findTransactionDatesAfter(baselineDate);
         for (LocalDate tbGap : tbGaps) {
-            int days = DateUtils.getExactDifferenceInDays(tbGap, DateUtils.getBusinessLocalDate());
-            if (days < 1) {
+            if (DateUtils.getExactDifferenceInDays(tbGap, DateUtils.getBusinessLocalDate()) < 1) {
                 continue;
             }
-            final StringBuilder sqlBuilder = new StringBuilder(600);
-            sqlBuilder.append("Insert Into m_trial_balance(office_id, account_id, Amount, entry_date, created_date,closing_balance) ")
-                    .append("Select je.office_id, je.account_id, SUM(CASE WHEN je.type_enum=1 THEN (-1) * je.amount ELSE je.amount END) ")
-                    .append("as Amount, Date(je.entry_date) as Entry_Date, je.transaction_date as Created_Date,sum(je.amount) as closing_balance ")
-                    .append("from acc_gl_journal_entry je WHERE je.transaction_date = ? ")
-                    .append("group by je.account_id, je.office_id, je.transaction_date, Date(je.entry_date)");
-            final int result = jdbcTemplate.update(sqlBuilder.toString(), tbGap);
-            log.debug("{}: Records affected by updateTrialBalanceDetails: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+            insertTrialBalanceForDate(tbGap);
         }
-        String distinctOfficeQuery = "select distinct(office_id) from m_trial_balance where closing_balance is null group by office_id";
-        final List<Long> officeIds = jdbcTemplate.queryForList(distinctOfficeQuery, Long.class);
+    }
+
+    private void insertTrialBalanceForDate(LocalDate tbGap) {
+        List<Object[]> rows = journalEntryRepository.findTrialBalanceLinesForDate(tbGap);
+
+        List<TrialBalance> trialBalances = rows.stream().map(row -> {
+            TrialBalance tb = new TrialBalance();
+            tb.setOfficeId((Long) row[0]);
+            tb.setGlAccountId((Long) row[1]);
+            tb.setAmount((BigDecimal) row[2]);
+            tb.setEntryDate((LocalDate) row[3]);
+            tb.setTransactionDate((LocalDate) row[4]);
+            tb.setClosingBalance((BigDecimal) row[5]);
+            return tb;
+        }).toList();
+
+        trialBalanceRepositoryWrapper.save(trialBalances);
+
+        log.debug("{}: Records affected by updateTrialBalanceDetails: {}", ThreadLocalContextUtil.getTenant().getName(),
+                trialBalances.size());
+    }
+
+    private void updateClosingBalances(JdbcTemplate jdbcTemplate) {
+        final List<Long> officeIds = trialBalanceRepository.findDistinctOfficeIdsWithNullClosingBalance();
+
         for (Long officeId : officeIds) {
-            String distinctAccountQuery = "select distinct(account_id) from m_trial_balance where office_id=? and closing_balance is null group by account_id";
-            final List<Long> accountIds = jdbcTemplate.queryForList(distinctAccountQuery, Long.class, officeId);
-            for (Long accountId : accountIds) {
-                final String closingBalanceQuery = "select closing_balance from m_trial_balance where office_id=? and account_id=? and closing_balance "
-                        + "is not null order by created_date desc, entry_date desc limit 1";
-                List<BigDecimal> closingBalanceData = jdbcTemplate.queryForList(closingBalanceQuery, BigDecimal.class, officeId, accountId);
-                List<TrialBalance> tbRows = trialBalanceRepositoryWrapper.findNewByOfficeAndAccount(officeId, accountId);
-                BigDecimal closingBalance = null;
-                if (!CollectionUtils.isEmpty(closingBalanceData)) {
-                    closingBalance = closingBalanceData.get(0);
-                }
-                if (CollectionUtils.isEmpty(closingBalanceData)) {
-                    closingBalance = BigDecimal.ZERO;
-                    for (TrialBalance row : tbRows) {
-                        closingBalance = closingBalance.add(row.getAmount());
-                        row.setClosingBalance(closingBalance);
-                    }
-                } else {
-                    for (TrialBalance tbRow : tbRows) {
-                        if (closingBalance != null) {
-                            closingBalance = closingBalance.add(tbRow.getAmount());
-                        }
-                        tbRow.setClosingBalance(closingBalance);
-                    }
-                }
-                trialBalanceRepositoryWrapper.save(tbRows);
-            }
+            updateClosingBalancesForOffice(jdbcTemplate, officeId);
         }
-        return RepeatStatus.FINISHED;
+    }
+
+    private void updateClosingBalancesForOffice(JdbcTemplate jdbcTemplate, Long officeId) {
+        final List<Long> accountIds = trialBalanceRepository.findDistinctAccountIdsWithNullClosingBalanceByOfficeId(officeId);
+
+        for (Long accountId : accountIds) {
+            updateClosingBalanceForAccount(jdbcTemplate, officeId, accountId);
+        }
+    }
+
+    private void updateClosingBalanceForAccount(JdbcTemplate jdbcTemplate, Long officeId, Long accountId) {
+        BigDecimal closingBalance = getPreviousClosingBalance(officeId, accountId);
+        List<TrialBalance> tbRows = trialBalanceRepositoryWrapper.findNewByOfficeAndAccount(officeId, accountId);
+
+        updateTrialBalanceRows(tbRows, closingBalance);
+    }
+
+    private BigDecimal getPreviousClosingBalance(Long officeId, Long accountId) {
+        List<BigDecimal> closingBalanceData = trialBalanceRepository.findLastClosingBalance(officeId, accountId);
+        return CollectionUtils.isEmpty(closingBalanceData) ? BigDecimal.ZERO : closingBalanceData.getFirst();
+    }
+
+    private void updateTrialBalanceRows(List<TrialBalance> tbRows, BigDecimal initialClosingBalance) {
+        BigDecimal closingBalance = initialClosingBalance;
+
+        for (TrialBalance row : tbRows) {
+            if (closingBalance != null) {
+                closingBalance = closingBalance.add(row.getAmount());
+            }
+            row.setClosingBalance(closingBalance);
+        }
     }
 }

@@ -24,7 +24,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -69,13 +68,15 @@ import org.springframework.stereotype.Component;
 
 @Path("/v1/accountingrules")
 @Component
-@Tag(name = "Accounting Rules", description = "It is typical scenario in MFI's that non accountants pass journal entries on a regular basis. For Ex: A branch office might deposit their entire cash at hand to their Bank account at the end of a working day. The branch office users might not understand enough of accounting to figure out which account needs to get credited and which account needs to be debited to represent this transaction.\n"
-        + "\n"
-        + "Enter accounting rules, an abstraction on top of manual Journal entires for enabling simpler data entry. An accounting rule can define any of the following abstractions\n"
-        + "\n" + "A Simple journal entry where both the credit and debit account have been preselected\n"
-        + "A Simple journal entry where either credit or debit accounts have been limited to a pre-selected list of accounts (Ex: Debit account should be one of \"Bank of America\" of \"JP Morgan\" and credit account should be \"Cash\")\n"
-        + "A Compound journal entry where multiple debits and / or multiple credits may be made amongst a set of preselected list of accounts (Ex: Credit account should be either \"Bank Of America\" or \"Cash\" and debit account can be \"Employee Salary\" and/or \"Miscellenous Expenses\")\n"
-        + "An accounting rule can also be optionally associated with a branch, so that only a particular Branch's users have access to the rule")
+@Tag(name = "Accounting Rules", description = """
+        It is typical scenario in MFI's that non accountants pass journal entries on a regular basis. For Ex: A branch office might deposit their entire cash at hand to their Bank account at the end of a working day. The branch office users might not understand enough of accounting to figure out which account needs to get credited and which account needs to be debited to represent this transaction.
+
+        Enter accounting rules, an abstraction on top of manual Journal entires for enabling simpler data entry. An accounting rule can define any of the following abstractions
+
+        A Simple journal entry where both the credit and debit account have been preselected
+        A Simple journal entry where either credit or debit accounts have been limited to a pre-selected list of accounts (Ex: Debit account should be one of "Bank of America" of "JP Morgan" and credit account should be "Cash")
+        A Compound journal entry where multiple debits and / or multiple credits may be made amongst a set of preselected list of accounts (Ex: Credit account should be either "Bank Of America" or "Cash" and debit account can be "Employee Salary" and/or "Miscellenous Expenses")
+        An accounting rule can also be optionally associated with a branch, so that only a particular Branch's users have access to the rule""")
 @RequiredArgsConstructor
 public class AccountingRuleApiResource {
 
@@ -94,8 +95,14 @@ public class AccountingRuleApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve Accounting Rule Details Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
-            + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "accountingrules/template")
+    @Operation(summary = "Retrieve Accounting Rule Details Template", description = """
+            This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+
+            Field Defaults
+            Allowed Value Lists
+            Example Request:
+
+            accountingrules/template""")
     public AccountingRuleData retrieveTemplate() {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
         return handleTemplate(null);
@@ -104,8 +111,12 @@ public class AccountingRuleApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve Accounting Rules", description = "Returns the list of defined accounting rules.\n" + "\n"
-            + "Example Requests:\n" + "\n" + "accountingrules")
+    @Operation(summary = "Retrieve Accounting Rules", description = """
+            Returns the list of defined accounting rules.
+
+            Example Requests:
+
+            accountingrules""")
     public List<AccountingRuleData> retrieveAllAccountingRules(@Context final UriInfo uriInfo) {
         final AppUser currentUser = context.authenticatedUser();
         currentUser.validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
@@ -122,8 +133,12 @@ public class AccountingRuleApiResource {
     @Path("{accountingRuleId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Accounting rule", description = "Returns the details of a defined Accounting rule.\n" + "\n"
-            + "Example Requests:\n" + "\n" + "accountingrules/1")
+    @Operation(summary = "Retrieve a Accounting rule", description = """
+            Returns the details of a defined Accounting rule.
+
+            Example Requests:
+
+            accountingrules/1""")
     public AccountingRuleData retreiveAccountingRule(
             @PathParam("accountingRuleId") @Parameter(description = "accountingRuleId") final Long accountingRuleId,
             @Context final UriInfo uriInfo) {
@@ -138,12 +153,18 @@ public class AccountingRuleApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Create/Define a Accounting rule", description = "Define a new Accounting rule.\n" + "\n" + "Mandatory Fields\n"
-            + "name, officeId,\n" + "accountToDebit OR debitTags,\n" + "accountToCredit OR creditTags.\n" + "\n" + "Optional Fields\n"
-            + "description")
+    @Operation(summary = "Create/Define a Accounting rule", description = """
+            Define a new Accounting rule.
+
+            Mandatory Fields
+            name, officeId,
+            accountToDebit OR debitTags,
+            accountToCredit OR creditTags.
+
+            Optional Fields
+            description""")
     @RequestBody(content = @Content(schema = @Schema(implementation = AccountRuleRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.PostAccountingRulesResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.PostAccountingRulesResponse.class)))
     public CommandProcessingResult createAccountingRule(@Parameter(hidden = true) AccountRuleRequest accountRuleRequest) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createAccountingRule()
                 .withJson(apiJsonSerializerService.serialize(accountRuleRequest)).build();
@@ -157,8 +178,7 @@ public class AccountingRuleApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Accounting Rule", description = "Updates the details of a Accounting rule.")
     @RequestBody(content = @Content(schema = @Schema(implementation = AccountRuleRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.PutAccountingRulesResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.PutAccountingRulesResponse.class)))
     public CommandProcessingResult updateAccountingRule(
             @PathParam("accountingRuleId") @Parameter(description = "accountingRuleId") final Long accountingRuleId,
             @Parameter(hidden = true) AccountRuleRequest accountRuleRequest) {
@@ -173,8 +193,7 @@ public class AccountingRuleApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Accounting Rule", description = "Deletes a Accounting rule.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.DeleteAccountingRulesResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.DeleteAccountingRulesResponse.class)))
     public CommandProcessingResult deleteAccountingRule(
             @PathParam("accountingRuleId") @Parameter(description = "accountingRuleId") final Long accountingRuleId) {
 

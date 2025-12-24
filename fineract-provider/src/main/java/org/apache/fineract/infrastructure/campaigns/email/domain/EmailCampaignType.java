@@ -41,19 +41,12 @@ public enum EmailCampaignType {
     }
 
     public static EmailCampaignType fromInt(final Integer typeValue) {
-        EmailCampaignType type = null;
-        switch (typeValue) {
-            case 1:
-                type = DIRECT;
-            break;
-            case 2:
-                type = SCHEDULE;
-            break;
-            case 3:
-                type = TRIGGERED;
-            break;
-        }
-        return type;
+        return switch (typeValue) {
+            case 1 -> DIRECT;
+            case 2 -> SCHEDULE;
+            case 3 -> TRIGGERED;
+            default -> null;
+        };
     }
 
     public boolean isDirect() {

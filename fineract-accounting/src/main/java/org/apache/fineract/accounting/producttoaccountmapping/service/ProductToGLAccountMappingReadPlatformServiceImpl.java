@@ -36,11 +36,10 @@ import org.apache.fineract.accounting.common.AccountingConstants.SharesProductAc
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.common.AccountingValidations;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
-import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeOffReasonToGLAccountMapper;
+import org.apache.fineract.accounting.producttoaccountmapping.data.AdvancedMappingToExpenseAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ClassificationToGLAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
-import org.apache.fineract.accounting.producttoaccountmapping.data.WriteOffReasonsToExpenseAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMapping;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
@@ -275,39 +274,33 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         return chargeToGLAccountMappers;
     }
 
-    private List<ChargeOffReasonToGLAccountMapper> fetchChargeOffReasonMappings(final PortfolioProductType portfolioProductType,
+    private List<AdvancedMappingToExpenseAccountData> fetchChargeOffReasonMappings(final PortfolioProductType portfolioProductType,
             final Long loanProductId) {
-        final List<ProductToGLAccountMapping> mappings = productToGLAccountMappingRepository.findAllChargeOffReasonsMappings(loanProductId,
-                portfolioProductType.getValue());
-        List<ChargeOffReasonToGLAccountMapper> chargeOffReasonToGLAccountMappers = mappings.isEmpty() ? null : new ArrayList<>();
+        return fetchAdvancedMappingToExpenseAccountData(
+                productToGLAccountMappingRepository.findAllChargeOffReasonsMappings(loanProductId, portfolioProductType.getValue()));
+    }
+
+    private List<AdvancedMappingToExpenseAccountData> fetchWriteOffReasonMappings(final PortfolioProductType portfolioProductType,
+            final Long loanProductId) {
+        return fetchAdvancedMappingToExpenseAccountData(
+                productToGLAccountMappingRepository.findAllWriteOffReasonsMappings(loanProductId, portfolioProductType.getValue()));
+    }
+
+    private List<AdvancedMappingToExpenseAccountData> fetchAdvancedMappingToExpenseAccountData(
+            final List<ProductToGLAccountMapping> mappings) {
+        List<AdvancedMappingToExpenseAccountData> advancedMappingToExpenseAccountData = mappings.isEmpty() ? null : new ArrayList<>();
         for (final ProductToGLAccountMapping mapping : mappings) {
             final Long glAccountId = mapping.getGlAccount().getId();
             final String glAccountName = mapping.getGlAccount().getName();
             final String glCode = mapping.getGlAccount().getGlCode();
-            final GLAccountData chargeOffExpenseAccount = new GLAccountData().setId(glAccountId).setName(glAccountName).setGlCode(glCode);
-            final CodeValueData chargeOffReasonsCodeValue = codeValueMapper.map(mapping.getChargeOffReason());
+            final GLAccountData expenseAccount = new GLAccountData().setId(glAccountId).setName(glAccountName).setGlCode(glCode);
+            final CodeValueData codeValue = (mapping.getChargeOffReason() != null) ? codeValueMapper.map(mapping.getChargeOffReason())
+                    : codeValueMapper.map(mapping.getWriteOffReason());
 
-            final ChargeOffReasonToGLAccountMapper chargeOffReasonToGLAccountMapper = new ChargeOffReasonToGLAccountMapper()
-                    .setChargeOffReasonCodeValue(chargeOffReasonsCodeValue).setExpenseAccount(chargeOffExpenseAccount);
-            chargeOffReasonToGLAccountMappers.add(chargeOffReasonToGLAccountMapper);
+            advancedMappingToExpenseAccountData
+                    .add(new AdvancedMappingToExpenseAccountData().setReasonCodeValue(codeValue).setExpenseAccount(expenseAccount));
         }
-        return chargeOffReasonToGLAccountMappers;
-    }
-
-    private List<WriteOffReasonsToExpenseAccountMapper> fetchWriteOffReasonMappings(final PortfolioProductType portfolioProductType,
-            final Long loanProductId) {
-        final List<ProductToGLAccountMapping> mappings = productToGLAccountMappingRepository.findAllWriteOffReasonsMappings(loanProductId,
-                portfolioProductType.getValue());
-        List<WriteOffReasonsToExpenseAccountMapper> writeOffReasonsToExpenseAccountMappers = mappings.isEmpty() ? null : new ArrayList<>();
-        for (final ProductToGLAccountMapping mapping : mappings) {
-            final String glCode = String.valueOf(mapping.getGlAccount().getId());
-            final String writeOffReasonId = String.valueOf(mapping.getWriteOffReason().getId());
-
-            final WriteOffReasonsToExpenseAccountMapper writeOffReasonToGLAccountMapper = new WriteOffReasonsToExpenseAccountMapper()
-                    .setWriteOffReasonCodeValueId(writeOffReasonId).setExpenseAccountId(glCode);
-            writeOffReasonsToExpenseAccountMappers.add(writeOffReasonToGLAccountMapper);
-        }
-        return writeOffReasonsToExpenseAccountMappers;
+        return advancedMappingToExpenseAccountData;
     }
 
     private List<ClassificationToGLAccountData> fetchClassificationMappings(final PortfolioProductType portfolioProductType,
@@ -380,12 +373,12 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
     }
 
     @Override
-    public List<ChargeOffReasonToGLAccountMapper> fetchChargeOffReasonMappingsForLoanProduct(Long loanProductId) {
+    public List<AdvancedMappingToExpenseAccountData> fetchChargeOffReasonMappingsForLoanProduct(Long loanProductId) {
         return fetchChargeOffReasonMappings(PortfolioProductType.LOAN, loanProductId);
     }
 
     @Override
-    public List<WriteOffReasonsToExpenseAccountMapper> fetchWriteOffReasonMappingsForLoanProduct(Long loanProductId) {
+    public List<AdvancedMappingToExpenseAccountData> fetchWriteOffReasonMappingsForLoanProduct(Long loanProductId) {
         return fetchWriteOffReasonMappings(PortfolioProductType.LOAN, loanProductId);
     }
 

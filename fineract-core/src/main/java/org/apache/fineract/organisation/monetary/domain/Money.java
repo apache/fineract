@@ -21,6 +21,7 @@ package org.apache.fineract.organisation.monetary.domain;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Iterator;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 public class Money implements Comparable<Money> {
@@ -45,9 +46,8 @@ public class Money implements Comparable<Money> {
 
         // round monetary amounts into multiples of say 20/50.
         if (currency.getInMultiplesOf() != null && currency.getDecimalPlaces() == 0 && currency.getInMultiplesOf() > 0
-                && amountScaled.doubleValue() > 0) {
-            final double existingVal = amountScaled.doubleValue();
-            amountScaled = BigDecimal.valueOf(roundToMultiplesOf(existingVal, currency.getInMultiplesOf()));
+                && MathUtil.isGreaterThanZero(amountScaled)) {
+            amountScaled = roundToMultiplesOf(amountScaled, currency.getInMultiplesOf());
         }
         this.amount = amountScaled.setScale(currency.getDecimalPlaces(), getMc().getRoundingMode());
     }

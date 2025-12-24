@@ -1,11 +1,4 @@
 = Journal Entry Aggregation
-:experimental:
-:source-highlighter: highlightjs
-:toc: left
-:toclevels: 3
-:icons: font
-:sectlinks:
-:sectnums:
 
 == Overview
 The Journal Entry Aggregation Job is a Spring Batch-based solution designed to efficiently aggregate journal entries in the Fineract system. This job processes journal entries in configurable chunks, improving performance and resource utilization when dealing with large volumes of financial transactions.

@@ -50,5 +50,6 @@ public class AccountingBridgeDataDTO {
     private boolean merchantBuyDownFee;
     private List<AdvancedMappingtDTO> buydownFeeClassificationCodeValue;
     private List<AdvancedMappingtDTO> capitalizedIncomeClassificationCodeValue;
+    private AdvancedMappingtDTO writeOffReasonCodeValue;
 
 }

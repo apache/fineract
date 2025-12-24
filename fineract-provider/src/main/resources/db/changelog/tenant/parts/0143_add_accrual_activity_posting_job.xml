@@ -23,6 +23,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <changeSet author="fineract" id="1">
+        <validCheckSum>9:7e5d899e1fb2620db5c145145679f1a9</validCheckSum>
         <insert tableName="job">
             <column name="name" value="Accrual Activity Posting"/>
             <column name="display_name" value="Accrual Activity Posting"/>

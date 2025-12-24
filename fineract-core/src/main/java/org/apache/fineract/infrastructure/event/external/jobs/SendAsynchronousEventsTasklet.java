@@ -86,7 +86,7 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
         return RepeatStatus.FINISHED;
     }
 
-    private boolean isDownstreamChannelEnabled() {
+    protected boolean isDownstreamChannelEnabled() {
         return fineractProperties.getEvents().getExternal().getProducer().getJms().isEnabled()
                 || fineractProperties.getEvents().getExternal().getProducer().getKafka().isEnabled();
     }

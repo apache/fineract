@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core.persistence;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.FlushModeType;
 import jakarta.persistence.PersistenceContext;
+import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -30,10 +31,28 @@ public class FlushModeHandler {
     private EntityManager entityManager;
 
     public void withFlushMode(FlushModeType flushMode, Runnable runnable) {
+        withFlushMode(flushMode, () -> {
+            runnable.run();
+            return null;
+        });
+    }
+
+    /**
+     * Executes the provided supplier with the specified flush mode, then restores the original flush mode.
+     *
+     * @param flushMode
+     *            the flush mode to set
+     * @param supplier
+     *            the code to execute
+     * @param <T>
+     *            the type of the result
+     * @return the result of the supplier
+     */
+    public <T> T withFlushMode(FlushModeType flushMode, Supplier<T> supplier) {
         FlushModeType original = entityManager.getFlushMode();
         try {
             entityManager.setFlushMode(flushMode);
-            runnable.run();
+            return supplier.get();
         } finally {
             entityManager.setFlushMode(original);
         }

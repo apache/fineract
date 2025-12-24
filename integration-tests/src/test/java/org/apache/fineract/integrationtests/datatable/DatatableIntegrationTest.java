@@ -965,4 +965,90 @@ public class DatatableIntegrationTest extends IntegrationTest {
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
+    @Test
+    public void testDropNullColumnWithData() {
+        // Create datatable for client entity
+        final HashMap<String, Object> columnMap = new HashMap<>();
+        final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
+        columnMap.put("datatableName", Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5));
+        columnMap.put("apptableName", CLIENT_APP_TABLE_NAME);
+        columnMap.put("entitySubType", CLIENT_PERSON_SUBTYPE_NAME);
+        columnMap.put("multiRow", false);
+
+        // Add columns: one that will have data and one that will be NULL
+        addDatatableColumn(datatableColumnsList, "columnWithData", "String", false, 50, null);
+        addDatatableColumn(datatableColumnsList, "columnWithNull", "String", false, 50, null);
+        columnMap.put("columns", datatableColumnsList);
+
+        String datatableRequestJsonString = new Gson().toJson(columnMap);
+        LOG.info("Creating datatable: {}", datatableRequestJsonString);
+
+        HashMap<String, Object> datatableResponse = this.datatableHelper.createDatatable(datatableRequestJsonString, "");
+        String datatableName = (String) datatableResponse.get("resourceIdentifier");
+        assertNotNull(datatableName);
+        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, datatableName);
+
+        // Create a client
+        final Integer clientId = ClientHelper.createClientAsPerson(requestSpec, responseSpec);
+
+        // Create a datatable entry with data in one column and NULL in the other
+        final HashMap<String, Object> datatableEntryMap = new HashMap<>();
+        datatableEntryMap.put("columnWithData", "TestValue");
+        // columnWithNull is intentionally not set, so it will be NULL
+        datatableEntryMap.put("locale", "en");
+
+        String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
+        LOG.info("Creating datatable entry: {}", datatableEntryRequestJsonString);
+
+        final boolean genericResultSet = true;
+        HashMap<String, Object> datatableEntryResponse = this.datatableHelper.createDatatableEntry(datatableName, clientId,
+                genericResultSet, datatableEntryRequestJsonString);
+        assertNotNull(datatableEntryResponse.get("resourceId"), "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
+        assertEquals(clientId, datatableEntryResponse.get("resourceId"));
+
+        // Verify column count before drop
+        GetDataTablesResponse dataTableBeforeDrop = datatableHelper.getDataTableDetails(datatableName);
+        List<ResultsetColumnHeaderData> columnHeadersBeforeDrop = dataTableBeforeDrop.getColumnHeaderData();
+        // Should have 5 columns before drop: client_id, columnWithData, columnWithNull, created_at, updated_at
+        // Note: Datatables automatically add audit columns (created_at, updated_at)
+        assertEquals(5, columnHeadersBeforeDrop.size(), "Should have 5 columns before dropping columnWithNull");
+
+        // Now try to drop the NULL column - this should succeed with the fix
+        HashMap<String, Object> updateMap = new HashMap<>();
+        updateMap.put("apptableName", CLIENT_APP_TABLE_NAME);
+        updateMap.put("entitySubType", CLIENT_PERSON_SUBTYPE_NAME);
+        List<Map<String, Object>> dropColumnsList = Collections.singletonList(Collections.singletonMap("name", "columnWithNull"));
+        updateMap.put("dropColumns", dropColumnsList);
+
+        String updateRequestJsonString = new Gson().toJson(updateMap);
+        LOG.info("Dropping NULL column: {}", updateRequestJsonString);
+
+        PutDataTablesResponse updateResponse = this.datatableHelper.updateDatatable(datatableName, updateRequestJsonString);
+        assertNotNull(updateResponse);
+        assertEquals(datatableName, updateResponse.getResourceIdentifier());
+
+        // Verify the column was dropped
+        GetDataTablesResponse dataTable = datatableHelper.getDataTableDetails(datatableName);
+        List<ResultsetColumnHeaderData> columnHeaders = dataTable.getColumnHeaderData();
+        // Should have 4 columns after drop: client_id, columnWithData, created_at, updated_at (columnWithNull should be
+        // dropped)
+        assertEquals(4, columnHeaders.size(), "Should have 4 columns after dropping columnWithNull");
+        boolean hasColumnWithData = false;
+        boolean hasColumnWithNull = false;
+        for (ResultsetColumnHeaderData header : columnHeaders) {
+            if ("columnWithData".equals(header.getColumnName())) {
+                hasColumnWithData = true;
+            }
+            if ("columnWithNull".equals(header.getColumnName())) {
+                hasColumnWithNull = true;
+            }
+        }
+        assertTrue(hasColumnWithData, "columnWithData should still exist");
+        assertFalse(hasColumnWithNull, "columnWithNull should have been dropped");
+
+        // Clean up
+        this.datatableHelper.deleteDatatableEntries(datatableName, clientId, "clientId");
+        this.datatableHelper.deleteDatatable(datatableName);
+    }
+
 }

@@ -28,4 +28,10 @@ public interface LoanReAgingApiConstants {
     String frequencyNumber = "frequencyNumber";
     String startDate = "startDate";
     String numberOfInstallments = "numberOfInstallments";
+
+    String reAgeInterestHandlingParamName = "reAgeInterestHandling";
+    String reasonCodeValueIdParamName = "reasonCodeValueId";
+
+    String transactionAmountParamName = "transactionAmount";
+    String noteParamName = "note";
 }

@@ -6251,6 +6251,75 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         });
     }
 
+    // UC158: Repayment schedule handling for flat cumulative multi-disbursement
+    @Test
+    public void uc158() {
+        AtomicLong loanIdRef = new AtomicLong();
+        Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final BigDecimal principalAmount = BigDecimal.valueOf(2000.0);
+
+        runAt("1 January 2024", () -> {
+            // Create a Cumulative Multidisbursal and Flat Interest Type
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(
+                    createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct().interestType(InterestType.FLAT).daysInMonthType(30)//
+                            .transactionProcessingStrategyCode(LoanProductTestBuilder.DEFAULT_STRATEGY).interestRateFrequencyType(YEARS)
+                            .daysInYearType(365).loanScheduleType(LoanScheduleType.CUMULATIVE.toString()).repaymentEvery(1)
+                            .installmentAmountInMultiplesOf(null)//
+                            .repaymentFrequencyType(2L)//
+            );
+            assertNotNull(loanProductResponse.getResourceId());
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), "1 January 2024",
+                    principalAmount.doubleValue(), 3).interestCalculationPeriodType(1).interestType(InterestType.FLAT)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.DEFAULT_STRATEGY).interestRateFrequencyType(YEARS)//
+                    .interestRatePerPeriod(BigDecimal.valueOf(7.0))//
+                    .repaymentEvery(1)//
+                    .repaymentFrequencyType(MONTHS)//
+                    .loanTermFrequency(3)//
+                    .loanTermFrequencyType(MONTHS);
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().approvedLoanAmount(principalAmount)
+                    .dateFormat(DATETIME_PATTERN).approvedOnDate("1 January 2024").locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("1 January 2024").dateFormat(DATETIME_PATTERN).locale("en")
+                            .transactionAmount(BigDecimal.valueOf(1000.00)));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 1017.50, 0.00, 1000.00, 0.00, null);
+            validatePeriod(loanDetails, 0, LocalDate.of(2024, 1, 1), null, 1000.0, null, null, null, 0.0, 0.0, null, null, null, null, null,
+                    null, null, null, null);
+            validatePeriod(loanDetails, 1, LocalDate.of(2024, 2, 1), null, 666.67, 333.33, 0.00, 333.33, 0.0, 0.0, 0.0, 0.00, 0.00, 0.00,
+                    5.83, 0.00, 5.83, 0.00, 0.00);
+            validatePeriod(loanDetails, 2, LocalDate.of(2024, 3, 1), null, 333.34, 333.33, 0.00, 333.33, 0.0, 0.0, 0.0, 0.00, 0.00, 0.00,
+                    5.83, 0.00, 5.83, 0.00, 0.00);
+            validatePeriod(loanDetails, 3, LocalDate.of(2024, 4, 1), null, 0.00, 333.34, 0.00, 333.34, 0.0, 0.0, 0.00, 0.00, 0.00, 0.00,
+                    5.84, 0.00, 5.84, 0.00, 0.00);
+            loanIdRef.set(loanResponse.getLoanId());
+        });
+
+        runAt("15 January 2024", () -> {
+            final Long loanId = loanIdRef.get();
+
+            loanTransactionHelper.disburseLoan(loanId, new PostLoansLoanIdRequest().actualDisbursementDate("15 January 2024")
+                    .dateFormat(DATETIME_PATTERN).locale("en").transactionAmount(BigDecimal.valueOf(500.0)));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            validateLoanSummaryBalances(loanDetails, 1526.25, 0.00, 1500.00, 0.00, null);
+            validatePeriod(loanDetails, 0, LocalDate.of(2024, 1, 1), null, 1000.0, null, null, null, 0.0, 0.0, null, null, null, null, null,
+                    null, null, null, null);
+            validatePeriod(loanDetails, 1, LocalDate.of(2024, 1, 15), null, 500.0, null, null, null, 0.0, 0.0, null, null, null, null, null,
+                    null, null, null, null);
+            validatePeriod(loanDetails, 2, LocalDate.of(2024, 2, 1), null, 1000.00, 500.00, 0.00, 500.00, 0.0, 0.0, 0.0, 0.00, 0.00, 0.00,
+                    8.75, 0.00, 8.75, 0.00, 0.00);
+            validatePeriod(loanDetails, 3, LocalDate.of(2024, 3, 1), null, 500.00, 500.00, 0.00, 500.00, 0.0, 0.0, 0.0, 0.00, 0.00, 0.00,
+                    8.75, 0.00, 8.75, 0.00, 0.00);
+            validatePeriod(loanDetails, 4, LocalDate.of(2024, 4, 1), null, 0.00, 500.00, 0.00, 500.00, 0.0, 0.0, 0.00, 0.00, 0.00, 0.00,
+                    8.75, 0.00, 8.75, 0.00, 0.00);
+        });
+    }
+
     private Long applyAndApproveLoanProgressiveAdvancedPaymentAllocationStrategyMonthlyRepayments(Long clientId, Long loanProductId,
             Integer numberOfRepayments, String loanDisbursementDate, double amount) {
         LOG.info("------------------------------APPLY AND APPROVE LOAN ---------------------------------------");

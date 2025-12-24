@@ -36,13 +36,17 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanScheduleVariationsAddedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanScheduleVariationsDeletedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.common.service.Validator;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanTermVariationsRepository;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
-import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleService;
 import org.springframework.transaction.annotation.Transactional;
 
 @AllArgsConstructor
@@ -52,7 +56,8 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
     private final LoanTermVariationsRepository loanTermVariationsRepository;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanAssembler loanAssembler;
-    private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
+    private final BusinessEventNotifierService businessEventNotifierService;
+    private final LoanScheduleService loanScheduleService;
 
     @Override
     public CommandProcessingResult createInterestPause(final ExternalId loanExternalId, final String startDateString,
@@ -107,6 +112,12 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
                         "Variation not found for the given loan ID"));
 
         loanTermVariationsRepository.delete(variation);
+        loan.getLoanTermVariations().remove(variation);
+
+        loanScheduleService.regenerateScheduleWithReprocessingTransactions(loan);
+
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanScheduleVariationsDeletedBusinessEvent(loan));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
 
         return new CommandProcessingResultBuilder().withEntityId(variationId).build();
     }
@@ -130,6 +141,11 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
 
         LoanTermVariations updatedVariation = loanTermVariationsRepository.save(variation);
 
+        loanScheduleService.regenerateScheduleWithReprocessingTransactions(loan);
+
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanScheduleVariationsAddedBusinessEvent(loan));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
+
         return new CommandProcessingResultBuilder().withEntityId(updatedVariation.getId())
                 .with(Map.of("startDate", startDate.toString(), "endDate", endDate.toString())).build();
     }
@@ -145,7 +161,10 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
         final LoanTermVariations savedVariation = loanTermVariationsRepository.saveAndFlush(variation);
         loan.getLoanTermVariations().add(savedVariation);
 
-        reprocessLoanTransactionsService.reprocessTransactions(loan);
+        loanScheduleService.regenerateScheduleWithReprocessingTransactions(loan);
+
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanScheduleVariationsAddedBusinessEvent(loan));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
 
         return new CommandProcessingResultBuilder().withEntityId(savedVariation.getId()).build();
     }

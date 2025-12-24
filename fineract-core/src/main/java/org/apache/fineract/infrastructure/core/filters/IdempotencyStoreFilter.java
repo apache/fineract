@@ -54,17 +54,17 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter {
         extractIdempotentKeyFromHttpServletRequest(request).ifPresent(idempotentKey -> fineractRequestContextHolder
                 .setAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_ATTRIBUTE, idempotentKey, request));
 
-        filterChain.doFilter(request, wrapper.getValue() != null ? wrapper.getValue() : response);
+        filterChain.doFilter(request, wrapper.get() != null ? wrapper.get() : response);
         Optional<Long> commandId = helper.getCommandId(request);
-        boolean isSuccessWithoutStored = commandId.isPresent() && wrapper.getValue() != null && helper.isStoreIdempotencyKey(request)
+        boolean isSuccessWithoutStored = commandId.isPresent() && wrapper.get() != null && helper.isStoreIdempotencyKey(request)
                 && helper.isAllowedContentTypeResponse(response);
         if (isSuccessWithoutStored) {
-            helper.storeCommandResult(response.getStatus(), Optional.ofNullable(wrapper.getValue())
+            helper.storeCommandResult(response.getStatus(), Optional.ofNullable(wrapper.get())
                     .map(ContentCachingResponseWrapper::getContentAsByteArray).map(s -> new String(s, StandardCharsets.UTF_8)).orElse(null),
                     commandId.get());
         }
-        if (wrapper.getValue() != null) {
-            wrapper.getValue().copyBodyToResponse();
+        if (wrapper.get() != null) {
+            wrapper.get().copyBodyToResponse();
         }
     }
 

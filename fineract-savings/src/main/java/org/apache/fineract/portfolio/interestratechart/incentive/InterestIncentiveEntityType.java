@@ -51,7 +51,7 @@ public enum InterestIncentiveEntityType {
 
     @Override
     public String toString() {
-        return name().toString().replaceAll("_", " ");
+        return name().replace("_", " ");
     }
 
     public Integer getValue() {

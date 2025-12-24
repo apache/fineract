@@ -984,12 +984,10 @@ public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationT
                             new BigDecimal("0.000000")));
 
             final var allExternalEvents = ExternalEventHelper.getAllExternalEvents(REQUEST_SPEC, RESPONSE_SPEC);
-            Assertions.assertEquals(1, allExternalEvents.size());
-            Assertions.assertEquals("LoanOwnershipTransferBusinessEvent", allExternalEvents.get(0).getType());
-            Assertions.assertEquals(Long.valueOf(loanID), allExternalEvents.get(0).getAggregateRootId());
-
-            ExternalEventHelper.deleteAllExternalEvents(REQUEST_SPEC, new ResponseSpecBuilder().expectStatusCode(Matchers.is(204)).build());
-            ExternalEventHelper.changeEventState(REQUEST_SPEC, RESPONSE_SPEC, "LoanOwnershipTransferBusinessEvent", true);
+            List<ExternalEventResponse> loanOwnershipTransferBusinessEvents = allExternalEvents.stream()
+                    .filter(e -> e.getType().equals("LoanOwnershipTransferBusinessEvent")).toList();
+            Assertions.assertEquals(1, loanOwnershipTransferBusinessEvents.size());
+            Assertions.assertEquals(Long.valueOf(loanID), loanOwnershipTransferBusinessEvents.get(0).getAggregateRootId());
 
             getAndValidateThereIsActiveMapping(loanID);
 
@@ -1184,6 +1182,7 @@ public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationT
             assertEquals(0.00, jsonPath.getDouble("data[8].row[8]"), 0.01);
             assertEquals(ownerId, jsonPath.getString("data[8].row[9]"));
         } finally {
+            ExternalEventHelper.deleteAllExternalEvents(REQUEST_SPEC, new ResponseSpecBuilder().expectStatusCode(Matchers.is(204)).build());
             cleanUpAndRestoreBusinessDate();
         }
     }
@@ -1368,8 +1367,8 @@ public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationT
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("4").withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2").withAmortizationTypeAsEqualInstallments()
                 .withInterestTypeAsDecliningBalance().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate(date).withSubmittedOnDate(date).withCollaterals(collaterals)
-                .build(clientID, loanProductID, null);
+                .withExpectedDisbursementDate(date).withSubmittedOnDate(date).withCollaterals(collaterals).withInArrearsTolerance("0")
+                .withPrincipalGrace("0").withInterestGrace("0").build(clientID, loanProductID, null);
         return LOAN_TRANSACTION_HELPER.getLoanId(loanApplicationJSON);
     }
 
