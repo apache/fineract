@@ -18,4 +18,12 @@
     under the License.
 
 -->
-[FINERACT] [VOTE] [RESULT] 🧾️ ${project['fineract.release.version']} for release
+
+
+[INSTRUCTIONS:START]
+
+Conclude voting with the ATR (ASF Trusted Releases) tool.
+
+https://release-test.apache.org
+
+[INSTRUCTIONS:END]

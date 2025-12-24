@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.gradle
 
-import groovy.json.JsonSlurper
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.filefilter.NotFileFilter
 import org.apache.commons.io.filefilter.PrefixFileFilter
@@ -384,23 +383,7 @@ class FineractPlugin implements Plugin<Project> {
             doFirst {
                 FineractPluginExtension.FineractPluginStep step = step(extension, "step10")
 
-                String version = project.properties?['fineract.release.version']
-
-                if(!version) {
-                    TextIO textIO = TextIoFactory.getTextIO();
-
-                    version = textIO.newStringInputReader()
-                            .withPattern("\\d+.\\d+.\\d+")
-                            .read("Release Version");
-                }
-
-                // TODO: input validation, see FINERACT-1610
-
-                this.context?.project?['fineract.release.version'] = version
-
-                if(step.email) {
-                    emailService.send( processEmailParams(step.email, this.context) )
-                }
+                printInstructions(project, "step10")
             }
         }
 
@@ -409,28 +392,7 @@ class FineractPlugin implements Plugin<Project> {
             doFirst {
                 FineractPluginExtension.FineractPluginStep step = step(extension, "step11")
 
-                String version = project.properties?['fineract.release.version']
-
-                if(!version) {
-                    TextIO textIO = TextIoFactory.getTextIO()
-
-                    version = textIO.newStringInputReader()
-                            .withPattern("\\d+.\\d+.\\d+")
-                            .read("Release Version");
-                }
-
-                // TODO: input validation, see FINERACT-1610
-
-                this.context?.project?['fineract.release.version'] = version
-
-                def jsonSlurper = new JsonSlurper()
-                def data = jsonSlurper.parse(new File("buildSrc/src/main/resources/vote/result.${version}.json"))
-
-                this.context?.project?['fineract.vote'] = data
-
-                if(step.email) {
-                    emailService.send( processEmailParams(step.email, this.context) )
-                }
+                printInstructions(project, "step11")
             }
         }
 
@@ -470,36 +432,7 @@ class FineractPlugin implements Plugin<Project> {
             doFirst {
                 log.warn("Release step 15: send email to announcement mailing list")
 
-                FineractPluginExtension.FineractPluginStep step = step(extension, "step15")
-
-                String version = project.properties?['fineract.release.version']
-
-                if(!version) {
-                    TextIO textIO = TextIoFactory.getTextIO()
-
-                    version = textIO.newStringInputReader()
-                            .withPattern("\\d+.\\d+.\\d+")
-                            .read("Release Version");
-                }
-
-                // TODO: input validation, see FINERACT-1610
-
-                FineractPluginExtension.FineractPluginJiraParams issues = jiraService.search(step.jira)
-
-                def versions = jiraService.getProjectVersions(step.jira.projectId)
-                def filteredVersions = versions.findAll {
-                    log.warn(">>>> VERSION: ${it.id} - ${it.name} - ${it.description}")
-                    it.name == version
-                }
-
-                this.context?.project?['fineract.release.version'] = version
-                this.context?.project?['fineract.release.issues'] = issues.result
-                this.context?.project?['fineract.release.projectId'] = step.jira.projectId
-                this.context?.project?['fineract.release.versionId'] = filteredVersions[0]?.id
-
-                if(step.email) {
-                    emailService.send( processEmailParams(step.email, this.context) )
-                }
+                printInstructions(project, "step15")
             }
         }
     }

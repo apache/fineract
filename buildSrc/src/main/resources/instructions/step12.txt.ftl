@@ -24,6 +24,7 @@
 
 Move the release candidate from the dev area to the release area using a Subversion server-side copy:
 
-svn mv https://dist.apache.org/repos/dist/dev/fineract/${project['fineract.release.version']} https://dist.apache.org/repos/dist/release  /fineract/
+# this is a remote operation
+svn mv -m "Release Fineract 1.14.0 🚢" https://dist.apache.org/repos/dist/dev/fineract/${project['fineract.release.version']} https://dist.apache.org/repos/dist/release/fineract/
 
 [INSTRUCTIONS:END]

@@ -6,7 +6,10 @@ Move the release candidate from the dev area to the release area using a Subvers
 
 [source,bash,subs="attributes+"]
 ----
-svn mv https://dist.apache.org/repos/dist/dev/fineract/{revnumber} https://dist.apache.org/repos/dist/release/fineract/
+# this is a remote operation
+svn mv -m "Release Fineract {revnumber} 🚢" \
+  https://dist.apache.org/repos/dist/dev/fineract/{revnumber} \
+  https://dist.apache.org/repos/dist/release/fineract/
 ----
 
 NOTE: https://www.apache.org/legal/release-policy.html#upload-ci[This must be done by a Fineract PMC member].

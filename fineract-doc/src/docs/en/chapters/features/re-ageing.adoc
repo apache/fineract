@@ -1,9 +1,4 @@
 = Loan Re-Aging
-:doctype: book
-:icons: font
-:toc: left
-:toclevels: 3
-:sectnums:
 
 == Overview
 

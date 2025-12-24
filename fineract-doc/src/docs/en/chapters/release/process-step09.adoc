@@ -2,9 +2,9 @@
 
 == Description
 
-Following are the typical things we need to verify before voting on a release candidate. And the release manager should verify them too before calling out a vote.
+Following are the typical things we need to verify before voting on a release candidate. And the release manager should verify them too before calling out a vote. Some of these checks are duplicated by https://release-test.apache.org[the ATR (ASF Trusted Releases) tool], and will need to continue to be duplicated until we get more comfortable with that tool.
 
-Make sure release artifacts are hosted at https://dist.apache.org/repos/dist/dev/fineract
+Make sure release artifacts are hosted at both https://release-test.apache.org/compose/fineract/{revnumber} AND https://dist.apache.org/repos/dist/dev/fineract
 
 * Release candidate files should match filenames mentioned earlier, and will be moved without renaming if/when the release vote passes.
 * Verify signatures and hashes. You may have to import the public key of the release manager to verify the signatures. (`gpg --import KEYS` or `gpg --recv-key <key id>`)
@@ -14,6 +14,7 @@ Make sure release artifacts are hosted at https://dist.apache.org/repos/dist/dev
 * All files have correct headers (Rat check should be clean - `./gradlew rat`)
 * No jar files in the source artifacts
 * All tests pass both in CI and locally
+* All ATR checks pass
 
 === Artifact verification
 

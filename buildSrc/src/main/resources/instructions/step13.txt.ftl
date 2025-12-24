@@ -30,5 +30,6 @@ and make sure that everything on the release tag is merged to develop and that e
 >> git push origin develop
 >> git branch -D release/${project['fineract.release.version']}
 >> git push origin :release/${project['fineract.release.version']}
+>> git describe
 
 [INSTRUCTIONS:END]

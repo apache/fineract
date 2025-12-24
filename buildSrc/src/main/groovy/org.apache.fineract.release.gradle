@@ -196,36 +196,10 @@ fineract {
         step10: [
             order: 10,
             description: 'Start voting on the dev mailing list',
-            email: [
-                from: "${findProperty('fineract.config.email')}",
-                name: "${findProperty('fineract.config.name')}",
-                to: "${findProperty('fineract.config.email')}",
-                // to: 'dev@fineract.apache.org',
-                mime: 'text/plain',
-                subjectTemplate: [
-                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step10.vote.subject.ftl"
-                ],
-                messageTemplate: [
-                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step10.vote.message.ftl"
-                ]
-            ]
         ],
         step11: [
             order: 11,
             description: 'Conclude the vote and announce results',
-            email: [
-                from: "${findProperty('fineract.config.email')}",
-                name: "${findProperty('fineract.config.name')}",
-                to: "${findProperty('fineract.config.email')}",
-                // to: 'dev@fineract.apache.org',
-                mime: 'text/plain',
-                subjectTemplate: [
-                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step11.vote.subject.ftl"
-                ],
-                messageTemplate: [
-                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step11.vote.message.ftl"
-                ]
-            ]
         ],
         step12: [
             order: 12,
