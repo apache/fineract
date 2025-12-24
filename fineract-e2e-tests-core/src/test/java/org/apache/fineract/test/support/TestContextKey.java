@@ -293,4 +293,5 @@ public abstract class TestContextKey {
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_360_30_ZERO_INTEREST_CHARGE_OFF_ACCRUAL_ACTIVITY = "loanProductCreateResponseLP2AdvancedPaymentZeroInterestChargeOffBehaviourAccrualActivity";
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADVANCED_CUSTOM_PAYMENT_ALLOCATION_PROGRESSIVE_LOAN_SCHEDULE_PRINCIPAL_FIRST = "loanProductCreateResponseLP2AdvancedPaymentHorizontalPrincipalFirst";
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL_360_30_USD = "loanProductCreateResponseLP2AdvancedPaymentHorizontal36030Usd";
+    public static final String VERIFIED_LOAN_ACCRUALS = "VERIFIED_LOAN_ACCRUALS";
 }
