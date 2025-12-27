@@ -22,10 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.Authenticator;
@@ -55,21 +53,13 @@ public class TemplateMergeService {
 
     private final FineractProperties fineractProperties;
 
-    // TODO Replace this with appropriate alternative available in Guava
     private static String getStringFromInputStream(final InputStream is) {
-        final StringBuilder sb = new StringBuilder();
-
-        String line;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
+        try {
+            return new String(is.readAllBytes(), StandardCharsets.UTF_8);
         } catch (final IOException e) {
             log.error("getStringFromInputStream() failed", e);
+            return "";
         }
-
-        return sb.toString();
     }
 
     public String compile(final Template template, final Map<String, Object> scopes) {
