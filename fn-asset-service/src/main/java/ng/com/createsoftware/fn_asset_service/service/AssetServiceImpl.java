@@ -3,6 +3,8 @@ package ng.com.createsoftware.fn_asset_service.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ng.com.createsoftware.fn_asset_service.client.FineractClientFeign;
+import ng.com.createsoftware.fn_asset_service.event.AuditPublisher;
 import ng.com.createsoftware.fn_asset_service.model.Asset;
 import ng.com.createsoftware.fn_asset_service.model.AssetType;
 import ng.com.createsoftware.fn_asset_service.repository.AssetRepository;
@@ -15,7 +17,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class AssetServiceImpl implements AssetService{
-
+    private final FineractClientFeign fineractClientFeign;
+    private final AuditPublisher auditPublisher;
     private final AssetRepository assetRepository;
     private final AssetTypeRepository assetTypeRepository;
 
@@ -35,11 +38,16 @@ public class AssetServiceImpl implements AssetService{
     @Override
     public Asset addAsset(Asset asset) {
         log.info("create asset");
+        fineractClientFeign.getClient(asset.getClientId());
         if(asset.getType() != null && asset.getType().getId() != null){
             var type = assetTypeRepository.findById(asset.getType().getId())
                     .orElse(null);
             asset.setType(type);
         }
+
+        //publish
+        auditPublisher.publish("ASSET CREATED", asset.getAssetName());
+
         return assetRepository.save(asset);
     }
 

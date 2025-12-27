@@ -141,11 +141,11 @@ if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
 // Configuration for SQL tasks
 // https://docs.groovy-lang.org/latest/html/api/groovy/sql/Sql.html
 import groovy.sql.Sql
-
-project.ext.mysqlUser='root'
-project.ext.mysqlPassword='mysql'
-project.ext.pgUser='root'
-project.ext.pgPassword='postgres'
+//
+//project.ext.mysqlUser='root'
+//project.ext.mysqlPassword='mysql'
+//project.ext.pgUser='root'
+//project.ext.pgPassword='postgres'
 
 configurations {
     driver
@@ -153,7 +153,7 @@ configurations {
 dependencies {
     driver 'org.mariadb.jdbc:mariadb-java-client'
     driver 'org.postgresql:postgresql'
-    driver 'com.mysql:mysql-connector-j'
+//    driver 'com.mysql:mysql-connector-j'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
@@ -161,13 +161,13 @@ configurations.driver.each {File file ->
     loader.addURL(file.toURL())
 }
 
-tasks.register('createDB') {
-    description = "Creates the MariaDB Database. Needs database name to be passed (like: -PdbName=someDBname)"
-    doLast {
-        def sql = Sql.newInstance('jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver')
-        sql.execute('CREATE DATABASE ' + "`$dbName` CHARACTER SET utf8mb4")
-    }
-}
+//tasks.register('createDB') {
+//    description = "Creates the MariaDB Database. Needs database name to be passed (like: -PdbName=someDBname)"
+//    doLast {
+//        def sql = Sql.newInstance('jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver')
+//        sql.execute('CREATE DATABASE ' + "`$dbName` CHARACTER SET utf8mb4")
+//    }
+//}
 
 tasks.register('dropDB') {
     description = "Drops the specified MariaDB database. The database name has to be passed (like: -PdbName=someDBname)"
@@ -177,37 +177,37 @@ tasks.register('dropDB') {
     }
 }
 
-tasks.register('createPGDB') {
-    description = "Creates the PostgreSQL Database. Needs database name to be passed (like: -PdbName=someDBname)"
-    doLast {
-        def sql = Sql.newInstance('jdbc:postgresql://localhost:5432/', pgUser, pgPassword, 'org.postgresql.Driver')
-        sql.execute('create database ' + "$dbName")
-    }
-}
+//tasks.register('createPGDB') {
+//    description = "Creates the PostgreSQL Database. Needs database name to be passed (like: -PdbName=someDBname)"
+//    doLast {
+//        def sql = Sql.newInstance('jdbc:postgresql://localhost:5432/', pgUser, pgPassword, 'org.postgresql.Driver')
+//        sql.execute('create database ' + "$dbName")
+//    }
+//}
 
-tasks.register('dropPGDB') {
-    description = "Drops the specified PostgreSQL database. The database name has to be passed (like: -PdbName=someDBname)"
-    doLast {
-        def sql = Sql.newInstance('jdbc:postgresql://localhost:5432/', pgUser, pgPassword, 'org.postgresql.Driver')
-        sql.execute('DROP DATABASE ' + "$dbName")
-    }
-}
+//tasks.register('dropPGDB') {
+//    description = "Drops the specified PostgreSQL database. The database name has to be passed (like: -PdbName=someDBname)"
+//    doLast {
+//        def sql = Sql.newInstance('jdbc:postgresql://localhost:5432/', pgUser, pgPassword, 'org.postgresql.Driver')
+//        sql.execute('DROP DATABASE ' + "$dbName")
+//    }
+//}
 
-tasks.register('createMySQLDB') {
-    description = "Creates the MySQL Database. Needs database name to be passed (like: -PdbName=someDBname)"
-    doLast {
-        def sql = Sql.newInstance('jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver')
-        sql.execute('CREATE DATABASE ' + "`$dbName` CHARACTER SET utf8mb4")
-    }
-}
+//tasks.register('createMySQLDB') {
+//    description = "Creates the MySQL Database. Needs database name to be passed (like: -PdbName=someDBname)"
+//    doLast {
+//        def sql = Sql.newInstance('jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver')
+//        sql.execute('CREATE DATABASE ' + "`$dbName` CHARACTER SET utf8mb4")
+//    }
+//}
 
-tasks.register('dropMySQLDB') {
-    description = "Drops the specified MySQL database. The database name has to be passed (like: -PdbName=someDBname)"
-    doLast {
-        def sql = Sql.newInstance('jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver')
-        sql.execute('DROP DATABASE ' + "`$dbName`")
-    }
-}
+//tasks.register('dropMySQLDB') {
+//    description = "Drops the specified MySQL database. The database name has to be passed (like: -PdbName=someDBname)"
+//    doLast {
+//        def sql = Sql.newInstance('jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver')
+//        sql.execute('DROP DATABASE ' + "`$dbName`")
+//    }
+//}
 
 tasks.register('setBlankPassword') {
     doLast {
@@ -224,7 +224,7 @@ bootRun {
 
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client'
-        implementation 'org.postgresql:postgresql'
+         implementation 'org.postgresql:postgresql'
     }
 }
 
@@ -283,25 +283,25 @@ jib {
     }
 }
 
-tasks.register('migrateDatabase') {
-    doFirst {
-        println 'Executing liquibase database migration to version ' + "$dbVersion"
-
-        def dbUrl = 'jdbc:' + "$dbType" + '://' + "$dbHost" + ':' + "$dbPort" + '/' + "$dbName"
-        def changeLogFilePath = 'fineract-provider/src/main/resources/db/changelog/tenant/upgrades/0000_upgrade_to_' + "$dbVersion" + '.xml'
-
-        liquibase {
-            activities {
-                main {
-                    changeLogFile changeLogFilePath
-                    url dbUrl
-                    username project.ext.mysqlUser
-                    password project.ext.mysqlPassword
-                }
-            }
-        }
-    }
-}
+//tasks.register('migrateDatabase') {
+//    doFirst {
+//        println 'Executing liquibase database migration to version ' + "$dbVersion"
+//
+//        def dbUrl = 'jdbc:' + "$dbType" + '://' + "$dbHost" + ':' + "$dbPort" + '/' + "$dbName"
+//        def changeLogFilePath = 'fineract-provider/src/main/resources/db/changelog/tenant/upgrades/0000_upgrade_to_' + "$dbVersion" + '.xml'
+//
+//        liquibase {
+//            activities {
+//                main {
+//                    changeLogFile changeLogFilePath
+//                    url dbUrl
+//                    username project.ext.mysqlUser
+//                    password project.ext.mysqlPassword
+//                }
+//            }
+//        }
+//    }
+//}
 
 cucumber {
     tags = 'not @ignore'

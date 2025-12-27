@@ -2,8 +2,10 @@ package ng.com.createsoftware.fn_account_service.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import ng.com.createsoftware.fn_account_service.client.FineractClient;
 import ng.com.createsoftware.fn_account_service.dto.request.AccountOfficerRequest;
 import ng.com.createsoftware.fn_account_service.dto.response.AccountOfficerResponse;
+import ng.com.createsoftware.fn_account_service.event.AuditEventPublisher;
 import ng.com.createsoftware.fn_account_service.mapper.AccountOfficerMapper;
 import ng.com.createsoftware.fn_account_service.model.AccountOfficer;
 import ng.com.createsoftware.fn_account_service.model.Status;
@@ -17,6 +19,8 @@ import java.util.List;
 public class AccountOfficerServiceImpl implements AccountOfficerService{
 
     private final AccountOfficerRepository accountOfficerRepository;
+    private final FineractClient staffClient;
+    private final AuditEventPublisher auditEventPublisher;
 
     @Override
     public List<AccountOfficerResponse> getAllAccountOfficers() {
@@ -55,6 +59,14 @@ public class AccountOfficerServiceImpl implements AccountOfficerService{
             officer.setStatus(Status.valueOf(request.getStatus()));
 
         AccountOfficer savedOfficer = accountOfficerRepository.save(officer);
+//
+        staffClient.createStaff(request);
+
+        //publish to audit
+        auditEventPublisher.publish(
+                "ACCoUNT_OFFICER_CREATED",
+                request.getFirstName() + " " + request.getLastName()
+        );
         return AccountOfficerMapper.accountOfficerToAccountOfficerResponse(savedOfficer);
     }
 

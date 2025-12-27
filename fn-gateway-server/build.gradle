@@ -30,8 +30,8 @@ dependencyManagement {
 
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
+//	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+//	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

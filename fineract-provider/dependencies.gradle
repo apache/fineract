@@ -52,7 +52,7 @@ dependencies {
             project(path: ':fineract-avro-schemas')
             )
     implementation(
-            'org.springframework.boot:spring-boot-starter-web',
+//            'org.springframework.boot:spring-boot-starter-web',
             'org.springframework.boot:spring-boot-starter-validation',
             'org.springframework.boot:spring-boot-starter-security',
             "org.springframework.boot:spring-boot-starter-oauth2-authorization-server",
@@ -66,6 +66,7 @@ dependencies {
             'org.springframework.integration:spring-integration-jms',
             'org.springframework.integration:spring-integration-kafka',
             'org.springframework.kafka:spring-kafka',
+            'org.springframework.boot:spring-boot-starter-jersey',
 
             'io.micrometer:micrometer-registry-prometheus',
             'io.micrometer:micrometer-registry-otlp',

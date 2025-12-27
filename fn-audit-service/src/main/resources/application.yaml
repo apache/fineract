@@ -8,6 +8,12 @@ spring:
     username: postgres
     password: vakporize
 
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
 
   jpa:
     hibernate:

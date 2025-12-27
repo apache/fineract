@@ -38,10 +38,10 @@ fineract:
         connection:provider_disables_autocommit: true
 
 
-rabbit:
-  exchange:
-    name: audit.exchange
-  queue:
-    name: audit.accounting.queue
-  routing:
-    key: audit.accounting
+#rabbit:
+#  exchange:
+#    name: audit.exchange
+#  queue:
+#    name: audit.accounting.queue
+#  routing:
+#    key: audit.accounting

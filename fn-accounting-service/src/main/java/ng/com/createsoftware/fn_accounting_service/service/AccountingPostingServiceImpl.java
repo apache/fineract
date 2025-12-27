@@ -19,7 +19,7 @@ public class AccountingPostingServiceImpl implements AccountingPostingService{
     private final GeneralLedgerRepository generalLedgerRepository;
     private final GLTransactionRepository glTransactionRepository;
 //    private final CustomerAccountRepository
-    private final CustomerRe
+//    private final CustomerRe
     @Override
     public Map<String, Object> postGlToGl(GlToGlRequest request) {
         return Map.of();

@@ -17,3 +17,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         connection:provider_disables_autocommit: true
+
+fineract:
+  base-url: http://localhost:8443/api/v1

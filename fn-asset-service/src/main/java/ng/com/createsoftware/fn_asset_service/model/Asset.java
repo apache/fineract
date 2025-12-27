@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name="assets")
 @Getter
@@ -18,7 +20,7 @@ public class Asset {
     private Long id;
 
     private String assetName;
-    private Double value;
+    private BigDecimal value;
 
     @ManyToOne
     @JoinColumn(name="asset_type_id")
@@ -26,5 +28,6 @@ public class Asset {
 
     private String branchCode;
 
+    private Long clientId;///fineract client
     private String status;
 }
