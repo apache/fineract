@@ -40,6 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -61,15 +62,18 @@ import org.springframework.security.core.userdetails.User;
 @Table(name = "m_appuser", uniqueConstraints = @UniqueConstraint(columnNames = { "username" }, name = "username_org"))
 public class AppUser extends AbstractPersistableCustom<Long> implements PlatformUser {
 
+    @Getter
     @Column(name = "email", nullable = false, length = 100)
     private String email;
 
     @Column(name = "username", nullable = false, length = 100)
     private String username;
 
+    @Getter
     @Column(name = "firstname", nullable = false, length = 100)
     private String firstname;
 
+    @Getter
     @Column(name = "lastname", nullable = false, length = 100)
     private String lastname;
 
@@ -94,27 +98,33 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
     @Column(name = "is_deleted", nullable = false)
     private boolean deleted;
 
+    @Getter
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
 
+    @Getter
     @ManyToOne
     @JoinColumn(name = "staff_id", nullable = true)
     private Staff staff;
 
+    @Getter
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "m_appuser_role", joinColumns = @JoinColumn(name = "appuser_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 
+    @Getter
     @Column(name = "last_time_password_updated")
     private LocalDate lastTimePasswordUpdated;
 
     @Column(name = "password_never_expires", nullable = false)
     private boolean passwordNeverExpires;
 
+    @Getter
     @Column(name = "is_self_service_user", nullable = false)
     private boolean isSelfServiceUser;
 
+    @Getter
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "appUser")
     private Set<AppUserClientMapping> appUserClientMappings = new HashSet<>();
 
@@ -206,14 +216,13 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
 
     private void updatePassword(JsonCommand command, PlatformPasswordEncoder platformPasswordEncoder, Map<String, Object> actualChanges) {
         final String passwordParamName = PASSWORD;
-        if (command.hasParameter(passwordParamName)) {
-            if (command.isChangeInPasswordParameterNamed(passwordParamName, this.password, platformPasswordEncoder, getId())) {
-                final String passwordEncodedValue = command.passwordValueOfParameterNamed(passwordParamName, platformPasswordEncoder,
-                        getId());
-                actualChanges.put(passwordParamName, true);
-                updatePassword(passwordEncodedValue);
-            }
+        if (command.hasParameter(passwordParamName)
+                && command.isChangeInPasswordParameterNamed(passwordParamName, this.password, platformPasswordEncoder, getId())) {
+            final String passwordEncodedValue = command.passwordValueOfParameterNamed(passwordParamName, platformPasswordEncoder, getId());
+            actualChanges.put(passwordParamName, true);
+            updatePassword(passwordEncodedValue);
         }
+
     }
 
     public void updatePassword(final String encodePassword) {
@@ -303,20 +312,18 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
 
         final String passwordNeverExpire = "passwordNeverExpires";
 
-        if (command.hasParameter(passwordNeverExpire)) {
-            if (command.isChangeInBooleanParameterNamed(passwordNeverExpire, this.passwordNeverExpires)) {
-                final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(passwordNeverExpire);
-                actualChanges.put(passwordNeverExpire, newValue);
-                this.passwordNeverExpires = newValue;
-            }
+        if (command.hasParameter(passwordNeverExpire)
+                && command.isChangeInBooleanParameterNamed(passwordNeverExpire, this.passwordNeverExpires)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(passwordNeverExpire);
+            actualChanges.put(passwordNeverExpire, newValue);
+            this.passwordNeverExpires = newValue;
         }
 
-        if (command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)) {
-            if (command.isChangeInBooleanParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER, this.isSelfServiceUser)) {
-                final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
-                actualChanges.put(AppUserConstants.IS_SELF_SERVICE_USER, newValue);
-                this.isSelfServiceUser = newValue;
-            }
+        if (command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)
+                && command.isChangeInBooleanParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER, this.isSelfServiceUser)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
+            actualChanges.put(AppUserConstants.IS_SELF_SERVICE_USER, newValue);
+            this.isSelfServiceUser = newValue;
         }
 
         if (this.isSelfServiceUser && command.hasParameter(AppUserConstants.CLIENTS)) {
@@ -345,7 +352,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
             roleIds.add(role.getId().toString());
         }
 
-        return roleIds.toArray(new String[roleIds.size()]);
+        return roleIds.toArray(new String[0]);
     }
 
     /**
@@ -372,11 +379,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
 
     public boolean isSystemUser() {
         // TODO Determine system user by ID not by user name
-        if (this.username.equals(AppUserConstants.SYSTEM_USER_NAME)) {
-            return true;
-        }
-
-        return false;
+        return this.username.equals(AppUserConstants.SYSTEM_USER_NAME);
     }
 
     @Override
@@ -440,36 +443,8 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         return hasAnyPermission("BYPASS_LOAN_WRITE_PROTECTION");
     }
 
-    public String getFirstname() {
-        return this.firstname;
-    }
-
-    public String getLastname() {
-        return this.lastname;
-    }
-
-    public String getEmail() {
-        return this.email;
-    }
-
-    public Set<Role> getRoles() {
-        return this.roles;
-    }
-
-    public Office getOffice() {
-        return this.office;
-    }
-
-    public Staff getStaff() {
-        return this.staff;
-    }
-
     public boolean getPasswordNeverExpires() {
         return this.passwordNeverExpires;
-    }
-
-    public LocalDate getLastTimePasswordUpdated() {
-        return this.lastTimePasswordUpdated;
     }
 
     public boolean canNotApproveLoanInPast() {
@@ -494,11 +469,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
 
     public boolean hasNotPermissionForReport(final String reportName) {
 
-        if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "REPORTING_SUPER_USER", "READ_" + reportName)) {
-            return true;
-        }
-
-        return false;
+        return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "REPORTING_SUPER_USER", "READ_" + reportName);
     }
 
     public boolean hasNotPermissionForDatatable(final String datatable, final String accessType) {
@@ -507,18 +478,10 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
 
         if (accessType.equalsIgnoreCase("READ")) {
 
-            if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", matchPermission)) {
-                return true;
-            }
-
-            return false;
+            return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", matchPermission);
         }
 
-        if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", matchPermission)) {
-            return true;
-        }
-
-        return false;
+        return hasNotPermissionForAnyOf("ALL_FUNCTIONS", matchPermission);
     }
 
     public boolean hasNotPermissionForAnyOf(final String... permissionCodes) {
@@ -696,12 +659,11 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
                 passwordEncodedValue = command.passwordValueOfParameterNamed(passwordParamName, platformPasswordEncoder, getId());
 
             }
-        } else if (command.hasParameter(passwordEncodedParamName)) {
-            if (command.isChangeInStringParameterNamed(passwordEncodedParamName, this.password)) {
+        } else if (command.hasParameter(passwordEncodedParamName)
+                && command.isChangeInStringParameterNamed(passwordEncodedParamName, this.password)) {
 
-                passwordEncodedValue = command.stringValueOfParameterNamed(passwordEncodedParamName);
+            passwordEncodedValue = command.stringValueOfParameterNamed(passwordEncodedParamName);
 
-            }
         }
 
         return passwordEncodedValue;
@@ -711,17 +673,9 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         return !isEnabled();
     }
 
-    public boolean isSelfServiceUser() {
-        return this.isSelfServiceUser;
-    }
-
-    public Set<AppUserClientMapping> getAppUserClientMappings() {
-        return this.appUserClientMappings;
-    }
-
     private Set<AppUserClientMapping> createAppUserClientMappings(Collection<Client> clients) {
         Set<AppUserClientMapping> newAppUserClientMappings = null;
-        if (clients != null && clients.size() > 0) {
+        if (clients != null && !clients.isEmpty()) {
             newAppUserClientMappings = new HashSet<>();
             for (Client client : clients) {
                 newAppUserClientMappings.add(new AppUserClientMapping(this, client));

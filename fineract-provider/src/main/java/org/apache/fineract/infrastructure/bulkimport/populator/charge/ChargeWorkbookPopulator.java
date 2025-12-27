@@ -44,8 +44,6 @@ public class ChargeWorkbookPopulator extends AbstractWorkbookPopulator {
         worksheet.setColumnWidth(ChargeConstants.CHARGE_NAME_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
         worksheet.setColumnWidth(ChargeConstants.CHARGE_AMOUNT_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
         worksheet.setColumnWidth(ChargeConstants.CHARGE_CALCULATION_TYPE_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
-        // worksheet.setColumnWidth(ChargeConstants.CHARGE_DUE_DATE_COL,
-        // TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
         worksheet.setColumnWidth(ChargeConstants.CHARGE_TIME_TYPE_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
 
         writeString(0, rowHeader, "ID");
@@ -54,21 +52,6 @@ public class ChargeWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(ChargeConstants.CHARGE_CALCULATION_TYPE_COL, rowHeader, "Charge Calculation Type*");
         // writeString(ChargeConstants.CHARGE_DUE_DATE_COL, rowHeader, "Charge Due Date*");
         writeString(ChargeConstants.CHARGE_TIME_TYPE_COL, rowHeader, "Charge Time Type*");
-    }
-
-    @SuppressWarnings("unused")
-    private void setRules(Sheet workSheet, final String dateFormat) {
-        // CellRangeAddressList dueDateRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
-        // ChargeConstants.CHARGE_DUE_DATE_COL, ChargeConstants.CHARGE_DUE_DATE_COL);
-
-        // DataValidationHelper validationHelper = new HSSFDataValidationHelper((HSSFSheet) workSheet);
-
-        // DataValidationConstraint dueDateConstraint = validationHelper
-        // .createDateConstraint(DataValidationConstraint.OperatorType.GREATER_OR_EQUAL, "=TODAY()", null, dateFormat);
-
-        // DataValidation dueDateValidation = validationHelper.createValidation(dueDateConstraint, dueDateRange);
-
-        // workSheet.addValidationData(dueDateValidation);
     }
 
 }

@@ -28,17 +28,17 @@ public class CollateralCannotBeCreatedException extends AbstractPlatformDomainRu
         LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE;
 
         public String errorMessage() {
-            if (name().toString().equalsIgnoreCase("LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE")) {
+            if (name().equalsIgnoreCase("LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE")) {
                 return "This collateral cannot be created as the loan it is associated with is not in submitted and pending approval stage";
             }
-            return name().toString();
+            return name();
         }
 
         public String errorCode() {
-            if (name().toString().equalsIgnoreCase("LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE")) {
+            if (name().equalsIgnoreCase("LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE")) {
                 return "error.msg.loan.collateral.associated.loan.not.in.submitted.and.pending.approval.stage";
             }
-            return name().toString();
+            return name();
         }
     }
 

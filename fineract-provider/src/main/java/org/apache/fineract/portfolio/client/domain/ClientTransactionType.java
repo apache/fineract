@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.client.domain;
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
 
 public enum ClientTransactionType {
 
@@ -43,7 +44,9 @@ public enum ClientTransactionType {
     }
 
     private static final Map<Integer, ClientTransactionType> intToEnumMap = new HashMap<>();
+    @Getter
     private static int minValue;
+    @Getter
     private static int maxValue;
 
     static {
@@ -64,21 +67,12 @@ public enum ClientTransactionType {
     }
 
     public static ClientTransactionType fromInt(final int i) {
-        final ClientTransactionType type = intToEnumMap.get(Integer.valueOf(i));
-        return type;
-    }
-
-    public static int getMinValue() {
-        return minValue;
-    }
-
-    public static int getMaxValue() {
-        return maxValue;
+        return intToEnumMap.get(i);
     }
 
     @Override
     public String toString() {
-        return name().toString();
+        return name();
     }
 
 }

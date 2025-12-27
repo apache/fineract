@@ -39,32 +39,17 @@ public enum ClientStatus {
 
     public static ClientStatus fromInt(final Integer statusValue) {
 
-        ClientStatus enumeration = ClientStatus.INVALID;
-        switch (statusValue) {
-            case 100:
-                enumeration = ClientStatus.PENDING;
-            break;
-            case 300:
-                enumeration = ClientStatus.ACTIVE;
-            break;
-            case 303:
-                enumeration = ClientStatus.TRANSFER_IN_PROGRESS;
-            break;
-            case 304:
-                enumeration = ClientStatus.TRANSFER_ON_HOLD;
-            break;
-            case 600:
-                enumeration = ClientStatus.CLOSED;
-            break;
-            case 700:
-                enumeration = ClientStatus.REJECTED;
-            break;
-            case 800:
-                enumeration = ClientStatus.WITHDRAWN;
-            break;
+        return switch (statusValue) {
+            case 100 -> ClientStatus.PENDING;
+            case 300 -> ClientStatus.ACTIVE;
+            case 303 -> ClientStatus.TRANSFER_IN_PROGRESS;
+            case 304 -> ClientStatus.TRANSFER_ON_HOLD;
+            case 600 -> ClientStatus.CLOSED;
+            case 700 -> ClientStatus.REJECTED;
+            case 800 -> ClientStatus.WITHDRAWN;
+            default -> ClientStatus.INVALID;
+        };
 
-        }
-        return enumeration;
     }
 
     public static ClientStatus fromString(final String clientString) {
