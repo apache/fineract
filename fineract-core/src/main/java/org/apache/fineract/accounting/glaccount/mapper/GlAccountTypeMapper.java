@@ -16,32 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.tax.request;
+package org.apache.fineract.accounting.glaccount.mapper;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import java.io.Serial;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
+import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Setter
-@Getter
-@NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class TaxComponentRequest implements Serializable {
+@Mapper(config = MapstructMapperConfig.class)
+public interface GlAccountTypeMapper {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    @Mapping(target = "id", expression = "java((long) glAccountType.getValue())")
+    @Mapping(target = "code", source = "glAccountType.code")
+    @Mapping(target = "description", source = "glAccountType.code")
+    EnumOptionData map(GLAccountType glAccountType);
 
-    private String name;
-    private BigDecimal percentage;
-    private Integer debitAccountType;
-    private Long debitAccountId;
-    private Integer creditAccountType;
-    private Long creditAccountId;
-    private String startDate;
-    private String dateFormat;
-    private String locale;
 }

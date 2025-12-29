@@ -16,32 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.tax.request;
+package org.apache.fineract.portfolio.tax.mapper;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import java.io.Serial;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.util.List;
+import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
+import org.apache.fineract.portfolio.tax.data.TaxGroupMappingsData;
+import org.apache.fineract.portfolio.tax.domain.TaxGroupMappings;
+import org.mapstruct.Mapper;
 
-@Setter
-@Getter
-@NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class TaxComponentRequest implements Serializable {
+@Mapper(config = MapstructMapperConfig.class, uses = { TaxComponentMapper.class })
+public interface TaxGroupMappingsMapper {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    TaxGroupMappingsData map(TaxGroupMappings taxGroupMapping);
 
-    private String name;
-    private BigDecimal percentage;
-    private Integer debitAccountType;
-    private Long debitAccountId;
-    private Integer creditAccountType;
-    private Long creditAccountId;
-    private String startDate;
-    private String dateFormat;
-    private String locale;
+    List<TaxGroupMappingsData> map(List<TaxGroupMappings> taxGroupMappings);
+
 }
