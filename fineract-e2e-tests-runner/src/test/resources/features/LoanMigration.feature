@@ -1122,3 +1122,422 @@ Feature: Loan Migration
       | 01 April 2025    | Accrual Activity | 33.0   | 0.0       | 33.0     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 April 2025    | Accrual          | 68.66  | 0.0       | 68.66    | 0.0  | 0.0       | 0.0          | false    | false    |
 
+  @TestRailId:C4437
+  Scenario: Verify backdated loan with applied charges and final COB - charge-inclusive income recognition
+    When Admin sets the business date to "10 April 2025"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 January 2025   | 500            | 33                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 12                | MONTHS                | 1              | MONTHS                 | 12                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "500" amount and expected disbursement date on "01 January 2025"
+    And Admin successfully disburse the loan on "01 January 2025" with "500" EUR transaction amount
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025   |           | 500.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025  |           | 464.27          | 35.73         | 13.75    | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 2  | 28   | 01 March 2025     |           | 428.54          | 35.73         | 13.75    | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 3  | 31   | 01 April 2025     |           | 392.81          | 35.73         | 13.75    | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 4  | 30   | 01 May 2025       |           | 355.02          | 37.79         | 11.69    | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 5  | 31   | 01 June 2025      |           | 315.3           | 39.72         | 9.76     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 6  | 30   | 01 July 2025      |           | 274.49          | 40.81         | 8.67     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 7  | 31   | 01 August 2025    |           | 232.56          | 41.93         | 7.55     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 8  | 31   | 01 September 2025 |           | 189.48          | 43.08         | 6.4      | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 9  | 30   | 01 October 2025   |           | 145.21          | 44.27         | 5.21     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 10 | 31   | 01 November 2025  |           | 99.72           | 45.49         | 3.99     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 11 | 30   | 01 December 2025  |           | 52.98           | 46.74         | 2.74     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 12 | 31   | 01 January 2026   |           | 0.0             | 52.98         | 1.46     | 0.0  | 0.0       | 54.44 | 0.0  | 0.0        | 0.0  | 54.44       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 500.0         | 98.72    | 0.0  | 0.0       | 598.72 | 0.0  | 0.0        | 0.0  | 598.72      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+#   --- Add fee charge backdated to 15 January 2025 ---
+    When Admin adds "LOAN_SNOOZE_FEE" due date charge with "15 January 2025" due date and 50 EUR transaction amount
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025   |           | 500.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025  |           | 464.27          | 35.73         | 13.75    | 50.0 | 0.0       | 99.48 | 0.0  | 0.0        | 0.0  | 99.48       |
+      | 2  | 28   | 01 March 2025     |           | 428.54          | 35.73         | 13.75    | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 3  | 31   | 01 April 2025     |           | 392.81          | 35.73         | 13.75    | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 4  | 30   | 01 May 2025       |           | 355.02          | 37.79         | 11.69    | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 5  | 31   | 01 June 2025      |           | 315.3           | 39.72         | 9.76     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 6  | 30   | 01 July 2025      |           | 274.49          | 40.81         | 8.67     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 7  | 31   | 01 August 2025    |           | 232.56          | 41.93         | 7.55     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 8  | 31   | 01 September 2025 |           | 189.48          | 43.08         | 6.4      | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 9  | 30   | 01 October 2025   |           | 145.21          | 44.27         | 5.21     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 10 | 31   | 01 November 2025  |           | 99.72           | 45.49         | 3.99     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 11 | 30   | 01 December 2025  |           | 52.98           | 46.74         | 2.74     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 12 | 31   | 01 January 2026   |           | 0.0             | 52.98         | 1.46     | 0.0  | 0.0       | 54.44 | 0.0  | 0.0        | 0.0  | 54.44       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 500.0         | 98.72    | 50.0  | 0.0      | 648.72 | 0.0  | 0.0        | 0.0  | 648.72      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 15 January 2025 | Flat             | 50.0 | 0.0  | 0.0    | 50.0        |
+#   --- Make partial payment backdated to 01 February 2025 covering portion of principal/interest/fees ---
+    And Customer makes "AUTOPAY" repayment on "01 February 2025" with 75 EUR transaction amount
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025   |           | 500.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025  |           | 464.27          | 35.73         | 13.75    | 50.0 | 0.0       | 99.48 | 75.0 | 0.0        | 0.0  | 24.48       |
+      | 2  | 28   | 01 March 2025     |           | 427.56          | 36.71         | 12.77    | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 3  | 31   | 01 April 2025     |           | 390.85          | 36.71         | 12.77    | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 4  | 30   | 01 May 2025       |           | 352.72          | 38.13         | 11.35    | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 5  | 31   | 01 June 2025      |           | 312.94          | 39.78         | 9.7      | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 6  | 30   | 01 July 2025      |           | 272.07          | 40.87         | 8.61     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 7  | 31   | 01 August 2025    |           | 230.07          | 42.0          | 7.48     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 8  | 31   | 01 September 2025 |           | 186.92          | 43.15         | 6.33     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 9  | 30   | 01 October 2025   |           | 142.58          | 44.34         | 5.14     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 10 | 31   | 01 November 2025  |           | 97.02           | 45.56         | 3.92     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 11 | 30   | 01 December 2025  |           | 50.21           | 46.81         | 2.67     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 12 | 31   | 01 January 2026   |           | 0.0             | 50.21         | 1.38     | 0.0  | 0.0       | 51.59 | 0.0  | 0.0        | 0.0  | 51.59       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 500.0         | 95.87    | 50.0  | 0.0      | 645.87 | 75.0 | 0.0        | 0.0  | 570.87      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees  | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0   | 0.0       | 500.0        | false    | false    |
+      | 01 February 2025 | Repayment        | 75.0   | 35.73     | 13.75    | 25.52 | 0.0       | 464.27       | false    | false    |
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid   | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 15 January 2025 | Flat             | 50.0 | 25.52  | 0.0    | 24.48       |
+#   --- Run inline COB job to generate aggregated accruals ---
+    When Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025   |           | 500.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025  |           | 464.27          | 35.73         | 13.75    | 50.0 | 0.0       | 99.48 | 75.0 | 0.0        | 0.0  | 24.48       |
+      | 2  | 28   | 01 March 2025     |           | 427.56          | 36.71         | 12.77    | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 3  | 31   | 01 April 2025     |           | 390.85          | 36.71         | 12.77    | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 4  | 30   | 01 May 2025       |           | 352.72          | 38.13         | 11.35    | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 5  | 31   | 01 June 2025      |           | 312.94          | 39.78         | 9.7      | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 6  | 30   | 01 July 2025      |           | 272.07          | 40.87         | 8.61     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 7  | 31   | 01 August 2025    |           | 230.07          | 42.0          | 7.48     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 8  | 31   | 01 September 2025 |           | 186.92          | 43.15         | 6.33     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 9  | 30   | 01 October 2025   |           | 142.58          | 44.34         | 5.14     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 10 | 31   | 01 November 2025  |           | 97.02           | 45.56         | 3.92     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 11 | 30   | 01 December 2025  |           | 50.21           | 46.81         | 2.67     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 12 | 31   | 01 January 2026   |           | 0.0             | 50.21         | 1.38     | 0.0  | 0.0       | 51.59 | 0.0  | 0.0        | 0.0  | 51.59       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 500.0         | 95.87    | 50.0  | 0.0      | 645.87 | 75.0 | 0.0        | 0.0  | 570.87      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees  | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0   | 0.0       | 500.0        | false    | false    |
+      | 01 February 2025 | Repayment        | 75.0   | 35.73     | 13.75    | 25.52 | 0.0       | 464.27       | false    | false    |
+      | 01 February 2025 | Accrual Activity | 63.75  | 0.0       | 13.75    | 50.0  | 0.0       | 0.0          | false    | false    |
+      | 01 March 2025    | Accrual Activity | 12.77  | 0.0       | 12.77    | 0.0   | 0.0       | 0.0          | false    | false    |
+      | 01 April 2025    | Accrual Activity | 12.77  | 0.0       | 12.77    | 0.0   | 0.0       | 0.0          | false    | false    |
+      | 09 April 2025    | Accrual          | 92.69  | 0.0       | 42.69    | 50.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid   | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 15 January 2025 | Flat             | 50.0 | 25.52  | 0.0    | 24.48       |
+    When Loan Pay-off is made on "10 April 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C4438
+  Scenario: Verify backdated loan with NSF fee after late payment - penalty income recognition
+    When Admin sets the business date to "10 April 2025"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 January 2025   | 500            | 33                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 12                | MONTHS                | 1              | MONTHS                 | 12                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "500" amount and expected disbursement date on "01 January 2025"
+    And Admin successfully disburse the loan on "01 January 2025" with "500" EUR transaction amount
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025   |           | 500.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025  |           | 464.27          | 35.73         | 13.75    | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 2  | 28   | 01 March 2025     |           | 428.54          | 35.73         | 13.75    | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 3  | 31   | 01 April 2025     |           | 392.81          | 35.73         | 13.75    | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 4  | 30   | 01 May 2025       |           | 355.02          | 37.79         | 11.69    | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 5  | 31   | 01 June 2025      |           | 315.3           | 39.72         | 9.76     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 6  | 30   | 01 July 2025      |           | 274.49          | 40.81         | 8.67     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 7  | 31   | 01 August 2025    |           | 232.56          | 41.93         | 7.55     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 8  | 31   | 01 September 2025 |           | 189.48          | 43.08         | 6.4      | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 9  | 30   | 01 October 2025   |           | 145.21          | 44.27         | 5.21     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 10 | 31   | 01 November 2025  |           | 99.72           | 45.49         | 3.99     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 11 | 30   | 01 December 2025  |           | 52.98           | 46.74         | 2.74     | 0.0  | 0.0       | 49.48 | 0.0  | 0.0        | 0.0  | 49.48       |
+      | 12 | 31   | 01 January 2026   |           | 0.0             | 52.98         | 1.46     | 0.0  | 0.0       | 54.44 | 0.0  | 0.0        | 0.0  | 54.44       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 500.0         | 98.72    | 0.0  | 0.0       | 598.72 | 0.0  | 0.0        | 0.0  | 598.72      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+#   --- Make late payment backdated to 15 February 2025 (due was 01 February 2025) ---
+    And Customer makes "AUTOPAY" repayment on "15 February 2025" with 49.48 EUR transaction amount
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 January 2025   |                  | 500.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
+      | 1  | 31   | 01 February 2025  | 15 February 2025 | 464.27          | 35.73         | 13.75    | 0.0  | 0.0       | 49.48 | 49.48 | 0.0        | 49.48 | 0.0         |
+      | 2  | 28   | 01 March 2025     |                  | 428.05          | 36.22         | 13.26    | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 3  | 31   | 01 April 2025     |                  | 391.34          | 36.71         | 12.77    | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 4  | 30   | 01 May 2025       |                  | 353.22          | 38.12         | 11.36    | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 5  | 31   | 01 June 2025      |                  | 313.45          | 39.77         | 9.71     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 6  | 30   | 01 July 2025      |                  | 272.59          | 40.86         | 8.62     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 7  | 31   | 01 August 2025    |                  | 230.61          | 41.98         | 7.5      | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 8  | 31   | 01 September 2025 |                  | 187.47          | 43.14         | 6.34     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 9  | 30   | 01 October 2025   |                  | 143.15          | 44.32         | 5.16     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 10 | 31   | 01 November 2025  |                  | 97.61           | 45.54         | 3.94     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 11 | 30   | 01 December 2025  |                  | 50.81           | 46.8          | 2.68     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 12 | 31   | 01 January 2026   |                  | 0.0             | 50.81         | 1.4      | 0.0  | 0.0       | 52.21 | 0.0   | 0.0        | 0.0   | 52.21       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
+      | 500.0         | 96.49    | 0.0  | 0.0       | 596.49 | 49.48 | 0.0        | 49.48 | 547.01      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+      | 15 February 2025 | Repayment        | 49.48  | 35.73     | 13.75    | 0.0  | 0.0       | 464.27       | false    | false    |
+#   --- Add NSF fee backdated to 20 February 2025 ---
+    When Admin adds an NSF fee because of payment bounce with "20 February 2025" transaction date
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 January 2025   |                  | 500.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
+      | 1  | 31   | 01 February 2025  | 15 February 2025 | 464.27          | 35.73         | 13.75    | 0.0  | 0.0       | 49.48 | 49.48 | 0.0        | 49.48 | 0.0         |
+      | 2  | 28   | 01 March 2025     |                  | 428.05          | 36.22         | 13.26    | 0.0  | 10.0      | 59.48 | 0.0   | 0.0        | 0.0   | 59.48       |
+      | 3  | 31   | 01 April 2025     |                  | 391.34          | 36.71         | 12.77    | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 4  | 30   | 01 May 2025       |                  | 353.22          | 38.12         | 11.36    | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 5  | 31   | 01 June 2025      |                  | 313.45          | 39.77         | 9.71     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 6  | 30   | 01 July 2025      |                  | 272.59          | 40.86         | 8.62     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 7  | 31   | 01 August 2025    |                  | 230.61          | 41.98         | 7.5      | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 8  | 31   | 01 September 2025 |                  | 187.47          | 43.14         | 6.34     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 9  | 30   | 01 October 2025   |                  | 143.15          | 44.32         | 5.16     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 10 | 31   | 01 November 2025  |                  | 97.61           | 45.54         | 3.94     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 11 | 30   | 01 December 2025  |                  | 50.81           | 46.8          | 2.68     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 12 | 31   | 01 January 2026   |                  | 0.0             | 50.81         | 1.4      | 0.0  | 0.0       | 52.21 | 0.0   | 0.0        | 0.0   | 52.21       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
+      | 500.0         | 96.49    | 0.0  | 10.0      | 606.49 | 49.48 | 0.0        | 49.48 | 557.01      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+      | 15 February 2025 | Repayment        | 49.48  | 35.73     | 13.75    | 0.0  | 0.0       | 464.27       | false    | false    |
+    And Loan Charges tab has the following data:
+      | Name    | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
+      | NSF fee | true      | Specified due date | 20 February 2025 | Flat             | 10.0 | 0.0  | 0.0    | 10.0        |
+#   --- Run inline COB job to generate aggregated accruals including penalty ---
+    When Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 January 2025   |                  | 500.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
+      | 1  | 31   | 01 February 2025  | 15 February 2025 | 464.27          | 35.73         | 13.75    | 0.0  | 0.0       | 49.48 | 49.48 | 0.0        | 49.48 | 0.0         |
+      | 2  | 28   | 01 March 2025     |                  | 428.05          | 36.22         | 13.26    | 0.0  | 10.0      | 59.48 | 0.0   | 0.0        | 0.0   | 59.48       |
+      | 3  | 31   | 01 April 2025     |                  | 391.34          | 36.71         | 12.77    | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 4  | 30   | 01 May 2025       |                  | 353.22          | 38.12         | 11.36    | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 5  | 31   | 01 June 2025      |                  | 313.45          | 39.77         | 9.71     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 6  | 30   | 01 July 2025      |                  | 272.59          | 40.86         | 8.62     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 7  | 31   | 01 August 2025    |                  | 230.61          | 41.98         | 7.5      | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 8  | 31   | 01 September 2025 |                  | 187.47          | 43.14         | 6.34     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 9  | 30   | 01 October 2025   |                  | 143.15          | 44.32         | 5.16     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 10 | 31   | 01 November 2025  |                  | 97.61           | 45.54         | 3.94     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 11 | 30   | 01 December 2025  |                  | 50.81           | 46.8          | 2.68     | 0.0  | 0.0       | 49.48 | 0.0   | 0.0        | 0.0   | 49.48       |
+      | 12 | 31   | 01 January 2026   |                  | 0.0             | 50.81         | 1.4      | 0.0  | 0.0       | 52.21 | 0.0   | 0.0        | 0.0   | 52.21       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
+      | 500.0         | 96.49    | 0.0  | 10.0      | 606.49 | 49.48 | 0.0        | 49.48 | 557.01      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+      | 01 February 2025 | Accrual Activity | 13.75  | 0.0       | 13.75    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 February 2025 | Repayment        | 49.48  | 35.73     | 13.75    | 0.0  | 0.0       | 464.27       | false    | false    |
+      | 01 March 2025    | Accrual Activity | 23.26  | 0.0       | 13.26    | 0.0  | 10.0      | 0.0          | false    | false    |
+      | 01 April 2025    | Accrual Activity | 12.77  | 0.0       | 12.77    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 April 2025    | Accrual          | 53.18  | 0.0       | 43.18    | 0.0  | 10.0      | 0.0          | false    | false    |
+    When Loan Pay-off is made on "10 April 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C4439
+  Scenario: Verify backdated loan with multiple repayment reversals and refunds - schedule and balance adjustments
+    When Admin sets the business date to "10 April 2025"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 January 2025   | 1000           | 33                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 12                | MONTHS                | 1              | MONTHS                 | 12                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "1000" amount and expected disbursement date on "01 January 2025"
+    And Admin successfully disburse the loan on "01 January 2025" with "1000" EUR transaction amount
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025   |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025  |           | 928.53          | 71.47         | 27.5     | 0.0  | 0.0       | 98.97  | 0.0  | 0.0        | 0.0  | 98.97       |
+      | 2  | 28   | 01 March 2025     |           | 857.06          | 71.47         | 27.5     | 0.0  | 0.0       | 98.97  | 0.0  | 0.0        | 0.0  | 98.97       |
+      | 3  | 31   | 01 April 2025     |           | 785.59          | 71.47         | 27.5     | 0.0  | 0.0       | 98.97  | 0.0  | 0.0        | 0.0  | 98.97       |
+      | 4  | 30   | 01 May 2025       |           | 709.99          | 75.6          | 23.37    | 0.0  | 0.0       | 98.97  | 0.0  | 0.0        | 0.0  | 98.97       |
+      | 5  | 31   | 01 June 2025      |           | 630.54          | 79.45         | 19.52    | 0.0  | 0.0       | 98.97  | 0.0  | 0.0        | 0.0  | 98.97       |
+      | 6  | 30   | 01 July 2025      |           | 548.91          | 81.63         | 17.34    | 0.0  | 0.0       | 98.97  | 0.0  | 0.0        | 0.0  | 98.97       |
+      | 7  | 31   | 01 August 2025    |           | 465.04          | 83.87         | 15.1     | 0.0  | 0.0       | 98.97  | 0.0  | 0.0        | 0.0  | 98.97       |
+      | 8  | 31   | 01 September 2025 |           | 378.86          | 86.18         | 12.79    | 0.0  | 0.0       | 98.97  | 0.0  | 0.0        | 0.0  | 98.97       |
+      | 9  | 30   | 01 October 2025   |           | 290.31          | 88.55         | 10.42    | 0.0  | 0.0       | 98.97  | 0.0  | 0.0        | 0.0  | 98.97       |
+      | 10 | 31   | 01 November 2025  |           | 199.32          | 90.99         | 7.98     | 0.0  | 0.0       | 98.97  | 0.0  | 0.0        | 0.0  | 98.97       |
+      | 11 | 30   | 01 December 2025  |           | 105.83          | 93.49         | 5.48     | 0.0  | 0.0       | 98.97  | 0.0  | 0.0        | 0.0  | 98.97       |
+      | 12 | 31   | 01 January 2026   |           | 0.0             | 105.83        | 2.91     | 0.0  | 0.0       | 108.74 | 0.0  | 0.0        | 0.0  | 108.74      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 1000.0        | 197.41   | 0.0  | 0.0       | 1197.41 | 0.0  | 0.0        | 0.0  | 1197.41     |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+#   --- Make first payment backdated to 01 February 2025 ---
+    And Customer makes "AUTOPAY" repayment on "01 February 2025" with 100 EUR transaction amount
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      |    |      | 01 January 2025   |                  | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
+      | 1  | 31   | 01 February 2025  | 01 February 2025 | 928.53          | 71.47         | 27.5     | 0.0  | 0.0       | 98.97  | 98.97  | 0.0        | 0.0  | 0.0         |
+      | 2  | 28   | 01 March 2025     |                  | 855.07          | 73.46         | 25.51    | 0.0  | 0.0       | 98.97  | 1.03   | 1.03       | 0.0  | 97.94       |
+      | 3  | 31   | 01 April 2025     |                  | 781.61          | 73.46         | 25.51    | 0.0  | 0.0       | 98.97  | 0.0    | 0.0        | 0.0  | 98.97       |
+      | 4  | 30   | 01 May 2025       |                  | 705.34          | 76.27         | 22.7     | 0.0  | 0.0       | 98.97  | 0.0    | 0.0        | 0.0  | 98.97       |
+      | 5  | 31   | 01 June 2025      |                  | 625.77          | 79.57         | 19.4     | 0.0  | 0.0       | 98.97  | 0.0    | 0.0        | 0.0  | 98.97       |
+      | 6  | 30   | 01 July 2025      |                  | 544.01          | 81.76         | 17.21    | 0.0  | 0.0       | 98.97  | 0.0    | 0.0        | 0.0  | 98.97       |
+      | 7  | 31   | 01 August 2025    |                  | 460.0           | 84.01         | 14.96    | 0.0  | 0.0       | 98.97  | 0.0    | 0.0        | 0.0  | 98.97       |
+      | 8  | 31   | 01 September 2025 |                  | 373.68          | 86.32         | 12.65    | 0.0  | 0.0       | 98.97  | 0.0    | 0.0        | 0.0  | 98.97       |
+      | 9  | 30   | 01 October 2025   |                  | 284.99          | 88.69         | 10.28    | 0.0  | 0.0       | 98.97  | 0.0    | 0.0        | 0.0  | 98.97       |
+      | 10 | 31   | 01 November 2025  |                  | 193.86          | 91.13         | 7.84     | 0.0  | 0.0       | 98.97  | 0.0    | 0.0        | 0.0  | 98.97       |
+      | 11 | 30   | 01 December 2025  |                  | 100.22          | 93.64         | 5.33     | 0.0  | 0.0       | 98.97  | 0.0    | 0.0        | 0.0  | 98.97       |
+      | 12 | 31   | 01 January 2026   |                  | 0.0             | 100.22        | 2.76     | 0.0  | 0.0       | 102.98 | 0.0    | 0.0        | 0.0  | 102.98      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late | Outstanding |
+      | 1000.0        | 191.65   | 0.0  | 0.0       | 1191.65 | 100.0 | 1.03       | 0.0  | 1091.65     |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 01 February 2025 | Repayment        | 100.0  | 72.5      | 27.5     | 0.0  | 0.0       | 927.5        | false    | false    |
+#   --- Make second payment backdated to 01 March 2025 ---
+    And Customer makes "AUTOPAY" repayment on "01 March 2025" with 150 EUR transaction amount
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2025   |                  | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2025  | 01 February 2025 | 928.53          | 71.47         | 27.5     | 0.0  | 0.0       | 98.97 | 98.97 | 0.0        | 0.0  | 0.0         |
+      | 2  | 28   | 01 March 2025     | 01 March 2025    | 855.07          | 73.46         | 25.51    | 0.0  | 0.0       | 98.97 | 98.97 | 1.03       | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2025     |                  | 778.18          | 76.89         | 22.08    | 0.0  | 0.0       | 98.97 | 52.06 | 52.06      | 0.0  | 46.91       |
+      | 4  | 30   | 01 May 2025       |                  | 700.81          | 77.37         | 21.6     | 0.0  | 0.0       | 98.97 | 0.0   | 0.0        | 0.0  | 98.97       |
+      | 5  | 31   | 01 June 2025      |                  | 621.11          | 79.7          | 19.27    | 0.0  | 0.0       | 98.97 | 0.0   | 0.0        | 0.0  | 98.97       |
+      | 6  | 30   | 01 July 2025      |                  | 539.22          | 81.89         | 17.08    | 0.0  | 0.0       | 98.97 | 0.0   | 0.0        | 0.0  | 98.97       |
+      | 7  | 31   | 01 August 2025    |                  | 455.08          | 84.14         | 14.83    | 0.0  | 0.0       | 98.97 | 0.0   | 0.0        | 0.0  | 98.97       |
+      | 8  | 31   | 01 September 2025 |                  | 368.62          | 86.46         | 12.51    | 0.0  | 0.0       | 98.97 | 0.0   | 0.0        | 0.0  | 98.97       |
+      | 9  | 30   | 01 October 2025   |                  | 279.79          | 88.83         | 10.14    | 0.0  | 0.0       | 98.97 | 0.0   | 0.0        | 0.0  | 98.97       |
+      | 10 | 31   | 01 November 2025  |                  | 188.51          | 91.28         | 7.69     | 0.0  | 0.0       | 98.97 | 0.0   | 0.0        | 0.0  | 98.97       |
+      | 11 | 30   | 01 December 2025  |                  | 94.72           | 93.79         | 5.18     | 0.0  | 0.0       | 98.97 | 0.0   | 0.0        | 0.0  | 98.97       |
+      | 12 | 31   | 01 January 2026   |                  | 0.0             | 94.72         | 2.6      | 0.0  | 0.0       | 97.32 | 0.0   | 0.0        | 0.0  | 97.32       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late | Outstanding |
+      | 1000.0        | 185.99   | 0.0  | 0.0       | 1185.99 | 250.0 | 53.09      | 0.0  | 935.99     |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 01 February 2025 | Repayment        | 100.0  | 72.5      | 27.5     | 0.0  | 0.0       | 927.5        | false    | false    |
+      | 01 March 2025    | Repayment        | 150.0  | 124.49    | 25.51    | 0.0  | 0.0       | 803.01       | false    | false    |
+#   --- Reverse/refund the first payment from 01 February 2025 ---
+    When Customer undo "1"th repayment on "01 February 2025"
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 January 2025   |               | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |       |             |
+      | 1  | 31   | 01 February 2025  | 01 March 2025 | 928.53          | 71.47         | 27.5     | 0.0  | 0.0       | 98.97  | 98.97 | 0.0        | 98.97 | 0.0         |
+      | 2  | 28   | 01 March 2025     |               | 857.06          | 71.47         | 27.5     | 0.0  | 0.0       | 98.97  | 51.03 | 0.0        | 0.0   | 47.94       |
+      | 3  | 31   | 01 April 2025     |               | 782.98          | 74.08         | 24.89    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 4  | 30   | 01 May 2025       |               | 706.55          | 76.43         | 22.54    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 5  | 31   | 01 June 2025      |               | 627.01          | 79.54         | 19.43    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 6  | 30   | 01 July 2025      |               | 545.28          | 81.73         | 17.24    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 7  | 31   | 01 August 2025    |               | 461.31          | 83.97         | 15.0     | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 8  | 31   | 01 September 2025 |               | 375.03          | 86.28         | 12.69    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 9  | 30   | 01 October 2025   |               | 286.37          | 88.66         | 10.31    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 10 | 31   | 01 November 2025  |               | 195.28          | 91.09         | 7.88     | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 11 | 30   | 01 December 2025  |               | 101.68          | 93.6          | 5.37     | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 12 | 31   | 01 January 2026   |               | 0.0             | 101.68        | 2.8      | 0.0  | 0.0       | 104.48 | 0.0   | 0.0        | 0.0   | 104.48      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late  | Outstanding |
+      | 1000.0        | 193.15   | 0.0  | 0.0       | 1193.15 | 150.0 | 0.0        | 98.97 | 1043.15     |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 01 February 2025 | Repayment        | 100.0  | 72.5      | 27.5     | 0.0  | 0.0       | 927.5        | true     | false    |
+      | 01 March 2025    | Repayment        | 150.0  | 95.0      | 55.0     | 0.0  | 0.0       | 905.0        | false    | true     |
+#   --- Make third payment backdated to 01 April 2025 ---
+    And Customer makes "AUTOPAY" repayment on "01 April 2025" with 200 EUR transaction amount
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 January 2025   |               | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |       |             |
+      | 1  | 31   | 01 February 2025  | 01 March 2025 | 928.53          | 71.47         | 27.5     | 0.0  | 0.0       | 98.97  | 98.97 | 0.0        | 98.97 | 0.0         |
+      | 2  | 28   | 01 March 2025     | 01 April 2025 | 857.06          | 71.47         | 27.5     | 0.0  | 0.0       | 98.97  | 98.97 | 0.0        | 47.94 | 0.0         |
+      | 3  | 31   | 01 April 2025     | 01 April 2025 | 782.98          | 74.08         | 24.89    | 0.0  | 0.0       | 98.97  | 98.97 | 0.0        | 0.0   | 0.0         |
+      | 4  | 30   | 01 May 2025       |               | 704.08          | 78.9          | 20.07    | 0.0  | 0.0       | 98.97  | 53.09 | 53.09      | 0.0   | 45.88       |
+      | 5  | 31   | 01 June 2025      |               | 624.47          | 79.61         | 19.36    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 6  | 30   | 01 July 2025      |               | 542.67          | 81.8          | 17.17    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 7  | 31   | 01 August 2025    |               | 458.62          | 84.05         | 14.92    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 8  | 31   | 01 September 2025 |               | 372.26          | 86.36         | 12.61    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 9  | 30   | 01 October 2025   |               | 283.53          | 88.73         | 10.24    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 10 | 31   | 01 November 2025  |               | 192.36          | 91.17         | 7.8      | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 11 | 30   | 01 December 2025  |               | 98.68           | 93.68         | 5.29     | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 12 | 31   | 01 January 2026   |               | 0.0             | 98.68         | 2.71     | 0.0  | 0.0       | 101.39 | 0.0   | 0.0        | 0.0   | 101.39      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late   | Outstanding |
+      | 1000.0        | 190.06   | 0.0  | 0.0       | 1190.06 | 350.0 | 53.09      | 146.91 | 840.06      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 01 February 2025 | Repayment        | 100.0  | 72.5      | 27.5     | 0.0  | 0.0       | 927.5        | true     | false    |
+      | 01 March 2025    | Repayment        | 150.0  | 95.0      | 55.0     | 0.0  | 0.0       | 905.0        | false    | true     |
+      | 01 April 2025    | Repayment        | 200.0  | 175.11    | 24.89    | 0.0  | 0.0       | 729.89       | false    | false    |
+#   --- Reverse/refund the second payment from 01 March 2025 ---
+    When Customer undo "2"th repayment on "01 March 2025"
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 January 2025   |               | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |       |             |
+      | 1  | 31   | 01 February 2025  | 01 April 2025 | 928.53          | 71.47         | 27.5     | 0.0  | 0.0       | 98.97  | 98.97 | 0.0        | 98.97 | 0.0         |
+      | 2  | 28   | 01 March 2025     | 01 April 2025 | 857.06          | 71.47         | 27.5     | 0.0  | 0.0       | 98.97  | 98.97 | 0.0        | 98.97 | 0.0         |
+      | 3  | 31   | 01 April 2025     |               | 785.59          | 71.47         | 27.5     | 0.0  | 0.0       | 98.97  | 2.06  | 0.0        | 0.0   | 96.91       |
+      | 4  | 30   | 01 May 2025       |               | 708.81          | 76.78         | 22.19    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 5  | 31   | 01 June 2025      |               | 629.33          | 79.48         | 19.49    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 6  | 30   | 01 July 2025      |               | 547.67          | 81.66         | 17.31    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 7  | 31   | 01 August 2025    |               | 463.76          | 83.91         | 15.06    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 8  | 31   | 01 September 2025 |               | 377.54          | 86.22         | 12.75    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 9  | 30   | 01 October 2025   |               | 288.95          | 88.59         | 10.38    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 10 | 31   | 01 November 2025  |               | 197.93          | 91.02         | 7.95     | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 11 | 30   | 01 December 2025  |               | 104.4           | 93.53         | 5.44     | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 12 | 31   | 01 January 2026   |               | 0.0             | 104.4         | 2.87     | 0.0  | 0.0       | 107.27 | 0.0   | 0.0        | 0.0   | 107.27      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late   | Outstanding |
+      | 1000.0        | 195.94   | 0.0  | 0.0       | 1195.94 | 200.0 | 0.0        | 197.94 | 995.94      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 01 February 2025 | Repayment        | 100.0  | 72.5      | 27.5     | 0.0  | 0.0       | 927.5        | true     | false    |
+      | 01 March 2025    | Repayment        | 150.0  | 95.0      | 55.0     | 0.0  | 0.0       | 905.0        | true     | true     |
+      | 01 April 2025    | Repayment        | 200.0  | 142.94    | 57.06    | 0.0  | 0.0       | 857.06       | false    | true     |
+#   --- Run inline COB job to generate aggregated accruals ---
+    When Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 January 2025   |               | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |       |             |
+      | 1  | 31   | 01 February 2025  | 01 April 2025 | 928.53          | 71.47         | 27.5     | 0.0  | 0.0       | 98.97  | 98.97 | 0.0        | 98.97 | 0.0         |
+      | 2  | 28   | 01 March 2025     | 01 April 2025 | 857.06          | 71.47         | 27.5     | 0.0  | 0.0       | 98.97  | 98.97 | 0.0        | 98.97 | 0.0         |
+      | 3  | 31   | 01 April 2025     |               | 785.59          | 71.47         | 27.5     | 0.0  | 0.0       | 98.97  | 2.06  | 0.0        | 0.0   | 96.91       |
+      | 4  | 30   | 01 May 2025       |               | 708.81          | 76.78         | 22.19    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 5  | 31   | 01 June 2025      |               | 629.33          | 79.48         | 19.49    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 6  | 30   | 01 July 2025      |               | 547.67          | 81.66         | 17.31    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 7  | 31   | 01 August 2025    |               | 463.76          | 83.91         | 15.06    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 8  | 31   | 01 September 2025 |               | 377.54          | 86.22         | 12.75    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 9  | 30   | 01 October 2025   |               | 288.95          | 88.59         | 10.38    | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 10 | 31   | 01 November 2025  |               | 197.93          | 91.02         | 7.95     | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 11 | 30   | 01 December 2025  |               | 104.4           | 93.53         | 5.44     | 0.0  | 0.0       | 98.97  | 0.0   | 0.0        | 0.0   | 98.97       |
+      | 12 | 31   | 01 January 2026   |               | 0.0             | 104.4         | 2.87     | 0.0  | 0.0       | 107.27 | 0.0   | 0.0        | 0.0   | 107.27      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late   | Outstanding |
+      | 1000.0        | 195.94   | 0.0  | 0.0       | 1195.94 | 200.0 | 0.0        | 197.94 | 995.94      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 01 February 2025 | Repayment        | 100.0  | 72.5      | 27.5     | 0.0  | 0.0       | 927.5        | true     | false    |
+      | 01 February 2025 | Accrual Activity | 27.5   | 0.0       | 27.5     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 March 2025    | Repayment        | 150.0  | 95.0      | 55.0     | 0.0  | 0.0       | 905.0        | true     | true     |
+      | 01 March 2025    | Accrual Activity | 27.5   | 0.0       | 27.5     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 April 2025    | Repayment        | 200.0  | 142.94    | 57.06    | 0.0  | 0.0       | 857.06       | false    | true     |
+      | 01 April 2025    | Accrual Activity | 27.5   | 0.0       | 27.5     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 April 2025    | Accrual          | 88.79  | 0.0       | 88.79    | 0.0  | 0.0       | 0.0          | false    | false    |
+#   --- Verify final loan balance reflects all transactions correctly ---
+    Then Loan has 995.94 outstanding amount
+    When Loan Pay-off is made on "10 April 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
