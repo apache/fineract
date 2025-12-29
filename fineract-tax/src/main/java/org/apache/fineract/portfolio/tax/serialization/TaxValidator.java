@@ -63,8 +63,8 @@ public class TaxValidator {
     public static final String COMPONENT_START_DATE = "component.start.date";
     private static final Set<String> SUPPORTED_TAX_COMPONENT_CREATE_PARAMETERS = new HashSet<>(
             Arrays.asList(DATE_FORMAT, LOCALE, TaxApiConstants.nameParamName, TaxApiConstants.percentageParamName,
-                    TaxApiConstants.startDateParamName, TaxApiConstants.debitAccountTypeParamName, TaxApiConstants.debitAcountIdParamName,
-                    TaxApiConstants.creditAccountTypeParamName, TaxApiConstants.creditAcountIdParamName));
+                    TaxApiConstants.startDateParamName, TaxApiConstants.debitAccountTypeParamName, TaxApiConstants.debitAccountIdParamName,
+                    TaxApiConstants.creditAccountTypeParamName, TaxApiConstants.creditAccountIdParamName));
     private static final Set<String> SUPPORTED_TAX_COMPONENT_UPDATE_PARAMETERS = new HashSet<>(Arrays.asList(DATE_FORMAT, LOCALE,
             TaxApiConstants.nameParamName, TaxApiConstants.percentageParamName, TaxApiConstants.startDateParamName));
     private static final Set<String> SUPPORTED_TAX_GROUP_PARAMETERS = new HashSet<>(
@@ -111,11 +111,11 @@ public class TaxValidator {
                 .isOneOfTheseValues(GLAccountType.ASSET.getValue(), GLAccountType.LIABILITY.getValue(), GLAccountType.EQUITY.getValue(),
                         GLAccountType.INCOME.getValue(), GLAccountType.EXPENSE.getValue());
 
-        final Long debitAccountId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.debitAcountIdParamName, element);
-        baseDataValidator.reset().parameter(TaxApiConstants.debitAcountIdParamName).value(debitAccountId).longGreaterThanZero();
+        final Long debitAccountId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.debitAccountIdParamName, element);
+        baseDataValidator.reset().parameter(TaxApiConstants.debitAccountIdParamName).value(debitAccountId).longGreaterThanZero();
         if (debitAccountType != null || debitAccountId != null) {
             baseDataValidator.reset().parameter(TaxApiConstants.debitAccountTypeParamName).value(debitAccountType).notBlank();
-            baseDataValidator.reset().parameter(TaxApiConstants.debitAcountIdParamName).value(debitAccountId).notBlank();
+            baseDataValidator.reset().parameter(TaxApiConstants.debitAccountIdParamName).value(debitAccountId).notBlank();
         }
 
         final Integer creditAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(TaxApiConstants.creditAccountTypeParamName,
@@ -124,10 +124,10 @@ public class TaxValidator {
                 .isOneOfTheseValues(GLAccountType.ASSET.getValue(), GLAccountType.LIABILITY.getValue(), GLAccountType.EQUITY.getValue(),
                         GLAccountType.INCOME.getValue(), GLAccountType.EXPENSE.getValue());
 
-        final Long creditAccountId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.creditAcountIdParamName, element);
-        baseDataValidator.reset().parameter(TaxApiConstants.creditAcountIdParamName).value(creditAccountId).longGreaterThanZero();
+        final Long creditAccountId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.creditAccountIdParamName, element);
+        baseDataValidator.reset().parameter(TaxApiConstants.creditAccountIdParamName).value(creditAccountId).longGreaterThanZero();
         if (creditAccountType != null || creditAccountId != null) {
-            baseDataValidator.reset().parameter(TaxApiConstants.creditAcountIdParamName).value(creditAccountId).notBlank();
+            baseDataValidator.reset().parameter(TaxApiConstants.creditAccountIdParamName).value(creditAccountId).notBlank();
             baseDataValidator.reset().parameter(TaxApiConstants.creditAccountTypeParamName).value(creditAccountType).notBlank();
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

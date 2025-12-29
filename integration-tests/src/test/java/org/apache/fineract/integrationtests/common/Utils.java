@@ -88,6 +88,7 @@ public final class Utils {
     public static final String TENANT_TIME_ZONE = "Asia/Kolkata";
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
+    public static final String LOCALE = "en";
     public static final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(DATE_FORMAT).toFormatter();
     public static final DateTimeFormatter dateTimeFormatter = new DateTimeFormatterBuilder().appendPattern(DATE_TIME_FORMAT).toFormatter();
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
