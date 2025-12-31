@@ -56,7 +56,8 @@ public class SmsConfigUtils {
                 ? pathBuilder.append("{apiEndPoint}")
                 : pathBuilder.append("{endPoint}/{apiEndPoint}");
         // pathBuilder.append("{endPoint}/{apiEndPoint}") ;
-        UriBuilder builder = UriBuilder.fromPath(pathBuilder.toString()).host(messageGatewayConfigurationData.hostName()).scheme("http")
+        String scheme = messageGatewayConfigurationData.sslEnabled() ? "https" : "http";
+        UriBuilder builder = UriBuilder.fromPath(pathBuilder.toString()).host(messageGatewayConfigurationData.hostName()).scheme(scheme)
                 .port(messageGatewayConfigurationData.portNumber());
         URI uri = messageGatewayConfigurationData.endPoint() == null || messageGatewayConfigurationData.endPoint().equals("/")
                 ? builder.build(apiEndPoint)
