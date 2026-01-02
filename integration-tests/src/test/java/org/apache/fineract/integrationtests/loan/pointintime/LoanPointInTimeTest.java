@@ -68,7 +68,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .recalculationRestFrequencyInterval(1)//
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
                     .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .disallowExpectedDisbursements(false)//
                     .allowApprovedDisbursedAmountsOverApplied(false)//
                     .overAppliedNumber(null)//
@@ -208,7 +208,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .recalculationRestFrequencyInterval(1)//
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
                     .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .disallowExpectedDisbursements(false)//
                     .allowApprovedDisbursedAmountsOverApplied(false)//
                     .overAppliedNumber(null)//
@@ -372,7 +372,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .recalculationRestFrequencyInterval(1)//
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
                     .rescheduleStrategyMethod(RescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .disallowExpectedDisbursements(false)//
                     .allowApprovedDisbursedAmountsOverApplied(false)//
                     .overAppliedNumber(null)//
@@ -543,7 +543,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .recalculationRestFrequencyInterval(1)//
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
                     .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .disallowExpectedDisbursements(false)//
                     .allowApprovedDisbursedAmountsOverApplied(false)//
                     .overAppliedNumber(null)//
@@ -687,7 +687,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .recalculationRestFrequencyInterval(1)//
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
                     .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .disallowExpectedDisbursements(false)//
                     .allowApprovedDisbursedAmountsOverApplied(false)//
                     .overAppliedNumber(null)//
@@ -785,7 +785,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .recalculationRestFrequencyInterval(1)//
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
                     .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .disallowExpectedDisbursements(false)//
                     .allowApprovedDisbursedAmountsOverApplied(false)//
                     .overAppliedNumber(null)//

@@ -463,7 +463,7 @@ public class LoanAccountData {
             final EnumOptionData amortizationType, final BigDecimal interestRatePerPeriod, final EnumOptionData interestRateFrequencyType,
             final BigDecimal annualInterestRate, final EnumOptionData interestType, final boolean isFloatingInterestRate,
             final BigDecimal interestRateDifferential, final EnumOptionData interestCalculationPeriodType,
-            Boolean allowPartialPeriodInterestCalcualtion, final LocalDate expectedFirstRepaymentOnDate,
+            Boolean allowPartialPeriodInterestCalculation, final LocalDate expectedFirstRepaymentOnDate,
             final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods,
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final LocalDate interestChargedFromDate,
             final LoanApplicationTimelineData timeline, final LoanSummaryData loanSummary,
@@ -508,7 +508,7 @@ public class LoanAccountData {
                 .setInterestRateFrequencyType(interestRateFrequencyType).setAnnualInterestRate(annualInterestRate)
                 .setInterestType(interestType).setFloatingInterestRate(isFloatingInterestRate)
                 .setInterestRateDifferential(interestRateDifferential).setInterestCalculationPeriodType(interestCalculationPeriodType)
-                .setAllowPartialPeriodInterestCalculation(allowPartialPeriodInterestCalcualtion)
+                .setAllowPartialPeriodInterestCalculation(allowPartialPeriodInterestCalculation)
                 .setExpectedFirstRepaymentOnDate(expectedFirstRepaymentOnDate).setGraceOnPrincipalPayment(graceOnPrincipalPayment)
                 .setRecurringMoratoriumOnPrincipalPeriods(recurringMoratoriumOnPrincipalPeriods)
                 .setGraceOnInterestPayment(graceOnInterestPayment).setGraceOnInterestCharged(graceOnInterestCharged)

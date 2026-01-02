@@ -159,7 +159,7 @@ public final class LoanProductsApiResourceSwagger {
         @Schema(example = "FULL_LEAP_YEAR")
         public String daysInYearCustomStrategy;
         @Schema(example = "true")
-        public Boolean allowPartialPeriodInterestCalcualtion;
+        public Boolean allowPartialPeriodInterestCalculation;
         @Schema(example = "179")
         public Integer overdueDaysForNPA;
         @Schema(example = "3")
@@ -1662,7 +1662,7 @@ public final class LoanProductsApiResourceSwagger {
         @Schema(example = "FULL_LEAP_YEAR")
         public String daysInYearCustomStrategy;
         @Schema(example = "true")
-        public Boolean allowPartialPeriodInterestCalcualtion;
+        public Boolean allowPartialPeriodInterestCalculation;
         @Schema(example = "179")
         public Integer overdueDaysForNPA;
         @Schema(example = "3")

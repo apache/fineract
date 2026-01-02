@@ -4450,7 +4450,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(2L)//
                     .enableDownPayment(true)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .enableAutoRepaymentForDownPayment(false)//
                     .multiDisburseLoan(false)//
                     .disallowExpectedDisbursements(null)//
@@ -4512,7 +4512,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(2L)//
                     .enableDownPayment(true)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .enableAutoRepaymentForDownPayment(false)//
                     .multiDisburseLoan(false)//
                     .disallowExpectedDisbursements(null)//
@@ -4575,7 +4575,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(2L)//
                     .enableDownPayment(true)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .enableAutoRepaymentForDownPayment(false)//
                     .multiDisburseLoan(false)//
                     .disallowExpectedDisbursements(null)//
@@ -4637,7 +4637,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .daysInMonthType(DaysInMonthType.ACTUAL).daysInYearType(DaysInYearType.DAYS_365).numberOfRepayments(4)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(2L)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .multiDisburseLoan(false)//
                     .disallowExpectedDisbursements(null)//
                     .allowApprovedDisbursedAmountsOverApplied(null)//
@@ -4739,7 +4739,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .maxInterestRatePerPeriod((double) 110)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(1L)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .multiDisburseLoan(false)//
                     .disallowExpectedDisbursements(null)//
                     .allowApprovedDisbursedAmountsOverApplied(null)//
@@ -4918,7 +4918,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .daysInMonthType(DaysInMonthType.ACTUAL).daysInYearType(DaysInYearType.DAYS_365).numberOfRepayments(4)//
                     .repaymentEvery(5)//
                     .repaymentFrequencyType(0L)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .multiDisburseLoan(false)//
                     .disallowExpectedDisbursements(null)//
                     .allowApprovedDisbursedAmountsOverApplied(null)//
@@ -4982,7 +4982,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(2L)//
                     .enableDownPayment(false)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .enableAutoRepaymentForDownPayment(null)//
                     .multiDisburseLoan(true)//
                     .disallowExpectedDisbursements(true)//
@@ -5064,7 +5064,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(2L)//
                     .enableDownPayment(false)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .enableAutoRepaymentForDownPayment(null)//
                     .multiDisburseLoan(true)//
                     .disallowExpectedDisbursements(true)//
@@ -5163,7 +5163,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
                     .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
                     .enableDownPayment(false)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .enableAutoRepaymentForDownPayment(null)//
                     .multiDisburseLoan(true)//
                     .disallowExpectedDisbursements(true)//
@@ -5280,7 +5280,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
                     .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
                     .enableDownPayment(false)//
-                    .allowPartialPeriodInterestCalcualtion(null)//
+                    .allowPartialPeriodInterestCalculation(null)//
                     .enableAutoRepaymentForDownPayment(null)//
                     .isInterestRecalculationEnabled(true)//
                     .interestRecalculationCompoundingMethod(0)//
@@ -5454,7 +5454,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .maxInterestRatePerPeriod((double) 0)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(1L)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .multiDisburseLoan(false)//
                     .disallowExpectedDisbursements(null)//
                     .allowApprovedDisbursedAmountsOverApplied(null)//
@@ -5527,7 +5527,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .maxInterestRatePerPeriod((double) 12)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .multiDisburseLoan(false)//
                     .disallowExpectedDisbursements(null)//
                     .allowApprovedDisbursedAmountsOverApplied(null)//
@@ -5574,7 +5574,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             PostLoanProductsRequest product = create4IProgressive().interestRateFrequencyType(YEARS).numberOfRepayments(6)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(1L)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .multiDisburseLoan(true)//
                     .maxTrancheCount(10)//
                     .disallowExpectedDisbursements(true)//
@@ -5757,7 +5757,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .maxInterestRatePerPeriod((double) 0)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(1L)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .multiDisburseLoan(false)//
                     .disallowExpectedDisbursements(null)//
                     .allowApprovedDisbursedAmountsOverApplied(null)//
@@ -5915,7 +5915,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .daysInMonthType(DaysInMonthType.ACTUAL).daysInYearType(DaysInYearType.DAYS_360).numberOfRepayments(3)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(1L)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .multiDisburseLoan(false)//
                     .disallowExpectedDisbursements(null)//
                     .allowApprovedDisbursedAmountsOverApplied(null)//
@@ -5973,7 +5973,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .interestRatePerPeriod(12.0).interestCalculationPeriodType(RepaymentFrequencyType.DAYS).numberOfRepayments(4)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(1L)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .installmentAmountInMultiplesOf(null)//
                     .multiDisburseLoan(false)//
                     .disallowExpectedDisbursements(null)//
@@ -6045,7 +6045,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
                     .enableDownPayment(false)//
                     .enableAccrualActivityPosting(true)//
-                    .allowPartialPeriodInterestCalcualtion(null)//
+                    .allowPartialPeriodInterestCalculation(null)//
                     .enableAutoRepaymentForDownPayment(null)//
                     .isInterestRecalculationEnabled(true)//
                     .delinquencyBucketId(delinquencyBucketId.longValue())//
@@ -6187,7 +6187,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
                     .enableDownPayment(false)//
                     .enableAccrualActivityPosting(true)//
-                    .allowPartialPeriodInterestCalcualtion(null)//
+                    .allowPartialPeriodInterestCalculation(null)//
                     .enableAutoRepaymentForDownPayment(null)//
                     .isInterestRecalculationEnabled(true)//
                     .delinquencyBucketId(delinquencyBucketId.longValue())//
