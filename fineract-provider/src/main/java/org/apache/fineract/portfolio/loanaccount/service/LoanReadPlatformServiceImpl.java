@@ -800,7 +800,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     + " l.term_frequency as termFrequency, l.term_period_frequency_enum as termPeriodFrequencyType, "
                     + " l.amortization_method_enum as amortizationType, l.interest_method_enum as interestType, l.is_equal_amortization as isEqualAmortization, l.interest_calculated_in_period_enum as interestCalculationPeriodType,"
                     + " l.fixed_principal_percentage_per_installment fixedPrincipalPercentagePerInstallment, "
-                    + " l.allow_partial_period_interest_calcualtion as allowPartialPeriodInterestCalcualtion,"
+                    + " l.allow_partial_period_interest_calcualtion as allowPartialPeriodInterestCalculation,"
                     + " l.loan_status_id as lifeCycleStatusId, l.loan_transaction_strategy_code as transactionStrategyCode, "
                     + " l.loan_transaction_strategy_name as transactionStrategyName, l.enable_installment_level_delinquency as enableInstallmentLevelDelinquency, "
                     + " l.currency_code as currencyCode, l.currency_digits as currencyDigits, l.currency_multiplesof as inMultiplesOf, rc."
@@ -1043,7 +1043,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             final EnumOptionData interestType = LoanEnumerations.interestType(interestTypeInt);
             final EnumOptionData interestCalculationPeriodType = LoanEnumerations
                     .interestCalculationPeriodType(interestCalculationPeriodTypeInt);
-            final Boolean allowPartialPeriodInterestCalcualtion = rs.getBoolean("allowPartialPeriodInterestCalcualtion");
+            final Boolean allowPartialPeriodInterestCalculation = rs.getBoolean("allowPartialPeriodInterestCalculation");
 
             final Integer lifeCycleStatusId = JdbcSupport.getInteger(rs, "lifeCycleStatusId");
             final LoanStatusEnumData status = LoanEnumerations.status(lifeCycleStatusId);
@@ -1264,7 +1264,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     termFrequency, termPeriodFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, null, null,
                     transactionStrategyCode, transactionStrategyName, amortizationType, interestRatePerPeriod, interestRateFrequencyType,
                     annualInterestRate, interestType, isFloatingInterestRate, interestRateDifferential, interestCalculationPeriodType,
-                    allowPartialPeriodInterestCalcualtion, expectedFirstRepaymentOnDate, graceOnPrincipalPayment,
+                    allowPartialPeriodInterestCalculation, expectedFirstRepaymentOnDate, graceOnPrincipalPayment,
                     recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate,
                     timeline, loanSummary, feeChargesDueAtDisbursementCharged, syncDisbursementWithMeeting, loanCounter, loanProductCounter,
                     multiDisburseLoan, canDefineInstallmentAmount, fixedEmiAmount, outstandingLoanBalance, inArrears, graceOnArrearsAgeing,

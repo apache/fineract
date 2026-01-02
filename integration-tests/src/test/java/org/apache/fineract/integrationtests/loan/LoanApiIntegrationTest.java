@@ -61,7 +61,7 @@ public class LoanApiIntegrationTest extends BaseLoanIntegrationTest {
                     .recalculationRestFrequencyInterval(1)//
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
                     .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .disallowExpectedDisbursements(false)//
                     .allowApprovedDisbursedAmountsOverApplied(false)//
                     .overAppliedNumber(null)//
@@ -85,7 +85,7 @@ public class LoanApiIntegrationTest extends BaseLoanIntegrationTest {
                     .recalculationRestFrequencyInterval(1)//
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
                     .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .disallowExpectedDisbursements(false)//
                     .allowApprovedDisbursedAmountsOverApplied(false)//
                     .overAppliedNumber(null)//
@@ -171,7 +171,7 @@ public class LoanApiIntegrationTest extends BaseLoanIntegrationTest {
                     .recalculationRestFrequencyInterval(1)//
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
                     .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .disallowExpectedDisbursements(false)//
                     .allowApprovedDisbursedAmountsOverApplied(false)//
                     .overAppliedNumber(null)//
@@ -242,7 +242,7 @@ public class LoanApiIntegrationTest extends BaseLoanIntegrationTest {
                     .recalculationRestFrequencyInterval(1)//
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
                     .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .disallowExpectedDisbursements(false)//
                     .allowApprovedDisbursedAmountsOverApplied(false)//
                     .overAppliedNumber(null)//
@@ -326,7 +326,7 @@ public class LoanApiIntegrationTest extends BaseLoanIntegrationTest {
                     .recalculationRestFrequencyInterval(1)//
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
                     .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .allowPartialPeriodInterestCalculation(false)//
                     .disallowExpectedDisbursements(false)//
                     .allowApprovedDisbursedAmountsOverApplied(false)//
                     .overAppliedNumber(null)//

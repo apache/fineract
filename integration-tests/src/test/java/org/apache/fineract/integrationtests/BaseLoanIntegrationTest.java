@@ -434,7 +434,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                 .amortizationType(AmortizationType.EQUAL_INSTALLMENTS)//
                 .interestType(InterestType.DECLINING_BALANCE)//
                 .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY)//
-                .allowPartialPeriodInterestCalcualtion(false)//
+                .allowPartialPeriodInterestCalculation(false)//
                 .creditAllocation(List.of())//
                 .overdueDaysForNPA(179)//
                 .daysInMonthType(30)//
@@ -530,7 +530,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                 .amortizationType(AmortizationType.EQUAL_INSTALLMENTS)//
                 .interestType(InterestType.DECLINING_BALANCE)//
                 .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY)//
-                .allowPartialPeriodInterestCalcualtion(false)//
+                .allowPartialPeriodInterestCalculation(false)//
                 .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
                 .paymentAllocation(List.of(createDefaultPaymentAllocation("NEXT_INSTALLMENT")))//
                 .creditAllocation(List.of())//
@@ -632,7 +632,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                 .amortizationType(AmortizationType.EQUAL_INSTALLMENTS)//
                 .interestType(InterestType.DECLINING_BALANCE)//
                 .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY)//
-                .allowPartialPeriodInterestCalcualtion(false)//
+                .allowPartialPeriodInterestCalculation(false)//
                 .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
                 .paymentAllocation(List.of(createDefaultPaymentAllocation("NEXT_INSTALLMENT")))//
                 .creditAllocation(List.of())//
@@ -768,7 +768,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
                         .graceOnArrearsAgeing(true))//
-                .allowPartialPeriodInterestCalcualtion(true)//
+                .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
                 .charges(Collections.emptyList())//
@@ -824,7 +824,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                 .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()) //
                 .addPaymentAllocationItem(defaultAllocation).enableDownPayment(false) //
                 .isInterestRecalculationEnabled(true).interestRecalculationCompoundingMethod(0) //
-                .preClosureInterestCalculationStrategy(1).recalculationRestFrequencyType(1).allowPartialPeriodInterestCalcualtion(true) //
+                .preClosureInterestCalculationStrategy(1).recalculationRestFrequencyType(1).allowPartialPeriodInterestCalculation(true) //
                 .rescheduleStrategyMethod(rescheduleStrategyMethod);
     }
 

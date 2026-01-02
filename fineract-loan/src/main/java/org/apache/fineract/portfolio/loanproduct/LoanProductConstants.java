@@ -130,7 +130,7 @@ public interface LoanProductConstants {
     String minimumGapBetweenInstallments = "minimumGap";
     String maximumGapBetweenInstallments = "maximumGap";
 
-    String ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME = "allowPartialPeriodInterestCalcualtion";
+    String ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME = "allowPartialPeriodInterestCalculation";
 
     String CAN_USE_FOR_TOPUP = "canUseForTopup";
 
