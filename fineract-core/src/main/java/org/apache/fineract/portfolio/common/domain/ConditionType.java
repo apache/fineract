@@ -25,8 +25,7 @@ public enum ConditionType {
     INVALID(0, "ConditionType.invalid"), //
     LESSTHAN(1, "ConditionType.lessthan"), //
     EQUAL(2, "ConditionType.equal"), //
-    // TODO: fix typo "GREATERTHAN"
-    GRETERTHAN(3, "ConditionType.greterthan"), //
+    GREATERTHAN(3, "ConditionType.greaterthan"), //
     NOT_EQUAL(4, "ConditionType.notequal");//
 
     private final Integer value;
@@ -43,7 +42,7 @@ public enum ConditionType {
             case 2:
                 return EQUAL;
             case 3:
-                return GRETERTHAN;
+                return GREATERTHAN;
             case 4:
                 return NOT_EQUAL;
             default:
