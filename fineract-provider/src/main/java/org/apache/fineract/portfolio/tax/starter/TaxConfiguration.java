@@ -25,6 +25,8 @@ import org.apache.fineract.portfolio.tax.domain.TaxComponentRepository;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepositoryWrapper;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepository;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepositoryWrapper;
+import org.apache.fineract.portfolio.tax.mapper.TaxComponentMapper;
+import org.apache.fineract.portfolio.tax.mapper.TaxGroupMapper;
 import org.apache.fineract.portfolio.tax.serialization.TaxValidator;
 import org.apache.fineract.portfolio.tax.service.TaxAssembler;
 import org.apache.fineract.portfolio.tax.service.TaxReadPlatformService;
@@ -34,7 +36,6 @@ import org.apache.fineract.portfolio.tax.service.TaxWritePlatformServiceImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
 public class TaxConfiguration {
@@ -48,9 +49,11 @@ public class TaxConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(TaxReadPlatformService.class)
-    public TaxReadPlatformService taxReadPlatformService(JdbcTemplate jdbcTemplate,
+    public TaxReadPlatformService taxReadPlatformService(final TaxComponentRepository taxComponentRepository,
+            final TaxComponentMapper taxComponentMapper, final TaxGroupRepository taxGroupRepository, final TaxGroupMapper taxGroupMapper,
             AccountingDropdownReadPlatformService accountingDropdownReadPlatformService) {
-        return new TaxReadPlatformServiceImpl(jdbcTemplate, accountingDropdownReadPlatformService);
+        return new TaxReadPlatformServiceImpl(accountingDropdownReadPlatformService, taxComponentRepository, taxComponentMapper,
+                taxGroupRepository, taxGroupMapper);
     }
 
     @Bean

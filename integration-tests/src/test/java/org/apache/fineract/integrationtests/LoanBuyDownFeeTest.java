@@ -261,7 +261,7 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
                 .repaymentFrequencyType(RepaymentFrequencyType.MONTHS_L).interestRatePerPeriod(10.0).minInterestRatePerPeriod(0.0)
                 .maxInterestRatePerPeriod(120.0).interestRateFrequencyType(InterestRateFrequencyType.YEARS)
                 .amortizationType(AmortizationType.EQUAL_INSTALLMENTS).interestType(InterestType.DECLINING_BALANCE)
-                .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY).allowPartialPeriodInterestCalcualtion(false)
+                .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY).allowPartialPeriodInterestCalculation(false)
                 .transactionProcessingStrategyCode("advanced-payment-allocation-strategy")
                 .paymentAllocation(List.of(createDefaultPaymentAllocation("NEXT_INSTALLMENT"))).creditAllocation(List.of())
                 .daysInMonthType(30).daysInYearType(360).isInterestRecalculationEnabled(false).accountingRule(3) // Accrual-based

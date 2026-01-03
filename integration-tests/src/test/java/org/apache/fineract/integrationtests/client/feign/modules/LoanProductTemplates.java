@@ -96,7 +96,7 @@ public interface LoanProductTemplates {
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
                         .graceOnArrearsAgeing(true))//
-                .allowPartialPeriodInterestCalcualtion(true)//
+                .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
                 .charges(Collections.emptyList())//
@@ -171,7 +171,7 @@ public interface LoanProductTemplates {
                 .amortizationType(AmortizationType.EQUAL_INSTALLMENTS)//
                 .interestType(InterestType.DECLINING_BALANCE)//
                 .interestCalculationPeriodType(InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)//
-                .allowPartialPeriodInterestCalcualtion(false)//
+                .allowPartialPeriodInterestCalculation(false)//
                 .creditAllocation(List.of())//
                 .overdueDaysForNPA(179)//
                 .daysInMonthType(DaysInMonthType.DAYS_30)//

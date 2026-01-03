@@ -1542,7 +1542,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
                 .interestRecalculationCompoundingMethod(0)//
                 .recalculationRestFrequencyType(2)//
                 .recalculationRestFrequencyInterval(1)//
-                .allowPartialPeriodInterestCalcualtion(false);//
+                .allowPartialPeriodInterestCalculation(false);//
 
     }
 

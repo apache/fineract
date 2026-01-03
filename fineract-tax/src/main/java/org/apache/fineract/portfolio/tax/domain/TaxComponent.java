@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
@@ -44,6 +45,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.tax.api.TaxApiConstants;
 
 @Entity
+@Getter
 @Table(name = "m_tax_component")
 public class TaxComponent extends AbstractAuditableCustom {
 
@@ -58,14 +60,14 @@ public class TaxComponent extends AbstractAuditableCustom {
 
     @ManyToOne
     @JoinColumn(name = "debit_account_id")
-    private GLAccount debitAcount;
+    private GLAccount debitAccount;
 
     @Column(name = "credit_account_type_enum")
     private Integer creditAccountType;
 
     @ManyToOne
     @JoinColumn(name = "credit_account_id")
-    private GLAccount creditAcount;
+    private GLAccount creditAccount;
 
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
@@ -81,24 +83,24 @@ public class TaxComponent extends AbstractAuditableCustom {
 
     }
 
-    private TaxComponent(final String name, final BigDecimal percentage, final GLAccountType debitAccountType, final GLAccount debitAcount,
-            final GLAccountType creditAccountType, final GLAccount creditAcount, final LocalDate startDate) {
+    private TaxComponent(final String name, final BigDecimal percentage, final GLAccountType debitAccountType, final GLAccount debitAccount,
+            final GLAccountType creditAccountType, final GLAccount creditAccount, final LocalDate startDate) {
         this.name = name;
         this.percentage = percentage;
         if (debitAccountType != null) {
             this.debitAccountType = debitAccountType.getValue();
         }
-        this.debitAcount = debitAcount;
+        this.debitAccount = debitAccount;
         if (creditAccountType != null) {
             this.creditAccountType = creditAccountType.getValue();
         }
-        this.creditAcount = creditAcount;
+        this.creditAccount = creditAccount;
         this.startDate = startDate;
     }
 
     public static TaxComponent createTaxComponent(final String name, final BigDecimal percentage, final GLAccountType debitAccountType,
-            final GLAccount debitAcount, final GLAccountType creditAccountType, final GLAccount creditAcount, final LocalDate startDate) {
-        return new TaxComponent(name, percentage, debitAccountType, debitAcount, creditAccountType, creditAcount, startDate);
+            final GLAccount debitAccount, final GLAccountType creditAccountType, final GLAccount creditAccount, final LocalDate startDate) {
+        return new TaxComponent(name, percentage, debitAccountType, debitAccount, creditAccountType, creditAccount, startDate);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -193,7 +195,7 @@ public class TaxComponent extends AbstractAuditableCustom {
     }
 
     public GLAccount getDebitAcount() {
-        return this.debitAcount;
+        return this.debitAccount;
     }
 
     public Integer getCreditAccountType() {
@@ -201,6 +203,6 @@ public class TaxComponent extends AbstractAuditableCustom {
     }
 
     public GLAccount getCreditAcount() {
-        return this.creditAcount;
+        return this.creditAccount;
     }
 }

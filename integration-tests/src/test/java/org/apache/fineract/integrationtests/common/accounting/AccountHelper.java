@@ -21,7 +21,9 @@ package org.apache.fineract.integrationtests.common.accounting;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.client.models.DeleteGLAccountsResponse;
 import org.apache.fineract.client.models.GetGLAccountsResponse;
 import org.apache.fineract.client.models.PostGLAccountsRequest;
@@ -31,6 +33,7 @@ import org.apache.fineract.client.models.PutGLAccountsResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.junit.jupiter.api.Assertions;
 
 @SuppressWarnings("rawtypes")
 public class AccountHelper {
@@ -160,5 +163,50 @@ public class AccountHelper {
 
     public static GetGLAccountsResponse getGLAccount(final Long glAccountId) {
         return Calls.ok(FineractClientHelper.getFineractClient().glAccounts.retreiveAccount(glAccountId, false));
+    }
+
+    public static Account createAssetGlAccount(final String glAccountName) {
+        PostGLAccountsResponse postGLAccountsResponse = createGLAccount(
+                createGlAccount(GLAccountType.ASSET, Utils.uniqueRandomStringGenerator(glAccountName, 6), null));
+        Assertions.assertNotNull(postGLAccountsResponse);
+        return new Account(postGLAccountsResponse.getResourceId().intValue(), Account.AccountType.ASSET);
+    }
+
+    public static Account createLiabilityGlAccount(final String glAccountName) {
+        PostGLAccountsResponse postGLAccountsResponse = createGLAccount(
+                createGlAccount(GLAccountType.LIABILITY, Utils.uniqueRandomStringGenerator(glAccountName, 6), null));
+        Assertions.assertNotNull(postGLAccountsResponse);
+        return new Account(postGLAccountsResponse.getResourceId().intValue(), Account.AccountType.LIABILITY);
+    }
+
+    public static Account createIncomeGlAccount(final String glAccountName) {
+        PostGLAccountsResponse postGLAccountsResponse = createGLAccount(
+                createGlAccount(GLAccountType.INCOME, Utils.uniqueRandomStringGenerator(glAccountName, 6), null));
+        Assertions.assertNotNull(postGLAccountsResponse);
+        return new Account(postGLAccountsResponse.getResourceId().intValue(), Account.AccountType.INCOME);
+    }
+
+    public static Account createExpenseGlAccount(final String glAccountName) {
+        PostGLAccountsResponse postGLAccountsResponse = createGLAccount(
+                createGlAccount(GLAccountType.EXPENSE, Utils.uniqueRandomStringGenerator(glAccountName, 6), null));
+        Assertions.assertNotNull(postGLAccountsResponse);
+        return new Account(postGLAccountsResponse.getResourceId().intValue(), Account.AccountType.EXPENSE);
+    }
+
+    public static Account createEquityGlAccount(final String glAccountName) {
+        PostGLAccountsResponse postGLAccountsResponse = createGLAccount(
+                createGlAccount(GLAccountType.EQUITY, Utils.uniqueRandomStringGenerator(glAccountName, 6), null));
+        Assertions.assertNotNull(postGLAccountsResponse);
+        return new Account(postGLAccountsResponse.getResourceId().intValue(), Account.AccountType.EQUITY);
+    }
+
+    public static PostGLAccountsRequest createGlAccount(final GLAccountType glAccountType, final String glAccountName,
+            final Long parentAccountId) {
+        return new PostGLAccountsRequest().type(glAccountType.getValue()).glCode(createGlCode(glAccountType)).manualEntriesAllowed(true)
+                .usage(1).parentId(parentAccountId).description(glAccountName).name(glAccountName);
+    }
+
+    public static String createGlCode(final GLAccountType glAccountType) {
+        return Utils.uniqueRandomStringGenerator(glAccountType.getValue().toString() + Calendar.getInstance().getTimeInMillis(), 2);
     }
 }

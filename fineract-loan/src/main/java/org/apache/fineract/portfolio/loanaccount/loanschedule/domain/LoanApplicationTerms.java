@@ -90,7 +90,7 @@ public final class LoanApplicationTerms {
     private PeriodFrequencyType interestRatePeriodFrequencyType;
     private BigDecimal annualNominalInterestRate;
     private InterestCalculationPeriodMethod interestCalculationPeriodMethod;
-    private boolean allowPartialPeriodInterestCalcualtion;
+    private boolean allowPartialPeriodInterestCalculation;
 
     private Money principal;
     private LocalDate expectedDisbursementDate;
@@ -293,7 +293,7 @@ public final class LoanApplicationTerms {
         this.buyDownFeeIncomeType = builder.buyDownFeeIncomeType;
         this.merchantBuyDownFee = builder.merchantBuyDownFee;
         this.interestMethod = builder.interestMethod;
-        this.allowPartialPeriodInterestCalcualtion = builder.allowPartialPeriodInterestCalculation;
+        this.allowPartialPeriodInterestCalculation = builder.allowPartialPeriodInterestCalculation;
     }
 
     public static class Builder {
@@ -688,7 +688,7 @@ public final class LoanApplicationTerms {
             final PeriodFrequencyType repaymentPeriodFrequencyType, final Integer nthDay, final DayOfWeekType weekDayType,
             final AmortizationMethod amortizationMethod, final InterestMethod interestMethod, final BigDecimal interestRatePerPeriod,
             final PeriodFrequencyType interestRatePeriodFrequencyType, final BigDecimal annualNominalInterestRate,
-            final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final boolean allowPartialPeriodInterestCalcualtion,
+            final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final boolean allowPartialPeriodInterestCalculation,
             final Money principal, final LocalDate expectedDisbursementDate, final LocalDate repaymentsStartingFromDate,
             final LocalDate calculatedRepaymentsStartingFromDate, final Integer principalGrace,
             final Integer recurringMoratoriumOnPrincipalPeriods, final Integer interestPaymentGrace, final Integer interestChargingGrace,
@@ -733,7 +733,7 @@ public final class LoanApplicationTerms {
         this.interestRatePeriodFrequencyType = interestRatePeriodFrequencyType;
         this.annualNominalInterestRate = annualNominalInterestRate;
         this.interestCalculationPeriodMethod = interestCalculationPeriodMethod;
-        this.allowPartialPeriodInterestCalcualtion = allowPartialPeriodInterestCalcualtion;
+        this.allowPartialPeriodInterestCalculation = allowPartialPeriodInterestCalculation;
 
         this.principal = principal;
         this.disbursedPrincipal = principal;
@@ -1106,7 +1106,7 @@ public final class LoanApplicationTerms {
             case INVALID:
             break;
             case SAME_AS_REPAYMENT_PERIOD:
-                if (this.allowPartialPeriodInterestCalcualtion) {
+                if (this.allowPartialPeriodInterestCalculation) {
                     LocalDate startDate = getExpectedDisbursementDate();
                     if (getInterestChargedFromDate() != null) {
                         startDate = getInterestChargedFromLocalDate();
@@ -1407,7 +1407,7 @@ public final class LoanApplicationTerms {
 
     private BigDecimal calculateLoanTermFrequency(final LocalDate periodStartDate, final LocalDate periodEndDate) {
         BigDecimal loanTermFrequencyBigDecimal = BigDecimal.valueOf(this.repaymentEvery);
-        if (this.interestCalculationPeriodMethod.isDaily() || this.allowPartialPeriodInterestCalcualtion) {
+        if (this.interestCalculationPeriodMethod.isDaily() || this.allowPartialPeriodInterestCalculation) {
             loanTermFrequencyBigDecimal = calculatePeriodsBetweenDates(periodStartDate, periodEndDate);
         }
         return loanTermFrequencyBigDecimal;
@@ -1681,7 +1681,7 @@ public final class LoanApplicationTerms {
 
         return LoanProductRelatedDetail.createFrom(currency, this.principal.getAmount(), this.interestRatePerPeriod,
                 this.interestRatePeriodFrequencyType, this.annualNominalInterestRate, this.interestMethod,
-                this.interestCalculationPeriodMethod, this.allowPartialPeriodInterestCalcualtion, this.repaymentEvery,
+                this.interestCalculationPeriodMethod, this.allowPartialPeriodInterestCalculation, this.repaymentEvery,
                 this.repaymentPeriodFrequencyType, this.numberOfRepayments, this.principalGrace, this.recurringMoratoriumOnPrincipalPeriods,
                 this.interestPaymentGrace, this.interestChargingGrace, this.amortizationMethod, this.inArrearsTolerance.getAmount(),
                 this.graceOnArrearsAgeing, this.daysInMonthType.getValue(), this.daysInYearType.getValue(),
@@ -1702,7 +1702,7 @@ public final class LoanApplicationTerms {
                 interestCalculationPeriodMethod, daysInYearType, daysInMonthType, amortizationMethod, repaymentPeriodFrequencyType,
                 repaymentEvery, numberOfRepayments,
                 isInterestChargedFromDateSameAsDisbursalDateEnabled != null && isInterestChargedFromDateSameAsDisbursalDateEnabled,
-                daysInYearCustomStrategy, allowPartialPeriodInterestCalcualtion, interestRecalculationEnabled, recalculationFrequencyType,
+                daysInYearCustomStrategy, allowPartialPeriodInterestCalculation, interestRecalculationEnabled, recalculationFrequencyType,
                 preClosureInterestCalculationStrategy);
     }
 

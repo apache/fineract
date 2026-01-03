@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.client.models.GetTaxesGroupResponse;
 import org.apache.fineract.client.models.PostTaxesGroupRequest;
 import org.apache.fineract.client.models.PostTaxesGroupResponse;
 import org.apache.fineract.client.util.Calls;
@@ -89,6 +90,14 @@ public final class TaxGroupHelper {
 
     public static PostTaxesGroupResponse createTaxGroup(PostTaxesGroupRequest request) {
         return Calls.ok(FineractClientHelper.getFineractClient().taxGroups.createTaxGroup(request));
+    }
+
+    public static GetTaxesGroupResponse retrieveTaxGroup(Long taxGroupId) {
+        return Calls.ok(FineractClientHelper.getFineractClient().taxGroups.retrieveTaxGroup(taxGroupId));
+    }
+
+    public static List<GetTaxesGroupResponse> retrieveAllTaxGroups() {
+        return Calls.ok(FineractClientHelper.getFineractClient().taxGroups.retrieveAllTaxGroups());
     }
 
 }

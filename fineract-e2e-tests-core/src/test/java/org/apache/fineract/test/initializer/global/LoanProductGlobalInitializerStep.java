@@ -122,7 +122,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         String name4 = DefaultLoanProduct.LP1_INTEREST_DECLINING_BALANCE_PERIOD_DAILY.getName();
         PostLoanProductsRequest loanProductsRequestInterestDecliningPeriodDaily = loanProductsRequestFactory
                 .defaultLoanProductsRequestLP1InterestDeclining().name(name4)
-                .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value).allowPartialPeriodInterestCalcualtion(false);
+                .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value).allowPartialPeriodInterestCalculation(false);
         PostLoanProductsResponse responseInterestDecliningPeriodDaily = createLoanProductIdempotent(
                 loanProductsRequestInterestDecliningPeriodDaily);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_DECLINING_PERIOD_DAILY,
@@ -209,7 +209,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT.value)//
                 .multiDisburseLoan(true)//
                 .disallowExpectedDisbursements(true)//
-                .allowPartialPeriodInterestCalcualtion(true)//
+                .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
         PostLoanProductsResponse responseInterestDecliningBalanceSaRRecalculationSameAsRepaymentCompoundingNoneMultiDisbursement = createLoanProductIdempotent(
@@ -686,7 +686,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .name(name33)//
                 .enableAccrualActivityPosting(true)//
                 .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value)//
-                .allowPartialPeriodInterestCalcualtion(false);//
+                .allowPartialPeriodInterestCalculation(false);//
         PostLoanProductsResponse responseInterestDecliningPeriodDailyAccrualActivity = createLoanProductIdempotent(
                 loanProductsRequestInterestDecliningPeriodDailyAccrualActivity);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_DECLINING_PERIOD_DAILY_ACCRUAL_ACTIVITY,
@@ -701,7 +701,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .name(name34)//
                 .enableAccrualActivityPosting(true)//
                 .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value)//
-                .allowPartialPeriodInterestCalcualtion(false);//
+                .allowPartialPeriodInterestCalculation(false);//
         PostLoanProductsResponse responseLP1InterestDecliningBalanceDailyRecalculationCompoundingNoneAccrualActivity = createLoanProductIdempotent(
                 loanProductsRequestLP1InterestDecliningBalanceDailyRecalculationCompoundingNoneAccrualActivity);
         TestContext.INSTANCE.set(
@@ -1315,7 +1315,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .enableDownPayment(false)//
                 .interestRecalculationCompoundingMethod(0)//
                 .repaymentFrequencyType(REPAYMENT_FREQUENCY_TYPE_MONTHS)//
-                .allowPartialPeriodInterestCalcualtion(true)//
+                .allowPartialPeriodInterestCalculation(true)//
                 .paymentAllocation(List.of(//
                         createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT")));//
         PostLoanProductsResponse responseLP2AdvancedPaymentInterestEmi36030InterestRecalculationDailyAllowPartialPeriod = createLoanProductIdempotent(
@@ -1952,7 +1952,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .defaultLoanProductsRequestLP1InterestDeclining().name(name81).isInterestRecalculationEnabled(true)
                 .preClosureInterestCalculationStrategy(1).rescheduleStrategyMethod(1).interestRecalculationCompoundingMethod(0)
                 .recalculationRestFrequencyType(2).recalculationRestFrequencyInterval(1)
-                .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value).allowPartialPeriodInterestCalcualtion(false);
+                .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value).allowPartialPeriodInterestCalculation(false);
         final PostLoanProductsResponse responseInterestDecliningPeriodDailyIntRecalc = createLoanProductIdempotent(
                 loanProductsRequestInterestDecliningPeriodDailyIntRecalc);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_DECLINING_PERIOD_DAILY_INT_RECALC,
@@ -1964,7 +1964,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         final PostLoanProductsRequest loanProductsRequestInterest36030DecliningPeriodDailyIntRecalc = loanProductsRequestFactory
                 .defaultLoanProductsRequestLP1InterestDeclining().name(name82).isInterestRecalculationEnabled(false)
                 .daysInYearType(DaysInYearType.DAYS360.value).daysInMonthType(DaysInMonthType.DAYS30.value)
-                .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value).allowPartialPeriodInterestCalcualtion(false);
+                .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value).allowPartialPeriodInterestCalculation(false);
         final PostLoanProductsResponse responseInterest36030DecliningPeriodDailyIntRecalc = createLoanProductIdempotent(
                 loanProductsRequestInterest36030DecliningPeriodDailyIntRecalc);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_360_30__DECLINING_PERIOD_DAILY_INT_RECALC,
@@ -3168,7 +3168,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disbursedAmountPercentageForDownPayment(null)//
                 .multiDisburseLoan(true)//
                 .disallowExpectedDisbursements(true)//
-                .allowPartialPeriodInterestCalcualtion(false)//
+                .allowPartialPeriodInterestCalculation(false)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
                 .paymentAllocation(List.of(//
@@ -3202,7 +3202,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .disbursedAmountPercentageForDownPayment(null)//
                 .multiDisburseLoan(true)//
                 .disallowExpectedDisbursements(true)//
-                .allowPartialPeriodInterestCalcualtion(false)//
+                .allowPartialPeriodInterestCalculation(false)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
                 .paymentAllocation(List.of(//
@@ -3259,7 +3259,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .installmentAmountInMultiplesOf(null)//
                 .multiDisburseLoan(true)//
                 .disallowExpectedDisbursements(true)//
-                .allowPartialPeriodInterestCalcualtion(false)//
+                .allowPartialPeriodInterestCalculation(false)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
                 .paymentAllocation(List.of(//
@@ -3377,7 +3377,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 // .interestType(INTEREST_TYPE_DECLINING_BALANCE)//
                 .defaultLoanProductsRequestLP1() //
                 .interestCalculationPeriodType(0)//
-                .allowPartialPeriodInterestCalcualtion(false)//
+                .allowPartialPeriodInterestCalculation(false)//
                 // .allowApprovedDisbursedAmountsOverApplied(false)//
                 .name(name130)//
                 .transactionProcessingStrategyCode(
@@ -3419,7 +3419,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")))//
                 .multiDisburseLoan(true)//
-                .allowPartialPeriodInterestCalcualtion(true)//
+                .allowPartialPeriodInterestCalculation(true)//
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
@@ -3452,7 +3452,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")))//
                 .multiDisburseLoan(true)//
-                .allowPartialPeriodInterestCalcualtion(true)//
+                .allowPartialPeriodInterestCalculation(true)//
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
@@ -3485,7 +3485,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
                         createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")))//
                 .multiDisburseLoan(true)//
-                .allowPartialPeriodInterestCalcualtion(false)//
+                .allowPartialPeriodInterestCalculation(false)//
                 .disallowExpectedDisbursements(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
@@ -3839,7 +3839,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .installmentAmountInMultiplesOf(null)//
                 .multiDisburseLoan(true)//
                 .disallowExpectedDisbursements(true)//
-                .allowPartialPeriodInterestCalcualtion(true)//
+                .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
                 .allowApprovedDisbursedAmountsOverApplied(true)//
@@ -3866,7 +3866,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .installmentAmountInMultiplesOf(null)//
                 .multiDisburseLoan(true)//
                 .disallowExpectedDisbursements(true)//
-                .allowPartialPeriodInterestCalcualtion(true)//
+                .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
                 .allowApprovedDisbursedAmountsOverApplied(true)//
@@ -3886,7 +3886,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .name(name145)//
                 .interestType(INTEREST_TYPE_FLAT)//
                 .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value)//
-                .allowPartialPeriodInterestCalcualtion(false)//
+                .allowPartialPeriodInterestCalculation(false)//
                 .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY.value)//
                 .recalculationRestFrequencyInterval(1)//
                 .daysInYearType(DaysInYearType.DAYS360.value)//
@@ -3917,7 +3917,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .enableDownPayment(true)//
                 .enableAutoRepaymentForDownPayment(true)//
                 .disbursedAmountPercentageForDownPayment(new BigDecimal(25))//
-                .allowPartialPeriodInterestCalcualtion(true)//
+                .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0);//
         PostLoanProductsResponse responseLoanProductsRequestInterestFlatSaRRecalculationSameAsRepaymentMultiDisbursementAUtoDownPayment = createLoanProductIdempotent(
@@ -4144,7 +4144,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .name(DefaultLoanProduct.LP1_INTEREST_FLAT_DAILY_RECALCULATION_SAR_MULTIDISB_EXPECT_TRANCHES.getName())//
                 .interestType(INTEREST_TYPE_FLAT)//
                 .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value)//
-                .allowPartialPeriodInterestCalcualtion(false)//
+                .allowPartialPeriodInterestCalculation(false)//
                 .recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT.value)//
                 .recalculationRestFrequencyInterval(1)//
                 .installmentAmountInMultiplesOf(null)//
@@ -4181,7 +4181,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .name(DefaultLoanProduct.LP1_INTEREST_FLAT_DAILY_ACTUAL_ACTUAL_MULTIDISB_EXPECT_TRANCHES.getName())//
                 .interestType(INTEREST_TYPE_FLAT)//
                 .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value)//
-                .allowPartialPeriodInterestCalcualtion(false)//
+                .allowPartialPeriodInterestCalculation(false)//
                 .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY.value)//
                 .interestRecalculationCompoundingMethod(0)//
                 .recalculationRestFrequencyInterval(1)//

@@ -23,9 +23,9 @@ public interface TaxApiConstants {
     String nameParamName = "name";
     String percentageParamName = "percentage";
     String debitAccountTypeParamName = "debitAccountType";
-    String debitAcountIdParamName = "debitAcountId";
+    String debitAccountIdParamName = "debitAccountId";
     String creditAccountTypeParamName = "creditAccountType";
-    String creditAcountIdParamName = "creditAcountId";
+    String creditAccountIdParamName = "creditAccountId";
 
     String startDateParamName = "startDate";
     String endDateParamName = "endDate";
