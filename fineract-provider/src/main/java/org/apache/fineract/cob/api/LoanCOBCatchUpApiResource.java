@@ -86,7 +86,6 @@ public class LoanCOBCatchUpApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieves whether Loan COB catch up is running", description = "Retrieves whether Loan COB catch up is running, and the current execution date if it is running.")
     public IsCatchUpRunningDTO isCatchUpRunning() {
-        return loanCOBCatchUpServiceOp.map(LoanCOBCatchUpService::isCatchUpRunning)
-                .orElseThrow(() -> new JobIsNotFoundOrNotEnabledException(JobName.LOAN_COB.name()));
+        return loanCOBCatchUpServiceOp.map(LoanCOBCatchUpService::isCatchUpRunning).orElseGet(() -> new IsCatchUpRunningDTO(false, null));
     }
 }
