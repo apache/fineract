@@ -52,6 +52,11 @@ public final class SavingsHelper {
             final Integer financialYearBeginningMonth, List<LocalDate> postInterestAsOn) {
 
         final List<LocalDateInterval> postingPeriods = new ArrayList<>();
+
+        if (startInterestCalculationLocalDate == null || interestPostingUpToDate == null) {
+            return postingPeriods;
+        }
+
         LocalDate periodStartDate = startInterestCalculationLocalDate;
         LocalDate periodEndDate = periodStartDate;
         LocalDate actualPeriodStartDate = periodStartDate;
