@@ -340,7 +340,7 @@ public class SavingsInterestPostingTest {
                     interestReceivableAccount.getAccountID().toString(), assetAccount, incomeAccount, expenseAccount, liabilityAccount);
 
             final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2025");
-            final LocalDate startDate = LocalDate.of(LocalDate.now(Utils.getZoneIdOfTenant()).getYear(), 1, 1);
+            final LocalDate startDate = LocalDate.of(2025, 1, 1);
             final String startStr = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US).format(startDate);
 
             final Integer accountId = savingsAccountHelper.applyForSavingsApplicationOnDate(clientId, productId,
