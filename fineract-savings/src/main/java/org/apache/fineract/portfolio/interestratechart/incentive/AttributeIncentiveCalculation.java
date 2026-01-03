@@ -38,7 +38,7 @@ public abstract class AttributeIncentiveCalculation {
             case NOT_EQUAL:
                 applyIncentive = compareVal != 0;
             break;
-            case GRETERTHAN:
+            case GREATERTHAN:
                 applyIncentive = compareVal > 0;
             break;
             default:
