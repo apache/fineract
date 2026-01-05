@@ -52,8 +52,4 @@ public class LoanReAmortizationParameter extends AbstractAuditableWithUTCDateTim
 
     // for JPA, don't use
     protected LoanReAmortizationParameter() {}
-
-    public LoanReAmortizationParameter getCopy(LoanTransaction loanTransaction) {
-        return new LoanReAmortizationParameter(loanTransaction, interestHandlingType, reamortizationReason);
-    }
 }

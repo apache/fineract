@@ -119,10 +119,6 @@ public enum GLAccountType {
         return name();
     }
 
-    public EnumOptionData toEnumOptionData() {
-        return new EnumOptionData((long) value, code, code);
-    }
-
     public boolean isAssetType() {
         return this.value.equals(GLAccountType.ASSET.getValue());
     }

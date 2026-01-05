@@ -61,7 +61,7 @@ public class TaxAssembler {
         final BigDecimal percentage = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(TaxApiConstants.percentageParamName, element);
         final Integer debitAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(TaxApiConstants.debitAccountTypeParamName,
                 element);
-        final Long debitAccountId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.debitAccountIdParamName, element);
+        final Long debitAccountId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.debitAcountIdParamName, element);
         GLAccountType debitGlAccountType = null;
         if (debitAccountType != null) {
             debitGlAccountType = GLAccountType.fromInt(debitAccountType);
@@ -70,7 +70,7 @@ public class TaxAssembler {
         if (debitAccountId != null) {
             debitGlAccount = this.glAccountRepositoryWrapper.findOneWithNotFoundDetection(debitAccountId);
             if (!debitGlAccount.getType().equals(debitAccountType) || debitGlAccount.isHeaderAccount()) {
-                baseDataValidator.parameter(TaxApiConstants.debitAccountIdParamName).value(debitAccountId)
+                baseDataValidator.parameter(TaxApiConstants.debitAcountIdParamName).value(debitAccountId)
                         .failWithCode("not.a.valid.account");
             }
         }
@@ -81,12 +81,12 @@ public class TaxAssembler {
         if (creditAccountType != null) {
             creditGlAccountType = GLAccountType.fromInt(creditAccountType);
         }
-        final Long creditAccountId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.creditAccountIdParamName, element);
+        final Long creditAccountId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.creditAcountIdParamName, element);
         GLAccount creditGlAccount = null;
         if (creditAccountId != null) {
             creditGlAccount = this.glAccountRepositoryWrapper.findOneWithNotFoundDetection(creditAccountId);
             if (!creditGlAccount.getType().equals(creditAccountType) || creditGlAccount.isHeaderAccount()) {
-                baseDataValidator.parameter(TaxApiConstants.creditAccountIdParamName).value(creditAccountId)
+                baseDataValidator.parameter(TaxApiConstants.creditAcountIdParamName).value(creditAccountId)
                         .failWithCode("not.a.valid.account");
             }
         }

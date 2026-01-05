@@ -945,7 +945,7 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
                         .graceOnArrearsAgeing(true))//
-                .allowPartialPeriodInterestCalculation(true)//
+                .allowPartialPeriodInterestCalcualtion(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
                 .charges(Collections.emptyList())//

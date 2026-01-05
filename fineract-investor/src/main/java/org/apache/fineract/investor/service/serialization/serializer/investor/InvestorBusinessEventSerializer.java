@@ -63,8 +63,9 @@ public class InvestorBusinessEventSerializer extends AbstractBusinessEventWithCu
 
     private static CurrencyDataV1 getCurrencyFromEvent(InvestorBusinessEvent event) {
         MonetaryCurrency loanCurrency = event.getLoan().getCurrency();
-        return CurrencyDataV1.newBuilder().setCode(loanCurrency.getCode()).setDecimalPlaces(loanCurrency.getDigitsAfterDecimal())
-                .setInMultiplesOf(loanCurrency.getInMultiplesOf()).build();
+        CurrencyDataV1 currency = CurrencyDataV1.newBuilder().setCode(loanCurrency.getCode())
+                .setDecimalPlaces(loanCurrency.getDigitsAfterDecimal()).setInMultiplesOf(loanCurrency.getInMultiplesOf()).build();
+        return currency;
     }
 
     @Override

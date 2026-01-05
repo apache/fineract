@@ -101,7 +101,9 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
         final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, name, fileName, fileSize, mimeType,
                 description, null);
 
-        return createDocument(documentCommand, inputStream);
+        final Long documentId = createDocument(documentCommand, inputStream);
+
+        return documentId;
 
     }
 
@@ -194,7 +196,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
         @Override
         public String toString() {
-            return name().toLowerCase();
+            return name().toString().toLowerCase();
         }
     }
 }

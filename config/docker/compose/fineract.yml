@@ -20,7 +20,7 @@ version: "3.8"
 
 services:
   fineract:
-    # user: "${FINERACT_USER}:${FINERACT_GROUP}"
+    user: "${FINERACT_USER}:${FINERACT_GROUP}"
     image: ${IMAGE_NAME:-apache/fineract:latest}
     volumes:
       - ${PWD}/config/docker/logback/logback-override.xml:/app/logback-override.xml

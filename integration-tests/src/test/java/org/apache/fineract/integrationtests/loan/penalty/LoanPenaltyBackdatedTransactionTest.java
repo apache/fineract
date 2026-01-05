@@ -80,7 +80,7 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
                     .recalculationRestFrequencyInterval(1)//
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
                     .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalculation(false)//
+                    .allowPartialPeriodInterestCalcualtion(false)//
                     .disallowExpectedDisbursements(false)//
                     .allowApprovedDisbursedAmountsOverApplied(false)//
                     .overAppliedNumber(null)//
@@ -193,7 +193,7 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
                     .recalculationRestFrequencyInterval(1)//
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
                     .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalculation(false)//
+                    .allowPartialPeriodInterestCalcualtion(false)//
                     .disallowExpectedDisbursements(false)//
                     .allowApprovedDisbursedAmountsOverApplied(false)//
                     .overAppliedNumber(null)//
@@ -307,7 +307,7 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
                     .recalculationRestFrequencyInterval(1)//
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
                     .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalculation(false)//
+                    .allowPartialPeriodInterestCalcualtion(false)//
                     .disallowExpectedDisbursements(false)//
                     .allowApprovedDisbursedAmountsOverApplied(false)//
                     .overAppliedNumber(null)//

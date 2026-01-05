@@ -220,15 +220,18 @@ class AdvancedPaymentAllocationsJsonParserTest {
 
     private static List<Pair<Integer, PaymentAllocationType>> createPaymentAllocationTypeList() {
         AtomicInteger i = new AtomicInteger(1);
-        return EnumSet.allOf(PaymentAllocationType.class).stream().map(p -> Pair.of(i.getAndIncrement(), p)).toList();
+        List<Pair<Integer, PaymentAllocationType>> list = EnumSet.allOf(PaymentAllocationType.class).stream()
+                .map(p -> Pair.of(i.getAndIncrement(), p)).toList();
+        return list;
     }
 
     @NonNull
     private JsonCommand createJsonCommand(Map<String, Object> jsonMap) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonMap);
-        return JsonCommand.from(json, JsonParser.parseString(json), fromJsonHelper, null, 1L, 2L, 3L, 4L, null, null, null, null, null,
-                null, null, null, null);
+        JsonCommand command = JsonCommand.from(json, JsonParser.parseString(json), fromJsonHelper, null, 1L, 2L, 3L, 4L, null, null, null,
+                null, null, null, null, null, null);
+        return command;
     }
 
 }

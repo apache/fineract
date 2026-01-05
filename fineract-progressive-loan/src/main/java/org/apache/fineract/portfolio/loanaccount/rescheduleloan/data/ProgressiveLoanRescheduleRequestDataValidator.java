@@ -94,7 +94,7 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
         }
 
         if (hasExtraTermsChange) {
-            validateExtraTerms(dataValidatorBuilder, loan, rescheduleFromDate);
+            validateExtraTerms(dataValidatorBuilder, loan);
         } else if (hasAdjustDueDateChange) {
             validateAdjustDueDateChange(dataValidatorBuilder, loan, rescheduleFromDate);
         } else if (hasInterestRateChange) {
@@ -124,10 +124,8 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
         validateForOverdueCharges(dataValidatorBuilder, loan, installment);
     }
 
-    private void validateExtraTerms(DataValidatorBuilder dataValidatorBuilder, Loan loan, LocalDate rescheduleFromDate) {
+    private void validateExtraTerms(DataValidatorBuilder dataValidatorBuilder, Loan loan) {
         validateLoanIsActive(loan, dataValidatorBuilder);
-        final LoanRepaymentScheduleInstallment installment = loan.getRelatedRepaymentScheduleInstallment(rescheduleFromDate);
-        validateReschedulingInstallment(dataValidatorBuilder, installment);
     }
 
     private Integer validateExtraTermsParam(FromJsonHelper fromJsonHelper, JsonElement jsonElement,

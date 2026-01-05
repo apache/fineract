@@ -280,14 +280,16 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         return offices;
     }
 
+    @SuppressWarnings("unchecked")
     private List<ChargeData> fetchCharges() {
-        return this.chargeReadPlatformService.retrieveAllCharges();
+        return (List) this.chargeReadPlatformService.retrieveAllCharges();
     }
 
+    @SuppressWarnings("unchecked")
     private List<StaffData> fetchStaff(final Long staffId) {
         List<StaffData> staff = null;
         if (staffId == null) {
-            staff = this.staffReadPlatformService.retrieveAllStaff(null, Boolean.FALSE, null);
+            staff = (List) this.staffReadPlatformService.retrieveAllStaff(null, Boolean.FALSE, null);
         } else {
             staff = new ArrayList<>();
             staff.add(this.staffReadPlatformService.retrieveStaff(staffId));
@@ -306,7 +308,8 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     }
 
     private List<SavingsProductData> fetchSavingsProducts() {
-        return (List<SavingsProductData>) savingsProductReadPlatformService.retrieveAll();
+        List<SavingsProductData> savingsProducts = (List<SavingsProductData>) savingsProductReadPlatformService.retrieveAll();
+        return savingsProducts;
     }
 
     private WorkbookPopulator populateCenterWorkbook(Long officeId, Long staffId) {
@@ -393,19 +396,23 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     }
 
     private List<CurrencyData> fetchCurrencies() {
-        return this.currencyReadPlatformService.retrieveAllPlatformCurrencies();
+        List<CurrencyData> currencies = (List<CurrencyData>) this.currencyReadPlatformService.retrieveAllPlatformCurrencies();
+        return currencies;
     }
 
     private List<PaymentTypeData> fetchPaymentTypes() {
-        return this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
+        List<PaymentTypeData> paymentTypeData = (List<PaymentTypeData>) this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
+        return paymentTypeData;
     }
 
     private List<FundData> fetchFunds() {
-        return this.fundReadPlatformService.retrieveAllFunds();
+        List<FundData> funds = (List<FundData>) this.fundReadPlatformService.retrieveAllFunds();
+        return funds;
     }
 
     private List<LoanProductData> fetchLoanProducts() {
-        return (List<LoanProductData>) this.loanProductReadPlatformService.retrieveAllLoanProducts();
+        List<LoanProductData> loanproducts = (List<LoanProductData>) this.loanProductReadPlatformService.retrieveAllLoanProducts();
+        return loanproducts;
     }
 
     private List<GroupGeneralData> fetchGroups(Long officeId) {
@@ -463,7 +470,8 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     }
 
     private List<GLAccountData> fetchGLAccounts() {
-        return this.glAccountReadPlatformService.retrieveAllGLAccounts(null, null, null, null, null, null);
+        List<GLAccountData> glaccounts = this.glAccountReadPlatformService.retrieveAllGLAccounts(null, null, null, null, null, null);
+        return glaccounts;
     }
 
     private WorkbookPopulator populateGuarantorWorkbook(Long officeId) {
@@ -496,12 +504,12 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         return new OfficeWorkbookPopulator(offices);
     }
 
-    // TODO: officeId seems to be unused and used in getTemplate() needs to be evaluated and removed
     private WorkbookPopulator populateChartOfAccountsWorkbook(Long officeId) {
         this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.GL_ACCOUNT_ENTITY_TYPE);
         List<GLAccountData> glAccounts = fetchGLAccounts();
         List<OfficeData> offices = fetchOffices(null);
-        return new ChartOfAccountsWorkbook(glAccounts, offices, this.currencyReadPlatformService.retrieveAllowedCurrencies());
+        return new ChartOfAccountsWorkbook(glAccounts, offices,
+                (List<CurrencyData>) this.currencyReadPlatformService.retrieveAllowedCurrencies());
     }
 
     private WorkbookPopulator populateStaffWorkbook(Long officeId) {
@@ -523,7 +531,8 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     }
 
     private List<ChargeData> fetchChargesForShares() {
-        return chargeReadPlatformService.retrieveSharesApplicableCharges();
+        List<ChargeData> chargesForShares = (List<ChargeData>) chargeReadPlatformService.retrieveSharesApplicableCharges();
+        return chargesForShares;
     }
 
     private List<ShareProductData> fetchSharedProducts() {
@@ -646,7 +655,8 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     }
 
     private List<RoleData> fetchRoles() {
-        return (List<RoleData>) roleReadPlatformService.retrieveAllActiveRoles();
+        List<RoleData> rolesList = (List<RoleData>) roleReadPlatformService.retrieveAllActiveRoles();
+        return rolesList;
     }
 
     private WorkbookPopulator populateFixedDepositTransactionsWorkbook(Long officeId) {

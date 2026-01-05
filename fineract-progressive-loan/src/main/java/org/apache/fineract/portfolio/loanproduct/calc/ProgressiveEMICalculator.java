@@ -46,7 +46,6 @@ import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeInterestHandlingType;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
@@ -186,24 +185,18 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     @Override
     public void addRepaymentPeriods(final ProgressiveLoanInterestScheduleModel scheduleModel, final LocalDate submittedOnDate,
-            final int numberOfRepaymentPeriodsToAdd, final List<LoanTransaction> alreadyProcessedTransactions) {
+            final int numberOfRepaymentPeriodsToAdd) {
         addRepaymentPeriods(scheduleModel,
-                EmiChangeOperation.addRepaymentPeriods(submittedOnDate, scheduleModel.zero(), numberOfRepaymentPeriodsToAdd),
-                alreadyProcessedTransactions);
+                EmiChangeOperation.addRepaymentPeriods(submittedOnDate, scheduleModel.zero(), numberOfRepaymentPeriodsToAdd));
     }
 
-    private void addRepaymentPeriods(final ProgressiveLoanInterestScheduleModel scheduleModel, final EmiChangeOperation operation,
-            final List<LoanTransaction> alreadyProcessedTransactions) {
-        final Optional<LoanReAgeParameter> reAgeTransactionParameter = alreadyProcessedTransactions.stream()
-                .filter(t -> t.isReAge() && !t.isReversed()).findFirst().map(LoanTransaction::getLoanReAgeParameter);
-        final LocalDate seedDate = reAgeTransactionParameter.map(LoanReAgeParameter::getStartDate).orElse(scheduleModel.getStartDate());
-        final int repaymentPeriodCount = reAgeTransactionParameter.map(param -> param.getNumberOfInstallments() - 1)
-                .orElse(scheduleModel.repaymentPeriods().size());
-
+    public void addRepaymentPeriods(final ProgressiveLoanInterestScheduleModel scheduleModel, final EmiChangeOperation operation) {
+        LocalDate disbursementDate = scheduleModel.getStartDate();
+        int repaymentPeriodCount = scheduleModel.repaymentPeriods().size();
         final LocalDate interestRateChangeEffectiveDate = operation.getSubmittedOnDate().minusDays(1);
 
-        final List<LocalDateInterval> periods2 = generateAdditionalRepaymentPeriodDueDates(scheduleModel, operation.getPeriodsToAdd(),
-                repaymentPeriodCount, scheduleModel.resolveRepaymentPeriodLengthGeneratorFunction(seedDate));
+        List<LocalDateInterval> periods2 = generateAdditionalRepaymentPeriodDueDates(scheduleModel, operation.getPeriodsToAdd(),
+                repaymentPeriodCount, scheduleModel.resolveRepaymentPEriodLengthGeneratorFunction(disbursementDate));
         updateModel(scheduleModel, periods2, LocalDateInterval::startDate, LocalDateInterval::endDate);
 
         scheduleModel
@@ -577,18 +570,12 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     public void updateModelRepaymentPeriodsDuringReAge(final ProgressiveLoanInterestScheduleModel scheduleModel,
             final LocalDate reAgePeriodStartDate, final LocalDate reAgeFirstDueDate, final LocalDate targetDate,
             final LoanApplicationTerms loanApplicationTerms, final MathContext mc) {
-        final Money futureCreditedPrincipals = scheduleModel.repaymentPeriods().stream()
-                .filter(rp -> !rp.getFromDate().isBefore(targetDate)).filter(rp -> rp.getDueDate().isAfter(targetDate))
-                .map(RepaymentPeriod::getCreditedPrincipal).reduce(scheduleModel.zero(), Money::add);
+        moveOutstandingAmountsFromPeriodsBeforeTransactionDate(scheduleModel.repaymentPeriods(), targetDate);
 
         // calculate already paid balances from transaction date
         final OutstandingDetails paidBalancesFromTransactionDate = calculatePaidBalancesAfterDate(scheduleModel, targetDate);
 
         accelerateMaturityDateTo(scheduleModel, targetDate);
-
-        addCredit(scheduleModel, targetDate, futureCreditedPrincipals, scheduleModel.zero());
-
-        moveOutstandingAmountsFromPeriodsBeforeTransactionDate(scheduleModel.repaymentPeriods(), targetDate);
 
         final ProgressiveLoanInterestScheduleModel temporaryReAgedScheduleModel = generateTemporaryReAgedScheduleModel(loanApplicationTerms,
                 mc, reAgePeriodStartDate);

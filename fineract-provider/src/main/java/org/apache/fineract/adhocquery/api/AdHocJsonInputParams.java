@@ -56,7 +56,7 @@ public enum AdHocJsonInputParams {
 
     @Override
     public String toString() {
-        return name().replace("_", " ");
+        return name().toString().replaceAll("_", " ");
     }
 
     public String getValue() {

@@ -323,9 +323,6 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         if (LoanTransactionType.REAGE.equals(loanTransaction.getTypeOf())) {
             newTransaction.setLoanReAgeParameter(loanTransaction.getLoanReAgeParameter().getCopy(newTransaction));
         }
-        if (LoanTransactionType.REAMORTIZE.equals(loanTransaction.getTypeOf())) {
-            newTransaction.setLoanReAmortizationParameter(loanTransaction.getLoanReAmortizationParameter().getCopy(newTransaction));
-        }
         newTransaction.setClassification(loanTransaction.getClassification());
         return newTransaction;
     }

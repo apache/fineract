@@ -18,20 +18,8 @@
 # under the License.
 #
 
-echo "Shutting down Fineract Kubernetes deployment..."
-
-echo "Deleting mifos-community..."
-kubectl delete -f fineract-mifoscommunity-deployment.yml --ignore-not-found=true
-
-echo "Deleting fineract-server..."
-kubectl delete -f fineract-server-deployment.yml --ignore-not-found=true
-
-echo "Deleting fineractmysql..."
-kubectl delete -f fineractmysql-deployment.yml --ignore-not-found=true
-kubectl delete -f fineractmysql-configmap.yml --ignore-not-found=true
-
-echo "Deleting secrets..."
-kubectl delete secret fineract-tenants-db-secret --ignore-not-found=true
-
-echo
-echo "Fineract Kubernetes deployment has been shut down."
+kubectl delete secret fineract-tenants-db-secret
+kubectl delete -f fineractmysql-configmap.yml
+kubectl delete -f fineractmysql-deployment.yml
+kubectl delete -f fineract-server-deployment.yml
+kubectl delete -f fineract-mifoscommunity-deployment.yml

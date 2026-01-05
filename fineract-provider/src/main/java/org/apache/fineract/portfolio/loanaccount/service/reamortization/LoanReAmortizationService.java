@@ -115,12 +115,16 @@ public class LoanReAmortizationService {
 
     public CommandProcessingResult undoReAmortize(Long loanId, JsonCommand command) {
         Loan loan = loanAssembler.assembleFrom(loanId);
-        final LoanTransaction reAmortizeTransaction = reAmortizationValidator.findAndValidateReAmortizeTransactionForUndo(loan);
+        reAmortizationValidator.validateUndoReAmortize(loan, command);
 
         Map<String, Object> changes = new LinkedHashMap<>();
         changes.put(LoanReAmortizationApiConstants.localeParameterName, command.locale());
         changes.put(LoanReAmortizationApiConstants.dateFormatParameterName, command.dateFormat());
 
+        LoanTransaction reAmortizeTransaction = findLatestNonReversedReAmortizeTransaction(loan);
+        if (reAmortizeTransaction == null) {
+            // TODO: when validations implemented; throw exception if there isn't a reamortize transaction available
+        }
         if (loan.isProgressiveSchedule()) {
             loanScheduleService.regenerateRepaymentSchedule(loan);
         }
@@ -179,6 +183,14 @@ public class LoanReAmortizationService {
         reAmortizeTransaction.reverse(reversalExternalId);
         reAmortizeTransaction.manuallyAdjustedOrReversed();
         reprocessLoanTransactionsService.reprocessTransactions(loan);
+    }
+
+    private LoanTransaction findLatestNonReversedReAmortizeTransaction(Loan loan) {
+        return loan.getLoanTransactions().stream() //
+                .filter(LoanTransaction::isNotReversed) //
+                .filter(LoanTransaction::isReAmortize) //
+                .max(Comparator.comparing(LoanTransaction::getTransactionDate)) //
+                .orElse(null);
     }
 
     private LoanTransaction createReAmortizeTransaction(Loan loan, JsonCommand command) {

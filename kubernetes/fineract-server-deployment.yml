@@ -64,26 +64,22 @@ spec:
         resources:
           limits:
             cpu: "1000m"
-            memory: "2Gi"
+            memory: "1Gi"
           requests:
             cpu: "200m"
-            memory: "1Gi"
+            memory: "0.5Gi"
         livenessProbe:
           httpGet:
             path: /fineract-provider/actuator/health/liveness
-            port: 8443
-            scheme: HTTPS
-          initialDelaySeconds: 90
-          periodSeconds: 10
-          failureThreshold: 3
+            port: 8080
+          initialDelaySeconds: 180
+          periodSeconds: 1
         readinessProbe:
           httpGet:
             path: /fineract-provider/actuator/health/readiness
-            port: 8443
-            scheme: HTTPS
-          initialDelaySeconds: 60
-          periodSeconds: 10
-          failureThreshold: 3
+            port: 8080
+          initialDelaySeconds: 180
+          periodSeconds: 1
         env:
         - name: FINERACT_NODE_ID
           value: '1'
@@ -117,10 +113,8 @@ spec:
               key: password
         - name: FINERACT_DEFAULT_TENANTDB_CONN_PARAMS
           value: ''
-        - name: FINERACT_SERVER_PORT
-          value: "8443"
         - name: JAVA_TOOL_OPTIONS
-          value: '-Xmx1G -XX:MaxMetaspaceSize=256m'
+          value: '-Xmx1G'
         ports:
         - containerPort: 8443
           name: fineract-server

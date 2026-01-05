@@ -420,7 +420,7 @@ public class ProgressiveLoanInterestScheduleModel {
         return this.modifiers.get(COPY);
     }
 
-    public Function<Long, LocalDate> resolveRepaymentPeriodLengthGeneratorFunction(final LocalDate instance) {
+    public Function<Long, LocalDate> resolveRepaymentPEriodLengthGeneratorFunction(LocalDate instance) {
         return switch (loanProductRelatedDetail.getRepaymentPeriodFrequencyType()) {
             case MONTHS -> instance::plusMonths;
             case WEEKS -> instance::plusWeeks;
@@ -429,4 +429,7 @@ public class ProgressiveLoanInterestScheduleModel {
         };
     }
 
+    public boolean isInterestRecalculationIsAllowed() {
+        return modifiers.get(INTEREST_RECALCULATION_ENABLED);
+    }
 }

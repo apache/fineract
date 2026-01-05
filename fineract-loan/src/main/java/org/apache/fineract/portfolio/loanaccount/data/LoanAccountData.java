@@ -128,7 +128,7 @@ public class LoanAccountData {
     private Integer recurringMoratoriumOnPrincipalPeriods;
     private Integer graceOnInterestPayment;
     private Integer graceOnInterestCharged;
-    private Integer graceOnArrearsAgeing;
+    private Integer graceOnArrearsAging;
     private LocalDate interestChargedFromDate;
     private LocalDate expectedFirstRepaymentOnDate;
     private Boolean syncDisbursementWithMeeting;
@@ -431,7 +431,7 @@ public class LoanAccountData {
                 .setGraceOnInterestCharged(product.getGraceOnInterestCharged()).setCharges(charges)
                 .setMultiDisburseLoan(product.getMultiDisburseLoan()).setCanDefineInstallmentAmount(product.isCanDefineInstallmentAmount())
                 .setMaxOutstandingLoanBalance(product.getOutstandingLoanBalance()).setProduct(product)
-                .setGraceOnArrearsAgeing(product.getGraceOnArrearsAgeing()).setOverdueCharges(product.overdueFeeCharges())
+                .setGraceOnArrearsAging(product.getGraceOnArrearsAging()).setOverdueCharges(product.overdueFeeCharges())
                 .setDaysInMonthType(product.getDaysInMonthType()).setDaysInYearType(product.getDaysInYearType())
                 .setInterestRecalculationEnabled(product.isInterestRecalculationEnabled())
                 .setInterestRecalculationData(product.toLoanInterestRecalculationData())
@@ -463,14 +463,14 @@ public class LoanAccountData {
             final EnumOptionData amortizationType, final BigDecimal interestRatePerPeriod, final EnumOptionData interestRateFrequencyType,
             final BigDecimal annualInterestRate, final EnumOptionData interestType, final boolean isFloatingInterestRate,
             final BigDecimal interestRateDifferential, final EnumOptionData interestCalculationPeriodType,
-            Boolean allowPartialPeriodInterestCalculation, final LocalDate expectedFirstRepaymentOnDate,
+            Boolean allowPartialPeriodInterestCalcualtion, final LocalDate expectedFirstRepaymentOnDate,
             final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods,
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final LocalDate interestChargedFromDate,
             final LoanApplicationTimelineData timeline, final LoanSummaryData loanSummary,
             final BigDecimal feeChargesDueAtDisbursementCharged, final Boolean syncDisbursementWithMeeting, final Integer loanCounter,
             final Integer loanProductCounter, final Boolean multiDisburseLoan, Boolean canDefineInstallmentAmount,
             final BigDecimal fixedEmiAmont, final BigDecimal outstandingLoanBalance, final Boolean inArrears,
-            final Integer graceOnArrearsAgeing, final Boolean isNPA, final EnumOptionData daysInMonthType,
+            final Integer graceOnArrearsAging, final Boolean isNPA, final EnumOptionData daysInMonthType,
             final EnumOptionData daysInYearType, final boolean isInterestRecalculationEnabled,
             final LoanInterestRecalculationData interestRecalculationData, final Boolean createStandingInstructionAtDisbursement,
             final Boolean isVariableInstallmentsAllowed, Integer minimumGap, Integer maximumGap, final EnumOptionData subStatus,
@@ -508,7 +508,7 @@ public class LoanAccountData {
                 .setInterestRateFrequencyType(interestRateFrequencyType).setAnnualInterestRate(annualInterestRate)
                 .setInterestType(interestType).setFloatingInterestRate(isFloatingInterestRate)
                 .setInterestRateDifferential(interestRateDifferential).setInterestCalculationPeriodType(interestCalculationPeriodType)
-                .setAllowPartialPeriodInterestCalculation(allowPartialPeriodInterestCalculation)
+                .setAllowPartialPeriodInterestCalculation(allowPartialPeriodInterestCalcualtion)
                 .setExpectedFirstRepaymentOnDate(expectedFirstRepaymentOnDate).setGraceOnPrincipalPayment(graceOnPrincipalPayment)
                 .setRecurringMoratoriumOnPrincipalPeriods(recurringMoratoriumOnPrincipalPeriods)
                 .setGraceOnInterestPayment(graceOnInterestPayment).setGraceOnInterestCharged(graceOnInterestCharged)
@@ -517,7 +517,7 @@ public class LoanAccountData {
                 .setSyncDisbursementWithMeeting(syncDisbursementWithMeeting).setLoanCounter(loanCounter)
                 .setLoanProductCounter(loanProductCounter).setMultiDisburseLoan(multiDisburseLoan)
                 .setCanDefineInstallmentAmount(canDefineInstallmentAmount).setFixedEmiAmount(fixedEmiAmont)
-                .setMaxOutstandingLoanBalance(outstandingLoanBalance).setInArrears(inArrears).setGraceOnArrearsAgeing(graceOnArrearsAgeing)
+                .setMaxOutstandingLoanBalance(outstandingLoanBalance).setInArrears(inArrears).setGraceOnArrearsAging(graceOnArrearsAging)
                 .setIsNPA(isNPA).setDaysInMonthType(daysInMonthType).setDaysInYearType(daysInYearType)
                 .setInterestRecalculationEnabled(isInterestRecalculationEnabled).setInterestRecalculationData(interestRecalculationData)
                 .setCreateStandingInstructionAtDisbursement(createStandingInstructionAtDisbursement)

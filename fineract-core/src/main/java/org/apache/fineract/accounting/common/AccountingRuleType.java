@@ -45,7 +45,8 @@ public enum AccountingRuleType {
     }
 
     public static AccountingRuleType fromInt(final Integer ruleTypeValue) {
-        return intToEnumMap.get(ruleTypeValue);
+        final AccountingRuleType type = intToEnumMap.get(ruleTypeValue);
+        return type;
     }
 
     AccountingRuleType(final Integer value, final String code, final String description) {

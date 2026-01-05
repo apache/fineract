@@ -44,8 +44,10 @@ public class MessagingProperties implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if (eventProperties.isEventVerificationEnabled() && (isBlank(brokerUrl) || isBlank(topicName))) {
-            throw new IllegalStateException("Broker and topic must be configured in case event verification is enabled");
+        if (eventProperties.isEventVerificationEnabled()) {
+            if (isBlank(brokerUrl) || isBlank(topicName)) {
+                throw new IllegalStateException("Broker and topic must be configured in case event verification is enabled");
+            }
         }
     }
 }

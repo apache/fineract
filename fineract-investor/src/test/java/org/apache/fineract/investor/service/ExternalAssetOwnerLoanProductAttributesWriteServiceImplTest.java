@@ -21,6 +21,7 @@ package org.apache.fineract.investor.service;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,9 +29,9 @@ import static org.mockito.Mockito.when;
 import com.google.gson.JsonElement;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 import lombok.Setter;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -106,7 +107,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
 
         // then
         verify(testContext.loanProductRepository).existsById(testContext.loanProductId);
-        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).findById(command.entityId());
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).findById(eq(command.entityId()));
         verify(testContext.externalAssetOwnerLoanProductAttributesRepository).saveAndFlush(loanProductAttributeArgumentCaptor.capture());
     }
 
@@ -133,7 +134,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
 
         // then
         verify(testContext.loanProductRepository).existsById(testContext.loanProductId);
-        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).findById(command.entityId());
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).findById(eq(command.entityId()));
         verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0))
                 .saveAndFlush(loanProductAttributeArgumentCaptor.capture());
     }
@@ -156,7 +157,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
 
         // then
         verify(testContext.loanProductRepository).existsById(testContext.loanProductId);
-        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).findById(1L);
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).findById(eq(1L));
         verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0))
                 .saveAndFlush(loanProductAttributeArgumentCaptor.capture());
         Assertions.assertEquals(thrownException.getMessage(), "Loan product attribute with id " + 1L + " was not found");
@@ -187,7 +188,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
 
         // then
         verify(testContext.loanProductRepository).existsById(testContext.loanProductId);
-        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).findById(command.entityId());
+        verify(testContext.externalAssetOwnerLoanProductAttributesRepository).findById(eq(command.entityId()));
         verify(testContext.externalAssetOwnerLoanProductAttributesRepository, times(0))
                 .saveAndFlush(loanProductAttributeArgumentCaptor.capture());
         Assertions.assertEquals(thrownException.getMessage(),
@@ -364,7 +365,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
         private ExternalAssetOwnerLoanProductAttributesWriteServiceImpl externalAssetOwnerLoanProductAttributesWriteService;
 
         private final FromJsonHelper fromJsonHelper = new FromJsonHelper();
-        private final Long loanProductId = ThreadLocalRandom.current().nextLong(10, 100);
+        private final Long loanProductId = Long.valueOf(RandomStringUtils.randomNumeric(2));
         @Setter
         private String attributeKey = "SETTLEMENT_MODEL";
         @Setter

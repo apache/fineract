@@ -74,7 +74,7 @@ public interface LoanProductConstants {
     String OUTSTANDING_LOAN_BALANCE_PARAMETER_NAME = "outstandingLoanBalance";
     String ALLOW_FULL_TERM_FOR_TRANCHE_PARAM_NAME = "allowFullTermForTranche";
 
-    String GRACE_ON_ARREARS_AGEING_PARAMETER_NAME = "graceOnArrearsAgeing";
+    String GRACE_ON_ARREARS_AGEING_PARAMETER_NAME = "graceOnArrearsAging";
     String OVERDUE_DAYS_FOR_NPA_PARAMETER_NAME = "overdueDaysForNPA";
     String MINIMUM_DAYS_BETWEEN_DISBURSAL_AND_FIRST_REPAYMENT = "minimumDaysBetweenDisbursalAndFirstRepayment";
     String ACCOUNT_MOVES_OUT_OF_NPA_ONLY_ON_ARREARS_COMPLETION_PARAM_NAME = "accountMovesOutOfNPAOnlyOnArrearsCompletion";
@@ -130,7 +130,7 @@ public interface LoanProductConstants {
     String minimumGapBetweenInstallments = "minimumGap";
     String maximumGapBetweenInstallments = "maximumGap";
 
-    String ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME = "allowPartialPeriodInterestCalculation";
+    String ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME = "allowPartialPeriodInterestCalcualtion";
 
     String CAN_USE_FOR_TOPUP = "canUseForTopup";
 

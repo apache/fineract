@@ -18,12 +18,4 @@
     under the License.
 
 -->
-
-
-[INSTRUCTIONS:START]
-
-Manually draft an email using your Apache ID.
-
-See https://fineract.apache.org/docs/current/#_step_15_announcement_email
-
-[INSTRUCTIONS:END]
+[ANNOUNCE] Apache Fineract ${project['fineract.release.version']} Release

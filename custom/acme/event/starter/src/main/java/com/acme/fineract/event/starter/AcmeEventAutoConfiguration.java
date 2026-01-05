@@ -20,7 +20,8 @@ package com.acme.fineract.event.starter;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScans;
 
 @AutoConfiguration
-@ComponentScan("com.acme.fineract.event.externalevent")
+@ComponentScans({ @ComponentScan("com.acme.fineract.event.externalevent") })
 public class AcmeEventAutoConfiguration {}

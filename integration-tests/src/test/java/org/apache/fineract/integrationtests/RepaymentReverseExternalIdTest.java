@@ -251,7 +251,7 @@ public class RepaymentReverseExternalIdTest extends BaseLoanIntegrationTest {
                 .interestRecalculationCompoundingMethod(0)//
                 .recalculationRestFrequencyType(2)//
                 .recalculationRestFrequencyInterval(1)//
-                .allowPartialPeriodInterestCalculation(false);//
+                .allowPartialPeriodInterestCalcualtion(false);//
     }
 
     private Integer createLoanAccount(final Integer clientID, final Long loanProductID, final String externalId) {

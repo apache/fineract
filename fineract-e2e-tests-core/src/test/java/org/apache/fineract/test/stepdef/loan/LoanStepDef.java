@@ -678,7 +678,7 @@ public class LoanStepDef extends AbstractStepDef {
         createFullyCustomizedLoanWithInterestRateFrequency(data.get(1));
     }
 
-    @When("Admin creates a fully customized loan with graceOnArrearsAgeing and following data:")
+    @When("Admin creates a fully customized loan with graceOnArrearsAging and following data:")
     public void createFullyCustomizedLoanWithGraceOnArrearsAgeing(final DataTable table) throws IOException {
         final List<List<String>> data = table.asLists();
         createFullyCustomizedLoanWithGraceOnArrearsAgeing(data.get(1));

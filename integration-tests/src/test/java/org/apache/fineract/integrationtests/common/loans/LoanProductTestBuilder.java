@@ -141,7 +141,7 @@ public class LoanProductTestBuilder {
     private String graceOnPrincipalPayment = null;
     private String graceOnInterestPayment = null;
     private JsonObject allowAttributeOverrides = null;
-    private Boolean allowPartialPeriodInterestCalculation = false;
+    private Boolean allowPartialPeriodInterestCalcualtion = false;
 
     private Boolean allowVariableInstallments = Boolean.FALSE;
     private Integer minimumGap;
@@ -290,7 +290,7 @@ public class LoanProductTestBuilder {
         if (allowAttributeOverrides != null) {
             map.put("allowAttributeOverrides", this.allowAttributeOverrides);
         }
-        map.put("allowPartialPeriodInterestCalculation", this.allowPartialPeriodInterestCalculation);
+        map.put("allowPartialPeriodInterestCalcualtion", this.allowPartialPeriodInterestCalcualtion);
         map.put("allowVariableInstallments", allowVariableInstallments);
         if (allowVariableInstallments) {
             map.put("minimumGap", minimumGap);
@@ -471,9 +471,9 @@ public class LoanProductTestBuilder {
         return this;
     }
 
-    public LoanProductTestBuilder withInterestCalculationPeriodTypeAsRepaymentPeriod(final Boolean allowPartialPeriodInterestCalculation) {
+    public LoanProductTestBuilder withInterestCalculationPeriodTypeAsRepaymentPeriod(final Boolean allowPartialPeriodInterestCalcualtion) {
         this.interestCalculationPeriodType = CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD;
-        this.allowPartialPeriodInterestCalculation = allowPartialPeriodInterestCalculation;
+        this.allowPartialPeriodInterestCalcualtion = allowPartialPeriodInterestCalcualtion;
         return this;
     }
 
@@ -814,8 +814,8 @@ public class LoanProductTestBuilder {
         return this;
     }
 
-    public LoanProductTestBuilder withAllowPartialPeriodInterestCalculation(final Boolean allowPartialPeriodInterestCalculation) {
-        this.allowPartialPeriodInterestCalculation = allowPartialPeriodInterestCalculation;
+    public LoanProductTestBuilder withAllowPartialPeriodInterestCalculation(final Boolean allowPartialPeriodInterestCalcualtion) {
+        this.allowPartialPeriodInterestCalcualtion = allowPartialPeriodInterestCalcualtion;
         return this;
     }
 

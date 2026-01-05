@@ -81,7 +81,8 @@ public final class AccountingConstants {
         }
 
         public static CashAccountsForLoan fromInt(final int i) {
-            return intToEnumMap.get(i);
+            final CashAccountsForLoan type = intToEnumMap.get(Integer.valueOf(i));
+            return type;
         }
     }
 
@@ -141,7 +142,8 @@ public final class AccountingConstants {
         }
 
         public static AccrualAccountsForLoan fromInt(final int i) {
-            return intToEnumMap.get(i);
+            final AccrualAccountsForLoan type = intToEnumMap.get(Integer.valueOf(i));
+            return type;
         }
 
     }
@@ -295,7 +297,8 @@ public final class AccountingConstants {
         }
 
         public static CashAccountsForSavings fromInt(final int i) {
-            return intToEnumMap.get(i);
+            final CashAccountsForSavings type = intToEnumMap.get(Integer.valueOf(i));
+            return type;
         }
     }
 
@@ -343,7 +346,8 @@ public final class AccountingConstants {
         }
 
         public static AccrualAccountsForSavings fromInt(final int i) {
-            return intToEnumMap.get(i);
+            final AccrualAccountsForSavings type = intToEnumMap.get(Integer.valueOf(i));
+            return type;
         }
     }
 
@@ -488,7 +492,8 @@ public final class AccountingConstants {
         }
 
         public static FinancialActivity fromInt(final int financialActivityId) {
-            return intToEnumMap.get(financialActivityId);
+            final FinancialActivity type = intToEnumMap.get(Integer.valueOf(financialActivityId));
+            return type;
         }
 
         public static FinancialActivityData toFinancialActivityData(final int financialActivityId) {
@@ -501,7 +506,8 @@ public final class AccountingConstants {
         }
 
         private static FinancialActivityData convertToFinancialActivityData(final FinancialActivity type) {
-            return new FinancialActivityData(type.value, type.code, type.getMappedGLAccountType());
+            FinancialActivityData financialActivityData = new FinancialActivityData(type.value, type.code, type.getMappedGLAccountType());
+            return financialActivityData;
         }
     }
 
@@ -539,7 +545,8 @@ public final class AccountingConstants {
         }
 
         public static CashAccountsForShares fromInt(final int i) {
-            return intToEnumMap.get(i);
+            final CashAccountsForShares type = intToEnumMap.get(Integer.valueOf(i));
+            return type;
         }
     }
 

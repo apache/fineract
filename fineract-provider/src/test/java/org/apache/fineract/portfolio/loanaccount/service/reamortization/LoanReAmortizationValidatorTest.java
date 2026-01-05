@@ -185,16 +185,53 @@ class LoanReAmortizationValidatorTest {
         List<LoanTransaction> transactions = List.of(loanTransaction(LoanTransactionType.DISBURSEMENT, actualDate.minusDays(3)));
         Loan loan = loan();
         given(loan.getLoanTransactions()).willReturn(transactions);
+        JsonCommand command = jsonCommand();
         // when
         GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
-                () -> underTest.findAndValidateReAmortizeTransactionForUndo(loan));
+                () -> underTest.validateUndoReAmortize(loan, command));
         // then
         assertThat(result).isNotNull();
         assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reamortize.reamortization.transaction.missing");
     }
 
     @Test
-    public void testValidateUndoReAmortize_ShouldNotThrowException() {
+    public void testValidateUndoReAmortize_ShouldThrowException_WhenLoanAlreadyHasRepaymentAfterReAmortization() {
+        // given
+        List<LoanTransaction> transactions = List.of(loanTransaction(LoanTransactionType.DISBURSEMENT, actualDate.minusDays(3)),
+                loanTransaction(LoanTransactionType.REAMORTIZE, actualDate.minusDays(2)),
+                loanTransaction(LoanTransactionType.REPAYMENT, actualDate.minusDays(1)));
+        Loan loan = loan();
+        given(loan.getLoanTransactions()).willReturn(transactions);
+        JsonCommand command = jsonCommand();
+        // when
+        GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
+                () -> underTest.validateUndoReAmortize(loan, command));
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reamortize.repayment.exists.after.reamortization");
+    }
+
+    @Test
+    public void testValidateUndoReAmortize_ShouldThrowException_WhenLoanAlreadyHasRepaymentAfterReAmortization_SameDay() {
+        // given
+        List<LoanTransaction> transactions = List.of(loanTransaction(LoanTransactionType.DISBURSEMENT, actualDate.minusDays(2)),
+                loanTransaction(LoanTransactionType.REAMORTIZE, actualDate.minusDays(1),
+                        OffsetDateTime.of(actualDate, LocalTime.of(10, 0), ZoneOffset.UTC)),
+                loanTransaction(LoanTransactionType.REPAYMENT, actualDate.minusDays(1),
+                        OffsetDateTime.of(actualDate, LocalTime.of(11, 0), ZoneOffset.UTC)));
+        Loan loan = loan();
+        given(loan.getLoanTransactions()).willReturn(transactions);
+        JsonCommand command = jsonCommand();
+        // when
+        GeneralPlatformDomainRuleException result = assertThrows(GeneralPlatformDomainRuleException.class,
+                () -> underTest.validateUndoReAmortize(loan, command));
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getGlobalisationMessageCode()).isEqualTo("error.msg.loan.reamortize.repayment.exists.after.reamortization");
+    }
+
+    @Test
+    public void testValidateUndoReAmortize_ShouldNotThrowException_WhenLoanAlreadyHasRepaymentAfterReAmortization_SameDay_RepaymentBeforeReAmortization() {
         // given
         List<LoanTransaction> transactions = List.of(loanTransaction(LoanTransactionType.DISBURSEMENT, actualDate.minusDays(2)),
                 loanTransaction(LoanTransactionType.REAMORTIZE, actualDate.minusDays(1),
@@ -203,8 +240,9 @@ class LoanReAmortizationValidatorTest {
                         OffsetDateTime.of(actualDate, LocalTime.of(9, 0), ZoneOffset.UTC)));
         Loan loan = loan();
         given(loan.getLoanTransactions()).willReturn(transactions);
+        JsonCommand command = jsonCommand();
         // when
-        underTest.findAndValidateReAmortizeTransactionForUndo(loan);
+        underTest.validateUndoReAmortize(loan, command);
         // then no exception thrown
     }
 
@@ -233,7 +271,6 @@ class LoanReAmortizationValidatorTest {
         given(loanTransaction.getTypeOf()).willReturn(type);
         given(loanTransaction.getTransactionDate()).willReturn(txDate);
         given(loanTransaction.getSubmittedOnDate()).willReturn(txDate);
-        given(loanTransaction.isNotReversed()).willReturn(true);
         return loanTransaction;
     }
 

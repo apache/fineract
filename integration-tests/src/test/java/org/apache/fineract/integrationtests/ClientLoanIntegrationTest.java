@@ -7169,7 +7169,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
         String loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(REQUEST_SPEC, RESPONSE_SPEC, loanID);
         List<String> comparisonAttributes = Arrays.asList("amortizationType", "interestType", "transactionProcessingStrategyCode",
                 "interestCalculationPeriodType", "repaymentFrequencyType", "graceOnPrincipalPayment", "graceOnInterestPayment",
-                "inArrearsTolerance", "graceOnArrearsAgeing");
+                "inArrearsTolerance", "graceOnArrearsAging");
 
         for (String comparisonAttribute : comparisonAttributes) {
             Object val1 = JsonPath.from(loanProductDetails).get(comparisonAttribute);
@@ -7186,7 +7186,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
         loanProductConfiguration.addProperty("inArrearsTolerance", bool);
         loanProductConfiguration.addProperty("repaymentEvery", bool);
         loanProductConfiguration.addProperty("graceOnPrincipalAndInterestPayment", bool);
-        loanProductConfiguration.addProperty("graceOnArrearsAgeing", bool);
+        loanProductConfiguration.addProperty("graceOnArrearsAging", bool);
         return loanProductConfiguration;
     }
 
@@ -8324,7 +8324,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
                         .graceOnArrearsAgeing(true))//
-                .allowPartialPeriodInterestCalculation(true)//
+                .allowPartialPeriodInterestCalcualtion(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
                 .charges(Collections.emptyList())//

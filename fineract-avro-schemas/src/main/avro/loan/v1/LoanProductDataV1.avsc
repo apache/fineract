@@ -389,7 +389,7 @@
         },
         {
             "default": null,
-            "name": "graceOnArrearsAgeing",
+            "name": "graceOnArrearsAging",
             "type": [
                 "null",
                 "int"

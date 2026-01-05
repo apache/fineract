@@ -63,7 +63,7 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
                     .recalculationRestFrequencyInterval(1)//
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
                     .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalculation(false)//
+                    .allowPartialPeriodInterestCalcualtion(false)//
                     .disallowExpectedDisbursements(false)//
                     .allowApprovedDisbursedAmountsOverApplied(false)//
                     .overAppliedNumber(null)//
@@ -159,7 +159,7 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
                     .recalculationRestFrequencyInterval(1)//
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD)//
                     .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalculation(true)//
+                    .allowPartialPeriodInterestCalcualtion(true)//
                     .preClosureInterestCalculationStrategy(1).disallowExpectedDisbursements(false)//
                     .allowApprovedDisbursedAmountsOverApplied(false)//
                     .overAppliedNumber(null)//
@@ -242,7 +242,7 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
                     .recalculationRestFrequencyInterval(1)//
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD)//
                     .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalculation(true)//
+                    .allowPartialPeriodInterestCalcualtion(true)//
                     .preClosureInterestCalculationStrategy(2).disallowExpectedDisbursements(false)//
                     .allowApprovedDisbursedAmountsOverApplied(false)//
                     .overAppliedNumber(null)//

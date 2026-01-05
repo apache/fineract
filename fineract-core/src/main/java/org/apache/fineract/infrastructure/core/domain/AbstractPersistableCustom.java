@@ -54,12 +54,12 @@ public abstract class AbstractPersistableCustom<T extends Serializable> implemen
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter
+    @Getter(onMethod_ = @Override)
     private T id;
 
     @Transient
     @Setter(value = AccessLevel.NONE)
-    @Getter
+    @Getter(onMethod_ = @Override)
     private boolean isNew = true;
 
     @PrePersist

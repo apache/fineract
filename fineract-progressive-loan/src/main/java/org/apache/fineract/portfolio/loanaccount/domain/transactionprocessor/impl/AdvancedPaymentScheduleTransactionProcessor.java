@@ -237,7 +237,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         for (final ChangeOperation changeOperation : changeOperations) {
             if (changeOperation.isLoanTermVariationsData()) {
                 final LoanTermVariationsData termVariationsData = changeOperation.getLoanTermVariationsData().get();
-                processLoanTermVariation(termVariationsData, ctx);
+                processLoanTermVariation(installments, termVariationsData, scheduleModel);
             } else if (changeOperation.isTransaction()) {
                 LoanTransaction transaction = changeOperation.getLoanTransaction().get();
                 if (loan.getStatus().isOverpaid() && transaction.isAccrualActivity()) {
@@ -303,14 +303,12 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 .map(TransactionChangeData::getNewTransaction).findFirst().orElse(transaction);
     }
 
-    private void processLoanTermVariation(final LoanTermVariationsData termVariationsData, final ProgressiveTransactionCtx ctx) {
-        final List<LoanRepaymentScheduleInstallment> installments = ctx.getInstallments();
-        final ProgressiveLoanInterestScheduleModel scheduleModel = ctx.getModel();
+    private void processLoanTermVariation(final List<LoanRepaymentScheduleInstallment> installments,
+            final LoanTermVariationsData termVariationsData, final ProgressiveLoanInterestScheduleModel scheduleModel) {
         switch (termVariationsData.getTermVariationType()) {
             case INTEREST_PAUSE -> handleInterestPause(installments, termVariationsData, scheduleModel);
             case INTEREST_RATE_FROM_INSTALLMENT -> handleChangeInterestRate(installments, termVariationsData, scheduleModel);
-            case EXTEND_REPAYMENT_PERIOD ->
-                handleExtraRepaymentPeriod(installments, termVariationsData, scheduleModel, ctx.getAlreadyProcessedTransactions());
+            case EXTEND_REPAYMENT_PERIOD -> handleExtraRepaymentPeriod(installments, termVariationsData, scheduleModel);
             case DUE_DATE -> handleDueDateChangeOnRepaymentPeriod(installments, termVariationsData, scheduleModel);
             default -> throw new IllegalStateException("Unhandled LoanTermVariationType.");
         }
@@ -398,12 +396,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     private void handleExtraRepaymentPeriod(final List<LoanRepaymentScheduleInstallment> installments,
-            final LoanTermVariationsData termVariationsData, final ProgressiveLoanInterestScheduleModel scheduleModel,
-            final List<LoanTransaction> alreadyProcessedTransactions) {
+            final LoanTermVariationsData termVariationsData, final ProgressiveLoanInterestScheduleModel scheduleModel) {
         final LocalDate interestRateChangeSubmittedOnDate = termVariationsData.getTermVariationApplicableFrom();
         final int repaymentPeriodsToAdd = termVariationsData.getDecimalValue().intValue();
-        emiCalculator.addRepaymentPeriods(scheduleModel, interestRateChangeSubmittedOnDate, repaymentPeriodsToAdd,
-                alreadyProcessedTransactions);
+        emiCalculator.addRepaymentPeriods(scheduleModel, interestRateChangeSubmittedOnDate, repaymentPeriodsToAdd);
         final Loan loan = installments.getFirst().getLoan();
 
         int nextInstallmentNumber = installments.stream().mapToInt(LoanRepaymentScheduleInstallment::getInstallmentNumber).max().orElse(0)
@@ -423,7 +419,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             }
         }
         processInterestRateChangeOnInstallments(scheduleModel, interestRateChangeSubmittedOnDate, installments);
-        reprocessInstallments(installments);
     }
 
     private void handleChangeInterestRate(final List<LoanRepaymentScheduleInstallment> installments,
@@ -643,11 +638,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             loanTransaction.updateComponentsAndTotal(totalOverDuePrincipal, totalOverDueInterest, Money.zero(currency),
                     Money.zero(currency));
 
-            if (totalOverDuePrincipal.isZero() && totalOverDueInterest.isZero() && loanTransaction.isNotReversed()) {
-                loanTransaction.reverse();
-                return;
-            }
-
             emiCalculator.updateModelRepaymentPeriodsDuringReAmortizationWithEqualInterestSplit(progressiveTransactionCtx.getModel(),
                     transactionDate);
             updateInstallmentsByRepaymentPeriods(loanTransaction, progressiveTransactionCtx);
@@ -725,11 +715,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 Money.zero(transactionCtx.getCurrency()), Money.zero(transactionCtx.getCurrency()),
                 Money.zero(transactionCtx.getCurrency()));
 
-        if (MathUtil.isEqualTo(overallOverDuePrincipal, ZERO) && loanTransaction.isNotReversed()) {
-            loanTransaction.reverse();
-            return;
-        }
-
         LoanRepaymentScheduleInstallment lastFutureInstallment = futureInstallments.stream()
                 .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getDueDate)).get();
         BigDecimal reAmortizationAmountPerInstallment = overallOverDuePrincipal.divide(BigDecimal.valueOf(futureInstallments.size()),
@@ -771,11 +756,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         loanTransaction.resetDerivedComponents();
         loanTransaction.updateComponentsAndTotal(totalOverDuePrincipal, totalOverDueInterest, Money.zero(currency), Money.zero(currency));
-
-        if (totalOverDuePrincipal.isZero() && totalOverDueInterest.isZero() && loanTransaction.isNotReversed()) {
-            loanTransaction.reverse();
-            return;
-        }
 
         // Update the existing model with re-amortized periods
         emiCalculator.updateModelRepaymentPeriodsDuringReAmortization(ctx.getModel(), transactionDate);
@@ -3150,8 +3130,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 .orElse(null);
 
         final List<LoanCharge> liftedLoanCharges = new ArrayList<>();
-        installments.stream().filter(installment -> !installment.getDueDate().isBefore(transactionDate))
-                .forEach(i -> liftedLoanCharges.addAll(getLoanChargesOfInstallment(ctx.getCharges(), i, 1)));
+        installments.stream().filter(installment -> !installment.getDueDate().isBefore(transactionDate)).forEach(i -> {
+            liftedLoanCharges.addAll(getLoanChargesOfInstallment(ctx.getCharges(), i, 1));
+        });
 
         installments.removeIf(i -> i.getInstallmentNumber() != null && !i.isDownPayment() && !i.getDueDate().isBefore(transactionDate));
 
@@ -3182,7 +3163,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         installment.setReAged(true);
                     }
                     installment.setAdditional(false);
-                    installment.setCreditedPrincipal(rp.getCreditedPrincipal().getAmount());
                     installment.updateObligationsMet(ctx.getCurrency(), transactionDate);
                 }
             } else {
@@ -3198,7 +3178,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         newInstallment.addToInterest(transactionDate, rp.getDueInterest());
                     }
 
-                    newInstallment.setCreditedPrincipal(rp.getCreditedPrincipal().getAmount());
                     newInstallment.updateObligationsMet(ctx.getCurrency(), transactionDate);
                     iterator.add(newInstallment);
                 }
@@ -3208,38 +3187,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         for (LoanCharge loanCharge : liftedLoanCharges) {
             loanChargeRepaymentScheduleProcessing.reprocess(ctx.getCurrency(), loanTransaction.getLoan().getDisbursementDate(),
                     installments, loanCharge);
-        }
-
-        reApplyInterestPauseOnReAgedInstallments(loanTransaction, ctx, reAgePeriodStartDate, installments);
-    }
-
-    private void reApplyInterestPauseOnReAgedInstallments(final LoanTransaction loanTransaction, final ProgressiveTransactionCtx ctx,
-            final LocalDate reAgePeriodStartDate, final List<LoanRepaymentScheduleInstallment> installments) {
-        final List<LoanRepaymentScheduleInstallment> reAgedInstallments = installments.stream()
-                .filter(LoanRepaymentScheduleInstallment::isReAged).toList();
-        if (!reAgedInstallments.isEmpty()) {
-            final LocalDate reAgeEndDate = reAgedInstallments.getLast().getDueDate();
-
-            final List<LoanTermVariationsData> loanTermVariationsToReprocess = loanTransaction.getLoan().getActiveLoanTermVariations()
-                    .stream().filter(ltv -> {
-                        if (!ltv.getTermType().isInterestPauseVariation()) {
-                            return false;
-                        }
-
-                        final LocalDate termFromFrom = ltv.getTermApplicableFrom();
-                        final LocalDate termEndFrom = ltv.getDateValue();
-
-                        if (termEndFrom == null) {
-                            return !termFromFrom.isBefore(reAgePeriodStartDate) && termFromFrom.isBefore(reAgeEndDate);
-                        }
-
-                        return (!termFromFrom.isAfter(reAgePeriodStartDate) && !termEndFrom.isBefore(reAgePeriodStartDate))
-                                || (termFromFrom.isAfter(reAgePeriodStartDate) && termFromFrom.isBefore(reAgeEndDate));
-                    }).map(LoanTermVariations::toData).collect(Collectors.toCollection(ArrayList::new));
-
-            for (LoanTermVariationsData termVariationsData : loanTermVariationsToReprocess) {
-                processLoanTermVariation(termVariationsData, ctx);
-            }
         }
     }
 
@@ -3280,7 +3227,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         newInstallment.setTotalPaidInAdvance(paidInAdvanceBalances.getPaidInAdvance().getAmount());
         newInstallment.setTotalPaidLate(paidInAdvanceBalances.getPaidLate());
         paidInAdvanceBalances.loanTransactionToRepaymentScheduleMappings.forEach(m -> m.setInstallment(newInstallment));
-        newInstallment.setCreditedPrincipal(rp.getCreditedPrincipal().getAmount());
         newInstallment.updateObligationsMet(currency, transactionDate);
 
         return newInstallment;
@@ -3292,7 +3238,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         installments.stream().sorted(LoanRepaymentScheduleInstallment::compareToByFromDueDate).forEachOrdered(i -> {
             i.updateInstallmentNumber(counter.getAndIncrement());
             final LocalDate prev = previousDueDate.get();
-            if (prev != null && !i.getFromDate().isEqual(prev) && !i.isDownPayment()) {
+            if (prev != null && (i.isAdditional() || i.isReAged())) {
                 i.updateFromDate(prev);
             }
             previousDueDate.set(i.getDueDate());
@@ -3307,10 +3253,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     private LocalDate calculateReAgedNextDate(final PeriodFrequencyType frequencyType, final LocalDate dueDate,
             final Integer frequencyNumber) {
         return switch (frequencyType) {
-            case DAYS -> dueDate.plusDays(frequencyNumber);
-            case WEEKS -> dueDate.plusWeeks(frequencyNumber);
-            case MONTHS -> dueDate.plusMonths(frequencyNumber);
-            case YEARS -> dueDate.plusYears(frequencyNumber);
+            case DAYS -> dueDate.plusDays((long) frequencyNumber);
+            case WEEKS -> dueDate.plusWeeks((long) frequencyNumber);
+            case MONTHS -> dueDate.plusMonths((long) frequencyNumber);
+            case YEARS -> dueDate.plusYears((long) frequencyNumber);
             default -> throw new UnsupportedOperationException();
         };
     }
@@ -3798,8 +3744,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     private void createChargeMappingsForInstallment(final LoanRepaymentScheduleInstallment installment,
             List<ReAgedChargeEqualAmortizationValues> reAgedChargeEqualAmortizationValues, Integer index) {
-        reAgedChargeEqualAmortizationValues.forEach(amortizationValue -> installment.getInstallmentCharges().add(new LoanInstallmentCharge(
-                amortizationValue.equalAmortizationValues.calculateValueBigDecimal(index), amortizationValue.charge, installment)));
+        reAgedChargeEqualAmortizationValues.forEach(amortizationValue -> {
+            installment.getInstallmentCharges().add(new LoanInstallmentCharge(
+                    amortizationValue.equalAmortizationValues.calculateValueBigDecimal(index), amortizationValue.charge, installment));
+        });
     }
 
     private FirstReAgeInstallmentProps calculateFirstReAgeInstallmentProps(List<LoanRepaymentScheduleInstallment> installments,
