@@ -60,7 +60,7 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
                     req.submittedOnDate("01 November 2023");
                     req.setLoanTermFrequency(45);
                     req.setRepaymentEvery(15);
-                    req.setGraceOnArrearsAgeing(0);
+                    req.setGraceOnArrearsAging(0);
                 });
 
                 // Loan amount Disbursement
@@ -146,7 +146,7 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
                     req.submittedOnDate("01 November 2023");
                     req.setLoanTermFrequency(45);
                     req.setRepaymentEvery(15);
-                    req.setGraceOnArrearsAgeing(0);
+                    req.setGraceOnArrearsAging(0);
                 });
 
                 // Loan amount Disbursement
@@ -268,7 +268,7 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
         product.setDelinquencyBucketId(delinquencyBucketId.longValue());
         product.setMultiDisburseLoan(multiDisburseEnabled);
         product.setEnableDownPayment(true);
-        product.setGraceOnArrearsAgeing(graceOnArrearsAging);
+        product.setGraceOnArrearsAging(graceOnArrearsAging);
 
         product.setDisbursedAmountPercentageForDownPayment(DOWN_PAYMENT_PERCENTAGE);
         product.setEnableAutoRepaymentForDownPayment(autoDownPaymentEnabled);

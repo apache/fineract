@@ -169,7 +169,7 @@ public final class LoanProductsApiResourceSwagger {
         @Schema(example = "90")
         public Integer inArrearsTolerance;
         @Schema(example = "3")
-        public Integer graceOnArrearsAgeing;
+        public Integer graceOnArrearsAging;
         @Schema(example = "false")
         public Boolean accountMovesOutOfNPAOnlyOnArrearsCompletion;
         @Schema(example = "false")
@@ -352,7 +352,7 @@ public final class LoanProductsApiResourceSwagger {
             @Schema(example = "true")
             public boolean graceOnPrincipalAndInterestPayment;
             @Schema(example = "true")
-            public boolean graceOnArrearsAgeing;
+            public boolean graceOnArrearsAging;
         }
 
         static final class RateData {
@@ -1672,7 +1672,7 @@ public final class LoanProductsApiResourceSwagger {
         @Schema(example = "90")
         public Integer inArrearsTolerance;
         @Schema(example = "3")
-        public Integer graceOnArrearsAgeing;
+        public Integer graceOnArrearsAging;
         @Schema(example = "false")
         public Boolean accountMovesOutOfNPAOnlyOnArrearsCompletion;
         @Schema(example = "false")

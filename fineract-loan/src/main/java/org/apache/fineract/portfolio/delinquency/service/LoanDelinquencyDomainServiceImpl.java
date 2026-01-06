@@ -113,8 +113,8 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         }
 
         Integer graceDays = 0;
-        if (loan.getLoanProductRelatedDetail().getGraceOnArrearsAgeing() != null) {
-            graceDays = loan.getLoanProductRelatedDetail().getGraceOnArrearsAgeing();
+        if (loan.getLoanProductRelatedDetail().getGraceOnArrearsAging() != null) {
+            graceDays = loan.getLoanProductRelatedDetail().getGraceOnArrearsAging();
         }
         log.debug("Loan id {} with overdue since date {} and outstanding amount {}", loan.getId(), overdueSinceDate, outstandingAmount);
 
@@ -192,8 +192,8 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         }
 
         Integer graceDays = 0;
-        if (loan.getLoanProductRelatedDetail().getGraceOnArrearsAgeing() != null) {
-            graceDays = loan.getLoanProductRelatedDetail().getGraceOnArrearsAgeing();
+        if (loan.getLoanProductRelatedDetail().getGraceOnArrearsAging() != null) {
+            graceDays = loan.getLoanProductRelatedDetail().getGraceOnArrearsAging();
         }
         log.debug("Loan id {} with overdue since date {} and outstanding amount {}", loan.getId(), overdueSinceDate, outstandingAmount);
 

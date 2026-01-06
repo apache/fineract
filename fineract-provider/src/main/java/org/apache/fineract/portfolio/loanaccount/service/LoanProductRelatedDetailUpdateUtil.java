@@ -248,12 +248,12 @@ public class LoanProductRelatedDetailUpdateUtil {
             loanRepaymentScheduleDetail.setGraceOnInterestCharged(newValue);
         }
 
-        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME,
-                loanRepaymentScheduleDetail.getGraceOnArrearsAgeing())) {
-            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME);
-            actualChanges.put(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, newValue);
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME,
+                loanRepaymentScheduleDetail.getGraceOnArrearsAging())) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME);
+            actualChanges.put(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME, newValue);
             actualChanges.put("locale", localeAsInput);
-            loanRepaymentScheduleDetail.setGraceOnArrearsAgeing(newValue);
+            loanRepaymentScheduleDetail.setGraceOnArrearsAging(newValue);
         }
 
         if (command.isChangeInIntegerParameterNamed(LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME,

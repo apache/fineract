@@ -119,7 +119,7 @@ public class LoanRequestFactory {
                 .amortizationType(DEFAULT_AMORTIZATION_TYPE)//
                 .transactionProcessingStrategyCode(DEFAULT_TRANSACTION_PROCESSING_STRATEGY_CODE)//
                 .dateFormat(DATE_FORMAT)//
-                .graceOnArrearsAgeing(3)//
+                .graceOnArrearsAging(3)//
                 .maxOutstandingLoanBalance(new BigDecimal(10000));
     }
 
@@ -143,7 +143,7 @@ public class LoanRequestFactory {
                 .amortizationType(DEFAULT_AMORTIZATION_TYPE)//
                 .transactionProcessingStrategyCode(DEFAULT_PROGRESSIVE_TRANSACTION_PROCESSING_STRATEGY_CODE)//
                 .dateFormat(DATE_FORMAT)//
-                .graceOnArrearsAgeing(3)//
+                .graceOnArrearsAging(3)//
                 .maxOutstandingLoanBalance(new BigDecimal(10000));
     }
 
@@ -172,7 +172,7 @@ public class LoanRequestFactory {
                 .amortizationType(DEFAULT_AMORTIZATION_TYPE)//
                 .isEqualAmortization(false)//
                 .transactionProcessingStrategyCode(DEFAULT_TRANSACTION_PROCESSING_STRATEGY_CODE)//
-                .graceOnArrearsAgeing(3)//
+                .graceOnArrearsAging(3)//
                 .loanIdToClose(null)//
                 .isTopup(null)//
                 .maxOutstandingLoanBalance(10000L)//

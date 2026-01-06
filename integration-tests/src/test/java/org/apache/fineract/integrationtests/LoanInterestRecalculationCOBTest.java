@@ -1022,7 +1022,7 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("1 February 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            schedulerJobHelper.executeAndAwaitJob("Update Loan Arrears Ageing");
+            schedulerJobHelper.executeAndAwaitJob("Update Loan Arrears Aging");
             schedulerJobHelper.executeAndAwaitJob("Recalculate Interest For Loans");
 
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
@@ -1036,7 +1036,7 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("2 February 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            schedulerJobHelper.executeAndAwaitJob("Update Loan Arrears Ageing");
+            schedulerJobHelper.executeAndAwaitJob("Update Loan Arrears Aging");
             schedulerJobHelper.executeAndAwaitJob("Recalculate Interest For Loans");
 
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
@@ -1050,7 +1050,7 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("20 February 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            schedulerJobHelper.executeAndAwaitJob("Update Loan Arrears Ageing");
+            schedulerJobHelper.executeAndAwaitJob("Update Loan Arrears Aging");
             schedulerJobHelper.executeAndAwaitJob("Recalculate Interest For Loans");
 
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
@@ -1064,7 +1064,7 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("2 March 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            schedulerJobHelper.executeAndAwaitJob("Update Loan Arrears Ageing");
+            schedulerJobHelper.executeAndAwaitJob("Update Loan Arrears Aging");
             schedulerJobHelper.executeAndAwaitJob("Recalculate Interest For Loans");
 
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
@@ -1114,7 +1114,7 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("2 February 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            schedulerJobHelper.executeAndAwaitJob("Update Loan Arrears Ageing");
+            schedulerJobHelper.executeAndAwaitJob("Update Loan Arrears Aging");
             schedulerJobHelper.executeAndAwaitJob("Recalculate Interest For Loans");
 
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
@@ -1206,7 +1206,7 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("8 February 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            schedulerJobHelper.executeAndAwaitJob("Update Loan Arrears Ageing");
+            schedulerJobHelper.executeAndAwaitJob("Update Loan Arrears Aging");
             schedulerJobHelper.executeAndAwaitJob("Recalculate Interest For Loans");
 
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);

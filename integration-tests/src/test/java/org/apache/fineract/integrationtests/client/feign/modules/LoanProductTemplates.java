@@ -78,7 +78,7 @@ public interface LoanProductTemplates {
                 .daysInYearType(DaysInYearType.ACTUAL)//
                 .daysInMonthType(DaysInMonthType.ACTUAL)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAgeing(3)//
+                .graceOnArrearsAging(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -95,7 +95,7 @@ public interface LoanProductTemplates {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAgeing(true))//
+                        .graceOnArrearsAging(true))//
                 .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
@@ -225,7 +225,7 @@ public interface LoanProductTemplates {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAgeing(true))//
+                        .graceOnArrearsAging(true))//
                 .isEqualAmortization(false)//
                 .enableDownPayment(false)//
                 .enableInstallmentLevelDelinquency(false)//

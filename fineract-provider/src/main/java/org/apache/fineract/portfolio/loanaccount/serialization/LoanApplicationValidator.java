@@ -165,7 +165,7 @@ public final class LoanApplicationValidator {
             LoanApiConstants.syncDisbursementWithMeetingParameterName, // optional
             LoanApiConstants.linkAccountIdParameterName, LoanApiConstants.disbursementDataParameterName,
             LoanApiConstants.fixedEmiAmountParameterName, LoanApiConstants.maxOutstandingBalanceParameterName,
-            LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME,
+            LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME,
             LoanApiConstants.createStandingInstructionAtDisbursementParameterName, LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose,
             LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam, LoanProductConstants.RATES_PARAM_NAME,
             LoanApiConstants.applicationId, // glim specific
@@ -500,9 +500,9 @@ public final class LoanApplicationValidator {
             baseDataValidator.reset().parameter(LoanApiConstants.graceOnInterestChargedParameterName).value(graceOnInterestCharged)
                     .zeroOrPositiveAmount();
 
-            final Integer graceOnArrearsAgeing = this.fromApiJsonHelper
-                    .extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element);
-            baseDataValidator.reset().parameter(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME).value(graceOnArrearsAgeing)
+            final Integer graceOnArrearsAging = this.fromApiJsonHelper
+                    .extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME).value(graceOnArrearsAging)
                     .zeroOrPositiveAmount();
 
             if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.interestChargedFromDateParameterName, element)) {
@@ -1219,10 +1219,10 @@ public final class LoanApplicationValidator {
                         .zeroOrPositiveAmount();
             }
 
-            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element)) {
-                final Integer graceOnArrearsAgeing = this.fromApiJsonHelper
-                        .extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element);
-                baseDataValidator.reset().parameter(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME).value(graceOnArrearsAgeing)
+            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME, element)) {
+                final Integer graceOnArrearsAging = this.fromApiJsonHelper
+                        .extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME, element);
+                baseDataValidator.reset().parameter(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME).value(graceOnArrearsAging)
                         .zeroOrPositiveAmount();
             }
 

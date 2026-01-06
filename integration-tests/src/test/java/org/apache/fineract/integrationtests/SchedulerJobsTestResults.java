@@ -659,7 +659,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        String JobName = "Update Loan Arrears Ageing";
+        String JobName = "Update Loan Arrears Aging";
 
         schedulerJobHelper.executeAndAwaitJob(JobName);
         HashMap loanSummaryData = loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);

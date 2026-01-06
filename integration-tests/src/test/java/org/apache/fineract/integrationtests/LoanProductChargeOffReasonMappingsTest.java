@@ -164,7 +164,7 @@ public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationT
                 .daysInYearType(1)//
                 .daysInMonthType(1)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAgeing(3)//
+                .graceOnArrearsAging(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -180,7 +180,7 @@ public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationT
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAgeing(true))
+                        .graceOnArrearsAging(true))
                 .outstandingLoanBalance(10000.0)//
                 .charges(charges)//
                 .accountingRule(3)//

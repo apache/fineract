@@ -67,7 +67,7 @@ public final class LoanScheduleValidator {
             LoanApiConstants.chargesParameterName, LoanApiConstants.collateralParameterName,
             LoanApiConstants.syncDisbursementWithMeetingParameterName, LoanApiConstants.linkAccountIdParameterName,
             LoanApiConstants.disbursementDataParameterName, LoanApiConstants.fixedEmiAmountParameterName,
-            LoanApiConstants.maxOutstandingBalanceParameterName, LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME,
+            LoanApiConstants.maxOutstandingBalanceParameterName, LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME,
             LoanApiConstants.createStandingInstructionAtDisbursementParameterName, LoanApiConstants.isFloatingInterestRateParameterName,
             LoanApiConstants.interestRateDifferentialParameterName, LoanApiConstants.repaymentFrequencyNthDayTypeParameterName,
             LoanApiConstants.repaymentFrequencyDayOfWeekTypeParameterName, LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose,
