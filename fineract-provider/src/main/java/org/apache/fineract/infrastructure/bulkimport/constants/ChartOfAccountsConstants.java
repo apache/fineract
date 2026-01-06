@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.constants;
 
-public final class ChartOfAcountsConstants {
+public final class ChartOfAccountsConstants {
 
-    private ChartOfAcountsConstants() {
+    private ChartOfAccountsConstants() {
 
     }
 
