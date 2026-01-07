@@ -28,6 +28,21 @@ if [[ -z "$TOTAL_SHARDS" || -z "$SHARD_INDEX" ]]; then
   exit 1
 fi
 
+if ! [[ "$TOTAL_SHARDS" =~ ^[1-9][0-9]*$ ]]; then
+  echo "ERROR: <total-shards> must be a positive integer."
+  exit 1
+fi
+
+if ! [[ "$SHARD_INDEX" =~ ^[1-9][0-9]*$ ]]; then
+  echo "ERROR: <shard-index> must be a positive integer."
+  exit 1
+fi
+
+if [[ "$SHARD_INDEX" -gt "$TOTAL_SHARDS" ]]; then
+  echo "ERROR: <shard-index> ($SHARD_INDEX) must be between 1 and <total-shards> ($TOTAL_SHARDS)."
+  exit 1
+fi
+
 echo "🔍 Searching for eligible JUnit test classes..."
 
 ALL_TESTS=$(find . -type f -path "*/src/test/java/*.java" \
