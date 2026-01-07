@@ -201,7 +201,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
             } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.STAFF.toString())) {
                 populator = populateStaffWorkbook(officeId);
             } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.SHARE_ACCOUNTS.toString())) {
-                populator = populateSharedAcountsWorkbook(officeId);
+                populator = populateSharedAccountsWorkbook(officeId);
             } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.SAVINGS_ACCOUNT.toString())) {
                 populator = populateSavingsAccountWorkbook(officeId, staffId);
             } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.SAVINGS_TRANSACTIONS.toString())) {
@@ -510,7 +510,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         return new StaffWorkbookPopulator(new OfficeSheetPopulator(offices));
     }
 
-    private WorkbookPopulator populateSharedAcountsWorkbook(Long officeId) {
+    private WorkbookPopulator populateSharedAccountsWorkbook(Long officeId) {
         this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.CLIENT_ENTITY_TYPE);
         this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.SHARED_ACCOUNT_ENTITY_TYPE);
         List<ShareProductData> shareProductDataList = fetchSharedProducts();
