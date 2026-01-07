@@ -259,7 +259,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData = new RepaymentScheduleRelatedLoanData(
                 accountData.getTimeline().getExpectedDisbursementDate(), accountData.getTimeline().getActualDisbursementDate(),
                 accountData.getCurrency(), accountData.getPrincipal(), accountData.getInArrearsTolerance(),
-                accountData.getFeeChargesAtDisbursementCharged());
+                accountData.getFeeChargesAtDisbursementCharged(), Boolean.TRUE.equals(accountData.getAllowFullTermForTranche()));
 
         final Collection<DisbursementData> disbursementData = retrieveLoanDisbursementDetails(accountData.getId());
         List<LoanTransactionRepaymentPeriodData> capitalizedIncomeData = loanCapitalizedIncomeBalanceRepository
