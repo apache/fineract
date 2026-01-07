@@ -58,6 +58,8 @@ public class LoanConfigurationDetails implements ILoanConfigurationDetails {
     private final RecalculationFrequencyType restFrequencyType;
     @Getter
     private final LoanPreCloseInterestCalculationStrategy preCloseInterestCalculationStrategy;
+    @Getter
+    private final boolean allowFullTermForTranche;
 
     public LoanConfigurationDetails(CurrencyData currency, BigDecimal interestRatePerPeriod, BigDecimal annualNominalInterestRate,
             Integer interestChargingGrace, Integer interestPaymentGrace, Integer principalGrace,
@@ -67,7 +69,7 @@ public class LoanConfigurationDetails implements ILoanConfigurationDetails {
             Integer numberOfRepayments, boolean interestRecognitionOnDisbursementDate,
             DaysInYearCustomStrategyType daysInYearCustomStrategy, boolean allowPartialPeriodInterestCalculation,
             boolean isInterestRecalculationEnabled, RecalculationFrequencyType restFrequencyType,
-            LoanPreCloseInterestCalculationStrategy preCloseInterestCalculationStrategy) {
+            LoanPreCloseInterestCalculationStrategy preCloseInterestCalculationStrategy, boolean allowFullTermForTranche) {
         this.currency = currency;
         this.interestRatePerPeriod = interestRatePerPeriod;
         this.annualNominalInterestRate = annualNominalInterestRate;
@@ -89,6 +91,7 @@ public class LoanConfigurationDetails implements ILoanConfigurationDetails {
         this.isInterestRecalculationEnabled = isInterestRecalculationEnabled;
         this.restFrequencyType = restFrequencyType;
         this.preCloseInterestCalculationStrategy = preCloseInterestCalculationStrategy;
+        this.allowFullTermForTranche = allowFullTermForTranche;
     }
 
     private Integer defaultToNullIfZero(final Integer value) {

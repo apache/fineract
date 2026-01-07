@@ -120,7 +120,8 @@ public class LoanTermVariationsMapper {
                 scheduleGeneratorDTO.getNumberOfdays(), scheduleGeneratorDTO.isSkipRepaymentOnFirstDayofMonth(), holidayDetailDTO,
                 allowCompoundingOnEod, scheduleGeneratorDTO.isFirstRepaymentDateAllowedOnHoliday(),
                 scheduleGeneratorDTO.isInterestToBeRecoveredFirstWhenGreaterThanEMI(), loan.getFixedPrincipalPercentagePerInstallment(),
-                scheduleGeneratorDTO.isPrincipalCompoundingDisabledForOverdueLoans(), repaymentStartDateType, loan.getSubmittedOnDate());
+                scheduleGeneratorDTO.isPrincipalCompoundingDisabledForOverdueLoans(), repaymentStartDateType, loan.getSubmittedOnDate(),
+                loan.isAllowFullTermForTranche());
     }
 
     private BigDecimal constructFloatingInterestRates(final BigDecimal annualNominalInterestRate, final FloatingRateDTO floatingRateDTO,

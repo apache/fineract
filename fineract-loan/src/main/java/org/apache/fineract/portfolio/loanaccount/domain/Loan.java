@@ -427,6 +427,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @Column(name = "enable_installment_level_delinquency", nullable = false)
     private boolean enableInstallmentLevelDelinquency = false;
 
+    @Getter
     @Column(name = "allow_full_term_for_tranche", nullable = false)
     private boolean allowFullTermForTranche = false;
 
@@ -1785,10 +1786,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public void updateEnableInstallmentLevelDelinquency(boolean enableInstallmentLevelDelinquency) {
         this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
-    }
-
-    public boolean isAllowFullTermForTranche() {
-        return this.allowFullTermForTranche;
     }
 
     public void updateAllowFullTermForTranche(boolean allowFullTermForTranche) {
