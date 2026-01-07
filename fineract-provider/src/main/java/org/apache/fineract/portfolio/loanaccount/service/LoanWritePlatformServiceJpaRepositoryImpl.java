@@ -2742,23 +2742,21 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(data));
                 });
 
-        final LoanTransaction chargeOffTransaction = LoanTransaction.chargeOff(loan, transactionDate, txnExternalId);
+        final LoanTransaction chargeOffTransaction;
 
         if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
-            if (loan.isCumulativeSchedule()) {
-                final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null, null);
-                loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
-            }
+            final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null, null);
+            loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
+            chargeOffTransaction = LoanTransaction.chargeOff(loan, transactionDate, txnExternalId);
             reprocessLoanTransactionsService.reprocessTransactions(loan, List.of(chargeOffTransaction));
             loan.addLoanTransaction(chargeOffTransaction);
         } else {
+            chargeOffTransaction = LoanTransaction.chargeOff(loan, transactionDate, txnExternalId);
             reprocessLoanTransactionsService.processLatestTransaction(chargeOffTransaction, loan);
             loan.addLoanTransaction(chargeOffTransaction);
         }
         loanTransactionRepository.saveAndFlush(chargeOffTransaction);
         journalEntryPoster.postJournalEntriesForLoanTransaction(chargeOffTransaction, false, false);
-
-        saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         String noteText = command.stringValueOfParameterNamed(LoanApiConstants.noteParameterName);
         if (StringUtils.isNotBlank(noteText)) {
