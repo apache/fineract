@@ -1017,11 +1017,11 @@ Feature: LoanInterestWaiver
       | 20 | 31   | 18 September 2023 |                   |  47.25          | 19.23         | 0.7      | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
       | 21 | 30   | 18 October 2023   |                   |  27.99          | 19.26         | 0.67     | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
       | 22 | 31   | 18 November 2023  |                   |   8.76          | 19.23         | 0.7      | 0.0  | 0.0       | 19.93 |  0.0  |  0.0        | 0.0   | 19.93       |
-      | 23 | 30   | 18 December 2023  |                   |   0.0           | 8.76          | 0.67     | 0.0  | 0.0       |  9.43 |  0.0  |  0.0        | 0.0   |  9.43       |
+      | 23 | 30   | 18 December 2023  |                   |   0.0           | 8.76          | 1.37     | 0.0  | 0.0       | 10.13 |  0.0  |  0.0        | 0.0   | 10.13       |
       | 24 | 31   | 18 January 2024   | 20 January 2022   |   0.0           |  0.0          | 0.0      | 0.0  | 0.0       |  0.0  |  0.0  |  0.0        | 0.0   | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late    | Outstanding |
-      | 431.98        | 15.91    | 0.0  | 0.0       | 447.89 | 350.19 | 350.19     | 0.0     | 97.7        |
+      | 431.98        | 16.61    | 0.0  | 0.0       | 448.59 | 350.19 | 350.19     | 0.0     | 98.4        |
     Then Loan Transactions tab has the following data:
       | Transaction date   | Transaction Type        | Amount  | Principal  | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 18 January 2022    | Disbursement            | 431.98  |   0.0      |  0.0     | 0.0  | 0.0       | 431.98       | false    | false    |

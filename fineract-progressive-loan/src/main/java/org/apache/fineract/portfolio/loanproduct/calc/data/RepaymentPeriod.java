@@ -87,6 +87,7 @@ public class RepaymentPeriod {
     @Getter
     private final ILoanConfigurationDetails loanProductRelatedDetail;
     @JsonExclude
+    @Setter
     private MonetaryCurrency currency;
 
     @Getter
@@ -154,6 +155,10 @@ public class RepaymentPeriod {
                 repaymentPeriod.isReAgedEarlyRepaymentHolder(), repaymentPeriod.getReAgedInterest());
         newRepaymentPeriod.setCreditedPrincipalMovedDueReAge(repaymentPeriod.getCreditedPrincipalMovedDueReAge());
         newRepaymentPeriod.setCreditedInterestMovedDueReAge(repaymentPeriod.getCreditedInterestMovedDueReAge());
+        newRepaymentPeriod.setTotalDisbursedAmount(repaymentPeriod.getTotalDisbursedAmount());
+        newRepaymentPeriod.setTotalCapitalizedIncomeAmount(repaymentPeriod.getTotalCapitalizedIncomeAmount());
+        newRepaymentPeriod.setInterestMoved(repaymentPeriod.isInterestMoved());
+        newRepaymentPeriod.setCurrency(repaymentPeriod.getCurrency());
         // There is always at least 1 interest period, by default with same from-due date as repayment period
         for (InterestPeriod interestPeriod : repaymentPeriod.getInterestPeriods()) {
             newRepaymentPeriod.getInterestPeriods().add(InterestPeriod.copy(newRepaymentPeriod, interestPeriod, mc));
@@ -169,6 +174,10 @@ public class RepaymentPeriod {
                 repaymentPeriod.isReAged(), repaymentPeriod.isReAgedEarlyRepaymentHolder(), repaymentPeriod.getReAgedInterest());
         newRepaymentPeriod.setCreditedPrincipalMovedDueReAge(repaymentPeriod.getCreditedPrincipalMovedDueReAge());
         newRepaymentPeriod.setCreditedInterestMovedDueReAge(repaymentPeriod.getCreditedInterestMovedDueReAge());
+        newRepaymentPeriod.setTotalDisbursedAmount(repaymentPeriod.getTotalDisbursedAmount());
+        newRepaymentPeriod.setTotalCapitalizedIncomeAmount(repaymentPeriod.getTotalCapitalizedIncomeAmount());
+        newRepaymentPeriod.setInterestMoved(repaymentPeriod.isInterestMoved());
+        newRepaymentPeriod.setCurrency(repaymentPeriod.getCurrency());
         // There is always at least 1 interest period, by default with same from-due date as repayment period
         for (InterestPeriod interestPeriod : repaymentPeriod.getInterestPeriods()) {
             var interestPeriodCopy = InterestPeriod.copy(newRepaymentPeriod, interestPeriod);

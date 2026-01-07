@@ -2600,7 +2600,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .defaultLoanProductsRequestLP2InterestDailyRecalculation()//
                 .name(name105)//
                 .paymentAllocation(List.of(//
-                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT")))
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"),
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "LAST_INSTALLMENT")))
                 .enableAccrualActivityPosting(true)//
                 .chargeOffBehaviour("ZERO_INTEREST");//
         PostLoanProductsResponse responseLoanProductsRequestAdvInterestRecalculationZeroInterestChargeOffBehaviourAccrualActivity = createLoanProductIdempotent(

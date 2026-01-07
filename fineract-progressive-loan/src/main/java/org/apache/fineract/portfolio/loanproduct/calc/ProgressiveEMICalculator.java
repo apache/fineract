@@ -601,17 +601,20 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     public boolean recalculateModelOverdueAmountsTillDate(final ProgressiveLoanInterestScheduleModel scheduleModel,
             final LocalDate targetDate, boolean prepayAttempt) {
         boolean hasChange = false;
-        final List<RepaymentPeriod> overdueInstallmentsSortedByInstallmentNumber = findPossiblyOverdueRepaymentPeriods(targetDate,
-                scheduleModel);
+        LocalDate recalculatedTargetDate = DateUtils.isAfter(targetDate, scheduleModel.getLastRepaymentPeriod().getDueDate())
+                ? scheduleModel.getLastRepaymentPeriod().getDueDate()
+                : targetDate;
+        final List<RepaymentPeriod> overdueInstallmentsSortedByInstallmentNumber = findPossiblyOverdueRepaymentPeriods(
+                recalculatedTargetDate, scheduleModel);
         if (!overdueInstallmentsSortedByInstallmentNumber.isEmpty()) {
             final RepaymentPeriod lastPeriod = scheduleModel.getLastRepaymentPeriod();
-            final RepaymentPeriod currentPeriod = scheduleModel.findRepaymentPeriod(targetDate).orElse(lastPeriod);
+            final RepaymentPeriod currentPeriod = scheduleModel.findRepaymentPeriod(recalculatedTargetDate).orElse(lastPeriod);
             Money overDuePrincipal = scheduleModel.zero();
             Money aggregatedOverDuePrincipal = scheduleModel.zero();
             for (RepaymentPeriod processingPeriod : overdueInstallmentsSortedByInstallmentNumber) {
                 // add and subtract outstanding principal
                 if (!overDuePrincipal.isZero()) {
-                    final boolean currentChanges = adjustOverduePrincipal(targetDate, processingPeriod, overDuePrincipal,
+                    final boolean currentChanges = adjustOverduePrincipal(recalculatedTargetDate, processingPeriod, overDuePrincipal,
                             aggregatedOverDuePrincipal, scheduleModel, prepayAttempt);
 
                     hasChange = hasChange || currentChanges;
@@ -621,15 +624,15 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 aggregatedOverDuePrincipal = aggregatedOverDuePrincipal.add(overDuePrincipal);
             }
 
-            if (!currentPeriod.equals(lastPeriod) || !targetDate.isAfter(lastPeriod.getDueDate())) {
-                final boolean currentChanges = adjustOverduePrincipal(targetDate, currentPeriod, overDuePrincipal,
+            if (!currentPeriod.equals(lastPeriod) || !recalculatedTargetDate.isAfter(lastPeriod.getDueDate())) {
+                final boolean currentChanges = adjustOverduePrincipal(recalculatedTargetDate, currentPeriod, overDuePrincipal,
                         aggregatedOverDuePrincipal, scheduleModel, prepayAttempt);
                 hasChange = hasChange || currentChanges;
 
             }
             if (aggregatedOverDuePrincipal.isGreaterThanZero() && (scheduleModel.lastOverdueBalanceChange() == null
-                    || scheduleModel.lastOverdueBalanceChange().isBefore(targetDate))) {
-                scheduleModel.lastOverdueBalanceChange(targetDate);
+                    || scheduleModel.lastOverdueBalanceChange().isBefore(recalculatedTargetDate))) {
+                scheduleModel.lastOverdueBalanceChange(recalculatedTargetDate);
             }
         }
 
