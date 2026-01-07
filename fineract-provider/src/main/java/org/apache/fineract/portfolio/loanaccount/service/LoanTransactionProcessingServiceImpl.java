@@ -131,7 +131,8 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
 
     @Override
     public LoanScheduleDTO getRecalculatedSchedule(final ScheduleGeneratorDTO generatorDTO, Loan loan) {
-        if (!loan.isInterestBearingAndInterestRecalculationEnabled() || loan.isNpa() || loan.isChargedOff()) {
+        if (!loan.isInterestBearingAndInterestRecalculationEnabled() || loan.isNpa()
+                || (loan.isChargedOff() && loan.isCumulativeSchedule())) {
             return null;
         }
         final InterestMethod interestMethod = loan.getLoanRepaymentScheduleDetail().getInterestMethod();

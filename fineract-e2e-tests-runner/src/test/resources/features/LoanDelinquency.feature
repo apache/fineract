@@ -1496,8 +1496,8 @@ Feature: LoanDelinquency
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type        | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 June 2024     | Disbursement            | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
-      | 14 July 2024     | Accrual                 | 10.0   | 0.0       | 10.0     | 0.0  | 0.0       | 0.0          |
-      | 15 July 2024     | Repayment               | 343.33 | 333.33    | 10.0     | 0.0  | 0.0       | 666.67        |
+      | 14 July 2024     | Accrual                 | 14.19  | 0.0       | 14.19    | 0.0  | 0.0       | 0.0          |
+      | 15 July 2024     | Repayment               | 343.33 | 333.33    | 10.0     | 0.0  | 0.0       | 666.67       |
     Then Loan has the following LOAN level next payment due data:
       | classification | nextPaymentDueDate | nextPaymentAmount |
       | NO_DELINQUENCY | 01 August 2024     | 343.33            |
