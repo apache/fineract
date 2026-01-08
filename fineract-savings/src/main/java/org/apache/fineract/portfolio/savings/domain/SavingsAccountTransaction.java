@@ -643,8 +643,8 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
             for (final SavingsAccountTransactionTaxDetails taxDetails : this.taxDetails) {
                 final Map<String, Object> taxDetailsData = new HashMap<>();
                 taxDetailsData.put("amount", taxDetails.getAmount());
-                if (taxDetails.getTaxComponent().getCreditAcount() != null) {
-                    taxDetailsData.put("creditAccountId", taxDetails.getTaxComponent().getCreditAcount().getId());
+                if (taxDetails.getTaxComponent().getCreditAccount() != null) {
+                    taxDetailsData.put("creditAccountId", taxDetails.getTaxComponent().getCreditAccount().getId());
                 }
                 taxData.add(taxDetailsData);
             }
