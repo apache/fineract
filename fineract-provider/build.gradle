@@ -243,7 +243,13 @@ bootJar {
 
 jib {
     from {
-        image = 'azul/zulu-openjdk-alpine:21'
+        def hasDockerCreds =
+                System.getenv("DOCKERHUB_USER")?.trim() &&
+                        System.getenv("DOCKERHUB_TOKEN")?.trim()
+
+        image = hasDockerCreds
+                ? "dhi.io/azul:21-jdk-prime"
+                : "azul/zulu-openjdk-alpine:21"
         platforms {
             platform {
                 architecture = System.getProperty("os.arch").equals("aarch64")?"arm64":"amd64"

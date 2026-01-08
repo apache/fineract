@@ -30,6 +30,8 @@ jobs:
       EVENT_VERIFICATION_ENABLED: true
       ACTIVEMQ_BROKER_URL: tcp://localhost:61616
       ACTIVEMQ_TOPIC_NAME: events
+      DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
     steps:
       - name: Checkout code
@@ -56,6 +58,13 @@ jobs:
           echo "Shard ${{ matrix.shard_index }} feature files:"
           cat feature_shard_${{ matrix.shard_index }}.txt
 
+      - name: Login to Docker Hardened Images registry
+        if: ${{ env.DOCKERHUB_USER != '' && env.DOCKERHUB_TOKEN != '' }}
+        uses: docker/login-action@v3
+        with:
+          registry: dhi.io
+          username: ${{ env.DOCKERHUB_USER }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
       - name: Build the image
         run: ./gradlew --no-daemon --console=plain :fineract-provider:jibDockerBuild -Djib.to.image=$IMAGE_NAME -x test -x cucumber
 
