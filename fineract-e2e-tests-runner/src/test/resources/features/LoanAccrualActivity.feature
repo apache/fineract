@@ -9399,3 +9399,150 @@ Feature: LoanAccrualActivity
     When Admin makes Credit Balance Refund transaction on "06 October 2025" with 36.34 EUR transaction amount
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
+  @TestRailId:C4517
+  Scenario: Verify that accrual and accrual activity amounts are correct in case of early paid last installment, overdue last-1 installment on each days around due date
+    When Admin sets the business date to "21 April 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL_360_30_USD | 21 April 2025     | 218.54         | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "21 April 2025" with "218.54" amount and expected disbursement date on "21 April 2025"
+    And Admin successfully disburse the loan on "21 April 2025" with "218.54" EUR transaction amount
+    When Admin sets the business date to "02 May 2025"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "02 May 2025" with 37.49 EUR transaction amount and system-generated Idempotency key
+    When Admin sets the business date to "21 May 2025"
+    And Customer makes "AUTOPAY" repayment on "21 May 2025" with 37.49 EUR transaction amount
+    When Admin sets the business date to "21 June 2025"
+    And Customer makes "AUTOPAY" repayment on "21 June 2025" with 37.49 EUR transaction amount
+    When Admin sets the business date to "21 July 2025"
+    And Customer makes "AUTOPAY" repayment on "21 July 2025" with 37.49 EUR transaction amount
+    When Admin sets the business date to "21 August 2025"
+    And Customer makes "AUTOPAY" repayment on "21 August 2025" with 37.49 EUR transaction amount
+#  --- Check on maturity date - 1 ---
+    When Admin sets the business date to "20 October 2025"
+    And Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 21 April 2025     |                | 218.54          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 30   | 21 May 2025       | 21 May 2025    | 182.67          | 35.87         | 1.62     | 0.0  | 0.0       | 37.49 | 37.49 | 0.12       | 0.0  | 0.0         |
+      | 2  | 31   | 21 June 2025      | 21 June 2025   | 146.39          | 36.28         | 1.21     | 0.0  | 0.0       | 37.49 | 37.49 | 0.12       | 0.0  | 0.0         |
+      | 3  | 30   | 21 July 2025      | 21 July 2025   | 109.81          | 36.58         | 0.91     | 0.0  | 0.0       | 37.49 | 37.49 | 0.12       | 0.0  | 0.0         |
+      | 4  | 31   | 21 August 2025    | 21 August 2025 | 72.92           | 36.89         | 0.6      | 0.0  | 0.0       | 37.49 | 37.49 | 0.12       | 0.0  | 0.0         |
+      | 5  | 31   | 21 September 2025 |                | 37.49           | 35.43         | 0.57     | 0.0  | 0.0       | 36.0  | 0.12  | 0.12       | 0.0  | 35.88       |
+      | 6  | 30   | 21 October 2025   | 02 May 2025    | 0.0             | 37.49         | 0.0      | 0.0  | 0.0       | 37.49 | 37.49 | 37.49      | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 218.54        | 4.91     | 0.0  | 0.0       | 223.45 | 187.57 | 38.09      | 0.0  | 35.88       |
+    And Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 21 April 2025     | Disbursement           | 218.54 | 0.0       | 0.0      | 0.0  | 0.0       | 218.54       | false    | false    |
+      | 02 May 2025       | Merchant Issued Refund | 37.49  | 37.49     | 0.0      | 0.0  | 0.0       | 181.05       | false    | false    |
+      | 02 May 2025       | Interest Refund        | 0.12   | 0.12      | 0.0      | 0.0  | 0.0       | 180.93       | false    | false    |
+      | 21 May 2025       | Repayment              | 37.49  | 35.87     | 1.62     | 0.0  | 0.0       | 145.06       | false    | false    |
+      | 21 May 2025       | Accrual Activity       | 1.62   | 0.0       | 1.62     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 June 2025      | Repayment              | 37.49  | 36.28     | 1.21     | 0.0  | 0.0       | 108.78       | false    | false    |
+      | 21 June 2025      | Accrual Activity       | 1.21   | 0.0       | 1.21     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 July 2025      | Repayment              | 37.49  | 36.58     | 0.91     | 0.0  | 0.0       | 72.2         | false    | false    |
+      | 21 July 2025      | Accrual Activity       | 0.91   | 0.0       | 0.91     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 August 2025    | Repayment              | 37.49  | 36.89     | 0.6      | 0.0  | 0.0       | 35.31        | false    | false    |
+      | 21 August 2025    | Accrual Activity       | 0.6    | 0.0       | 0.6      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 September 2025 | Accrual Activity       | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 October 2025   | Accrual                | 4.63   | 0.0       | 4.63     | 0.0  | 0.0       | 0.0          | false    | false    |
+#   --- Check on maturity date ---
+    When Admin sets the business date to "21 October 2025"
+    And Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 21 April 2025     |                | 218.54          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 30   | 21 May 2025       | 21 May 2025    | 182.67          | 35.87         | 1.62     | 0.0  | 0.0       | 37.49 | 37.49 | 0.12       | 0.0  | 0.0         |
+      | 2  | 31   | 21 June 2025      | 21 June 2025   | 146.39          | 36.28         | 1.21     | 0.0  | 0.0       | 37.49 | 37.49 | 0.12       | 0.0  | 0.0         |
+      | 3  | 30   | 21 July 2025      | 21 July 2025   | 109.81          | 36.58         | 0.91     | 0.0  | 0.0       | 37.49 | 37.49 | 0.12       | 0.0  | 0.0         |
+      | 4  | 31   | 21 August 2025    | 21 August 2025 | 72.92           | 36.89         | 0.6      | 0.0  | 0.0       | 37.49 | 37.49 | 0.12       | 0.0  | 0.0         |
+      | 5  | 31   | 21 September 2025 |                | 37.49           | 35.43         | 0.58     | 0.0  | 0.0       | 36.01 | 0.12  | 0.12       | 0.0  | 35.89       |
+      | 6  | 30   | 21 October 2025   | 02 May 2025    | 0.0             | 37.49         | 0.0      | 0.0  | 0.0       | 37.49 | 37.49 | 37.49      | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 218.54        | 4.92     | 0.0  | 0.0       | 223.46 | 187.57 | 38.09      | 0.0  | 35.89       |
+    And Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 21 April 2025     | Disbursement           | 218.54 | 0.0       | 0.0      | 0.0  | 0.0       | 218.54       | false    | false    |
+      | 02 May 2025       | Merchant Issued Refund | 37.49  | 37.49     | 0.0      | 0.0  | 0.0       | 181.05       | false    | false    |
+      | 02 May 2025       | Interest Refund        | 0.12   | 0.12      | 0.0      | 0.0  | 0.0       | 180.93       | false    | false    |
+      | 21 May 2025       | Repayment              | 37.49  | 35.87     | 1.62     | 0.0  | 0.0       | 145.06       | false    | false    |
+      | 21 May 2025       | Accrual Activity       | 1.62   | 0.0       | 1.62     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 June 2025      | Repayment              | 37.49  | 36.28     | 1.21     | 0.0  | 0.0       | 108.78       | false    | false    |
+      | 21 June 2025      | Accrual Activity       | 1.21   | 0.0       | 1.21     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 July 2025      | Repayment              | 37.49  | 36.58     | 0.91     | 0.0  | 0.0       | 72.2         | false    | false    |
+      | 21 July 2025      | Accrual Activity       | 0.91   | 0.0       | 0.91     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 August 2025    | Repayment              | 37.49  | 36.89     | 0.6      | 0.0  | 0.0       | 35.31        | false    | false    |
+      | 21 August 2025    | Accrual Activity       | 0.6    | 0.0       | 0.6      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 September 2025 | Accrual Activity       | 0.57   | 0.0       | 0.57     | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 19 October 2025   | Accrual                | 4.63   | 0.0       | 4.63     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 October 2025   | Accrual                | 0.28   | 0.0       | 0.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+#   --- Check on maturity date + 1 ---
+    When Admin sets the business date to "22 October 2025"
+    And Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 21 April 2025     |                | 218.54          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 30   | 21 May 2025       | 21 May 2025    | 182.67          | 35.87         | 1.62     | 0.0  | 0.0       | 37.49 | 37.49 | 0.12       | 0.0  | 0.0         |
+      | 2  | 31   | 21 June 2025      | 21 June 2025   | 146.39          | 36.28         | 1.21     | 0.0  | 0.0       | 37.49 | 37.49 | 0.12       | 0.0  | 0.0         |
+      | 3  | 30   | 21 July 2025      | 21 July 2025   | 109.81          | 36.58         | 0.91     | 0.0  | 0.0       | 37.49 | 37.49 | 0.12       | 0.0  | 0.0         |
+      | 4  | 31   | 21 August 2025    | 21 August 2025 | 72.92           | 36.89         | 0.6      | 0.0  | 0.0       | 37.49 | 37.49 | 0.12       | 0.0  | 0.0         |
+      | 5  | 31   | 21 September 2025 |                | 37.49           | 35.43         | 0.58     | 0.0  | 0.0       | 36.01 | 0.12  | 0.12       | 0.0  | 35.89       |
+      | 6  | 30   | 21 October 2025   | 02 May 2025    | 0.0             | 37.49         | 0.0      | 0.0  | 0.0       | 37.49 | 37.49 | 37.49      | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 218.54        | 4.92     | 0.0  | 0.0       | 223.46 | 187.57 | 38.09      | 0.0  | 35.89       |
+    And Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 21 April 2025     | Disbursement           | 218.54 | 0.0       | 0.0      | 0.0  | 0.0       | 218.54       | false    | false    |
+      | 02 May 2025       | Merchant Issued Refund | 37.49  | 37.49     | 0.0      | 0.0  | 0.0       | 181.05       | false    | false    |
+      | 02 May 2025       | Interest Refund        | 0.12   | 0.12      | 0.0      | 0.0  | 0.0       | 180.93       | false    | false    |
+      | 21 May 2025       | Repayment              | 37.49  | 35.87     | 1.62     | 0.0  | 0.0       | 145.06       | false    | false    |
+      | 21 May 2025       | Accrual Activity       | 1.62   | 0.0       | 1.62     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 June 2025      | Repayment              | 37.49  | 36.28     | 1.21     | 0.0  | 0.0       | 108.78       | false    | false    |
+      | 21 June 2025      | Accrual Activity       | 1.21   | 0.0       | 1.21     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 July 2025      | Repayment              | 37.49  | 36.58     | 0.91     | 0.0  | 0.0       | 72.2         | false    | false    |
+      | 21 July 2025      | Accrual Activity       | 0.91   | 0.0       | 0.91     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 August 2025    | Repayment              | 37.49  | 36.89     | 0.6      | 0.0  | 0.0       | 35.31        | false    | false    |
+      | 21 August 2025    | Accrual Activity       | 0.6    | 0.0       | 0.6      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 September 2025 | Accrual Activity       | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 19 October 2025   | Accrual                | 4.63   | 0.0       | 4.63     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 October 2025   | Accrual                | 0.28   | 0.0       | 0.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 October 2025   | Accrual                | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+#   --- Check on maturity date + 2 ---
+    When Admin sets the business date to "23 October 2025"
+    And Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 21 April 2025     |                | 218.54          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 30   | 21 May 2025       | 21 May 2025    | 182.67          | 35.87         | 1.62     | 0.0  | 0.0       | 37.49 | 37.49 | 0.12       | 0.0  | 0.0         |
+      | 2  | 31   | 21 June 2025      | 21 June 2025   | 146.39          | 36.28         | 1.21     | 0.0  | 0.0       | 37.49 | 37.49 | 0.12       | 0.0  | 0.0         |
+      | 3  | 30   | 21 July 2025      | 21 July 2025   | 109.81          | 36.58         | 0.91     | 0.0  | 0.0       | 37.49 | 37.49 | 0.12       | 0.0  | 0.0         |
+      | 4  | 31   | 21 August 2025    | 21 August 2025 | 72.92           | 36.89         | 0.6      | 0.0  | 0.0       | 37.49 | 37.49 | 0.12       | 0.0  | 0.0         |
+      | 5  | 31   | 21 September 2025 |                | 37.49           | 35.43         | 0.58     | 0.0  | 0.0       | 36.01 | 0.12  | 0.12       | 0.0  | 35.89       |
+      | 6  | 30   | 21 October 2025   | 02 May 2025    | 0.0             | 37.49         | 0.0      | 0.0  | 0.0       | 37.49 | 37.49 | 37.49      | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 218.54        | 4.92     | 0.0  | 0.0       | 223.46 | 187.57 | 38.09      | 0.0  | 35.89       |
+    And Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 21 April 2025     | Disbursement           | 218.54 | 0.0       | 0.0      | 0.0  | 0.0       | 218.54       | false    | false    |
+      | 02 May 2025       | Merchant Issued Refund | 37.49  | 37.49     | 0.0      | 0.0  | 0.0       | 181.05       | false    | false    |
+      | 02 May 2025       | Interest Refund        | 0.12   | 0.12      | 0.0      | 0.0  | 0.0       | 180.93       | false    | false    |
+      | 21 May 2025       | Repayment              | 37.49  | 35.87     | 1.62     | 0.0  | 0.0       | 145.06       | false    | false    |
+      | 21 May 2025       | Accrual Activity       | 1.62   | 0.0       | 1.62     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 June 2025      | Repayment              | 37.49  | 36.28     | 1.21     | 0.0  | 0.0       | 108.78       | false    | false    |
+      | 21 June 2025      | Accrual Activity       | 1.21   | 0.0       | 1.21     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 July 2025      | Repayment              | 37.49  | 36.58     | 0.91     | 0.0  | 0.0       | 72.2         | false    | false    |
+      | 21 July 2025      | Accrual Activity       | 0.91   | 0.0       | 0.91     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 August 2025    | Repayment              | 37.49  | 36.89     | 0.6      | 0.0  | 0.0       | 35.31        | false    | false    |
+      | 21 August 2025    | Accrual Activity       | 0.6    | 0.0       | 0.6      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 September 2025 | Accrual Activity       | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 19 October 2025   | Accrual                | 4.63   | 0.0       | 4.63     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 October 2025   | Accrual                | 0.28   | 0.0       | 0.28     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 October 2025   | Accrual                | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+    #   --- Close loan ---
+    When Loan Pay-off is made on "23 October 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
