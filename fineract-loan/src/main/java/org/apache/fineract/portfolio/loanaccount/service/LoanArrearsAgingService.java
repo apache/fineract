@@ -26,11 +26,11 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleP
 
 public interface LoanArrearsAgingService {
 
-    void updateLoanArrearsAgingDetailsWithOriginalSchedule(Loan loan);
+    void updateLoanArrearsAgeingDetailsWithOriginalSchedule(Loan loan);
 
     Map<Long, List<LoanSchedulePeriodData>> getScheduleDate(String loanId);
 
-    void updateLoanArrearsAgingDetails(Loan loan);
+    void updateLoanArrearsAgeingDetails(Loan loan);
 
     void createInsertStatements(List<String> insertStatement, Map<Long, List<LoanSchedulePeriodData>> scheduleDate,
             boolean isInsertStatement);

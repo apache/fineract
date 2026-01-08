@@ -182,7 +182,7 @@ public class LoanProductsRequestFactory {
                 .daysInYearType(DAYS_IN_YEAR_TYPE)//
                 .daysInMonthType(DAYS_IN_MONTH_TYPE)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAging(3)//
+                .graceOnArrearsAgeing(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -199,7 +199,7 @@ public class LoanProductsRequestFactory {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAging(true))//
+                        .graceOnArrearsAgeing(true))//
                 .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
@@ -292,7 +292,7 @@ public class LoanProductsRequestFactory {
                 .daysInYearType(DAYS_IN_YEAR_TYPE)//
                 .daysInMonthType(DAYS_IN_MONTH_TYPE)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAging(3)//
+                .graceOnArrearsAgeing(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -309,7 +309,7 @@ public class LoanProductsRequestFactory {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAging(true))
+                        .graceOnArrearsAgeing(true))
                 .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
@@ -400,7 +400,7 @@ public class LoanProductsRequestFactory {
                 .daysInYearType(DAYS_IN_YEAR_TYPE)//
                 .daysInMonthType(DAYS_IN_MONTH_TYPE)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAging(3)//
+                .graceOnArrearsAgeing(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -417,7 +417,7 @@ public class LoanProductsRequestFactory {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAging(true))
+                        .graceOnArrearsAgeing(true))
                 .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
@@ -507,7 +507,7 @@ public class LoanProductsRequestFactory {
                 .daysInYearType(DAYS_IN_YEAR_TYPE)//
                 .daysInMonthType(DAYS_IN_MONTH_TYPE)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAging(3)//
+                .graceOnArrearsAgeing(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -523,7 +523,7 @@ public class LoanProductsRequestFactory {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAging(true))
+                        .graceOnArrearsAgeing(true))
                 .outstandingLoanBalance(10000.0)//
                 .charges(charges)//
                 .accountingRule(LOAN_ACCOUNTING_RULE)//
@@ -620,7 +620,7 @@ public class LoanProductsRequestFactory {
                 .daysInYearType(DAYS_IN_YEAR_TYPE)//
                 .daysInMonthType(DAYS_IN_MONTH_TYPE)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAging(3)//
+                .graceOnArrearsAgeing(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -636,7 +636,7 @@ public class LoanProductsRequestFactory {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAging(true))
+                        .graceOnArrearsAgeing(true))
                 .outstandingLoanBalance(10000.0)//
                 .charges(charges)//
                 .accountingRule(LOAN_ACCOUNTING_RULE)//
@@ -705,7 +705,7 @@ public class LoanProductsRequestFactory {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAging(true))//
+                        .graceOnArrearsAgeing(true))//
                 .allowPartialPeriodInterestCalculation(false)//
                 .allowVariableInstallments(false)//
                 .amortizationType(AMORTIZATION_TYPE)//
@@ -849,7 +849,7 @@ public class LoanProductsRequestFactory {
                 .daysInYearType(DAYS_IN_YEAR_TYPE)//
                 .daysInMonthType(DAYS_IN_MONTH_TYPE)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAging(3)//
+                .graceOnArrearsAgeing(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -866,7 +866,7 @@ public class LoanProductsRequestFactory {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAging(true))//
+                        .graceOnArrearsAgeing(true))//
                 .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
@@ -962,7 +962,7 @@ public class LoanProductsRequestFactory {
                 .daysInYearType(DAYS_IN_YEAR_TYPE)//
                 .daysInMonthType(DAYS_IN_MONTH_TYPE)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAging(3)//
+                .graceOnArrearsAgeing(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -979,7 +979,7 @@ public class LoanProductsRequestFactory {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAging(true))
+                        .graceOnArrearsAgeing(true))
                 .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
@@ -1073,7 +1073,7 @@ public class LoanProductsRequestFactory {
                 .daysInYearType(DAYS_IN_YEAR_TYPE)//
                 .daysInMonthType(DAYS_IN_MONTH_TYPE)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAging(3)//
+                .graceOnArrearsAgeing(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -1090,7 +1090,7 @@ public class LoanProductsRequestFactory {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAging(true))//
+                        .graceOnArrearsAgeing(true))//
                 .allowPartialPeriodInterestCalculation(false)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
@@ -1199,7 +1199,7 @@ public class LoanProductsRequestFactory {
                 .daysInYearType(DAYS_IN_YEAR_TYPE)//
                 .daysInMonthType(DAYS_IN_MONTH_TYPE)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAging(3)//
+                .graceOnArrearsAgeing(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -1220,7 +1220,7 @@ public class LoanProductsRequestFactory {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAging(true))//
+                        .graceOnArrearsAgeing(true))//
                 .allowPartialPeriodInterestCalculation(false)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
@@ -1321,7 +1321,7 @@ public class LoanProductsRequestFactory {
                 .daysInYearType(DAYS_IN_YEAR_TYPE)//
                 .daysInMonthType(DAYS_IN_MONTH_TYPE)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAging(3)//
+                .graceOnArrearsAgeing(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -1338,7 +1338,7 @@ public class LoanProductsRequestFactory {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAging(true))//
+                        .graceOnArrearsAgeing(true))//
                 .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
@@ -1451,7 +1451,7 @@ public class LoanProductsRequestFactory {
                 .daysInYearType(DAYS_IN_YEAR_TYPE)//
                 .daysInMonthType(DAYS_IN_MONTH_TYPE)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAging(3)//
+                .graceOnArrearsAgeing(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -1472,7 +1472,7 @@ public class LoanProductsRequestFactory {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAging(true))//
+                        .graceOnArrearsAgeing(true))//
                 .allowPartialPeriodInterestCalculation(false)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
@@ -1560,7 +1560,7 @@ public class LoanProductsRequestFactory {
                 .daysInYearType(DAYS_IN_YEAR_TYPE)//
                 .daysInMonthType(DAYS_IN_MONTH_TYPE)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAging(3)//
+                .graceOnArrearsAgeing(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -1577,7 +1577,7 @@ public class LoanProductsRequestFactory {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAging(true))//
+                        .graceOnArrearsAgeing(true))//
                 .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
@@ -1698,7 +1698,7 @@ public class LoanProductsRequestFactory {
                 .daysInYearType(DAYS_IN_YEAR_TYPE_360)//
                 .daysInMonthType(DAYS_IN_MONTH_TYPE_30)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAging(3)//
+                .graceOnArrearsAgeing(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -1715,7 +1715,7 @@ public class LoanProductsRequestFactory {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAging(true))//
+                        .graceOnArrearsAgeing(true))//
                 .allowPartialPeriodInterestCalculation(false)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//

@@ -68,7 +68,7 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
 
             // Create Loan Product
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() //
-                    .graceOnArrearsAging(0).numberOfRepayments(numberOfRepayments) //
+                    .graceOnArrearsAgeing(0).numberOfRepayments(numberOfRepayments) //
                     .repaymentEvery(repaymentEvery) //
                     .installmentAmountInMultiplesOf(null) //
                     .repaymentFrequencyType(RepaymentFrequencyType.DAYS.longValue()) //
@@ -181,7 +181,7 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
 
             // Create Loan Product
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() //
-                    .graceOnArrearsAging(0).numberOfRepayments(numberOfRepayments) //
+                    .graceOnArrearsAgeing(0).numberOfRepayments(numberOfRepayments) //
                     .repaymentEvery(repaymentEvery) //
                     .installmentAmountInMultiplesOf(null) //
                     .repaymentFrequencyType(RepaymentFrequencyType.DAYS.longValue()) //
@@ -295,7 +295,7 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
 
             // Create Loan Product
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() //
-                    .graceOnArrearsAging(0).numberOfRepayments(numberOfRepayments) //
+                    .graceOnArrearsAgeing(0).numberOfRepayments(numberOfRepayments) //
                     .repaymentEvery(repaymentEvery) //
                     .installmentAmountInMultiplesOf(null) //
                     .repaymentFrequencyType(RepaymentFrequencyType.DAYS.longValue()) //

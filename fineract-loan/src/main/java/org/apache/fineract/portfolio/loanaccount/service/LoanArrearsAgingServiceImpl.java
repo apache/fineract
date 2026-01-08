@@ -98,7 +98,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
     }
 
     @Override
-    public void updateLoanArrearsAgingDetailsWithOriginalSchedule(final Loan loan) {
+    public void updateLoanArrearsAgeingDetailsWithOriginalSchedule(final Loan loan) {
         int count = this.jdbcTemplate.queryForObject("select count(mla.loan_id) from m_loan_arrears_aging mla where mla.loan_id =?",
                 Integer.class, loan.getId());
         List<String> updateStatement = new ArrayList<>();
@@ -125,7 +125,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
     }
 
     @Override
-    public void updateLoanArrearsAgingDetails(final Loan loan) {
+    public void updateLoanArrearsAgeingDetails(final Loan loan) {
         if (loan != null) {
             int count = this.jdbcTemplate.queryForObject("select count(mla.loan_id) from m_loan_arrears_aging mla where mla.loan_id =?",
                     Integer.class, loan.getId());
@@ -373,7 +373,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
                     "mr.interest_amount as interestAmount, mr.fee_charges_amount as feeAmount, mr.penalty_charges_amount as penaltyAmount  ");
             scheduleDetail.append("from m_loan ml  INNER JOIN m_loan_repayment_schedule_history mr on mr.loan_id = ml.id ");
             scheduleDetail.append("where mr.duedate  < "
-                    + sqlGenerator.subDate(sqlGenerator.currentBusinessDate(), "COALESCE(ml.grace_on_arrears_aging, 0)", "day") + " and ");
+                    + sqlGenerator.subDate(sqlGenerator.currentBusinessDate(), "COALESCE(ml.grace_on_arrears_ageing, 0)", "day") + " and ");
             scheduleDetail.append("ml.id IN(").append(loanIdsAsString).append(") and  mr.version = (");
             scheduleDetail.append("select max(lrs.version) from m_loan_repayment_schedule_history lrs where mr.loan_id = lrs.loan_id");
             scheduleDetail.append(") order by ml.id,mr.duedate");
@@ -413,9 +413,9 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
     private void handleArrearsForLoan(Loan loan) {
         if (loan != null && loan.isOpen() && loan.isInterestBearingAndInterestRecalculationEnabled()
                 && loan.loanProduct().isArrearsBasedOnOriginalSchedule()) {
-            updateLoanArrearsAgingDetailsWithOriginalSchedule(loan);
+            updateLoanArrearsAgeingDetailsWithOriginalSchedule(loan);
         } else {
-            updateLoanArrearsAgingDetails(loan);
+            updateLoanArrearsAgeingDetails(loan);
         }
     }
 
@@ -528,7 +528,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         @Override
         public void onBusinessEvent(LoanDisbursalBusinessEvent event) {
             Loan loan = event.get();
-            updateLoanArrearsAgingDetails(loan);
+            updateLoanArrearsAgeingDetails(loan);
         }
     }
 

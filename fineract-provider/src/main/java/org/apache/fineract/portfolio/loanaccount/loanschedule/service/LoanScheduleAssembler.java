@@ -365,10 +365,10 @@ public class LoanScheduleAssembler {
         final Boolean isInterestChargedFromDateSameAsDisbursalDateEnabled = this.configurationDomainService
                 .isInterestChargedFromDateSameAsDisbursementDate();
 
-        Integer graceOnArrearsAging = this.fromApiJsonHelper
-                .extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME, element);
-        if (!allowOverridingGraceOnArrearsAging || graceOnArrearsAging == null) {
-            graceOnArrearsAging = loanProduct.getLoanProductRelatedDetail().getGraceOnArrearsAging();
+        Integer graceOnArrearsAgeing = this.fromApiJsonHelper
+                .extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element);
+        if (!allowOverridingGraceOnArrearsAging || graceOnArrearsAgeing == null) {
+            graceOnArrearsAgeing = loanProduct.getLoanProductRelatedDetail().getGraceOnArrearsAgeing();
         }
 
         // other
@@ -539,7 +539,7 @@ public class LoanScheduleAssembler {
                 allowPartialPeriodInterestCalculation, principalMoney, expectedDisbursementDate, repaymentsStartingFromDate,
                 calculatedRepaymentsStartingFromDate, graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods,
                 graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, inArrearsToleranceMoney,
-                loanProduct.isMultiDisburseLoan(), emiAmount, disbursementDatas, maxOutstandingBalance, graceOnArrearsAging,
+                loanProduct.isMultiDisburseLoan(), emiAmount, disbursementDatas, maxOutstandingBalance, graceOnArrearsAgeing,
                 daysInMonthType, daysInYearType, isInterestRecalculationEnabled, recalculationFrequencyType, restCalendarInstance,
                 compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment,
                 loanProduct.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf(),
@@ -1243,7 +1243,7 @@ public class LoanScheduleAssembler {
                     .setInArrearsTolerance(loan.loanProduct().getLoanProductRelatedDetail().getInArrearsTolerance().getAmount());
         }
         if (!graceOnArrearsAging) {
-            productRelatedDetail.setGraceOnArrearsAging(loan.loanProduct().getLoanProductRelatedDetail().getGraceOnArrearsAging());
+            productRelatedDetail.setGraceOnArrearsAgeing(loan.loanProduct().getLoanProductRelatedDetail().getGraceOnArrearsAgeing());
         }
         if (!interestCalcPeriod) {
             productRelatedDetail.setInterestCalculationPeriodMethod(
@@ -1413,12 +1413,12 @@ public class LoanScheduleAssembler {
             loanProductRelatedDetail.setGraceOnInterestCharged(newValue);
         }
 
-        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME,
-                loanProductRelatedDetail.getGraceOnArrearsAging())) {
-            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME);
-            changes.put(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME, newValue);
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME,
+                loanProductRelatedDetail.getGraceOnArrearsAgeing())) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME);
+            changes.put(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, newValue);
             changes.put("locale", localeAsInput);
-            loanProductRelatedDetail.setGraceOnArrearsAging(newValue);
+            loanProductRelatedDetail.setGraceOnArrearsAgeing(newValue);
         }
 
         if (command.isChangeInIntegerParameterNamed(LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME,

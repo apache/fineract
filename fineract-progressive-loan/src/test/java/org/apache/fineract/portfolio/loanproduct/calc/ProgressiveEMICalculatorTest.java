@@ -4277,7 +4277,7 @@ class ProgressiveEMICalculatorTest {
         }
 
         @Test
-        public void test_chargeBackOn2ndRP_ReAgingOn1stRPsDueDate_EQUAL_AMORTIZATION_FULL_INTEREST() {
+        public void test_chargeBackOn2ndRP_ReAgeingOn1stRPsDueDate_EQUAL_AMORTIZATION_FULL_INTEREST() {
             ProgressiveLoanInterestScheduleModel interestSchedule = generateSchedule();
 
             emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
@@ -4312,7 +4312,7 @@ class ProgressiveEMICalculatorTest {
         }
 
         @Test
-        public void test_chargeBackOn2ndRP_ReAgingOn2stRPsDueDate_EQUAL_AMORTIZATION_FULL_INTEREST() {
+        public void test_chargeBackOn2ndRP_ReAgeingOn2stRPsDueDate_EQUAL_AMORTIZATION_FULL_INTEREST() {
             ProgressiveLoanInterestScheduleModel interestSchedule = generateSchedule();
 
             emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),
@@ -4347,7 +4347,7 @@ class ProgressiveEMICalculatorTest {
         }
 
         @Test
-        public void test_chargeBackOn2ndRP_ReAgingDuring2stRP_EQUAL_AMORTIZATION_FULL_INTEREST() {
+        public void test_chargeBackOn2ndRP_ReAgeingDuring2stRP_EQUAL_AMORTIZATION_FULL_INTEREST() {
             ProgressiveLoanInterestScheduleModel interestSchedule = generateSchedule();
 
             emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1),

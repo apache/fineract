@@ -678,10 +678,10 @@ public class LoanStepDef extends AbstractStepDef {
         createFullyCustomizedLoanWithInterestRateFrequency(data.get(1));
     }
 
-    @When("Admin creates a fully customized loan with graceOnArrearsAging and following data:")
-    public void createFullyCustomizedLoanWithGraceOnArrearsAging(final DataTable table) throws IOException {
+    @When("Admin creates a fully customized loan with graceOnArrearsAgeing and following data:")
+    public void createFullyCustomizedLoanWithGraceOnArrearsAgeing(final DataTable table) throws IOException {
         final List<List<String>> data = table.asLists();
-        createFullyCustomizedLoanWithGraceOnArrearsAging(data.get(1));
+        createFullyCustomizedLoanWithGraceOnArrearsAgeing(data.get(1));
     }
 
     @When("Admin creates a fully customized loan with charges and following data:")
@@ -3617,7 +3617,7 @@ public class LoanStepDef extends AbstractStepDef {
         eventCheckHelper.createLoanEventCheck(response);
     }
 
-    public void createFullyCustomizedLoanWithGraceOnArrearsAging(final List<String> loanData) throws IOException {
+    public void createFullyCustomizedLoanWithGraceOnArrearsAgeing(final List<String> loanData) throws IOException {
         final String loanProduct = loanData.get(0);
         final String submitDate = loanData.get(1);
         final String principal = loanData.get(2);
@@ -3634,7 +3634,7 @@ public class LoanStepDef extends AbstractStepDef {
         final Integer graceOnInterestPayment = Integer.valueOf(loanData.get(13));
         final Integer graceOnInterestCharged = Integer.valueOf(loanData.get(14));
         final String transactionProcessingStrategyCode = loanData.get(15);
-        final String graceOnArrearsAgingStr = loanData.get(16);
+        final String graceOnArrearsAgeingStr = loanData.get(16);
 
         final PostClientsResponse clientResponse = testContext().get(TestContextKey.CLIENT_CREATE_RESPONSE);
         final Long clientId = clientResponse.getClientId();
@@ -3661,7 +3661,7 @@ public class LoanStepDef extends AbstractStepDef {
                 .valueOf(transactionProcessingStrategyCode);
         final String transactionProcessingStrategyCodeValue = processingStrategyCode.getValue();
 
-        Integer graceOnArrearsAgingValue = Integer.valueOf(graceOnArrearsAgingStr);
+        Integer graceOnArrearsAgeingValue = Integer.valueOf(graceOnArrearsAgeingStr);
 
         final PostLoansRequest loansRequest = loanRequestFactory//
                 .defaultLoansRequest(clientId)//
@@ -3682,7 +3682,7 @@ public class LoanStepDef extends AbstractStepDef {
                 .graceOnInterestPayment(graceOnInterestPayment)//
                 .graceOnInterestPayment(graceOnInterestCharged)//
                 .transactionProcessingStrategyCode(transactionProcessingStrategyCodeValue)//
-                .graceOnArrearsAging(graceOnArrearsAgingValue);//
+                .graceOnArrearsAgeing(graceOnArrearsAgeingValue);//
 
         final PostLoansResponse response = ok(
                 () -> fineractClient.loans().calculateLoanScheduleOrSubmitLoanApplication(loansRequest, Map.of()));

@@ -58,7 +58,7 @@ public interface ILoanConfigurationDetails {
 
     AmortizationMethod getAmortizationMethod();
 
-    Integer getGraceOnArrearsAging();
+    Integer getGraceOnArrearsAgeing();
 
     Integer getDaysInMonthType();
 
