@@ -36,7 +36,7 @@
         </update>
         <update tableName="job">
             <column name="short_name" value="LA_ARAG"/>
-            <where>name='Update Loan Arrears Ageing'</where>
+            <where>name='Update Loan Arrears Aging'</where>
         </update>
         <update tableName="job">
             <column name="short_name" value="LA_PIAD"/>

@@ -376,7 +376,7 @@ CREATE TABLE IF NOT EXISTS `job` (
 /*!40000 ALTER TABLE `job` DISABLE KEYS */;
 INSERT INTO `job` (`id`, `name`, `display_name`, `cron_expression`, `create_time`, `task_priority`, `group_name`, `previous_run_start_time`, `next_run_time`, `job_key`, `initializing_errorlog`, `is_active`, `currently_running`, `updates_allowed`, `scheduler_group`, `is_misfired`) VALUES
     (1, 'Update loan Summary', 'Update loan Summary', '0 0 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2017-02-24 22:00:00', 'Update loan SummaryJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-    (2, 'Update Loan Arrears Ageing', 'Update Loan Arrears Ageing', '0 1 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2017-02-25 00:01:00', 'Update Loan Arrears AgeingJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+    (2, 'Update Loan Arrears Aging', 'Update Loan Arrears Aging', '0 1 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2017-02-25 00:01:00', 'Update Loan Arrears AgingJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
     (3, 'Update Loan Paid In Advance', 'Update Loan Paid In Advance', '0 5 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2017-02-25 00:05:00', 'Update Loan Paid In AdvanceJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
     (4, 'Apply Annual Fee For Savings', 'Apply Annual Fee For Savings', '0 20 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2017-02-24 22:20:00', 'Apply Annual Fee For SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
     (5, 'Apply Holidays To Loans', 'Apply Holidays To Loans', '0 0 12 * * ?', '2015-06-03 02:56:57', 5, NULL, NULL, '2017-02-25 12:00:00', 'Apply Holidays To LoansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
@@ -2246,7 +2246,7 @@ CREATE TABLE IF NOT EXISTS `m_loan` (
   `loan_product_counter` SMALLINT DEFAULT NULL,
   `fixed_emi_amount` decimal(19,6) DEFAULT NULL,
   `max_outstanding_loan_balance` decimal(19,6) DEFAULT NULL,
-  `grace_on_arrears_ageing` SMALLINT DEFAULT NULL,
+  `grace_on_arrears_aging` SMALLINT DEFAULT NULL,
   `is_npa` tinyint NOT NULL DEFAULT '0',
   `total_recovered_derived` decimal(19,6) DEFAULT NULL,
   `accrued_till` date DEFAULT NULL,
@@ -3951,7 +3951,7 @@ CREATE TABLE IF NOT EXISTS `m_product_loan` (
   `allow_multiple_disbursals` tinyint NOT NULL DEFAULT '0',
   `max_disbursals` INT DEFAULT NULL,
   `max_outstanding_loan_balance` decimal(19,6) DEFAULT NULL,
-  `grace_on_arrears_ageing` SMALLINT DEFAULT NULL,
+  `grace_on_arrears_aging` SMALLINT DEFAULT NULL,
   `overdue_days_for_npa` SMALLINT DEFAULT NULL,
   `days_in_month_enum` SMALLINT NOT NULL DEFAULT '1',
   `days_in_year_enum` SMALLINT NOT NULL DEFAULT '1',
@@ -4005,7 +4005,7 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_configurable_attributes` (
   `arrearstolerance_amount` TINYINT NOT NULL DEFAULT '1',
   `repay_every` TINYINT NOT NULL DEFAULT '1',
   `moratorium` TINYINT NOT NULL DEFAULT '1',
-  `grace_on_arrears_ageing` TINYINT NOT NULL DEFAULT '1',
+  `grace_on_arrears_aging` TINYINT NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `fk_m_product_loan_configurable_attributes_0001` (`loan_product_id`),
   CONSTRAINT `fk_m_product_loan_configurable_attributes_0001` FOREIGN KEY (`loan_product_id`) REFERENCES `m_product_loan` (`id`)

@@ -137,7 +137,7 @@ public class LoanProductData implements Serializable {
     private final Integer recurringMoratoriumOnPrincipalPeriods;
     private final Integer graceOnInterestPayment;
     private final Integer graceOnInterestCharged;
-    private final Integer graceOnArrearsAgeing;
+    private final Integer graceOnArrearsAging;
     private final Integer overdueDaysForNPA;
     private final EnumOptionData daysInMonthType;
     private final EnumOptionData daysInYearType;
@@ -314,7 +314,7 @@ public class LoanProductData implements Serializable {
         final Integer recurringMoratoriumOnPrincipalPeriods = null;
         final Integer graceOnInterestPayment = null;
         final Integer graceOnInterestCharged = null;
-        final Integer graceOnArrearsAgeing = null;
+        final Integer graceOnArrearsAging = null;
         final Integer overdueDaysForNPA = null;
         final Collection<ChargeData> charges = null;
         final Collection<LoanProductBorrowerCycleVariationData> principalVariations = new ArrayList<>(1);
@@ -394,7 +394,7 @@ public class LoanProductData implements Serializable {
                 includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariations,
                 interestRateVariations, numberOfRepaymentVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
                 disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber,
-                allowFullTermForTranche, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
+                allowFullTermForTranche, graceOnArrearsAging, overdueDaysForNPA, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds,
                 productGuaranteeData, principalThresholdForLastInstallment, accountMovesOutOfNPAOnlyOnArrearsCompletion,
                 canDefineInstallmentAmount, installmentAmountInMultiplesOf, loanProductConfigurableAttributes,
@@ -453,7 +453,7 @@ public class LoanProductData implements Serializable {
         final Integer recurringMoratoriumOnPrincipalPeriods = null;
         final Integer graceOnInterestPayment = null;
         final Integer graceOnInterestCharged = null;
-        final Integer graceOnArrearsAgeing = null;
+        final Integer graceOnArrearsAging = null;
         final Integer overdueDaysForNPA = null;
 
         final Collection<ChargeData> charges = null;
@@ -535,7 +535,7 @@ public class LoanProductData implements Serializable {
                 includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariations,
                 interestRateVariations, numberOfRepaymentVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
                 disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber,
-                allowFullTermForTranche, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
+                allowFullTermForTranche, graceOnArrearsAging, overdueDaysForNPA, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds,
                 productGuaranteeData, principalThresholdForLastInstallment, accountMovesOutOfNPAOnlyOnArrearsCompletion,
                 canDefineInstallmentAmount, installmentAmountInMultiplesOf, loanProductConfigurableAttributes,
@@ -600,7 +600,7 @@ public class LoanProductData implements Serializable {
         final Integer recurringMoratoriumOnPrincipalPeriods = null;
         final Integer graceOnInterestPayment = null;
         final Integer graceOnInterestCharged = null;
-        final Integer graceOnArrearsAgeing = null;
+        final Integer graceOnArrearsAging = null;
         final Integer overdueDaysForNPA = null;
 
         final Collection<ChargeData> charges = null;
@@ -683,7 +683,7 @@ public class LoanProductData implements Serializable {
                 includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariationsForBorrowerCycle,
                 interestRateVariationsForBorrowerCycle, numberOfRepaymentVariationsForBorrowerCycle, multiDisburseLoan, maxTrancheCount,
                 outstandingLoanBalance, disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType,
-                overAppliedNumber, allowFullTermForTranche, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
+                overAppliedNumber, allowFullTermForTranche, graceOnArrearsAging, overdueDaysForNPA, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds,
                 productGuaranteeData, principalThresholdForLastInstallment, accountMovesOutOfNPAOnlyOnArrearsCompletion,
                 canDefineInstallmentAmount, installmentAmountInMultiplesOf, loanProductConfigurableAttributes,
@@ -742,7 +742,7 @@ public class LoanProductData implements Serializable {
         final Integer recurringMoratoriumOnPrincipalPeriods = null;
         final Integer graceOnInterestPayment = null;
         final Integer graceOnInterestCharged = null;
-        final Integer graceOnArrearsAgeing = null;
+        final Integer graceOnArrearsAging = null;
         final Integer overdueDaysForNPA = null;
 
         final Collection<ChargeData> charges = null;
@@ -825,7 +825,7 @@ public class LoanProductData implements Serializable {
                 includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariationsForBorrowerCycle,
                 interestRateVariationsForBorrowerCycle, numberOfRepaymentVariationsForBorrowerCycle, multiDisburseLoan, maxTrancheCount,
                 outstandingLoanBalance, disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType,
-                overAppliedNumber, allowFullTermForTranche, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
+                overAppliedNumber, allowFullTermForTranche, graceOnArrearsAging, overdueDaysForNPA, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds,
                 productGuaranteeData, principalThresholdForLastInstallment, accountMovesOutOfNPAOnlyOnArrearsCompletion,
                 canDefineInstallmentAmount, installmentAmountInMultiplesOf, loanProductConfigurableAttributes,
@@ -878,7 +878,7 @@ public class LoanProductData implements Serializable {
             Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariations, Boolean multiDisburseLoan,
             Integer maxTrancheCount, BigDecimal outstandingLoanBalance, final Boolean disallowExpectedDisbursements,
             final Boolean allowApprovedDisbursedAmountsOverApplied, final String overAppliedCalculationType,
-            final Integer overAppliedNumber, final Boolean allowFullTermForTranche, final Integer graceOnArrearsAgeing,
+            final Integer overAppliedNumber, final Boolean allowFullTermForTranche, final Integer graceOnArrearsAging,
             final Integer overdueDaysForNPA, final EnumOptionData daysInMonthType, final EnumOptionData daysInYearType,
             final boolean isInterestRecalculationEnabled, final LoanProductInterestRecalculationData interestRecalculationData,
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment, boolean holdGuaranteeFunds,
@@ -1007,7 +1007,7 @@ public class LoanProductData implements Serializable {
         this.overAppliedNumber = overAppliedNumber;
         this.allowFullTermForTranche = allowFullTermForTranche;
 
-        this.graceOnArrearsAgeing = graceOnArrearsAgeing;
+        this.graceOnArrearsAging = graceOnArrearsAging;
         this.overdueDaysForNPA = overdueDaysForNPA;
         this.daysInMonthType = daysInMonthType;
         this.daysInYearType = daysInYearType;
@@ -1210,7 +1210,7 @@ public class LoanProductData implements Serializable {
         this.accountingMappingOptions = accountingMappingOptions;
         this.accountingRuleOptions = accountingRuleOptions;
         this.valueConditionTypeOptions = valueConditionTypeOptions;
-        this.graceOnArrearsAgeing = productData.graceOnArrearsAgeing;
+        this.graceOnArrearsAging = productData.graceOnArrearsAging;
         this.overdueDaysForNPA = productData.overdueDaysForNPA;
 
         this.daysInMonthType = productData.daysInMonthType;

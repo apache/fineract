@@ -2177,7 +2177,7 @@
             <column defaultValueComputed="NULL" name="loan_product_counter" type="SMALLINT"/>
             <column defaultValueComputed="NULL" name="fixed_emi_amount" type="DECIMAL(19, 6)"/>
             <column defaultValueComputed="NULL" name="max_outstanding_loan_balance" type="DECIMAL(19, 6)"/>
-            <column defaultValueComputed="NULL" name="grace_on_arrears_ageing" type="SMALLINT"/>
+            <column defaultValueComputed="NULL" name="grace_on_arrears_aging" type="SMALLINT"/>
             <column defaultValueBoolean="false" name="is_npa" type="boolean">
                 <constraints nullable="false"/>
             </column>
@@ -3166,7 +3166,7 @@
             </column>
             <column defaultValueComputed="NULL" name="max_disbursals" type="INT"/>
             <column defaultValueComputed="NULL" name="max_outstanding_loan_balance" type="DECIMAL(19, 6)"/>
-            <column defaultValueComputed="NULL" name="grace_on_arrears_ageing" type="SMALLINT"/>
+            <column defaultValueComputed="NULL" name="grace_on_arrears_aging" type="SMALLINT"/>
             <column defaultValueComputed="NULL" name="overdue_days_for_npa" type="SMALLINT"/>
             <column defaultValueNumeric="1" name="days_in_month_enum" type="SMALLINT">
                 <constraints nullable="false"/>
@@ -3240,7 +3240,7 @@
             <column defaultValueBoolean="true" name="moratorium" type="boolean">
                 <constraints nullable="false"/>
             </column>
-            <column defaultValueBoolean="true" name="grace_on_arrears_ageing" type="boolean">
+            <column defaultValueBoolean="true" name="grace_on_arrears_aging" type="boolean">
                 <constraints nullable="false"/>
             </column>
         </createTable>

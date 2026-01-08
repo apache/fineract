@@ -175,7 +175,7 @@ public class LoanConfigurationDetails implements ILoanConfigurationDetails {
     }
 
     @Override
-    public Integer getGraceOnArrearsAgeing() {
+    public Integer getGraceOnArrearsAging() {
         return 0;
     }
 

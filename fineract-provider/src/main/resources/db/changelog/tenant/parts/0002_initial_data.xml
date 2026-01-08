@@ -554,14 +554,14 @@
         </insert>
         <insert tableName="job">
             <column name="id" valueNumeric="2"/>
-            <column name="name" value="Update Loan Arrears Ageing"/>
-            <column name="display_name" value="Update Loan Arrears Ageing"/>
+            <column name="name" value="Update Loan Arrears Aging"/>
+            <column name="display_name" value="Update Loan Arrears Aging"/>
             <column name="cron_expression" value="0 1 0 1/1 * ? *"/>
             <column name="create_time" valueDate="${current_datetime}"/>
             <column name="task_priority" valueNumeric="5"/>
             <column name="group_name"/>
             <column name="previous_run_start_time"/>
-            <column name="job_key" value="Update Loan Arrears AgeingJobDetail1 _ DEFAULT"/>
+            <column name="job_key" value="Update Loan Arrears AgingJobDetail1 _ DEFAULT"/>
             <column name="initializing_errorlog"/>
             <column name="is_active" valueBoolean="true"/>
             <column name="currently_running" valueBoolean="false"/>

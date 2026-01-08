@@ -342,7 +342,7 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
                 req.submittedOnDate("01 November 2023");
                 req.setLoanTermFrequency(45);
                 req.setRepaymentEvery(15);
-                req.setGraceOnArrearsAgeing(0);
+                req.setGraceOnArrearsAging(0);
             });
 
             // Partial Loan amount Disbursement
@@ -448,7 +448,7 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
         product.setDelinquencyBucketId(delinquencyBucketId.longValue());
         product.setMultiDisburseLoan(multiDisburseEnabled);
         product.setEnableDownPayment(true);
-        product.setGraceOnArrearsAgeing(graceOnArrearsAging);
+        product.setGraceOnArrearsAging(graceOnArrearsAging);
 
         product.setDisbursedAmountPercentageForDownPayment(DOWN_PAYMENT_PERCENTAGE);
         product.setEnableAutoRepaymentForDownPayment(autoDownPaymentEnabled);
@@ -481,7 +481,7 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
         product.setDelinquencyBucketId(delinquencyBucketId.longValue());
         product.setMultiDisburseLoan(multiDisburseEnabled);
         product.setEnableDownPayment(false);
-        product.setGraceOnArrearsAgeing(graceOnArrearsAging);
+        product.setGraceOnArrearsAging(graceOnArrearsAging);
         product.setEnableInstallmentLevelDelinquency(installmentLevelDelinquencyEnabled);
 
         PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
@@ -498,7 +498,7 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2022", 1000.0, 2, req -> {
                 req.setLoanTermFrequency(30);
                 req.setRepaymentEvery(15);
-                req.setGraceOnArrearsAgeing(0);
+                req.setGraceOnArrearsAging(0);
             });
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 January 2022");
             loanIdHolder[0] = loanId;
@@ -548,7 +548,7 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2022", 1000.0, 3, req -> {
                 req.setLoanTermFrequency(45);
                 req.setRepaymentEvery(15);
-                req.setGraceOnArrearsAgeing(0);
+                req.setGraceOnArrearsAging(0);
             });
             disburseLoan(loanId, BigDecimal.valueOf(100.00), "01 January 2022");
             loanIdHolder[0] = loanId;
@@ -595,7 +595,7 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "10 January 2022", 1000.0, 3, req -> {
                 req.setLoanTermFrequency(30);
                 req.setRepaymentEvery(10);
-                req.setGraceOnArrearsAgeing(0);
+                req.setGraceOnArrearsAging(0);
             });
             disburseLoan(loanId, BigDecimal.valueOf(100.00), "10 January 2022");
             loanIdHolder[0] = loanId;
@@ -642,7 +642,7 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2022", 1000.0, 1, req -> {
                 req.setLoanTermFrequency(30);
                 req.setRepaymentEvery(30);
-                req.setGraceOnArrearsAgeing(0);
+                req.setGraceOnArrearsAging(0);
             });
             disburseLoan(loanId, BigDecimal.valueOf(100.00), "01 January 2022");
             loanIdHolder[0] = loanId;
@@ -708,7 +708,7 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2022", 1000.0, 2, req -> {
                 req.setLoanTermFrequency(20);
                 req.setRepaymentEvery(10);
-                req.setGraceOnArrearsAgeing(0);
+                req.setGraceOnArrearsAging(0);
             });
             disburseLoan(loanId, BigDecimal.valueOf(100.00), "01 January 2022");
             loanIdHolder[0] = loanId;
@@ -743,7 +743,7 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2022", 1000.0, 4, req -> {
                 req.setLoanTermFrequency(60);
                 req.setRepaymentEvery(15);
-                req.setGraceOnArrearsAgeing(0);
+                req.setGraceOnArrearsAging(0);
             });
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 January 2022");
             loanIdHolder[0] = loanId;
@@ -778,7 +778,7 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "28 May 2025", 1000.0, 7, req -> {
                 req.setLoanTermFrequency(210);
                 req.setRepaymentEvery(30);
-                req.setGraceOnArrearsAgeing(3);
+                req.setGraceOnArrearsAging(3);
             });
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "28 May 2025");
             loanIdHolder[0] = loanId;

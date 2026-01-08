@@ -128,7 +128,7 @@ public class LoanDelinquencyDomainServiceTest {
                 fromDate, dueDate, principal, zeroAmount, zeroAmount, zeroAmount, false, new HashSet<>(), zeroAmount));
 
         // when
-        when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(0);
+        when(loanProductRelatedDetail.getGraceOnArrearsAging()).thenReturn(0);
         when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loan.getCurrency()).thenReturn(currency);
@@ -154,7 +154,7 @@ public class LoanDelinquencyDomainServiceTest {
                 fromDate, dueDate, principal, zeroAmount, zeroAmount, zeroAmount, false, new HashSet<>(), zeroAmount));
 
         // when
-        when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(0);
+        when(loanProductRelatedDetail.getGraceOnArrearsAging()).thenReturn(0);
         when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null, LoanTransactionType.CHARGEBACK))
@@ -195,7 +195,7 @@ public class LoanDelinquencyDomainServiceTest {
         List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = Arrays.asList(installment);
 
         // when
-        when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(0);
+        when(loanProductRelatedDetail.getGraceOnArrearsAging()).thenReturn(0);
         when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loan.getCurrency()).thenReturn(currency);
@@ -224,7 +224,7 @@ public class LoanDelinquencyDomainServiceTest {
         List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = Arrays.asList(installment);
 
         // when
-        when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(0);
+        when(loanProductRelatedDetail.getGraceOnArrearsAging()).thenReturn(0);
         when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null, LoanTransactionType.CHARGEBACK))
@@ -278,7 +278,7 @@ public class LoanDelinquencyDomainServiceTest {
 
         List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = Arrays.asList(installment);
         // when
-        when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(0);
+        when(loanProductRelatedDetail.getGraceOnArrearsAging()).thenReturn(0);
         when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loan.isEnableInstallmentLevelDelinquency()).thenReturn(true);
@@ -329,7 +329,7 @@ public class LoanDelinquencyDomainServiceTest {
         List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = Arrays.asList(installmentOne, installmentTwo,
                 installmentThree);
 
-        when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(0);
+        when(loanProductRelatedDetail.getGraceOnArrearsAging()).thenReturn(0);
         when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null, LoanTransactionType.CHARGEBACK))
@@ -385,7 +385,7 @@ public class LoanDelinquencyDomainServiceTest {
 
         when(localLoan.getId()).thenReturn(42L);
         when(localLoan.getLoanProductRelatedDetail()).thenReturn(localDetails);
-        when(localDetails.getGraceOnArrearsAgeing()).thenReturn(0);
+        when(localDetails.getGraceOnArrearsAging()).thenReturn(0);
         when(localLoan.getRepaymentScheduleInstallments()).thenReturn(installments);
         when(localLoan.getLastLoanRepaymentScheduleInstallment()).thenReturn(installmentThree);
         when(localLoan.getCurrency()).thenReturn(currency);

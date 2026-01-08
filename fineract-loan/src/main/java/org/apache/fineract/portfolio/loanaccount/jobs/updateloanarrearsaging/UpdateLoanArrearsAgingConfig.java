@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.jobs.updateloanarrearsageing;
+package org.apache.fineract.portfolio.loanaccount.jobs.updateloanarrearsaging;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
@@ -32,27 +32,27 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @RequiredArgsConstructor
-public class UpdateLoanArrearsAgeingConfig {
+public class UpdateLoanArrearsAgingConfig {
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
 
-    private final LoanArrearsAgeingUpdateHandler updateLoanArrearsAgingService;
+    private final LoanArrearsAgingUpdateHandler updateLoanArrearsAgingService;
 
     @Bean
-    protected Step updateLoanArrearsAgeingStep() {
-        return new StepBuilder(JobName.UPDATE_LOAN_ARREARS_AGEING.name(), jobRepository)
-                .tasklet(updateLoanArrearsAgeingTasklet(), transactionManager).build();
+    protected Step updateLoanArrearsAgingStep() {
+        return new StepBuilder(JobName.UPDATE_LOAN_ARREARS_AGING.name(), jobRepository)
+                .tasklet(updateLoanArrearsAgingTasklet(), transactionManager).build();
     }
 
     @Bean
-    public Job updateLoanArrearsAgeingJob() {
-        return new JobBuilder(JobName.UPDATE_LOAN_ARREARS_AGEING.name(), jobRepository).start(updateLoanArrearsAgeingStep())
+    public Job updateLoanArrearsAgingJob() {
+        return new JobBuilder(JobName.UPDATE_LOAN_ARREARS_AGING.name(), jobRepository).start(updateLoanArrearsAgingStep())
                 .incrementer(new RunIdIncrementer()).build();
     }
 
     @Bean
-    public UpdateLoanArrearsAgeingTasklet updateLoanArrearsAgeingTasklet() {
-        return new UpdateLoanArrearsAgeingTasklet(updateLoanArrearsAgingService);
+    public UpdateLoanArrearsAgingTasklet updateLoanArrearsAgingTasklet() {
+        return new UpdateLoanArrearsAgingTasklet(updateLoanArrearsAgingService);
     }
 }

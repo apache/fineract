@@ -498,7 +498,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAgeing(true)//
+                        .graceOnArrearsAging(true)//
                 ).isEqualAmortization(false)//
                 .delinquencyBucketId(delinquencyBucketId.longValue())//
                 .enableDownPayment(false)//
@@ -596,7 +596,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAgeing(true)//
+                        .graceOnArrearsAging(true)//
                 ).isEqualAmortization(false)//
                 .delinquencyBucketId(delinquencyBucketId)//
                 .enableDownPayment(false)//
@@ -698,7 +698,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAgeing(true)//
+                        .graceOnArrearsAging(true)//
                 ).isEqualAmortization(false)//
                 .delinquencyBucketId(delinquencyBucketId.longValue())//
                 .enableDownPayment(false)//
@@ -750,7 +750,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                 .daysInYearType(1)//
                 .daysInMonthType(1)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAgeing(3)//
+                .graceOnArrearsAging(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -767,7 +767,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAgeing(true))//
+                        .graceOnArrearsAging(true))//
                 .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
@@ -887,7 +887,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                 .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
                 .interestType(interestType)//
                 .amortizationType(amortizationType)//
-                .graceOnArrearsAgeing(0);
+                .graceOnArrearsAging(0);
     }
 
     private RequestSpecification createRequestSpecification(String authKey) {
@@ -1381,7 +1381,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                 .maxOutstandingLoanBalance(BigDecimal.valueOf(amount)) //
                 .principal(BigDecimal.valueOf(amount)) //
                 .loanType("individual") //
-                .graceOnArrearsAgeing(0);
+                .graceOnArrearsAging(0);
         if (customizer != null) {
             customizer.accept(postLoansRequest);
         }

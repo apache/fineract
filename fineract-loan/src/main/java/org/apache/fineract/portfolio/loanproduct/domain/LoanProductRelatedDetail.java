@@ -124,8 +124,8 @@ public class LoanProductRelatedDetail {
     @Column(name = "arrearstolerance_amount", scale = 6, precision = 19)
     private BigDecimal inArrearsTolerance;
 
-    @Column(name = "grace_on_arrears_ageing")
-    private Integer graceOnArrearsAgeing;
+    @Column(name = "grace_on_arrears_aging")
+    private Integer graceOnArrearsAging;
 
     @Column(name = "days_in_month_enum", nullable = false)
     private Integer daysInMonthType;
@@ -217,7 +217,7 @@ public class LoanProductRelatedDetail {
             final Integer repaymentEvery, final PeriodFrequencyType repaymentPeriodFrequencyType, final Integer numberOfRepayments,
             final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods,
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final AmortizationMethod amortizationMethod,
-            final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing, final Integer daysInMonthType,
+            final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAging, final Integer daysInMonthType,
             final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization,
             final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
             final boolean enableAutoRepaymentForDownPayment, final LoanScheduleType loanScheduleType,
@@ -236,7 +236,7 @@ public class LoanProductRelatedDetail {
                 nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalculation,
                 repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, graceOnPrincipalPayment,
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
-                inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
+                inArrearsTolerance, graceOnArrearsAging, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment,
                 loanScheduleType, loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes,
                 chargeOffBehaviour, interestRecognitionOnDisbursementDate, daysInYearCustomStrategy, enableIncomeCapitalization,
@@ -255,7 +255,7 @@ public class LoanProductRelatedDetail {
             final Integer repayEvery, final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfRepayments,
             final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods,
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final AmortizationMethod amortizationMethod,
-            final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing, final Integer daysInMonthType,
+            final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAging, final Integer daysInMonthType,
             final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization,
             final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
             final boolean enableAutoRepaymentForDownPayment, final LoanScheduleType loanScheduleType,
@@ -290,7 +290,7 @@ public class LoanProductRelatedDetail {
         } else {
             this.inArrearsTolerance = inArrearsTolerance;
         }
-        this.graceOnArrearsAgeing = graceOnArrearsAgeing;
+        this.graceOnArrearsAging = graceOnArrearsAging;
         this.daysInMonthType = daysInMonthType;
         this.daysInYearType = daysInYearType;
         this.isInterestRecalculationEnabled = isInterestRecalculationEnabled;

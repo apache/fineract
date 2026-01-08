@@ -4048,7 +4048,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .inArrearsTolerance(10) //
                 .graceOnPrincipalPayment(1) //
                 .graceOnInterestPayment(1) //
-                .graceOnArrearsAgeing(3) //
+                .graceOnArrearsAging(3) //
                 .numberOfRepayments(6) //
                 .allowAttributeOverrides(new AllowAttributeOverrides() //
                         .amortizationType(true) //
@@ -4058,7 +4058,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         .inArrearsTolerance(true) //
                         .repaymentEvery(true) //
                         .graceOnPrincipalAndInterestPayment(true) //
-                        .graceOnArrearsAgeing(true));
+                        .graceOnArrearsAging(true));
         final PostLoanProductsResponse responseWithOverrides = createLoanProductIdempotent(loanProductsRequestWithOverrides);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_WITH_OVERRIDES, responseWithOverrides);
 
@@ -4071,7 +4071,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .inArrearsTolerance(10) //
                 .graceOnPrincipalPayment(1) //
                 .graceOnInterestPayment(1) //
-                .graceOnArrearsAgeing(3) //
+                .graceOnArrearsAging(3) //
                 .numberOfRepayments(6) //
                 .allowAttributeOverrides(new AllowAttributeOverrides() //
                         .amortizationType(false) //
@@ -4081,7 +4081,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                         .inArrearsTolerance(false) //
                         .repaymentEvery(false) //
                         .graceOnPrincipalAndInterestPayment(false) //
-                        .graceOnArrearsAgeing(false));
+                        .graceOnArrearsAging(false));
         final PostLoanProductsResponse responseNoOverrides = createLoanProductIdempotent(loanProductsRequestNoOverrides);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_NO_OVERRIDES, responseNoOverrides);
 
