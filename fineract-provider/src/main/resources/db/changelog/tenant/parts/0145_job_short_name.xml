@@ -30,6 +30,7 @@
         </addColumn>
     </changeSet>
     <changeSet author="fineract" id="2">
+        <validCheckSum>9:a995791c486d4329896d14acb83e84c3</validCheckSum>
         <update tableName="job">
             <column name="short_name" value="LA_USUM"/>
             <where>name='Update loan Summary'</where>
