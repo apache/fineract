@@ -1853,7 +1853,7 @@ public class LoanProductsRequestFactory {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAging(true))//
+                        .graceOnArrearsAgeing(true))//
                 .isEqualAmortization(false)//
                 .delinquencyBucketId(DELINQUENCY_BUCKET_ID.longValue())//
                 .enableDownPayment(false)//
