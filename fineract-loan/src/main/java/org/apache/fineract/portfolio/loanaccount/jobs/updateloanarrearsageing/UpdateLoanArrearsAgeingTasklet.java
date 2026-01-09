@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.jobs.updateloanarrearsaging;
+package org.apache.fineract.portfolio.loanaccount.jobs.updateloanarrearsageing;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,13 +27,13 @@ import org.springframework.batch.repeat.RepeatStatus;
 
 @Slf4j
 @RequiredArgsConstructor
-public class UpdateLoanArrearsAgingTasklet implements Tasklet {
+public class UpdateLoanArrearsAgeingTasklet implements Tasklet {
 
-    private final LoanArrearsAgingUpdateHandler loanArrearsAgingUpdateHandler;
+    private final LoanArrearsAgeingUpdateHandler loanArrearsAgeingUpdateHandler;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        loanArrearsAgingUpdateHandler.updateLoanArrearsAgingDetailsForAllLoans();
+        loanArrearsAgeingUpdateHandler.updateLoanArrearsAgeingDetailsForAllLoans();
         return RepeatStatus.FINISHED;
     }
 
