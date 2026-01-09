@@ -46,7 +46,7 @@ class ExternalIdFactoryTest {
     @Test
     void testProduceWithNullShouldReturnEmptyExternalId() {
         // when
-        ExternalId result = ExternalIdFactory.produce(null);
+        ExternalId result = ExternalIdFactory.produce((String) null);
 
         // then
         Assertions.assertNotNull(result);
