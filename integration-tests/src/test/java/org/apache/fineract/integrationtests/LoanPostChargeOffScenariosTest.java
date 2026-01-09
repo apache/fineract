@@ -1194,7 +1194,7 @@ public class LoanPostChargeOffScenariosTest extends BaseLoanIntegrationTest {
                 .daysInYearType(1)//
                 .daysInMonthType(1)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAging(3)//
+                .graceOnArrearsAgeing(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -1211,7 +1211,7 @@ public class LoanPostChargeOffScenariosTest extends BaseLoanIntegrationTest {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAging(true))//
+                        .graceOnArrearsAgeing(true))//
                 .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//

@@ -50,7 +50,7 @@ import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHe
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class LoanAccountArrearsAgingCOBBusinessStepTest extends BaseLoanIntegrationTest {
+public class LoanAccountArrearsAgeingCOBBusinessStepTest extends BaseLoanIntegrationTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -69,7 +69,7 @@ public class LoanAccountArrearsAgingCOBBusinessStepTest extends BaseLoanIntegrat
     }
 
     @Test
-    public void loanArrearsAgingCOBBusinessStepTest() {
+    public void loanArrearsAgeingCOBBusinessStepTest() {
         // Set Business Date
         try {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
@@ -105,7 +105,7 @@ public class LoanAccountArrearsAgingCOBBusinessStepTest extends BaseLoanIntegrat
             String loan2ExternalIdStr = UUID.randomUUID().toString();
             final Integer loanId_2 = createLoanAccount(loanOperationDate, clientId, loanProductId, loan2ExternalIdStr);
 
-            // Run Loan cob with verfying business step for Update Arrears aging details
+            // Run Loan cob with verfying business step for Update Arrears ageing details
             final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
 
             // COB Step Validation

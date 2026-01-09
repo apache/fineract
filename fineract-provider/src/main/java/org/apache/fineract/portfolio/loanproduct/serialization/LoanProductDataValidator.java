@@ -164,7 +164,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.INTEREST_RATE_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME,
             LoanProductConstants.NUMBER_OF_REPAYMENT_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME, LoanProductConstants.SHORT_NAME,
             LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME, LoanProductConstants.OUTSTANDING_LOAN_BALANCE_PARAMETER_NAME,
-            LoanProductConstants.MAX_TRANCHE_COUNT_PARAMETER_NAME, LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME,
+            LoanProductConstants.MAX_TRANCHE_COUNT_PARAMETER_NAME, LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME,
             LoanProductConstants.OVERDUE_DAYS_FOR_NPA_PARAMETER_NAME, LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME,
             LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME, LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME,
             LoanProductConstants.rescheduleStrategyMethodParameterName,
@@ -216,7 +216,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
             LoanProductConstants.interestCalculationPeriodTypeParamName, LoanProductConstants.inArrearsToleranceParamName,
             LoanProductConstants.repaymentEveryParamName, LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName,
-            LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME };
+            LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME };
     public static final String LOANPRODUCT = "loanproduct";
     public static final String OVER_APPLIED_CALCULATION_TYPE = "overAppliedCalculationType";
     public static final String OPENING_SQUARE_BRACKET = "[";
@@ -397,9 +397,9 @@ public final class LoanProductDataValidator {
         final Integer graceOnInterestCharged = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(GRACE_ON_INTEREST_CHARGED, element);
         baseDataValidator.reset().parameter(GRACE_ON_INTEREST_CHARGED).value(graceOnInterestCharged).zeroOrPositiveAmount();
 
-        final Integer graceOnArrearsAging = this.fromApiJsonHelper
-                .extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME, element);
-        baseDataValidator.reset().parameter(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME).value(graceOnArrearsAging)
+        final Integer graceOnArrearsAgeing = this.fromApiJsonHelper
+                .extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME).value(graceOnArrearsAgeing)
                 .integerZeroOrGreater();
 
         final Integer overdueDaysForNPA = this.fromApiJsonHelper
@@ -1472,10 +1472,10 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(GRACE_ON_INTEREST_CHARGED).value(graceOnInterestCharged).zeroOrPositiveAmount();
         }
 
-        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME, element)) {
-            final Integer graceOnArrearsAging = this.fromApiJsonHelper
-                    .extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME, element);
-            baseDataValidator.reset().parameter(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME).value(graceOnArrearsAging)
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element)) {
+            final Integer graceOnArrearsAgeing = this.fromApiJsonHelper
+                    .extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME).value(graceOnArrearsAgeing)
                     .integerZeroOrGreater();
         }
 

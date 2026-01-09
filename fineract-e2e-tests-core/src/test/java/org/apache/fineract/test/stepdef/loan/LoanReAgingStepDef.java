@@ -68,7 +68,7 @@ public class LoanReAgingStepDef extends AbstractStepDef {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
 
-        PostLoansLoanIdTransactionsRequest reAgingRequest = setReAgingRequestProperties(//
+        PostLoansLoanIdTransactionsRequest reAgingRequest = setReAgeingRequestProperties(//
                 LoanRequestFactory.defaultReAgingRequest(), //
                 table.row(0), //
                 table.row(1) //
@@ -84,7 +84,7 @@ public class LoanReAgingStepDef extends AbstractStepDef {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         String loanExternalId = loanResponse.getResourceExternalId();
 
-        PostLoansLoanIdTransactionsRequest reAgingRequest = setReAgingRequestProperties(//
+        PostLoansLoanIdTransactionsRequest reAgingRequest = setReAgeingRequestProperties(//
                 LoanRequestFactory.defaultReAgingRequest(), //
                 table.row(0), //
                 table.row(1) //
@@ -361,7 +361,7 @@ public class LoanReAgingStepDef extends AbstractStepDef {
         return actualValues;
     }
 
-    PostLoansLoanIdTransactionsRequest setReAgingRequestProperties(PostLoansLoanIdTransactionsRequest request, List<String> headers,
+    PostLoansLoanIdTransactionsRequest setReAgeingRequestProperties(PostLoansLoanIdTransactionsRequest request, List<String> headers,
             List<String> values) {
         for (int i = 0; i < headers.size(); i++) {
             String header = headers.get(i).toLowerCase().trim().replaceAll(" ", "");
@@ -383,7 +383,7 @@ public class LoanReAgingStepDef extends AbstractStepDef {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         String loanExternalId = loanResponse.getResourceExternalId();
 
-        PostLoansLoanIdTransactionsRequest reAgingRequest = setReAgingRequestProperties(//
+        PostLoansLoanIdTransactionsRequest reAgingRequest = setReAgeingRequestProperties(//
                 LoanRequestFactory.defaultReAgingRequest(), //
                 table.row(0), //
                 table.row(1) //
@@ -399,7 +399,7 @@ public class LoanReAgingStepDef extends AbstractStepDef {
         Assertions.assertNotNull(loanResponse);
         final long loanId = loanResponse.getLoanId();
 
-        PostLoansLoanIdTransactionsRequest reAgingRequest = setReAgingRequestProperties(//
+        PostLoansLoanIdTransactionsRequest reAgingRequest = setReAgeingRequestProperties(//
                 LoanRequestFactory.defaultReAgingRequest(), //
                 table.row(0), //
                 table.row(1) //

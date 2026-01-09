@@ -3979,7 +3979,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     @Test
-    public void testLoanScheduleWithInterestRecalculation_WITH_CURRENT_REPAYMENT_BASED_ARREARS_AGING() {
+    public void testLoanScheduleWithInterestRecalculation_WITH_CURRENT_REPAYMENT_BASED_ARREARS_AGEING() {
 
         DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
@@ -4060,7 +4060,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     @Test
-    public void testLoanScheduleWithInterestRecalculation_WITH_ORIGINAL_REPAYMENT_BASED_ARREARS_AGING() {
+    public void testLoanScheduleWithInterestRecalculation_WITH_ORIGINAL_REPAYMENT_BASED_ARREARS_AGEING() {
 
         DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
@@ -7169,7 +7169,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
         String loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(REQUEST_SPEC, RESPONSE_SPEC, loanID);
         List<String> comparisonAttributes = Arrays.asList("amortizationType", "interestType", "transactionProcessingStrategyCode",
                 "interestCalculationPeriodType", "repaymentFrequencyType", "graceOnPrincipalPayment", "graceOnInterestPayment",
-                "inArrearsTolerance", "graceOnArrearsAging");
+                "inArrearsTolerance", "graceOnArrearsAgeing");
 
         for (String comparisonAttribute : comparisonAttributes) {
             Object val1 = JsonPath.from(loanProductDetails).get(comparisonAttribute);
@@ -7186,7 +7186,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
         loanProductConfiguration.addProperty("inArrearsTolerance", bool);
         loanProductConfiguration.addProperty("repaymentEvery", bool);
         loanProductConfiguration.addProperty("graceOnPrincipalAndInterestPayment", bool);
-        loanProductConfiguration.addProperty("graceOnArrearsAging", bool);
+        loanProductConfiguration.addProperty("graceOnArrearsAgeing", bool);
         return loanProductConfiguration;
     }
 
@@ -8306,7 +8306,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
                 .daysInYearType(1)//
                 .daysInMonthType(1)//
                 .canDefineInstallmentAmount(true)//
-                .graceOnArrearsAging(3)//
+                .graceOnArrearsAgeing(3)//
                 .overdueDaysForNPA(179)//
                 .accountMovesOutOfNPAOnlyOnArrearsCompletion(false)//
                 .principalThresholdForLastInstallment(50)//
@@ -8323,7 +8323,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
                         .inArrearsTolerance(true)//
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
-                        .graceOnArrearsAging(true))//
+                        .graceOnArrearsAgeing(true))//
                 .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//

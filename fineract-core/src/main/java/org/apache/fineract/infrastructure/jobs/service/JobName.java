@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.jobs.service;
 
 public enum JobName {
 
-    UPDATE_LOAN_ARREARS_AGING("Update Loan Arrears Aging"), //
+    UPDATE_LOAN_ARREARS_AGEING("Update Loan Arrears Ageing"), //
     APPLY_ANNUAL_FEE_FOR_SAVINGS("Apply Annual Fee For Savings"), //
     APPLY_HOLIDAYS_TO_LOANS("Apply Holidays To Loans"), //
     POST_INTEREST_FOR_SAVINGS("Post Interest For Savings"), //

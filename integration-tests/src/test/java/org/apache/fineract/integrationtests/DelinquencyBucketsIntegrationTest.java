@@ -987,7 +987,7 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     @Test
-    public void testLoanClassificationUsingAgingArrears() {
+    public void testLoanClassificationUsingAgeingArrears() {
         try {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));

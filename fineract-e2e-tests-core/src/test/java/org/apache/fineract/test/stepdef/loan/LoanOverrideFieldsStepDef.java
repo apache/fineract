@@ -72,7 +72,7 @@ public class LoanOverrideFieldsStepDef extends AbstractStepDef {
             case "inArrearsTolerance" -> loanDetails.getInArrearsTolerance();
             case "graceOnPrincipalPayment" -> loanDetails.getGraceOnPrincipalPayment();
             case "graceOnInterestPayment" -> loanDetails.getGraceOnInterestPayment();
-            case "graceOnArrearsAging" -> loanDetails.getGraceOnArrearsAging();
+            case "graceOnArrearsAgeing" -> loanDetails.getGraceOnArrearsAgeing();
             default -> throw new IllegalArgumentException("Unknown override field: " + fieldName);
         };
     }
@@ -113,7 +113,7 @@ public class LoanOverrideFieldsStepDef extends AbstractStepDef {
             case "inArrearsTolerance" -> request.inArrearsTolerance(isNull ? null : new BigDecimal(value));
             case "graceOnInterestPayment" -> request.graceOnInterestPayment(isNull ? null : Integer.valueOf(value));
             case "graceOnPrincipalPayment" -> request.graceOnPrincipalPayment(isNull ? null : Integer.valueOf(value));
-            case "graceOnArrearsAging" -> request.graceOnArrearsAging(isNull ? null : Integer.valueOf(value));
+            case "graceOnArrearsAgeing" -> request.graceOnArrearsAgeing(isNull ? null : Integer.valueOf(value));
             default -> throw new IllegalArgumentException("Unknown override field: " + fieldName);
         }
     }
