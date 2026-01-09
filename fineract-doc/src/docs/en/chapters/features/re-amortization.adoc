@@ -1,0 +1,247 @@
+= Loan Re-Amortization
+
+== Overview
+
+Re-amortization recalculates EMI (Equal Monthly Installment) amounts for remaining installments based on the outstanding principal balance as of the current business date.
+
+=== Example
+
+A customer has a 1000 EUR loan with 4 monthly installments of 250 EUR each. After missing the first two payments (500 EUR overdue), re-amortization redistributes this amount across the remaining 2 installments, resulting in 500 EUR per installment instead of 250 EUR - without changing due dates or adding new installments.
+
+=== Re-Amortization vs Re-Aging
+
+[cols="1,2,2",options="header"]
+|===
+| Aspect | Re-Amortization | Re-Aging
+
+| Schedule structure
+| Preserves existing installment count and due dates
+| Creates new installments with user-defined count, start date, and frequency
+
+| User input
+| Only interest handling type
+| Start date, number of installments, period type, frequency, interest handling
+
+| Use case
+| Redistribute overdue principal across existing future installments
+| Restructure loan for customers in payment difficulty
+|===
+
+== Supported Loan Type
+
+Re-amortization is only available for:
+
+* **Progressive** loan schedule type
+* **Advanced Payment Allocation** strategy
+* For interest-bearing loans: **interest recalculation must be enabled**
+
+== Eligibility Criteria
+
+* Loan must be **active** (disbursed and not closed)
+* Transaction date must be **before or on maturity date**
+* Loan must **not** be charged-off
+* Loan must **not** be contract terminated
+* Only **one** re-amortization transaction is allowed per business day
+
+== Interest Handling Types
+
+For **interest-bearing loans**, re-amortization supports three strategies:
+
+[cols="1,3",options="header"]
+|===
+| Type | Description
+
+| `DEFAULT`
+| Standard behavior - outstanding principal is redistributed across remaining installments
+
+| `EQUAL_AMORTIZATION_INTEREST_SPLIT`
+| Outstanding principal and interest are split equally across remaining installments
+|===
+
+== Business Events
+
+* `LoanReAmortizeBusinessEvent` - triggered after re-amortization
+* `LoanReAmortizeTransactionBusinessEvent` - triggered for the transaction
+* `LoanUndoReAmortizeBusinessEvent` - triggered after undo operation
+* `LoanUndoReAmortizeTransactionBusinessEvent` - triggered for undo transaction
+
+== Permissions
+
+* `REAMORTIZE_LOAN` - required to apply re-amortization
+* `UNDO_REAMORTIZE_LOAN` - required to undo re-amortization
+
+== API Endpoints
+
+=== Apply Re-Amortization
+
+* *Endpoint*: `POST /loans/{loanId}/transactions?command=reAmortize`
+* *Alternative*: `POST /loans/external-id/{loanExternalId}/transactions?command=reAmortize`
+
+==== Request Body
+
+[source,json]
+----
+{
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "externalId": "ext-123",
+    "reAmortizationInterestHandling": "DEFAULT",
+    "reasonCodeValueId": 1
+}
+----
+
+[cols="2,1,4",options="header"]
+|===
+| Parameter | Required | Description
+
+| `locale`
+| Yes
+| Locale for parsing
+
+| `dateFormat`
+| Yes
+| Date format pattern
+
+| `externalId`
+| No
+| External identifier for the transaction (max 100 chars)
+
+| `reAmortizationInterestHandling`
+| No
+| Interest handling type: `DEFAULT` or `EQUAL_AMORTIZATION_INTEREST_SPLIT`. Defaults to `DEFAULT`
+
+| `reasonCodeValueId`
+| No
+| Code value ID for re-amortization reason (from `ReamortizationReasons` code)
+|===
+
+==== Response Body
+
+[source,json]
+----
+{
+    "officeId": 1,
+    "clientId": 1,
+    "loanId": 1,
+    "resourceId": 15,
+    "resourceExternalId": "ext-123",
+    "changes": {
+        "locale": "en",
+        "dateFormat": "dd MMMM yyyy"
+    }
+}
+----
+
+=== Undo Re-Amortization
+
+* *Endpoint*: `POST /loans/{loanId}/transactions?command=undoReAmortize`
+* *Alternative*: `POST /loans/external-id/{loanExternalId}/transactions?command=undoReAmortize`
+
+==== Request Body
+
+[source,json]
+----
+{
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "externalId": "reversal-ext-123"
+}
+----
+
+==== Response Body
+
+[source,json]
+----
+{
+    "officeId": 1,
+    "clientId": 1,
+    "loanId": 1,
+    "resourceId": 15,
+    "resourceExternalId": "ext-123",
+    "changes": {
+        "locale": "en",
+        "dateFormat": "dd MMMM yyyy"
+    }
+}
+----
+
+=== Preview Re-Amortization
+
+Generates a preview of the re-amortized schedule without modifying the loan.
+
+* *Endpoint*: `GET /loans/{loanId}/transactions/reamortization-preview`
+* *Alternative*: `GET /loans/external-id/{loanExternalId}/transactions/reamortization-preview`
+
+==== Query Parameters
+
+[cols="2,1,4",options="header"]
+|===
+| Parameter | Required | Description
+
+| `reAmortizationInterestHandling`
+| Yes
+| Interest handling type: `DEFAULT` or `EQUAL_AMORTIZATION_INTEREST_SPLIT`
+|===
+
+==== Response Body
+
+Returns the projected loan schedule with recalculated installments:
+
+[source,json]
+----
+{
+    "currency": {
+        "code": "USD",
+        "decimalPlaces": 2
+    },
+    "loanTermInDays": 60,
+    "totalPrincipalDisbursed": 1000.00,
+    "totalPrincipalExpected": 1000.00,
+    "totalInterestCharged": 50.00,
+    "totalFeeChargesCharged": 0.00,
+    "totalRepaymentExpected": 1050.00,
+    "periods": [
+        {
+            "period": 1,
+            "dueDate": "01 February 2023",
+            "principalDue": 500.00,
+            "interestDue": 25.00,
+            "totalDueForPeriod": 525.00
+        },
+        {
+            "period": 2,
+            "dueDate": "01 March 2023",
+            "principalDue": 500.00,
+            "interestDue": 25.00,
+            "totalDueForPeriod": 525.00
+        }
+    ]
+}
+----
+
+=== Transaction Template
+
+* *Endpoint*: `GET /loans/{loanId}/transactions/template?command=reAmortization`
+
+== Behavior
+
+Installments excluded from redistribution:
+
+* Down-payment installments
+* Re-aged installments
+* Additional (N+1) installments
+
+Outstanding principal from installments with due date ≤ transaction date is redistributed equally across future installments.
+
+== Implementation Notes
+
+Creates a `REAMORTIZE` transaction with:
+
+* `transactionDate` = current business date
+* `amount` = outstanding principal until transaction date
+* `principalPortion` = outstanding principal
+* `interestPortion` = 0
+* `feeChargesPortion` = 0
+* `penaltyChargesPortion` = 0
+
+Non-monetary transaction - no GL entries created.
