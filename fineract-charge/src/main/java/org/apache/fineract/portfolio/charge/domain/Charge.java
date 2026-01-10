@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -66,34 +68,41 @@ public class Charge extends AbstractPersistableCustom<Long> {
     public static final String LOCALE_PARAM_NAME = "locale";
     public static final String FEE_FREQUENCY_PARAM_NAME = "feeFrequency";
 
+    @Getter
     @Column(name = "name", length = 100)
     private String name;
 
+    @Getter
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
 
+    @Getter
     @Column(name = "currency_code", length = 3)
     private String currencyCode;
 
     @Column(name = "charge_applies_to_enum", nullable = false)
     private Integer chargeAppliesTo;
 
+    @Getter
     @Column(name = "charge_time_enum", nullable = false)
     private Integer chargeTimeType;
 
+    @Getter
     @Column(name = "charge_calculation_enum")
     private Integer chargeCalculation;
 
-    @Column(name = "charge_payment_mode_enum", nullable = true)
+    @Getter
+    @Column(name = "charge_payment_mode_enum")
     private Integer chargePaymentMode;
 
-    @Column(name = "fee_on_day", nullable = true)
+    @Column(name = "fee_on_day")
     private Integer feeOnDay;
 
-    @Column(name = "fee_interval", nullable = true)
+    @Getter
+    @Column(name = "fee_interval")
     private Integer feeInterval;
 
-    @Column(name = "fee_on_month", nullable = true)
+    @Column(name = "fee_on_month")
     private Integer feeOnMonth;
 
     @Column(name = "is_penalty", nullable = false)
@@ -105,10 +114,12 @@ public class Charge extends AbstractPersistableCustom<Long> {
     @Column(name = "is_deleted", nullable = false)
     private boolean deleted = false;
 
-    @Column(name = "min_cap", scale = 6, precision = 19, nullable = true)
+    @Getter
+    @Column(name = "min_cap", scale = 6, precision = 19)
     private BigDecimal minCap;
 
-    @Column(name = "max_cap", scale = 6, precision = 19, nullable = true)
+    @Getter
+    @Column(name = "max_cap", scale = 6, precision = 19)
     private BigDecimal maxCap;
 
     @Column(name = "fee_frequency", nullable = true)
@@ -117,26 +128,35 @@ public class Charge extends AbstractPersistableCustom<Long> {
     @Column(name = "is_free_withdrawal", nullable = false)
     private boolean enableFreeWithdrawal;
 
-    @Column(name = "free_withdrawal_charge_frequency", nullable = true)
+    @Column(name = "free_withdrawal_charge_frequency")
     private Integer freeWithdrawalFrequency;
 
-    @Column(name = "restart_frequency", nullable = true)
+    @Getter
+    @Column(name = "restart_frequency")
     private Integer restartFrequency;
 
-    @Column(name = "restart_frequency_enum", nullable = true)
+    @Getter
+    @Column(name = "restart_frequency_enum")
     private Integer restartFrequencyEnum;
 
+    @Getter
     @Column(name = "is_payment_type", nullable = false)
     private boolean enablePaymentType;
 
+    @Setter
+    @Getter
     @ManyToOne
     @JoinColumn(name = "payment_type_id", nullable = false)
     private PaymentType paymentType;
 
+    @Getter
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "income_or_liability_account_id")
     private GLAccount account;
 
+    @Getter
+    @Setter
     @ManyToOne
     @JoinColumn(name = "tax_group_id")
     private TaxGroup taxGroup;
@@ -245,12 +265,9 @@ public class Charge extends AbstractPersistableCustom<Long> {
                 this.restartFrequencyEnum = restartFrequencyEnum.getValue();
             }
 
-            if (enablePaymentType) {
-                if (paymentType != null) {
-
-                    this.enablePaymentType = true;
-                    this.paymentType = paymentType;
-                }
+            if (enablePaymentType && paymentType != null) {
+                this.enablePaymentType = true;
+                this.paymentType = paymentType;
             }
 
         } else if (isLoanCharge()) {
@@ -277,26 +294,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
-
-    public String getCurrencyCode() {
-        return this.currencyCode;
-    }
-
-    public Integer getChargeTimeType() {
-        return this.chargeTimeType;
-    }
-
-    public Integer getChargeCalculation() {
-        return this.chargeCalculation;
     }
 
     public boolean isActive() {
@@ -351,14 +348,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
         return ChargeCalculationType.fromInt(this.chargeCalculation).isPercentageOfDisbursementAmount();
     }
 
-    public BigDecimal getMinCap() {
-        return this.minCap;
-    }
-
-    public BigDecimal getMaxCap() {
-        return this.maxCap;
-    }
-
     public boolean isEnableFreeWithdrawal() {
         return this.enableFreeWithdrawal;
     }
@@ -369,22 +358,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
 
     public Integer getFrequencyFreeWithdrawalCharge() {
         return this.freeWithdrawalFrequency;
-    }
-
-    public Integer getRestartFrequency() {
-        return this.restartFrequency;
-    }
-
-    public Integer getRestartFrequencyEnum() {
-        return this.restartFrequencyEnum;
-    }
-
-    public PaymentType getPaymentType() {
-        return this.paymentType;
-    }
-
-    public void setPaymentType(PaymentType paymentType) {
-        this.paymentType = paymentType;
     }
 
     private Long getPaymentTypeId() {
@@ -450,11 +423,9 @@ public class Charge extends AbstractPersistableCustom<Long> {
                     baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(this.chargeTimeType)
                             .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
                 }
-            } else if (isClientCharge()) {
-                if (!isAllowedLoanChargeTime()) {
-                    baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(this.chargeTimeType)
-                            .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.client");
-                }
+            } else if (isClientCharge() && !isAllowedLoanChargeTime()) {
+                baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(this.chargeTimeType)
+                        .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.client");
             }
         }
 
@@ -647,7 +618,7 @@ public class Charge extends AbstractPersistableCustom<Long> {
     }
 
     /**
-     * Delete is a <i>soft delete</i>. Updates flag on charge so it wont appear in query/report results.
+     * Delete is a <i>soft delete</i>. Updates flag on charge so it won't appear in query/report results.
      *
      * Any fields with unique constraints and prepended with id of record.
      */
@@ -690,14 +661,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
 
     }
 
-    public Integer getChargePaymentMode() {
-        return this.chargePaymentMode;
-    }
-
-    public Integer getFeeInterval() {
-        return this.feeInterval;
-    }
-
     public boolean isMonthlyFee() {
         return ChargeTimeType.fromInt(this.chargeTimeType).isMonthlyFee();
     }
@@ -726,14 +689,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
         return this.feeFrequency;
     }
 
-    public GLAccount getAccount() {
-        return this.account;
-    }
-
-    public void setAccount(GLAccount account) {
-        this.account = account;
-    }
-
     public Long getIncomeAccountId() {
         Long incomeAccountId = null;
         if (this.account != null) {
@@ -753,14 +708,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
     public boolean isDisbursementCharge() {
         return ChargeTimeType.fromInt(this.chargeTimeType).equals(ChargeTimeType.DISBURSEMENT)
                 || ChargeTimeType.fromInt(this.chargeTimeType).equals(ChargeTimeType.TRANCHE_DISBURSEMENT);
-    }
-
-    public TaxGroup getTaxGroup() {
-        return this.taxGroup;
-    }
-
-    public void setTaxGroup(TaxGroup taxGroup) {
-        this.taxGroup = taxGroup;
     }
 
     @Override

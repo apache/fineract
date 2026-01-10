@@ -79,7 +79,7 @@ public class FineractErrorDecoder implements ErrorDecoder {
 
     private String extractValidationErrors(JsonNode rootNode) {
         JsonNode errorsNode = rootNode.get("errors");
-        if (errorsNode != null && errorsNode.isArray() && errorsNode.size() > 0) {
+        if (errorsNode != null && errorsNode.isArray() && !errorsNode.isEmpty()) {
             StringBuilder errors = new StringBuilder("Validation errors: ");
             for (JsonNode error : errorsNode) {
                 String parameterName = extractField(error, "parameterName");

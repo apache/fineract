@@ -141,12 +141,10 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
 
             // If the Loan is not Active yet or is cancelled (rejected or withdrawn), return template data
             if (loan.isSubmittedAndPendingApproval() || loan.isApproved() || loan.isCancelled()) {
-                if (loan.getLoanProduct() != null && !loan.getLoanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
-                    return collectionData;
-                } else {
+                if (loan.getLoanProduct() == null || loan.getLoanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
                     collectionData.setAvailableDisbursementAmountWithOverApplied(calculateAvailableDisbursementAmountWithOverApplied(loan));
-                    return collectionData;
                 }
+                return collectionData;
             }
 
             final List<LoanDelinquencyAction> savedDelinquencyList = retrieveLoanDelinquencyActions(loanId);

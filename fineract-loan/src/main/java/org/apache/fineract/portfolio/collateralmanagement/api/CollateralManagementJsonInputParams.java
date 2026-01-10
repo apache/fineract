@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.collateralmanagement.api;
 
+import lombok.Getter;
+
+@Getter
 public enum CollateralManagementJsonInputParams {
 
     NAME("name"), //
@@ -39,11 +42,7 @@ public enum CollateralManagementJsonInputParams {
 
     @Override
     public String toString() {
-        return name().replaceAll("_", " ");
-    }
-
-    public String getValue() {
-        return this.value;
+        return name().replace("_", " ");
     }
 
 }

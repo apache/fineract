@@ -60,8 +60,7 @@ public final class ApiResponseDecoder implements Decoder {
     }
 
     private boolean isApiResponseType(Type type) {
-        if (type instanceof ParameterizedType) {
-            ParameterizedType paramType = (ParameterizedType) type;
+        if (type instanceof ParameterizedType paramType) {
             Type rawType = paramType.getRawType();
             return rawType == ApiResponse.class;
         }
@@ -69,8 +68,7 @@ public final class ApiResponseDecoder implements Decoder {
     }
 
     private Type getApiResponseInnerType(Type type) {
-        if (type instanceof ParameterizedType) {
-            ParameterizedType paramType = (ParameterizedType) type;
+        if (type instanceof ParameterizedType paramType) {
             Type[] typeArgs = paramType.getActualTypeArguments();
             if (typeArgs.length > 0) {
                 return typeArgs[0];

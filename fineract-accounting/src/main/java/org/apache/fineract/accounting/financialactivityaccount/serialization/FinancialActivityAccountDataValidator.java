@@ -72,8 +72,7 @@ public final class FinancialActivityAccountDataValidator {
     }
 
     private DataValidatorBuilder getDataValidator(final List<ApiParameterError> dataValidationErrors) {
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("financialactivityaccount");
-        return baseDataValidator;
+        return new DataValidatorBuilder(dataValidationErrors).resource("financialactivityaccount");
     }
 
     public void validateForUpdate(final String json) {

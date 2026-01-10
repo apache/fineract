@@ -77,21 +77,13 @@ public interface ImagesApi {
         }
         String ext = fileName.substring(dotPos + 1).toLowerCase();
 
-        switch (ext) {
-            case "jpg":
-            case "jpeg":
-                return "image/jpeg";
-            case "png":
-                return "image/png";
-            case "gif":
-                return "image/gif";
-            case "tif":
-            case "tiff":
-                return "image/tiff";
-            case "pdf":
-                return "application/pdf";
-            default:
-                return "application/octet-stream";
-        }
+        return switch (ext) {
+            case "jpg", "jpeg" -> "image/jpeg";
+            case "png" -> "image/png";
+            case "gif" -> "image/gif";
+            case "tif", "tiff" -> "image/tiff";
+            case "pdf" -> "application/pdf";
+            default -> "application/octet-stream";
+        };
     }
 }

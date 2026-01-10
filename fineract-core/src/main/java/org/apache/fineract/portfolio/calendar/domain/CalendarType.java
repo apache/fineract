@@ -20,7 +20,9 @@ package org.apache.fineract.portfolio.calendar.domain;
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
 
+@Getter
 public enum CalendarType {
 
     COLLECTION(1, "calendarType.collection"), //
@@ -36,16 +38,10 @@ public enum CalendarType {
         this.code = code;
     }
 
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
     private static final Map<Integer, CalendarType> intToEnumMap = new HashMap<>();
+    @Getter
     private static int minValue;
+    @Getter
     private static int maxValue;
 
     static {
@@ -66,21 +62,12 @@ public enum CalendarType {
     }
 
     public static CalendarType fromInt(final int i) {
-        final CalendarType type = intToEnumMap.get(Integer.valueOf(i));
-        return type;
-    }
-
-    public static int getMinValue() {
-        return minValue;
-    }
-
-    public static int getMaxValue() {
-        return maxValue;
+        return intToEnumMap.get(i);
     }
 
     @Override
     public String toString() {
-        return name().toString();
+        return name();
     }
 
     public boolean isCollection() {

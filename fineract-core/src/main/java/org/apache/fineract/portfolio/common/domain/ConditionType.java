@@ -57,7 +57,7 @@ public enum ConditionType {
 
     @Override
     public String toString() {
-        return name().toString().replace("_", " ");
+        return name().replace("_", " ");
     }
 
     public Integer getValue() {

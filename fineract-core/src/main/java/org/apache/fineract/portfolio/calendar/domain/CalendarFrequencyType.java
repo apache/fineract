@@ -20,9 +20,11 @@ package org.apache.fineract.portfolio.calendar.domain;
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.springframework.util.StringUtils;
 
+@Getter
 public enum CalendarFrequencyType {
 
     INVALID(0, "calendarFrequencyType.invalid"), //
@@ -39,16 +41,10 @@ public enum CalendarFrequencyType {
         this.code = code;
     }
 
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
     private static final Map<Integer, CalendarFrequencyType> intToEnumMap = new HashMap<>();
+    @Getter
     private static int minValue = CalendarFrequencyType.DAILY.value;
+    @Getter
     private static int maxValue = CalendarFrequencyType.YEARLY.value;
 
     static {
@@ -58,8 +54,7 @@ public enum CalendarFrequencyType {
     }
 
     public static CalendarFrequencyType fromInt(final int i) {
-        final CalendarFrequencyType type = intToEnumMap.get(Integer.valueOf(i));
-        return type;
+        return intToEnumMap.get(i);
     }
 
     public static CalendarFrequencyType fromString(final String frequencyString) {
@@ -82,17 +77,9 @@ public enum CalendarFrequencyType {
         return frequency;
     }
 
-    public static int getMinValue() {
-        return minValue;
-    }
-
-    public static int getMaxValue() {
-        return maxValue;
-    }
-
     @Override
     public String toString() {
-        return name().toString();
+        return name();
     }
 
     public boolean isWeekly() {
@@ -115,18 +102,13 @@ public enum CalendarFrequencyType {
      * @return CalendarFrequencyType
      */
     public static CalendarFrequencyType from(final PeriodFrequencyType periodFrequencyType) {
-        switch (periodFrequencyType) {
-            case DAYS:
-                return CalendarFrequencyType.DAILY;
-            case WEEKS:
-                return CalendarFrequencyType.WEEKLY;
-            case MONTHS:
-                return CalendarFrequencyType.MONTHLY;
-            case YEARS:
-                return CalendarFrequencyType.YEARLY;
-            default:
-                return CalendarFrequencyType.INVALID;
-        }
+        return switch (periodFrequencyType) {
+            case DAYS -> CalendarFrequencyType.DAILY;
+            case WEEKS -> CalendarFrequencyType.WEEKLY;
+            case MONTHS -> CalendarFrequencyType.MONTHLY;
+            case YEARS -> CalendarFrequencyType.YEARLY;
+            default -> CalendarFrequencyType.INVALID;
+        };
     }
 
     /**
@@ -136,17 +118,12 @@ public enum CalendarFrequencyType {
      * @return
      */
     public static PeriodFrequencyType from(final CalendarFrequencyType frequencyType) {
-        switch (frequencyType) {
-            case DAILY:
-                return PeriodFrequencyType.DAYS;
-            case WEEKLY:
-                return PeriodFrequencyType.WEEKS;
-            case MONTHLY:
-                return PeriodFrequencyType.MONTHS;
-            case YEARLY:
-                return PeriodFrequencyType.YEARS;
-            default:
-                return PeriodFrequencyType.INVALID;
-        }
+        return switch (frequencyType) {
+            case DAILY -> PeriodFrequencyType.DAYS;
+            case WEEKLY -> PeriodFrequencyType.WEEKS;
+            case MONTHLY -> PeriodFrequencyType.MONTHS;
+            case YEARLY -> PeriodFrequencyType.YEARS;
+            default -> PeriodFrequencyType.INVALID;
+        };
     }
 }

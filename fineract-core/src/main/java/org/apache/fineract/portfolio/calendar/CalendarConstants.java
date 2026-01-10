@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.calendar;
 
 import java.util.HashSet;
 import java.util.Set;
+import lombok.Getter;
 
 public final class CalendarConstants {
 
@@ -29,6 +30,7 @@ public final class CalendarConstants {
 
     public static final String CALENDAR_RESOURCE_NAME = "calendar";
 
+    @Getter
     public enum CalendarSupportedParameters {
 
         CALENDAR_ID("id"), //
@@ -80,12 +82,9 @@ public final class CalendarConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replace("_", " ");
         }
 
-        public String getValue() {
-            return this.value;
-        }
     }
 
 }
