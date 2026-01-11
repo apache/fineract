@@ -24,6 +24,9 @@ public class AccountOfficer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String staffId;
+
     @Column(nullable = false, unique = true)
     private String code;
 

@@ -31,3 +31,7 @@ rabbit:
       name: audit.accounting.queue
     routing:
       key: audit.accounting
+
+fineract:
+  base:
+    url: http://localhost:8443/fineract-provider

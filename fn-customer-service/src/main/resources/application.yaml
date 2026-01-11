@@ -29,3 +29,7 @@ customer:
     routing:
       created: customer.created
       bvnVerified: customer.bvn.verified
+
+
+fineract:
+  base-url: http://localhost:8443/fineract-provider

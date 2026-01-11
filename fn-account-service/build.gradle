@@ -9,7 +9,7 @@ version = '0.0.1-SNAPSHOT'
 description = 'An Account Service for the Waya Bank Micro Services'
 
 ext {
-	set('springCloudVersion', "2024.0.0")
+	set('springCloudVersion', "2025.0.0")
 }
 
 java {
