@@ -5101,9 +5101,8 @@ Feature: LoanReAmortization
     When Loan Pay-off is made on "02 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @Skip
   @TestRailId:C4510 @AdvancedPaymentAllocation
-  Scenario: Verify allowing re-amortization on same day as disbursement - interest bearing loan with default interest handling - UC5.1
+  Scenario: Verify re-amortization on same day as disbursement is rejected when no overdue exists - interest bearing loan with default interest handling - UC5.1
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin set "LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -5127,31 +5126,14 @@ Feature: LoanReAmortization
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-#  --- re-amortization transaction --- 500 error!!
-    And Admin creates a Loan re-amortization transaction on current business date
-    Then Loan Repayment schedule has 6 periods, with the following data for periods:
-      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
-      |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
-      | 1  | 31   | 01 February 2024 |           | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 2  | 29   | 01 March 2024    |           | 67.05           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 3  | 31   | 01 April 2024    |           | 50.43           | 16.62         | 0.39     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 4  | 30   | 01 May 2024      |           | 33.71           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 5  | 31   | 01 June 2024     |           | 16.9            | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 6  | 30   | 01 July 2024     |           | 0.0             | 16.9          | 0.1      | 0.0  | 0.0       | 17.0  | 0.0  | 0.0        | 0.0  | 17.0        |
-    Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
-      | 100.0         | 2.05     | 0.0  | 0.0       | 102.05 | 0.0  | 0.0        | 0.0  | 102.05      |
-    Then Loan Transactions tab has the following data:
-      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
-      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
-      | 15 March 2024    | Re-amortize      | 17.01  | 16.52     | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
+#  --- re-amortization transaction - fails with 403 because no overdue installments exist on disbursement day ---
+    And Admin creates a Loan re-amortization transaction on current business date but fails with 403 error
 # --- close the loan --- #
     When Loan Pay-off is made on "01 January 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @Skip
   @TestRailId:C4511 @AdvancedPaymentAllocation
-  Scenario: Verify allowing re-amortization on same day as disbursement - interest bearing loan with equal amortization + interest split - UC5.2
+  Scenario: Verify re-amortization on same day as disbursement is rejected when no overdue exists - interest bearing loan with equal amortization + interest split - UC5.2
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin set "LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -5175,24 +5157,8 @@ Feature: LoanReAmortization
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
-# --- re-amortization transaction --- 500 error!!
-    And Admin creates a Loan re-amortization transaction on current business date with reAmortizationInterestHandling "EQUAL_AMORTIZATION_INTEREST_SPLIT"
-    Then Loan Repayment schedule has 6 periods, with the following data for periods:
-      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
-      |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
-      | 1  | 31   | 01 February 2024 |           | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 2  | 29   | 01 March 2024    |           | 67.05           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 3  | 31   | 01 April 2024    |           | 50.43           | 16.62         | 0.39     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 4  | 30   | 01 May 2024      |           | 33.71           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 5  | 31   | 01 June 2024     |           | 16.9            | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 6  | 30   | 01 July 2024     |           | 0.0             | 16.9          | 0.1      | 0.0  | 0.0       | 17.0  | 0.0  | 0.0        | 0.0  | 17.0        |
-    Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
-      | 100.0         | 2.05     | 0.0  | 0.0       | 102.05 | 0.0  | 0.0        | 0.0  | 102.05      |
-    Then Loan Transactions tab has the following data:
-      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
-      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
-      | 15 March 2024    | Re-amortize      | 17.01  | 16.52     | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
+# --- re-amortization transaction - fails with 403 because no overdue installments exist on disbursement day ---
+    And Admin creates a Loan re-amortization transaction on current business date with reAmortizationInterestHandling "EQUAL_AMORTIZATION_INTEREST_SPLIT" but fails with 403 error
 # --- close the loan --- #
     When Loan Pay-off is made on "01 January 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
