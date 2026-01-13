@@ -600,6 +600,7 @@ public class FineractProperties {
 
         private FineractInvestorModuleProperties investor;
         private FineractSelfServiceModuleProperties selfService;
+        private FineractLoanOriginationModuleProperties loanOrigination;
     }
 
     @Getter
@@ -611,6 +612,12 @@ public class FineractProperties {
     @Getter
     @Setter
     public static class FineractSelfServiceModuleProperties extends AbstractFineractModuleProperties {
+
+    }
+
+    @Getter
+    @Setter
+    public static class FineractLoanOriginationModuleProperties extends AbstractFineractModuleProperties {
 
     }
 

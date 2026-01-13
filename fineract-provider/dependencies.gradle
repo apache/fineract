@@ -39,6 +39,7 @@ dependencies {
     implementation(project(path: ':fineract-progressive-loan'))
     implementation(project(path: ':fineract-report'))
     implementation(project(path: ':fineract-tax'))
+    implementation(project(path: ':fineract-loan-origination'))
 
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 

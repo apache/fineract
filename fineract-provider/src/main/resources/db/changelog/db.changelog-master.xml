@@ -37,6 +37,7 @@
     <include file="db/changelog/tenant/module/savings/parts/module-changelog-master.xml" context="tenant_db AND !initial_switch"/>
     <includeAll path="db/custom-changelog" errorIfMissingOrEmpty="false" context="tenant_db AND !initial_switch AND custom_changelog"/>
     <include file="/db/changelog/tenant/module/progressiveloan/module-changelog-master.xml" context="tenant_db AND !initial_switch"/>
+    <include file="db/changelog/tenant/module/loanorigination/module-changelog-master.xml" context="tenant_db AND !initial_switch"/>
     <!-- Scripts to run after the modules were initialized  -->
     <include file="tenant/final-changelog-tenant.xml" relativeToChangelogFile="true" context="tenant_db AND !initial_switch"/>
 </databaseChangeLog>
