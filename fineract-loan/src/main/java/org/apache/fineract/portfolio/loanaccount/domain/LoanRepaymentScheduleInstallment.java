@@ -1147,7 +1147,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     public void copyFrom(final LoanRepaymentScheduleInstallment installment) {
-        if (nonNullAndEqual(getId(), installment.getId())) {
+        if (installment == this || nonNullAndEqual(getId(), installment.getId())) {
             return;
         }
         // Reset balances
