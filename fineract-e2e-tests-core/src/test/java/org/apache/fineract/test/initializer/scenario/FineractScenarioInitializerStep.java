@@ -21,4 +21,6 @@ package org.apache.fineract.test.initializer.scenario;
 public interface FineractScenarioInitializerStep {
 
     void initializeForScenario() throws Exception;
+
+    void resetAfterScenario();
 }
