@@ -3439,7 +3439,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     /**
      * Reverse only disbursement, accruals, and repayments at disbursal transactions
      */
-    public void reverseExistingTransactionsTillLastDisbursal(Loan loan, final LoanTransaction lastDisbursalTransaction) {
+    private void reverseExistingTransactionsTillLastDisbursal(Loan loan, final LoanTransaction lastDisbursalTransaction) {
         LoanCharge chargeToDeactivate = null;
 
         for (final LoanCharge charge : loan.getCharges()) {

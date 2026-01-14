@@ -1090,7 +1090,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         updateLoanCompoundingDetails(period.getLoanCompoundingDetails());
         getInstallmentCharges().clear();
         getPostDatedChecks().clear();
-        getLoanTransactionToRepaymentScheduleMappings().clear();
         // Update fields
         setFromDate(period.periodFromDate());
         setDueDate(period.periodDueDate());
