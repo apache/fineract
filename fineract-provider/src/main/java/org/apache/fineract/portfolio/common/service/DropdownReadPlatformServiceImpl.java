@@ -45,7 +45,7 @@ public class DropdownReadPlatformServiceImpl implements DropdownReadPlatformServ
     @Override
     public List<EnumOptionData> retrieveConditionTypeOptions() {
         return Arrays.asList(conditionType(ConditionType.EQUAL, "condition"), conditionType(ConditionType.NOT_EQUAL, "condition"),
-                conditionType(ConditionType.GRETERTHAN, "condition"), conditionType(ConditionType.LESSTHAN, "condition"));
+                conditionType(ConditionType.GREATERTHAN, "condition"), conditionType(ConditionType.LESSTHAN, "condition"));
     }
 
     @Override

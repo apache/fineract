@@ -58,7 +58,7 @@ public interface ILoanConfigurationDetails {
 
     AmortizationMethod getAmortizationMethod();
 
-    Integer getGraceOnArrearsAging();
+    Integer getGraceOnArrearsAgeing();
 
     Integer getDaysInMonthType();
 
@@ -73,4 +73,6 @@ public interface ILoanConfigurationDetails {
     RecalculationFrequencyType getRestFrequencyType();
 
     LoanPreCloseInterestCalculationStrategy getPreCloseInterestCalculationStrategy();
+
+    boolean isAllowFullTermForTranche();
 }

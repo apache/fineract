@@ -35,5 +35,6 @@ public record LoanRepaymentScheduleModelData(@NotNull LocalDate scheduleGenerati
         @NotNull boolean downPaymentEnabled, @NotNull DaysInMonthType daysInMonth, @NotNull DaysInYearType daysInYear,
         BigDecimal downPaymentPercentage, Integer installmentAmountInMultiplesOf, Integer fixedLength,
         @NotNull Boolean interestRecognitionOnDisbursementDate, @Nullable DaysInYearCustomStrategyType daysInYearCustomStrategy,
-        @NotNull InterestMethod interestMethod, @NotNull boolean allowPartialPeriodInterestCalculation) {
+        @NotNull InterestMethod interestMethod, @NotNull boolean allowPartialPeriodInterestCalculation,
+        @NotNull boolean allowFullTermForTranche) {
 }

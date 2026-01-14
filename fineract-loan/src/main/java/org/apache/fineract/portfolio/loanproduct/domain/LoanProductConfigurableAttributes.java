@@ -58,14 +58,14 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
     @Column(name = "moratorium")
     private Boolean graceOnPrincipalAndInterestPayment;
 
-    @Column(name = "grace_on_arrears_aging")
-    private Boolean graceOnArrearsAging;
+    @Column(name = "grace_on_arrears_ageing")
+    private Boolean graceOnArrearsAgeing;
 
     private static final String[] supportedLoanConfigurableAttributes = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
             LoanProductConstants.interestCalculationPeriodTypeParamName, LoanProductConstants.inArrearsToleranceParamName,
             LoanProductConstants.repaymentEveryParamName, LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName,
-            LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME };
+            LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME };
 
     public static LoanProductConfigurableAttributes createFrom(JsonCommand command) {
 
@@ -92,7 +92,7 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
                 .getAsJsonPrimitive(LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName).getAsBoolean();
         final Boolean graceOnArrearsAging = command.parsedJson().getAsJsonObject()
                 .getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
-                .getAsJsonPrimitive(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME).getAsBoolean();
+                .getAsJsonPrimitive(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME).getAsBoolean();
 
         return new LoanProductConfigurableAttributes(amortization, interestMethod, transactionProcessingStrategy, interestCalcPeriod,
                 arrearsTolerance, repaymentEvery, graceOnPrincipalAndInterestPayment, graceOnArrearsAging);
@@ -122,7 +122,7 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
         this.amortizationType = amortization;
         this.interestType = interestMethod;
         this.inArrearsTolerance = arrearsTolerance;
-        this.graceOnArrearsAging = graceOnArrearsAging;
+        this.graceOnArrearsAgeing = graceOnArrearsAging;
         this.interestCalculationPeriodType = interestCalcPeriod;
         this.graceOnPrincipalAndInterestPayment = graceOnPrincipalAndInterestPayment;
         this.repaymentEvery = repaymentEvery;
@@ -170,7 +170,7 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
     }
 
     public Boolean getGraceOnArrearsAgingBoolean() {
-        return graceOnArrearsAging;
+        return graceOnArrearsAgeing;
     }
 
     public void setLoanProduct(LoanProduct loanProduct) {
@@ -205,8 +205,8 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
         this.graceOnPrincipalAndInterestPayment = graceOnPrincipalAndInterestPayment;
     }
 
-    public void setGraceOnArrearsAging(Boolean graceOnArrearsAging) {
-        this.graceOnArrearsAging = graceOnArrearsAging;
+    public void setGraceOnArrearsAgeing(Boolean graceOnArrearsAgeing) {
+        this.graceOnArrearsAgeing = graceOnArrearsAgeing;
     }
 
     @Override
@@ -227,12 +227,12 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
                 && Objects.equals(interestCalculationPeriodType, that.interestCalculationPeriodType)
                 && Objects.equals(inArrearsTolerance, that.inArrearsTolerance) && Objects.equals(repaymentEvery, that.repaymentEvery)
                 && Objects.equals(graceOnPrincipalAndInterestPayment, that.graceOnPrincipalAndInterestPayment)
-                && Objects.equals(graceOnArrearsAging, that.graceOnArrearsAging);
+                && Objects.equals(graceOnArrearsAgeing, that.graceOnArrearsAgeing);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(loanProduct, amortizationType, interestType, transactionProcessingStrategyCode, interestCalculationPeriodType,
-                inArrearsTolerance, repaymentEvery, graceOnPrincipalAndInterestPayment, graceOnArrearsAging);
+                inArrearsTolerance, repaymentEvery, graceOnPrincipalAndInterestPayment, graceOnArrearsAgeing);
     }
 }

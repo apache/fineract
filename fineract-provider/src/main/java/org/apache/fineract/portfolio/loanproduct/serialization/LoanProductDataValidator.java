@@ -164,7 +164,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.INTEREST_RATE_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME,
             LoanProductConstants.NUMBER_OF_REPAYMENT_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME, LoanProductConstants.SHORT_NAME,
             LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME, LoanProductConstants.OUTSTANDING_LOAN_BALANCE_PARAMETER_NAME,
-            LoanProductConstants.MAX_TRANCHE_COUNT_PARAMETER_NAME, LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME,
+            LoanProductConstants.MAX_TRANCHE_COUNT_PARAMETER_NAME, LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME,
             LoanProductConstants.OVERDUE_DAYS_FOR_NPA_PARAMETER_NAME, LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME,
             LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME, LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME,
             LoanProductConstants.rescheduleStrategyMethodParameterName,
@@ -216,7 +216,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
             LoanProductConstants.interestCalculationPeriodTypeParamName, LoanProductConstants.inArrearsToleranceParamName,
             LoanProductConstants.repaymentEveryParamName, LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName,
-            LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME };
+            LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME };
     public static final String LOANPRODUCT = "loanproduct";
     public static final String OVER_APPLIED_CALCULATION_TYPE = "overAppliedCalculationType";
     public static final String OPENING_SQUARE_BRACKET = "[";
@@ -397,9 +397,9 @@ public final class LoanProductDataValidator {
         final Integer graceOnInterestCharged = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(GRACE_ON_INTEREST_CHARGED, element);
         baseDataValidator.reset().parameter(GRACE_ON_INTEREST_CHARGED).value(graceOnInterestCharged).zeroOrPositiveAmount();
 
-        final Integer graceOnArrearsAging = this.fromApiJsonHelper
-                .extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME, element);
-        baseDataValidator.reset().parameter(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME).value(graceOnArrearsAging)
+        final Integer graceOnArrearsAgeing = this.fromApiJsonHelper
+                .extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME).value(graceOnArrearsAgeing)
                 .integerZeroOrGreater();
 
         final Integer overdueDaysForNPA = this.fromApiJsonHelper
@@ -1088,7 +1088,8 @@ public final class LoanProductDataValidator {
             effectiveAllowFullTermForTranche = loanProduct.getLoanProductTrancheDetails().isAllowFullTermForTranche();
         }
 
-        // Validate: allowFullTermForTranche requires multi-disburse and PROGRESSIVE schedule
+        // Validate: allowFullTermForTranche requires multi-disburse and PROGRESSIVE
+        // schedule
         if (Boolean.TRUE.equals(effectiveAllowFullTermForTranche)) {
             if (!Boolean.TRUE.equals(effectiveMultiDisburseLoan)) {
                 baseDataValidator.reset().parameter(LoanProductConstants.ALLOW_FULL_TERM_FOR_TRANCHE_PARAM_NAME).failWithCode(
@@ -1472,10 +1473,10 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(GRACE_ON_INTEREST_CHARGED).value(graceOnInterestCharged).zeroOrPositiveAmount();
         }
 
-        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME, element)) {
-            final Integer graceOnArrearsAging = this.fromApiJsonHelper
-                    .extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME, element);
-            baseDataValidator.reset().parameter(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME).value(graceOnArrearsAging)
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element)) {
+            final Integer graceOnArrearsAgeing = this.fromApiJsonHelper
+                    .extractIntegerWithLocaleNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME).value(graceOnArrearsAgeing)
                     .integerZeroOrGreater();
         }
 
@@ -2125,7 +2126,8 @@ public final class LoanProductDataValidator {
             final JsonArray reasonToExpenseMappingArray = this.fromApiJsonHelper.extractJsonArrayNamed(parameterName, element);
             if (reasonToExpenseMappingArray != null && !reasonToExpenseMappingArray.isEmpty()) {
                 Map<Long, Set<Long>> reasonToAccounts = new HashMap<>();
-                List<JsonObject> processedMappings = new ArrayList<>(); // Collect processed mappings for the new method
+                List<JsonObject> processedMappings = new ArrayList<>(); // Collect processed mappings
+                                                                        // for the new method
 
                 int i = 0;
                 do {
@@ -2189,7 +2191,8 @@ public final class LoanProductDataValidator {
             final JsonArray classificationToIncomeMappingArray = this.fromApiJsonHelper.extractJsonArrayNamed(parameterName, element);
             if (classificationToIncomeMappingArray != null && classificationToIncomeMappingArray.size() > 0) {
                 Map<Long, Set<Long>> classificationToAccounts = new HashMap<>();
-                List<JsonObject> processedMappings = new ArrayList<>(); // Collect processed mappings for the new method
+                List<JsonObject> processedMappings = new ArrayList<>(); // Collect processed mappings
+                                                                        // for the new method
 
                 int i = 0;
                 do {
@@ -2794,44 +2797,52 @@ public final class LoanProductDataValidator {
         }
     }
 
-    private void validateLoanScheduleType(final String transactionProcessingStrategyCode, final DataValidatorBuilder baseDataValidator,
-                                          final JsonElement element) {
+    private void validateLoanScheduleType(final String transactionProcessingStrategyCode,
+                                          final DataValidatorBuilder baseDataValidator, final JsonElement element) {
 
-        final String loanScheduleType = this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element);
+        final String loanScheduleType =
+                this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element);
 
-        // If the field is not provided / explicitly null, it is optional: do nothing and avoid NPE.
         if (loanScheduleType == null || loanScheduleType.isBlank()) {
             return;
         }
 
-        // Validate the string against enum values (adds a validation error if invalid).
-        baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE).value(loanScheduleType)
+        // Existing validation: record an error if value is not one of the enum values.
+        baseDataValidator.reset()
+                .parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE)
+                .value(loanScheduleType)
                 .isOneOfEnumValues(LoanScheduleType.class);
 
-        // Safely parse enum for further cross-field checks. If invalid, stop to avoid IllegalArgumentException.
+        // FIX: avoid IllegalArgumentException if loanScheduleType is invalid
         final LoanScheduleType scheduleType;
         try {
             scheduleType = LoanScheduleType.valueOf(loanScheduleType);
-        } catch (IllegalArgumentException ex) {
+        } catch (final IllegalArgumentException ex) {
             return;
         }
 
         if (!LoanScheduleType.PROGRESSIVE.equals(scheduleType)
                 && AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY
                 .equals(transactionProcessingStrategyCode)) {
-            baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE).failWithCode(
-                    "supported.only.for.progressive.loan.schedule.type",
-                    "Progressive repayment schedule processing is only available with `Advanced payment allocation` strategy");
+
+            baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE)
+                    .failWithCode("supported.only.for.progressive.loan.schedule.type",
+                            "Progressive repayment schedule processing is only available with `Advanced payment allocation` strategy");
         }
 
         if (LoanScheduleType.PROGRESSIVE.equals(scheduleType)
                 && !AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY
                 .equals(transactionProcessingStrategyCode)) {
-            baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE).failWithCode(
-                    "supported.only.with.advanced.payment.allocation.strategy",
-                    loanScheduleType + " loan schedule type is not available with " + transactionProcessingStrategyCode + " strategy");
+
+            baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE)
+                    .failWithCode("supported.only.with.advanced.payment.allocation.strategy",
+                            loanScheduleType + " loan schedule type is not available with "
+                                    + transactionProcessingStrategyCode + " strategy");
         }
     }
+
+
+
 
 
     public void validateRepaymentPeriodWithGraceSettings(final Integer numberOfRepayments, final Integer graceOnPrincipalPayment,

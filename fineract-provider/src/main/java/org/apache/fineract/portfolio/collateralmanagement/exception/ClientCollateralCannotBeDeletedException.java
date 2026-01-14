@@ -38,7 +38,7 @@ public class ClientCollateralCannotBeDeletedException extends AbstractPlatformDo
             if (name().equalsIgnoreCase("CLIENT_COLLATERAL_IS_ALREADY_ATTACHED")) {
                 return "error.msg.client.collateral.is.already.associated.with.loan.collateral";
             }
-            return name().toString();
+            return name();
         }
     }
 

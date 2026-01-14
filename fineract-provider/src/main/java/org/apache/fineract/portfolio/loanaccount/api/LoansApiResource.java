@@ -211,8 +211,8 @@ import org.springframework.util.CollectionUtils;
         + "graceOnInterestPayment\n"
         + "Optional: Integer - represents the number of repayment periods that grace should apply to the interest component of a repayment period. Interest is still calculated but offset to later repayment periods.\n"
         + "graceOnInterestCharged\n" + "Optional: Integer - represents the number of repayment periods that should be interest-free.\n"
-        + "graceOnArrearsAging\n"
-        + "Optional: Integer - Used in Arrears calculation to only take into account loans that are more than graceOnArrearsAging days overdue.\n"
+        + "graceOnArrearsAgeing\n"
+        + "Optional: Integer - Used in Arrears calculation to only take into account loans that are more than graceOnArrearsAgeing days overdue.\n"
         + "interestChargedFromDate\n" + "Optional: Date - The date from with interest is to start being charged.\n"
         + "expectedDisbursementDate\n" + "The proposed disbursement date of the loan so a proposed repayment schedule can be provided.\n"
         + "submittedOnDate\n" + "The date the loan application was submitted by applicant.\n" + "linkAccountId\n"
@@ -527,7 +527,8 @@ public class LoansApiResource {
 
                     RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData = new RepaymentScheduleRelatedLoanData(
                             i.getTimeline().getExpectedDisbursementDate(), i.getTimeline().getActualDisbursementDate(), i.getCurrency(),
-                            i.getPrincipal(), i.getInArrearsTolerance(), i.getFeeChargesAtDisbursementCharged());
+                            i.getPrincipal(), i.getInArrearsTolerance(), i.getFeeChargesAtDisbursementCharged(),
+                            Boolean.TRUE.equals(i.getAllowFullTermForTranche()));
                     LoanScheduleData repaymentSchedule = loanReadPlatformService.retrieveRepaymentSchedule(loanId,
                             repaymentScheduleRelatedData, disbursementData, capitalizedIncomeData, i.isInterestRecalculationEnabled(),
                             LoanScheduleType.fromEnumOptionData(i.getLoanScheduleType()));
@@ -552,7 +553,7 @@ public class LoansApiResource {
     @Operation(summary = "Calculate loan repayment schedule | Submit a new Loan Application", description = "It calculates the loan repayment Schedule\n"
             + "Submits a new loan application\n"
             + "Mandatory Fields: clientId, productId, principal, loanTermFrequency, loanTermFrequencyType, loanType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, interestRatePerPeriod, amortizationType, interestType, interestCalculationPeriodType, transactionProcessingStrategyCode, expectedDisbursementDate, submittedOnDate, loanType\n"
-            + "Optional Fields: graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId, allowPartialPeriodInterestCalculation, fixedEmiAmount, maxOutstandingLoanBalance, disbursementData, graceOnArrearsAging, createStandingInstructionAtDisbursement (requires linkedAccountId if set to true)\n"
+            + "Optional Fields: graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId, allowPartialPeriodInterestCalculation, fixedEmiAmount, maxOutstandingLoanBalance, disbursementData, graceOnArrearsAgeing, createStandingInstructionAtDisbursement (requires linkedAccountId if set to true)\n"
             + "Additional Mandatory Fields if interest recalculation is enabled for product and Rest frequency not same as repayment period: recalculationRestFrequencyDate\n"
             + "Additional Mandatory Fields if interest recalculation with interest/fee compounding is enabled for product and compounding frequency not same as repayment period: recalculationCompoundingFrequencyDate\n"
             + "Additional Mandatory Field if Entity-Datatable Check is enabled for the entity of type loan: datatables")
@@ -1098,7 +1099,8 @@ public class LoansApiResource {
                         loanBasicDetails.getTimeline().getExpectedDisbursementDate(),
                         loanBasicDetails.getTimeline().getActualDisbursementDate(), loanBasicDetails.getCurrency(),
                         loanBasicDetails.getPrincipal(), loanBasicDetails.getInArrearsTolerance(),
-                        loanBasicDetails.getFeeChargesAtDisbursementCharged());
+                        loanBasicDetails.getFeeChargesAtDisbursementCharged(),
+                        Boolean.TRUE.equals(loanBasicDetails.getAllowFullTermForTranche()));
                 repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(resolvedLoanId, repaymentScheduleRelatedData,
                         disbursementData, capitalizedIncomeData, loanBasicDetails.isInterestRecalculationEnabled(),
                         LoanScheduleType.fromEnumOptionData(loanBasicDetails.getLoanScheduleType()));

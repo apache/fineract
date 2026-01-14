@@ -24,7 +24,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -56,10 +55,17 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Path("/v1/{entityType}/{entityId}/documents")
-@Tag(name = "Documents", description = "Multiple Documents (a combination of a name, description and a file) may be attached to different Entities like Clients, Groups, Staff, Loans, Savings and Client Identifiers in the system\n"
-        + "\n" + "Note: The currently allowed Entities are\n" + "\n" + "Clients: URL Pattern as clients\n" + "Staff: URL Pattern as staff\n"
-        + "Loans: URL Pattern as loans\n" + "Savings: URL Pattern as savings\n" + "Client Identifiers: URL Pattern as client_identifiers\n"
-        + "Groups: URL Pattern as groups")
+@Tag(name = "Documents", description = """
+        Multiple Documents (a combination of a name, description and a file) may be attached to different Entities like Clients, Groups, Staff, Loans, Savings and Client Identifiers in the system
+
+        Note: The currently allowed Entities are
+
+        Clients: URL Pattern as clients
+        Staff: URL Pattern as staff
+        Loans: URL Pattern as loans
+        Savings: URL Pattern as savings
+        Client Identifiers: URL Pattern as client_identifiers
+        Groups: URL Pattern as groups""")
 @RequiredArgsConstructor
 public class DocumentManagementApiResource {
 
@@ -73,8 +79,14 @@ public class DocumentManagementApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List documents", description = "Example Requests:\n" + "\n" + "clients/1/documents\n" + "\n"
-            + "client_identifiers/1/documents\n" + "\n" + "loans/1/documents?fields=name,description")
+    @Operation(summary = "List documents", description = """
+            Example Requests:
+
+            clients/1/documents
+
+            client_identifiers/1/documents
+
+            loans/1/documents?fields=name,description""")
     public List<DocumentData> retrieveAllDocuments(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId) {
 
@@ -87,12 +99,24 @@ public class DocumentManagementApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @RequestBody(description = "Create document", content = {
             @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = DocumentManagementApiResourceSwagger.DocumentUploadRequest.class)) })
-    @Operation(summary = "Create a Document", description = "Note: A document is created using a Multi-part form upload \n" + "\n"
-            + "Body Parts\n" + "\n" + "name : \n" + "Name or summary of the document\n" + "\n" + "description : \n"
-            + "Description of the document\n" + "\n" + "file : \n" + "The file to be uploaded\n" + "\n" + "Mandatory Fields : \n"
-            + "file and description")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Not Shown (multi-part form data)", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.PostEntityTypeEntityIdDocumentsResponse.class))) })
+    @Operation(summary = "Create a Document", description = """
+            Note: A document is created using a Multi-part form upload\s
+
+            Body Parts
+
+            name :\s
+            Name or summary of the document
+
+            description :\s
+            Description of the document
+
+            file :\s
+            The file to be uploaded
+
+            Mandatory Fields :\s
+            file and description""")
+
+    @ApiResponse(responseCode = "200", description = "Not Shown (multi-part form data)", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.PostEntityTypeEntityIdDocumentsResponse.class)))
     public CommandProcessingResult createDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @HeaderParam("Content-Length") @Parameter(description = "Content-Length") final Long fileSize,
@@ -116,11 +140,17 @@ public class DocumentManagementApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @RequestBody(description = "Update document", content = {
             @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = DocumentManagementApiResourceSwagger.DocumentUploadRequest.class)) })
-    @Operation(summary = "Update a Document", description = "Note: A document is updated using a Multi-part form upload \n" + "Body Parts\n"
-            + "name\n" + "Name or summary of the document\n" + "description\n" + "Description of the document\n" + "file\n"
-            + "The file to be uploaded")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Not Shown (multi-part form data)", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.PutEntityTypeEntityIdDocumentsResponse.class))) })
+    @Operation(summary = "Update a Document", description = """
+            Note: A document is updated using a Multi-part form upload\s
+            Body Parts
+            name
+            Name or summary of the document
+            description
+            Description of the document
+            file
+            The file to be uploaded""")
+
+    @ApiResponse(responseCode = "200", description = "Not Shown (multi-part form data)", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.PutEntityTypeEntityIdDocumentsResponse.class)))
     public CommandProcessingResult updateDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @PathParam("documentId") @Parameter(description = "documentId") final Long documentId,
@@ -159,8 +189,16 @@ public class DocumentManagementApiResource {
     @Path("{documentId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Document", description = "Example Requests:\n" + "\n" + "clients/1/documents/1\n" + "\n" + "\n"
-            + "loans/1/documents/1\n" + "\n" + "\n" + "client_identifiers/1/documents/1?fields=name,description")
+    @Operation(summary = "Retrieve a Document", description = """
+            Example Requests:
+
+            clients/1/documents/1
+
+
+            loans/1/documents/1
+
+
+            client_identifiers/1/documents/1?fields=name,description""")
     public DocumentData getDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @PathParam("documentId") @Parameter(description = "documentId") final Long documentId) {
@@ -173,9 +211,16 @@ public class DocumentManagementApiResource {
     @Path("{documentId}/attachment")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_OCTET_STREAM })
-    @Operation(summary = "Retrieve Binary File associated with Document", description = "Request used to download the file associated with the document\n"
-            + "\n" + "Example Requests:\n" + "\n" + "clients/1/documents/1/attachment\n" + "\n" + "\n" + "loans/1/documents/1/attachment")
-    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Not Shown: The corresponding Binary file") })
+    @Operation(summary = "Retrieve Binary File associated with Document", description = """
+            Request used to download the file associated with the document
+
+            Example Requests:
+
+            clients/1/documents/1/attachment
+
+
+            loans/1/documents/1/attachment""")
+    @ApiResponse(responseCode = "200", description = "Not Shown: The corresponding Binary file")
     public Response downloadFile(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @PathParam("documentId") @Parameter(description = "documentId") final Long documentId) {
@@ -190,8 +235,8 @@ public class DocumentManagementApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Remove a Document", description = "")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.DeleteEntityTypeEntityIdDocumentsResponse.class))) })
+
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.DeleteEntityTypeEntityIdDocumentsResponse.class)))
     public CommandProcessingResult deleteDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @PathParam("documentId") @Parameter(description = "documentId") final Long documentId) {

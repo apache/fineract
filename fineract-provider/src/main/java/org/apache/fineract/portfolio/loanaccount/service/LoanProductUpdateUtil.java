@@ -357,12 +357,12 @@ public class LoanProductUpdateUtil {
                 }
 
                 if (command.parsedJson().getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
-                        .getAsJsonPrimitive(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME)
+                        .getAsJsonPrimitive(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME)
                         .getAsBoolean() != loanProduct.getLoanConfigurableAttributes().getGraceOnArrearsAgingBoolean()) {
                     loanProduct.getLoanConfigurableAttributes()
-                            .setGraceOnArrearsAging(command.parsedJson().getAsJsonObject()
+                            .setGraceOnArrearsAgeing(command.parsedJson().getAsJsonObject()
                                     .getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
-                                    .getAsJsonPrimitive(LoanProductConstants.GRACE_ON_ARREARS_AGING_PARAMETER_NAME).getAsBoolean());
+                                    .getAsJsonPrimitive(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME).getAsBoolean());
                 }
             } else {
                 loanProduct.setLoanConfigurableAttributes(LoanProductConfigurableAttributes.populateDefaultsForConfigurableAttributes());

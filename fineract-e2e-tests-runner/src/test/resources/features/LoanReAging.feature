@@ -518,7 +518,7 @@ Feature: LoanReAging
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3059 @AdvancedPaymentAllocation
-  Scenario: Verify Loan re-aging transaction - partial principal payment scenario + undo re-aging
+  Scenario: Verify Loan re-aging transaction - partial principal payment scenario + undo re-ageing
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule

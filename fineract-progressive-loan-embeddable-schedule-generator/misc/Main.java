@@ -62,7 +62,7 @@ public class Main {
         final InterestMethod interestMethod = InterestMethod.DECLINING_BALANCE;
         final boolean allowPartialPeriodInterestCalculation = true;
 
-        var config = new LoanRepaymentScheduleModelData(startDate, currency, disbursedAmount, disbursementDate, noRepayments, repaymentFrequency, repaymentFrequencyType, annualNominalInterestRate, isDownPaymentEnabled, daysInMonthType, daysInYearType, downPaymentPercentage, installmentAmountInMultiplesOf, fixedLength, interestRecognitionOnDisbursementDate, dasInYearCustomStrategy, interestMethod, allowPartialPeriodInterestCalculation);
+        var config = new LoanRepaymentScheduleModelData(startDate, currency, disbursedAmount, disbursementDate, noRepayments, repaymentFrequency, repaymentFrequencyType, annualNominalInterestRate, isDownPaymentEnabled, daysInMonthType, daysInYearType, downPaymentPercentage, installmentAmountInMultiplesOf, fixedLength, interestRecognitionOnDisbursementDate, dasInYearCustomStrategy, interestMethod, allowPartialPeriodInterestCalculation, false);
 
         final LoanSchedulePlan plan = calculator.generate(mc, config);
         printPlan(plan);

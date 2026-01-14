@@ -92,8 +92,13 @@ public class ClientAddressApiResource {
     @Path("/{clientid}/addresses")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List all addresses for a Client", description = "Example Requests:\n" + "\n" + "client/1/addresses\n" + "\n"
-            + "\n" + "clients/1/addresses?status=false,true&&type=1,2,3")
+    @Operation(summary = "List all addresses for a Client", description = """
+            Example Requests:
+
+            client/1/addresses
+
+
+            clients/1/addresses?status=false,true&&type=1,2,3""")
     public List<AddressData> getAddresses(@QueryParam("status") @Parameter(description = "status") final String status,
             @QueryParam("type") @Parameter(description = "type") final long addressTypeId,
             @PathParam("clientid") @Parameter(description = "clientId") final long clientid) {
@@ -105,11 +110,14 @@ public class ClientAddressApiResource {
     @Path("/{clientid}/addresses")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update an address for a Client", description = "All the address fields can be updated by using update client address API\n"
-            + "\n" + "Mandatory Fields\n" + "type and addressId")
+    @Operation(summary = "Update an address for a Client", description = """
+            All the address fields can be updated by using update client address API
+
+            Mandatory Fields
+            type and addressId""")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientAddressRequest.class)))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientAddressApiResourcesSwagger.PutClientClientIdAddressesResponse.class))) })
+
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientAddressApiResourcesSwagger.PutClientClientIdAddressesResponse.class)))
     public CommandProcessingResult updateClientAddress(@PathParam("clientid") @Parameter(description = "clientId") final long clientid,
             @Parameter(hidden = true) ClientAddressRequest clientAddressRequest) {
 

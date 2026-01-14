@@ -202,7 +202,7 @@ public class TaxComponent extends AbstractAuditableCustom {
         return this.creditAccountType;
     }
 
-    public GLAccount getCreditAcount() {
+    public GLAccount getCreditAccount() {
         return this.creditAccount;
     }
 }

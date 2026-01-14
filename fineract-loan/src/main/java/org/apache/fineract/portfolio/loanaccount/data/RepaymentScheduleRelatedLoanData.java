@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Getter;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
@@ -34,10 +35,19 @@ public class RepaymentScheduleRelatedLoanData {
     private final BigDecimal netDisbursalAmount;
     private final BigDecimal inArrearsTolerance;
     private final BigDecimal totalFeeChargesAtDisbursement;
+    @Getter
+    private final boolean allowFullTermForTranche;
 
     public RepaymentScheduleRelatedLoanData(final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate,
             final CurrencyData currency, final BigDecimal principal, final BigDecimal inArrearsTolerance,
             final BigDecimal totalFeeChargesAtDisbursement) {
+        this(expectedDisbursementDate, actualDisbursementDate, currency, principal, inArrearsTolerance, totalFeeChargesAtDisbursement,
+                false);
+    }
+
+    public RepaymentScheduleRelatedLoanData(final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate,
+            final CurrencyData currency, final BigDecimal principal, final BigDecimal inArrearsTolerance,
+            final BigDecimal totalFeeChargesAtDisbursement, final boolean allowFullTermForTranche) {
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.actualDisbursementDate = actualDisbursementDate;
         this.currency = currency;
@@ -45,6 +55,7 @@ public class RepaymentScheduleRelatedLoanData {
         this.inArrearsTolerance = inArrearsTolerance;
         this.totalFeeChargesAtDisbursement = totalFeeChargesAtDisbursement;
         this.netDisbursalAmount = this.principal.subtract(this.totalFeeChargesAtDisbursement);
+        this.allowFullTermForTranche = allowFullTermForTranche;
     }
 
     public LocalDate disbursementDate() {

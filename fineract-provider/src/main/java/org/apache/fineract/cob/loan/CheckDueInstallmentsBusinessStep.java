@@ -87,11 +87,9 @@ public class CheckDueInstallmentsBusinessStep implements LoanCOBBusinessStep {
                     ThreadLocalContextUtil.setActionContext(ActionContext.COB);
                 }
             }
-        }, duration -> {
-            log.debug(
-                    "Ending custom snapshot event processing for loan with Id [{}], account number [{}], external Id [{}], finished in [{}]ms.",
-                    loan.getId(), loan.getAccountNumber(), externalId, duration.toMillis());
-        });
+        }, duration -> log.debug(
+                "Ending custom snapshot event processing for loan with Id [{}], account number [{}], external Id [{}], finished in [{}]ms.",
+                loan.getId(), loan.getAccountNumber(), externalId, duration.toMillis()));
 
         return loan;
     }

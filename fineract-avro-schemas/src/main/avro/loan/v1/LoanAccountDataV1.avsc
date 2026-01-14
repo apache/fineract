@@ -413,7 +413,7 @@
         },
         {
             "default": null,
-            "name": "graceOnArrearsAging",
+            "name": "graceOnArrearsAgeing",
             "type": [
                 "null",
                 "int"

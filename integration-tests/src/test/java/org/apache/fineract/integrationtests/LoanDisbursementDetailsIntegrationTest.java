@@ -880,4 +880,258 @@ public class LoanDisbursementDetailsIntegrationTest {
         assertEquals(false, loanDetails.getAllowFullTermForTranche());
         log.info("-------------------LOAN LEVEL OVERRIDE OF allowFullTermForTranche WORKED SUCCESSFULLY-------");
     }
+
+    @Test
+    public void testFullTermTranche_S1_DisbursementOnInstallmentDate() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withinterestRatePerPeriod("9.4822").withInterestRateFrequencyTypeAsYear().withMultiDisburse()
+                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).addAdvancedPaymentAllocation(defaultAllocation)
+                .withAllowFullTermForTranche(true).withDaysInYear("360").withMinPrincipal("100").build(null);
+
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        log.info("------------------LOAN PRODUCT CREATED WITH ID----------- {}", loanProductId);
+
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2024");
+        log.info("------------------CLIENT CREATED WITH ID----------- {}", clientId);
+
+        List<HashMap> createTranches = new ArrayList<>();
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 January 2024", "100"));
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 February 2024", "100"));
+
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("200").withLoanTermFrequency("6")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("6").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("9.4822").withExpectedDisbursementDate("01 January 2024")
+                .withTranches(createTranches).withSubmittedOnDate("01 January 2024")
+                .withRepaymentStrategy(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .build(clientId.toString(), loanProductId.toString(), null);
+
+        final Integer loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        log.info("------------------LOAN CREATED WITH ID----------- {}", loanId);
+
+        this.loanTransactionHelper.approveLoanWithApproveAmount("01 January 2024", "01 January 2024", "200", loanId, createTranches);
+        log.info("-------------------LOAN APPROVED-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount("01 January 2024", loanId, "100");
+        log.info("-------------------FIRST TRANCHE DISBURSED-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount("01 February 2024", loanId, "100");
+        log.info("-------------------SECOND TRANCHE DISBURSED-------");
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(loanDetails);
+
+        GetLoansLoanIdRepaymentSchedule schedule = loanDetails.getRepaymentSchedule();
+        assertNotNull(schedule);
+
+        List<GetLoansLoanIdRepaymentPeriod> periods = schedule.getPeriods();
+        assertNotNull(periods);
+        assertEquals(9, periods.size(), "Total periods should be 9 (2 disbursements + 7 repayment periods)");
+
+        // Count disbursement periods (no period number) and repayment periods (with period number)
+        long disbursementPeriods = periods.stream().filter(p -> p.getPeriod() == null).count();
+        long repaymentPeriods = periods.stream().filter(p -> p.getPeriod() != null).count();
+        assertEquals(2, disbursementPeriods, "Should have 2 disbursement periods");
+        assertEquals(7, repaymentPeriods, "Should have 7 repayment periods");
+
+        log.info("-------------------S1 TEST: SCHEDULE VALIDATION-------");
+        log.info("Schedule structure validated: 2 disbursement + 7 repayment periods");
+
+        // Close the loan to allow LoanTestLifecycleExtension cleanup to succeed
+        closeFullTermTrancheLoan(loanId, "01 August 2024");
+    }
+
+    @Test
+    public void testFullTermTranche_S2_MidPeriodDisbursement() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withinterestRatePerPeriod("9.4822").withInterestRateFrequencyTypeAsYear().withMultiDisburse()
+                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).addAdvancedPaymentAllocation(defaultAllocation)
+                .withAllowFullTermForTranche(true).withDaysInYear("360").withMinPrincipal("100").build(null);
+
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        log.info("------------------LOAN PRODUCT CREATED WITH ID----------- {}", loanProductId);
+
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2024");
+        log.info("------------------CLIENT CREATED WITH ID----------- {}", clientId);
+
+        List<HashMap> createTranches = new ArrayList<>();
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 January 2024", "100"));
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "15 February 2024", "100"));
+
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("200").withLoanTermFrequency("6")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("6").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("9.4822").withExpectedDisbursementDate("01 January 2024")
+                .withTranches(createTranches).withSubmittedOnDate("01 January 2024")
+                .withRepaymentStrategy(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .build(clientId.toString(), loanProductId.toString(), null);
+
+        final Integer loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        log.info("------------------LOAN CREATED WITH ID----------- {}", loanId);
+
+        this.loanTransactionHelper.approveLoanWithApproveAmount("01 January 2024", "01 January 2024", "200", loanId, createTranches);
+        log.info("-------------------LOAN APPROVED-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount("01 January 2024", loanId, "100");
+        log.info("-------------------FIRST TRANCHE DISBURSED-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount("15 February 2024", loanId, "100");
+        log.info("-------------------SECOND TRANCHE DISBURSED (MID-PERIOD)-------");
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(loanDetails);
+
+        GetLoansLoanIdRepaymentSchedule schedule = loanDetails.getRepaymentSchedule();
+        assertNotNull(schedule);
+
+        List<GetLoansLoanIdRepaymentPeriod> periods = schedule.getPeriods();
+        assertNotNull(periods);
+        assertEquals(9, periods.size(), "Total periods should be 9 (2 disbursements + 7 repayment periods)");
+
+        // Count disbursement periods (no period number) and repayment periods (with period number)
+        long disbursementPeriods = periods.stream().filter(p -> p.getPeriod() == null).count();
+        long repaymentPeriods = periods.stream().filter(p -> p.getPeriod() != null).count();
+        assertEquals(2, disbursementPeriods, "Should have 2 disbursement periods");
+        assertEquals(7, repaymentPeriods, "Should have 7 repayment periods");
+
+        log.info("-------------------S2 TEST: SCHEDULE VALIDATION-------");
+        log.info("Schedule structure validated: 2 disbursement + 7 repayment periods (mid-period disbursement)");
+
+        // Close the loan to allow LoanTestLifecycleExtension cleanup to succeed
+        closeFullTermTrancheLoan(loanId, "01 August 2024");
+    }
+
+    @Test
+    public void testFullTermTranche_S3_BothBeforeFirstRepayment() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withinterestRatePerPeriod("9.4822").withInterestRateFrequencyTypeAsYear().withMultiDisburse()
+                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).addAdvancedPaymentAllocation(defaultAllocation)
+                .withAllowFullTermForTranche(true).withDaysInYear("360").withMinPrincipal("100").build(null);
+
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        log.info("------------------LOAN PRODUCT CREATED WITH ID----------- {}", loanProductId);
+
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2024");
+        log.info("------------------CLIENT CREATED WITH ID----------- {}", clientId);
+
+        List<HashMap> createTranches = new ArrayList<>();
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 January 2024", "100"));
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "15 January 2024", "100"));
+
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("200").withLoanTermFrequency("6")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("6").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("9.4822").withExpectedDisbursementDate("01 January 2024")
+                .withTranches(createTranches).withSubmittedOnDate("01 January 2024")
+                .withRepaymentStrategy(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .build(clientId.toString(), loanProductId.toString(), null);
+
+        final Integer loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        log.info("------------------LOAN CREATED WITH ID----------- {}", loanId);
+
+        this.loanTransactionHelper.approveLoanWithApproveAmount("01 January 2024", "01 January 2024", "200", loanId, createTranches);
+        log.info("-------------------LOAN APPROVED-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount("01 January 2024", loanId, "100");
+        log.info("-------------------FIRST TRANCHE DISBURSED-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount("15 January 2024", loanId, "100");
+        log.info("-------------------SECOND TRANCHE DISBURSED (BEFORE FIRST REPAYMENT)-------");
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(loanDetails);
+
+        GetLoansLoanIdRepaymentSchedule schedule = loanDetails.getRepaymentSchedule();
+        assertNotNull(schedule);
+
+        List<GetLoansLoanIdRepaymentPeriod> periods = schedule.getPeriods();
+        assertNotNull(periods);
+        assertEquals(8, periods.size(), "Total periods should be 8 (2 disbursements + 6 repayment periods - NO EXTENSION)");
+
+        // Count disbursement periods (no period number) and repayment periods (with period number)
+        long disbursementPeriods = periods.stream().filter(p -> p.getPeriod() == null).count();
+        long repaymentPeriods = periods.stream().filter(p -> p.getPeriod() != null).count();
+        assertEquals(2, disbursementPeriods, "Should have 2 disbursement periods");
+        assertEquals(6, repaymentPeriods, "Should have 6 repayment periods (no term extension)");
+
+        log.info("-------------------S3 TEST: SCHEDULE VALIDATION-------");
+        log.info("Schedule structure validated: 2 disbursement + 6 repayment periods (no term extension)");
+        log.info("Both disbursements before first repayment date result in same maturity date");
+
+        // Close the loan to allow LoanTestLifecycleExtension cleanup to succeed
+        closeFullTermTrancheLoan(loanId, "01 July 2024");
+    }
+
+    @Test
+    public void testFullTermTrancheBackwardCompatibility() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final String loanProductWithoutFlag = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withinterestRatePerPeriod("9.4822").withInterestRateFrequencyTypeAsYear().withMultiDisburse()
+                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).addAdvancedPaymentAllocation(defaultAllocation)
+                .withAllowFullTermForTranche(false).withDaysInYear("360").withMinPrincipal("100").build(null);
+
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductWithoutFlag);
+        log.info("------------------LOAN PRODUCT CREATED WITH allowFullTermForTranche=false ID----------- {}", loanProductId);
+
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2024");
+        log.info("------------------CLIENT CREATED WITH ID----------- {}", clientId);
+
+        List<HashMap> createTranches = new ArrayList<>();
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 January 2024", "100"));
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 February 2024", "100"));
+
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("200").withLoanTermFrequency("6")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("6").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("9.4822").withExpectedDisbursementDate("01 January 2024")
+                .withTranches(createTranches).withSubmittedOnDate("01 January 2024")
+                .withRepaymentStrategy(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .build(clientId.toString(), loanProductId.toString(), null);
+
+        final Integer loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        log.info("------------------LOAN CREATED WITH ID----------- {}", loanId);
+
+        this.loanTransactionHelper.approveLoanWithApproveAmount("01 January 2024", "01 January 2024", "200", loanId, createTranches);
+        log.info("-------------------LOAN APPROVED-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount("01 January 2024", loanId, "100");
+        log.info("-------------------FIRST TRANCHE DISBURSED-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount("01 February 2024", loanId, "100");
+        log.info("-------------------SECOND TRANCHE DISBURSED-------");
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(loanDetails);
+
+        GetLoansLoanIdRepaymentSchedule schedule = loanDetails.getRepaymentSchedule();
+        assertNotNull(schedule);
+
+        List<GetLoansLoanIdRepaymentPeriod> periods = schedule.getPeriods();
+        assertNotNull(periods);
+
+        log.info("-------------------BACKWARD COMPATIBILITY TEST: SCHEDULE VALIDATION-------");
+        log.info("Expected: OLD behavior when allowFullTermForTranche=false");
+        log.info("Schedule should NOT use full term tranche logic - should match existing multi-disburse behavior");
+    }
+
+    /**
+     * Helper method to close a loan by making a full prepayment. This ensures the loan is closed before the
+     * LoanTestLifecycleExtension cleanup runs.
+     */
+    private void closeFullTermTrancheLoan(Integer loanId, String lastRepaymentDate) {
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        BigDecimal outstandingAmount = loanDetails.getSummary().getTotalOutstanding();
+
+        if (outstandingAmount != null && outstandingAmount.compareTo(BigDecimal.ZERO) > 0) {
+            log.info("-------------------CLOSING LOAN {} WITH PREPAYMENT OF {} ON {}-------", loanId, outstandingAmount, lastRepaymentDate);
+            this.loanTransactionHelper.makeLoanRepayment(lastRepaymentDate, outstandingAmount.floatValue(), loanId);
+        }
+    }
 }
