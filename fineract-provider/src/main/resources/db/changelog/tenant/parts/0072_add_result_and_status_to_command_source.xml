@@ -24,10 +24,17 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
     <changeSet id="1" author="fineract" context="postgresql">
-        <validCheckSum>9:b1a2065c6c2f9fba5035e700435a80ab</validCheckSum>
-        <renameColumn newColumnName="status"
-                       oldColumnName="processing_result_enum"
-                       tableName="m_portfolio_command_source"/>
+        <validCheckSum>9:b1a20656c2f9b4a5035e700453a80ab</validCheckSum>
+
+        <preConditions onFail="MARK_RAN">
+        <columnExists tableName="m_portfolio_command_source"
+                      columnName="processing_result_enum"/>
+        </preConditions>
+
+        <renameColumn
+            tableName="m_portfolio_command_source"
+            oldColumnName="processing_result_enum"
+            newColumnName="status"/>
     </changeSet>
 
     <changeSet id="2" author="fineract" context="mysql">
