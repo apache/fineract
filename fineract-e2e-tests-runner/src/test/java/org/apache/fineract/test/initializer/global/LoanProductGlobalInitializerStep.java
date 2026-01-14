@@ -4485,16 +4485,6 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         return advancedPaymentData;
     }
 
-    public static AdvancedPaymentData editPaymentAllocationFutureInstallment(String transactionType, String futureInstallmentAllocationRule,
-            List<PaymentAllocationOrder> paymentAllocationOrder) {
-        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
-        advancedPaymentData.setTransactionType(transactionType);
-        advancedPaymentData.setFutureInstallmentAllocationRule(futureInstallmentAllocationRule);
-        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrder);
-
-        return advancedPaymentData;
-    }
-
     private static CreditAllocationData createCreditAllocation(String transactionType, List<String> creditAllocationRules) {
         CreditAllocationData creditAllocationData = new CreditAllocationData();
         creditAllocationData.setTransactionType(transactionType);

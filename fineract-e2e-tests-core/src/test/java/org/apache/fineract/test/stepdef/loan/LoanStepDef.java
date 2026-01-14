@@ -143,7 +143,6 @@ import org.apache.fineract.test.helper.BusinessDateHelper;
 import org.apache.fineract.test.helper.CodeHelper;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
 import org.apache.fineract.test.helper.Utils;
-import org.apache.fineract.test.initializer.global.LoanProductGlobalInitializerStep;
 import org.apache.fineract.test.messaging.EventAssertion;
 import org.apache.fineract.test.messaging.config.EventProperties;
 import org.apache.fineract.test.messaging.config.JobPollingProperties;
@@ -3213,8 +3212,8 @@ public class LoanStepDef extends AbstractStepDef {
             if (transactionTypeToChange.equals(transactionTypeOriginal)) {
                 futureInstallmentAllocationRule = futureInstallmentAllocationRuleNew;
             }
-            newPaymentAllocation.add(LoanProductGlobalInitializerStep.editPaymentAllocationFutureInstallment(transactionTypeOriginal,
-                    futureInstallmentAllocationRule, paymentAllocationOrder));
+            newPaymentAllocation.add(editPaymentAllocationFutureInstallment(transactionTypeOriginal, futureInstallmentAllocationRule,
+                    paymentAllocationOrder));
         });
 
         PutLoanProductsProductIdRequest putLoanProductsProductIdRequest = new PutLoanProductsProductIdRequest()
@@ -5906,5 +5905,15 @@ public class LoanStepDef extends AbstractStepDef {
                 .filter(r -> r.getRelationType().equals(relationshipType)).toList();
 
         assertEquals(Integer.valueOf(numberOfRelations), relationshipOptional.size(), "Missed relationship for transaction");
+    }
+
+    public static AdvancedPaymentData editPaymentAllocationFutureInstallment(String transactionType, String futureInstallmentAllocationRule,
+            List<PaymentAllocationOrder> paymentAllocationOrder) {
+        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
+        advancedPaymentData.setTransactionType(transactionType);
+        advancedPaymentData.setFutureInstallmentAllocationRule(futureInstallmentAllocationRule);
+        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrder);
+
+        return advancedPaymentData;
     }
 }
