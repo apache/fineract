@@ -72,7 +72,7 @@ public class SavingsSchedularInterestPoster {
                 boolean postInterestAsOn = false;
                 LocalDate transactionDate = null;
                 try {
-                    if (isInterestAlreadyPostedForPeriod(savingsAccountData, currentDate)) {
+                    if (isInterestAlreadyPostedForCurrentPeriod(savingsAccountData, currentDate)) {
                         log.debug("Interest already posted for savings account {} up to date {}, skipping", savingsAccountData.getId(),
                                 savingsAccountData.getSummary().getInterestPostedTillDate());
                         continue;
@@ -256,12 +256,12 @@ public class SavingsSchedularInterestPoster {
                 + LAST_MODIFIED_DATE_DB_FIELD + " = ?, " + LAST_MODIFIED_BY_DB_FIELD + " = ? " + "WHERE id=?";
     }
 
-    private boolean isInterestAlreadyPostedForPeriod(SavingsAccountData savingsAccountData, LocalDate currentDate) {
+    private boolean isInterestAlreadyPostedForCurrentPeriod(SavingsAccountData savingsAccountData, LocalDate currentDate) {
         LocalDate interestPostedTillDate = savingsAccountData.getSummary().getInterestPostedTillDate();
         if (interestPostedTillDate == null) {
             return false;
         }
-        return !interestPostedTillDate.isBefore(currentDate);
+        return interestPostedTillDate.isAfter(currentDate) || interestPostedTillDate.equals(currentDate);
     }
 
     private boolean hasNewInterestTransactions(SavingsAccountData savingsAccountData) {
