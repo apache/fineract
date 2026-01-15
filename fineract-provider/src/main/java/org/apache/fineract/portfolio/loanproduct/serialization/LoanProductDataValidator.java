@@ -2797,32 +2797,48 @@ public final class LoanProductDataValidator {
         }
     }
 
-    private void validateLoanScheduleType(final String transactionProcessingStrategyCode, final DataValidatorBuilder baseDataValidator,
-            final JsonElement element) {
-        final String loanScheduleType = this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element);
-        baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE).value(loanScheduleType).ignoreIfNull()
+    private void validateLoanScheduleType(final String transactionProcessingStrategyCode,
+                                          final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+
+        final String loanScheduleTypeStr =
+                this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element);
+
+        // Existing validation: record an error if value is not one of the enum values.
+        baseDataValidator.reset()
+                .parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE)
+                .value(loanScheduleTypeStr)
+                .ignoreIfNull()
                 .isOneOfEnumValues(LoanScheduleType.class);
 
-        if (loanScheduleType == null || baseDataValidator.hasError()) {
+        if (loanScheduleTypeStr == null || loanScheduleTypeStr.isBlank()) {
             return;
         }
 
-        if (!LoanScheduleType.PROGRESSIVE.equals(LoanScheduleType.valueOf(loanScheduleType))
-                && AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY
-                        .equals(transactionProcessingStrategyCode)) {
-            baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE).failWithCode(
-                    "supported.only.for.progressive.loan.schedule.type",
-                    "Progressive repayment schedule processing is only available with `Advanced payment allocation` strategy");
+        final LoanScheduleType loanScheduleType;
+        try {
+            loanScheduleType = LoanScheduleType.valueOf(loanScheduleTypeStr);
+        } catch (final IllegalArgumentException ex) {
+            return;
         }
 
-        if (LoanScheduleType.PROGRESSIVE.equals(LoanScheduleType.valueOf(loanScheduleType))
-                && !AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY
-                        .equals(transactionProcessingStrategyCode)) {
-            baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE).failWithCode(
-                    "supported.only.with.advanced.payment.allocation.strategy",
-                    loanScheduleType + " loan schedule type is not available with " + transactionProcessingStrategyCode + " strategy");
+        final boolean isAdvancedAllocationStrategy =
+                AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(transactionProcessingStrategyCode);
+
+        if (isAdvancedAllocationStrategy && loanScheduleType != LoanScheduleType.PROGRESSIVE) {
+            baseDataValidator.reset()
+                    .parameter(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE)
+                    .failWithCode("supported.only.for.progressive.loan.schedule.type",
+                            "Progressive repayment schedule processing is only available with `Advanced payment allocation` strategy");
+        }
+
+        if (!isAdvancedAllocationStrategy && loanScheduleType == LoanScheduleType.PROGRESSIVE) {
+            baseDataValidator.reset()
+                    .parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE)
+                    .failWithCode("supported.only.with.advanced.payment.allocation.strategy",
+                            loanScheduleTypeStr + " loan schedule type is not available with " + transactionProcessingStrategyCode + " strategy");
         }
     }
+
 
     public void validateRepaymentPeriodWithGraceSettings(final Integer numberOfRepayments, final Integer graceOnPrincipalPayment,
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final Integer recurringMoratoriumOnPrincipalPeriods,
