@@ -3635,7 +3635,6 @@ Feature: LoanReAmortization
     When Loan Pay-off is made on "01 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @Skip
   @TestRailId:C4496 @AdvancedPaymentAllocation
   Scenario: Verify Loan re-aging trn with 2nd disb after re-amortization - interest bearing multidisb loan with equal amortization + interest split - UC1.2
     When Admin sets the business date to "01 January 2024"
@@ -3709,12 +3708,12 @@ Feature: LoanReAmortization
       | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           |  0.0          | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
       | 3  | 31   | 01 April 2024     |                  | 62.86           | 20.71         | 0.61     | 0.0  | 0.0       | 21.32 | 0.0   | 0.0        | 0.0  | 21.32       |
       |    |      | 15 April 2024     |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
-      | 4  | 30   | 01 May 2024       |                  | 108.7           | 54.16         | 0.8      | 0.0  | 0.0       | 54.96 | 0.0   | 0.0        | 0.0  | 54.96       |
-      | 5  | 31   | 01 June 2024      |                  |  54.41          | 54.2          | 0.76     | 0.0  | 0.0       | 54.96 | 0.0   | 0.0        | 0.0  | 54.96       |
-      | 6  | 30   | 01 July 2024      |                  |   0.0           | 54.51         | 0.44     | 0.0  | 0.0       | 54.95 | 0.0   | 0.0        | 0.0  | 54.95       |
+      | 4  | 30   | 01 May 2024       |                  | 108.76          | 54.1          | 0.85     | 0.0  | 0.0       | 54.95 | 0.0   | 0.0        | 0.0  | 54.95       |
+      | 5  | 31   | 01 June 2024      |                  | 54.56           | 54.2          | 0.75     | 0.0  | 0.0       | 54.95 | 0.0   | 0.0        | 0.0  | 54.95       |
+      | 6  | 30   | 01 July 2024      |                  | 0.0             | 54.56         | 0.44     | 0.0  | 0.0       | 55.0  | 0.0   | 0.0        | 0.0  | 55.0        |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 200.0         | 2.34     | 0.0  | 0.0       | 202.34 | 17.01 | 0.0        | 0.0  | 185.33      |
+      | 200.0         | 3.23     | 0.0  | 0.0       | 203.23 | 17.01 | 0.0        | 0.0  | 186.22      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -3927,7 +3926,6 @@ Feature: LoanReAmortization
     When Loan Pay-off is made on "01 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @Skip
   @TestRailId:C4499 @AdvancedPaymentAllocation
   Scenario: Verify Loan re-amortization trn with CI after re-amortization - interest bearing multidisb loan with equal amortization + interest split - UC2.2
     When Admin sets the business date to "01 January 2024"
@@ -4001,12 +3999,12 @@ Feature: LoanReAmortization
       | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           |  0.0          | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
       | 3  | 31   | 01 April 2024     |                  | 62.86           | 20.71         | 0.61     | 0.0  | 0.0       | 21.32 | 0.0   | 0.0        | 0.0  | 21.32       |
       |    |      | 01 April 2024     |                  |  50.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
-      | 4  | 30   | 01 May 2024       |                  | 75.36           | 37.5          | 0.49     | 0.0  | 0.0       | 37.99 | 0.0   | 0.0        | 0.0  | 37.99       |
-      | 5  | 31   | 01 June 2024      |                  | 37.74           | 37.62         | 0.37     | 0.0  | 0.0       | 37.99 | 0.0   | 0.0        | 0.0  | 37.99       |
-      | 6  | 30   | 01 July 2024      |                  |  0.0            | 37.74         | 0.24     | 0.0  | 0.0       | 37.98 | 0.0   | 0.0        | 0.0  | 37.98       |
+      | 4  | 30   | 01 May 2024       |                  | 75.46           | 37.4          | 0.78     | 0.0  | 0.0       | 38.18 | 0.0   | 0.0        | 0.0  | 38.18       |
+      | 5  | 31   | 01 June 2024      |                  | 37.84           | 37.62         | 0.56     | 0.0  | 0.0       | 38.18 | 0.0   | 0.0        | 0.0  | 38.18       |
+      | 6  | 30   | 01 July 2024      |                  |  0.0            | 37.84         | 0.34     | 0.0  | 0.0       | 38.18 | 0.0   | 0.0        | 0.0  | 38.18       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 150.0         | 2.29     | 0.0  | 0.0       | 152.29 | 17.01 | 0.0        | 0.0  | 135.28     |
+      | 150.0         | 2.87     | 0.0  | 0.0       | 152.87 | 17.01 | 0.0        | 0.0  | 135.86      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement       | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -4217,7 +4215,6 @@ Feature: LoanReAmortization
     When Loan Pay-off is made on "15 March 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @Skip
   @TestRailId:C4502
   Scenario: Verify Re-amortization with interest pause after re-amortization - interest bearing loan with equal amortization + interest split - UC3.2
     When Admin sets the business date to "01 January 2024"
@@ -4292,10 +4289,10 @@ Feature: LoanReAmortization
       |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024  | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
       | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           |  0.0          | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024     |                  | 62.86           | 20.73         | 0.61     | 0.0  | 0.0       | 21.32 | 0.0   | 0.0        | 0.0  | 21.32       |
-      | 4  | 30   | 01 May 2024       |                  | 41.86           | 21.0          | 0.32     | 0.0  | 0.0       | 21.32 | 0.0   | 0.0        | 0.0  | 21.32       |
-      | 5  | 31   | 01 June 2024      |                  | 20.88           | 20.95         | 0.37     | 0.0  | 0.0       | 21.32 | 0.0   | 0.0        | 0.0  | 21.32       |
-      | 6  | 30   | 01 July 2024      |                  |  0.0            | 20.92         | 0.24     | 0.0  | 0.0       | 21.16 | 0.0   | 0.0        | 0.0  | 21.16       |
+      | 3  | 31   | 01 April 2024     |                  | 62.84           | 20.73         | 0.59     | 0.0  | 0.0       | 21.32 | 0.0   | 0.0        | 0.0  | 21.32       |
+      | 4  | 30   | 01 May 2024       |                  | 41.84           | 21.0          | 0.32     | 0.0  | 0.0       | 21.32 | 0.0   | 0.0        | 0.0  | 21.32       |
+      | 5  | 31   | 01 June 2024      |                  | 20.88           | 20.96         | 0.36     | 0.0  | 0.0       | 21.32 | 0.0   | 0.0        | 0.0  | 21.32       |
+      | 6  | 30   | 01 July 2024      |                  |  0.0            | 20.88         | 0.24     | 0.0  | 0.0       | 21.12 | 0.0   | 0.0        | 0.0  | 21.12       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 100.0         | 2.09     | 0.0  | 0.0       | 102.09 | 17.01 | 0.0        | 0.0  | 85.08       |
@@ -5163,7 +5160,6 @@ Feature: LoanReAmortization
     When Loan Pay-off is made on "01 January 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @Skip
   @TestRailId:C4512 @AdvancedPaymentAllocation
   Scenario: Verify Loan re-aging trn with Charge-off with interest zero after re-amortization - interest bearing multidisb loan with equal amortization + interest split - UC6.1
     When Admin sets the business date to "01 January 2024"
@@ -5235,25 +5231,26 @@ Feature: LoanReAmortization
       |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024  | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
       | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           |  0.0          | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024     |                  | 62.98           | 20.59         | 0.73     | 0.0  | 0.0       | 21.32 | 0.0   | 0.0        | 0.0  | 21.32       |
-      | 4  | 30   | 01 May 2024       |                  | 42.08           | 20.91         | 0.41     | 0.0  | 0.0       | 21.32 | 0.0   | 0.0        | 0.0  | 21.32       |
-      | 5  | 31   | 01 June 2024      |                  | 20.76           | 21.32         | 0.0      | 0.0  | 0.0       | 21.32 | 0.0   | 0.0        | 0.0  | 21.32       |
-      | 6  | 30   | 01 July 2024      |                  |  0.0            | 20.76         | 0.0      | 0.0  | 0.0       | 20.76 | 0.0   | 0.0        | 0.0  | 20.76       |
+      | 3  | 31   | 01 April 2024     |                  | 62.86           | 20.71         | 0.61     | 0.0  | 0.0       | 21.32 | 0.0   | 0.0        | 0.0  | 21.32       |
+      | 4  | 30   | 01 May 2024       |                  | 41.89           | 20.97         | 0.35     | 0.0  | 0.0       | 21.32 | 0.0   | 0.0        | 0.0  | 21.32       |
+      | 5  | 31   | 01 June 2024      |                  | 20.57           | 21.32         | 0.0      | 0.0  | 0.0       | 21.32 | 0.0   | 0.0        | 0.0  | 21.32       |
+      | 6  | 30   | 01 July 2024      |                  |  0.0            | 20.57         | 0.0      | 0.0  | 0.0       | 20.57 | 0.0   | 0.0        | 0.0  | 20.57       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 2.29     | 0.0  | 0.0       | 102.29 | 17.01 | 0.0        | 0.0  | 85.28       |
+      | 100.0         | 1.54     | 0.0  | 0.0       | 101.54 | 17.01 | 0.0        | 0.0  | 84.53       |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 15 March 2024    | Re-amortize      | 17.01  | 16.52     | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 April 2024    | Accrual          | 1.54   | 0.0       | 1.54     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 April 2024    | Charge-off       | 84.53  | 83.57     | 0.96     | 0.0  | 0.0       | 0.0          | false    | false    |
     And Admin creates re-amortization trn on current business date with reAmortizationInterestHandling "EQUAL_AMORTIZATION_INTEREST_SPLIT" is forbidden as loan was charged-off
 # --- close the loan --- #
     When Admin sets the business date to "01 May 2024"
     When Loan Pay-off is made on "01 May 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @Skip
   @TestRailId:C__6.2 @AdvancedPaymentAllocation
   Scenario: Verify Loan re-aging trn with accelerate maturity charge-off after re-amortization - interest bearing loan with equal amortization + interest split - UC6.2
     When Admin sets the business date to "01 January 2024"
@@ -5320,18 +5317,19 @@ Feature: LoanReAmortization
 # --- charge-off the loan --- #
     When Admin sets the business date to "15 April 2024"
     And Admin does charge-off the loan on "15 April 2024"
-    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024 | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
       | 2  | 29   | 01 March 2024    | 15 March 2024    | 83.57           |  0.0          | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
-      | 3  | 31   | 15 April 2024    |                  | 0.0             | 83.57         | 1.15     | 0.0  | 0.0       | 84.72 | 0.0   | 0.0        | 0.0  | 84.72       |
+      | 3  | 31   | 01 April 2024    |                  | 62.86           | 20.71         | 0.61     | 0.0  | 0.0       | 21.32 | 0.0   | 0.0        | 0.0  | 21.32       |
+      | 4  | 14   | 15 April 2024    |                  | 0.0             | 62.86         | 0.35     | 0.0  | 0.0       | 63.21 | 0.0   | 0.0        | 0.0  | 63.21       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 1.73     | 0.0  | 0.0       | 101.73 | 17.01 | 0.0        | 0.0  | 84.72       |
+      | 100.0         | 1.54     | 0.0  | 0.0       | 101.54 | 17.01 | 0.0        | 0.0  | 84.53       |
     And Admin creates re-amortization trn on current business date with reAmortizationInterestHandling "EQUAL_AMORTIZATION_INTEREST_SPLIT" is forbidden as loan was charged-off
 # --- close the loan --- #
-    When Loan Pay-off is made on "01 April 2024"
+    When Loan Pay-off is made on "15 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4514 @AdvancedPaymentAllocation
