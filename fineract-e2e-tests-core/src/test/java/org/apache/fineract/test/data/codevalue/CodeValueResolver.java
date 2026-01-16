@@ -36,14 +36,26 @@ public class CodeValueResolver {
 
     private final FineractFeignClient fineractClient;
 
-    @Cacheable(key = "#codeValue.getName()", value = "codeValuesByName")
+    @Cacheable(key = "#codeId + '-' + #codeValue", value = "codeValuesByName")
     public long resolve(Long codeId, CodeValue codeValue) {
         String codeValueName = codeValue.getName();
 
         log.debug("Resolving code value by code id and name [{}]", codeValue);
         List<GetCodeValuesDataResponse> codeValuesResponses = ok(() -> fineractClient.codeValues().retrieveAllCodeValues(codeId, Map.of()));
         GetCodeValuesDataResponse foundPtr = codeValuesResponses.stream().filter(ptr -> codeValueName.equals(ptr.getName())).findAny()
-                .orElseThrow(() -> new IllegalArgumentException("Payment type [%s] not found".formatted(codeValueName)));
+                .orElseThrow(
+                        () -> new IllegalArgumentException("Code Value [%s] not found for Code [%s]".formatted(codeValueName, codeId)));
+
+        return foundPtr.getId();
+    }
+
+    @Cacheable(key = "#codeName + '-' + #codeValue", value = "codeValuesByName")
+    public long resolve(String codeName, String codeValue) {
+        log.debug("Resolving code value by code id and name [{}]", codeValue);
+        List<GetCodeValuesDataResponse> codeValuesResponses = ok(
+                () -> fineractClient.codeValues().retrieveAllCodeValues1(codeName, Map.of()));
+        GetCodeValuesDataResponse foundPtr = codeValuesResponses.stream().filter(ptr -> codeValue.equals(ptr.getName())).findAny()
+                .orElseThrow(() -> new IllegalArgumentException("Code Value [%s] not found for Code [%s]".formatted(codeValue, codeName)));
 
         return foundPtr.getId();
     }

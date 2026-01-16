@@ -689,7 +689,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
 
         if (StringUtils.isNotBlank(code)) {
             if (isConstraintApproach) {
-                codeMappings.put(dataTableNameAlias + "_" + name, this.codeReadPlatformService.retriveCode(code).getId());
+                codeMappings.put(dataTableNameAlias + "_" + name, this.codeReadPlatformService.retrieveCode(code).getId());
                 String fkName = "fk_" + dataTableNameAlias + "_" + name;
                 constrainBuilder.append(", CONSTRAINT ").append(sqlGenerator.escape(fkName)).append(" ").append("FOREIGN KEY (")
                         .append(sqlGenerator.escape(name)).append(") ").append(REFERENCES_CLAUSE)
@@ -753,7 +753,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
         if (StringUtils.isNotBlank(code)) {
             if (isConstraintApproach) {
                 String fkName = "fk_" + dataTableNameAlias + "_" + name;
-                codeMappings.put(dataTableNameAlias + "_" + name, this.codeReadPlatformService.retriveCode(code).getId());
+                codeMappings.put(dataTableNameAlias + "_" + name, this.codeReadPlatformService.retrieveCode(code).getId());
                 constrainBuilder.append(",ADD CONSTRAINT  ").append(sqlGenerator.escape(fkName)).append(" ").append("FOREIGN KEY (")
                         .append(sqlGenerator.escape(name)).append(") ").append(REFERENCES_CLAUSE)
                         .append(sqlGenerator.escape(CODE_VALUES_TABLE)).append(" (").append(TABLE_FIELD_ID).append(")");
@@ -823,7 +823,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
                         }
                     }
                     if (newCode != null) {
-                        codeMappings.put(dataTableNameAlias + "_" + newName, this.codeReadPlatformService.retriveCode(newCode).getId());
+                        codeMappings.put(dataTableNameAlias + "_" + newName, this.codeReadPlatformService.retrieveCode(newCode).getId());
                         if (code == null || !StringUtils.equalsIgnoreCase(oldName, newName)) {
                             constrainBuilder.append(", ADD CONSTRAINT  ").append(sqlGenerator.escape(newFkName)).append(" ")
                                     .append("FOREIGN KEY (").append(sqlGenerator.escape(newName)).append(") ").append(REFERENCES_CLAUSE)

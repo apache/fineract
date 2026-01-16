@@ -22,10 +22,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.codes.exception.CodeValueNotFoundException;
+import org.apache.fineract.infrastructure.codes.mapper.CodeValueMapper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -33,16 +35,13 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
-
-    @Autowired
-    public CodeValueReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    private final CodeValueRepository codeValueRepository;
+    private final CodeValueMapper codeValueMapper;
 
     private static final class CodeValueDataMapper implements RowMapper<CodeValueData> {
 
@@ -104,5 +103,23 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
             throw new CodeValueNotFoundException(codeValueId, e);
         }
 
+    }
+
+    @Override
+    public List<CodeValueData> retrieveAllCodeValues(String codeName) {
+        // TODO: review whether it is needed.
+        this.context.authenticatedUser();
+        return codeValueMapper.map(codeValueRepository.findByCodeName(codeName));
+    }
+
+    @Override
+    public CodeValueData retrieveCodeValue(String codeName, Long codeValueId) {
+        // TODO: review whether it is needed.
+        this.context.authenticatedUser();
+        CodeValueData codeValueData = codeValueMapper.map(codeValueRepository.findByCodeNameAndId(codeName, codeValueId));
+        if (codeValueData == null) {
+            throw new CodeValueNotFoundException(codeName, codeValueId);
+        }
+        return codeValueData;
     }
 }

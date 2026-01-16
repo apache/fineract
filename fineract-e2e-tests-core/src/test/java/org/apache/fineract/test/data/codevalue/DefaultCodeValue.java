@@ -23,7 +23,10 @@ public enum DefaultCodeValue implements CodeValue {
     // Charge-off reason
     FRAUD("Fraud"), //
     DELINQUENT("Delinquent"), //
-    OTHER("Other"), BAD_DEBT("Bad Debt"), FORGIVEN("Forgiven"), TEST("Test"); //
+    OTHER("Other"), //
+    BAD_DEBT("Bad Debt"), //
+    FORGIVEN("Forgiven"), //
+    TEST("Test"); //
 
     private final String customName;
 
