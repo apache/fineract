@@ -35,3 +35,12 @@ agency:
 posting:
   service:
     url: http://localhost:9009
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
