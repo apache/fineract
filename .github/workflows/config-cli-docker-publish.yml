@@ -7,9 +7,9 @@ on:
       - develop
       - yaml-data
     paths:
-      - 'docs/data-collection/fineract-config-cli/src/**'
-      - 'docs/data-collection/fineract-config-cli/pom.xml'
-      - 'docs/data-collection/fineract-config-cli/Dockerfile'
+      - 'fineract-adorsys-data-collection/fineract-config-cli/src/**'
+      - 'fineract-adorsys-data-collection/fineract-config-cli/pom.xml'
+      - 'fineract-adorsys-data-collection/fineract-config-cli/Dockerfile'
       - '.github/workflows/config-cli-docker-publish.yml'
 
   pull_request:

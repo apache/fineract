@@ -2789,6 +2789,6 @@ tellerAccountingRules:
   officeName: Bamenda Branch
 businessDate:
   type: BUSINESS_DATE
-  date: 15 January 2026
+  date: 16 January 2026
   dateFormat: dd MMMM yyyy
   locale: en

@@ -8,7 +8,7 @@ on:
       - config-demo
       - yaml-data
     paths:
-      - 'docs/data-collection/fineract-config-cli/**'
+      - 'fineract-adorsys-data-collection/fineract-config-cli/**'
       - '.github/workflows/config-cli-build.yml'
   pull_request:
     branches:

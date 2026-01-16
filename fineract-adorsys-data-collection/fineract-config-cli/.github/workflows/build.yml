@@ -6,7 +6,6 @@ on:
       - main
       - develop
       - config-demo
-      - update/activate-maker-checker-for-manual-journal-entries
   pull_request:
     branches:
       - main
