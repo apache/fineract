@@ -16,7 +16,7 @@
 # under the License.
 #
 
-version: "3.8"
+#version: "3.9"
 
 services:
 
@@ -38,3 +38,133 @@ services:
       - ./config/docker/env/fineract.env
       - ./config/docker/env/fineract-common.env
       - ./config/docker/env/fineract-mariadb.env
+
+  consul:
+    image: hashicorp/consul:1.17
+    container_name: consul
+    command: consul agent -dev -client=0.0.0.0
+    ports:
+      - "8500:8500"
+    networks:
+      - corebanking-net
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.0
+    container_name: keycloak
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8088:8080"
+    networks:
+      - corebanking-net
+  api-gateway:
+    build:
+      context: ./fn-api-gateway
+    container_name: api-gateway
+    depends_on:
+      - consul
+      - keycloak
+      - fineract
+    ports:
+      - "9000:9000"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - corebanking-net
+
+  fn-account-service:
+    build:
+      context: ./fn-account-service
+    container_name: fn-account-service
+    ports:
+      - "9001:9001"
+    depends_on:
+      - db
+      - consul
+      - fineract
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - corebanking-net
+
+  fn-accounting-service:
+    build:
+      context: ./fn-accounting-service
+    container_name: fn-accounting-service
+    ports:
+      - "9002:9002"
+    depends_on:
+      - consul
+      - fineract
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - corebanking-net
+
+  fn-asset-service:
+    build:
+      context: ./fn-asset-service
+    container_name: fn-asset-service
+    ports:
+      - "9003:9003"
+    depends_on:
+      - consul
+      - fineract
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - corebanking-net
+
+  fn-branch-service:
+    build:
+      context: ./fn-branch-service
+    container_name: fn-branch-service
+    ports:
+      - "9004:9004"
+    depends_on:
+      - consul
+      - fineract
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - corebanking-net
+
+
+  fn-wallet-service:
+    build:
+      context: ./fn-wallet-service
+    container_name: fn-wallet-service
+    ports:
+      - "9005:9005"
+    depends_on:
+      - consul
+      - fineract
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - corebanking-net
+
+
+
+  fn-agency-banking-service:
+    build:
+      context: ./fn-agency-bancking-service
+    container_name: fn-agency-banking-service
+    ports:
+      - "9006:9006"
+    depends_on:
+      - consul
+      - fineract
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - corebanking-net
+
+
+
+
+networks:
+  corebanking-net:
+    driver: bridge

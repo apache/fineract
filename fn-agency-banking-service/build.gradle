@@ -1,7 +1,7 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.2.1'
-	id 'io.spring.dependency-management' version '1.1.4'
+	id 'org.springframework.boot' version '3.5.9'
+	id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'ng.com.createsoftware'
@@ -14,7 +14,7 @@ java {
 	}
 }
 ext {
-	set('springCloudVersion', "2023.0.3")
+	set('springCloudVersion', "2025.0.1")
 }
 
 configurations {
@@ -32,16 +32,10 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-<<<<<<< Updated upstream
-//	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-jersey'
-//	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
-=======
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 //	implementation 'org.springframework.boot:spring-boot-starter-jersey'
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
->>>>>>> Stashed changes
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
