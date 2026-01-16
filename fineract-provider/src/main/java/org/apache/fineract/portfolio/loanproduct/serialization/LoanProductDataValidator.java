@@ -2797,17 +2797,13 @@ public final class LoanProductDataValidator {
         }
     }
 
-    private void validateLoanScheduleType(final String transactionProcessingStrategyCode,
-                                          final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+    private void validateLoanScheduleType(final String transactionProcessingStrategyCode, final DataValidatorBuilder baseDataValidator,
+            final JsonElement element) {
 
-        final String loanScheduleTypeStr =
-                this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element);
+        final String loanScheduleTypeStr = this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element);
 
         // Existing validation: record an error if value is not one of the enum values.
-        baseDataValidator.reset()
-                .parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE)
-                .value(loanScheduleTypeStr)
-                .ignoreIfNull()
+        baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE).value(loanScheduleTypeStr).ignoreIfNull()
                 .isOneOfEnumValues(LoanScheduleType.class);
 
         if (loanScheduleTypeStr == null || loanScheduleTypeStr.isBlank()) {
@@ -2821,24 +2817,21 @@ public final class LoanProductDataValidator {
             return;
         }
 
-        final boolean isAdvancedAllocationStrategy =
-                AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(transactionProcessingStrategyCode);
+        final boolean isAdvancedAllocationStrategy = AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+                .equals(transactionProcessingStrategyCode);
 
         if (isAdvancedAllocationStrategy && loanScheduleType != LoanScheduleType.PROGRESSIVE) {
-            baseDataValidator.reset()
-                    .parameter(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE)
-                    .failWithCode("supported.only.for.progressive.loan.schedule.type",
-                            "Progressive repayment schedule processing is only available with `Advanced payment allocation` strategy");
+            baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE).failWithCode(
+                    "supported.only.for.progressive.loan.schedule.type",
+                    "Progressive repayment schedule processing is only available with `Advanced payment allocation` strategy");
         }
 
         if (!isAdvancedAllocationStrategy && loanScheduleType == LoanScheduleType.PROGRESSIVE) {
-            baseDataValidator.reset()
-                    .parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE)
-                    .failWithCode("supported.only.with.advanced.payment.allocation.strategy",
-                            loanScheduleTypeStr + " loan schedule type is not available with " + transactionProcessingStrategyCode + " strategy");
+            baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE).failWithCode(
+                    "supported.only.with.advanced.payment.allocation.strategy",
+                    loanScheduleTypeStr + " loan schedule type is not available with " + transactionProcessingStrategyCode + " strategy");
         }
     }
-
 
     public void validateRepaymentPeriodWithGraceSettings(final Integer numberOfRepayments, final Integer graceOnPrincipalPayment,
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final Integer recurringMoratoriumOnPrincipalPeriods,
