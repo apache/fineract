@@ -16,35 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.test.initializer.scenario;
+package org.apache.fineract.test.initializer.global;
 
-import static org.apache.fineract.test.initializer.global.GlobalConfigurationGlobalInitializerStep.CONFIG_KEY_ENABLE_ADDRESS;
 import static org.apache.fineract.test.initializer.global.GlobalConfigurationGlobalInitializerStep.CONFIG_KEY_ENABLE_BUSINESS_DATE;
-import static org.apache.fineract.test.initializer.global.GlobalConfigurationGlobalInitializerStep.CONFIG_KEY_ENABLE_RECALCULATE_COB_DATE;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.test.helper.BusinessDateHelper;
 import org.apache.fineract.test.helper.GlobalConfigurationHelper;
+import org.apache.fineract.test.initializer.scenario.FineractScenarioInitializerStep;
 import org.springframework.stereotype.Component;
 
-@Component
+@Slf4j
 @RequiredArgsConstructor
-public class GlobalConfigurationScenarioInitializerStep implements FineractScenarioInitializerStep {
+@Component
+public class BusinessDateInitializerStep implements FineractScenarioInitializerStep {
 
-    private final GlobalConfigurationHelper globalConfigurationHelper;
+    private final BusinessDateHelper businessDateHelper;
+    private final GlobalConfigurationHelper configurationHelper;
 
     @Override
-    public void initializeForScenario() throws Exception {
-        // Enable-address set to false
-        globalConfigurationHelper.disableGlobalConfiguration(CONFIG_KEY_ENABLE_ADDRESS, 0L);
-
-        // Enable business date and COB date
-        globalConfigurationHelper.enableGlobalConfiguration(CONFIG_KEY_ENABLE_BUSINESS_DATE, 0L);
-        globalConfigurationHelper.enableGlobalConfiguration(CONFIG_KEY_ENABLE_RECALCULATE_COB_DATE, 0L);
+    public void initializeForScenario() {
+        configurationHelper.enableGlobalConfiguration(CONFIG_KEY_ENABLE_BUSINESS_DATE, 0L);
+        businessDateHelper.setBusinessDateToday();
     }
 
     @Override
     public void resetAfterScenario() {
-        // Enable business date
-        globalConfigurationHelper.disableGlobalConfiguration(CONFIG_KEY_ENABLE_BUSINESS_DATE, 0L);
+        configurationHelper.enableGlobalConfiguration(CONFIG_KEY_ENABLE_BUSINESS_DATE, 0L);
+        businessDateHelper.setBusinessDateToday();
+        configurationHelper.disableGlobalConfiguration(CONFIG_KEY_ENABLE_BUSINESS_DATE, 0L);
     }
 }

@@ -105,6 +105,31 @@ public class LoanReAmortizationStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_REAMORTIZATION_UNDO_RESPONSE, response);
     }
 
+    @When("Admin creates a Loan re-amortization transaction on current business date but fails with {int} error")
+    public void createLoanReAmortizationFailsWithError(int errorCode) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final Long loanId = loanResponse.getLoanId();
+
+        final PostLoansLoanIdTransactionsRequest reAmortizationRequest = LoanRequestFactory.defaultLoanReAmortizationRequest();
+
+        CallFailedRuntimeException exception = fail(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId,
+                reAmortizationRequest, Map.of("command", "reAmortize")));
+        assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(errorCode);
+    }
+
+    @When("Admin creates a Loan re-amortization transaction on current business date with reAmortizationInterestHandling {string} but fails with {int} error")
+    public void createLoanReAmortizationWithInterestHandlingFailsWithError(final String reAmortizationInterestHandling, int errorCode) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final Long loanId = loanResponse.getLoanId();
+
+        final PostLoansLoanIdTransactionsRequest reAmortizationRequest = LoanRequestFactory.defaultLoanReAmortizationRequest()
+                .reAmortizationInterestHandling(reAmortizationInterestHandling);
+
+        CallFailedRuntimeException exception = fail(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId,
+                reAmortizationRequest, Map.of("command", "reAmortize")));
+        assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(errorCode);
+    }
+
     @When("Admin creates a Loan re-amortization transaction on current business date is forbidden as loan was charged-off")
     public void reAmortizationChargedOffLoanFailure() {
         reAmortizationFailure(ErrorMessageHelper.reAmortizeChargedOffLoanFailure());
@@ -168,6 +193,20 @@ public class LoanReAmortizationStepDef extends AbstractStepDef {
     public void createReAmortizedPreviewByLoanExternalId(final DataTable table) {
         final LoanScheduleData response = reAmortizedPreviewByLoanExternalId(table);
         testContext().set(TestContextKey.LOAN_REAMORTIZATION_PREVIEW_RESPONSE, response);
+    }
+
+    @When("Admin creates a Loan re-amortization preview by Loan external ID with the following data, but fails with {int} error code:")
+    public void createReAmortizedPreviewByLoanExternalIdFailsWithErrorCode(int errorCode, final DataTable table) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final String loanExternalId = loanResponse.getResourceExternalId();
+
+        final List<String> data = table.asLists().get(1);
+        final String reAmortizationInterestHandling = data.getFirst();
+
+        final Map<String, Object> queryParams = Map.of("reAmortizationInterestHandling", reAmortizationInterestHandling);
+        CallFailedRuntimeException exception = fail(
+                () -> fineractClient.loanTransactions().previewReAmortizationSchedule1(loanExternalId, queryParams));
+        assertThat(exception.getStatus()).isEqualTo(errorCode);
     }
 
     @Then("Loan Re-Amortization Repayment schedule preview has the following data in Total row:")

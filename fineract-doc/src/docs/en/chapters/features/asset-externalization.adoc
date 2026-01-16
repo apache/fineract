@@ -1,0 +1,307 @@
+
+# Asset Externalization
+---
+
+
+## 1. Purpose & Scope
+
+The Asset Externalization capability enables **loan ownership transfer** between a **Platform Owner** and external investors within **Fineract**, supporting:
+
+* Loan sales and securitization for GPL products
+* Real-time ownership awareness with **COB-based execution**
+* Full accounting, reporting, and auditing for **Platform Owner–owned and investor-owned loans**
+* API-driven ownership lifecycle management
+* Event-driven downstream integration (ETL, Credit domains)
+
+Ownership is **exclusive**: once sold, the loan is **100% investor-owned** until buyback.
+
+---
+
+## 2. In-Scope vs Out-of-Scope
+
+### In Scope (Fineract Responsibilities)
+
+* Persist and manage **loan ownership throughout loan lifecycle**
+* Accept ownership transfer requests (sale, buyback, cancel)
+* Execute ownership changes **at Close of Business (COB)**
+* Generate **accounting journal entries** per ownership
+* Publish **ownership change events**
+* Provide **GET/POST APIs** for ownership and transfers
+* Support delayed settlement (pending → active)
+* Produce investor accounting reports
+
+### Out of Scope
+
+* General high-level mechanism for determining which loans/clients are eligible for sale or buyback (loan state requirements are scope and implemented)
+* Smart Order Router which could prioritize internal logic or market logic
+* Credit ETL (Extract, Transform, Load) schema decisions outside Fineract
+
+---
+
+## 3. Ownership Model
+
+### Ownership Characteristics
+
+* Single owner at any time (**Platform Owner** or Investor)
+* Ownership stored with:
+
+* Asset Owner ID
+* Transfer (Sale / Buyback) ID
+* Purchase Price Ratio
+* Effective date range
+* Status
+* Ownership updates requested in real time, **executed during COB**
+
+### Ownership Statuses
+
+|===
+| Status | Description
+| PENDING | Transfer requested, not yet executed
+| ACTIVE | Investor owns the loan
+| BUYBACK | Ownership reverted to Platform Owner
+| DECLINED | Transfer invalid due to balance/state
+| CANCELLED | Transfer cancelled before execution
+|===
+
+---
+
+## 4. Functional Flows
+
+### 4.1 Asset Sale (Ownership Transfer to Investor)
+
+**Preconditions**
+
+* Loan must be **ACTIVE**
+* No active ownership
+* Balance at COB **> 0.00**
+
+**Process**
+
+1. Sale request submitted via API
+2. Ownership record created with status **PENDING**
+3. At COB on settlement date:
+
+* If balance > 0.00 → status becomes **ACTIVE**
+* If balance ≤ 0.00 → status becomes **DECLINED**
+4. Journal entries posted using **closing balance**
+5. Ownership effective from next day
+
+**Persisted Data**
+
+* Asset Owner ID
+* Sale Transaction ID
+* Purchase Price Ratio
+* Settlement date
+* Effective date range
+* Timestamps
+
+---
+
+### 4.2 Buyback (Ownership Transfer to Platform Owner)
+
+**Preconditions**
+
+* Active ownership exists
+* Loan must be **ACTIVE**
+* Can be triggered for fraud, reversals, or business decision
+
+**Process**
+
+1. Buyback request submitted
+2. Buyback transfer record created
+3. At COB:
+
+* Ownership marked **INACTIVE**
+* Journal entries posted using closing balance
+4. Ownership reverts to Platform Owner
+
+**No buyback occurs if**
+
+* Loan is CLOSED
+* No active ownership
+* Loan not found
+
+---
+
+### 4.3 Delayed Settlement (Phase 2)
+
+* Sale request can include **future settlement date**
+* Ownership remains **PENDING** until settlement
+* Pending accounting entries applied
+* At settlement COB:
+
+* Pending → ACTIVE if balance > 0
+* Pending → DECLINED if balance ≤ 0
+
+---
+
+## 5. Accounting Behavior
+
+### General Rules
+
+* All accounting logic remains unchanged **except owner tagging**
+* Fees, payments, delinquency, charge-off rules remain unchanged
+* Fees after sale belong to **investor**
+* No ownership transfer or GL entries if balance ≤ 0
+
+---
+
+### 5.1 Sale & Buyback Journal Entries (COB)
+
+**Sale**
+
+* DR Loan/Fee Receivable – Investor
+* CR Loan/Fee Receivable – Platform Owner
+
+**Buyback**
+
+* DR Loan/Fee Receivable – Platform Owner
+* CR Loan/Fee Receivable – Investor
+
+---
+
+### 5.2 Investor-Owned Loan Transactions
+
+For investor-owned loans, journal entries are posted **against investor GLs** for:
+
+* Disbursement
+* Repayments (all payment types)
+* Refunds
+* Goodwill credits
+* Snooze & NSF fees
+* Fee waivers
+* Credit balance refunds
+* Repayment adjustments & reversals
+* Charge-offs (non-payment, deceased, bankrupt)
+* Recoveries (repayments, refunds)
+
+---
+
+## 6. Events
+
+### Ownership Change Events
+
+Events are published **in real time** when ownership changes occur.
+
+**Published For**
+
+* Sale
+* Buyback
+* Declined transfers
+
+**Event Payload**
+
+* Date/time
+* Loan account ID
+* Sale/Buyback Transaction ID
+* Asset Owner ID
+* Loan balance
+
+**Consumption**
+
+* Fineract SOR → Adaptor → Credit ETL
+* Persisted in Credit databases
+
+---
+
+## 7. APIs
+
+### Transfer Requests
+
+Ownership transfer requests are supported for **sale**, **buyback**, and **cancel**, targeting loans by internal or external identifiers.
+
+**Root endpoint**
+
+* `/external-asset-owners`
+
+**Sale / Buyback / Cancel**
+
+* `POST /external-asset-owners/transfers?loanId=<loan_id>&command=<sale|buyback|cancel>`
+* `POST /external-asset-owners/transfers?loanExternalId=<loan_external_id>&command=<sale|buyback|cancel>`
+* `POST /external-asset-owners/transfers/loans/<loan_id>?command=<action>`
+* `POST /external-asset-owners/transfers/loans/external-id/<loan_external_id>?command=<action>`
+
+---
+
+### Retrieve Ownership
+
+Ownership and transfer information can be retrieved using:
+
+* `GET /external-asset-owners/transfers?transferExternalId=<transfer_external_id>`
+* `GET /external-asset-owners/transfers?loanId=<loan_id>`
+* `GET /external-asset-owners/transfers?loanExternalId=<loan_external_id>`
+
+---
+
+### Retrieve Accounting Data
+
+Accounting data related to ownership is available through:
+
+* Transfer journal entries
+
+* `GET /external-asset-owners/transfers/external-id/{ownerExternalId}/journal-entries`
+
+* Owner journal entries
+
+* `GET /external-asset-owners/owners/external-id/{ownerExternalId}/journal-entries`
+
+---
+
+## 8. Data Model (Summary)
+
+### Core Tables
+
+* `m_external_asset_owner`
+* `m_external_asset_owner_transfer`
+* `m_external_asset_owner_active_transfer_loan_mapping`
+* `m_external_asset_owner_journal_entry_mapping`
+* `m_external_asset_transfer_journal_entry_mapping`
+* `m_external_asset_owner_transfer_details`
+
+Supports:
+
+* Ownership history
+* Effective dating
+* Auditing
+* Investor-level accounting reconciliation
+
+---
+
+## 9. Reporting
+
+### Daily Investor Reports
+
+* GL Trial Balance Summary (by investor)
+* Transaction Detail Report (by investor)
+
+Used for reconciliation of:
+
+* Investor cash
+* GL balances
+* Ownership-related postings
+
+---
+
+## 10. Validation Rules (Consolidated)
+
+* Only **ACTIVE loans** accepted for sale
+* No transfer if:
+
+* Loan CLOSED
+* Balance ≤ 0 at COB
+* Active ownership already exists
+* Invalid loan ID
+* Only one pending transfer allowed per loan
+* Ownership changes occur **only during COB**
+
+---
+
+## 11. Key Design Constraints
+
+* Transfer initiation via API only
+* Execution strictly at COB
+* Ownership effective date always starts **day after settlement**
+* Journal entries linked to owner via mapping tables
+* Accounting and Investor modules are logically coupled
+
+---
