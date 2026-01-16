@@ -134,7 +134,7 @@ public class CodesApiResource {
     public String retrieveCodeByName(@PathParam("codeName") @Parameter(description = "codeName") final String codeName,
             @Context final UriInfo uriInfo) {
 
-        final CodeData code = this.readPlatformService.retriveCode(codeName);
+        final CodeData code = this.readPlatformService.retrieveCode(codeName);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, code, RESPONSE_DATA_PARAMETERS);

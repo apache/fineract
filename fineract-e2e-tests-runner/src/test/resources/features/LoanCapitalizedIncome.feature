@@ -7673,7 +7673,7 @@ Feature: Capitalized Income
     And Admin successfully disburse the loan on "1 January 2024" with "900" EUR transaction amount
     Then Loan status will be "ACTIVE"
     When Admin sets the business date to "2 January 2024"
-    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "2 January 2024" with "100" EUR transaction amount and "capitalized_income_transaction_classification" classification
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "2 January 2024" with "100" EUR transaction amount and "capitalized_income_transaction_classification_value" classification
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date            | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024 |                 | 900.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -8277,7 +8277,7 @@ Feature: Capitalized Income
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4096
-  Scenario: Verify GL entries for Capitalized Income Amortization - UC2: Amortization for Capitalized Income with classification rule: pending_bankruptcy
+  Scenario: Verify GL entries for Capitalized Income Amortization - UC2: Amortization for Capitalized Income with classification rule: capitalized_income_transaction_classification_value
     When Admin sets the business date to "01 January 2024"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -8285,7 +8285,7 @@ Feature: Capitalized Income
       | LP2_PROGRESSIVE_ADV_PMNT_ALLOCATION_CAPITALIZED_INCOME_ADJ_CUSTOM_ALLOC_CLASSIFICATION_INCOME_MAP | 01 January 2024   | 350            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2024" with "350" amount and expected disbursement date on "01 January 2024"
     And Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
-    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount and classification: scheduled_payment
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount and "capitalized_income_transaction_classification_value" classification
     When Admin sets the business date to "02 January 2024"
     And Admin runs inline COB job for Loan
     Then Loan Transactions tab has a "CAPITALIZED_INCOME" transaction with date "01 January 2024" which has the following Journal entries:
@@ -8301,7 +8301,7 @@ Feature: Capitalized Income
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4097
-  Scenario: Verify GL entries for Capitalized Income Amortization - UC3: Amortization for Capitalized Incomes with NO classification and with classification rule: pending_bankruptcy
+  Scenario: Verify GL entries for Capitalized Income Amortization - UC3: Amortization for Capitalized Incomes with NO classification and with classification rule: capitalized_income_transaction_classification_value
     When Admin sets the business date to "01 January 2024"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -8312,7 +8312,7 @@ Feature: Capitalized Income
     And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount
     When Admin sets the business date to "02 January 2024"
     And Admin runs inline COB job for Loan
-    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "02 January 2024" with "20" EUR transaction amount and classification: scheduled_payment
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "02 January 2024" with "20" EUR transaction amount and "capitalized_income_transaction_classification_value" classification
     When Admin sets the business date to "03 January 2024"
     And Admin runs inline COB job for Loan
     Then Loan Transactions tab has a "CAPITALIZED_INCOME" transaction with date "01 January 2024" which has the following Journal entries:
@@ -8346,7 +8346,7 @@ Feature: Capitalized Income
     And Admin successfully approves the loan on "01 January 2024" with "200" amount and expected disbursement date on "01 January 2024"
     And Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
     Then Loan status will be "ACTIVE"
-    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount and classification: scheduled_payment
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount and "capitalized_income_transaction_classification_value" classification
     Then Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
@@ -8365,7 +8365,7 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable            | 50.0  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
-    And Loan Transactions tab has a "Capitalized Income" transaction with date "01 January 2024" which has classification code value "scheduled_payment"
+    And Loan Transactions tab has a "Capitalized Income" transaction with date "01 January 2024" which has classification code value "capitalized_income_transaction_classification_value"
     Then LoanCapitalizedIncomeTransactionCreatedBusinessEvent is raised on "01 January 2024"
     And Admin adds capitalized income adjustment with "AUTOPAY" payment type to the loan on "01 January 2024" with "25" EUR transaction amount
     Then Loan Transactions tab has the following data:

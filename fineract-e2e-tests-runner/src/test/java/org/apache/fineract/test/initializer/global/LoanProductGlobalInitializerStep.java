@@ -62,6 +62,7 @@ import org.apache.fineract.test.data.OverAppliedCalculationType;
 import org.apache.fineract.test.data.PreClosureInterestCalculationRule;
 import org.apache.fineract.test.data.RecalculationRestFrequencyType;
 import org.apache.fineract.test.data.TransactionProcessingStrategyCode;
+import org.apache.fineract.test.data.codevalue.CodeNames;
 import org.apache.fineract.test.data.codevalue.CodeValue;
 import org.apache.fineract.test.data.codevalue.CodeValueResolver;
 import org.apache.fineract.test.data.codevalue.DefaultCodeValue;
@@ -3697,7 +3698,9 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
 
         List<PostClassificationToIncomeAccountMappings> buydownfeeClassificationToIncomeAccountMappings = new ArrayList<>();
         PostClassificationToIncomeAccountMappings classificationToIncomeAccountMappings = new PostClassificationToIncomeAccountMappings();
-        classificationToIncomeAccountMappings.setClassificationCodeValueId(25L);
+        long classificationId = codeValueResolver.resolve(CodeNames.BUYDOWN_FEE_TRANSACTION_CLASSIFICATION.getValue(),
+                CodeGlobalInitializerStep.BUYDOWN_FEE_TRANSACTION_CLASSIFICATION_VALUE);
+        classificationToIncomeAccountMappings.setClassificationCodeValueId(classificationId);
         classificationToIncomeAccountMappings.setIncomeAccountId(10L);
         buydownfeeClassificationToIncomeAccountMappings.add(classificationToIncomeAccountMappings);
 
@@ -3736,7 +3739,10 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
 
         List<PostClassificationToIncomeAccountMappings> capitalizedIncomeClassificationToIncomeAccountMappings = new ArrayList<>();
         PostClassificationToIncomeAccountMappings classificationToIncomeAccountMappingsCapitalizedIncome = new PostClassificationToIncomeAccountMappings();
-        classificationToIncomeAccountMappingsCapitalizedIncome.setClassificationCodeValueId(24L);
+        long capitalizedIncomeClassificationId = codeValueResolver.resolve(
+                CodeNames.CAPITALIZED_INCOME_TRANSACTION_CLASSIFICATION.getValue(),
+                CodeGlobalInitializerStep.CAPITALIZED_INCOME_TRANSACTION_CLASSIFICATION_VALUE);
+        classificationToIncomeAccountMappingsCapitalizedIncome.setClassificationCodeValueId(capitalizedIncomeClassificationId);
         classificationToIncomeAccountMappingsCapitalizedIncome.setIncomeAccountId(15L);
         capitalizedIncomeClassificationToIncomeAccountMappings.add(classificationToIncomeAccountMappingsCapitalizedIncome);
 
