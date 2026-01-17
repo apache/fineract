@@ -119,6 +119,7 @@ plugins {
     id 'org.openapi.generator' version '7.8.0' apply false
     id 'com.gradleup.shadow' version '8.3.5' apply false
     id 'me.champeau.jmh' version '0.7.1' apply false
+    id 'org.cyclonedx.bom' version '3.1.0' apply false
 }
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"
@@ -886,6 +887,16 @@ configure(project.fineractPublishProjects) {
             sign publishing.publications.mavenJava
         }
     }
+}
+
+// Configuration for CycloneDX SBOM generator
+// https://github.com/CycloneDX/cyclonedx-gradle-plugin
+apply plugin: 'org.cyclonedx.bom'
+
+cyclonedxBom {
+    projectType = "application"
+    includeBomSerialNumber = true
+    includeLicenseText = true
 }
 
 task printSourceSetInformation() {
