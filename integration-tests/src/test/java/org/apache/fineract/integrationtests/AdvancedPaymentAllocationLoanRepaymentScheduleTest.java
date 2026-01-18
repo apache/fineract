@@ -3851,7 +3851,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
     // every 2 months)
     // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
     // 1. Create a Loan product with Adv. Pment. Alloc. and No Interest
-    // 2. Submit Loan and approve -> expect validation error - Loan acount Fixed
+    // 2. Submit Loan and approve -> expect validation error - Loan account Fixed
     // Length with a wrong Loan Term setup
     @Test
     public void uc132() {
