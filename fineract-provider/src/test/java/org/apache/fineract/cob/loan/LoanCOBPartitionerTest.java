@@ -30,16 +30,14 @@ import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
 import org.apache.fineract.cob.data.COBParameter;
 import org.apache.fineract.cob.data.COBPartition;
-import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
@@ -59,7 +57,11 @@ class LoanCOBPartitionerTest {
     @Mock
     private JobOperator jobOperator;
     @Mock
-    private JobExplorer jobExplorer;
+    private StepExecution stepExecution;
+    @Mock
+    private JobExecution jobExecution;
+    @Mock
+    private ExecutionContext executionContext;
 
     @Test
     public void testLoanCOBPartitioner() {
@@ -69,17 +71,19 @@ class LoanCOBPartitionerTest {
                 .thenReturn(BUSINESS_STEP_SET);
         when(retrieveLoanIdService.retrieveLoanCOBPartitions(1L, BUSINESS_DATE, false, 5))
                 .thenReturn(List.of(new COBPartition(1L,10L, 1L, 5L), new COBPartition(11L,20L, 2L, 4L)));
-        LoanCOBPartitioner loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, retrieveLoanIdService, jobOperator, jobExplorer, 1L);
-        loanCOBPartitioner.setBusinessDate(BUSINESS_DATE);
-        loanCOBPartitioner.setIsCatchUp(false);
+        when(stepExecution.getJobExecution()).thenReturn(jobExecution);
+        when(jobExecution.getExecutionContext()).thenReturn(executionContext);
+        when(executionContext.get(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME)).thenReturn(BUSINESS_DATE);
+        when(executionContext.get(LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME)).thenReturn(false);
+        LoanCOBPartitioner loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, retrieveLoanIdService, jobOperator,stepExecution, 1L);
 
         //when
         Map<String, ExecutionContext> partitions = loanCOBPartitioner.partition(1);
 
         //then
         Assertions.assertEquals(2, partitions.size());
-        validatePartitions(partitions, 1, 1,  10);
-        validatePartitions(partitions, 2, 11,  20);
+        validatePartitions(partitions, 1, 1,  10, BUSINESS_DATE.toString(), "false");
+        validatePartitions(partitions, 2, 11,  20, BUSINESS_DATE.toString(), "false");
     }
 
     @Test
@@ -88,19 +92,16 @@ class LoanCOBPartitionerTest {
         when(propertyService.getPartitionSize(LoanCOBConstant.JOB_NAME)).thenReturn(5);
         when(cobBusinessStepService.getCOBBusinessSteps(LoanCOBBusinessStep.class, LoanCOBConstant.LOAN_COB_JOB_NAME))
                 .thenReturn(Set.of());
-        JobExecution jobExecution = Mockito.mock(JobExecution.class);
+
+        when(stepExecution.getJobExecution()).thenReturn(jobExecution);
         when(jobExecution.getId()).thenReturn(123L);
-        when(jobExplorer.findRunningJobExecutions(JobName.LOAN_COB.name())).thenReturn(Set.of(jobExecution));
-        LoanCOBPartitioner loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, retrieveLoanIdService, jobOperator, jobExplorer, 1L);
-        loanCOBPartitioner.setBusinessDate(BUSINESS_DATE);
-        loanCOBPartitioner.setIsCatchUp(false);
+        LoanCOBPartitioner loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, retrieveLoanIdService, jobOperator, stepExecution, 1L);
 
         //when
         Map<String, ExecutionContext> partitions = loanCOBPartitioner.partition(1);
 
         //then
         Assertions.assertEquals(0, partitions.size());
-        verify(jobExplorer, times(1)).findRunningJobExecutions(JobName.LOAN_COB.name());
         verify(jobOperator, times(1)).stop(123L);
     }
 
@@ -112,24 +113,30 @@ class LoanCOBPartitionerTest {
                 .thenReturn(BUSINESS_STEP_SET);
         when(retrieveLoanIdService.retrieveLoanCOBPartitions(1L, BUSINESS_DATE, false, 5))
                 .thenReturn(List.of());
-        LoanCOBPartitioner loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, retrieveLoanIdService, jobOperator, jobExplorer, 1L);
-        loanCOBPartitioner.setBusinessDate(BUSINESS_DATE);
-        loanCOBPartitioner.setBusinessDate(BUSINESS_DATE);
-        loanCOBPartitioner.setIsCatchUp(false);
+        when(stepExecution.getJobExecution()).thenReturn(jobExecution);
+        when(jobExecution.getExecutionContext()).thenReturn(executionContext);
+        when(executionContext.get(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME)).thenReturn(BUSINESS_DATE);
+        when(executionContext.get(LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME)).thenReturn(false);
+        LoanCOBPartitioner loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, retrieveLoanIdService, jobOperator,stepExecution, 1L);
 
         //when
         Map<String, ExecutionContext> partitions = loanCOBPartitioner.partition(1);
 
         //then
         Assertions.assertEquals(1, partitions.size());
-        validatePartitions(partitions, 1, 0,  0);
+        validatePartitions(partitions, 1, 0,  0, BUSINESS_DATE.toString(), "false");
     }
 
-    private void validatePartitions(Map<String, ExecutionContext> partitions, int index, long min, long max) {
+    private void validatePartitions(Map<String, ExecutionContext> partitions, int index, long min, long max, String businessDate,
+            String isCatchUp) {
         Assertions.assertEquals(BUSINESS_STEP_SET,
                 partitions.get(LoanCOBPartitioner.PARTITION_PREFIX + index).get(LoanCOBConstant.BUSINESS_STEPS));
         Assertions.assertEquals(new COBParameter(min, max),
                 partitions.get(LoanCOBPartitioner.PARTITION_PREFIX + index).get(LoanCOBConstant.LOAN_COB_PARAMETER));
         Assertions.assertEquals("partition_" + index, partitions.get(LoanCOBPartitioner.PARTITION_PREFIX + index).get("partition"));
+        Assertions.assertEquals(businessDate,
+                partitions.get(LoanCOBPartitioner.PARTITION_PREFIX + index).get(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME));
+        Assertions.assertEquals(isCatchUp,
+                partitions.get(LoanCOBPartitioner.PARTITION_PREFIX + index).get(LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME));
     }
 }

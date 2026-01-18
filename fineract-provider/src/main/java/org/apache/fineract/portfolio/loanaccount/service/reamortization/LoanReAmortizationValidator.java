@@ -131,6 +131,15 @@ public class LoanReAmortizationValidator {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.reamortize.not.allowed.on.contract.terminated",
                     "Loan re-amortization is not allowed on contract terminated loan.", loan.getId());
         }
+
+        // validate there are overdue installments to re-amortize
+        boolean hasOverdueInstallments = loan.getRepaymentScheduleInstallments().stream()
+                .anyMatch(installment -> installment.getDueDate().isBefore(getBusinessLocalDate())
+                        && installment.getPrincipalOutstanding(loan.getCurrency()).isGreaterThanZero());
+        if (!hasOverdueInstallments) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.reamortize.no.overdue.amount",
+                    "Re-amortization cannot be executed: no overdue amount exists.", loan.getId());
+        }
     }
 
     public LoanTransaction findAndValidateReAmortizeTransactionForUndo(Loan loan) {

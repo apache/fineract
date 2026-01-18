@@ -45,8 +45,7 @@ public class InputChannelInterceptor implements ExecutorChannelInterceptor {
     @Override
     public void afterMessageHandled(@NonNull final Message<?> message, @NonNull final MessageChannel channel,
             @NonNull final MessageHandler handler, final Exception ex) {
-        log.debug("Cleaning up ThreadLocal context after message handling");
-        ThreadLocalContextUtil.reset();
+        afterHandleMessage();
     }
 
     public Message<StepExecutionRequest> beforeHandleMessage(Message<?> message) {
@@ -54,9 +53,14 @@ public class InputChannelInterceptor implements ExecutorChannelInterceptor {
     }
 
     public StepExecutionRequest beforeHandleMessage(ContextualMessage contextualMessage) {
-        log.debug("Initializing ThreadLocal context for message handling");
+        log.debug("Initializing ThreadLocal context for message handling: {}", contextualMessage);
         ThreadLocalContextUtil.init(contextualMessage.getContext());
         ThreadLocalContextUtil.setActionContext(ActionContext.COB);
         return contextualMessage.getStepExecutionRequest();
+    }
+
+    public void afterHandleMessage() {
+        log.debug("Cleaning up ThreadLocal context after message handling");
+        ThreadLocalContextUtil.reset();
     }
 }

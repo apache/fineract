@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.delinquency.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -139,14 +138,8 @@ public class DelinquencyWritePlatformServiceHelper {
     }
 
     public List<DelinquencyRange> sortDelinquencyRangesByMinAge(List<DelinquencyRange> ranges) {
-        final Comparator<DelinquencyRange> orderByMinAge = new Comparator<DelinquencyRange>() {
-
-            @Override
-            public int compare(DelinquencyRange o1, DelinquencyRange o2) {
-                return o1.getMinimumAgeDays().compareTo(o2.getMinimumAgeDays());
-            }
-        };
-        Collections.sort(ranges, orderByMinAge);
+        final Comparator<DelinquencyRange> orderByMinAge = Comparator.comparing(DelinquencyRange::getMinimumAgeDays);
+        ranges.sort(orderByMinAge);
         return ranges;
     }
 

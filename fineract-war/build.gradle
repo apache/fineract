@@ -150,7 +150,7 @@ distributions {
                         '**/.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', 
                         '**/.externalToolbuilders', '.theia', 'LICENSE_RELEASE', 
                         'NOTICE_RELEASE', '**/licenses', '*.class', '**/bin', '*.log', '.dockerignore', 
-                        '**/.gitkeep', '*.swp', '.atr-rat-excludes-bin.txt', '**/jquery-1.7.min.js'
+                        '**/.gitkeep', '*.swp', '.atr-rat-excludes-bin.txt'
                 
                 // Ensure consistent file paths for caching
                 eachFile { details ->

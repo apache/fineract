@@ -77,6 +77,7 @@ import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactio
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -129,7 +130,7 @@ public class LoanReAgingService {
                 .with(changes).build();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public LoanScheduleData previewReAge(final Long loanId, final String loanExternalId, final ReAgePreviewRequest reAgePreviewRequest) {
         final Loan loan = loanId != null ? loanAssembler.assembleFrom(loanId)
                 : loanAssembler.assembleFrom(ExternalIdFactory.produce(loanExternalId), false);

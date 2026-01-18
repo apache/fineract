@@ -23,11 +23,9 @@ import static org.apache.fineract.infrastructure.security.vote.SelfServiceUserAu
 import static org.springframework.security.authorization.AuthenticatedAuthorizationManager.fullyAuthenticated;
 import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAuthority;
 import static org.springframework.security.authorization.AuthorizationManagers.allOf;
-import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.cache.service.CacheWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -72,6 +70,7 @@ import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -81,18 +80,19 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    private static final PathPatternRequestMatcher.Builder API_MATCHER = PathPatternRequestMatcher.withDefaults();
+    private static final String ALL_FUNCTIONS = "ALL_FUNCTIONS";
+    private static final String ALL_FUNCTIONS_READ = "ALL_FUNCTIONS_READ";
+    private static final String ALL_FUNCTIONS_WRITE = "ALL_FUNCTIONS_WRITE";
+
     @Autowired
     private ApplicationContext applicationContext;
-
     @Autowired
     private TenantAwareJpaPlatformUserDetailsService userDetailsService;
-
     @Autowired
     private FineractProperties fineractProperties;
-
     @Autowired
     private ServerProperties serverProperties;
-
     @Autowired
     private ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;
     @Autowired
@@ -109,7 +109,6 @@ public class SecurityConfig {
     private MDCWrapper mdcWrapper;
     @Autowired
     private FineractRequestContextHolder fineractRequestContextHolder;
-
     @Autowired(required = false)
     private LoanCOBFilterHelper loanCOBFilterHelper;
     @Autowired
@@ -117,62 +116,64 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http //
-                .securityMatcher(antMatcher("/api/**")).authorizeHttpRequests((auth) -> {
-                    List<AuthorizationManager<RequestAuthorizationContext>> authorizationManagers = new ArrayList<>();
-                    authorizationManagers.add(fullyAuthenticated());
-                    if (fineractProperties.getSecurity().getTwoFactor().isEnabled()) {
-                        authorizationManagers.add(hasAuthority("TWOFACTOR_AUTHENTICATED"));
-                    }
-                    if (fineractProperties.getModule().getSelfService().isEnabled()) {
-                        auth.requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/authentication")).permitAll() //
-                                .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/registration")).permitAll() //
-                                .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/registration/user")).permitAll(); //
-                        authorizationManagers.add(selfServiceUserAuthManager());
-                    }
-                    auth.requestMatchers(antMatcher(HttpMethod.OPTIONS, "/api/**")).permitAll() //
-                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/echo")).permitAll() //
-                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/authentication")).permitAll() //
-                            .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/instance-mode")).permitAll() //
-                            // businessdate
-                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/businessdate/*"))
-                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_BUSINESS_DATE")
-                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/businessdate"))
-                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_BUSINESS_DATE")
-                            // external
-                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/externalevents/configuration"))
-                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_EXTERNAL_EVENT_CONFIGURATION")
-                            .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/externalevents/configuration"))
-                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_EXTERNAL_EVENT_CONFIGURATION")
-                            // cache
-                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/caches"))
-                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_CACHE")
-                            .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/caches"))
-                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_CACHE")
-                            // currency
-                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/currencies"))
-                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_CURRENCY")
-                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/currencies"))
-                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_CURRENCY")
-                            // ...
-                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated() //
-                            .requestMatchers(antMatcher("/api/*/twofactor")).fullyAuthenticated() //
-                            .requestMatchers(antMatcher("/api/**"))
-                            .access(allOf(authorizationManagers.toArray(new AuthorizationManager[0]))); //
-                }).httpBasic((httpBasic) -> httpBasic.authenticationEntryPoint(basicAuthenticationEntryPoint())) //
-                .csrf(AbstractHttpConfigurer::disable) // NOSONAR only creating a
-                                                       // service that
-                // is used by non-browser clients
-                .sessionManagement((smc) -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //
-                .addFilterBefore(tenantAwareBasicAuthenticationFilter(), SecurityContextHolderFilter.class) //
-                .addFilterAfter(requestResponseFilter(), ExceptionTranslationFilter.class) //
-                .addFilterAfter(correlationHeaderFilter(), RequestResponseFilter.class) //
-                .addFilterAfter(fineractInstanceModeApiFilter(), CorrelationHeaderFilter.class); //
-        if (!Objects.isNull(loanCOBFilterHelper)) {
-            http.addFilterAfter(loanCOBApiFilter(), FineractInstanceModeApiFilter.class) //
-                    .addFilterAfter(idempotencyStoreFilter(), LoanCOBApiFilter.class); //
+
+        http.securityMatcher(API_MATCHER.matcher("/api/**")).authorizeHttpRequests(auth -> {
+
+            List<AuthorizationManager<RequestAuthorizationContext>> authorizationManagers = new ArrayList<>();
+            authorizationManagers.add(fullyAuthenticated());
+
+            if (fineractProperties.getSecurity().getTwoFactor().isEnabled()) {
+                authorizationManagers.add(hasAuthority("TWOFACTOR_AUTHENTICATED"));
+            }
+
+            if (fineractProperties.getModule().getSelfService().isEnabled()) {
+                auth.requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/self/authentication")).permitAll()
+                        .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/self/registration")).permitAll()
+                        .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/self/registration/user")).permitAll();
+                authorizationManagers.add(selfServiceUserAuthManager());
+            }
+
+            auth.requestMatchers(API_MATCHER.matcher(HttpMethod.OPTIONS, "/api/**")).permitAll()
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/echo")).permitAll()
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/authentication")).permitAll()
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/instance-mode")).permitAll()
+                    // businessdate
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/businessdate/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_BUSINESS_DATE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/businessdate"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_BUSINESS_DATE")
+                    // external
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/externalevents/configuration"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_EXTERNAL_EVENT_CONFIGURATION")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/externalevents/configuration"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_EXTERNAL_EVENT_CONFIGURATION")
+                    // cache
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/caches"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CACHE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/caches"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CACHE")
+                    // currency
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/currencies"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CURRENCY")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/currencies"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CURRENCY")
+
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated()
+                    .requestMatchers(API_MATCHER.matcher("/api/*/twofactor")).fullyAuthenticated()
+                    .requestMatchers(API_MATCHER.matcher("/api/**"))
+                    .access(allOf(authorizationManagers.toArray(new AuthorizationManager[0])));
+        }).httpBasic(hb -> hb.authenticationEntryPoint(basicAuthenticationEntryPoint())).csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(smc -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(tenantAwareBasicAuthenticationFilter(), SecurityContextHolderFilter.class)
+                .addFilterAfter(requestResponseFilter(), ExceptionTranslationFilter.class)
+                .addFilterAfter(correlationHeaderFilter(), RequestResponseFilter.class)
+                .addFilterAfter(fineractInstanceModeApiFilter(), CorrelationHeaderFilter.class);
+
+        if (loanCOBFilterHelper != null) {
+            http.addFilterAfter(loanCOBApiFilter(), FineractInstanceModeApiFilter.class).addFilterAfter(idempotencyStoreFilter(),
+                    LoanCOBApiFilter.class);
         } else {
-            http.addFilterAfter(idempotencyStoreFilter(), FineractInstanceModeApiFilter.class); //
+            http.addFilterAfter(idempotencyStoreFilter(), FineractInstanceModeApiFilter.class);
         }
         if (fineractProperties.getIpTracking().isEnabled()) {
             http.addFilterAfter(callerIpTrackingFilter(), RequestResponseFilter.class);
@@ -182,16 +183,18 @@ public class SecurityConfig {
         }
 
         if (serverProperties.getSsl().isEnabled()) {
-            http.requiresChannel(channel -> channel.requestMatchers(antMatcher("/api/**")).requiresSecure());
+            http.requiresChannel(channel -> channel.requestMatchers(API_MATCHER.matcher("/api/**")).requiresSecure());
         }
 
         if (fineractProperties.getSecurity().getHsts().isEnabled()) {
             http.requiresChannel(channel -> channel.anyRequest().requiresSecure()).headers(
                     headers -> headers.httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000)));
         }
+
         if (fineractProperties.getSecurity().getCors().isEnabled()) {
             http.cors(Customizer.withDefaults());
         }
+
         return http.build();
     }
 
@@ -228,7 +231,8 @@ public class SecurityConfig {
         TenantAwareBasicAuthenticationFilter filter = new TenantAwareBasicAuthenticationFilter(authenticationManagerBean(),
                 basicAuthenticationEntryPoint(), toApiJsonSerializer, configurationDomainService, cacheWritePlatformService,
                 userNotificationService, basicAuthTenantDetailsService, businessDateReadPlatformService);
-        filter.setRequestMatcher(antMatcher("/api/**"));
+
+        filter.setRequestMatcher(API_MATCHER.matcher("/api/**"));
         return filter;
     }
 

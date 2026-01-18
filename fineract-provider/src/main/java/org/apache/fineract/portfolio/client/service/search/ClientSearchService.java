@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.client.service.search;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.PagedRequest;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.domain.ClientRepository;
@@ -58,7 +57,7 @@ public class ClientSearchService {
 
         Optional<ClientTextSearch> request = searchRequest.getRequest();
         String requestSearchText = request.map(ClientTextSearch::getText).orElse(null);
-        String searchText = StringUtils.defaultString(requestSearchText, "");
+        String searchText = Objects.toString(requestSearchText, "");
 
         Pageable pageable = searchRequest.toPageable();
 

@@ -194,7 +194,7 @@ public class TaxComponent extends AbstractAuditableCustom {
         return this.debitAccountType;
     }
 
-    public GLAccount getDebitAcount() {
+    public GLAccount getDebitAccount() {
         return this.debitAccount;
     }
 
@@ -202,7 +202,7 @@ public class TaxComponent extends AbstractAuditableCustom {
         return this.creditAccountType;
     }
 
-    public GLAccount getCreditAcount() {
+    public GLAccount getCreditAccount() {
         return this.creditAccount;
     }
 }

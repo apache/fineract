@@ -79,7 +79,6 @@ import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.DisbursementDetail;
 import org.apache.fineract.client.models.GetCodeValuesDataResponse;
-import org.apache.fineract.client.models.GetCodesResponse;
 import org.apache.fineract.client.models.GetLoanProductsChargeOffReasonOptions;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoanProductsResponse;
@@ -105,8 +104,6 @@ import org.apache.fineract.client.models.OldestCOBProcessedLoanDTO;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostAddAndDeleteDisbursementDetailRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.models.PostCodeValueDataResponse;
-import org.apache.fineract.client.models.PostCodeValuesDataRequest;
 import org.apache.fineract.client.models.PostLoansDisbursementData;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
@@ -131,6 +128,7 @@ import org.apache.fineract.test.data.LoanTermFrequencyType;
 import org.apache.fineract.test.data.RepaymentFrequencyType;
 import org.apache.fineract.test.data.TransactionProcessingStrategyCode;
 import org.apache.fineract.test.data.TransactionType;
+import org.apache.fineract.test.data.codevalue.CodeNames;
 import org.apache.fineract.test.data.codevalue.CodeValue;
 import org.apache.fineract.test.data.codevalue.CodeValueResolver;
 import org.apache.fineract.test.data.codevalue.DefaultCodeValue;
@@ -143,7 +141,6 @@ import org.apache.fineract.test.helper.BusinessDateHelper;
 import org.apache.fineract.test.helper.CodeHelper;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
 import org.apache.fineract.test.helper.Utils;
-import org.apache.fineract.test.initializer.global.LoanProductGlobalInitializerStep;
 import org.apache.fineract.test.messaging.EventAssertion;
 import org.apache.fineract.test.messaging.config.EventProperties;
 import org.apache.fineract.test.messaging.config.JobPollingProperties;
@@ -2222,18 +2219,103 @@ public class LoanStepDef extends AbstractStepDef {
                 Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions")));
         List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.getTransactions();
         List<List<String>> data = table.asLists();
+        List<String> header = table.row(0);
+        checkLoanTransactionTab(data, transactions, header, resourceId);
+    }
+
+    @Then("Loan Transactions tab has the following new accrual data:")
+    public void loanTransactionsTabCheckNewAccruals(DataTable table) {
+        PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        List<List<String>> expectedAccruals = testContext().get(TestContextKey.VERIFIED_LOAN_ACCRUALS);
+        if (expectedAccruals == null) {
+            expectedAccruals = new ArrayList<>();
+            testContext().set(TestContextKey.VERIFIED_LOAN_ACCRUALS, expectedAccruals);
+        }
+        long loanId = loanCreateResponse.getLoanId();
+        String resourceId = String.valueOf(loanId);
+        List<GetLoansLoanIdTransactions> transactions = getAccrualTransactions(loanId);
+        List<List<String>> data = table.asLists();
+        expectedAccruals.addAll(data.subList(1, data.size()));
+        List<String> header = table.row(0);
+
+        checkLoanTransactionTabRows(expectedAccruals, transactions, header, resourceId);
+        assertThat(transactions.size())
+                .as(ErrorMessageHelper.nrOfLinesWrongInTransactionsTab(resourceId, transactions.size(), expectedAccruals.size()))
+                .isEqualTo(expectedAccruals.size());
+    }
+
+    @Then("Loan Transactions tab has no new accrual data")
+    public void loanTransactionsTabCheckNoNewAccruals() {
+        PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        List<List<String>> expectedAccruals = testContext().get(TestContextKey.VERIFIED_LOAN_ACCRUALS);
+        if (expectedAccruals == null) {
+            expectedAccruals = new ArrayList<>();
+            testContext().set(TestContextKey.VERIFIED_LOAN_ACCRUALS, expectedAccruals);
+        }
+        long loanId = loanCreateResponse.getLoanId();
+        String resourceId = String.valueOf(loanId);
+
+        List<GetLoansLoanIdTransactions> transactions = getAccrualTransactions(loanId);
+        assertThat(transactions.size())
+                .as(ErrorMessageHelper.nrOfLinesWrongInTransactionsTab(resourceId, transactions.size(), expectedAccruals.size()))
+                .isEqualTo(expectedAccruals.size());
+    }
+
+    @Then("Loan Transactions tab has the following accrual data:")
+    public void loanTransactionsTabCheckAccruals(DataTable table) {
+        PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.getLoanId();
+        String resourceId = String.valueOf(loanId);
+        List<GetLoansLoanIdTransactions> transactions = getAccrualTransactions(loanId);
+        List<List<String>> data = table.asLists();
+        List<String> header = table.row(0);
+
+        checkLoanTransactionTab(data, transactions, header, resourceId);
+    }
+
+    @Then("Loan Transactions tab has the following data without accruals:")
+    public void loanTransactionsTabCheckWithoutAccruals(DataTable table) {
+        PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.getLoanId();
+        String resourceId = String.valueOf(loanId);
+
+        GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions")));
+        List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.getTransactions().stream()
+                .filter(lt -> !lt.getType().getAccrual() && !"Accrual Adjustment".equalsIgnoreCase(lt.getType().getValue())).toList();
+        List<List<String>> data = table.asLists();
+        List<String> header = table.row(0);
+
+        checkLoanTransactionTab(data, transactions, header, resourceId);
+    }
+
+    public List<GetLoansLoanIdTransactions> getAccrualTransactions(Long loanId) {
+        GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions")));
+        return loanDetailsResponse.getTransactions().stream().filter(
+                lt -> "Accrual".equalsIgnoreCase(lt.getType().getValue()) || "Accrual Adjustment".equalsIgnoreCase(lt.getType().getValue()))
+                .toList();
+    }
+
+    public void checkLoanTransactionTabRows(List<List<String>> data, List<GetLoansLoanIdTransactions> transactions, List<String> header,
+            String resourceId) {
         for (int i = 1; i < data.size(); i++) {
             List<String> expectedValues = data.get(i);
             String transactionDateExpected = expectedValues.get(0);
             List<List<String>> actualValuesList = transactions.stream()//
                     .filter(t -> transactionDateExpected.equals(FORMATTER.format(t.getDate())))//
-                    .map(t -> fetchValuesOfTransaction(table.row(0), t))//
+                    .map(t -> fetchValuesOfTransaction(header, t))//
                     .collect(Collectors.toList());//
             boolean containsExpectedValues = actualValuesList.stream()//
                     .anyMatch(actualValues -> actualValues.equals(expectedValues));//
             assertThat(containsExpectedValues)
                     .as(ErrorMessageHelper.wrongValueInLineInTransactionsTab(resourceId, i, actualValuesList, expectedValues)).isTrue();
         }
+    }
+
+    public void checkLoanTransactionTab(List<List<String>> data, List<GetLoansLoanIdTransactions> transactions, List<String> header,
+            String resourceId) {
+        checkLoanTransactionTabRows(data, transactions, header, resourceId);
         assertThat(transactions.size())
                 .as(ErrorMessageHelper.nrOfLinesWrongInTransactionsTab(resourceId, transactions.size(), data.size() - 1))
                 .isEqualTo(data.size() - 1);
@@ -3128,8 +3210,8 @@ public class LoanStepDef extends AbstractStepDef {
             if (transactionTypeToChange.equals(transactionTypeOriginal)) {
                 futureInstallmentAllocationRule = futureInstallmentAllocationRuleNew;
             }
-            newPaymentAllocation.add(LoanProductGlobalInitializerStep.editPaymentAllocationFutureInstallment(transactionTypeOriginal,
-                    futureInstallmentAllocationRule, paymentAllocationOrder));
+            newPaymentAllocation.add(editPaymentAllocationFutureInstallment(transactionTypeOriginal, futureInstallmentAllocationRule,
+                    paymentAllocationOrder));
         });
 
         PutLoanProductsProductIdRequest putLoanProductsProductIdRequest = new PutLoanProductsProductIdRequest()
@@ -4795,14 +4877,6 @@ public class LoanStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_CAPITALIZED_INCOME_RESPONSE, capitalizedIncomeResponse);
     }
 
-    @And("Admin adds capitalized income with {string} payment type to the loan on {string} with {string} EUR transaction amount and classification: scheduled_payment")
-    public void adminAddsCapitalizedIncomeToTheLoanOnWithEURTransactionAmountWithClassificationScheduledPayment(
-            final String transactionPaymentType, final String transactionDate, final String amount) {
-        final PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = addCapitalizedIncomeToTheLoanOnWithEURTransactionAmountWithClassificationScheduledPayment(
-                transactionPaymentType, transactionDate, amount);
-        testContext().set(TestContextKey.LOAN_CAPITALIZED_INCOME_RESPONSE, capitalizedIncomeResponse);
-    }
-
     @And("Admin adds capitalized income with {string} payment type to the loan on {string} with {string} EUR transaction amount and {string} classification")
     public void adminAddsCapitalizedIncomeWithClassification(final String transactionPaymentType, final String transactionDate,
             final String amount, final String classificationCodeName) {
@@ -4820,7 +4894,8 @@ public class LoanStepDef extends AbstractStepDef {
         final Long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
 
         // Get classification code value
-        final Long classificationId = getClassificationCodeValueId(classificationCodeName);
+        final Long classificationId = getClassificationCodeValueId(CodeNames.CAPITALIZED_INCOME_TRANSACTION_CLASSIFICATION.getValue(),
+                classificationCodeName);
 
         final PostLoansLoanIdTransactionsRequest capitalizedIncomeRequest = LoanRequestFactory.defaultCapitalizedIncomeRequest()
                 .transactionDate(transactionDate).transactionAmount(Double.valueOf(amount)).paymentTypeId(paymentTypeValue)
@@ -5289,24 +5364,16 @@ public class LoanStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_BUY_DOWN_FEE_RESPONSE, buyDownFeesIncomeResponse);
     }
 
-    @And("Admin adds buy down fee with {string} payment type to the loan on {string} with {string} EUR transaction amount and classification: pending_bankruptcy")
-    public void adminAddsBuyDownFeesToTheLoanOnWithEURTransactionAmountWithClassification(final String transactionPaymentType,
-            final String transactionDate, final String amount) {
-        final PostLoansLoanIdTransactionsResponse buyDownFeesIncomeResponse = addBuyDownFeeToTheLoanOnWithEURTransactionAmountWithClassification(
-                transactionPaymentType, transactionDate, amount);
-        testContext().set(TestContextKey.LOAN_BUY_DOWN_FEE_RESPONSE, buyDownFeesIncomeResponse);
-    }
-
     @When("Admin adds buy down fee with {string} payment type to the loan on {string} with {string} EUR transaction amount and {string} classification")
     public void adminAddsBuyDownFeeWithClassification(final String transactionPaymentType, final String transactionDate,
-            final String amount, final String classificationCodeName) {
+            final String amount, final String classificationCodeValueName) {
         final PostLoansLoanIdTransactionsResponse buyDownFeesIncomeResponse = addBuyDownFeeWithClassification(transactionPaymentType,
-                transactionDate, amount, classificationCodeName);
+                transactionDate, amount, classificationCodeValueName);
         testContext().set(TestContextKey.LOAN_BUY_DOWN_FEE_RESPONSE, buyDownFeesIncomeResponse);
     }
 
     public PostLoansLoanIdTransactionsResponse addBuyDownFeeWithClassification(final String transactionPaymentType,
-            final String transactionDate, final String amount, final String classificationCodeName) {
+            final String transactionDate, final String amount, final String classificationCodeValueName) {
         final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         final long loanId = loanResponse.getLoanId();
 
@@ -5314,7 +5381,8 @@ public class LoanStepDef extends AbstractStepDef {
         final Long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
 
         // Get classification code value
-        final Long classificationId = getClassificationCodeValueId(classificationCodeName);
+        final Long classificationId = getClassificationCodeValueId(CodeNames.BUYDOWN_FEE_TRANSACTION_CLASSIFICATION.getValue(),
+                classificationCodeValueName);
 
         final PostLoansLoanIdTransactionsRequest buyDownFeeRequest = LoanRequestFactory.defaultBuyDownFeeIncomeRequest()
                 .transactionDate(transactionDate).transactionAmount(Double.valueOf(amount)).paymentTypeId(paymentTypeValue)
@@ -5656,27 +5724,18 @@ public class LoanStepDef extends AbstractStepDef {
                 .isEqualTo(expectedClassification);
     }
 
-    private Long getClassificationCodeValueId(String classificationName) {
-        final GetCodesResponse code = codeHelper.retrieveCodeByName(classificationName);
-
+    private Long getClassificationCodeValueId(String codeName, String codeValueName) {
         // Check if code value already exists
-        List<GetCodeValuesDataResponse> existingCodeValues = fineractClient.codeValues().retrieveAllCodeValues(code.getId());
-        String codeValueName = classificationName + "_value";
-
+        List<GetCodeValuesDataResponse> existingCodeValues = fineractClient.codeValues().retrieveAllCodeValues1(codeName);
         // Try to find existing code value with the same name
         for (GetCodeValuesDataResponse codeValue : existingCodeValues) {
             if (codeValueName.equals(codeValue.getName())) {
-                log.info("Reusing existing code value: {}", codeValueName);
+                log.debug("Reusing existing code value: {}", codeValueName);
                 return codeValue.getId();
             }
         }
 
-        // If not found, create a new code value
-        PostCodeValuesDataRequest codeValueRequest = new PostCodeValuesDataRequest().name(codeValueName).isActive(true).position(1);
-
-        PostCodeValueDataResponse response = codeHelper.createCodeValue(code.getId(), codeValueRequest);
-
-        return response.getSubResourceId();
+        throw new IllegalStateException(String.format("Code [%s] with code value [%s] cannot be found", codeName, codeValueName));
     }
 
     @And("Loan Amortization Allocation Mapping for {string} transaction created on {string} contains the following data:")
@@ -5821,5 +5880,15 @@ public class LoanStepDef extends AbstractStepDef {
                 .filter(r -> r.getRelationType().equals(relationshipType)).toList();
 
         assertEquals(Integer.valueOf(numberOfRelations), relationshipOptional.size(), "Missed relationship for transaction");
+    }
+
+    public static AdvancedPaymentData editPaymentAllocationFutureInstallment(String transactionType, String futureInstallmentAllocationRule,
+            List<PaymentAllocationOrder> paymentAllocationOrder) {
+        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
+        advancedPaymentData.setTransactionType(transactionType);
+        advancedPaymentData.setFutureInstallmentAllocationRule(futureInstallmentAllocationRule);
+        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrder);
+
+        return advancedPaymentData;
     }
 }

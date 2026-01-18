@@ -1088,7 +1088,8 @@ public final class LoanProductDataValidator {
             effectiveAllowFullTermForTranche = loanProduct.getLoanProductTrancheDetails().isAllowFullTermForTranche();
         }
 
-        // Validate: allowFullTermForTranche requires multi-disburse and PROGRESSIVE schedule
+        // Validate: allowFullTermForTranche requires multi-disburse and PROGRESSIVE
+        // schedule
         if (Boolean.TRUE.equals(effectiveAllowFullTermForTranche)) {
             if (!Boolean.TRUE.equals(effectiveMultiDisburseLoan)) {
                 baseDataValidator.reset().parameter(LoanProductConstants.ALLOW_FULL_TERM_FOR_TRANCHE_PARAM_NAME).failWithCode(
@@ -2125,7 +2126,8 @@ public final class LoanProductDataValidator {
             final JsonArray reasonToExpenseMappingArray = this.fromApiJsonHelper.extractJsonArrayNamed(parameterName, element);
             if (reasonToExpenseMappingArray != null && !reasonToExpenseMappingArray.isEmpty()) {
                 Map<Long, Set<Long>> reasonToAccounts = new HashMap<>();
-                List<JsonObject> processedMappings = new ArrayList<>(); // Collect processed mappings for the new method
+                List<JsonObject> processedMappings = new ArrayList<>(); // Collect processed mappings
+                                                                        // for the new method
 
                 int i = 0;
                 do {
@@ -2189,7 +2191,8 @@ public final class LoanProductDataValidator {
             final JsonArray classificationToIncomeMappingArray = this.fromApiJsonHelper.extractJsonArrayNamed(parameterName, element);
             if (classificationToIncomeMappingArray != null && classificationToIncomeMappingArray.size() > 0) {
                 Map<Long, Set<Long>> classificationToAccounts = new HashMap<>();
-                List<JsonObject> processedMappings = new ArrayList<>(); // Collect processed mappings for the new method
+                List<JsonObject> processedMappings = new ArrayList<>(); // Collect processed mappings
+                                                                        // for the new method
 
                 int i = 0;
                 do {
@@ -2797,8 +2800,12 @@ public final class LoanProductDataValidator {
     private void validateLoanScheduleType(final String transactionProcessingStrategyCode, final DataValidatorBuilder baseDataValidator,
             final JsonElement element) {
         final String loanScheduleType = this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element);
-        baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE).value(loanScheduleType)
+        baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE).value(loanScheduleType).ignoreIfNull()
                 .isOneOfEnumValues(LoanScheduleType.class);
+
+        if (loanScheduleType == null || baseDataValidator.hasError()) {
+            return;
+        }
 
         if (!LoanScheduleType.PROGRESSIVE.equals(LoanScheduleType.valueOf(loanScheduleType))
                 && AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY

@@ -1,0 +1,450 @@
+= Pause Delinquency
+
+== Overview
+
+Pause Delinquency is a feature that allows users to temporarily pause the delinquency calculation for loan accounts. This functionality provides flexibility in managing loan delinquency status during specific periods, such as when customers are experiencing temporary financial difficulties or during special circumstances.
+
+The system provides API support for establishing a "pause delinquency" on loan accounts and resuming paused delinquency when needed. When a loan is paused, no evaluation of delinquency is performed for that loan account during COB processing, and the delinquency bucket and tags remain unchanged.
+
+== Introduction
+
+=== Purpose
+
+This document specifies the functional and business requirements for the Pause Delinquency feature in Fineract. It defines the rules for pausing and resuming delinquency calculations, database design, API endpoints, event handling, and validation rules.
+
+=== Scope
+
+The scope of this document includes:
+
+* Pause and Resume delinquency actions at the loan account level
+* Database schema for storing delinquency actions
+* API endpoints for managing delinquency actions
+* Integration with existing delinquency calculation logic
+* Event emission when pause flag changes
+* Loan API extension with pause status information
+* Validation rules for pause and resume actions
+
+=== Applicability
+
+The requirements described apply to:
+
+* Active loan accounts only
+* All loan products that support delinquency tracking
+
+=== Definitions and Key Concepts
+
+*Delinquency:* The state of a loan account when payments are overdue beyond the configured delinquency ranges.
+
+*Pause:* An action that temporarily stops the delinquency calculation for a loan account. During the pause period, the delinquency status remains unchanged.
+
+*Resume:* An action that ends an active pause period and re-enables delinquency calculation. The resume date becomes the effective end date for the pause period.
+
+*Pause Period:* The time interval between the pause start date and the effective end date (either the pause end date or the resume date, whichever comes first).
+
+*Delinquency Calculation Paused Status:* The current pause status is determined by checking if the business date falls within any active pause periods. The system maintains a list of pause periods, each with an `active` field indicating if that period is currently active.
+
+*Effective Pause Period:* The actual pause period after considering resume actions. If a resume action occurs during a pause period, it effectively moves the pause end date earlier.
+
+== Design Decisions and Considerations
+
+=== Loan-Level Feature
+
+This is a feature that belongs to the loan and not a loan product. Each loan account can have its own pause/resume configuration independent of the loan product settings.
+
+=== Scope of Pause
+
+Pause applies to both:
+
+* Loan-level delinquency calculation
+* Installment-level delinquency calculation
+
+The pause mechanism controls whether the delinquency recalculation runs during COB processing. When delinquency calculation runs after the pause period, it takes into account the duration of the pause.
+
+=== Pause and Resume Actions
+
+Once a loan is paused, it can be resumed using a resume action. It is not possible to undo a pause by updating or deleting the pause itself. The resume action must be used to end an active pause period.
+
+
+== Database Design
+
+=== Overview
+
+The delinquency pause functionality uses the `m_loan_delinquency_action` table to store delinquency actions (pause and resume) for loan accounts. The existing delinquency-related tables remain unchanged.
+
+=== Existing Tables
+
+The following existing tables are related to delinquency:
+
+*m_delinquency_bucket*: A bucket is a set of preconfigured delinquency ranges which is referred by the loan product.
+
+*m_delinquency_range*: The delinquency ranges (e.g.: 5-15 days, 15-30 days, etc.).
+
+*m_delinquency_bucket_mappings*: Creates the association between the ranges and buckets. This table defines which ranges belong to a bucket.
+
+*m_loan_delinquency_tag_history*: Stores the delinquency calculation result, with a history.
+
+=== Table: m_loan_delinquency_action
+
+The `m_loan_delinquency_action` table stores loan-level configuration for delinquency actions (pause and resume).
+
+[cols="1,2,1,3",options="header"]
+|===
+| Column Name          | Type                                   | Constraints                           | Description
+| id                   | BIGINT                                 | PK, not null                          | Primary Key of the delinquency action
+| loan_id              | BIGINT                                 | Index created, not null, FK to m_loan | Stores the association for the loan
+| action               | VARCHAR(128)                           | not null                              | The enum type of the action (e.g.: PAUSE, RESUME)
+| start_date           | Date                                   | not null                              | The effective start of the given action, inclusive
+| end_date             | Date                                   | optional                              | The effective end date of the given action, inclusive
+| created_by           | BIGINT                                 | not null                              | Audit field
+| created_on_utc       | DATETIME(6) / TIMESTAMP WITH TIME ZONE | not null                              | Audit field - MySQL: DATETIME(6), PostgreSQL: TIMESTAMP WITH TIME ZONE
+| last_modified_by     | BIGINT                                 | not null                              | Audit field
+| last_modified_on_utc | DATETIME(6) / TIMESTAMP WITH TIME ZONE | not null                              | Audit field - MySQL: DATETIME(6), PostgreSQL: TIMESTAMP WITH TIME ZONE
+|===
+
+=== Example Data
+
+[cols="1,1,1,1,1,1,1,1,1",options="header"]
+|===
+| id | loan_id | action | start_date | end_date   | created_by | created_on_utc       | last_modified_by | last_modified_on_utc
+| 1  | 100     | PAUSE  | 2023-10-05 | 2023-10-10 | 1001       | 2023-10-05T10:49:54Z | 1001             | 2023-10-05T10:49:54Z
+| 2  | 100     | RESUME | 2023-10-08 |            | 1001       | 2023-10-07T10:49:54Z | 1001             | 2023-10-07T10:49:54Z
+| 3  | 100     | PAUSE  | 2023-10-11 | 2023-10-15 | 1001       | 2023-10-07T11:49:54Z | 1001             | 2023-10-08T10:49:54Z
+|===
+
+=== Database Query Logic
+
+==== Determining Current Pause Status
+
+In order to decide if the delinquency calculation is currently paused or not, the system checks for the most recent delinquency action (ordered by creation date) that is effective on the current business date:
+
+* For PAUSE actions: the business date must be between the pause start date and end date (inclusive)
+* For RESUME actions: the business date must be on or after the resume start date, and the resume action has no end date
+
+The logic for interpreting the result:
+
+* **Nothing is returned** → delinquency calculation is enabled
+* **PAUSE entry is returned** → currently paused
+* **RESUME entry is returned** → delinquency calculation is enabled
+
+==== Calculating Effective Pause Periods
+
+For calculating delinquency ranges, the following algorithm is used:
+
+1. All pause and resume entries are retrieved for a loan from the database
+2. Effective pause periods are calculated as follows:
+   * Groups entries by action type (PAUSE or RESUME)
+   * For each PAUSE entry, finds a matching RESUME entry (if any) that overlaps with the pause period
+   * When a matching RESUME is found, it sets the effective end date of the pause period to the resume start date
+3. For each installment, the system filters out pause periods that are not relevant (e.g., not overlapping with the installment's unpaid period)
+4. The effective delinquency is calculated using the formula: `current date - unpaid installment date - sum(relevant pause days)`
+
+== API Design
+
+=== Delinquency Actions Endpoints
+
+Two endpoints are provided for managing delinquency actions:
+
+* One endpoint retrieves all delinquency actions created for a loan
+* Another endpoint submits a new delinquency action for an existing loan
+
+There are **no endpoints for update and delete** of existing delinquency actions. Once created, actions cannot be modified or deleted directly.
+
+==== Retrieve All Delinquency Actions
+
+Retrieve all delinquency-actions for a given loan:
+
+[source]
+----
+GET /loans/{loanId}/delinquency-actions
+GET /loans/external-id/{loanExternalId}/delinquency-actions
+----
+
+**Response:**
+
+Returns an array of delinquency actions:
+
+[source,json]
+----
+[
+  {
+    "id": 123,
+    "action": "PAUSE",
+    "startDate": [2023, 10, 5],
+    "endDate": [2023, 10, 8],
+    "createdById": 1,
+    "createdOn": "2023-10-05T10:49:54Z",
+    "updatedById": 1,
+    "lastModifiedOn": "2023-10-05T10:49:54Z"
+  },
+  {
+    "id": 125,
+    "action": "PAUSE",
+    "startDate": [2023, 11, 5],
+    "endDate": [2023, 11, 8],
+    "createdById": 1,
+    "createdOn": "2023-11-05T10:49:54Z",
+    "updatedById": 1,
+    "lastModifiedOn": "2023-11-05T10:49:54Z"
+  }
+]
+----
+
+==== Create New Delinquency Action
+
+Create a new delinquency action for a loan:
+
+[source]
+----
+POST /loans/{loanId}/delinquency-actions
+POST /loans/external-id/{loanExternalId}/delinquency-actions
+----
+
+**Request Body:**
+
+[source,json]
+----
+{
+  "action": "pause",
+  "startDate": "2023-10-05",
+  "endDate": "2023-10-08",
+  "dateFormat": "yyyy-MM-dd",
+  "locale": "en"
+}
+----
+
+**Note:** The `dateFormat` and `locale` fields are optional. If not provided, default values will be used.
+
+**Response:**
+
+Returns a standard command processing result:
+
+[source,json]
+----
+{
+  "officeId": 1,
+  "clientId": 1,
+  "resourceId": 123
+}
+----
+
+The `resourceId` field contains the ID of the created delinquency action.
+
+=== Loan Read Endpoint
+
+The loan read endpoint includes delinquency information, including pause periods.
+
+[source]
+----
+GET /loans/{loanId}
+GET /loans/external-id/{loanExternalId}
+----
+
+**Response Structure:**
+
+The `GetLoansLoanIdResponse` contains the following fields related to delinquency:
+
+* `GetLoansLoanIdDelinquencySummary delinquent` - comprehensive delinquency summary data
+* `DelinquencyRangeData delinquencyRange` - current delinquency range classification
+
+**Delinquency Summary Fields:**
+
+The `GetLoansLoanIdDelinquencySummary` object contains:
+
+* **Collection Data:**
+  * `availableDisbursementAmount` (BigDecimal) - available amount for disbursement
+  * `availableDisbursementAmountWithOverApplied` (BigDecimal) - available amount with over-applied consideration
+  * `pastDueDays` (Integer) - number of days past due
+  * `nextPaymentDueDate` (LocalDate) - next payment due date
+  * `nextPaymentAmount` (BigDecimal) - next payment amount
+  * `delinquentDays` (Integer) - number of delinquent days
+  * `delinquentDate` (LocalDate) - date when loan became delinquent
+  * `delinquentAmount` (BigDecimal) - total delinquent amount
+  * `delinquentPrincipal` (BigDecimal) - delinquent principal amount
+  * `delinquentInterest` (BigDecimal) - delinquent interest amount
+  * `delinquentFee` (BigDecimal) - delinquent fee amount
+  * `delinquentPenalty` (BigDecimal) - delinquent penalty amount
+  * `lastPaymentDate` (LocalDate) - date of last payment
+  * `lastPaymentAmount` (BigDecimal) - amount of last payment
+  * `lastRepaymentDate` (LocalDate) - date of last repayment
+  * `lastRepaymentAmount` (BigDecimal) - amount of last repayment
+
+* **Pause Periods:**
+  * `delinquencyPausePeriods` (List<GetLoansLoanIdDelinquencyPausePeriod>) - list of pause periods for the loan
+
+* **Installment Level Delinquency:**
+  * `installmentLevelDelinquency` (List<GetLoansLoanIdLoanInstallmentLevelDelinquency>) - installment-level delinquency data (if enabled)
+
+**Pause Period Structure:**
+
+Each `GetLoansLoanIdDelinquencyPausePeriod` object contains:
+
+* `active` (Boolean) - indicates if this pause period is currently active based on the business date
+* `pausePeriodStart` (LocalDate) - start date of the pause period
+* `pausePeriodEnd` (LocalDate) - effective end date of the pause period
+
+**Note:** The system supports multiple pause periods. The `active` field in each pause period indicates whether that specific period is currently active. A period is considered active if the current business date falls between `pausePeriodStart` (inclusive) and `pausePeriodEnd` (inclusive).
+
+== Validation Rules
+
+=== General Rules
+
+* Pause and resume delinquency actions can only be created for **active loan accounts**
+* Currently only **PAUSE** and **RESUME** actions are supported
+
+=== Validation Rules for Pause
+
+* Pause start date must be **on or after the disbursement date** of the loan
+* Pause must last at least a day (start date must be before end date)
+* **Overlapping pause periods are not allowed**
+* A loan account can have multiple pause periods, but the dates do not overlap with one another
+* Both start date and end date are mandatory for pause actions
+
+=== Validation Rules for Resume
+
+* Resume can only be used when there is an **active pause**
+* Resume start date must be **exactly equal to the current business date** (cannot be backdated or future-dated)
+* In case of resume, end_date must **not** be specified
+* Only one resume action can exist for a given date (duplicate resumes on the same date are not allowed)
+* The resume date will become the effective pause end date for pause date calculations
+
+== Business Rules
+
+=== Delinquency Calculation During Pause
+
+* While a loan account is actively paused:
+** No evaluation of delinquency will be performed for that loan account during COB processing
+** The delinquency bucket and tags remain unchanged during the pause period
+
+=== Pause Period Expiration
+
+* When the business date moves beyond the pause period end date (or resume date, if applicable), the pause period is no longer active
+* Delinquency calculation runs during COB processing when the business date is outside any active pause periods
+* The system checks pause status during COB processing and calculates delinquency if the loan is not currently paused
+
+=== Delinquency Recalculation After Pause Period
+
+* When a pause period ends (either by reaching the end date or through a resume action), delinquency is recalculated during the next COB (Close of Business) run when the system processes the loan and detects that it is no longer paused
+* The resume date (if used) becomes the effective pause end date for pause date calculations
+* Delinquency calculation running after the pause period takes into account the duration of the pause by subtracting pause days from the overdue calculation
+
+=== Effective Pause Period Calculation
+
+* Effective pause periods are calculated by merging the pause and related resume entries
+* When there is a resume entry, it technically moves the end_date of the pause period earlier
+* For each installment, only relevant pause periods (overlapping with the installment's unpaid period) are considered
+* The effective delinquency is calculated using the formula: `current date - unpaid installment date - sum(relevant pause days)`
+
+== Event Definition
+
+=== Overview
+
+Events are emitted when delinquency actions are created and when the state of the delinquency calculation flag changes during COB processing.
+
+=== New Business Event
+
+**LoanAccountDelinquencyPauseChangedBusinessEvent** is emitted whenever a delinquency action (pause or resume) is created for a loan account. This event is triggered immediately after the action is saved to the database.
+
+=== Existing Events
+
+In the regular loan COB process, the system calculates and sets delinquency tags for loans with the current date.
+
+**LoanDelinquencyRangeChangeBusinessEvent** is emitted when:
+* The pause status changes during COB processing (e.g., when entering or exiting a pause period)
+* A backdated pause action is created that affects the current delinquency status
+
+=== Changes to CollectionDataV1
+
+**CollectionDataV1** (Avro schema) has been extended with a new field:
+
+* `delinquencyPausePeriods` (array of `DelinquencyPausePeriodV1`) - list of pause periods for the loan
+
+Each `DelinquencyPausePeriodV1` contains:
+
+* `active` (boolean) - indicates if this pause period is currently active
+* `pausePeriodStart` (string) - start date of the pause period
+* `pausePeriodEnd` (string) - effective end date of the pause period
+
+This allows external systems to track pause periods through the existing event infrastructure without requiring a new event schema version.
+
+=== Event Trigger
+
+The following events are triggered:
+
+* **LoanAccountDelinquencyPauseChangedBusinessEvent**: Emitted when any delinquency action (pause or resume) is created
+* **LoanDelinquencyRangeChangeBusinessEvent**: Emitted when the pause status changes during COB processing or when a backdated pause affects current status
+
+=== Backdated Pause Handling
+
+When a backdated pause action is created (start date is before the current business date), the system will:
+
+* Recalculate the loan's delinquency data immediately
+* If the pause end date is after the current business date, emit `LoanDelinquencyRangeChangeBusinessEvent` to reflect the current pause status
+* Always emit `LoanAccountDelinquencyPauseChangedBusinessEvent` when any action is created
+
+== Example Scenarios
+
+=== Scenario #1: Simple Pause Period
+
+**Setup:**
+* Loan disbursement: January 1st, 2022 (Amount: 1000)
+* Installment #1: Due January 7th, 2022 (Amount: 250)
+* Installment #2: Due January 28th, 2022 (Amount: 250)
+* Installment #3: Due February 14th, 2022 (Amount: 250)
+* Installment #4: Due March 7th, 2022 (Amount: 250)
+
+**Pause Period:** January 2nd - January 20th, 2022
+
+**Behavior:**
+
+* **Pause Flag:** False on January 1st, True from January 2nd to January 20th, False from January 21st onwards
+* **Installment #1:**
+** Pause days: 1-18 (January 2nd-20th)
+** Unpaid installment date: Increments daily from 0
+** Overdue days: Shows 1 from January 7th to January 20th, then increments from 2 (January 21st)
+* **Installment #2:**
+** Pause days: 0-5 (January 2nd-20th, but only relevant days after installment due date)
+** Unpaid installment date: Increments daily from 0
+** Overdue days: Shows 1 from January 28th, then increments
+* **Installment #3:**
+** Pause days: 0-13 (January 2nd-20th, but only relevant days before installment due date)
+** Unpaid installment date: Increments daily from 0
+** Overdue days: Shows 1 from February 14th, then increments
+
+=== Scenario #2: Pause with Resume
+
+**Setup:**
+* Same loan schedule as Scenario #1
+
+**Pause Period:** January 2nd - January 20th, 2022
+**Resume Date:** January 15th, 2022
+
+**Behavior:**
+
+* **Effective Pause Period:** January 2nd - January 14th, 2022 (resume on 15th effectively ends the pause earlier)
+* **Installment #1:**
+** Pause days: 0-13 (January 2nd-14th)
+** Unpaid installment date: Increments daily from 0
+** Overdue days: Shows 1 from January 7th to January 14th, then increments from 1 (January 15th)
+* **Installment #2:**
+** Pause days: 0-13 (January 2nd-14th)
+** Unpaid installment date: Increments daily from 0
+** Overdue days: Shows 1 from January 28th, then increments
+* **Installment #3:**
+** Pause days: 0-13 (January 2nd-14th)
+** Unpaid installment date: Increments daily from 0
+** Overdue days: Shows 1 from February 14th, then increments
+
+The resume action effectively moves the pause end date from January 20th to January 14th, resulting in fewer pause days being counted for delinquency calculations.
+
+== Summary
+
+The Pause Delinquency feature provides a flexible mechanism for temporarily suspending delinquency calculations on loan accounts. Key aspects include:
+
+* Loan-level configuration (not product-level)
+* Support for multiple non-overlapping pause periods
+* Resume functionality to end pause periods early
+* Automatic expiration of pause periods when business date moves beyond the end date
+* Integration with existing delinquency calculation logic
+* Event emission when pause status changes
+* API endpoints for managing pause/resume actions
+* Extension of loan read API with pause status information

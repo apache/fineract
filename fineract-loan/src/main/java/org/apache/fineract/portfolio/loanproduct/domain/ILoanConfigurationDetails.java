@@ -73,4 +73,6 @@ public interface ILoanConfigurationDetails {
     RecalculationFrequencyType getRestFrequencyType();
 
     LoanPreCloseInterestCalculationStrategy getPreCloseInterestCalculationStrategy();
+
+    boolean isAllowFullTermForTranche();
 }

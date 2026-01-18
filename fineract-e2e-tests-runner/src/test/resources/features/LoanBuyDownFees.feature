@@ -3232,7 +3232,7 @@ Feature:Feature: Buy Down Fees
     And Admin successfully approves the loan on "01 January 2024" with "100" amount and expected disbursement date on "01 January 2024"
     And Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
     Then Loan status will be "ACTIVE"
-    When Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount and "buydown_fee_transaction_classification" classification
+    When Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount and "buydown_fee_transaction_classification_value" classification
     Then Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
@@ -3841,7 +3841,7 @@ Feature:Feature: Buy Down Fees
       | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_CLASSIFICATION_INCOME_MAP | 01 January 2024   | 350            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2024" with "350" amount and expected disbursement date on "01 January 2024"
     And Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
-    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount and classification: pending_bankruptcy
+    When Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount and "buydown_fee_transaction_classification_value" classification
     And Admin sets the business date to "02 January 2024"
     And Admin runs inline COB job for Loan
     Then Loan Transactions tab has a "BUY_DOWN_FEE" transaction with date "01 January 2024" which has the following Journal entries:
@@ -3868,7 +3868,7 @@ Feature:Feature: Buy Down Fees
     And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount
     And Admin sets the business date to "02 January 2024"
     And Admin runs inline COB job for Loan
-    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "02 January 2024" with "20" EUR transaction amount and classification: pending_bankruptcy
+    When Admin adds buy down fee with "AUTOPAY" payment type to the loan on "02 January 2024" with "20" EUR transaction amount and "buydown_fee_transaction_classification_value" classification
     And Admin sets the business date to "03 January 2024"
     And Admin runs inline COB job for Loan
     Then Loan Transactions tab has a "BUY_DOWN_FEE" transaction with date "01 January 2024" which has the following Journal entries:
@@ -3902,7 +3902,7 @@ Feature:Feature: Buy Down Fees
     And Admin successfully approves the loan on "01 January 2024" with "100" amount and expected disbursement date on "01 January 2024"
     And Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
     Then Loan status will be "ACTIVE"
-    When Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount and classification: pending_bankruptcy
+    When Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 January 2024" with "50" EUR transaction amount and "buydown_fee_transaction_classification_value" classification
     Then Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
@@ -3920,7 +3920,7 @@ Feature:Feature: Buy Down Fees
       | Type      | Account code | Account name                | Debit | Credit |
       | EXPENSE   | 450280       | Buy Down Expense            | 50.0  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
-    And Loan Transactions tab has a "Buy Down Fee" transaction with date "01 January 2024" which has classification code value "pending_bankruptcy"
+    And Loan Transactions tab has a "Buy Down Fee" transaction with date "01 January 2024" which has classification code value "buydown_fee_transaction_classification_value"
     And Buy down fee contains the following data:
       | Date            | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
       | 01 January 2024 | 50.0       | 0.0              | 50.0                     | 0.0             | 0.0                |

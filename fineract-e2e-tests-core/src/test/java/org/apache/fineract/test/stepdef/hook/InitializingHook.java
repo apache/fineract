@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.test.stepdef.hook;
 
+import io.cucumber.java.After;
 import io.cucumber.java.AfterAll;
 import io.cucumber.java.Before;
 import io.cucumber.java.BeforeAll;
@@ -38,10 +39,10 @@ public class InitializingHook {
         environment.getPropertySources().addFirst(new ResourcePropertySource("classpath:fineract-test-application.properties"));
         InitializerProperties initializerProperties = PropertiesFactory.get(environment, InitializerProperties.class);
         if (initializerProperties.isEnabled()) {
-            log.info("Setting up defaults for Fineract");
+            log.info("Setting up global defaults for Fineract");
             FineractInitializerFactory.get().setupGlobalDefaults();
         } else {
-            log.info("Skipping defaults for Fineract");
+            log.info("Skipping global defaults for Fineract");
         }
 
         FineractInitializerFactory.get().setupDefaultsForSuite();
@@ -50,6 +51,11 @@ public class InitializingHook {
     @Before
     public static void before() throws Exception {
         FineractInitializerFactory.get().setupDefaultsForScenario();
+    }
+
+    @After
+    public static void after() throws Exception {
+        FineractInitializerFactory.get().resetDefaultsAfterScenario();
     }
 
     @AfterAll

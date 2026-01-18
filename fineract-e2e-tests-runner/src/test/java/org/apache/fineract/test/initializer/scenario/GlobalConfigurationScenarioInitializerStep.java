@@ -41,4 +41,10 @@ public class GlobalConfigurationScenarioInitializerStep implements FineractScena
         globalConfigurationHelper.enableGlobalConfiguration(CONFIG_KEY_ENABLE_BUSINESS_DATE, 0L);
         globalConfigurationHelper.enableGlobalConfiguration(CONFIG_KEY_ENABLE_RECALCULATE_COB_DATE, 0L);
     }
+
+    @Override
+    public void resetAfterScenario() {
+        // Enable business date
+        globalConfigurationHelper.disableGlobalConfiguration(CONFIG_KEY_ENABLE_BUSINESS_DATE, 0L);
+    }
 }

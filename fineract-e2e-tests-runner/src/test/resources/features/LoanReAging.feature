@@ -4175,7 +4175,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 01 February 2024 | Chargeback       | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 100.0        | false    | false    |
       | 15 March 2024    | Re-age           | 101.42 | 100.0     | 1.42     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Repayment        | 101.42 | 100.0     | 1.42     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 March 2024    | Accrual          | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 March 2024    | Accrual          | 2.0    | 0.0       | 2.0      | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:C4135 @AdvancedPaymentAllocation
   Scenario: Verify allowing Re-aging on interest bearing loan - Interest calculation: Default Behavior - Charge-back before re-aging and installment is partially paid - UC3.1
@@ -4274,7 +4274,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 01 March 2024    | Repayment        | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 90.0         | false    | false    |
       | 15 March 2024    | Re-age           | 91.4   | 90.0      | 1.4      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Repayment        | 91.4   | 90.0      | 1.4      | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 March 2024    | Accrual          | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 March 2024    | Accrual          | 1.98   | 0.0       | 1.98     | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:C4356 @AdvancedPaymentAllocation
   Scenario: Verify Re-aging on interest bearing loan - Interest calculation: Default Behavior - with NEXT_INSTALLMENT allocation rule, backdated re-aging on 1st installment after repay and chargeback on 1st due - UC3.2
@@ -4603,7 +4603,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 01 February 2024 | Accrual Activity | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Re-age           | 76.22  | 75.58     | 0.64     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Repayment        | 76.22  | 75.58     | 0.64     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 March 2024    | Accrual          | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 March 2024    | Accrual          | 1.22   | 0.0       | 1.22     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Accrual Activity | 0.64   | 0.0       | 0.64     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin set "LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
@@ -4827,7 +4827,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 01 March 2024    | Accrual Activity | 0.47   | 0.0       | 0.47     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Re-age           | 59.21  | 59.05     | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Repayment        | 59.21  | 59.05     | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 March 2024    | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 March 2024    | Accrual          | 1.21   | 0.0       | 1.21     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Accrual Activity | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin set "LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
@@ -4927,7 +4927,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 01 March 2024    | Accrual Activity | 0.49   | 0.0       | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 April 2024    | Accrual Activity | 0.39   | 0.0       | 0.39     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 May 2024      | Repayment        | 67.83  | 67.05     | 0.78     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 01 May 2024      | Accrual          | 1.07   | 0.0       | 1.07     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 May 2024      | Accrual          | 1.85   | 0.0       | 1.85     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 May 2024      | Accrual Activity | 0.39   | 0.0       | 0.39     | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:C4233
@@ -5020,7 +5020,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 01 March 2024    | Re-age           | 76.02  | 75.58     | 0.44     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Accrual Activity | 0.44   | 0.0       | 0.44     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Repayment        | 76.22  | 75.58     | 0.64     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 March 2024    | Accrual          | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 March 2024    | Accrual          | 1.22   | 0.0       | 1.22     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Accrual Activity | 0.2    | 0.0       | 0.2      | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:C4085 @AdvancedPaymentAllocation
@@ -6498,7 +6498,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 01 February 2024 | Re-age           | 83.57  | 83.57     | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Repayment        | 17.01  | 17.01     | 0.0      | 0.0  | 0.0       | 66.56        | false    | true     |
       | 01 June 2024     | Repayment        | 68.22  | 66.56     | 1.66     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 01 June 2024     | Accrual          | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 June 2024     | Accrual          | 2.24   | 0.0       | 2.24     | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:С4268 @AdvancedPaymentAllocation
   Scenario: Verify allowing Re-aging on interest bearing loan - Interest calculation: Default Behavior - with LAST_INSTALLMENT allocation rule and partial repayment, due date and frequency changed - UC5.1
@@ -6591,7 +6591,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 01 February 2024 | Accrual Activity | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Re-age           | 76.22  | 75.58     | 0.64     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Repayment        | 76.22  | 75.58     | 0.64     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 March 2024    | Accrual          | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 March 2024    | Accrual          | 1.22   | 0.0       | 1.22     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Accrual Activity | 0.64   | 0.0       | 0.64     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin set "LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
@@ -6697,7 +6697,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 13 April 2024    | Accrual Activity | 0.18   | 0.0       | 0.18     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 April 2024    | Accrual Activity | 0.18   | 0.0       | 0.18     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 May 2024      | Repayment        | 67.83  | 67.05     | 0.78     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 01 May 2024      | Accrual          | 1.07   | 0.0       | 1.07     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 May 2024      | Accrual          | 1.85   | 0.0       | 1.85     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 May 2024      | Accrual Activity | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:С4270 @AdvancedPaymentAllocation
@@ -6790,7 +6790,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 01 March 2024    | Re-age           | 76.02  | 75.58     | 0.44     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Accrual Activity | 0.44   | 0.0       | 0.44     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Repayment        | 76.22  | 75.58     | 0.64     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 March 2024    | Accrual          | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 March 2024    | Accrual          | 1.22   | 0.0       | 1.22     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Accrual Activity | 0.2    | 0.0       | 0.2      | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:С4271 @AdvancedPaymentAllocation
@@ -6895,7 +6895,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 16 April 2024    | Accrual Activity | 0.18   | 0.0       | 0.18     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 April 2024    | Accrual Activity | 0.18   | 0.0       | 0.18     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 May 2024      | Repayment        | 67.82  | 67.05     | 0.77     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 01 May 2024      | Accrual          | 1.07   | 0.0       | 1.07     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 May 2024      | Accrual          | 1.84   | 0.0       | 1.84     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 May 2024      | Accrual Activity | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:C4249 @AdvancedPaymentAllocation
@@ -8520,7 +8520,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 16 April 2024    | Payout Refund         | 40.0   | 14.52     | 0.48     | 0.0  | 25.0      | 69.05        | false    | false    |
       | 16 April 2024    | Interest Refund       | 0.52   | 0.39      | 0.13     | 0.0  | 0.0       | 68.66        | false    | false    |
       | 17 April 2024    | Repayment             | 80.0   | 68.66     | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 17 April 2024    | Accrual               | 25.58  | 0.0       | 0.58     | 0.0  | 25.0      | 0.0          | false    | false    |
+      | 17 April 2024    | Accrual               | 26.19  | 0.0       | 1.19     | 0.0  | 25.0      | 0.0          | false    | false    |
       | 17 April 2024    | Accrual Activity      | 25.13  | 0.0       | 0.13     | 0.0  | 25.0      | 0.0          | false    | false    |
       | 18 April 2024    | Credit Balance Refund | 11.34  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
 #   --- Close loan ---
@@ -8657,17 +8657,18 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
     #  --- Charge-off ---
     When Admin sets the business date to "15 April 2024"
     And Admin does charge-off the loan on "15 April 2024"
-    Then Loan Repayment schedule has 8 periods, with the following data for periods:
-      | Nr | Days | Date              | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
-      |    |      | 01 January 2024   |               | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
-      | 1  | 31   | 01 February 2024  | 15 March 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024     | 15 March 2024 | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024     |               | 69.84           | 13.73         | 0.48     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
-      | 4  | 30   | 01 May 2024       |               | 55.73           | 14.11         | 0.13     | 0.0  | 0.0       | 14.24 | 0.0   | 0.0        | 0.0  | 14.24       |
-      | 5  | 31   | 01 June 2024      |               | 41.49           | 14.24         | 0.0      | 0.0  | 0.0       | 14.24 | 0.0   | 0.0        | 0.0  | 14.24       |
-      | 6  | 30   | 01 July 2024      |               | 27.25           | 14.24         | 0.0      | 0.0  | 0.0       | 14.24 | 0.0   | 0.0        | 0.0  | 14.24       |
-      | 7  | 31   | 01 August 2024    |               | 13.12           | 14.13         | 0.11     | 0.0  | 0.0       | 14.24 | 0.0   | 0.0        | 0.0  | 14.24       |
-      | 8  | 31   | 01 September 2024 |               | 0.0             | 13.12         | 0.08     | 0.0  | 0.0       | 13.2  | 0.0   | 0.0        | 0.0  | 13.2        |
+    Then Loan Repayment schedule has 9 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024   |                 | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2024  | 01 February 2024| 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024     | 15 March 2024   | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
+      | 3  | 14   | 15 March 2024     | 15 March 2024   | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
+      | 4  | 17   | 01 April 2024     |                 | 69.84           | 13.73         | 0.48     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
+      | 5  | 30   | 01 May 2024       |                 | 55.76           | 14.08         | 0.13     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
+      | 6  | 31   | 01 June 2024      |                 | 41.55           | 14.21         | 0.0      | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
+      | 7  | 30   | 01 July 2024      |                 | 27.34           | 14.21         | 0.0      | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
+      | 8  | 31   | 01 August 2024    |                 | 13.24           | 14.1          | 0.11     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
+      | 9  | 31   | 01 September 2024 |                 | 0.0             | 13.24         | 0.08     | 0.0  | 0.0       | 13.32 | 0.0   | 0.0        | 0.0  | 13.32       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 100.0         | 1.38     | 0.0  | 0.0       | 101.38 | 17.01 | 0.0        | 0.0  | 84.37       |
@@ -8675,7 +8676,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
-      | 15 March 2024    | Re-age           | 83.7   | 83.57     | 0.13     | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 15 March 2024    | Re-age           | 83.78  | 83.57     | 0.21     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 April 2024    | Accrual          | 1.19   | 0.0       | 1.19     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 April 2024    | Charge-off       | 84.37  | 83.57     | 0.8      | 0.0  | 0.0       | 0.0          | false    | false    |
 #    --- Charge-off undo ---
@@ -8700,7 +8701,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
-      | 15 March 2024    | Re-age           | 83.78  | 83.57     | 0.21     | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 15 March 2024    | Re-age           | 83.78  | 83.57     | 0.21     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 April 2024    | Accrual          | 1.19   | 0.0       | 1.19     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 April 2024    | Charge-off       | 84.37  | 83.57     | 0.8      | 0.0  | 0.0       | 0.0          | true     | false    |
 #   --- Close loan ---

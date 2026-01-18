@@ -34,17 +34,12 @@ public class ClientAddressRepositoryWrapper {
 
     public ClientAddress findOneByClientIdAndAddressTypeAndIsActive(final long clientId, final CodeValue addressType,
             final boolean isActive) {
-        final ClientAddress clientAddress = this.clientAddressRepository.findByClientIdAndAddressTypeAndIsActive(clientId, addressType,
-                isActive);
-        // if (clientAddress == null) { throw new
-        // AddressNotFoundException(clientId, addressType); }
-        return clientAddress;
+        return this.clientAddressRepository.findByClientIdAndAddressTypeAndIsActive(clientId, addressType, isActive);
     }
 
     public ClientAddress findOneByClientIdAndAddressId(final long clientId, final long addressId) {
-        final ClientAddress clientAddress = this.clientAddressRepository.findByClientIdAndAddressId(clientId, addressId);
 
-        return clientAddress;
+        return this.clientAddressRepository.findByClientIdAndAddressId(clientId, addressId);
     }
 
 }

@@ -32,6 +32,7 @@ public final class LoanCOBConstant extends COBConstant {
     public static final String LOAN_IDS_PARAMETER_NAME = "LoanIds";
 
     public static final String LOAN_COB_PARTITIONER_STEP = "Loan COB partition - Step";
+    public static final String PARTITION_KEY = "partition";
 
     private LoanCOBConstant() {
 
