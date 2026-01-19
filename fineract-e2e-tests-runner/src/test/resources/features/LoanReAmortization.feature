@@ -5251,7 +5251,7 @@ Feature: LoanReAmortization
     When Loan Pay-off is made on "01 May 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @TestRailId:C__6.2 @AdvancedPaymentAllocation
+  @TestRailId:C4513 @AdvancedPaymentAllocation
   Scenario: Verify Loan re-aging trn with accelerate maturity charge-off after re-amortization - interest bearing loan with equal amortization + interest split - UC6.2
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -5508,7 +5508,6 @@ Feature: LoanReAmortization
 # --- close the loan --- #
     When Loan Pay-off is made on "01 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
-
 
   @TestRailId:C4412 @AdvancedPaymentAllocation
   Scenario: Verify disbursement after re-amortization - Interest calculation: Default Behavior - UC1
@@ -6379,4 +6378,177 @@ Feature: LoanReAmortization
       | 01 May 2024      | Repayment        | 54.86  | 53.33     | 1.53     | 0.0  | 0.0       | 130.24       | false    | false    |
 # --- close the loan --- #
     When Loan Pay-off is made on "01 May 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C4534 @AdvancedPaymentAllocation
+  Scenario: Verify 2nd disbursement after re-amortization on non-interest bearing multidisb loan
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE | 01 January 2024   | 200            | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "200" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2024 |           | 83.33           | 16.67         | 0.0      | 0.0  | 0.0       | 16.67 | 0.0  | 0.0        | 0.0  | 16.67       |
+      | 2  | 29   | 01 March 2024    |           | 66.66           | 16.67         | 0.0      | 0.0  | 0.0       | 16.67 | 0.0  | 0.0        | 0.0  | 16.67       |
+      | 3  | 31   | 01 April 2024    |           | 49.99           | 16.67         | 0.0      | 0.0  | 0.0       | 16.67 | 0.0  | 0.0        | 0.0  | 16.67       |
+      | 4  | 30   | 01 May 2024      |           | 33.32           | 16.67         | 0.0      | 0.0  | 0.0       | 16.67 | 0.0  | 0.0        | 0.0  | 16.67       |
+      | 5  | 31   | 01 June 2024     |           | 16.65           | 16.67         | 0.0      | 0.0  | 0.0       | 16.67 | 0.0  | 0.0        | 0.0  | 16.67       |
+      | 6  | 30   | 01 July 2024     |           | 0.0             | 16.65         | 0.0      | 0.0  | 0.0       | 16.65 | 0.0  | 0.0        | 0.0  | 16.65       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+    # --- First installment paid --- #
+    When Admin sets the business date to "01 February 2024"
+    And Customer makes "AUTOPAY" repayment on "01 February 2024" with 16.67 EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2024 | 01 February 2024 | 83.33           | 16.67         | 0.0      | 0.0  | 0.0       | 16.67 | 16.67 | 0.0        | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    |                  | 66.66           | 16.67         | 0.0      | 0.0  | 0.0       | 16.67 | 0.0   | 0.0        | 0.0  | 16.67       |
+      | 3  | 31   | 01 April 2024    |                  | 49.99           | 16.67         | 0.0      | 0.0  | 0.0       | 16.67 | 0.0   | 0.0        | 0.0  | 16.67       |
+      | 4  | 30   | 01 May 2024      |                  | 33.32           | 16.67         | 0.0      | 0.0  | 0.0       | 16.67 | 0.0   | 0.0        | 0.0  | 16.67       |
+      | 5  | 31   | 01 June 2024     |                  | 16.65           | 16.67         | 0.0      | 0.0  | 0.0       | 16.67 | 0.0   | 0.0        | 0.0  | 16.67       |
+      | 6  | 30   | 01 July 2024     |                  | 0.0             | 16.65         | 0.0      | 0.0  | 0.0       | 16.65 | 0.0   | 0.0        | 0.0  | 16.65       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 16.67 | 0.0        | 0.0  | 83.33       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 01 February 2024 | Repayment        | 16.67  | 16.67     | 0.0      | 0.0  | 0.0       | 83.33        | false    | false    |
+    # --- re-amortization transaction --- #
+    When Admin sets the business date to "15 March 2024"
+    And Admin creates a Loan re-amortization transaction on current business date with reAmortizationInterestHandling "EQUAL_AMORTIZATION_INTEREST_SPLIT"
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2024 | 01 February 2024 | 83.33           | 16.67         | 0.0      | 0.0  | 0.0       | 16.67 | 16.67 | 0.0        | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    | 15 March 2024    | 83.33           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024    |                  | 62.49           | 20.84         | 0.0      | 0.0  | 0.0       | 20.84 | 0.0   | 0.0        | 0.0  | 20.84       |
+      | 4  | 30   | 01 May 2024      |                  | 41.65           | 20.84         | 0.0      | 0.0  | 0.0       | 20.84 | 0.0   | 0.0        | 0.0  | 20.84       |
+      | 5  | 31   | 01 June 2024     |                  | 20.81           | 20.84         | 0.0      | 0.0  | 0.0       | 20.84 | 0.0   | 0.0        | 0.0  | 20.84       |
+      | 6  | 30   | 01 July 2024     |                  | 0.0             | 20.81         | 0.0      | 0.0  | 0.0       | 20.81 | 0.0   | 0.0        | 0.0  | 20.81       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 16.67 | 0.0        | 0.0  | 83.33       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 01 February 2024 | Repayment        | 16.67  | 16.67     | 0.0      | 0.0  | 0.0       | 83.33        | false    | false    |
+      | 15 March 2024    | Re-amortize      | 16.67  | 16.67     | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+    # --- 2nd disbursement
+    When Admin sets the business date to "15 April 2024"
+    When Admin successfully disburse the loan on "15 April 2024" with "100" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2024 | 01 February 2024 | 83.33           | 16.67         | 0.0      | 0.0  | 0.0       | 16.67 | 16.67 | 0.0        | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    | 15 March 2024    | 83.33           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024    |                  | 62.49           | 20.84         | 0.0      | 0.0  | 0.0       | 20.84 | 0.0   | 0.0        | 0.0  | 20.84       |
+      |    |      | 15 April 2024    |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 4  | 30   | 01 May 2024      |                  | 108.32          | 54.17         | 0.0      | 0.0  | 0.0       | 54.17 | 0.0   | 0.0        | 0.0  | 54.17       |
+      | 5  | 31   | 01 June 2024     |                  | 54.15           | 54.17         | 0.0      | 0.0  | 0.0       | 54.17 | 0.0   | 0.0        | 0.0  | 54.17       |
+      | 6  | 30   | 01 July 2024     |                  | 0.0             | 54.15         | 0.0      | 0.0  | 0.0       | 54.15 | 0.0   | 0.0        | 0.0  | 54.15       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      | 200.0         | 0.0      | 0.0  | 0.0       | 200.0 | 16.67 | 0.0        | 0.0  | 183.33      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 01 February 2024 | Repayment        | 16.67  | 16.67     | 0.0      | 0.0  | 0.0       | 83.33        | false    | false    |
+      | 15 March 2024    | Re-amortize      | 16.67  | 16.67     | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 April 2024    | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 183.33       | false    | false    |
+    # --- close the loan --- #
+    When Admin sets the business date to "01 May 2024"
+    When Loan Pay-off is made on "01 May 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C4535 @AdvancedPaymentAllocation
+  Scenario: Verify 2nd disbursement after maturity date with active re-amortization - validates isTransactionAfterMaturityDate check
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE | 01 January 2024   | 200            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "200" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2024 |           | 75.21           | 24.79         | 0.58     | 0.0  | 0.0       | 25.37 | 0.0  | 0.0        | 0.0  | 25.37       |
+      | 2  | 29   | 01 March 2024    |           | 50.28           | 24.93         | 0.44     | 0.0  | 0.0       | 25.37 | 0.0  | 0.0        | 0.0  | 25.37       |
+      | 3  | 31   | 01 April 2024    |           | 25.2            | 25.08         | 0.29     | 0.0  | 0.0       | 25.37 | 0.0  | 0.0        | 0.0  | 25.37       |
+      | 4  | 30   | 01 May 2024      |           | 0.0             | 25.2          | 0.15     | 0.0  | 0.0       | 25.35 | 0.0  | 0.0        | 0.0  | 25.35       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.46     | 0.0  | 0.0       | 101.46 | 0.0  | 0.0        | 0.0  | 101.46      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+    # --- First installment paid --- #
+    When Admin sets the business date to "01 February 2024"
+    And Customer makes "AUTOPAY" repayment on "01 February 2024" with 25.37 EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2024 | 01 February 2024 | 75.21           | 24.79         | 0.58     | 0.0  | 0.0       | 25.37 | 25.37 | 0.0        | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    |                  | 50.28           | 24.93         | 0.44     | 0.0  | 0.0       | 25.37 | 0.0   | 0.0        | 0.0  | 25.37       |
+      | 3  | 31   | 01 April 2024    |                  | 25.2            | 25.08         | 0.29     | 0.0  | 0.0       | 25.37 | 0.0   | 0.0        | 0.0  | 25.37       |
+      | 4  | 30   | 01 May 2024      |                  | 0.0             | 25.2          | 0.15     | 0.0  | 0.0       | 25.35 | 0.0   | 0.0        | 0.0  | 25.35       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 100.0         | 1.46     | 0.0  | 0.0       | 101.46 | 25.37 | 0.0        | 0.0  | 76.09       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 01 February 2024 | Repayment        | 25.37  | 24.79     | 0.58     | 0.0  | 0.0       | 75.21        | false    | false    |
+    # --- re-amortization transaction (before maturity on May 1) - zeros period 2, spreads to periods 3 & 4 --- #
+    When Admin sets the business date to "15 March 2024"
+    And Admin creates a Loan re-amortization transaction on current business date with reAmortizationInterestHandling "EQUAL_AMORTIZATION_INTEREST_SPLIT"
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2024 | 01 February 2024 | 75.21           | 24.79         | 0.58     | 0.0  | 0.0       | 25.37 | 25.37 | 0.0        | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    | 15 March 2024    | 75.21           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024    |                  | 37.72           | 37.49         | 0.66     | 0.0  | 0.0       | 38.15 | 0.0   | 0.0        | 0.0  | 38.15       |
+      | 4  | 30   | 01 May 2024      |                  | 0.0             | 37.72         | 0.44     | 0.0  | 0.0       | 38.16 | 0.0   | 0.0        | 0.0  | 38.16       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 100.0         | 1.68     | 0.0  | 0.0       | 101.68 | 25.37 | 0.0        | 0.0  | 76.31       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 01 February 2024 | Repayment        | 25.37  | 24.79     | 0.58     | 0.0  | 0.0       | 75.21        | false    | false    |
+      | 15 March 2024    | Re-amortize      | 25.37  | 24.93     | 0.44     | 0.0  | 0.0       | 0.0          | false    | false    |
+    # --- 2nd disbursement AFTER maturity (01 May 2024)
+    When Admin sets the business date to "15 May 2024"
+    When Admin successfully disburse the loan on "15 May 2024" with "100" EUR transaction amount
+    Then Loan Repayment schedule has 5 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2024 | 01 February 2024 | 75.21           | 24.79         | 0.58     | 0.0  | 0.0       | 25.37 | 25.37 | 0.0        | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    | 15 March 2024    | 75.21           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024    |                  | 37.72           | 37.49         | 0.66     | 0.0  | 0.0       | 38.15 | 0.0   | 0.0        | 0.0  | 38.15       |
+      | 4  | 30   | 01 May 2024      |                  | 0.0             | 37.72         | 0.66     | 0.0  | 0.0       | 38.38 | 0.0   | 0.0        | 0.0  | 38.38       |
+      |    |      | 15 May 2024      |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 5  | 0    | 15 May 2024      |                  | 0.0             | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 0.0   | 0.0        | 0.0  | 100.0       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      | 200.0         | 1.9      | 0.0  | 0.0       | 201.9 | 25.37 | 0.0        | 0.0  | 176.53      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 01 February 2024 | Repayment        | 25.37  | 24.79     | 0.58     | 0.0  | 0.0       | 75.21        | false    | false    |
+      | 15 March 2024    | Re-amortize      | 25.37  | 24.93     | 0.44     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 May 2024      | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 175.21       | false    | false    |
+    # --- close the loan --- #
+    When Admin sets the business date to "01 June 2024"
+    When Loan Pay-off is made on "01 June 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
