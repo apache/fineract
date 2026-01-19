@@ -32,9 +32,12 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanPointInTimeData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.arrears.LoanArrearsData;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,15 +76,14 @@ public class LoanPointInTimeServiceImpl implements LoanPointInTimeService {
             int afterRemovalTxCount = loan.getLoanTransactions().size();
             int afterRemovalChargeCount = loan.getCharges().size();
 
-            // In case the loan is cumulative and is being prepaid by the latest repayment tx, we need the
-            // recalculateFrom and recalculateTill
-            // set to the same date which is the prepaying transaction's date
-            // currently this is not implemented and opens up buggy edge cases
-            // we work this around only for cases when the loan is already closed or the requested date doesn't change
-            // the loan's state
-            if (txCount != afterRemovalTxCount || chargeCount != afterRemovalChargeCount) {
+            boolean needsScheduleRegeneration = txCount != afterRemovalTxCount || chargeCount != afterRemovalChargeCount;
+
+            if (needsScheduleRegeneration) {
                 ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null, null);
                 loanScheduleService.regenerateScheduleWithReprocessingTransactions(loan, scheduleGeneratorDTO);
+                recalculateSummaryForInstallmentsUpToDate(loan, date);
+            } else if (!loan.isClosed()) {
+                recalculateSummaryForInstallmentsUpToDate(loan, date);
             }
 
             LoanArrearsData arrearsData = arrearsAgingService.calculateArrearsForLoan(loan);
@@ -97,7 +99,62 @@ public class LoanPointInTimeServiceImpl implements LoanPointInTimeService {
     }
 
     private void removeAfterDateCharges(Loan loan, LocalDate date) {
-        loan.removeCharges(c -> DateUtils.isAfter(c.getEffectiveDueDate(), date));
+        // Don't remove installment fees based on effectiveDueDate since they span multiple installments
+        // For installment fees, effectiveDueDate returns the first UNPAID installment's due date,
+        // which would incorrectly remove the entire fee even if some installments are already paid/due
+        // The recalculateSummaryForInstallmentsUpToDate method handles installment fee adjustments separately
+        loan.removeCharges(c -> !c.isInstalmentFee() && DateUtils.isAfter(c.getEffectiveDueDate(), date));
+    }
+
+    private void recalculateSummaryForInstallmentsUpToDate(Loan loan, LocalDate date) {
+        var currency = loan.getCurrency();
+        var summary = loan.getSummary();
+
+        // Calculate fee charged based only on charges due by the specified date.
+        // This excludes after-date charges and only includes installment fee portions for installments due by the date.
+        Money feeChargedFromRemainingCharges = calculateTotalFeeChargedFromCharges(loan, date, currency);
+
+        // Include fees due at disbursement which are always included regardless of date
+        Money adjustedFeeCharged = feeChargedFromRemainingCharges.plus(summary.getTotalFeeChargesDueAtDisbursement(currency));
+
+        // Only proceed with adjustment if the fee charged differs from summary
+        if (adjustedFeeCharged.getAmount().compareTo(summary.getTotalFeeChargesCharged()) == 0) {
+            return;
+        }
+
+        // Delegate to domain to recalculate all derived totals consistently
+        summary.recalculateDerivedTotalsForAdjustedFeeCharged(adjustedFeeCharged.getAmount());
+    }
+
+    private Money calculateTotalFeeChargedFromCharges(Loan loan, LocalDate date, MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (LoanCharge charge : loan.getCharges()) {
+            if (charge.isActive() && !charge.isPenaltyCharge() && !charge.isDueAtDisbursement()) {
+                // For installment fees, calculate the portion up to the date
+                if (charge.isInstalmentFee()) {
+                    Money installmentTotal = calculateInstallmentFeeUpToDate(charge, date, currency);
+                    total = total.plus(installmentTotal);
+                } else {
+                    // For one-time charges, include only if due on or before the date
+                    LocalDate chargeDueDate = charge.getEffectiveDueDate();
+                    if (chargeDueDate != null && !DateUtils.isAfter(chargeDueDate, date)) {
+                        total = total.plus(charge.getAmount(currency));
+                    }
+                }
+            }
+        }
+        return total;
+    }
+
+    private Money calculateInstallmentFeeUpToDate(LoanCharge charge, LocalDate date, MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (var installmentCharge : charge.installmentCharges()) {
+            var installment = installmentCharge.getInstallment();
+            if (installment != null && !DateUtils.isAfter(installment.getDueDate(), date)) {
+                total = total.plus(installmentCharge.getAmount(currency));
+            }
+        }
+        return total;
     }
 
     private void removeAfterDateTransactions(Loan loan, LocalDate date) {

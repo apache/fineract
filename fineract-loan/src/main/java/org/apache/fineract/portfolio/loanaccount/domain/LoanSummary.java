@@ -285,6 +285,10 @@ public class LoanSummary {
         this.totalFeeChargesOutstanding = totalFeeChargesOutstanding;
     }
 
+    public void updateFeeChargesCharged(final BigDecimal totalFeeChargesCharged) {
+        this.totalFeeChargesCharged = totalFeeChargesCharged;
+    }
+
     public void updatePenaltyChargeOutstanding(final BigDecimal totalPenaltyChargesOutstanding) {
         this.totalPenaltyChargesOutstanding = totalPenaltyChargesOutstanding;
     }
@@ -307,6 +311,29 @@ public class LoanSummary {
 
     public void updateTotalWaived(final BigDecimal totalWaived) {
         this.totalWaived = totalWaived;
+    }
+
+    public void updateTotalExpectedRepayment(final BigDecimal totalExpectedRepayment) {
+        this.totalExpectedRepayment = totalExpectedRepayment;
+    }
+
+    public void updateTotalExpectedCostOfLoan(final BigDecimal totalExpectedCostOfLoan) {
+        this.totalExpectedCostOfLoan = totalExpectedCostOfLoan;
+    }
+
+    public void recalculateDerivedTotalsForAdjustedFeeCharged(final BigDecimal adjustedFeeCharged) {
+        this.totalFeeChargesCharged = adjustedFeeCharged;
+
+        this.totalFeeChargesOutstanding = adjustedFeeCharged.subtract(this.totalFeeChargesRepaid).subtract(this.totalFeeChargesWaived)
+                .subtract(this.totalFeeChargesWrittenOff);
+
+        this.totalOutstanding = this.totalPrincipalOutstanding.add(this.totalInterestOutstanding).add(this.totalFeeChargesOutstanding)
+                .add(this.totalPenaltyChargesOutstanding);
+
+        this.totalExpectedRepayment = this.totalPrincipal.add(this.totalInterestCharged).add(adjustedFeeCharged)
+                .add(this.totalPenaltyChargesCharged);
+
+        this.totalExpectedCostOfLoan = this.totalInterestCharged.add(adjustedFeeCharged).add(this.totalPenaltyChargesCharged);
     }
 
     protected Money calculateTotalPrincipalRepaid(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
