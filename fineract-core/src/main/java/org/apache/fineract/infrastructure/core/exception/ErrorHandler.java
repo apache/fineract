@@ -116,6 +116,7 @@ public final class ErrorHandler {
     private final DefaultExceptionMapper defaultExceptionMapper;
 
     @NotNull
+    @SuppressWarnings("unchecked")
     public <T extends RuntimeException> ExceptionMapper<T> findMostSpecificExceptionHandler(T exception) {
         Class<?> clazz = exception.getClass();
         do {
@@ -123,23 +124,19 @@ public final class ErrorHandler {
             Set<String> fineractErrorMappers = createSet(ctx.getBeanNamesForType(FineractExceptionMapper.class));
             SetUtils.SetView<String> intersection = SetUtils.intersection(exceptionMappers, fineractErrorMappers);
             if (!intersection.isEmpty()) {
-                // noinspection unchecked
                 return (ExceptionMapper<T>) ctx.getBean(intersection.iterator().next());
             }
             if (!exceptionMappers.isEmpty()) {
-                // noinspection unchecked
                 return (ExceptionMapper<T>) ctx.getBean(exceptionMappers.iterator().next());
             }
             clazz = clazz.getSuperclass();
         } while (!clazz.equals(Exception.class));
-        // noinspection unchecked
         return (ExceptionMapper<T>) defaultExceptionMapper;
     }
 
     /**
      * Returns an object of ErrorInfo type containing the information regarding the raised error.
      *
-     * @param exception
      * @return ErrorInfo
      */
     public ErrorInfo handle(@NotNull RuntimeException exception) {

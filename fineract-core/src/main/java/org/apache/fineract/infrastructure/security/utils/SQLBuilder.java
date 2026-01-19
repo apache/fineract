@@ -27,11 +27,9 @@ import java.util.regex.Pattern;
 import lombok.Getter;
 
 /**
- * Utility to assemble the WHERE clause of an SQL query without the risk of SQL injection.
- *
- * <p>
- * When using this utility instead of manually assembling SQL queries, then {@link SqlValidator} should not be required
- * anymore. (Correctly using this means only ever passing completely fixed String literals to .)
+ * Utility to assemble the WHERE clause of an SQL query without the risk of SQL injection. When using this utility
+ * instead of manually assembling SQL queries, then SqlValidator should not be required anymore. (Correctly using this
+ * means only ever passing completely fixed String literals to .)
  *
  * @author Michael Vorburger <mike@vorburger.ch>
  */
@@ -67,9 +65,6 @@ public class SQLBuilder {
             throw new IllegalArgumentException("criteria cannot be null");
         }
         String trimmedCriteria = criteria.trim();
-        if (trimmedCriteria.isEmpty()) {
-            throw new IllegalArgumentException("criteria cannot be null");
-        }
         if (trimmedCriteria.contains("?")) {
             throw new IllegalArgumentException(
                     "criteria cannot contain a '?' (that is automatically added at the end): " + trimmedCriteria);
@@ -89,7 +84,7 @@ public class SQLBuilder {
                     "criteria cannot contain more than 1 space (between column name and operator): " + trimmedCriteria);
         }
         if (!operator.equals("=") && !operator.equals("<") && !operator.equals(">") && !operator.equals("<=") && !operator.equals(">=")
-                && !operator.equals("<>") && !operator.equals("LIKE") && !operator.equals("like") && !operator.toLowerCase().equals("is")) {
+                && !operator.equals("<>") && !operator.equalsIgnoreCase("like") && !operator.equalsIgnoreCase("is")) {
             // add support for SQL's BETWEEN and IN, if/when ever needed.. (it's
             // a little more than just adding above, as it can have multiple
             // arguments)
@@ -97,7 +92,7 @@ public class SQLBuilder {
         }
 
         // TODO: Would be better to use SqlOperator functionality to handle
-        if (sb.length() > 0) {
+        if (!sb.isEmpty()) {
             sb.append(whereLogicalOperator.getSqlStr());
         }
         sb.append(trimmedCriteria);
@@ -124,7 +119,7 @@ public class SQLBuilder {
     }
 
     public void addSubOperation(Consumer<SQLBuilder> subOperation) {
-        if (sb.length() > 0) {
+        if (!sb.isEmpty()) {
             sb.append(WhereLogicalOperator.AND.getSqlStr());
         }
         sb.append(" ( ");
@@ -138,8 +133,8 @@ public class SQLBuilder {
      * @return SQL WHERE clause, almost always starting with " WHERE ..." (unless no criteria, then empty)
      */
     public String getSQLTemplate() {
-        if (sb.length() > 0) {
-            return " WHERE  " + sb.toString();
+        if (!sb.isEmpty()) {
+            return " WHERE  " + sb;
         }
         return "";
     }
@@ -178,7 +173,7 @@ public class SQLBuilder {
             } else if (currentArg == null) {
                 whereClause.append("null");
             } else {
-                whereClause.append(String.valueOf(currentArg));
+                whereClause.append(currentArg);
             }
             whereClause.append("]");
         }

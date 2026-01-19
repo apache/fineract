@@ -18,9 +18,12 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
+import lombok.Getter;
+
 /**
- * Enum representation of {@link SavingsAccount} status states.
+ * Enum representation of SavingsAccount status states.
  */
+@Getter
 public enum SavingsAccountStatusType {
 
     INVALID(0, "savingsAccountStatusType.invalid"), //
@@ -39,41 +42,19 @@ public enum SavingsAccountStatusType {
     private final String code;
 
     public static SavingsAccountStatusType fromInt(final Integer type) {
-
-        SavingsAccountStatusType enumeration = SavingsAccountStatusType.INVALID;
-        switch (type) {
-            case 100:
-                enumeration = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
-            break;
-            case 200:
-                enumeration = SavingsAccountStatusType.APPROVED;
-            break;
-            case 300:
-                enumeration = SavingsAccountStatusType.ACTIVE;
-            break;
-            case 303:
-                enumeration = SavingsAccountStatusType.TRANSFER_IN_PROGRESS;
-            break;
-            case 304:
-                enumeration = SavingsAccountStatusType.TRANSFER_ON_HOLD;
-            break;
-            case 400:
-                enumeration = SavingsAccountStatusType.WITHDRAWN_BY_APPLICANT;
-            break;
-            case 500:
-                enumeration = SavingsAccountStatusType.REJECTED;
-            break;
-            case 600:
-                enumeration = SavingsAccountStatusType.CLOSED;
-            break;
-            case 700:
-                enumeration = SavingsAccountStatusType.PRE_MATURE_CLOSURE;
-            break;
-            case 800:
-                enumeration = SavingsAccountStatusType.MATURED;
-            break;
-        }
-        return enumeration;
+        return switch (type) {
+            case 100 -> SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
+            case 200 -> SavingsAccountStatusType.APPROVED;
+            case 300 -> SavingsAccountStatusType.ACTIVE;
+            case 303 -> SavingsAccountStatusType.TRANSFER_IN_PROGRESS;
+            case 304 -> SavingsAccountStatusType.TRANSFER_ON_HOLD;
+            case 400 -> SavingsAccountStatusType.WITHDRAWN_BY_APPLICANT;
+            case 500 -> SavingsAccountStatusType.REJECTED;
+            case 600 -> SavingsAccountStatusType.CLOSED;
+            case 700 -> SavingsAccountStatusType.PRE_MATURE_CLOSURE;
+            case 800 -> SavingsAccountStatusType.MATURED;
+            default -> SavingsAccountStatusType.INVALID;
+        };
     }
 
     SavingsAccountStatusType(final Integer value, final String code) {
@@ -83,14 +64,6 @@ public enum SavingsAccountStatusType {
 
     public boolean hasStateOf(final SavingsAccountStatusType state) {
         return this.value.equals(state.getValue());
-    }
-
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
     }
 
     public boolean isSubmittedAndPendingApproval() {

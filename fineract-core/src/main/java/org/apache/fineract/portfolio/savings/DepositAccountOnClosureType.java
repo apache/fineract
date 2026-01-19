@@ -19,11 +19,12 @@
 package org.apache.fineract.portfolio.savings;
 
 import java.util.Arrays;
+import lombok.Getter;
 
 /**
- * An enumeration of different options available on account closure {@link FixedDepositAccount} &amp;
- * {@link RecurringDepositAccount}.
+ * An enumeration of different options available on account closure
  */
+@Getter
 public enum DepositAccountOnClosureType {
 
     INVALID(0, "depositAccountClosureType.invalid"), //
@@ -40,31 +41,18 @@ public enum DepositAccountOnClosureType {
         this.code = code;
     }
 
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
     public static DepositAccountOnClosureType fromInt(final Integer v) {
         if (v == null) {
             return INVALID;
         }
 
-        switch (v) {
-            case 100:
-                return WITHDRAW_DEPOSIT;
-            case 200:
-                return TRANSFER_TO_SAVINGS;
-            case 300:
-                return REINVEST_PRINCIPAL_AND_INTEREST;
-            case 400:
-                return REINVEST_PRINCIPAL_ONLY;
-            default:
-                return INVALID;
-        }
+        return switch (v) {
+            case 100 -> WITHDRAW_DEPOSIT;
+            case 200 -> TRANSFER_TO_SAVINGS;
+            case 300 -> REINVEST_PRINCIPAL_AND_INTEREST;
+            case 400 -> REINVEST_PRINCIPAL_ONLY;
+            default -> INVALID;
+        };
     }
 
     // TODO: why not just use the enum values... just more boilerplate code here!!

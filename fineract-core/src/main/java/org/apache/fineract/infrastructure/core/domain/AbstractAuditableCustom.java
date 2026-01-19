@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.core.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
+import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.data.domain.Auditable;
@@ -32,15 +33,11 @@ import org.springframework.data.jpa.domain.AbstractAuditable;
  * instead of LocalDateTime for created and modified.
  *
  * Abstract base class for auditable entities. Stores the audit values in persistent fields.
- *
- * @param <U>
- *            the auditing type. Typically some kind of user.
- * @param <PK>
- *            the type of the auditing type's identifier
  */
 @MappedSuperclass
 public abstract class AbstractAuditableCustom extends AbstractPersistableCustom<Long> implements Auditable<Long, Long, LocalDateTime> {
 
+    @Serial
     private static final long serialVersionUID = 141481953116476081L;
 
     @Column(name = "createdby_id")
