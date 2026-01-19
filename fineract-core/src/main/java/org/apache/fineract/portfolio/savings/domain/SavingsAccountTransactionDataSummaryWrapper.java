@@ -26,8 +26,7 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.springframework.stereotype.Component;
 
 /**
- * A wrapper for dealing with side-effect free functionality related to a {@link SavingsAccount}'s
- * {@link SavingsAccountTransaction}'s.
+ * A wrapper for dealing with side-effect free functionality related to a SavingsAccountTransaction.
  */
 @Component
 public final class SavingsAccountTransactionDataSummaryWrapper {

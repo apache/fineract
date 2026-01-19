@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.Getter;
 import net.fortuna.ical4j.model.property.RRule;
 import net.fortuna.ical4j.validate.ValidationException;
 import org.apache.commons.collections4.CollectionUtils;
@@ -40,6 +41,7 @@ import org.springframework.util.ObjectUtils;
 public class DataValidatorBuilder {
 
     public static final String VALID_INPUT_SEPARATOR = "_";
+    @Getter
     private final List<ApiParameterError> dataValidationErrors;
     private String resource;
     private String parameter;
@@ -76,10 +78,6 @@ public class DataValidatorBuilder {
 
     public boolean hasError() {
         return !dataValidationErrors.isEmpty();
-    }
-
-    public List<ApiParameterError> getDataValidationErrors() {
-        return dataValidationErrors;
     }
 
     public DataValidatorBuilder resource(final String resource) {
@@ -629,7 +627,13 @@ public class DataValidatorBuilder {
             return this;
         }
 
-        final List<Object> list = (List<Object>) this.value;
+        if (!(this.value instanceof List<?> list)) {
+            String validationErrorCode = "validation.msg." + this.resource + "." + this.parameter + ".is.not.list";
+            String defaultEnglishMessage = "The parameter `" + this.parameter + "` should be a list.";
+            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode, defaultEnglishMessage, this.parameter);
+            this.dataValidationErrors.add(error);
+            return this;
+        }
         if (CollectionUtils.isEmpty(list)) {
             String validationErrorCode = "validation.msg." + this.resource + "." + this.parameter + ".cannot.be.empty";
             String defaultEnglishMessage = "The parameter `" + this.parameter + "` cannot be empty. You must select at least one.";

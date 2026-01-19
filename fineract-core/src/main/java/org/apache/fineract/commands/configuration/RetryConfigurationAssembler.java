@@ -56,7 +56,7 @@ public class RetryConfigurationAssembler {
 
     public Retry getRetryConfigurationForExecuteCommand() {
         Class<? extends Throwable>[] exceptionList = fineractProperties.getRetry().getInstances().getExecuteCommand().getRetryExceptions();
-        RetryConfig.Builder configBuilder = buildCommonExecuteCommandConfiguration();
+        RetryConfig.Builder<Throwable> configBuilder = buildCommonExecuteCommandConfiguration();
 
         if (exceptionList != null) {
             configBuilder.retryOnException(ex -> {
@@ -71,7 +71,7 @@ public class RetryConfigurationAssembler {
 
     public Retry getRetryConfigurationForBatchApiWithEnclosingTransaction() {
         Class<? extends Throwable>[] exceptionList = fineractProperties.getRetry().getInstances().getExecuteCommand().getRetryExceptions();
-        RetryConfig.Builder configBuilder = buildCommonExecuteCommandConfiguration();
+        RetryConfig.Builder<Throwable> configBuilder = buildCommonExecuteCommandConfiguration();
 
         if (exceptionList != null) {
             configBuilder.retryOnException(ex -> {
@@ -89,10 +89,10 @@ public class RetryConfigurationAssembler {
         return registry.retry(BATCH_RETRY, config);
     }
 
-    private RetryConfig.Builder buildCommonExecuteCommandConfiguration() {
+    private RetryConfig.Builder<Throwable> buildCommonExecuteCommandConfiguration() {
         var props = fineractProperties.getRetry().getInstances().getExecuteCommand();
 
-        RetryConfig.Builder configBuilder = RetryConfig.custom().maxAttempts(props.getMaxAttempts());
+        RetryConfig.Builder<Throwable> configBuilder = RetryConfig.<Throwable>custom().maxAttempts(props.getMaxAttempts());
 
         if (props.getWaitDuration() != null && props.getWaitDuration().toMillis() >= 0) {
             if (Boolean.TRUE.equals(props.getEnableExponentialBackoff())) {
@@ -111,7 +111,7 @@ public class RetryConfigurationAssembler {
     }
 
     public Retry getRetryConfigurationForCommandResultPersistence() {
-        RetryConfig.Builder configBuilder = buildCommonExecuteCommandConfiguration();
+        RetryConfig.Builder<Throwable> configBuilder = buildCommonExecuteCommandConfiguration();
 
         configBuilder.retryOnException(e -> e instanceof RuntimeException && !(e instanceof CommandResultPersistenceException));
 

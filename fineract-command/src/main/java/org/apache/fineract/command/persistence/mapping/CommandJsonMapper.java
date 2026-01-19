@@ -34,6 +34,7 @@ final class CommandJsonMapper {
     private static final String CLASS_ATTRIBUTE = "@class";
     private final ObjectMapper mapper;
 
+    @SuppressWarnings("unchecked")
     public <T> T map(JsonNode source) {
         if (source == null) {
             return null;

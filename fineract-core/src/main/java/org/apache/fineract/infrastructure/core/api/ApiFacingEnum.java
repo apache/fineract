@@ -34,10 +34,12 @@ public interface ApiFacingEnum<T extends Enum<T> & ApiFacingEnum<T>> {
     }
 
     default StringEnumOptionData getValueAsStringEnumOptionData() {
-        return new StringEnumOptionData(((Enum<T>) this).name(), getCode(), getHumanReadableName());
+        return new StringEnumOptionData(this.name(), getCode(), getHumanReadableName());
     }
 
     String getCode();
 
     String getHumanReadableName();
+
+    String name();
 }

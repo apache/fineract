@@ -21,7 +21,6 @@ package org.apache.fineract.investor.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -42,6 +41,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -64,9 +64,9 @@ public class ExternalAssetOwnerLoanProductAttributesReadServiceTest {
 
     private ExternalAssetOwnerLoanProductAttributesReadService underTest;
 
-    private int offset = 0;
+    private static final int OFFSET = 0;
 
-    private int limit = 100;
+    private static final int LIMIT = 100;
 
     @BeforeEach
     public void setUp() {
@@ -80,11 +80,12 @@ public class ExternalAssetOwnerLoanProductAttributesReadServiceTest {
         // given
         ExternalAssetOwnerLoanProductAttributes attributes = Mockito.mock(ExternalAssetOwnerLoanProductAttributes.class);
         ExternalTransferLoanProductAttributesData data = Mockito.mock(ExternalTransferLoanProductAttributesData.class);
-        PageRequest pageRequest = PageRequest.of(offset, limit, Sort.by("id").ascending());
+        PageRequest pageRequest = PageRequest.of(OFFSET, LIMIT, Sort.by("id").ascending());
         org.springframework.data.domain.Page<ExternalAssetOwnerLoanProductAttributes> attributesPage = new PageImpl<>(List.of(attributes),
                 pageRequest, 1);
 
-        when(externalAssetOwnerLoanProductAttributesRepository.findAll(any(Specification.class), eq(pageRequest)))
+        when(externalAssetOwnerLoanProductAttributesRepository
+                .findAll(ArgumentMatchers.<Specification<ExternalAssetOwnerLoanProductAttributes>>any(), eq(pageRequest)))
                 .thenReturn(attributesPage);
         when(loanProductRepository.existsById(loanProductId)).thenReturn(true);
         when(mapper.mapLoanProductAttributes(attributes)).thenReturn(data);
@@ -95,7 +96,7 @@ public class ExternalAssetOwnerLoanProductAttributesReadServiceTest {
 
         // then
         assertEquals(1, result.getTotalFilteredRecords());
-        assertEquals(data, result.getPageItems().get(0));
+        assertEquals(data, result.getPageItems().getFirst());
         verify(loanProductRepository, times(1)).existsById(loanProductId);
         verify(mapper, times(1)).mapLoanProductAttributes(attributes);
     }
@@ -105,11 +106,12 @@ public class ExternalAssetOwnerLoanProductAttributesReadServiceTest {
         // given
         Long loanProductId = 1L;
         ExternalAssetOwnerLoanProductAttributes attributes = Mockito.mock(ExternalAssetOwnerLoanProductAttributes.class);
-        PageRequest pageRequest = PageRequest.of(offset, limit, Sort.by("id").ascending());
+        PageRequest pageRequest = PageRequest.of(OFFSET, LIMIT, Sort.by("id").ascending());
         org.springframework.data.domain.Page<ExternalAssetOwnerLoanProductAttributes> attributesPage = new PageImpl<>(List.of(attributes),
                 pageRequest, 0);
 
-        when(externalAssetOwnerLoanProductAttributesRepository.findAll(any(Specification.class), eq(pageRequest)))
+        when(externalAssetOwnerLoanProductAttributesRepository
+                .findAll(ArgumentMatchers.<Specification<ExternalAssetOwnerLoanProductAttributes>>any(), eq(pageRequest)))
                 .thenReturn(attributesPage);
         when(loanProductRepository.existsById(loanProductId)).thenReturn(true);
         when(mapper.mapLoanProductAttributes(attributes)).thenReturn(null);
@@ -120,8 +122,9 @@ public class ExternalAssetOwnerLoanProductAttributesReadServiceTest {
 
         // then
         assertEquals(1, result.getTotalFilteredRecords());
-        assertNull(result.getPageItems().get(0));
-        verify(externalAssetOwnerLoanProductAttributesRepository, times(1)).findAll(any(Specification.class), eq(pageRequest));
+        assertNull(result.getPageItems().getFirst());
+        verify(externalAssetOwnerLoanProductAttributesRepository, times(1))
+                .findAll(ArgumentMatchers.<Specification<ExternalAssetOwnerLoanProductAttributes>>any(), eq(pageRequest));
         verify(loanProductRepository, times(1)).existsById(loanProductId);
         verify(mapper, times(1)).mapLoanProductAttributes(attributes);
     }
