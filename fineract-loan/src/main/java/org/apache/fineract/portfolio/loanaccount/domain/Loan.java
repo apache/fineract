@@ -1636,6 +1636,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return this.loanTermVariations.stream().filter(LoanTermVariations::isActive).collect(Collectors.toList());
     }
 
+    public void setLoanTermVariations(List<LoanTermVariations> loanTermVariations) {
+        this.loanTermVariations = loanTermVariations;
+    }
+
     public boolean isTopup() {
         return this.isTopup;
     }

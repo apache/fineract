@@ -964,8 +964,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (isTransactionChronologicallyLatest && (!reprocess || !loan.isInterestBearingAndInterestRecalculationEnabled())
                 && !loan.isForeclosure()) {
             loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(),
-                    newInterestPaymentWaiverTransaction, new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                            loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+                    newInterestPaymentWaiverTransaction,
+                    new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
+                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null, loan.getActiveLoanTermVariations()));
 
             reprocess = false;
             if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
@@ -2993,7 +2994,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (processLatest) {
             loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), interestRefundTxn,
                     new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null, loan.getActiveLoanTermVariations()));
             loan.addLoanTransaction(interestRefundTxn);
         } else {
             if (loan.isCumulativeSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()) {
@@ -3053,7 +3054,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loan.addLoanTransaction(chargebackTransaction);
             loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), chargebackTransaction,
                     new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null, loan.getActiveLoanTermVariations()));
         }
         loanLifecycleStateMachine.determineAndTransition(loan, chargebackTransaction.getTransactionDate());
     }
@@ -3253,7 +3254,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loan.addLoanTransaction(loanTransaction);
             loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), loanTransaction,
                     new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null, loan.getActiveLoanTermVariations()));
         }
         loanBalanceService.updateLoanSummaryDerivedFields(loan);
         loanLifecycleStateMachine.transition(LoanEvent.WRITE_OFF_OUTSTANDING, loan);
@@ -3325,7 +3326,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 loan.addLoanTransaction(loanTransaction);
                 loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), loanTransaction,
                         new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                                new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+                                new MoneyHolder(loan.getTotalOverpaidAsMoney()), null, loan.getActiveLoanTermVariations()));
 
                 loanBalanceService.updateLoanSummaryDerivedFields(loan);
             } else if (totalOutstanding.isGreaterThanZero()) {

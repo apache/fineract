@@ -35,6 +35,7 @@ import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.data.TransactionChangeData;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
@@ -119,8 +120,10 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
     @Override
     @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public Money totalInterestByTransactions(LoanRepaymentScheduleTransactionProcessor processor, final Long loanId,
-            LocalDate relatedRefundTransactionDate, List<LoanTransaction> newTransactions, List<Long> oldTransactionIds) {
+            LocalDate relatedRefundTransactionDate, List<LoanTransaction> newTransactions, List<Long> oldTransactionIds,
+            List<LoanTermVariations> activeLoanTermVariations) {
         Loan loan = loanAssembler.assembleFrom(loanId);
+        loan.setLoanTermVariations(activeLoanTermVariations);
         if (processor == null) {
             processor = loanTransactionProcessingService.getTransactionProcessor(loan.getTransactionProcessingStrategyCode());
         }

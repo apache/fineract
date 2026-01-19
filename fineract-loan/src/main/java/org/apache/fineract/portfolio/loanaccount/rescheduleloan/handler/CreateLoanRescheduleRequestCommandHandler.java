@@ -18,25 +18,21 @@
  */
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.handler;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.service.LoanRescheduleRequestWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 @CommandType(entity = "RESCHEDULELOAN", action = "CREATE")
 public class CreateLoanRescheduleRequestCommandHandler implements NewCommandSourceHandler {
 
     private final LoanRescheduleRequestWritePlatformService loanRescheduleRequestWritePlatformService;
-
-    @Autowired
-    public CreateLoanRescheduleRequestCommandHandler(LoanRescheduleRequestWritePlatformService loanRescheduleRequestWritePlatformService) {
-        this.loanRescheduleRequestWritePlatformService = loanRescheduleRequestWritePlatformService;
-    }
 
     @Transactional
     @Override

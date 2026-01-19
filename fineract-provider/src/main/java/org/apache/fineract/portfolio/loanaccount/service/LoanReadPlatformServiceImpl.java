@@ -2244,9 +2244,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
         final InterestRefundService interestRefundService = interestRefundServiceDelegate.lookupInterestRefundService(loan);
         final Money totalInterest = interestRefundService.totalInterestByTransactions(null, loan.getId(), targetTxn.getTransactionDate(),
-                List.of(), loan.getLoanTransactions().stream().map(AbstractPersistableCustom::getId).toList());
+                List.of(), loan.getLoanTransactions().stream().map(AbstractPersistableCustom::getId).toList(),
+                loan.getActiveLoanTermVariations());
         final Money newTotalInterest = interestRefundService.totalInterestByTransactions(null, loan.getId(), targetTxn.getTransactionDate(),
-                List.of(targetTxn), loan.getLoanTransactions().stream().map(AbstractPersistableCustom::getId).toList());
+                List.of(targetTxn), loan.getLoanTransactions().stream().map(AbstractPersistableCustom::getId).toList(),
+                loan.getActiveLoanTermVariations());
         final BigDecimal interestRefundAmount = totalInterest.minus(newTotalInterest).getAmount();
         final Collection<PaymentTypeData> paymentTypeOptions = paymentTypeReadPlatformService.retrieveAllPaymentTypes();
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.INTEREST_REFUND);

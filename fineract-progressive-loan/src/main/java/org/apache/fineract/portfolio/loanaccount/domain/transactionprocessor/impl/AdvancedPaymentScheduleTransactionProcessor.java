@@ -229,7 +229,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         ProgressiveLoanInterestScheduleModel scheduleModel = emiCalculator.generateInstallmentInterestScheduleModel(installments,
                 LoanConfigurationDetailsMapper.map(loan), installmentAmountInMultiplesOf, overpaymentHolder.getMoneyObject().getMc());
         ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, charges, overpaymentHolder,
-                changedTransactionDetail, scheduleModel);
+                changedTransactionDetail, scheduleModel, loan.getActiveLoanTermVariations());
 
         List<ChangeOperation> changeOperations = createSortedChangeList(loanTermVariations, loanTransactions, charges);
 
@@ -571,7 +571,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         .filter(LoanTransaction::isNotReversed).filter(tr -> tr.getId() == null).toList());
                 if (validateInterestRefundTransactionRelation(loanTransaction)) {
                     final Money interestAfterRefund = interestRefundService.totalInterestByTransactions(this, loan.getId(), targetDate,
-                            modifiedTransactions, unmodifiedTransactionIds);
+                            modifiedTransactions, unmodifiedTransactionIds, ctx.getActiveLoanTermVariations());
                     final Money newAmount = interestBeforeRefund.minus(progCtx.getSumOfInterestRefundAmount()).minus(interestAfterRefund);
                     loanTransaction.updateAmount(newAmount.getAmount());
                 }

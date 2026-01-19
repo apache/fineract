@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -25,11 +27,15 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
@@ -150,6 +156,65 @@ public class LoanRefundTransactionTest extends BaseLoanIntegrationTest {
             Assertions.assertTrue(loanDetails.getTransactions().stream()
                     .filter(transaction -> transaction.getType().getCode().equals("loanTransactionType.interestRefund"))
                     .allMatch(transaction -> transaction.getAmount().doubleValue() > 0.0));
+        });
+    }
+
+    @Test
+    public void testMerchantIssuedRefundAndCreditBalanceRefundWithAdjustSchedule() {
+        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
+
+        runAt("24 September 2025", () -> {
+            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long loanId = createLoanForRefundWithInterestRefund(clientId, "MERCHANT_ISSUED_REFUND", "24 September 2025", 116.89,
+                    35.99, 3);
+            loanIdRef.set(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(116.89), "24 September 2025");
+        });
+
+        runAt("26 September 2025", () -> {
+            executeInlineCOB(loanIdRef.get());
+            addRepaymentForLoan(loanIdRef.get(), 117.12, "26 September 2025");
+        });
+
+        runAt("06 October 2025", () -> {
+            executeInlineCOB(loanIdRef.get());
+            loanTransactionHelper.makeMerchantIssuedRefund(loanIdRef.get(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("06 October 2025").locale(LOCALE).transactionAmount(8.13));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanIdRef.get());
+            // Validate Loan is Overpaid
+            assertTrue(loanDetails.getStatus().getOverpaid());
+
+            validateLoanSummaryBalances(loanDetails, 0.00, 117.12, 0.00, 116.89, 8.14);
+        });
+
+        runAt("07 October 2025", () -> {
+            executeInlineCOB(loanIdRef.get());
+            loanTransactionHelper.makeCreditBalanceRefund(loanIdRef.get(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("07 October 2025").locale(LOCALE).transactionAmount(8.14));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanIdRef.get());
+            // Validate Loan is Closed
+            assertTrue(loanDetails.getStatus().getClosedObligationsMet());
+            validateLoanSummaryBalances(loanDetails, 0.00, 117.12, 0.00, 116.89, null);
+
+            PostCreateRescheduleLoansResponse rescheduleLoansResponse = loanRescheduleRequestHelper//
+                    .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()//
+                            .loanId(loanIdRef.get())//
+                            .rescheduleReasonId(1L)//
+                            .rescheduleFromDate("25 September 2025").dateFormat(DATETIME_PATTERN).locale(LOCALE)//
+                            .submittedOnDate("07 October 2025")//
+                            .newInterestRate(BigDecimal.valueOf(25.99)));//
+
+            loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(), //
+                    new PostUpdateRescheduleLoansRequest()//
+                            .approvedOnDate("07 October 2025").locale(LOCALE).dateFormat(DATETIME_PATTERN));//
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanIdRef.get());
+            // Validate Loan is Overpaid
+            assertTrue(loanDetails.getStatus().getOverpaid());
+
+            validateLoanSummaryBalances(loanDetails, 0.00, 117.06, 0.00, 116.89, 0.06);
         });
     }
 

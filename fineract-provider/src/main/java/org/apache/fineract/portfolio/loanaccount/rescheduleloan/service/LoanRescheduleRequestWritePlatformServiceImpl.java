@@ -444,17 +444,18 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             } else {
                 loanSchedule.updateLoanSchedule(loan, loanScheduleDTO.getLoanScheduleModel());
             }
-            loanAccrualsProcessingService.reprocessExistingAccruals(loan, true);
-            loanChargeService.recalculateAllCharges(loan);
-            reprocessLoanTransactionsService.reprocessTransactions(loan);
-
-            this.loanRepaymentScheduleHistoryRepository.saveAll(loanRepaymentScheduleHistoryList);
 
             loan.updateRescheduledByUser(appUser);
             loan.updateRescheduledOnDate(DateUtils.getBusinessLocalDate());
 
             // update the status of the request
             loanRescheduleRequest.approve(appUser, approvedOnDate);
+
+            loanAccrualsProcessingService.reprocessExistingAccruals(loan, true);
+            loanChargeService.recalculateAllCharges(loan);
+            reprocessLoanTransactionsService.reprocessTransactions(loan);
+
+            this.loanRepaymentScheduleHistoryRepository.saveAll(loanRepaymentScheduleHistoryList);
 
             Optional<LocalDate> lastTransactionDateForReprocessing = loanTransactionRepository.findLastTransactionDateForReprocessing(loan);
             if (lastTransactionDateForReprocessing.isPresent()) {

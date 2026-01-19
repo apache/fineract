@@ -26,6 +26,7 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 
 @Data
 @AllArgsConstructor
@@ -36,4 +37,5 @@ public class TransactionCtx {
     private final Set<LoanCharge> charges;
     private final MoneyHolder overpaymentHolder;
     private final ChangedTransactionDetail changedTransactionDetail;
+    private final List<LoanTermVariations> activeLoanTermVariations;
 }

@@ -28,6 +28,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
@@ -52,14 +53,16 @@ public class ProgressiveTransactionCtx extends TransactionCtx {
 
     public ProgressiveTransactionCtx(MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
             Set<LoanCharge> charges, MoneyHolder overpaymentHolder, ChangedTransactionDetail changedTransactionDetail,
-            ProgressiveLoanInterestScheduleModel model) {
-        this(currency, installments, charges, overpaymentHolder, changedTransactionDetail, model, Money.zero(currency));
+            ProgressiveLoanInterestScheduleModel model, List<LoanTermVariations> activeLoanTermVariations) {
+        this(currency, installments, charges, overpaymentHolder, changedTransactionDetail, model, Money.zero(currency),
+                activeLoanTermVariations);
     }
 
     public ProgressiveTransactionCtx(MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
             Set<LoanCharge> charges, MoneyHolder overpaymentHolder, ChangedTransactionDetail changedTransactionDetail,
-            ProgressiveLoanInterestScheduleModel model, Money sumOfInterestRefundAmount) {
-        super(currency, installments, charges, overpaymentHolder, changedTransactionDetail);
+            ProgressiveLoanInterestScheduleModel model, Money sumOfInterestRefundAmount,
+            List<LoanTermVariations> activeLoanTermVariations) {
+        super(currency, installments, charges, overpaymentHolder, changedTransactionDetail, activeLoanTermVariations);
         this.sumOfInterestRefundAmount = sumOfInterestRefundAmount;
         this.model = model;
     }

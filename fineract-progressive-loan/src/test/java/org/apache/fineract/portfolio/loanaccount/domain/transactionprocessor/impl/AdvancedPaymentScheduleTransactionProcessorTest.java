@@ -164,8 +164,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(charge.updatePaidAmountBy(refEq(chargeAmountMoney), eq(1), refEq(zero))).thenReturn(chargeAmountMoney);
         when(loanTransaction.isPenaltyPayment()).thenReturn(false);
 
-        underTest.processLatestTransaction(loanTransaction,
-                new TransactionCtx(currency, List.of(installment), Set.of(charge), new MoneyHolder(overpaidAmount), null));
+        underTest.processLatestTransaction(loanTransaction, new TransactionCtx(currency, List.of(installment), Set.of(charge),
+                new MoneyHolder(overpaidAmount), null, loan.getActiveLoanTermVariations()));
 
         Mockito.verify(installment, times(1)).payFeeChargesComponent(eq(transactionDate), eq(chargeAmountMoney));
         Mockito.verify(loanTransaction, times(1)).updateComponents(refEq(zero), refEq(zero), refEq(chargeAmountMoney), refEq(zero));
@@ -208,8 +208,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(charge.updatePaidAmountBy(refEq(transactionAmountMoney), eq(1), refEq(zero))).thenReturn(transactionAmountMoney);
         when(loanTransaction.isPenaltyPayment()).thenReturn(false);
 
-        underTest.processLatestTransaction(loanTransaction,
-                new TransactionCtx(currency, List.of(installment), Set.of(charge), new MoneyHolder(overpaidAmount), null));
+        underTest.processLatestTransaction(loanTransaction, new TransactionCtx(currency, List.of(installment), Set.of(charge),
+                new MoneyHolder(overpaidAmount), null, loan.getActiveLoanTermVariations()));
 
         Mockito.verify(installment, times(1)).payFeeChargesComponent(eq(transactionDate), eq(transactionAmountMoney));
         Mockito.verify(loanTransaction, times(1)).updateComponents(refEq(zero), refEq(zero), refEq(transactionAmountMoney), refEq(zero));
@@ -260,8 +260,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(loanPaymentAllocationRule.getAllocationTypes()).thenReturn(List.of(PaymentAllocationType.DUE_PRINCIPAL));
         when(loanTransaction.isOn(transactionDate)).thenReturn(true);
 
-        underTest.processLatestTransaction(loanTransaction,
-                new TransactionCtx(currency, List.of(installment), Set.of(charge), new MoneyHolder(overpaidAmount), null));
+        underTest.processLatestTransaction(loanTransaction, new TransactionCtx(currency, List.of(installment), Set.of(charge),
+                new MoneyHolder(overpaidAmount), null, loan.getActiveLoanTermVariations()));
 
         Mockito.verify(installment, times(1)).payFeeChargesComponent(transactionDate, chargeAmountMoney);
         Mockito.verify(loanTransaction, times(1)).updateComponents(refEq(zero), refEq(zero), refEq(chargeAmountMoney), refEq(zero));
@@ -289,7 +289,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         installments.add(installment);
 
         // when
-        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null);
+        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null,
+                loan.getActiveLoanTermVariations());
         underTest.processCreditTransaction(chargebackTransaction, ctx);
 
         // verify principal
@@ -346,7 +347,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         installments.add(installment);
 
         // when
-        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null);
+        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null,
+                loan.getActiveLoanTermVariations());
         underTest.processCreditTransaction(chargebackTransaction, ctx);
 
         // verify charges on installment
@@ -398,7 +400,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         installments.add(installment2);
 
         // when
-        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null);
+        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null,
+                loan.getActiveLoanTermVariations());
         underTest.processCreditTransaction(chargebackTransaction, ctx);
 
         // verify principal
@@ -491,7 +494,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
 
         // Set up TransactionCtx with installments and charges
         TransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, Set.of(), overpaymentHolder, changedTransactionDetail,
-                model, null);
+                model, loan.getActiveLoanTermVariations());
 
         // Mock additional necessary methods
         LoanCharge loanCharge = mock(LoanCharge.class);
@@ -570,7 +573,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(model.getMaturityDate()).thenReturn(LocalDate.of(2023, 12, 31));
 
         TransactionCtx ctx = new ProgressiveTransactionCtx(currency, spyInstallments, Set.of(), new MoneyHolder(Money.zero(currency)),
-                mock(ChangedTransactionDetail.class), model, Money.zero(currency));
+                mock(ChangedTransactionDetail.class), model, Money.zero(currency), loan.getActiveLoanTermVariations());
 
         underTest.processLatestTransaction(disbursementTransaction, ctx);
 

@@ -211,7 +211,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
         ProgressiveLoanInterestScheduleModel model = savedModel.get();
         ProgressiveTransactionCtx progressiveContext = new ProgressiveTransactionCtx(loan.getCurrency(),
                 loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()),
-                new ChangedTransactionDetail(), model, getTotalRefundInterestAmount(loan));
+                new ChangedTransactionDetail(), model, getTotalRefundInterestAmount(loan), loan.getActiveLoanTermVariations());
         progressiveContext.getAlreadyProcessedTransactions().addAll(loanTransactionService.retrieveListOfTransactionsForReprocessing(loan));
         progressiveContext.setChargedOff(loan.isChargedOff());
         progressiveContext.setWrittenOff(loan.isClosedWrittenOff());

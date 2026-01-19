@@ -83,7 +83,7 @@ public class LoanRefundService {
 
         loadTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), loanTransaction,
                 new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                        new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+                        new MoneyHolder(loan.getTotalOverpaidAsMoney()), null, loan.getActiveLoanTermVariations()));
 
         loanLifecycleStateMachine.determineAndTransition(loan, loanTransaction.getTransactionDate());
     }
