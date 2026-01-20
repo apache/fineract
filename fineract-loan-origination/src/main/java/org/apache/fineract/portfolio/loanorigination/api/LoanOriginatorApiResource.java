@@ -1,0 +1,190 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.fineract.portfolio.loanorigination.api;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriInfo;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.service.CommandWrapperBuilder;
+import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
+import org.apache.fineract.portfolio.loanorigination.service.LoanOriginatorReadPlatformService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
+
+@Path("/v1/loan-originators")
+@Component
+@ConditionalOnProperty(value = "fineract.module.loan-origination.enabled", havingValue = "true")
+@Tag(name = "Loan Originators", description = "Manage loan originator details for revenue sharing and reporting")
+@RequiredArgsConstructor
+public class LoanOriginatorApiResource {
+
+    private final PlatformSecurityContext context;
+    private final LoanOriginatorReadPlatformService loanOriginatorReadPlatformService;
+    private final DefaultToApiJsonSerializer<LoanOriginatorData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Create a new loan originator", description = "Creates a new loan originator record. Requires CREATE_LOAN_ORIGINATOR permission.")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "400", description = "Required parameter is missing or incorrect format")
+    @ApiResponse(responseCode = "403", description = "Duplicate external ID or insufficient permissions")
+    public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanOriginator().withJson(apiRequestBodyAsJson).build();
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "List all loan originators", description = "Retrieves all loan originator records. Requires READ_LOAN_ORIGINATOR permission.")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+    public String retrieveAll(@Context final UriInfo uriInfo) {
+        this.context.authenticatedUser().validateHasReadPermission(LoanOriginatorApiConstants.RESOURCE_NAME);
+
+        final List<LoanOriginatorData> originators = this.loanOriginatorReadPlatformService.retrieveAll();
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, originators, LoanOriginatorApiConstants.RESPONSE_PARAMS);
+    }
+
+    @GET
+    @Path("{originatorId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve a loan originator by ID", description = "Retrieves a loan originator by its internal ID. Requires READ_LOAN_ORIGINATOR permission.")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+    @ApiResponse(responseCode = "404", description = "Originator not found")
+    public String retrieveOne(@PathParam("originatorId") @Parameter(description = "originatorId") final Long originatorId,
+            @Context final UriInfo uriInfo) {
+        this.context.authenticatedUser().validateHasReadPermission(LoanOriginatorApiConstants.RESOURCE_NAME);
+
+        final LoanOriginatorData originator = this.loanOriginatorReadPlatformService.retrieveById(originatorId);
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, originator, LoanOriginatorApiConstants.RESPONSE_PARAMS);
+    }
+
+    @GET
+    @Path("external-id/{externalId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve a loan originator by external ID", description = "Retrieves a loan originator by its external ID. Requires READ_LOAN_ORIGINATOR permission.")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+    @ApiResponse(responseCode = "404", description = "Originator not found")
+    public String retrieveByExternalId(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
+            @Context final UriInfo uriInfo) {
+        this.context.authenticatedUser().validateHasReadPermission(LoanOriginatorApiConstants.RESOURCE_NAME);
+
+        final LoanOriginatorData originator = this.loanOriginatorReadPlatformService.retrieveByExternalId(externalId);
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, originator, LoanOriginatorApiConstants.RESPONSE_PARAMS);
+    }
+
+    @PUT
+    @Path("{originatorId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Update a loan originator by ID", description = "Updates a loan originator by its internal ID. Requires UPDATE_LOAN_ORIGINATOR permission.")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "400", description = "Incorrect format")
+    @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+    @ApiResponse(responseCode = "404", description = "Originator not found")
+    public String update(@PathParam("originatorId") @Parameter(description = "originatorId") final Long originatorId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateLoanOriginator(originatorId).withJson(apiRequestBodyAsJson)
+                .build();
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @PUT
+    @Path("external-id/{externalId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Update a loan originator by external ID", description = "Updates a loan originator by its external ID. Requires UPDATE_LOAN_ORIGINATOR permission.")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "400", description = "Incorrect format")
+    @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+    @ApiResponse(responseCode = "404", description = "Originator not found")
+    public String updateByExternalId(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+        final Long originatorId = this.loanOriginatorReadPlatformService.resolveIdByExternalId(externalId);
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateLoanOriginator(originatorId).withJson(apiRequestBodyAsJson)
+                .build();
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @DELETE
+    @Path("{originatorId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Delete a loan originator by ID", description = "Deletes a loan originator by its internal ID. Requires DELETE_LOAN_ORIGINATOR permission.")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "403", description = "Originator is mapped to loans and cannot be deleted, or insufficient permissions")
+    @ApiResponse(responseCode = "404", description = "Originator not found")
+    public String delete(@PathParam("originatorId") @Parameter(description = "originatorId") final Long originatorId) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteLoanOriginator(originatorId).build();
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @DELETE
+    @Path("external-id/{externalId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Delete a loan originator by external ID", description = "Deletes a loan originator by its external ID. Requires DELETE_LOAN_ORIGINATOR permission.")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "403", description = "Originator is mapped to loans and cannot be deleted, or insufficient permissions")
+    @ApiResponse(responseCode = "404", description = "Originator not found")
+    public String deleteByExternalId(@PathParam("externalId") @Parameter(description = "externalId") final String externalId) {
+        final Long originatorId = this.loanOriginatorReadPlatformService.resolveIdByExternalId(externalId);
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteLoanOriginator(originatorId).build();
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return this.toApiJsonSerializer.serialize(result);
+    }
+}

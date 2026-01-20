@@ -552,7 +552,7 @@ public class BatchApiStepDef extends AbstractStepDef {
         // Create new user which cannot bypass loan COB execution
         PostUsersResponse createUserResponse = testContext().get(TestContextKey.CREATED_SIMPLE_USER_RESPONSE);
         Long createdUserId = createUserResponse.getResourceId();
-        GetUsersUserIdResponse user = fineractFeignClient.users().retrieveOne31(createdUserId);
+        GetUsersUserIdResponse user = fineractFeignClient.users().retrieveOne32(createdUserId);
         String authorizationString = user.getUsername() + ":" + PWD_USER_WITH_ROLE;
         Base64 base64 = new Base64();
         headerMap.put("Authorization",

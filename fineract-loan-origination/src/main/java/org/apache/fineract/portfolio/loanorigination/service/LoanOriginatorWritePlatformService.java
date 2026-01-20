@@ -16,28 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanorigination.domain;
+package org.apache.fineract.portfolio.loanorigination.service;
 
-public enum LoanOriginatorStatus {
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
-    ACTIVE("ACTIVE"), PENDING("PENDING"), INACTIVE("INACTIVE");
+public interface LoanOriginatorWritePlatformService {
 
-    private final String value;
+    CommandProcessingResult create(JsonCommand command);
 
-    LoanOriginatorStatus(String value) {
-        this.value = value;
-    }
+    CommandProcessingResult update(Long id, JsonCommand command);
 
-    public String getValue() {
-        return value;
-    }
-
-    public static LoanOriginatorStatus fromString(String text) {
-        for (LoanOriginatorStatus status : LoanOriginatorStatus.values()) {
-            if (status.value.equalsIgnoreCase(text)) {
-                return status;
-            }
-        }
-        throw new IllegalArgumentException("Unknown LoanOriginatorStatus: " + text);
-    }
+    CommandProcessingResult delete(Long id);
 }

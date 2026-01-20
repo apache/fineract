@@ -1128,6 +1128,29 @@ final class LoansApiResourceSwagger {
             public boolean isProcessed;
         }
 
+        @Schema(description = "Originator data associated with the loan")
+        static final class GetLoansLoanIdOriginatorData {
+
+            private GetLoansLoanIdOriginatorData() {}
+
+            @Schema(example = "1")
+            public Long id;
+            @Schema(example = "REV-SHARE-001")
+            public String externalId;
+            @Schema(example = "PP Merchant")
+            public String name;
+            @Schema(example = "ACTIVE")
+            public String status;
+            @Schema(example = "1")
+            public Long originatorTypeId;
+            @Schema(example = "MERCHANT")
+            public String originatorTypeName;
+            @Schema(example = "2")
+            public Long channelTypeId;
+            @Schema(example = "ONLINE")
+            public String channelTypeName;
+        }
+
         @Schema(example = "1")
         public Long id;
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
@@ -1206,6 +1229,8 @@ final class LoansApiResourceSwagger {
         public GetLoansLoanIdDelinquencySummary delinquent;
         @Schema(description = "Set of charges")
         public List<GetLoansLoanIdLoanChargeData> charges;
+        @Schema(description = "List of originators associated with this loan")
+        public List<GetLoansLoanIdOriginatorData> originators;
         public DelinquencyRangeData delinquencyRange;
         @Schema(example = "false")
         public Boolean fraud;
@@ -1399,6 +1424,13 @@ final class LoansApiResourceSwagger {
 
         public List<PostLoansRequestChargeData> charges;
 
+        @Schema(description = """
+                Optional array of originators to associate with this loan. \
+                Each entry can reference an existing originator by 'id' or 'externalId'. \
+                If the global config 'enable_originator_creation_during_loan_application' is enabled, \
+                non-existing originators will be auto-created using the provided details (name, typeId, channelTypeId).""")
+        public List<PostLoansOriginatorData> originators;
+
         static final class PostLoansRequestChargeData {
 
             private PostLoansRequestChargeData() {}
@@ -1408,6 +1440,27 @@ final class LoansApiResourceSwagger {
 
             @Schema(example = "1.0")
             public BigDecimal amount;
+        }
+
+        @Schema(description = "Originator data for loan creation request")
+        public static final class PostLoansOriginatorData {
+
+            private PostLoansOriginatorData() {}
+
+            @Schema(description = "Originator internal ID (use this OR externalId, not both)", example = "1")
+            public Long id;
+
+            @Schema(description = "Originator external ID (use this OR id, not both)", example = "REV-SHARE-001")
+            public String externalId;
+
+            @Schema(description = "Originator name (used when creating new originator if config enabled)", example = "PP Merchant")
+            public String name;
+
+            @Schema(description = "Code value ID for originator type (from LoanOriginatorType code)", example = "1")
+            public Long typeId;
+
+            @Schema(description = "Code value ID for channel type (from LoanOriginationChannelType code)", example = "2")
+            public Long channelTypeId;
         }
     }
 

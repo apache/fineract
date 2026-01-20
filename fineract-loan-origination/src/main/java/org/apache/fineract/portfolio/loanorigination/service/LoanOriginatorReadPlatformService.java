@@ -16,28 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanorigination.domain;
+package org.apache.fineract.portfolio.loanorigination.service;
 
-public enum LoanOriginatorStatus {
+import java.util.List;
+import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
 
-    ACTIVE("ACTIVE"), PENDING("PENDING"), INACTIVE("INACTIVE");
+public interface LoanOriginatorReadPlatformService {
 
-    private final String value;
+    List<LoanOriginatorData> retrieveAll();
 
-    LoanOriginatorStatus(String value) {
-        this.value = value;
-    }
+    LoanOriginatorData retrieveById(Long id);
 
-    public String getValue() {
-        return value;
-    }
+    LoanOriginatorData retrieveByExternalId(String externalId);
 
-    public static LoanOriginatorStatus fromString(String text) {
-        for (LoanOriginatorStatus status : LoanOriginatorStatus.values()) {
-            if (status.value.equalsIgnoreCase(text)) {
-                return status;
-            }
-        }
-        throw new IllegalArgumentException("Unknown LoanOriginatorStatus: " + text);
-    }
+    Long resolveIdByExternalId(String externalId);
 }

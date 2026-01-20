@@ -68,7 +68,7 @@ public class UserStepDef extends AbstractStepDef {
                 .repeatPassword(PWD_USER_WITH_ROLE) //
                 .roles(List.of(roleId));
 
-        PostUsersResponse createUserResponse = ok(() -> fineractClient.users().create15(postUsersRequest));
+        PostUsersResponse createUserResponse = ok(() -> fineractClient.users().create16(postUsersRequest));
         testContext().set(TestContextKey.CREATED_SIMPLE_USER_RESPONSE, createUserResponse);
         testContext().set(TestContextKey.CREATED_SIMPLE_USER_USERNAME, generatedUsername);
         testContext().set(TestContextKey.CREATED_SIMPLE_USER_PASSWORD, PWD_USER_WITH_ROLE);

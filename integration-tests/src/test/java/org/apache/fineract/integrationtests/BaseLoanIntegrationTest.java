@@ -374,7 +374,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         String password = "AKleRbDhK421$";
         String email = firstname + "." + lastname + "@whatever.mifos.org";
         Calls.ok(fineractClient().users
-                .create15(new PostUsersRequest().addRolesItem(roleId).email(email).firstname(firstname).lastname(lastname)
+                .create16(new PostUsersRequest().addRolesItem(roleId).email(email).firstname(firstname).lastname(lastname)
                         .repeatPassword(password).sendPasswordToEmail(false).officeId(1L).username(userName).password(password)));
 
         // login user
