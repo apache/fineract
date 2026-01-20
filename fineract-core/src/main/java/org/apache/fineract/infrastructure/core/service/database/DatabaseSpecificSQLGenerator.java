@@ -105,8 +105,8 @@ public class DatabaseSpecificSQLGenerator {
     }
 
     public String countQueryResult(@NonNull String sql) {
-        // Needs to remove the limit and offset
-        sql = sql.replaceAll("LIMIT \\d+", "").replaceAll("OFFSET \\d+", "").trim();
+        // Remove SQL_CALC_FOUND_ROWS, LIMIT and OFFSET
+        sql = sql.replaceAll("SQL_CALC_FOUND_ROWS", "").replaceAll("LIMIT \\d+(,\\d+)?", "").replaceAll("OFFSET \\d+", "").trim();
         return format("SELECT COUNT(*) FROM (%s) AS temp", sql);
     }
 

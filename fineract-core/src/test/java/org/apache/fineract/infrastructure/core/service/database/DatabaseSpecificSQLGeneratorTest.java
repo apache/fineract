@@ -63,4 +63,25 @@ public class DatabaseSpecificSQLGeneratorTest {
         String countQuery = databaseSpecificSQLGenerator.countQueryResult(sql);
         Assertions.assertEquals("SELECT COUNT(*) FROM (SELECT 1 FROM test_table WHERE asd=2) AS temp", countQuery);
     }
+
+    @Test
+    public void testCountQueryResultOnSqlWithCalcFoundRows() {
+        String sql = "SELECT SQL_CALC_FOUND_ROWS 1 FROM test_table WHERE asd=2";
+        String countQuery = databaseSpecificSQLGenerator.countQueryResult(sql);
+        Assertions.assertEquals("SELECT COUNT(*) FROM (SELECT  1 FROM test_table WHERE asd=2) AS temp", countQuery);
+    }
+
+    @Test
+    public void testCountQueryResultOnSqlWithCalcFoundRowsAndLimit() {
+        String sql = "SELECT SQL_CALC_FOUND_ROWS 1 FROM test_table WHERE asd=2 LIMIT 10";
+        String countQuery = databaseSpecificSQLGenerator.countQueryResult(sql);
+        Assertions.assertEquals("SELECT COUNT(*) FROM (SELECT  1 FROM test_table WHERE asd=2) AS temp", countQuery);
+    }
+
+    @Test
+    public void testCountQueryResultOnSqlWithCalcFoundRowsLimitAndOffset() {
+        String sql = "SELECT SQL_CALC_FOUND_ROWS 1 FROM test_table WHERE asd=2 LIMIT 10,5";
+        String countQuery = databaseSpecificSQLGenerator.countQueryResult(sql);
+        Assertions.assertEquals("SELECT COUNT(*) FROM (SELECT  1 FROM test_table WHERE asd=2) AS temp", countQuery);
+    }
 }
