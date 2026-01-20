@@ -84,4 +84,11 @@ public class DatabaseSpecificSQLGeneratorTest {
         String countQuery = databaseSpecificSQLGenerator.countQueryResult(sql);
         Assertions.assertEquals("SELECT COUNT(*) FROM (SELECT  1 FROM test_table WHERE asd=2) AS temp", countQuery);
     }
+
+    @Test
+    public void testCountQueryResultOnSqlWithStandardLimitOffsetSyntax() {
+        String sql = "SELECT 1 FROM test_table WHERE asd=2 LIMIT 10 OFFSET 5";
+        String countQuery = databaseSpecificSQLGenerator.countQueryResult(sql);
+        Assertions.assertEquals("SELECT COUNT(*) FROM (SELECT 1 FROM test_table WHERE asd=2) AS temp", countQuery);
+    }
 }
