@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.api;
 
+import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -93,6 +94,7 @@ public class RunreportsApiResource {
 
     @GET
     @Path("{reportName}")
+    @Timed(value = "fineract.report.execution", description = "Time taken to execute reports", extraTags = { "component", "reporting" })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON, "text/csv", "application/vnd.ms-excel", "application/pdf", "text/html" })
     @Operation(summary = "Run a predefined report", description = ReportParameters.FULL_DESCRIPTION)
