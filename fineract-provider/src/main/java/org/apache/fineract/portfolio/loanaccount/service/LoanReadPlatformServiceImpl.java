@@ -379,6 +379,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 arrayPos = arrayPos + 1;
             }
 
+            if (searchParameters.hasProductId()) {
+                sqlBuilder.append(" and l.product_id = ?");
+                extraCriterias.add(searchParameters.getProductId());
+                arrayPos = arrayPos + 1;
+            }
+
             if (searchParameters.hasOrderBy()) {
                 sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
