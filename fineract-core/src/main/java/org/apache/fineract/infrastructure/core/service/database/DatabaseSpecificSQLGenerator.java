@@ -105,8 +105,12 @@ public class DatabaseSpecificSQLGenerator {
     }
 
     public String countQueryResult(@NonNull String sql) {
-        // Needs to remove the limit and offset
-        sql = sql.replaceAll("LIMIT \\d+", "").replaceAll("OFFSET \\d+", "").trim();
+        // Remove SQL_CALC_FOUND_ROWS, LIMIT and OFFSET (case-insensitive for robustness)
+        // Handle both MySQL syntax (LIMIT offset,count) and standard syntax (LIMIT count OFFSET offset)
+        sql = sql.replaceAll("(?i)\\bSQL_CALC_FOUND_ROWS\\b\\s*", "") // Remove SQL_CALC_FOUND_ROWS and any trailing spaces
+                .replaceAll("(?i)\\bLIMIT\\s+\\d+(?:,\\d+)?\\b", "") // MySQL: LIMIT offset,count or LIMIT count
+                .replaceAll("(?i)\\bOFFSET\\s+\\d+\\b", "") // Standard: OFFSET offset
+                .trim();
         return format("SELECT COUNT(*) FROM (%s) AS temp", sql);
     }
 

@@ -45,9 +45,16 @@ public class PaginationHelper {
 
         // determine how many rows are available
         final String sqlCountRows = sqlGenerator.countLastExecutedQueryResult(sqlFetchRows);
-        final Integer totalFilteredRecords;
+        Integer totalFilteredRecords;
         if (databaseTypeResolver.isMySQL()) {
             totalFilteredRecords = jt.queryForObject(sqlCountRows, Integer.class); // NOSONAR
+            
+            // Fallback: If FOUND_ROWS() returns 0 but we have items, use COUNT(*) approach
+            // This handles cases where FOUND_ROWS() fails due to complex queries or connection issues
+            if ((totalFilteredRecords == null || totalFilteredRecords == 0) && !items.isEmpty()) {
+                String countSql = sqlGenerator.countQueryResult(sqlFetchRows);
+                totalFilteredRecords = jt.queryForObject(countSql, Integer.class, args); // NOSONAR
+            }
         } else {
             totalFilteredRecords = jt.queryForObject(sqlCountRows, Integer.class, args); // NOSONAR
         }
@@ -61,6 +68,13 @@ public class PaginationHelper {
         // determine how many rows are available
         String sqlCountRows = sqlGenerator.countLastExecutedQueryResult(sql);
         Integer totalFilteredRecords = jdbcTemplate.queryForObject(sqlCountRows, Integer.class);
+        
+        // Fallback: If FOUND_ROWS() returns 0 but we have items, use COUNT(*) approach (MySQL/MariaDB)
+        // This handles cases where FOUND_ROWS() fails due to complex queries or connection issues
+        if (databaseTypeResolver.isMySQL() && (totalFilteredRecords == null || totalFilteredRecords == 0) && !items.isEmpty()) {
+            String countSql = sqlGenerator.countQueryResult(sql);
+            totalFilteredRecords = jdbcTemplate.queryForObject(countSql, Integer.class);
+        }
 
         return new Page<>(items, ObjectUtils.defaultIfNull(totalFilteredRecords, 0));
     }
