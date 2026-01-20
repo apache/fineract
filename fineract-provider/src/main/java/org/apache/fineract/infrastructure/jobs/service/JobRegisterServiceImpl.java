@@ -154,7 +154,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
     @Override
     public void pauseScheduler() {
-        final SchedulerDetail schedulerDetail = this.schedularWritePlatformService.retriveSchedulerDetail();
+        final SchedulerDetail schedulerDetail = this.schedularWritePlatformService.retrieveSchedulerDetail();
         if (!schedulerDetail.isSuspended()) {
             schedulerDetail.setSuspended(true);
             this.schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
@@ -163,7 +163,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
     @Override
     public void startScheduler() {
-        final SchedulerDetail schedulerDetail = this.schedularWritePlatformService.retriveSchedulerDetail();
+        final SchedulerDetail schedulerDetail = this.schedularWritePlatformService.retrieveSchedulerDetail();
         if (schedulerDetail.isSuspended()) {
             schedulerDetail.setSuspended(false);
             this.schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
@@ -233,7 +233,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
     @Override
     public boolean isSchedulerRunning() {
-        return !this.schedularWritePlatformService.retriveSchedulerDetail().isSuspended();
+        return !this.schedularWritePlatformService.retrieveSchedulerDetail().isSuspended();
     }
 
     /**
