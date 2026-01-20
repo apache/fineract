@@ -91,4 +91,18 @@ public class DatabaseSpecificSQLGeneratorTest {
         String countQuery = databaseSpecificSQLGenerator.countQueryResult(sql);
         Assertions.assertEquals("SELECT COUNT(*) FROM (SELECT 1 FROM test_table WHERE asd=2) AS temp", countQuery);
     }
+
+    @Test
+    public void testCountQueryResultWithLowercaseSqlKeywords() {
+        String sql = "select sql_calc_found_rows 1 from test_table where asd=2 limit 10 offset 5";
+        String countQuery = databaseSpecificSQLGenerator.countQueryResult(sql);
+        Assertions.assertEquals("SELECT COUNT(*) FROM (select 1 from test_table where asd=2) AS temp", countQuery);
+    }
+
+    @Test
+    public void testCountQueryResultWithMixedCaseSqlKeywords() {
+        String sql = "Select SQL_Calc_Found_Rows 1 From test_table Limit 10,5";
+        String countQuery = databaseSpecificSQLGenerator.countQueryResult(sql);
+        Assertions.assertEquals("SELECT COUNT(*) FROM (Select 1 From test_table) AS temp", countQuery);
+    }
 }
