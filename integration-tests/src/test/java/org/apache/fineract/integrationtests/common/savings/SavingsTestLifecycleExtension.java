@@ -65,7 +65,7 @@ public class SavingsTestLifecycleExtension implements AfterAllCallback {
                 try {
                     this.savingsAccountHelper.postInterestForSavings(savingsId.intValue());
                     SavingsAccountData savingsAccountData = Calls
-                            .ok(FineractClientHelper.getFineractClient().savingsAccounts.retrieveOne25(savingsId, false, null, "all"));
+                            .ok(FineractClientHelper.getFineractClient().savingsAccounts.retrieveOne26(savingsId, false, null, "all"));
                     BigDecimal accountBalance = MathUtil.subtract(savingsAccountData.getSummary().getAvailableBalance(),
                             savingsAccountData.getMinRequiredBalance(), MathContext.DECIMAL64);
                     if (accountBalance.compareTo(BigDecimal.ZERO) > 0) {

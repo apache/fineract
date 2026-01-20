@@ -16,28 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanorigination.domain;
+package org.apache.fineract.portfolio.loanorigination.data;
 
-public enum LoanOriginatorStatus {
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    ACTIVE("ACTIVE"), PENDING("PENDING"), INACTIVE("INACTIVE");
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class LoanOriginatorData implements Serializable {
 
-    private final String value;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    LoanOriginatorStatus(String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public static LoanOriginatorStatus fromString(String text) {
-        for (LoanOriginatorStatus status : LoanOriginatorStatus.values()) {
-            if (status.value.equalsIgnoreCase(text)) {
-                return status;
-            }
-        }
-        throw new IllegalArgumentException("Unknown LoanOriginatorStatus: " + text);
-    }
+    private Long id;
+    private String externalId;
+    private String name;
+    private String status;
+    private Long originatorTypeId;
+    private Long channelTypeId;
 }

@@ -271,6 +271,18 @@
                 "null",
                 "org.apache.fineract.avro.generic.v1.CodeValueDataV1"
             ]
+        },
+        {
+            "default": null,
+            "name": "originators",
+            "doc": "List of originators attached to the parent loan for revenue sharing",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.OriginatorDetailsV1"
+                }
+            ]
         }
     ]
 }

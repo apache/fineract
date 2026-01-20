@@ -3929,4 +3929,27 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId;
         return this;
     }
+
+    public CommandWrapperBuilder createLoanOriginator() {
+        this.actionName = "CREATE";
+        this.entityName = "LOAN_ORIGINATOR";
+        this.href = "/loan-originators";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateLoanOriginator(final Long originatorId) {
+        this.actionName = "UPDATE";
+        this.entityName = "LOAN_ORIGINATOR";
+        this.entityId = originatorId;
+        this.href = "/loan-originators/" + originatorId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteLoanOriginator(final Long originatorId) {
+        this.actionName = "DELETE";
+        this.entityName = "LOAN_ORIGINATOR";
+        this.entityId = originatorId;
+        this.href = "/loan-originators/" + originatorId;
+        return this;
+    }
 }
