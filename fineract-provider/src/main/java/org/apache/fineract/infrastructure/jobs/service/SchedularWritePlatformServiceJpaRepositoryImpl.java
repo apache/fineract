@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetailRepository;
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -103,13 +104,9 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     }
 
     @Override
-    public SchedulerDetail retriveSchedulerDetail() {
-        SchedulerDetail schedulerDetail = null;
-        final List<SchedulerDetail> schedulerDetailList = this.schedulerDetailRepository.findAll();
-        if (schedulerDetailList != null) {
-            schedulerDetail = schedulerDetailList.get(0);
-        }
-        return schedulerDetail;
+    public SchedulerDetail retrieveSchedulerDetail() {
+        return this.schedulerDetailRepository.findAll(PageRequest.of(0, 1))
+                .stream().findFirst().orElse(null);
     }
 
     @Transactional
@@ -142,7 +139,7 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
                 && scheduledJobDetail.getNextRunTime().after(new Date()))) {
             isStopExecution = true;
         }
-        final SchedulerDetail schedulerDetail = retriveSchedulerDetail();
+        final SchedulerDetail schedulerDetail = retrieveSchedulerDetail();
         if (triggerType.equals(SchedulerServiceConstants.TRIGGER_TYPE_CRON) && schedulerDetail.isSuspended()) {
             scheduledJobDetail.setTriggerMisfired(true);
             isStopExecution = true;

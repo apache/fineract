@@ -41,7 +41,7 @@ public interface SchedularWritePlatformService {
 
     CommandProcessingResult updateJobDetail(Long jobId, JsonCommand command);
 
-    SchedulerDetail retriveSchedulerDetail();
+    SchedulerDetail retrieveSchedulerDetail();
 
     void updateSchedulerDetail(SchedulerDetail schedulerDetail);
 
