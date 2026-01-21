@@ -3286,14 +3286,14 @@ Feature: LoanReAgingAccruals
       | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
       | 3  | 14   | 15 March 2024     | 15 March 2024    | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
       | 4  | 17   | 01 April 2024     |                  | 70.33           | 13.24         | 1.18     | 0.0  | 0.0       | 14.42 | 0.0   | 0.0        | 0.0  | 14.42       |
-      | 5  | 30   | 01 May 2024       |                  | 56.56           | 13.77         | 0.7      | 0.0  | 0.0       | 14.47 | 0.0   | 0.0        | 0.0  | 14.47       |
-      | 6  | 31   | 01 June 2024      |                  | 42.66           | 13.9          | 0.57     | 0.0  | 0.0       | 14.47 | 0.0   | 0.0        | 0.0  | 14.47       |
-      | 7  | 30   | 01 July 2024      |                  | 28.62           | 14.04         | 0.43     | 0.0  | 0.0       | 14.47 | 0.0   | 0.0        | 0.0  | 14.47       |
-      | 8  | 31   | 01 August 2024    |                  | 14.44           | 14.18         | 0.29     | 0.0  | 0.0       | 14.47 | 0.0   | 0.0        | 0.0  | 14.47       |
-      | 9  | 31   | 01 September 2024 |                  | 0.0             | 14.44         | 0.14     | 0.0  | 0.0       | 14.58 | 0.0   | 0.0        | 0.0  | 14.58       |
+      | 5  | 30   | 01 May 2024       |                  | 56.45           | 13.88         | 0.59     | 0.0  | 0.0       | 14.47 | 0.0   | 0.0        | 0.0  | 14.47       |
+      | 6  | 31   | 01 June 2024      |                  | 42.54           | 13.91         | 0.56     | 0.0  | 0.0       | 14.47 | 0.0   | 0.0        | 0.0  | 14.47       |
+      | 7  | 30   | 01 July 2024      |                  | 28.5            | 14.04         | 0.43     | 0.0  | 0.0       | 14.47 | 0.0   | 0.0        | 0.0  | 14.47       |
+      | 8  | 31   | 01 August 2024    |                  | 14.31           | 14.19         | 0.28     | 0.0  | 0.0       | 14.47 | 0.0   | 0.0        | 0.0  | 14.47       |
+      | 9  | 31   | 01 September 2024 |                  | 0.0             | 14.31         | 0.14     | 0.0  | 0.0       | 14.45 | 0.0   | 0.0        | 0.0  | 14.45       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 3.89     | 0.0  | 0.0       | 103.89 | 17.01 | 0.0        | 0.0  | 86.88       |
+      | 100.0         | 3.76     | 0.0  | 0.0       | 103.76 | 17.01 | 0.0        | 0.0  | 86.75       |
     And Loan Transactions tab has the following data without accruals:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -3324,8 +3324,7 @@ Feature: LoanReAgingAccruals
 
 #   --- Close loan ---
   #  When Loan Pay-off is made on "02 April 2024"
-    When Admin sets the business date to "01 May 2024"
-    And Customer makes "AUTOPAY" repayment on "01 May 2024" with 85.45 EUR transaction amount
+    When Loan Pay-off is made on "02 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:4436 @AdvancedPaymentAllocation

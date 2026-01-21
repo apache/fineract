@@ -1104,7 +1104,12 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             Money diff = totalDisbursedAmount.plus(totalCapitalizedIncome, mc).plus(scheduleModel.getTotalCreditedPrincipal(), mc)
                     .plus(totalDueInterest, mc).minus(totalEMI, mc);
 
-            repaymentPeriod.setEmi(repaymentPeriod.getEmi().add(diff, mc));
+            Money adjustedEmi = repaymentPeriod.getEmi().add(diff, mc);
+            if (repaymentPeriod.getFixedInterest().isGreaterThanZero()
+                    && adjustedEmi.isLessThan(repaymentPeriod.getPaidPrincipal().add(repaymentPeriod.getFixedInterest()))) {
+                adjustedEmi = repaymentPeriod.getPaidPrincipal().add(repaymentPeriod.getFixedInterest());
+            }
+            repaymentPeriod.setEmi(adjustedEmi);
             if (repaymentPeriod.getEmi()
                     .isLessThan(repaymentPeriod.getTotalPaidAmount().minus(repaymentPeriod.getTotalCreditedAmount(), mc))) {
                 repaymentPeriod.setEmi(repaymentPeriod.getTotalPaidAmount().minus(repaymentPeriod.getTotalCreditedAmount(), mc));

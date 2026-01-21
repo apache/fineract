@@ -8005,14 +8005,14 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
       | 3  | 14   | 15 March 2024     | 15 March 2024    | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
       | 4  | 17   | 01 April 2024     |                  | 70.25           | 13.32         | 0.98     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 5  | 30   | 01 May 2024       |                  | 56.08           | 14.17         | 0.13     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 6  | 31   | 01 June 2024      |                  | 41.78           | 14.3          | 0.0      | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 7  | 30   | 01 July 2024      |                  | 27.65           | 14.13         | 0.17     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 8  | 31   | 01 August 2024    |                  | 13.51           | 14.14         | 0.16     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 9  | 31   | 01 September 2024 |                  | 0.0             | 13.51         | 0.08     | 0.0  | 0.0       | 13.59 | 0.0   | 0.0        | 0.0  | 13.59       |
+      | 5  | 30   | 01 May 2024       |                  | 56.06           | 14.19         | 0.11     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
+      | 6  | 31   | 01 June 2024      |                  | 41.76           | 14.3          | 0.0      | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
+      | 7  | 30   | 01 July 2024      |                  | 27.63           | 14.13         | 0.17     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
+      | 8  | 31   | 01 August 2024    |                  | 13.49           | 14.14         | 0.16     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
+      | 9  | 31   | 01 September 2024 |                  | 0.0             | 13.49         | 0.08     | 0.0  | 0.0       | 13.57 | 0.0   | 0.0        | 0.0  | 13.57       |
     And Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 2.1      | 0.0  | 0.0       | 102.1 | 17.01 | 0.0        | 0.0  | 85.09       |
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 100.0         | 2.08     | 0.0  | 0.0       | 102.08 | 17.01 | 0.0        | 0.0  | 85.07       |
     And Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -8473,14 +8473,14 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
       | 3  | 14   | 15 March 2024     | 15 March 2024    | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
       | 4  | 17   | 01 April 2024     |                  | 69.84           | 13.73         | 0.48     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
-      | 5  | 30   | 01 May 2024       |                  | 55.76           | 14.08         | 0.13     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
-      | 6  | 31   | 01 June 2024      |                  | 41.55           | 14.21         | 0.0      | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
-      | 7  | 30   | 01 July 2024      |                  | 27.34           | 14.21         | 0.0      | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
-      | 8  | 31   | 01 August 2024    |                  | 13.24           | 14.1          | 0.11     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
-      | 9  | 31   | 01 September 2024 |                  | 0.0             | 13.24         | 0.08     | 0.0  | 0.0       | 13.32 | 0.0   | 0.0        | 0.0  | 13.32       |
+      | 5  | 30   | 01 May 2024       |                  | 55.74           | 14.1          | 0.11     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
+      | 6  | 31   | 01 June 2024      |                  | 41.53           | 14.21         | 0.0      | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
+      | 7  | 30   | 01 July 2024      |                  | 27.32           | 14.21         | 0.0      | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
+      | 8  | 31   | 01 August 2024    |                  | 13.22           | 14.1          | 0.11     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
+      | 9  | 31   | 01 September 2024 |                  | 0.0             | 13.22         | 0.08     | 0.0  | 0.0       | 13.3  | 0.0   | 0.0        | 0.0  | 13.3        |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 1.38     | 0.0  | 0.0       | 101.38 | 17.01 | 0.0        | 0.0  | 84.37       |
+      | 100.0         | 1.36     | 0.0  | 0.0       | 101.36 | 17.01 | 0.0        | 0.0  | 84.35       |
     And Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -8643,14 +8643,14 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
       | 3  | 14   | 15 March 2024     | 15 March 2024    | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
       | 4  | 17   | 01 April 2024     |                  | 69.84           | 13.73         | 0.48     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
-      | 5  | 30   | 01 May 2024       |                  | 55.76           | 14.08         | 0.13     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
-      | 6  | 31   | 01 June 2024      |                  | 41.55           | 14.21         | 0.0      | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
-      | 7  | 30   | 01 July 2024      |                  | 27.34           | 14.21         | 0.0      | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
-      | 8  | 31   | 01 August 2024    |                  | 13.24           | 14.1          | 0.11     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
-      | 9  | 31   | 01 September 2024 |                  | 0.0             | 13.24         | 0.08     | 0.0  | 0.0       | 13.32 | 0.0   | 0.0        | 0.0  | 13.32       |
+      | 5  | 30   | 01 May 2024       |                  | 55.74           | 14.1          | 0.11     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
+      | 6  | 31   | 01 June 2024      |                  | 41.53           | 14.21         | 0.0      | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
+      | 7  | 30   | 01 July 2024      |                  | 27.32           | 14.21         | 0.0      | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
+      | 8  | 31   | 01 August 2024    |                  | 13.22           | 14.1          | 0.11     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
+      | 9  | 31   | 01 September 2024 |                  | 0.0             | 13.22         | 0.08     | 0.0  | 0.0       | 13.3  | 0.0   | 0.0        | 0.0  | 13.3        |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 1.38     | 0.0  | 0.0       | 101.38 | 17.01 | 0.0        | 0.0  | 84.37       |
+      | 100.0         | 1.36     | 0.0  | 0.0       | 101.36 | 17.01 | 0.0        | 0.0  | 84.35       |
     And Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -8825,14 +8825,14 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
       | 3  | 14   | 15 March 2024     | 15 March 2024    | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
       | 4  | 17   | 01 April 2024     |                  | 69.84           | 13.73         | 0.48     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
-      | 5  | 30   | 01 May 2024       |                  | 55.76           | 14.08         | 0.13     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
-      | 6  | 31   | 01 June 2024      |                  | 41.55           | 14.21         | 0.0      | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
-      | 7  | 30   | 01 July 2024      |                  | 27.34           | 14.21         | 0.0      | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
-      | 8  | 31   | 01 August 2024    |                  | 13.24           | 14.1          | 0.11     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
-      | 9  | 31   | 01 September 2024 |                  | 0.0             | 13.24         | 0.08     | 0.0  | 0.0       | 13.32 | 0.0   | 0.0        | 0.0  | 13.32       |
+      | 5  | 30   | 01 May 2024       |                  | 55.74           | 14.1          | 0.11     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
+      | 6  | 31   | 01 June 2024      |                  | 41.53           | 14.21         | 0.0      | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
+      | 7  | 30   | 01 July 2024      |                  | 27.32           | 14.21         | 0.0      | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
+      | 8  | 31   | 01 August 2024    |                  | 13.22           | 14.1          | 0.11     | 0.0  | 0.0       | 14.21 | 0.0   | 0.0        | 0.0  | 14.21       |
+      | 9  | 31   | 01 September 2024 |                  | 0.0             | 13.22         | 0.08     | 0.0  | 0.0       | 13.3  | 0.0   | 0.0        | 0.0  | 13.3        |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 1.38     | 0.0  | 0.0       | 101.38 | 17.01 | 0.0        | 0.0  | 84.37       |
+      | 100.0         | 1.36     | 0.0  | 0.0       | 101.36 | 17.01 | 0.0        | 0.0  | 84.35       |
     And Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -9564,19 +9564,22 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
       | 3  | 14   | 15 March 2024     | 15 March 2024    | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
       | 4  | 17   | 01 April 2024     |                  | 70.33           | 13.24         | 1.18     | 0.0  | 0.0       | 14.42 | 0.0   | 0.0        | 0.0  | 14.42       |
-      | 5  | 30   | 01 May 2024       |                  | 56.56           | 13.77         | 0.7      | 0.0  | 0.0       | 14.47 | 0.0   | 0.0        | 0.0  | 14.47       |
-      | 6  | 31   | 01 June 2024      |                  | 42.66           | 13.9          | 0.57     | 0.0  | 0.0       | 14.47 | 0.0   | 0.0        | 0.0  | 14.47       |
-      | 7  | 30   | 01 July 2024      |                  | 28.62           | 14.04         | 0.43     | 0.0  | 0.0       | 14.47 | 0.0   | 0.0        | 0.0  | 14.47       |
-      | 8  | 31   | 01 August 2024    |                  | 14.44           | 14.18         | 0.29     | 0.0  | 0.0       | 14.47 | 0.0   | 0.0        | 0.0  | 14.47       |
-      | 9  | 31   | 01 September 2024 |                  | 0.0             | 14.44         | 0.14     | 0.0  | 0.0       | 14.58 | 0.0   | 0.0        | 0.0  | 14.58       |
+      | 5  | 30   | 01 May 2024       |                  | 56.45           | 13.88         | 0.59     | 0.0  | 0.0       | 14.47 | 0.0   | 0.0        | 0.0  | 14.47       |
+      | 6  | 31   | 01 June 2024      |                  | 42.54           | 13.91         | 0.56     | 0.0  | 0.0       | 14.47 | 0.0   | 0.0        | 0.0  | 14.47       |
+      | 7  | 30   | 01 July 2024      |                  | 28.5            | 14.04         | 0.43     | 0.0  | 0.0       | 14.47 | 0.0   | 0.0        | 0.0  | 14.47       |
+      | 8  | 31   | 01 August 2024    |                  | 14.31           | 14.19         | 0.28     | 0.0  | 0.0       | 14.47 | 0.0   | 0.0        | 0.0  | 14.47       |
+      | 9  | 31   | 01 September 2024 |                  | 0.0             | 14.31         | 0.14     | 0.0  | 0.0       | 14.45 | 0.0   | 0.0        | 0.0  | 14.45       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 3.89     | 0.0  | 0.0       | 103.89 | 17.01 | 0.0        | 0.0  | 86.88       |
+      | 100.0         | 3.76     | 0.0  | 0.0       | 103.76 | 17.01 | 0.0        | 0.0  | 86.75       |
     And Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 15 March 2024    | Re-age           | 84.37  | 83.57     | 0.8      | 0.0  | 0.0       | 0.0          | false    | false    |
+# --- close the loan --- #
+    When Loan Pay-off is made on "02 April 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4295
   Scenario: Verify Re-aging with loan reschedule: UC4: Interest handling: DEFAULT, reschedule, N+1 installment

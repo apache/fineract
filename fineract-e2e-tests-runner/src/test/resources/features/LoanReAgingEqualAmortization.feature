@@ -9347,13 +9347,13 @@ Feature: LoanReAgingEqualAmortization
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024 | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
       | 2  | 29   | 01 March 2024    |                  | 67.05           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
-      | 3  | 31   | 01 April 2024    |                  | 50.47           | 16.58         | 0.49     | 0.0  | 0.0       | 17.07 | 0.0   | 0.0        | 0.0  | 17.07       |
-      | 4  | 30   | 01 May 2024      |                  | 33.82           | 16.65         | 0.42     | 0.0  | 0.0       | 17.07 | 0.0   | 0.0        | 0.0  | 17.07       |
-      | 5  | 31   | 01 June 2024     |                  | 17.03           | 16.79         | 0.28     | 0.0  | 0.0       | 17.07 | 0.0   | 0.0        | 0.0  | 17.07       |
-      | 6  | 30   | 01 July 2024     |                  | 0.0             | 17.03         | 0.14     | 0.0  | 0.0       | 17.17 | 0.0   | 0.0        | 0.0  | 17.17       |
+      | 3  | 31   | 01 April 2024    |                  | 50.42           | 16.63         | 0.44     | 0.0  | 0.0       | 17.07 | 0.0   | 0.0        | 0.0  | 17.07       |
+      | 4  | 30   | 01 May 2024      |                  | 33.77           | 16.65         | 0.42     | 0.0  | 0.0       | 17.07 | 0.0   | 0.0        | 0.0  | 17.07       |
+      | 5  | 31   | 01 June 2024     |                  | 16.98           | 16.79         | 0.28     | 0.0  | 0.0       | 17.07 | 0.0   | 0.0        | 0.0  | 17.07       |
+      | 6  | 30   | 01 July 2024     |                  | 0.0             | 16.98         | 0.14     | 0.0  | 0.0       | 17.12 | 0.0   | 0.0        | 0.0  | 17.12       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 2.4      | 0.0  | 0.0       | 102.4  | 17.01 | 0.0        | 0.0  | 85.39       |
+      | 100.0         | 2.35     | 0.0  | 0.0       | 102.35 | 17.01 | 0.0        | 0.0  | 85.34       |
     And Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
