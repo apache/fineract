@@ -945,6 +945,48 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         }
     }
 
+    public void addPenaltyCharges(final Money amount) {
+        if (amount != null) {
+            addPenaltyCharges(amount.getAmount());
+        }
+    }
+
+    public void addPenaltyCharges(final BigDecimal amount) {
+        if (this.penaltyCharges == null) {
+            setPenaltyCharges(amount);
+        } else {
+            setPenaltyCharges(this.penaltyCharges.add(amount));
+        }
+    }
+
+    public void addToPenaltyPaid(final Money amount) {
+        if (amount != null) {
+            addToPenaltyPaid(amount.getAmount());
+        }
+    }
+
+    public void addToPenaltyPaid(final BigDecimal amount) {
+        if (this.penaltyChargesPaid == null) {
+            setPenaltyChargesPaid(amount);
+        } else {
+            setPenaltyChargesPaid(this.penaltyChargesPaid.add(amount));
+        }
+    }
+
+    public void addToFeeChargesPaid(final Money amount) {
+        if (amount != null) {
+            addToFeeChargesPaid(amount.getAmount());
+        }
+    }
+
+    public void addToFeeChargesPaid(final BigDecimal amount) {
+        if (this.feeChargesPaid == null) {
+            setFeeChargesPaid(amount);
+        } else {
+            setFeeChargesPaid(this.feeChargesPaid.add(amount));
+        }
+    }
+
     /********** UNPAY COMPONENTS ****/
 
     public Money unpayPenaltyChargesComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
