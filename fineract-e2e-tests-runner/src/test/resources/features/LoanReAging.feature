@@ -3304,7 +3304,7 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
     When Loan Pay-off is made on "02 January 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @Skip @TestRailId:C4080 @AdvancedPaymentAllocation
+  @TestRailId:C4080 @AdvancedPaymentAllocation
   Scenario: Verify Loan re-aging transaction at 1st installment with charge - before maturity date and removes additional normal installments and not modifies n+1 - UC13
     When Admin sets the business date to "01 January 2025"
     When Admin creates a client with random data
@@ -3340,12 +3340,12 @@ Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
       | 1               | MONTHS        | 11 January 2025  | 2                    |
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
-      | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      |    |      | 01 January 2025   |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
-      | 1  |  0   | 01 January 2025   | 01 January 2025 |  750.0          | 250.0         | 0.0      | 0.0  | 0.0       | 250.0  | 250.0 | 0.0        | 0.0  |   0.0       |
-      | 2  | 9    | 10 January 2025   | 10 January 2025 | 750.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0   | 0.0        | 0.0  | 0.0         |
-      | 3  | 1    | 11 January 2025   |                 |  375.0          | 375.0         | 0.0      | 0.0  | 20.0      | 395.0  | 0.0   | 0.0        | 0.0  | 395.0       |
-      | 4  | 31   | 11 February 2025  |                 |    0.0          | 375.0         | 0.0      | 0.0  | 0.0       | 375.0  | 0.0   | 0.0        | 0.0  | 375.0       |
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 0    | 01 January 2025  | 01 January 2025 | 750.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 250.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 9    | 10 January 2025  |                 | 750.0           | 0.0           | 0.0      | 0.0  | 20.0      | 20.0  | 0.0   | 0.0        | 0.0  | 20.0        |
+      | 3  | 1    | 11 January 2025  |                 | 375.0           | 375.0         | 0.0      | 0.0  | 0.0       | 375.0 | 0.0   | 0.0        | 0.0  | 375.0       |
+      | 4  | 31   | 11 February 2025 |                 | 0.0             | 375.0         | 0.0      | 0.0  | 0.0       | 375.0 | 0.0   | 0.0        | 0.0  | 375.0       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 20.0      | 1020.0 | 250.0 | 0.0        | 0.0  | 770.0       |
