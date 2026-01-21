@@ -30,18 +30,13 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
 import org.apache.fineract.portfolio.loanorigination.service.LoanOriginatorReadPlatformService;
@@ -57,8 +52,6 @@ public class LoanOriginatorApiResource {
 
     private final PlatformSecurityContext context;
     private final LoanOriginatorReadPlatformService loanOriginatorReadPlatformService;
-    private final DefaultToApiJsonSerializer<LoanOriginatorData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @POST
@@ -68,10 +61,9 @@ public class LoanOriginatorApiResource {
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "400", description = "Required parameter is missing or incorrect format")
     @ApiResponse(responseCode = "403", description = "Duplicate external ID or insufficient permissions")
-    public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    public CommandProcessingResult create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanOriginator().withJson(apiRequestBodyAsJson).build();
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @GET
@@ -80,12 +72,10 @@ public class LoanOriginatorApiResource {
     @Operation(summary = "List all loan originators", description = "Retrieves all loan originator records. Requires READ_LOAN_ORIGINATOR permission.")
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "403", description = "Insufficient permissions")
-    public String retrieveAll(@Context final UriInfo uriInfo) {
+    public List<LoanOriginatorData> retrieveAll() {
         this.context.authenticatedUser().validateHasReadPermission(LoanOriginatorApiConstants.RESOURCE_NAME);
 
-        final List<LoanOriginatorData> originators = this.loanOriginatorReadPlatformService.retrieveAll();
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, originators, LoanOriginatorApiConstants.RESPONSE_PARAMS);
+        return this.loanOriginatorReadPlatformService.retrieveAll();
     }
 
     @GET
@@ -96,13 +86,10 @@ public class LoanOriginatorApiResource {
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     @ApiResponse(responseCode = "404", description = "Originator not found")
-    public String retrieveOne(@PathParam("originatorId") @Parameter(description = "originatorId") final Long originatorId,
-            @Context final UriInfo uriInfo) {
+    public LoanOriginatorData retrieveOne(@PathParam("originatorId") @Parameter(description = "originatorId") final Long originatorId) {
         this.context.authenticatedUser().validateHasReadPermission(LoanOriginatorApiConstants.RESOURCE_NAME);
 
-        final LoanOriginatorData originator = this.loanOriginatorReadPlatformService.retrieveById(originatorId);
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, originator, LoanOriginatorApiConstants.RESPONSE_PARAMS);
+        return this.loanOriginatorReadPlatformService.retrieveById(originatorId);
     }
 
     @GET
@@ -113,13 +100,11 @@ public class LoanOriginatorApiResource {
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     @ApiResponse(responseCode = "404", description = "Originator not found")
-    public String retrieveByExternalId(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
-            @Context final UriInfo uriInfo) {
+    public LoanOriginatorData retrieveByExternalId(
+            @PathParam("externalId") @Parameter(description = "externalId") final String externalId) {
         this.context.authenticatedUser().validateHasReadPermission(LoanOriginatorApiConstants.RESOURCE_NAME);
 
-        final LoanOriginatorData originator = this.loanOriginatorReadPlatformService.retrieveByExternalId(externalId);
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, originator, LoanOriginatorApiConstants.RESPONSE_PARAMS);
+        return this.loanOriginatorReadPlatformService.retrieveByExternalId(externalId);
     }
 
     @PUT
@@ -131,12 +116,11 @@ public class LoanOriginatorApiResource {
     @ApiResponse(responseCode = "400", description = "Incorrect format")
     @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     @ApiResponse(responseCode = "404", description = "Originator not found")
-    public String update(@PathParam("originatorId") @Parameter(description = "originatorId") final Long originatorId,
+    public CommandProcessingResult update(@PathParam("originatorId") @Parameter(description = "originatorId") final Long originatorId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateLoanOriginator(originatorId).withJson(apiRequestBodyAsJson)
                 .build();
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @PUT
@@ -148,14 +132,14 @@ public class LoanOriginatorApiResource {
     @ApiResponse(responseCode = "400", description = "Incorrect format")
     @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     @ApiResponse(responseCode = "404", description = "Originator not found")
-    public String updateByExternalId(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
+    public CommandProcessingResult updateByExternalId(
+            @PathParam("externalId") @Parameter(description = "externalId") final String externalId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         final Long originatorId = this.loanOriginatorReadPlatformService.resolveIdByExternalId(externalId);
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateLoanOriginator(originatorId).withJson(apiRequestBodyAsJson)
                 .build();
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @DELETE
@@ -166,10 +150,9 @@ public class LoanOriginatorApiResource {
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "403", description = "Originator is mapped to loans and cannot be deleted, or insufficient permissions")
     @ApiResponse(responseCode = "404", description = "Originator not found")
-    public String delete(@PathParam("originatorId") @Parameter(description = "originatorId") final Long originatorId) {
+    public CommandProcessingResult delete(@PathParam("originatorId") @Parameter(description = "originatorId") final Long originatorId) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteLoanOriginator(originatorId).build();
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @DELETE
@@ -180,11 +163,11 @@ public class LoanOriginatorApiResource {
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "403", description = "Originator is mapped to loans and cannot be deleted, or insufficient permissions")
     @ApiResponse(responseCode = "404", description = "Originator not found")
-    public String deleteByExternalId(@PathParam("externalId") @Parameter(description = "externalId") final String externalId) {
+    public CommandProcessingResult deleteByExternalId(
+            @PathParam("externalId") @Parameter(description = "externalId") final String externalId) {
         final Long originatorId = this.loanOriginatorReadPlatformService.resolveIdByExternalId(externalId);
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteLoanOriginator(originatorId).build();
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 }
