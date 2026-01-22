@@ -217,6 +217,13 @@ public class GlobalConfigurationHelper {
         forcePasswordResetDaysDefault.put("trapDoor", false);
         defaults.add(forcePasswordResetDaysDefault);
 
+        HashMap<String, Object> passwordReuseCheckHistoryCountDefault = new HashMap<>();
+        passwordReuseCheckHistoryCountDefault.put("name", GlobalConfigurationConstants.PASSWORD_REUSE_CHECK_HISTORY_COUNT);
+        passwordReuseCheckHistoryCountDefault.put("value", 3L);
+        passwordReuseCheckHistoryCountDefault.put("enabled", false);
+        passwordReuseCheckHistoryCountDefault.put("trapDoor", false);
+        defaults.add(passwordReuseCheckHistoryCountDefault);
+
         HashMap<String, Object> graceOnPenaltyPostingDefault = new HashMap<>();
         graceOnPenaltyPostingDefault.put("name", GlobalConfigurationConstants.GRACE_ON_PENALTY_POSTING);
         graceOnPenaltyPostingDefault.put("value", 0L);

@@ -151,4 +151,6 @@ public interface ConfigurationDomainService {
     boolean isImmediateChargeAccrualPostMaturityEnabled();
 
     String getAssetOwnerTransferOustandingInterestStrategy();
+
+    Integer getPasswordReuseRestrictionCount();
 }

@@ -32,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -48,7 +49,6 @@ import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
-import org.apache.fineract.useradministration.api.AppUserApiConstant;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserPreviousPassword;
 import org.apache.fineract.useradministration.domain.AppUserPreviousPasswordRepository;
@@ -83,6 +83,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     private final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository;
     private final StaffRepositoryWrapper staffRepositoryWrapper;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Override
     @Transactional
@@ -269,12 +270,20 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         AppUserPreviousPassword currentPasswordToSaveAsPreview = null;
 
         if (passWordEncodedValue != null) {
-            PageRequest pageRequest = PageRequest.of(0, AppUserApiConstant.numberOfPreviousPasswords, Sort.Direction.DESC, "removalDate");
-            final List<AppUserPreviousPassword> nLastUsedPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(),
-                    pageRequest);
-            for (AppUserPreviousPassword aPreviewPassword : nLastUsedPasswords) {
-                if (aPreviewPassword.getPassword().equals(passWordEncodedValue)) {
-                    throw new PasswordPreviouslyUsedException();
+            final Integer passwordReuseRestrictionCount = this.configurationDomainService.getPasswordReuseRestrictionCount();
+            if (passwordReuseRestrictionCount != null) {
+                List<AppUserPreviousPassword> previousPasswords;
+                if (passwordReuseRestrictionCount == 0) {
+                    previousPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(),
+                            PageRequest.of(0, Integer.MAX_VALUE, Sort.Direction.DESC, "removalDate"));
+                } else {
+                    PageRequest pageRequest = PageRequest.of(0, passwordReuseRestrictionCount, Sort.Direction.DESC, "removalDate");
+                    previousPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(), pageRequest);
+                }
+                for (AppUserPreviousPassword aPreviewPassword : previousPasswords) {
+                    if (aPreviewPassword.getPassword().equals(passWordEncodedValue)) {
+                        throw new PasswordPreviouslyUsedException();
+                    }
                 }
             }
 

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.useradministration.starter;
 
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -75,10 +76,10 @@ public class UserAdministrationConfiguration {
             PlatformPasswordEncoder platformPasswordEncoder, AppUserRepository appUserRepository,
             OfficeRepositoryWrapper officeRepositoryWrapper, RoleRepository roleRepository, UserDataValidator fromApiJsonDeserializer,
             AppUserPreviousPasswordRepository appUserPreviewPasswordRepository, StaffRepositoryWrapper staffRepositoryWrapper,
-            ClientRepositoryWrapper clientRepositoryWrapper) {
+            ClientRepositoryWrapper clientRepositoryWrapper, ConfigurationDomainService configurationDomainService) {
         return new AppUserWritePlatformServiceJpaRepositoryImpl(context, userDomainService, platformPasswordEncoder, appUserRepository,
                 officeRepositoryWrapper, roleRepository, fromApiJsonDeserializer, appUserPreviewPasswordRepository, staffRepositoryWrapper,
-                clientRepositoryWrapper);
+                clientRepositoryWrapper, configurationDomainService);
     }
 
     @Bean
