@@ -16,7 +16,7 @@ jobs:
       - name: Verify Title Format
         run: |
           title="${{ github.event.pull_request.title }}"
-          regex="^FINERACT-[0-9]+:"
+          regex="^FINERACT-[0-9]+: "
 
           if [[ ! "$title" =~ $regex ]]; then
             echo "::error::PR title '$title' is invalid."
