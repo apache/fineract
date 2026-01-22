@@ -695,3 +695,202 @@ Feature: MerchantIssuedRefund
       | 01 February 2025 | Interest Refund        | 1.46   | 1.46      | 0.0      | 0.0  | 0.0       | 23.34        | false    | true     |
     #following steps will fail if Interest Refund is not recalculated properly
     Then Loan has 23.97 outstanding amount
+
+  @TestRailId:C4542
+  Scenario: Verify adding manual Interest Refund on closed loan with multiple tranches
+    When Admin sets the business date to "07 March 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                    | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF_ACCRUAL_ACTIVITY | 07 March 2025     | 915.88         | 24.99                  | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 24                | MONTHS                | 1              | MONTHS                 | 24                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "07 March 2025" with "915.88" amount and expected disbursement date on "07 March 2025"
+    When Admin sets the business date to "11 March 2025"
+    And Admin successfully disburse the loan on "11 March 2025" with "228.97" EUR transaction amount
+    And Admin successfully disburse the loan on "11 March 2025" with "228.97" EUR transaction amount
+    And Admin successfully disburse the loan on "11 March 2025" with "228.97" EUR transaction amount
+    And Admin successfully disburse the loan on "11 March 2025" with "228.97" EUR transaction amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 228.97       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 457.94       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 686.91       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 915.88       | false    | false    |
+    Then Loan status will be "ACTIVE"
+    # ========== REPAYMENT 1: 04 April 2025 ==========
+    When Admin sets the business date to "04 April 2025"
+    #And Admin runs inline COB job for Loan
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "04 April 2025" with 48.91 EUR transaction amount and system-generated Idempotency key
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 228.97       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 457.94       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 686.91       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 915.88       | false    | false    |
+      | 04 April 2025    | Repayment        | 48.91  | 33.86     | 15.05    | 0.0  | 0.0       | 882.02       | false    | false    |
+    Then Loan status will be "ACTIVE"
+
+    # ========== REPAYMENT 2: 02 May 2025 ==========
+    When Admin sets the business date to "02 May 2025"
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "02 May 2025" with 48.91 EUR transaction amount and system-generated Idempotency key
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 228.97       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 457.94       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 686.91       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 915.88       | false    | false    |
+      | 04 April 2025    | Repayment        | 48.91  | 33.86     | 15.05    | 0.0  | 0.0       | 882.02       | false    | false    |
+      | 02 May 2025      | Repayment        | 48.91  | 32.0      | 16.91    | 0.0  | 0.0       | 850.02       | false    | false    |
+    Then Loan status will be "ACTIVE"
+
+    # ========== REPAYMENT 3: 30 May 2025 ==========
+    When Admin sets the business date to "30 May 2025"
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "30 May 2025" with 48.91 EUR transaction amount and system-generated Idempotency key
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 228.97       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 457.94       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 686.91       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 915.88       | false    | false    |
+      | 04 April 2025    | Repayment        | 48.91  | 33.86     | 15.05    | 0.0  | 0.0       | 882.02       | false    | false    |
+      | 02 May 2025      | Repayment        | 48.91  | 32.0      | 16.91    | 0.0  | 0.0       | 850.02       | false    | false    |
+      | 30 May 2025      | Repayment        | 48.91  | 32.61     | 16.3     | 0.0  | 0.0       | 817.41       | false    | false    |
+    Then Loan status will be "ACTIVE"
+
+    # ========== REPAYMENT 4: 27 June 2025 ==========
+    When Admin sets the business date to "27 June 2025"
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "27 June 2025" with 48.91 EUR transaction amount and system-generated Idempotency key
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 228.97       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 457.94       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 686.91       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 915.88       | false    | false    |
+      | 04 April 2025    | Repayment        | 48.91  | 33.86     | 15.05    | 0.0  | 0.0       | 882.02       | false    | false    |
+      | 02 May 2025      | Repayment        | 48.91  | 32.0      | 16.91    | 0.0  | 0.0       | 850.02       | false    | false    |
+      | 30 May 2025      | Repayment        | 48.91  | 32.61     | 16.3     | 0.0  | 0.0       | 817.41       | false    | false    |
+      | 27 June 2025     | Repayment        | 48.91  | 33.25     | 15.66    | 0.0  | 0.0       | 784.16       | false    | false    |
+    Then Loan status will be "ACTIVE"
+
+    # ========== REPAYMENT 5: 08 August 2025 ==========
+    When Admin sets the business date to "08 August 2025"
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "08 August 2025" with 48.91 EUR transaction amount and system-generated Idempotency key
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 228.97       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 457.94       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 686.91       | false    | false    |
+      | 11 March 2025    | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 915.88       | false    | false    |
+      | 04 April 2025    | Repayment        | 48.91  | 33.86     | 15.05    | 0.0  | 0.0       | 882.02       | false    | false    |
+      | 02 May 2025      | Repayment        | 48.91  | 32.0      | 16.91    | 0.0  | 0.0       | 850.02       | false    | false    |
+      | 30 May 2025      | Repayment        | 48.91  | 32.61     | 16.3     | 0.0  | 0.0       | 817.41       | false    | false    |
+      | 27 June 2025     | Repayment        | 48.91  | 33.25     | 15.66    | 0.0  | 0.0       | 784.16       | false    | false    |
+      | 08 August 2025   | Repayment        | 48.91  | 26.36     | 22.55    | 0.0  | 0.0       | 757.8        | false    | false    |
+    Then Loan status will be "ACTIVE"
+
+    # ========== REPAYMENT 6: 05 September 2025 ==========
+    When Admin sets the business date to "05 September 2025"
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "05 September 2025" with 48.91 EUR transaction amount and system-generated Idempotency key
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025     | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 228.97       | false    | false    |
+      | 11 March 2025     | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 457.94       | false    | false    |
+      | 11 March 2025     | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 686.91       | false    | false    |
+      | 11 March 2025     | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 915.88       | false    | false    |
+      | 04 April 2025     | Repayment        | 48.91  | 33.86     | 15.05    | 0.0  | 0.0       | 882.02       | false    | false    |
+      | 02 May 2025       | Repayment        | 48.91  | 32.0      | 16.91    | 0.0  | 0.0       | 850.02       | false    | false    |
+      | 30 May 2025       | Repayment        | 48.91  | 32.61     | 16.3     | 0.0  | 0.0       | 817.41       | false    | false    |
+      | 27 June 2025      | Repayment        | 48.91  | 33.25     | 15.66    | 0.0  | 0.0       | 784.16       | false    | false    |
+      | 08 August 2025    | Repayment        | 48.91  | 26.36     | 22.55    | 0.0  | 0.0       | 757.8        | false    | false    |
+      | 05 September 2025 | Repayment        | 48.91  | 34.38     | 14.53    | 0.0  | 0.0       | 723.42       | false    | false    |
+    Then Loan status will be "ACTIVE"
+
+    # ========== REPAYMENT 7: 03 October 2025 ==========
+    When Admin sets the business date to "03 October 2025"
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "03 October 2025" with 48.91 EUR transaction amount and system-generated Idempotency key
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025     | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 228.97       | false    | false    |
+      | 11 March 2025     | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 457.94       | false    | false    |
+      | 11 March 2025     | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 686.91       | false    | false    |
+      | 11 March 2025     | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 915.88       | false    | false    |
+      | 04 April 2025     | Repayment        | 48.91  | 33.86     | 15.05    | 0.0  | 0.0       | 882.02       | false    | false    |
+      | 02 May 2025       | Repayment        | 48.91  | 32.0      | 16.91    | 0.0  | 0.0       | 850.02       | false    | false    |
+      | 30 May 2025       | Repayment        | 48.91  | 32.61     | 16.3     | 0.0  | 0.0       | 817.41       | false    | false    |
+      | 27 June 2025      | Repayment        | 48.91  | 33.25     | 15.66    | 0.0  | 0.0       | 784.16       | false    | false    |
+      | 08 August 2025    | Repayment        | 48.91  | 26.36     | 22.55    | 0.0  | 0.0       | 757.8        | false    | false    |
+      | 05 September 2025 | Repayment        | 48.91  | 34.38     | 14.53    | 0.0  | 0.0       | 723.42       | false    | false    |
+      | 03 October 2025   | Repayment        | 48.91  | 35.04     | 13.87    | 0.0  | 0.0       | 688.38       | false    | false    |
+    Then Loan status will be "ACTIVE"
+
+    # ========== 4 MERCHANT ISSUED REFUNDS: 08 October 2025 ==========
+    When Admin sets the business date to "08 October 2025"
+    When Admin sets the business date to "09 October 2025"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "08 October 2025" with 228.97 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation false
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "08 October 2025" with 228.97 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation false
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "08 October 2025" with 228.97 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation false
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "08 October 2025" with 228.97 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation false
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025     | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 228.97       | false    | false    |
+      | 11 March 2025     | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 457.94       | false    | false    |
+      | 11 March 2025     | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 686.91       | false    | false    |
+      | 11 March 2025     | Disbursement     | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 915.88       | false    | false    |
+      | 04 April 2025     | Repayment        | 48.91  | 33.86     | 15.05    | 0.0  | 0.0       | 882.02       | false    | false    |
+      | 11 April 2025     | Accrual Activity | 15.05  | 0.0       | 15.05    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 May 2025       | Repayment        | 48.91  | 32.0      | 16.91    | 0.0  | 0.0       | 850.02       | false    | false    |
+      | 11 May 2025       | Accrual Activity | 16.91  | 0.0       | 16.91    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 May 2025       | Repayment        | 48.91  | 32.61     | 16.3     | 0.0  | 0.0       | 817.41       | false    | false    |
+      | 11 June 2025      | Accrual Activity | 16.3   | 0.0       | 16.3     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 June 2025      | Repayment        | 48.91  | 33.25     | 15.66    | 0.0  | 0.0       | 784.16       | false    | false    |
+      | 11 July 2025      | Accrual Activity | 15.66  | 0.0       | 15.66    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 August 2025    | Repayment        | 48.91  | 26.36     | 22.55    | 0.0  | 0.0       | 757.8        | false    | false    |
+      | 11 August 2025    | Accrual Activity | 22.55  | 0.0       | 22.55    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 September 2025 | Repayment        | 48.91  | 34.38     | 14.53    | 0.0  | 0.0       | 723.42       | false    | false    |
+      | 11 September 2025 | Accrual Activity | 14.53  | 0.0       | 14.53    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 October 2025   | Repayment        | 48.91  | 35.04     | 13.87    | 0.0  | 0.0       | 688.38       | false    | false    |
+      | 08 October 2025   | Merchant Issued Refund | 228.97 | 226.62    | 2.35     | 0.0  | 0.0       | 461.76       | false    | false    |
+      | 08 October 2025   | Merchant Issued Refund | 228.97 | 228.97    | 0.0      | 0.0  | 0.0       | 232.79       | false    | false    |
+      | 08 October 2025   | Merchant Issued Refund | 228.97 | 228.97    | 0.0      | 0.0  | 0.0       | 3.82         | false    | false    |
+      | 08 October 2025   | Merchant Issued Refund | 228.97 | 3.82      | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 October 2025   | Accrual Activity       | 16.22  | 0.0       | 16.22    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 October 2025   | Accrual                | 117.22 | 0.0       | 117.22   | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan status will be "OVERPAID"
+
+    # ========== CREDIT BALANCE REFUND TO CLOSE LOAN: 09 October 2025 ==========
+    When Admin sets the business date to "09 October 2025"
+    And Admin runs inline COB job for Loan
+    And Admin makes Credit Balance Refund transaction on "09 October 2025" with 225.15 EUR transaction amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025     | Disbursement           | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 228.97       | false    | false    |
+      | 11 March 2025     | Disbursement           | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 457.94       | false    | false    |
+      | 11 March 2025     | Disbursement           | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 686.91       | false    | false    |
+      | 11 March 2025     | Disbursement           | 228.97 | 0.0       | 0.0      | 0.0  | 0.0       | 915.88       | false    | false    |
+      | 04 April 2025     | Repayment              | 48.91  | 33.86     | 15.05    | 0.0  | 0.0       | 882.02       | false    | false    |
+      | 11 April 2025     | Accrual Activity       | 15.05  | 0.0       | 15.05    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 May 2025       | Repayment              | 48.91  | 32.0      | 16.91    | 0.0  | 0.0       | 850.02       | false    | false    |
+      | 11 May 2025       | Accrual Activity       | 16.91  | 0.0       | 16.91    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 May 2025       | Repayment              | 48.91  | 32.61     | 16.3     | 0.0  | 0.0       | 817.41       | false    | false    |
+      | 11 June 2025      | Accrual Activity       | 16.3   | 0.0       | 16.3     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 June 2025      | Repayment              | 48.91  | 33.25     | 15.66    | 0.0  | 0.0       | 784.16       | false    | false    |
+      | 11 July 2025      | Accrual Activity       | 15.66  | 0.0       | 15.66    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 August 2025    | Repayment              | 48.91  | 26.36     | 22.55    | 0.0  | 0.0       | 757.8        | false    | false    |
+      | 11 August 2025    | Accrual Activity       | 22.55  | 0.0       | 22.55    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 September 2025 | Repayment              | 48.91  | 34.38     | 14.53    | 0.0  | 0.0       | 723.42       | false    | false    |
+      | 11 September 2025 | Accrual Activity       | 14.53  | 0.0       | 14.53    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 October 2025   | Repayment              | 48.91  | 35.04     | 13.87    | 0.0  | 0.0       | 688.38       | false    | false    |
+      | 08 October 2025   | Merchant Issued Refund | 228.97 | 226.62    | 2.35     | 0.0  | 0.0       | 461.76       | false    | false    |
+      | 08 October 2025   | Merchant Issued Refund | 228.97 | 228.97    | 0.0      | 0.0  | 0.0       | 232.79       | false    | false    |
+      | 08 October 2025   | Merchant Issued Refund | 228.97 | 228.97    | 0.0      | 0.0  | 0.0       | 3.82         | false    | false    |
+      | 08 October 2025   | Merchant Issued Refund | 228.97 | 3.82      | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 October 2025   | Accrual Activity       | 16.22  | 0.0       | 16.22    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 October 2025   | Accrual                | 117.22 | 0.0       | 117.22   | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 October 2025   | Credit Balance Refund  | 225.15 | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+
+    # ========== MANUAL INTEREST REFUNDS ON CLOSED LOAN ==========
+    When Admin manually adds Interest Refund for "1"th "MERCHANT_ISSUED_REFUND" transaction made on "08 October 2025" with 0.01 EUR interest refund amount
+    When Admin manually adds Interest Refund for "2"th "MERCHANT_ISSUED_REFUND" transaction made on "08 October 2025" with 0.01 EUR interest refund amount
+    When Admin manually adds Interest Refund for "3"th "MERCHANT_ISSUED_REFUND" transaction made on "08 October 2025" with 0.01 EUR interest refund amount
+    When Admin manually adds Interest Refund for "4"th "MERCHANT_ISSUED_REFUND" transaction made on "08 October 2025" with 0.01 EUR interest refund amount
+    Then Loan status will be "OVERPAID"

@@ -458,6 +458,39 @@ public class LoanStepDef extends AbstractStepDef {
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
     }
 
+    @When("Admin manually adds Interest Refund for {string}th {string} transaction made on {string} with {double} EUR interest refund amount")
+    public void addInterestRefundTransactionManuallyNth(final String nthTransaction, final String transactionTypeInput,
+            final String transactionDate, final double amount) throws IOException {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.getLoanId();
+        final TransactionType transactionType = TransactionType.valueOf(transactionTypeInput);
+
+        final GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions")));
+        assert loanDetailsResponse != null;
+        final List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.getTransactions();
+        assert transactions != null;
+
+        final int nthItem = Integer.parseInt(nthTransaction) - 1;
+        final List<GetLoansLoanIdTransactions> matchingTransactions = transactions.stream()
+                .filter(t -> t.getType() != null
+                        && (transactionType.equals(TransactionType.PAYOUT_REFUND) ? "Payout Refund" : "Merchant Issued Refund")
+                                .equals(t.getType().getValue())
+                        && t.getDate() != null && transactionDate.equals(FORMATTER.format(t.getDate())))
+                .toList();
+
+        if (nthItem < 0 || nthItem >= matchingTransactions.size()) {
+            throw new IllegalStateException("No " + nthTransaction + "th refund transaction found on " + transactionDate + " for loan "
+                    + loanId + ". Found " + matchingTransactions.size() + " matching transactions.");
+        }
+        final GetLoansLoanIdTransactions refundTransaction = matchingTransactions.get(nthItem);
+
+        final PostLoansLoanIdTransactionsResponse adjustmentResponse = addInterestRefundTransaction(amount, refundTransaction.getId());
+        testContext().set(TestContextKey.LOAN_INTEREST_REFUND_RESPONSE, adjustmentResponse);
+        eventCheckHelper.transactionEventCheck(adjustmentResponse, TransactionType.INTEREST_REFUND, null);
+        eventCheckHelper.loanBalanceChangedEventCheck(loanId);
+    }
+
     @When("Admin manually adds Interest Refund for {string} transaction made on invalid date {string} with {double} EUR interest refund amount")
     public void addInterestRefundTransactionManuallyWithInvalidDate(final String transactionTypeInput, final String transactionDate,
             final double amount) {
