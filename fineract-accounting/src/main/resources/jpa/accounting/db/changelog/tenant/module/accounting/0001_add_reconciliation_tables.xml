@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- Bank Statement Import -->
+    <changeSet id="1-create-bank-statement-import" author="reconciliation-module">
+        <createTable tableName="bank_statement_import">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="gl_account_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="office_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="statement_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="opening_balance" type="DECIMAL(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="closing_balance" type="DECIMAL(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_name" type="VARCHAR(255)"/>
+            <column name="file_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(50)" defaultValue="DRAFT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="imported_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="imported_date" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reconciled_by" type="BIGINT"/>
+            <column name="reconciled_date" type="DATETIME"/>
+            <column name="approved_by" type="BIGINT"/>
+            <column name="approved_date" type="DATETIME"/>
+            <column name="notes" type="TEXT"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="bank_statement_import"
+                                 baseColumnNames="gl_account_id"
+                                 constraintName="fk_bsi_gl_account"
+                                 referencedTableName="acc_gl_account"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="bank_statement_import"
+                                 baseColumnNames="office_id"
+                                 constraintName="fk_bsi_office"
+                                 referencedTableName="m_office"
+                                 referencedColumnNames="id"/>
+
+        <createIndex tableName="bank_statement_import" indexName="idx_bsi_gl_account">
+            <column name="gl_account_id"/>
+        </createIndex>
+        <createIndex tableName="bank_statement_import" indexName="idx_bsi_statement_date">
+            <column name="statement_date"/>
+        </createIndex>
+        <createIndex tableName="bank_statement_import" indexName="idx_bsi_status">
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Bank Statement Transaction -->
+    <changeSet id="2-create-bank-statement-transaction" author="reconciliation-module">
+        <createTable tableName="bank_statement_transaction">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="statement_import_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transaction_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value_date" type="DATE"/>
+            <column name="description" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reference_number" type="VARCHAR(100)"/>
+            <column name="check_number" type="VARCHAR(50)"/>
+            <column name="debit_amount" type="DECIMAL(19,6)"/>
+            <column name="credit_amount" type="DECIMAL(19,6)"/>
+            <column name="balance" type="DECIMAL(19,6)"/>
+            <column name="transaction_type" type="VARCHAR(50)"/>
+            <column name="is_matched" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="matched_date" type="DATETIME"/>
+            <column name="matched_by" type="BIGINT"/>
+            <column name="notes" type="TEXT"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="bank_statement_transaction"
+                                 baseColumnNames="statement_import_id"
+                                 constraintName="fk_bst_import"
+                                 referencedTableName="bank_statement_import"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <createIndex tableName="bank_statement_transaction" indexName="idx_bst_import">
+            <column name="statement_import_id"/>
+        </createIndex>
+        <createIndex tableName="bank_statement_transaction" indexName="idx_bst_transaction_date">
+            <column name="transaction_date"/>
+        </createIndex>
+        <createIndex tableName="bank_statement_transaction" indexName="idx_bst_is_matched">
+            <column name="is_matched"/>
+        </createIndex>
+        <createIndex tableName="bank_statement_transaction" indexName="idx_bst_reference">
+            <column name="reference_number"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Reconciliation Match -->
+    <changeSet id="3-create-reconciliation-match" author="reconciliation-module">
+        <createTable tableName="reconciliation_match">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="statement_import_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bank_transaction_id" type="BIGINT"/>
+            <column name="gl_journal_entry_id" type="BIGINT"/>
+            <column name="match_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="match_confidence" type="DECIMAL(5,2)"/>
+            <column name="amount" type="DECIMAL(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notes" type="TEXT"/>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="reconciliation_match"
+                                 baseColumnNames="statement_import_id"
+                                 constraintName="fk_rm_import"
+                                 referencedTableName="bank_statement_import"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="reconciliation_match"
+                                 baseColumnNames="bank_transaction_id"
+                                 constraintName="fk_rm_bank_transaction"
+                                 referencedTableName="bank_statement_transaction"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <createIndex tableName="reconciliation_match" indexName="idx_rm_import">
+            <column name="statement_import_id"/>
+        </createIndex>
+        <createIndex tableName="reconciliation_match" indexName="idx_rm_bank_transaction">
+            <column name="bank_transaction_id"/>
+        </createIndex>
+        <createIndex tableName="reconciliation_match" indexName="idx_rm_gl_entry">
+            <column name="gl_journal_entry_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Reconciliation Adjustment -->
+    <changeSet id="4-create-reconciliation-adjustment" author="reconciliation-module">
+        <createTable tableName="reconciliation_adjustment">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="statement_import_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="adjustment_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="DECIMAL(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gl_account_debit" type="BIGINT"/>
+            <column name="gl_account_credit" type="BIGINT"/>
+            <column name="journal_entry_id" type="BIGINT"/>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="approved" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="approved_by" type="BIGINT"/>
+            <column name="approved_date" type="DATETIME"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="reconciliation_adjustment"
+                                 baseColumnNames="statement_import_id"
+                                 constraintName="fk_ra_import"
+                                 referencedTableName="bank_statement_import"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <createIndex tableName="reconciliation_adjustment" indexName="idx_ra_import">
+            <column name="statement_import_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Reconciliation Rule -->
+    <changeSet id="5-create-reconciliation-rule" author="reconciliation-module">
+        <createTable tableName="reconciliation_rule">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="gl_account_id" type="BIGINT"/>
+            <column name="match_condition" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="condition_value" type="VARCHAR(255)"/>
+            <column name="date_tolerance_days" type="INT" defaultValueNumeric="0"/>
+            <column name="amount_tolerance" type="DECIMAL(19,6)" defaultValueNumeric="0"/>
+            <column name="priority" type="INT" defaultValueNumeric="100"/>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true"/>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="reconciliation_rule" indexName="idx_rr_gl_account">
+            <column name="gl_account_id"/>
+        </createIndex>
+        <createIndex tableName="reconciliation_rule" indexName="idx_rr_active">
+            <column name="is_active"/>
+        </createIndex>
+        <createIndex tableName="reconciliation_rule" indexName="idx_rr_priority">
+            <column name="priority"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Reconciliation Audit Log -->
+    <changeSet id="6-create-reconciliation-audit-log" author="reconciliation-module">
+        <createTable tableName="reconciliation_audit_log">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="statement_import_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="action" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="performed_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="performed_date" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="old_value" type="TEXT"/>
+            <column name="new_value" type="TEXT"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="reconciliation_audit_log"
+                                 baseColumnNames="statement_import_id"
+                                 constraintName="fk_ral_import"
+                                 referencedTableName="bank_statement_import"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <createIndex tableName="reconciliation_audit_log" indexName="idx_ral_import">
+            <column name="statement_import_id"/>
+        </createIndex>
+        <createIndex tableName="reconciliation_audit_log" indexName="idx_ral_action">
+            <column name="action"/>
+        </createIndex>
+        <createIndex tableName="reconciliation_audit_log" indexName="idx_ral_performed_date">
+            <column name="performed_date"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
