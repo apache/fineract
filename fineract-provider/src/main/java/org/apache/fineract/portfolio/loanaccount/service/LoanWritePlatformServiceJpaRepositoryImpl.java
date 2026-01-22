@@ -3016,6 +3016,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loanAccrualsProcessingService.reprocessExistingAccruals(loan, true);
             loanAccrualsProcessingService.processIncomePostingAndAccruals(loan, true);
         }
+        loanLifecycleStateMachine.determineAndTransition(loan, interestRefundTxn.getTransactionDate());
 
         loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
         loanAccountDomainService.setLoanDelinquencyTag(loan, transactionDate);
