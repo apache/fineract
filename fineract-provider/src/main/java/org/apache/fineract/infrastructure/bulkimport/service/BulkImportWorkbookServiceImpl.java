@@ -247,7 +247,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
         final ImportTemplateLocationMapper importTemplateLocationMapper = new ImportTemplateLocationMapper();
         final String sql = "select " + importTemplateLocationMapper.schema();
 
-        return this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper, new Object[] { Integer.parseInt(importDocumentId) }); // NOSONAR
+        return this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper, new Object[] { Long.parseLong(importDocumentId) }); // NOSONAR
     }
 
     @Override
@@ -255,7 +255,8 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
         this.securityContext.authenticatedUser();
         final ImportTemplateLocationMapper importTemplateLocationMapper = new ImportTemplateLocationMapper();
         final String sql = "select " + importTemplateLocationMapper.schema();
-        DocumentData documentData = this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper, new Object[] { importDocumentId }); // NOSONAR
+        DocumentData documentData = this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper,
+                new Object[] { Long.parseLong(importDocumentId) }); // NOSONAR
         return buildResponse(documentData);
     }
 
