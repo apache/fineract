@@ -23,6 +23,8 @@ import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface LoanOriginatorRepository extends JpaRepository<LoanOriginator, Long>, JpaSpecificationExecutor<LoanOriginator> {
 
@@ -31,4 +33,13 @@ public interface LoanOriginatorRepository extends JpaRepository<LoanOriginator, 
     boolean existsByExternalId(ExternalId externalId);
 
     List<LoanOriginator> findByStatus(LoanOriginatorStatus status);
+
+    @Query("SELECT lo FROM LoanOriginator lo LEFT JOIN FETCH lo.originatorType LEFT JOIN FETCH lo.channelType")
+    List<LoanOriginator> findAllWithCodeValues();
+
+    @Query("SELECT lo FROM LoanOriginator lo LEFT JOIN FETCH lo.originatorType LEFT JOIN FETCH lo.channelType WHERE lo.id = :id")
+    Optional<LoanOriginator> findByIdWithCodeValues(@Param("id") Long id);
+
+    @Query("SELECT lo FROM LoanOriginator lo LEFT JOIN FETCH lo.originatorType LEFT JOIN FETCH lo.channelType WHERE lo.externalId = :externalId")
+    Optional<LoanOriginator> findByExternalIdWithCodeValues(@Param("externalId") ExternalId externalId);
 }

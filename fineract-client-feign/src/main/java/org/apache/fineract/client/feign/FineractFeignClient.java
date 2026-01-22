@@ -96,6 +96,7 @@ import org.apache.fineract.client.feign.services.LoanCollateralApi;
 import org.apache.fineract.client.feign.services.LoanCollateralManagementApi;
 import org.apache.fineract.client.feign.services.LoanDisbursementDetailsApi;
 import org.apache.fineract.client.feign.services.LoanInterestPauseApi;
+import org.apache.fineract.client.feign.services.LoanOriginatorsApi;
 import org.apache.fineract.client.feign.services.LoanProductsApi;
 import org.apache.fineract.client.feign.services.LoanReschedulingApi;
 import org.apache.fineract.client.feign.services.LoanTransactionsApi;
@@ -530,6 +531,10 @@ public final class FineractFeignClient {
 
     public LoanInterestPauseApi loanInterestPause() {
         return create(LoanInterestPauseApi.class);
+    }
+
+    public LoanOriginatorsApi loanOriginators() {
+        return create(LoanOriginatorsApi.class);
     }
 
     public LoanProductsApi loanProducts() {

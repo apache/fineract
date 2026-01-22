@@ -19,33 +19,50 @@
 package org.apache.fineract.portfolio.loanorigination.service;
 
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
+import org.apache.fineract.portfolio.loanorigination.domain.LoanOriginator;
+import org.apache.fineract.portfolio.loanorigination.domain.LoanOriginatorRepository;
+import org.apache.fineract.portfolio.loanorigination.exception.LoanOriginatorNotFoundException;
+import org.apache.fineract.portfolio.loanorigination.mapper.LoanOriginatorMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 @ConditionalOnProperty(value = "fineract.module.loan-origination.enabled", havingValue = "true")
 public class LoanOriginatorReadPlatformServiceImpl implements LoanOriginatorReadPlatformService {
 
-    private static final String NOT_IMPLEMENTED_MESSAGE = "Not implemented yet";
+    private final LoanOriginatorRepository loanOriginatorRepository;
+    private final LoanOriginatorMapper loanOriginatorMapper;
 
     @Override
     public List<LoanOriginatorData> retrieveAll() {
-        throw new UnsupportedOperationException(NOT_IMPLEMENTED_MESSAGE);
+        final List<LoanOriginator> originators = this.loanOriginatorRepository.findAllWithCodeValues();
+        return this.loanOriginatorMapper.toDataList(originators);
     }
 
     @Override
-    public LoanOriginatorData retrieveById(Long id) {
-        throw new UnsupportedOperationException(NOT_IMPLEMENTED_MESSAGE);
+    public LoanOriginatorData retrieveById(final Long id) {
+        final LoanOriginator originator = this.loanOriginatorRepository.findByIdWithCodeValues(id)
+                .orElseThrow(() -> new LoanOriginatorNotFoundException(id));
+        return this.loanOriginatorMapper.toData(originator);
     }
 
     @Override
-    public LoanOriginatorData retrieveByExternalId(String externalId) {
-        throw new UnsupportedOperationException(NOT_IMPLEMENTED_MESSAGE);
+    public LoanOriginatorData retrieveByExternalId(final String externalId) {
+        final LoanOriginator originator = this.loanOriginatorRepository.findByExternalIdWithCodeValues(new ExternalId(externalId))
+                .orElseThrow(() -> new LoanOriginatorNotFoundException(externalId));
+        return this.loanOriginatorMapper.toData(originator);
     }
 
     @Override
-    public Long resolveIdByExternalId(String externalId) {
-        throw new UnsupportedOperationException(NOT_IMPLEMENTED_MESSAGE);
+    public Long resolveIdByExternalId(final String externalId) {
+        final LoanOriginator originator = this.loanOriginatorRepository.findByExternalId(new ExternalId(externalId))
+                .orElseThrow(() -> new LoanOriginatorNotFoundException(externalId));
+        return originator.getId();
     }
 }
