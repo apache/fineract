@@ -470,6 +470,10 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     private void addInterestAccrual(@NonNull final Loan loan, @NonNull final LocalDate tillDate,
             final LoanScheduleGenerator scheduleGenerator, @NonNull final LoanRepaymentScheduleInstallment installment,
             @NonNull final AccrualPeriodsData accrualPeriods) {
+        // No interest, no need for calculations
+        if (!loan.isInterestBearing()) {
+            return;
+        }
         final LoanTransaction reAgeTransaction = loan.findReAgeTransaction();
         final LoanReAgeParameter loanReAgeParameter = reAgeTransaction != null ? reAgeTransaction.getLoanReAgeParameter() : null;
 
