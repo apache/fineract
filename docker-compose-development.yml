@@ -88,3 +88,7 @@ services:
       # - ./config/docker/env/cloudwatch.env
       - ./config/docker/env/debug.env
     logging: *default-logging
+    networks:
+     default:
+       aliases:
+         - fineract-server

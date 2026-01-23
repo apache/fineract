@@ -50,8 +50,10 @@ scrape_configs:
 
     # Override the global default and scrape targets from this job every 5 seconds.
     scrape_interval: 5s
-    metrics_path: "/actuator/prometheus"
+    metrics_path: "/fineract-provider/actuator/prometheus"
     scheme: "https"
+    tls_config:
+      insecure_skip_verify: true
 
     static_configs:
       - targets: ["fineract-server:8443"]
