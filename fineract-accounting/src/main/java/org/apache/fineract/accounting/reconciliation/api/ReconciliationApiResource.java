@@ -276,6 +276,25 @@ public class ReconciliationApiResource {
         return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
+    @GET
+    @Path("{importId}/summary")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(tags = { "Account Reconciliation" }, summary = "Get Reconciliation Summary", description = """
+            Retrieve summary information for a reconciliation import.
+            
+            Example Request:
+            
+            accounting/reconciliation/1/summary
+            """)
+    @ApiResponse(responseCode = "200", description = "OK")
+    public ReconciliationSummaryData retrieveSummary(@PathParam("importId") @Parameter(description = "importId") final Long importId) {
+
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
+
+        return this.readPlatformService.retrieveSummary(importId);
+    }
+
     @POST
     @Path("{importId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -314,23 +333,23 @@ public class ReconciliationApiResource {
         return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
-    @GET
-    @Path("{importId}/summary")
+    @DELETE
+    @Path("{importId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(tags = { "Account Reconciliation" }, summary = "Get Reconciliation Summary", description = """
-            Retrieve summary information for a reconciliation import.
+    @Operation(tags = { "Account Reconciliation" }, summary = "Delete Reconciliation", description = """
+            Delete a reconciliation import.
             
             Example Request:
             
-            accounting/reconciliation/1/summary
+            DELETE accounting/reconciliation/1
             """)
     @ApiResponse(responseCode = "200", description = "OK")
-    public ReconciliationSummaryData retrieveSummary(@PathParam("importId") @Parameter(description = "importId") final Long importId) {
+    public CommandProcessingResult deleteImport(@PathParam("importId") @Parameter(description = "importId") final Long importId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteReconciliationImport(importId).build();
 
-        return this.readPlatformService.retrieveSummary(importId);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @GET
@@ -361,25 +380,6 @@ public class ReconciliationApiResource {
         final LocalDate toDate = toDateStr != null ? LocalDate.parse(toDateStr, DateUtils.DEFAULT_DATE_FORMATTER) : null;
 
         return this.readPlatformService.retrieveUnreconciledGLEntries(glAccountId, fromDate, toDate);
-    }
-
-    @DELETE
-    @Path("{importId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(tags = { "Account Reconciliation" }, summary = "Delete Reconciliation", description = """
-            Delete a reconciliation import.
-            
-            Example Request:
-            
-            DELETE accounting/reconciliation/1
-            """)
-    @ApiResponse(responseCode = "200", description = "OK")
-    public CommandProcessingResult deleteImport(@PathParam("importId") @Parameter(description = "importId") final Long importId) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteReconciliationImport(importId).build();
-
-        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @GET

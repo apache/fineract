@@ -3983,7 +3983,7 @@ public class CommandWrapperBuilder {
         this.actionName = "COMPLETE";
         this.entityName = "RECONCILIATIONIMPORT";
         this.entityId = importId;
-        this.href = "/accounting/reconciliation/" + importId + "?command=complete";
+        this.href = "/accounting/reconciliation/" + importId;
         return this;
     }
 
@@ -3991,7 +3991,7 @@ public class CommandWrapperBuilder {
         this.actionName = "APPROVE";
         this.entityName = "RECONCILIATIONIMPORT";
         this.entityId = importId;
-        this.href = "/accounting/reconciliation/" + importId + "?command=approve";
+        this.href = "/accounting/reconciliation/" + importId;
         return this;
     }
 
