@@ -3929,4 +3929,103 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId;
         return this;
     }
+
+    public CommandWrapperBuilder createReconciliationImport() {
+        this.actionName = "CREATE";
+        this.entityName = "RECONCILIATIONIMPORT";
+        this.entityId = null;
+        this.href = "/accounting/reconciliation";
+        return this;
+    }
+
+    public CommandWrapperBuilder importReconciliationTransactions(final Long importId) {
+        this.actionName = "IMPORTTRANSACTIONS";
+        this.entityName = "RECONCILIATIONIMPORT";
+        this.entityId = importId;
+        this.href = "/accounting/reconciliation/" + importId + "/transactions";
+        return this;
+    }
+
+    public CommandWrapperBuilder autoMatchReconciliation(final Long importId) {
+        this.actionName = "AUTOMATCH";
+        this.entityName = "RECONCILIATIONIMPORT";
+        this.entityId = importId;
+        this.href = "/accounting/reconciliation/" + importId + "/auto-match";
+        return this;
+    }
+
+    public CommandWrapperBuilder createReconciliationMatch(final Long importId) {
+        this.actionName = "CREATEMATCH";
+        this.entityName = "RECONCILIATIONIMPORT";
+        this.entityId = importId;
+        this.href = "/accounting/reconciliation/" + importId + "/matches";
+        return this;
+    }
+
+    public CommandWrapperBuilder removeReconciliationMatch(final Long importId, final Long matchId) {
+        this.actionName = "REMOVEMATCH";
+        this.entityName = "RECONCILIATIONIMPORT";
+        this.entityId = importId;
+        this.subentityId = matchId;
+        this.href = "/accounting/reconciliation/" + importId + "/matches/" + matchId;
+        return this;
+    }
+
+    public CommandWrapperBuilder createReconciliationAdjustment(final Long importId) {
+        this.actionName = "CREATEADJUSTMENT";
+        this.entityName = "RECONCILIATIONIMPORT";
+        this.entityId = importId;
+        this.href = "/accounting/reconciliation/" + importId + "/adjustments";
+        return this;
+    }
+
+    public CommandWrapperBuilder completeReconciliation(final Long importId) {
+        this.actionName = "COMPLETE";
+        this.entityName = "RECONCILIATIONIMPORT";
+        this.entityId = importId;
+        this.href = "/accounting/reconciliation/" + importId + "?command=complete";
+        return this;
+    }
+
+    public CommandWrapperBuilder approveReconciliation(final Long importId) {
+        this.actionName = "APPROVE";
+        this.entityName = "RECONCILIATIONIMPORT";
+        this.entityId = importId;
+        this.href = "/accounting/reconciliation/" + importId + "?command=approve";
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteReconciliationImport(final Long importId) {
+        this.actionName = "DELETE";
+        this.entityName = "RECONCILIATIONIMPORT";
+        this.entityId = importId;
+        this.href = "/accounting/reconciliation/" + importId;
+        this.json = "{}";
+        return this;
+    }
+
+    public CommandWrapperBuilder createReconciliationRule() {
+        this.actionName = "CREATE";
+        this.entityName = "RECONCILIATIONRULE";
+        this.entityId = null;
+        this.href = "/accounting/reconciliation/rules";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateReconciliationRule(final Long ruleId) {
+        this.actionName = "UPDATE";
+        this.entityName = "RECONCILIATIONRULE";
+        this.entityId = ruleId;
+        this.href = "/accounting/reconciliation/rules/" + ruleId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteReconciliationRule(final Long ruleId) {
+        this.actionName = "DELETE";
+        this.entityName = "RECONCILIATIONRULE";
+        this.entityId = ruleId;
+        this.href = "/accounting/reconciliation/rules/" + ruleId;
+        this.json = "{}";
+        return this;
+    }
 }
