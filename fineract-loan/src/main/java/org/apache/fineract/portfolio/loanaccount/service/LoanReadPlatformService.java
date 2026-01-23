@@ -168,4 +168,6 @@ public interface LoanReadPlatformService {
     LoanTransactionData retrieveLoanReAgeTemplate(Long loanId);
 
     LoanTransactionData retrieveLoanReAmortizationTemplate(Long loanId);
+
+    Integer countInstallmentsByLoanIdWhereIsAdditionalFalseAndIsDownPaymentFalse(Long loanId);
 }

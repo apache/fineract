@@ -1286,6 +1286,8 @@ final class LoansApiResourceSwagger {
         public StringEnumOptionData buyDownFeeStrategy;
         @Schema(example = "FEE")
         public StringEnumOptionData buyDownFeeIncomeType;
+        @Schema(example = "6")
+        public Integer actualNoTerm;
     }
 
     @Schema(description = "GetLoansResponse")

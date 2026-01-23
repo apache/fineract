@@ -201,6 +201,8 @@ public class EventCheckHelper {
                     BigDecimal delinquentFeeExpected = body.getDelinquent().getDelinquentFee();
                     BigDecimal delinquentPenaltyActual = loanAccountDataV1.getDelinquent().getDelinquentPenalty();
                     BigDecimal delinquentPenaltyExpected = body.getDelinquent().getDelinquentPenalty();
+                    Integer actualNoTermActual = loanAccountDataV1.getActualNoTerm();
+                    Integer actualNoTermExpected = body.getActualNoTerm();
 
                     assertThat(idActual).isEqualTo(idExpected);
                     assertThat(statusIdActual).isEqualTo(statusIdExpected);
@@ -217,6 +219,7 @@ public class EventCheckHelper {
                     assertThat(areBigDecimalValuesEqual(delinquentInterestActual, delinquentInterestExpected)).isTrue();
                     assertThat(areBigDecimalValuesEqual(delinquentFeeActual, delinquentFeeExpected)).isTrue();
                     assertThat(areBigDecimalValuesEqual(delinquentPenaltyActual, delinquentPenaltyExpected)).isTrue();
+                    assertThat(actualNoTermActual).isEqualTo(actualNoTermExpected);
 
                     return null;
                 });

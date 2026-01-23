@@ -72,4 +72,7 @@ public interface LoanRepaymentScheduleInstallmentRepository
             """)
     List<LoanRepaymentScheduleInstallment> findByLoanId(@Param("loanId") Long loanId);
 
+    long countLoanRepaymentScheduleInstallmentsByLoan_IdAndAdditionalAndIsDownPayment(Long loanId, boolean additional,
+            boolean isDownPayment);
+
 }

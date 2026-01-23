@@ -1797,6 +1797,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     }
 
     @Override
+    public Integer countInstallmentsByLoanIdWhereIsAdditionalFalseAndIsDownPaymentFalse(Long loanId) {
+        return loanRepaymentScheduleService.countInstallmentsByLoanIdWhereIsAdditionalFalseAndIsDownPaymentFalse(loanId);
+    }
+
+    @Override
     public LoanTransactionData retrieveLoanChargeOffTemplate(final Long loanId) {
 
         final LoanAccountData loan = this.retrieveOne(loanId);

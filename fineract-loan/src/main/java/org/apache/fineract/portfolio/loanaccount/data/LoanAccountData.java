@@ -104,6 +104,7 @@ public class LoanAccountData {
     private Integer termFrequency;
     private EnumOptionData termPeriodFrequencyType;
     private Integer numberOfRepayments;
+    private Integer actualNoTerm;
     private Integer repaymentEvery;
     private Integer fixedLength;
     private EnumOptionData repaymentFrequencyType;

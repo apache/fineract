@@ -60,6 +60,11 @@ public class LoanRepaymentScheduleService {
                 isInterestRecalculationEnabled, loanScheduleType);
     }
 
+    public Integer countInstallmentsByLoanIdWhereIsAdditionalFalseAndIsDownPaymentFalse(Long loanId) {
+        return Math.toIntExact(loanRepaymentScheduleInstallmentRepository
+                .countLoanRepaymentScheduleInstallmentsByLoan_IdAndAdditionalAndIsDownPayment(loanId, false, false));
+    }
+
     public LoanScheduleData extractLoanScheduleData(final List<LoanRepaymentScheduleInstallment> installments,
             final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData, Collection<DisbursementData> disbursementData,
             Collection<LoanTransactionRepaymentPeriodData> capitalizedIncomeData, boolean isInterestRecalculationEnabled,

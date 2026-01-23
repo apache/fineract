@@ -1024,6 +1024,8 @@ public class LoansApiResource {
                 loanBasicDetails = loanBasicDetails.setMeeting(calendarData);
             }
         }
+        loanBasicDetails.setActualNoTerm(
+                loanReadPlatformService.countInstallmentsByLoanIdWhereIsAdditionalFalseAndIsDownPaymentFalse(resolvedLoanId));
         Collection<InterestRatePeriodData> interestRatesPeriods = this.loanReadPlatformService
                 .retrieveLoanInterestRatePeriodData(loanBasicDetails);
         Collection<LoanTransactionData> loanRepayments = null;

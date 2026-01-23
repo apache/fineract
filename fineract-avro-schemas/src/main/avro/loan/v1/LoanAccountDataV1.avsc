@@ -853,6 +853,14 @@
                     "items": "org.apache.fineract.avro.loan.v1.OriginatorDetailsV1"
                 }
             ]
+        },
+        {
+            "default": null,
+            "name": "actualNoTerm",
+            "type": [
+                "null",
+                "int"
+            ]
         }
     ]
 }

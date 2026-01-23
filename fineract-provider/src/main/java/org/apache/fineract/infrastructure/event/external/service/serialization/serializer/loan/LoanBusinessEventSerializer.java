@@ -102,6 +102,10 @@ public class LoanBusinessEventSerializer extends AbstractBusinessEventWithCustom
             data.setLoanTermVariations(activeLoanTermVariations.stream().map(LoanTermVariations::toData).toList());
         }
 
+        Integer actualNoTerms = Math.toIntExact(
+                event.get().getRepaymentScheduleInstallments().stream().filter(i -> !i.isAdditional() && !i.isDownPayment()).count());
+        data.setActualNoTerm(actualNoTerms);
+
         final LoanAccountDataV1 result = mapper.map(data);
         result.getDelinquent().setInstallmentDelinquencyBuckets(installmentsDelinquencyData);
 
