@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +33,7 @@ import org.apache.fineract.client.models.PostTaxesComponentsResponse;
 import org.apache.fineract.client.models.PostTaxesGroupRequest;
 import org.apache.fineract.client.models.PostTaxesGroupResponse;
 import org.apache.fineract.client.models.PostTaxesGroupTaxComponents;
+import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.TaxComponentHelper;
 import org.apache.fineract.integrationtests.common.TaxGroupHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -112,6 +117,30 @@ public class TaxesTest {
         Assertions.assertNotNull(taxComponentRespose.getResourceId());
 
         return taxComponentRespose.getResourceId();
+    }
+
+    @Test
+    void retrieveTaxGroupWithNonExistentId_shouldReturn404() {
+        final Long nonExistentTaxGroupId = 99999L;
+
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> TaxGroupHelper.retrieveTaxGroup(nonExistentTaxGroupId));
+
+        assertEquals(404, exception.getResponse().code());
+        assertTrue(exception.getMessage().contains("error.msg.tax.group.id.invalid"),
+                "Response should contain the error code for tax group not found");
+    }
+
+    @Test
+    void retrieveTaxComponentWithNonExistentId_shouldReturn404() {
+        final Long nonExistentTaxComponentId = 99999L;
+
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> TaxComponentHelper.retrieveTaxComponent(nonExistentTaxComponentId));
+
+        assertEquals(404, exception.getResponse().code());
+        assertTrue(exception.getMessage().contains("error.msg.tax.component.id.invalid"),
+                "Response should contain the error code for tax component not found");
     }
 
 }
