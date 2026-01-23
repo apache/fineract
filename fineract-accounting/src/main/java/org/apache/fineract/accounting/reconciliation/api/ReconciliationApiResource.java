@@ -42,6 +42,7 @@ import org.apache.fineract.accounting.reconciliation.data.ReconciliationSummaryD
 import org.apache.fineract.accounting.reconciliation.data.UnreconciledGLEntryData;
 import org.apache.fineract.accounting.reconciliation.service.ReconciliationReadPlatformService;
 import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.exception.UnsupportedCommandException;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -306,7 +307,7 @@ public class ReconciliationApiResource {
         }
 
         if (commandRequest == null) {
-            throw new IllegalArgumentException(
+            throw new UnsupportedCommandException(commandParam,
                     "Unsupported command: " + commandParam + ". Supported commands are: complete, approve");
         }
 
