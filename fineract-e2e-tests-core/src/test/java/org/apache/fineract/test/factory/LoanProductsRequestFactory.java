@@ -1632,6 +1632,17 @@ public class LoanProductsRequestFactory {
                 .incomeFromCapitalizationAccountId(accountTypeResolver.resolve(DefaultAccountType.INTEREST_INCOME));//
     }
 
+    public PostLoanProductsRequest defaultLoanProductsRequestLP2EmiDeferredIncome() {
+        return defaultLoanProductsRequestLP2EmiCapitalizedIncome()//
+                .enableBuyDownFee(true)//
+                .merchantBuyDownFee(true)//
+                .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)//
+                .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)//
+                .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.INTEREST)//
+                .buyDownExpenseAccountId(accountTypeResolver.resolve(DefaultAccountType.BUY_DOWN_EXPENSE))//
+                .incomeFromBuyDownAccountId(accountTypeResolver.resolve(DefaultAccountType.INCOME_FROM_BUY_DOWN));//
+    }
+
     public PostLoanProductsRequest defaultLoanProductsRequestLP2ChargeOffReasonToExpenseAccountMappingsWithCapitalizedIncome() {
         return defaultLoanProductsRequestLP2ChargeOffReasonToExpenseAccountMappings()//
                 .enableIncomeCapitalization(true)//
