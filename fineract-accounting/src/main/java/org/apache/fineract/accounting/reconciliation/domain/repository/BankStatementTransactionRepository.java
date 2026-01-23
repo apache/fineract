@@ -41,4 +41,7 @@ public interface BankStatementTransactionRepository
 
     @Query("SELECT t FROM BankStatementTransaction t WHERE t.referenceNumber = :referenceNumber AND t.matched = false")
     List<BankStatementTransaction> findUnmatchedByReferenceNumber(@Param("referenceNumber") String referenceNumber);
+
+    @Query("DELETE FROM BankStatementTransaction t WHERE t.statementImport.id = :importId")
+    void deleteByImportId(@Param("importId") Long importId);
 }

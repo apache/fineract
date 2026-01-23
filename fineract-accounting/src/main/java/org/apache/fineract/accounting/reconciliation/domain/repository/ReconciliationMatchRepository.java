@@ -39,4 +39,7 @@ public interface ReconciliationMatchRepository
 
     @Query("SELECT m FROM ReconciliationMatch m WHERE m.matchType = :matchType AND m.statementImport.id = :importId")
     List<ReconciliationMatch> findByImportIdAndMatchType(@Param("importId") Long importId, @Param("matchType") String matchType);
+
+    @Query("DELETE FROM ReconciliationMatch m WHERE m.statementImport.id = :importId")
+    void deleteByImportId(@Param("importId") Long importId);
 }

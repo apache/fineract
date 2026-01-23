@@ -33,10 +33,10 @@ import org.apache.fineract.accounting.reconciliation.data.ReconciliationRuleData
 import org.apache.fineract.accounting.reconciliation.data.ReconciliationSummaryData;
 import org.apache.fineract.accounting.reconciliation.data.UnreconciledGLEntryData;
 import org.apache.fineract.accounting.reconciliation.domain.BankStatementImport;
-import org.apache.fineract.accounting.reconciliation.domain.BankStatementImportRepository;
 import org.apache.fineract.accounting.reconciliation.domain.ReconciliationRule;
-import org.apache.fineract.accounting.reconciliation.domain.ReconciliationRuleRepository;
-import org.apache.fineract.accounting.reconciliation.exception.BankStatementImportNotFoundException;
+import org.apache.fineract.accounting.reconciliation.domain.repository.BankStatementImportRepository;
+import org.apache.fineract.accounting.reconciliation.domain.repository.ReconciliationRuleRepository;
+import org.apache.fineract.accounting.reconciliation.exception.ReconciliationNotFoundException;
 import org.apache.fineract.accounting.reconciliation.exception.ReconciliationRuleNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -108,10 +108,9 @@ public class ReconciliationReadPlatformServiceImpl implements ReconciliationRead
             final String lastModifiedByUsername = rs.getString("lastModifiedByUsername");
             final LocalDate lastModifiedDate = JdbcSupport.getLocalDate(rs, "lastModifiedDate");
 
-            return BankStatementImportData.instance(id, glAccountId, glAccountName, glAccountCode, fileName, importDate, fromDate,
-                    toDate, status, totalTransactions, matchedCount, unmatchedCount, totalDebits, totalCredits, openingBalance,
-                    closingBalance, completedDate, approvedDate, approvedByUserId, approvedByUsername, createdBy, createdByUsername,
-                    createdDate, lastModifiedBy, lastModifiedByUsername, lastModifiedDate);
+            return new BankStatementImportData().setId(id).setGlAccountId(glAccountId).setGlAccountName(glAccountName)
+                    .setFileName(fileName).setStatementDate(fromDate).setOpeningBalance(openingBalance)
+                    .setClosingBalance(closingBalance).setStatus(status);
         }
     }
 
@@ -140,8 +139,9 @@ public class ReconciliationReadPlatformServiceImpl implements ReconciliationRead
             final Boolean isMatched = rs.getBoolean("isMatched");
             final Integer matchConfidence = JdbcSupport.getInteger(rs, "matchConfidence");
 
-            return BankStatementTransactionData.instance(id, importId, transactionDate, valueDate, description, referenceNumber,
-                    debitAmount, creditAmount, balance, isMatched, matchConfidence);
+            return new BankStatementTransactionData().setId(id).setStatementImportId(importId).setTransactionDate(transactionDate)
+                    .setValueDate(valueDate).setDescription(description).setReferenceNumber(referenceNumber)
+                    .setDebitAmount(debitAmount).setCreditAmount(creditAmount).setBalance(balance).setIsMatched(isMatched);
         }
     }
 
@@ -184,9 +184,12 @@ public class ReconciliationReadPlatformServiceImpl implements ReconciliationRead
             final Integer glEntryType = JdbcSupport.getInteger(rs, "glEntryType");
             final String glTransactionId = rs.getString("glTransactionId");
 
-            return ReconciliationMatchData.instance(id, importId, bankTransactionId, glEntryId, matchType, matchConfidence,
-                    isSystemGenerated, createdBy, createdByUsername, createdDate, bankTransactionDate, bankDescription, bankDebitAmount,
-                    bankCreditAmount, glEntryDate, glDescription, glAmount, glEntryType, glTransactionId);
+            final BigDecimal amount = bankDebitAmount != null && bankDebitAmount.compareTo(BigDecimal.ZERO) > 0 ? bankDebitAmount
+                    : bankCreditAmount;
+
+            return new ReconciliationMatchData().setId(id).setStatementImportId(importId).setBankTransactionId(bankTransactionId)
+                    .setGlJournalEntryId(glEntryId).setMatchType(matchType)
+                    .setMatchConfidence(matchConfidence != null ? BigDecimal.valueOf(matchConfidence) : null).setAmount(amount);
         }
     }
 
@@ -224,9 +227,8 @@ public class ReconciliationReadPlatformServiceImpl implements ReconciliationRead
             final String createdByUsername = rs.getString("createdByUsername");
             final LocalDate createdDate = JdbcSupport.getLocalDate(rs, "createdDate");
 
-            return ReconciliationAdjustmentData.instance(id, importId, adjustmentDate, description, debitAccountId, debitAccountName,
-                    debitAccountCode, creditAccountId, creditAccountName, creditAccountCode, amount, journalEntryId, createdBy,
-                    createdByUsername, createdDate);
+            return new ReconciliationAdjustmentData().setId(id).setStatementImportId(importId).setDescription(description)
+                    .setAmount(amount);
         }
     }
 
@@ -252,7 +254,8 @@ public class ReconciliationReadPlatformServiceImpl implements ReconciliationRead
             final Integer entryType = JdbcSupport.getInteger(rs, "entryType");
             final String referenceNumber = rs.getString("referenceNumber");
 
-            return UnreconciledGLEntryData.instance(id, entryDate, transactionId, description, amount, entryType, referenceNumber);
+            return new UnreconciledGLEntryData().setId(id).setTransactionId(transactionId).setTransactionDate(entryDate)
+                    .setDescription(description).setAmount(amount);
         }
     }
 
@@ -292,9 +295,9 @@ public class ReconciliationReadPlatformServiceImpl implements ReconciliationRead
             final String lastModifiedByUsername = rs.getString("lastModifiedByUsername");
             final LocalDate lastModifiedDate = JdbcSupport.getLocalDate(rs, "lastModifiedDate");
 
-            return ReconciliationRuleData.instance(id, glAccountId, glAccountName, glAccountCode, ruleName, ruleType, matchField,
-                    matchPattern, dateToleranceDays, amountTolerance, isActive, priority, createdBy, createdByUsername, createdDate,
-                    lastModifiedBy, lastModifiedByUsername, lastModifiedDate);
+            return new ReconciliationRuleData().setId(id).setGlAccountId(glAccountId).setName(ruleName).setDescription(matchPattern)
+                    .setMatchCondition(matchField).setConditionValue(matchPattern).setDateToleranceDays(dateToleranceDays)
+                    .setAmountTolerance(amountTolerance).setIsActive(isActive).setPriority(priority);
         }
     }
 
@@ -350,7 +353,7 @@ public class ReconciliationReadPlatformServiceImpl implements ReconciliationRead
             final String sql = "SELECT " + mapper.schema() + " WHERE bsi.id = ?";
             return this.jdbcTemplate.queryForObject(sql, mapper, importId);
         } catch (final EmptyResultDataAccessException e) {
-            throw new BankStatementImportNotFoundException(importId);
+            throw new ReconciliationNotFoundException(importId);
         }
     }
 
@@ -378,7 +381,7 @@ public class ReconciliationReadPlatformServiceImpl implements ReconciliationRead
     @Override
     public ReconciliationSummaryData retrieveSummary(Long importId) {
         final BankStatementImport importRecord = this.bankStatementImportRepository.findById(importId)
-                .orElseThrow(() -> new BankStatementImportNotFoundException(importId));
+                .orElseThrow(() -> new ReconciliationNotFoundException(importId));
 
         final String matchSql = "SELECT COUNT(*) FROM acc_reconciliation_match WHERE import_id = ?";
         final Integer totalMatches = this.jdbcTemplate.queryForObject(matchSql, Integer.class, importId);
@@ -391,10 +394,8 @@ public class ReconciliationReadPlatformServiceImpl implements ReconciliationRead
         final Integer totalAdjustments = (Integer) adjustmentResult[0];
         final BigDecimal totalAdjustmentAmount = (BigDecimal) adjustmentResult[1];
 
-        return ReconciliationSummaryData.instance(importId, importRecord.getTotalTransactions(), importRecord.getMatchedCount(),
-                importRecord.getUnmatchedCount(), totalMatches, totalAdjustments, totalAdjustmentAmount, importRecord.getTotalDebits(),
-                importRecord.getTotalCredits(), importRecord.getOpeningBalance(), importRecord.getClosingBalance(),
-                importRecord.getStatus());
+        return new ReconciliationSummaryData().setImportId(importId).setOpeningBalance(importRecord.getOpeningBalance())
+                .setClosingBalance(importRecord.getClosingBalance()).setStatus(importRecord.getStatus());
     }
 
     @Override

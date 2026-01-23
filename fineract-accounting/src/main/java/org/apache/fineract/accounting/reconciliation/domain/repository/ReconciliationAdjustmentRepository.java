@@ -36,4 +36,7 @@ public interface ReconciliationAdjustmentRepository
 
     @Query("SELECT a FROM ReconciliationAdjustment a WHERE a.adjustmentType = :adjustmentType")
     List<ReconciliationAdjustment> findByAdjustmentType(@Param("adjustmentType") String adjustmentType);
+
+    @Query("DELETE FROM ReconciliationAdjustment a WHERE a.statementImport.id = :importId")
+    void deleteByImportId(@Param("importId") Long importId);
 }
