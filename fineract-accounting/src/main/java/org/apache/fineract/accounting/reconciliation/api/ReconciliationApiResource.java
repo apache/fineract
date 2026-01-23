@@ -49,10 +49,7 @@ import org.apache.fineract.accounting.reconciliation.service.ReconciliationReadP
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -74,7 +71,6 @@ public class ReconciliationApiResource {
     private final PlatformSecurityContext context;
     private final ReconciliationReadPlatformService readPlatformService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -315,7 +311,8 @@ public class ReconciliationApiResource {
         }
 
         if (commandRequest == null) {
-            throw new IllegalArgumentException("Unsupported command: " + commandParam);
+            throw new IllegalArgumentException(
+                    "Unsupported command: " + commandParam + ". Supported commands are: complete, approve");
         }
 
         return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
