@@ -3140,8 +3140,8 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
 
-            if (!DateUtils.isEqual(annualFeeDueDate, transactionDate)) {
-                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("invalid.date");
+            if (DateUtils.isBefore(transactionDate, annualFeeDueDate)) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.before.dueDate");
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
 
