@@ -10076,3 +10076,66 @@ Feature: Charge-off
     And Admin does charge-off the loan on "01 October 2025"
     Then Loan has 11.51 total unpaid payable due interest
     Then Loan has 0.0 total unpaid payable not due interest
+
+  Scenario: Verify charge-off after repayment reversal with merchant refunds and credit balance refund
+    When Admin sets the business date to "03 November 2025"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_CUSTOM_PMT_ALLOC_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALC_ZERO_CHARGE_OFF_ACCRUAL | 03 November 2025  | 127.17         | 9.51                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 24                | MONTHS                | 1              | MONTHS                 | 24                 | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "03 November 2025" with "127.17" amount and expected disbursement date on "03 November 2025"
+    When Admin successfully disburse the loan on "03 November 2025" with "127.17" EUR transaction amount
+    When Admin sets the business date to "03 December 2025"
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "03 December 2025" with 6 EUR transaction amount and system-generated Idempotency key
+    When Admin sets the business date to "17 December 2025"
+    When Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "17 December 2025" with 145 EUR transaction amount and system-generated Idempotency key
+    When Admin sets the business date to "23 January 2026"
+    When Admin makes Credit Balance Refund transaction on "23 January 2026" with 23.83 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "03 December 2025"
+    And Admin does charge-off the loan on "23 January 2026"
+    Then Loan status will be "ACTIVE"
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 03 November 2025 | Disbursement           | 127.17 | 0.0       | 0.0      | 0.0  | 0.0       | 127.17       | false    |
+      | 03 December 2025 | Repayment              | 6.0    | 5.01      | 0.99     | 0.0  | 0.0       | 122.16       | true     |
+      | 03 December 2025 | Accrual Activity       | 0.99   | 0.0       | 0.99     | 0.0  | 0.0       | 0.0          | false    |
+      | 17 December 2025 | Accrual                | 1.44   | 0.0       | 1.44     | 0.0  | 0.0       | 0.0          | false    |
+      | 17 December 2025 | Merchant Issued Refund | 145.0  | 127.17    | 1.45     | 0.0  | 0.0       | 0.0          | false    |
+      | 17 December 2025 | Interest Refund        | 1.45   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 17 December 2025 | Accrual Activity       | 0.46   | 0.0       | 0.46     | 0.0  | 0.0       | 0.0          | false    |
+      | 03 January 2026  | Accrual Activity       | 0.46   | 0.0       | 0.46     | 0.0  | 0.0       | 0.0          | false    |
+      | 23 January 2026  | Credit Balance Refund  | 23.83  | 6.0       | 0.0      | 0.0  | 0.0       | 6.0          | false    |
+      | 23 January 2026  | Accrual                | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    |
+      | 23 January 2026  | Charge-off             | 6.0    | 6.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+    Then Loan Repayment schedule has 24 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 03 November 2025  |                  | 127.17          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 30   | 03 December 2025  | 17 December 2025 | 122.32          | 4.85          | 0.99     | 0.0  | 0.0       | 5.84  | 5.84  | 0.0        | 5.84 | 0.0         |
+      | 2  | 31   | 03 January 2026   | 17 December 2025 | 116.94          | 5.38          | 0.46     | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 3  | 31   | 03 February 2026  |                  | 111.1           | 29.67         | 0.0      | 0.0  | 0.0       | 29.67 | 23.67 | 23.67      | 0.0  | 6.0         |
+      | 4  | 28   | 03 March 2026     | 17 December 2025 | 105.26          | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 5  | 31   | 03 April 2026     | 17 December 2025 | 99.42           | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 6  | 30   | 03 May 2026       | 17 December 2025 | 93.58           | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 7  | 31   | 03 June 2026      | 17 December 2025 | 87.74           | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 8  | 30   | 03 July 2026      | 17 December 2025 | 81.9            | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 9  | 31   | 03 August 2026    | 17 December 2025 | 76.06           | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 10 | 31   | 03 September 2026 | 17 December 2025 | 70.22           | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 11 | 30   | 03 October 2026   | 17 December 2025 | 64.38           | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 12 | 31   | 03 November 2026  | 17 December 2025 | 58.54           | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 13 | 30   | 03 December 2026  | 17 December 2025 | 52.7            | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 14 | 31   | 03 January 2027   | 17 December 2025 | 46.86           | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 15 | 31   | 03 February 2027  | 17 December 2025 | 41.02           | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 16 | 28   | 03 March 2027     | 17 December 2025 | 35.18           | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 17 | 31   | 03 April 2027     | 17 December 2025 | 29.34           | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 18 | 30   | 03 May 2027       | 17 December 2025 | 23.5            | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 19 | 31   | 03 June 2027      | 17 December 2025 | 17.66           | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 20 | 30   | 03 July 2027      | 17 December 2025 | 11.82           | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 21 | 31   | 03 August 2027    | 17 December 2025 | 5.98            | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 22 | 31   | 03 September 2027 | 17 December 2025 | 0.14            | 5.84          | 0.0      | 0.0  | 0.0       | 5.84  | 5.84  | 5.84       | 0.0  | 0.0         |
+      | 23 | 30   | 03 October 2027   | 17 December 2025 | 0.0             | 0.14          | 0.0      | 0.0  | 0.0       | 0.14  | 0.14  | 0.14       | 0.0  | 0.0         |
+      | 24 | 31   | 03 November 2027  | 17 December 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 151.0         | 1.45     | 0.0  | 0.0       | 152.45 | 146.45 | 140.61     | 5.84 | 6.0         |
+    When Loan Pay-off is made on "23 January 2026"
+    Then Loan's all installments have obligations met

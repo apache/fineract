@@ -2189,11 +2189,20 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         }
                     });
 
-            final Money amountToEditLastInstallment = loanTransaction.getLoan().getPrincipal().minus(installments.stream() //
-                    .filter(i -> i.getPrincipal() != null) //
+            final BigDecimal totalCreditedPrincipal = installments.stream() //
                     .filter(i -> !i.isAdditional()) //
+                    .map(i -> MathUtil.nullToZero(i.getCreditedPrincipal())) //
+                    .reduce(ZERO, BigDecimal::add);
+
+            final Money scheduledPrincipal = Money.of(currency, installments.stream() //
+                    .filter(i -> i.getPrincipal() != null && !i.isAdditional()) //
                     .map(LoanRepaymentScheduleInstallment::getPrincipal) //
                     .reduce(ZERO, BigDecimal::add));
+
+            final Money totalPrincipal = loanTransaction.getLoan().getPrincipal() //
+                    .plus(Money.of(currency, totalCreditedPrincipal));
+
+            final Money amountToEditLastInstallment = totalPrincipal.minus(scheduledPrincipal);
 
             BigDecimal principalBalance = amountToEditLastInstallment.getAmount();
             for (int i = installments.size() - 1; i > 0 && BigDecimal.ZERO.compareTo(principalBalance) != 0; i--) {
