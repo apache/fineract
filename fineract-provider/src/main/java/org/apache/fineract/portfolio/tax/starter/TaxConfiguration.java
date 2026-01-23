@@ -50,10 +50,11 @@ public class TaxConfiguration {
     @Bean
     @ConditionalOnMissingBean(TaxReadPlatformService.class)
     public TaxReadPlatformService taxReadPlatformService(final TaxComponentRepository taxComponentRepository,
-            final TaxComponentMapper taxComponentMapper, final TaxGroupRepository taxGroupRepository, final TaxGroupMapper taxGroupMapper,
-            AccountingDropdownReadPlatformService accountingDropdownReadPlatformService) {
-        return new TaxReadPlatformServiceImpl(accountingDropdownReadPlatformService, taxComponentRepository, taxComponentMapper,
-                taxGroupRepository, taxGroupMapper);
+            final TaxComponentRepositoryWrapper taxComponentRepositoryWrapper, final TaxComponentMapper taxComponentMapper,
+            final TaxGroupRepository taxGroupRepository, final TaxGroupRepositoryWrapper taxGroupRepositoryWrapper,
+            final TaxGroupMapper taxGroupMapper, AccountingDropdownReadPlatformService accountingDropdownReadPlatformService) {
+        return new TaxReadPlatformServiceImpl(accountingDropdownReadPlatformService, taxComponentRepository, taxComponentRepositoryWrapper,
+                taxComponentMapper, taxGroupRepository, taxGroupRepositoryWrapper, taxGroupMapper);
     }
 
     @Bean

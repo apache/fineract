@@ -25,7 +25,9 @@ import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformServi
 import org.apache.fineract.portfolio.tax.data.TaxComponentData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepository;
+import org.apache.fineract.portfolio.tax.domain.TaxComponentRepositoryWrapper;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepository;
+import org.apache.fineract.portfolio.tax.domain.TaxGroupRepositoryWrapper;
 import org.apache.fineract.portfolio.tax.mapper.TaxComponentMapper;
 import org.apache.fineract.portfolio.tax.mapper.TaxGroupMapper;
 
@@ -34,8 +36,10 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
 
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
     private final TaxComponentRepository taxComponentRepository;
+    private final TaxComponentRepositoryWrapper taxComponentRepositoryWrapper;
     private final TaxComponentMapper taxComponentMapper;
     private final TaxGroupRepository taxGroupRepository;
+    private final TaxGroupRepositoryWrapper taxGroupRepositoryWrapper;
     private final TaxGroupMapper taxGroupMapper;
 
     @Override
@@ -45,7 +49,7 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
 
     @Override
     public TaxComponentData retrieveTaxComponentData(final Long id) {
-        return taxComponentMapper.map(taxComponentRepository.getReferenceById(id));
+        return taxComponentMapper.map(taxComponentRepositoryWrapper.findOneWithNotFoundDetection(id));
     }
 
     @Override
@@ -61,7 +65,7 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
 
     @Override
     public TaxGroupData retrieveTaxGroupData(final Long id) {
-        return taxGroupMapper.map(taxGroupRepository.getReferenceById(id));
+        return taxGroupMapper.map(taxGroupRepositoryWrapper.findOneWithNotFoundDetection(id));
     }
 
     @Override
