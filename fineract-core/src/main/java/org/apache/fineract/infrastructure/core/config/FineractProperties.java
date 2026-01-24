@@ -302,6 +302,8 @@ public class FineractProperties {
         private int tenantUpgradeTaskExecutorCorePoolSize;
         private int tenantUpgradeTaskExecutorMaxPoolSize;
         private int tenantUpgradeTaskExecutorQueueCapacity;
+        private int eventTaskExecutorCorePoolSize;
+        private int eventTaskExecutorMaxPoolSize;
     }
 
     @Getter

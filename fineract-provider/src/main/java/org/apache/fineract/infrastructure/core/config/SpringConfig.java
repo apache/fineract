@@ -19,34 +19,71 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
+import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 
 @Configuration
 public class SpringConfig {
 
-    @Bean
-    public SimpleApplicationEventMulticaster applicationEventMulticaster() {
-        SimpleApplicationEventMulticaster saem = new SimpleApplicationEventMulticaster();
-        saem.setTaskExecutor(new SimpleAsyncTaskExecutor());
-        return saem;
+    private static final int AWAIT_TERMINATION_SECONDS = 60;
+
+    private final FineractProperties fineractProperties;
+
+    public SpringConfig(FineractProperties fineractProperties) {
+        this.fineractProperties = fineractProperties;
     }
 
-    // The application events (for importing) rely on the inheritable thread local security context strategy
-    // This is NOT compatible with threadpools so if we use threadpools the below will need to be reworked
+    private int getEventExecutorCorePoolSize() {
+        int configured = fineractProperties.getTaskExecutor().getEventTaskExecutorCorePoolSize();
+        if (configured > 0) {
+            return configured;
+        }
+        return Runtime.getRuntime().availableProcessors() * 2;
+    }
+
+    private int getEventExecutorMaxPoolSize() {
+        int configured = fineractProperties.getTaskExecutor().getEventTaskExecutorMaxPoolSize();
+        if (configured > 0) {
+            return configured;
+        }
+        return Runtime.getRuntime().availableProcessors() * 5;
+    }
+
+    @Bean(name = "fineractEventExecutor")
+    public ThreadPoolTaskExecutor fineractEventExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(getEventExecutorCorePoolSize());
+        executor.setMaxPoolSize(getEventExecutorMaxPoolSize());
+        executor.setThreadNamePrefix("FineractEvent-");
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(AWAIT_TERMINATION_SECONDS);
+        return executor;
+    }
+
+    @Bean
+    @DependsOn("overrideSecurityContextHolderStrategy")
+    public SimpleApplicationEventMulticaster applicationEventMulticaster(
+            @Qualifier("fineractEventExecutor") ThreadPoolTaskExecutor taskExecutor) {
+        SimpleApplicationEventMulticaster multicaster = new SimpleApplicationEventMulticaster();
+        multicaster.setTaskExecutor(new DelegatingSecurityContextAsyncTaskExecutor(taskExecutor));
+        return multicaster;
+    }
+
     @Bean
     public MethodInvokingFactoryBean overrideSecurityContextHolderStrategy() {
-        MethodInvokingFactoryBean mifb = new MethodInvokingFactoryBean();
-        mifb.setTargetClass(SecurityContextHolder.class);
-        mifb.setTargetMethod("setStrategyName");
-        mifb.setArguments("MODE_INHERITABLETHREADLOCAL");
-        return mifb;
+        MethodInvokingFactoryBean factoryBean = new MethodInvokingFactoryBean();
+        factoryBean.setTargetClass(SecurityContextHolder.class);
+        factoryBean.setTargetMethod("setStrategyName");
+        factoryBean.setArguments(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+        return factoryBean;
     }
 
     @Bean
