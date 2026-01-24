@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalcualtionAdditionalDetails;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.InterestRecalculationAdditionalDetailData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 
 public interface LoanScheduleModelPeriod {
@@ -55,7 +55,7 @@ public interface LoanScheduleModelPeriod {
 
     void addInterestAmount(Money interestDue);
 
-    Set<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails();
+    Set<InterestRecalculationAdditionalDetailData> getLoanCompoundingDetails();
 
     void setEMIFixedSpecificToInstallmentTrue();
 

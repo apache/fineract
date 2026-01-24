@@ -48,10 +48,7 @@ import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeInterestHandlingType;
-import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelRepaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
@@ -60,10 +57,13 @@ import org.apache.fineract.portfolio.loanproduct.calc.data.EmiAdjustment;
 import org.apache.fineract.portfolio.loanproduct.calc.data.EmiChangeOperation;
 import org.apache.fineract.portfolio.loanproduct.calc.data.EqualAmortizationValues;
 import org.apache.fineract.portfolio.loanproduct.calc.data.InterestPeriod;
+import org.apache.fineract.portfolio.loanproduct.calc.data.LoanReAgeParameterData;
 import org.apache.fineract.portfolio.loanproduct.calc.data.OutstandingDetails;
 import org.apache.fineract.portfolio.loanproduct.calc.data.PeriodDueDetails;
+import org.apache.fineract.portfolio.loanproduct.calc.data.ProcessedTransactionData;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanproduct.calc.data.RepaymentPeriod;
+import org.apache.fineract.portfolio.loanproduct.calc.data.RepaymentScheduleInstallmentData;
 import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -89,11 +89,11 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     @Override
     @NotNull
     public ProgressiveLoanInterestScheduleModel generateInstallmentInterestScheduleModel(
-            @NotNull List<LoanRepaymentScheduleInstallment> installments, @NotNull ILoanConfigurationDetails loanProductRelatedDetail,
+            @NotNull List<RepaymentScheduleInstallmentData> installments, @NotNull ILoanConfigurationDetails loanProductRelatedDetail,
             final Integer installmentAmountInMultiplesOf, final MathContext mc) {
         installments = installments.stream().filter(installment -> !installment.isDownPayment() && !installment.isAdditional()).toList();
-        return generateInterestScheduleModel(installments, LoanRepaymentScheduleInstallment::getFromDate,
-                LoanRepaymentScheduleInstallment::getDueDate, loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
+        return generateInterestScheduleModel(installments, RepaymentScheduleInstallmentData::getFromDate,
+                RepaymentScheduleInstallmentData::getDueDate, loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
     }
 
     @NotNull
@@ -291,17 +291,17 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     @Override
     public void addRepaymentPeriods(final ProgressiveLoanInterestScheduleModel scheduleModel, final LocalDate submittedOnDate,
-            final int numberOfRepaymentPeriodsToAdd, final List<LoanTransaction> alreadyProcessedTransactions) {
+            final int numberOfRepaymentPeriodsToAdd, final List<ProcessedTransactionData> alreadyProcessedTransactions) {
         addRepaymentPeriods(scheduleModel,
                 EmiChangeOperation.addRepaymentPeriods(submittedOnDate, scheduleModel.zero(), numberOfRepaymentPeriodsToAdd),
                 alreadyProcessedTransactions);
     }
 
     private void addRepaymentPeriods(final ProgressiveLoanInterestScheduleModel scheduleModel, final EmiChangeOperation operation,
-            final List<LoanTransaction> alreadyProcessedTransactions) {
-        final Optional<LoanReAgeParameter> reAgeTransactionParameter = alreadyProcessedTransactions.stream()
-                .filter(t -> t.isReAge() && !t.isReversed()).findFirst().map(LoanTransaction::getLoanReAgeParameter);
-        final LocalDate seedDate = reAgeTransactionParameter.map(LoanReAgeParameter::getStartDate).orElse(scheduleModel.getStartDate());
+            final List<ProcessedTransactionData> alreadyProcessedTransactions) {
+        final Optional<LoanReAgeParameterData> reAgeTransactionParameter = alreadyProcessedTransactions.stream()
+                .filter(ProcessedTransactionData::isReAge).findFirst().flatMap(ProcessedTransactionData::getReAgeParameterOptional);
+        final LocalDate seedDate = reAgeTransactionParameter.map(LoanReAgeParameterData::getStartDate).orElse(scheduleModel.getStartDate());
         final int repaymentPeriodCount = reAgeTransactionParameter.map(param -> param.getNumberOfInstallments() - 1)
                 .orElse(scheduleModel.repaymentPeriods().size());
 
@@ -2000,7 +2000,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     @Override
     public OutstandingDetails precalculateReAgeEqualAmortizationAmount(ProgressiveLoanInterestScheduleModel interestSchedule,
-            LocalDate transactionDate, LoanReAgeParameter reageParameter) {
+            LocalDate transactionDate, LoanReAgeParameterData reageParameter) {
         return getOutstandingAmountsTillDate(interestSchedule,
                 reageParameter.getInterestHandlingType().equals(LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_PAYABLE_INTEREST)
                         ? transactionDate
@@ -2009,7 +2009,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     @Override
     public void reAgeEqualAmortization(ProgressiveLoanInterestScheduleModel interestSchedule, LocalDate transactionDate,
-            LoanReAgeParameter reageParameter, Money feesPenaltiesOutstanding,
+            LoanReAgeParameterData reageParameter, Money feesPenaltiesOutstanding,
             EqualAmortizationValues feesPenaltiesEqualAmortizationValues) {
         LocalDate originalMaturityDate = interestSchedule.getMaturityDate();
         List<RepaymentPeriod> reAgedRepaymentPeriods = new ArrayList<>(reageParameter.getNumberOfInstallments());
@@ -2063,7 +2063,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     }
 
     private void updateModelForReageEqualAmortization(ProgressiveLoanInterestScheduleModel interestSchedule,
-            LoanReAgeParameter reageParameter, List<RepaymentPeriod> reAgedRepaymentPeriods) {
+            LoanReAgeParameterData reageParameter, List<RepaymentPeriod> reAgedRepaymentPeriods) {
         int numberOfInstallmentsToAdd = reageParameter.getNumberOfInstallments();
         LocalDate toDate = reageParameter.getStartDate();
         RepaymentPeriod previous = interestSchedule.getLastRepaymentPeriod();

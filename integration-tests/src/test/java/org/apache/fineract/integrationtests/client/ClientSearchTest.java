@@ -199,8 +199,12 @@ public class ClientSearchTest extends IntegrationTest {
         clientHelper.createClient(request1);
 
         PostClientsRequest request2 = ClientHelper.defaultClientCreationRequest();
+        String uniqueFirstName = Utils.randomStringGenerator("FN_", 10);
+        String uniqueLastName = Utils.randomStringGenerator("LN_", 10);
+        request2.setFirstname(uniqueFirstName);
+        request2.setLastname(uniqueLastName);
         clientHelper.createClient(request2);
-        String client2DisplayName = "%s %s".formatted(request2.getFirstname(), request2.getLastname());
+        String client2DisplayName = "%s %s".formatted(uniqueFirstName, uniqueLastName);
 
         PostClientsRequest request3 = ClientHelper.defaultClientCreationRequest();
         clientHelper.createClient(request3);

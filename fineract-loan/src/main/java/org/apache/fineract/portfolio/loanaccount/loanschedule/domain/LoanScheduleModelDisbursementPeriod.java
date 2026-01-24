@@ -23,7 +23,7 @@ import java.time.LocalDate;
 import java.util.Set;
 import lombok.Getter;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalcualtionAdditionalDetails;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.InterestRecalculationAdditionalDetailData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 
 /**
@@ -124,7 +124,7 @@ public final class LoanScheduleModelDisbursementPeriod implements LoanScheduleMo
     }
 
     @Override
-    public Set<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails() {
+    public Set<InterestRecalculationAdditionalDetailData> getLoanCompoundingDetails() {
         return null;
     }
 

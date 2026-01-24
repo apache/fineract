@@ -23,7 +23,6 @@ import java.time.LocalDate;
 import java.util.Set;
 import lombok.Getter;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalcualtionAdditionalDetails;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
 
 @Getter
@@ -124,7 +123,7 @@ public final class LoanScheduleModelDownPaymentPeriod implements LoanScheduleMod
     }
 
     @Override
-    public Set<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails() {
+    public Set<InterestRecalculationAdditionalDetailData> getLoanCompoundingDetails() {
         return null;
     }
 

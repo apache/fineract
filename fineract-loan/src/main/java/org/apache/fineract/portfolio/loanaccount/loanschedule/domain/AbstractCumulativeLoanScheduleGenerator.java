@@ -58,6 +58,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.InterestRecalculationAdditionalDetailData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleModelDownPaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleParams;
@@ -459,8 +460,8 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
                             if (loanApplicationTerms.allowCompoundingOnEod()) {
                                 effectiveDate = effectiveDate.minusDays(1);
                             }
-                            LoanInterestRecalcualtionAdditionalDetails additionalDetails = new LoanInterestRecalcualtionAdditionalDetails(
-                                    effectiveDate, entry.getValue().getAmount());
+                            InterestRecalculationAdditionalDetailData additionalDetails = InterestRecalculationAdditionalDetailData
+                                    .of(effectiveDate, entry.getValue().getAmount());
                             loanScheduleModelPeriod.getLoanCompoundingDetails().add(additionalDetails);
                         }
                     }
@@ -2728,8 +2729,8 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
                     scheduledLoanInstallment.periodDueDate(), scheduledLoanInstallment.principalDue(),
                     scheduledLoanInstallment.interestDue(), scheduledLoanInstallment.feeChargesDue(),
                     scheduledLoanInstallment.penaltyChargesDue(), scheduledLoanInstallment.isRecalculatedInterestComponent(),
-                    scheduledLoanInstallment.getLoanCompoundingDetails(), scheduledLoanInstallment.rescheduleInterestPortion(),
-                    scheduledLoanInstallment.isDownPaymentPeriod());
+                    InterestRecalculationAdditionalDetailData.toEntities(scheduledLoanInstallment.getLoanCompoundingDetails()),
+                    scheduledLoanInstallment.rescheduleInterestPortion(), scheduledLoanInstallment.isDownPaymentPeriod());
             installments.add(installment);
         }
     }

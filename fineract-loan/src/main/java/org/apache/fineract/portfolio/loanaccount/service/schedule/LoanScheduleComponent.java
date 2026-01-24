@@ -23,6 +23,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.InterestRecalculationAdditionalDetailData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
 import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
@@ -46,8 +47,8 @@ public class LoanScheduleComponent {
                             scheduledLoanInstallment.periodDueDate(), scheduledLoanInstallment.principalDue(),
                             scheduledLoanInstallment.interestDue(), scheduledLoanInstallment.feeChargesDue(),
                             scheduledLoanInstallment.penaltyChargesDue(), scheduledLoanInstallment.isRecalculatedInterestComponent(),
-                            scheduledLoanInstallment.getLoanCompoundingDetails(), scheduledLoanInstallment.rescheduleInterestPortion(),
-                            scheduledLoanInstallment.isDownPaymentPeriod());
+                            InterestRecalculationAdditionalDetailData.toEntities(scheduledLoanInstallment.getLoanCompoundingDetails()),
+                            scheduledLoanInstallment.rescheduleInterestPortion(), scheduledLoanInstallment.isDownPaymentPeriod());
                     loan.addLoanRepaymentScheduleInstallment(installment);
                 } else {
                     existingInstallment.copyFrom(scheduledLoanInstallment);

@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanproduct.calc;
 
-import static java.math.BigDecimal.ZERO;
-
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -39,16 +37,14 @@ import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeInterestHandlingType;
-import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelRepaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanInterestScheduleModelParserServiceGsonImpl;
 import org.apache.fineract.portfolio.loanproduct.calc.data.EqualAmortizationValues;
 import org.apache.fineract.portfolio.loanproduct.calc.data.InterestPeriod;
+import org.apache.fineract.portfolio.loanproduct.calc.data.LoanReAgeParameterData;
 import org.apache.fineract.portfolio.loanproduct.calc.data.OutstandingDetails;
 import org.apache.fineract.portfolio.loanproduct.calc.data.PeriodDueDetails;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
@@ -190,10 +186,10 @@ class ProgressiveEMICalculatorTest {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
         final Integer installmentAmountInMultiplesOf = null;
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
 
         Mockito.when(loanProductRelatedDetail.getCurrencyData()).thenReturn(currency);
 
@@ -213,18 +209,18 @@ class ProgressiveEMICalculatorTest {
     public void test_emi_calculator_performance() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
-        expectedRepaymentPeriods.add(repayment(7, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 8, 1)));
-        expectedRepaymentPeriods.add(repayment(8, LocalDate.of(2024, 8, 1), LocalDate.of(2024, 9, 1)));
-        expectedRepaymentPeriods.add(repayment(9, LocalDate.of(2024, 9, 1), LocalDate.of(2024, 10, 1)));
-        expectedRepaymentPeriods.add(repayment(10, LocalDate.of(2024, 10, 1), LocalDate.of(2024, 11, 1)));
-        expectedRepaymentPeriods.add(repayment(11, LocalDate.of(2024, 11, 1), LocalDate.of(2024, 12, 1)));
-        expectedRepaymentPeriods.add(repayment(12, LocalDate.of(2024, 12, 1), LocalDate.of(2025, 1, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 7, 1), LocalDate.of(2024, 8, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 8, 1), LocalDate.of(2024, 9, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 9, 1), LocalDate.of(2024, 10, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 10, 1), LocalDate.of(2024, 11, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 11, 1), LocalDate.of(2024, 12, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 12, 1), LocalDate.of(2025, 1, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -264,12 +260,12 @@ class ProgressiveEMICalculatorTest {
     public void test_emiAdjustment_newCalculatedEmiNotBetterThanOriginal() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(15.678);
         final Integer installmentAmountInMultiplesOf = null;
@@ -300,12 +296,12 @@ class ProgressiveEMICalculatorTest {
     public void test_disbursedAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(9.4822);
         final Integer installmentAmountInMultiplesOf = null;
@@ -336,12 +332,12 @@ class ProgressiveEMICalculatorTest {
     public void test_multi_disbursedAmt200_2ndOnDueDate_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(9.4822);
         final Integer installmentAmountInMultiplesOf = null;
@@ -382,12 +378,12 @@ class ProgressiveEMICalculatorTest {
     public void test_reschedule_interest_on0201_4per_disbursedAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -424,12 +420,12 @@ class ProgressiveEMICalculatorTest {
     public void test_reschedule_interest_on0201_2nd_EMI_not_changeable_disbursedAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -474,12 +470,12 @@ class ProgressiveEMICalculatorTest {
 
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -521,12 +517,12 @@ class ProgressiveEMICalculatorTest {
     public void test_reschedule_interest_on0215_4per_disbursedAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -567,12 +563,12 @@ class ProgressiveEMICalculatorTest {
     public void test_balance_correction_on0215_disbursedAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -683,12 +679,12 @@ class ProgressiveEMICalculatorTest {
     public void test_payoff_on0215_disbursedAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -765,12 +761,12 @@ class ProgressiveEMICalculatorTest {
     public void test_payoff_on0115_disbursedAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -854,12 +850,12 @@ class ProgressiveEMICalculatorTest {
 
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(9.4822);
         final Integer installmentAmountInMultiplesOf = null;
@@ -903,12 +899,12 @@ class ProgressiveEMICalculatorTest {
 
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(9.4822);
         final Integer installmentAmountInMultiplesOf = null;
@@ -952,12 +948,12 @@ class ProgressiveEMICalculatorTest {
 
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(9.4822);
         final Integer installmentAmountInMultiplesOf = null;
@@ -998,12 +994,12 @@ class ProgressiveEMICalculatorTest {
     public void test_disbursedAmt100_dayInYearsActual_daysInMonthActual_repayEvery1Month() {
 
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2023, 12, 12), LocalDate.of(2024, 1, 12)),
-                repayment(2, LocalDate.of(2024, 1, 12), LocalDate.of(2024, 2, 12)),
-                repayment(3, LocalDate.of(2024, 2, 12), LocalDate.of(2024, 3, 12)),
-                repayment(4, LocalDate.of(2024, 3, 12), LocalDate.of(2024, 4, 12)),
-                repayment(5, LocalDate.of(2024, 4, 12), LocalDate.of(2024, 5, 12)),
-                repayment(6, LocalDate.of(2024, 5, 12), LocalDate.of(2024, 6, 12)));
+                periodData(LocalDate.of(2023, 12, 12), LocalDate.of(2024, 1, 12)),
+                periodData(LocalDate.of(2024, 1, 12), LocalDate.of(2024, 2, 12)),
+                periodData(LocalDate.of(2024, 2, 12), LocalDate.of(2024, 3, 12)),
+                periodData(LocalDate.of(2024, 3, 12), LocalDate.of(2024, 4, 12)),
+                periodData(LocalDate.of(2024, 4, 12), LocalDate.of(2024, 5, 12)),
+                periodData(LocalDate.of(2024, 5, 12), LocalDate.of(2024, 6, 12)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(9.4822);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1034,12 +1030,12 @@ class ProgressiveEMICalculatorTest {
     public void test_multidisbursement_total_repay1st_dayInYears360_daysInMonth30_repayEvery1Month() {
 
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1084,10 +1080,10 @@ class ProgressiveEMICalculatorTest {
     public void test_disbursedAmt1000_NoInterest_repayEvery1Month() {
 
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(2, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(3, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(4, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(5, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
 
         final BigDecimal interestRate = BigDecimal.ZERO;
         final Integer installmentAmountInMultiplesOf = null;
@@ -1115,12 +1111,12 @@ class ProgressiveEMICalculatorTest {
     public void test_disbursedAmt100_dayInYears364_daysInMonthActual_repayEvery1Week() {
 
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 8)),
-                repayment(2, LocalDate.of(2024, 1, 8), LocalDate.of(2024, 1, 15)),
-                repayment(3, LocalDate.of(2024, 1, 15), LocalDate.of(2024, 1, 22)),
-                repayment(4, LocalDate.of(2024, 1, 22), LocalDate.of(2024, 1, 29)),
-                repayment(5, LocalDate.of(2024, 1, 29), LocalDate.of(2024, 2, 5)),
-                repayment(6, LocalDate.of(2024, 2, 5), LocalDate.of(2024, 2, 12)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 8)),
+                periodData(LocalDate.of(2024, 1, 8), LocalDate.of(2024, 1, 15)),
+                periodData(LocalDate.of(2024, 1, 15), LocalDate.of(2024, 1, 22)),
+                periodData(LocalDate.of(2024, 1, 22), LocalDate.of(2024, 1, 29)),
+                periodData(LocalDate.of(2024, 1, 29), LocalDate.of(2024, 2, 5)),
+                periodData(LocalDate.of(2024, 2, 5), LocalDate.of(2024, 2, 12)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(9.4822);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1151,9 +1147,9 @@ class ProgressiveEMICalculatorTest {
     public void test_disbursedAmt100_dayInYears364_daysInMonthActual_repayEvery2Week() {
 
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 15)),
-                repayment(2, LocalDate.of(2024, 1, 15), LocalDate.of(2024, 1, 29)),
-                repayment(3, LocalDate.of(2024, 1, 29), LocalDate.of(2024, 2, 12)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 15)),
+                periodData(LocalDate.of(2024, 1, 15), LocalDate.of(2024, 1, 29)),
+                periodData(LocalDate.of(2024, 1, 29), LocalDate.of(2024, 2, 12)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(9.4822);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1181,12 +1177,12 @@ class ProgressiveEMICalculatorTest {
     public void test_disbursedAmt100_dayInYears360_daysInMonthDoesntMatter_repayEvery15Days() {
 
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 16)),
-                repayment(2, LocalDate.of(2024, 1, 16), LocalDate.of(2024, 1, 31)),
-                repayment(3, LocalDate.of(2024, 1, 31), LocalDate.of(2024, 2, 15)),
-                repayment(4, LocalDate.of(2024, 2, 15), LocalDate.of(2024, 3, 1)),
-                repayment(5, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 16)),
-                repayment(6, LocalDate.of(2024, 3, 16), LocalDate.of(2024, 3, 31)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 16)),
+                periodData(LocalDate.of(2024, 1, 16), LocalDate.of(2024, 1, 31)),
+                periodData(LocalDate.of(2024, 1, 31), LocalDate.of(2024, 2, 15)),
+                periodData(LocalDate.of(2024, 2, 15), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 16)),
+                periodData(LocalDate.of(2024, 3, 16), LocalDate.of(2024, 3, 31)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(9.4822);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1217,18 +1213,18 @@ class ProgressiveEMICalculatorTest {
     public void test_disbursedAmt1000_actual_actual_repayEvery1Month_verify_due_principal_amounts() {
 
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)),
-                repayment(7, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 8, 1)),
-                repayment(8, LocalDate.of(2024, 8, 1), LocalDate.of(2024, 9, 1)),
-                repayment(9, LocalDate.of(2024, 9, 1), LocalDate.of(2024, 10, 1)),
-                repayment(10, LocalDate.of(2024, 10, 1), LocalDate.of(2024, 11, 1)),
-                repayment(11, LocalDate.of(2024, 11, 1), LocalDate.of(2024, 12, 1)),
-                repayment(12, LocalDate.of(2024, 12, 1), LocalDate.of(2025, 1, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)),
+                periodData(LocalDate.of(2024, 7, 1), LocalDate.of(2024, 8, 1)),
+                periodData(LocalDate.of(2024, 8, 1), LocalDate.of(2024, 9, 1)),
+                periodData(LocalDate.of(2024, 9, 1), LocalDate.of(2024, 10, 1)),
+                periodData(LocalDate.of(2024, 10, 1), LocalDate.of(2024, 11, 1)),
+                periodData(LocalDate.of(2024, 11, 1), LocalDate.of(2024, 12, 1)),
+                periodData(LocalDate.of(2024, 12, 1), LocalDate.of(2025, 1, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(25);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1277,7 +1273,7 @@ class ProgressiveEMICalculatorTest {
 
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1339,7 +1335,7 @@ class ProgressiveEMICalculatorTest {
 
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1406,7 +1402,7 @@ class ProgressiveEMICalculatorTest {
 
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1474,12 +1470,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_singleInterestPauseAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1512,12 +1508,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_interestPauseBetweenTwoPeriodsAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1550,12 +1546,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_interestPauseFirstDayOfMonthAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1588,12 +1584,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_interestPauseLastDayOfMonthAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1626,12 +1622,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_interestPauseWholeMonthAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1664,12 +1660,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_interestPauseTwoWholeMonthsAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1702,12 +1698,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_interestPauseAndExistedMultipleInterestPeriodsAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1747,12 +1743,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_interestPauseBetweenRepaymentPeriodsAndExistedMultipleInterestPeriods_Amt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1791,12 +1787,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_interestPauseOnFirstDayOfMonthAndExistedMultipleInterestPeriods_Amt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1831,12 +1827,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_interestPauseBorderedByPeriod_Amt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1868,12 +1864,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_interestPauseOnTheFirstAndThirdRepaymentPeriodAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1907,12 +1903,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_interestPauseOnTheFirstDayOfFirstPeriodAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1943,12 +1939,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_reschedule_disbursedAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7);
         final Integer installmentAmountInMultiplesOf = null;
@@ -1986,12 +1982,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_two_reschedules_disbursedAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7);
         final Integer installmentAmountInMultiplesOf = null;
@@ -2030,12 +2026,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_reschedule_partial_period_disbursedAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7);
         final Integer installmentAmountInMultiplesOf = null;
@@ -2073,12 +2069,12 @@ class ProgressiveEMICalculatorTest {
     public void test_actual_actual_repayment_schedule_across_multiple_years() {
         MathContext mc = new MathContext(12, RoundingMode.HALF_UP);
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2023, 11, 13), LocalDate.of(2023, 12, 13)),
-                repayment(2, LocalDate.of(2023, 12, 13), LocalDate.of(2024, 1, 13)),
-                repayment(3, LocalDate.of(2024, 1, 13), LocalDate.of(2024, 2, 13)),
-                repayment(4, LocalDate.of(2024, 2, 13), LocalDate.of(2024, 3, 13)),
-                repayment(5, LocalDate.of(2024, 3, 13), LocalDate.of(2024, 4, 13)),
-                repayment(6, LocalDate.of(2024, 4, 13), LocalDate.of(2024, 5, 13)));
+                periodData(LocalDate.of(2023, 11, 13), LocalDate.of(2023, 12, 13)),
+                periodData(LocalDate.of(2023, 12, 13), LocalDate.of(2024, 1, 13)),
+                periodData(LocalDate.of(2024, 1, 13), LocalDate.of(2024, 2, 13)),
+                periodData(LocalDate.of(2024, 2, 13), LocalDate.of(2024, 3, 13)),
+                periodData(LocalDate.of(2024, 3, 13), LocalDate.of(2024, 4, 13)),
+                periodData(LocalDate.of(2024, 4, 13), LocalDate.of(2024, 5, 13)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(9.99);
         final Integer installmentAmountInMultiplesOf = null;
@@ -2122,12 +2118,12 @@ class ProgressiveEMICalculatorTest {
     public void test_actual_actual_repayment_schedule_across_multiple_years_overdue() {
         MathContext mc = new MathContext(12, RoundingMode.HALF_UP);
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2023, 11, 13), LocalDate.of(2023, 12, 13)),
-                repayment(2, LocalDate.of(2023, 12, 13), LocalDate.of(2024, 1, 13)),
-                repayment(3, LocalDate.of(2024, 1, 13), LocalDate.of(2024, 2, 13)),
-                repayment(4, LocalDate.of(2024, 2, 13), LocalDate.of(2024, 3, 13)),
-                repayment(5, LocalDate.of(2024, 3, 13), LocalDate.of(2024, 4, 13)),
-                repayment(6, LocalDate.of(2024, 4, 13), LocalDate.of(2024, 5, 13)));
+                periodData(LocalDate.of(2023, 11, 13), LocalDate.of(2023, 12, 13)),
+                periodData(LocalDate.of(2023, 12, 13), LocalDate.of(2024, 1, 13)),
+                periodData(LocalDate.of(2024, 1, 13), LocalDate.of(2024, 2, 13)),
+                periodData(LocalDate.of(2024, 2, 13), LocalDate.of(2024, 3, 13)),
+                periodData(LocalDate.of(2024, 3, 13), LocalDate.of(2024, 4, 13)),
+                periodData(LocalDate.of(2024, 4, 13), LocalDate.of(2024, 5, 13)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(9.99);
         final Integer installmentAmountInMultiplesOf = null;
@@ -2167,12 +2163,12 @@ class ProgressiveEMICalculatorTest {
     public void test_repayment_actual_actual_repayment_schedule_across_multiple_years_overdue() {
         MathContext mc = new MathContext(12, RoundingMode.HALF_UP);
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2023, 11, 13), LocalDate.of(2023, 12, 13)),
-                repayment(2, LocalDate.of(2023, 12, 13), LocalDate.of(2024, 1, 13)),
-                repayment(3, LocalDate.of(2024, 1, 13), LocalDate.of(2024, 2, 13)),
-                repayment(4, LocalDate.of(2024, 2, 13), LocalDate.of(2024, 3, 13)),
-                repayment(5, LocalDate.of(2024, 3, 13), LocalDate.of(2024, 4, 13)),
-                repayment(6, LocalDate.of(2024, 4, 13), LocalDate.of(2024, 5, 13)));
+                periodData(LocalDate.of(2023, 11, 13), LocalDate.of(2023, 12, 13)),
+                periodData(LocalDate.of(2023, 12, 13), LocalDate.of(2024, 1, 13)),
+                periodData(LocalDate.of(2024, 1, 13), LocalDate.of(2024, 2, 13)),
+                periodData(LocalDate.of(2024, 2, 13), LocalDate.of(2024, 3, 13)),
+                periodData(LocalDate.of(2024, 3, 13), LocalDate.of(2024, 4, 13)),
+                periodData(LocalDate.of(2024, 4, 13), LocalDate.of(2024, 5, 13)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(9.99);
         final Integer installmentAmountInMultiplesOf = null;
@@ -2217,12 +2213,12 @@ class ProgressiveEMICalculatorTest {
     public void test_360_30_repayment_schedule_disbursement_month_end() {
         MathContext mc = new MathContext(12, RoundingMode.HALF_UP);
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2023, 10, 31), LocalDate.of(2023, 11, 30)),
-                repayment(2, LocalDate.of(2023, 11, 30), LocalDate.of(2023, 12, 31)),
-                repayment(3, LocalDate.of(2023, 12, 31), LocalDate.of(2024, 1, 31)),
-                repayment(4, LocalDate.of(2024, 1, 31), LocalDate.of(2024, 2, 29)),
-                repayment(5, LocalDate.of(2024, 2, 29), LocalDate.of(2024, 3, 31)),
-                repayment(6, LocalDate.of(2024, 3, 31), LocalDate.of(2024, 4, 30)));
+                periodData(LocalDate.of(2023, 10, 31), LocalDate.of(2023, 11, 30)),
+                periodData(LocalDate.of(2023, 11, 30), LocalDate.of(2023, 12, 31)),
+                periodData(LocalDate.of(2023, 12, 31), LocalDate.of(2024, 1, 31)),
+                periodData(LocalDate.of(2024, 1, 31), LocalDate.of(2024, 2, 29)),
+                periodData(LocalDate.of(2024, 2, 29), LocalDate.of(2024, 3, 31)),
+                periodData(LocalDate.of(2024, 3, 31), LocalDate.of(2024, 4, 30)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(9.99);
         final Integer installmentAmountInMultiplesOf = null;
@@ -2254,12 +2250,12 @@ class ProgressiveEMICalculatorTest {
     public void test_360_30_repayment_schedule_disbursement_near_month_end() {
         MathContext mc = new MathContext(12, RoundingMode.HALF_UP);
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2023, 10, 30), LocalDate.of(2023, 11, 30)),
-                repayment(2, LocalDate.of(2023, 11, 30), LocalDate.of(2023, 12, 30)),
-                repayment(3, LocalDate.of(2023, 12, 30), LocalDate.of(2024, 1, 30)),
-                repayment(4, LocalDate.of(2024, 1, 30), LocalDate.of(2024, 2, 29)),
-                repayment(5, LocalDate.of(2024, 2, 29), LocalDate.of(2024, 3, 30)),
-                repayment(6, LocalDate.of(2024, 3, 30), LocalDate.of(2024, 4, 30)));
+                periodData(LocalDate.of(2023, 10, 30), LocalDate.of(2023, 11, 30)),
+                periodData(LocalDate.of(2023, 11, 30), LocalDate.of(2023, 12, 30)),
+                periodData(LocalDate.of(2023, 12, 30), LocalDate.of(2024, 1, 30)),
+                periodData(LocalDate.of(2024, 1, 30), LocalDate.of(2024, 2, 29)),
+                periodData(LocalDate.of(2024, 2, 29), LocalDate.of(2024, 3, 30)),
+                periodData(LocalDate.of(2024, 3, 30), LocalDate.of(2024, 4, 30)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(45.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -2291,12 +2287,12 @@ class ProgressiveEMICalculatorTest {
     public void test_360_30_repayment_schedule_disbursement_repay_every_2_months() {
         MathContext mc = new MathContext(12, RoundingMode.HALF_UP);
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2023, 10, 29), LocalDate.of(2023, 12, 29)),
-                repayment(2, LocalDate.of(2023, 12, 29), LocalDate.of(2024, 2, 29)),
-                repayment(3, LocalDate.of(2024, 2, 29), LocalDate.of(2024, 4, 29)),
-                repayment(4, LocalDate.of(2024, 4, 29), LocalDate.of(2024, 6, 29)),
-                repayment(5, LocalDate.of(2024, 6, 29), LocalDate.of(2024, 8, 29)),
-                repayment(6, LocalDate.of(2024, 8, 29), LocalDate.of(2024, 10, 29)));
+                periodData(LocalDate.of(2023, 10, 29), LocalDate.of(2023, 12, 29)),
+                periodData(LocalDate.of(2023, 12, 29), LocalDate.of(2024, 2, 29)),
+                periodData(LocalDate.of(2024, 2, 29), LocalDate.of(2024, 4, 29)),
+                periodData(LocalDate.of(2024, 4, 29), LocalDate.of(2024, 6, 29)),
+                periodData(LocalDate.of(2024, 6, 29), LocalDate.of(2024, 8, 29)),
+                periodData(LocalDate.of(2024, 8, 29), LocalDate.of(2024, 10, 29)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(19.99);
         final Integer installmentAmountInMultiplesOf = null;
@@ -2328,12 +2324,12 @@ class ProgressiveEMICalculatorTest {
     public void test_actual_actual_repayment_schedule_disbursement_month_end() {
         MathContext mc = new MathContext(12, RoundingMode.HALF_UP);
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2023, 10, 31), LocalDate.of(2023, 11, 30)),
-                repayment(2, LocalDate.of(2023, 11, 30), LocalDate.of(2023, 12, 31)),
-                repayment(3, LocalDate.of(2023, 12, 31), LocalDate.of(2024, 1, 31)),
-                repayment(4, LocalDate.of(2024, 1, 31), LocalDate.of(2024, 2, 29)),
-                repayment(5, LocalDate.of(2024, 2, 29), LocalDate.of(2024, 3, 31)),
-                repayment(6, LocalDate.of(2024, 3, 31), LocalDate.of(2024, 4, 30)));
+                periodData(LocalDate.of(2023, 10, 31), LocalDate.of(2023, 11, 30)),
+                periodData(LocalDate.of(2023, 11, 30), LocalDate.of(2023, 12, 31)),
+                periodData(LocalDate.of(2023, 12, 31), LocalDate.of(2024, 1, 31)),
+                periodData(LocalDate.of(2024, 1, 31), LocalDate.of(2024, 2, 29)),
+                periodData(LocalDate.of(2024, 2, 29), LocalDate.of(2024, 3, 31)),
+                periodData(LocalDate.of(2024, 3, 31), LocalDate.of(2024, 4, 30)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(45.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -2365,12 +2361,12 @@ class ProgressiveEMICalculatorTest {
     public void test_actual_actual_repayment_schedule_disbursement_near_month_end() {
         MathContext mc = new MathContext(12, RoundingMode.HALF_UP);
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2021, 10, 30), LocalDate.of(2021, 11, 30)),
-                repayment(2, LocalDate.of(2021, 11, 30), LocalDate.of(2021, 12, 30)),
-                repayment(3, LocalDate.of(2021, 12, 30), LocalDate.of(2022, 1, 30)),
-                repayment(4, LocalDate.of(2022, 1, 30), LocalDate.of(2022, 2, 28)),
-                repayment(5, LocalDate.of(2022, 2, 28), LocalDate.of(2022, 3, 30)),
-                repayment(6, LocalDate.of(2022, 3, 30), LocalDate.of(2022, 4, 30)));
+                periodData(LocalDate.of(2021, 10, 30), LocalDate.of(2021, 11, 30)),
+                periodData(LocalDate.of(2021, 11, 30), LocalDate.of(2021, 12, 30)),
+                periodData(LocalDate.of(2021, 12, 30), LocalDate.of(2022, 1, 30)),
+                periodData(LocalDate.of(2022, 1, 30), LocalDate.of(2022, 2, 28)),
+                periodData(LocalDate.of(2022, 2, 28), LocalDate.of(2022, 3, 30)),
+                periodData(LocalDate.of(2022, 3, 30), LocalDate.of(2022, 4, 30)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(9.4822);
         final Integer installmentAmountInMultiplesOf = null;
@@ -2402,12 +2398,12 @@ class ProgressiveEMICalculatorTest {
     public void test_actual_actual_repayment_schedule_disbursement_near_month_end_repay_every_2_months() {
         MathContext mc = new MathContext(12, RoundingMode.HALF_UP);
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2022, 10, 29), LocalDate.of(2022, 12, 29)),
-                repayment(2, LocalDate.of(2022, 12, 29), LocalDate.of(2023, 2, 28)),
-                repayment(3, LocalDate.of(2023, 2, 28), LocalDate.of(2023, 4, 29)),
-                repayment(4, LocalDate.of(2023, 4, 29), LocalDate.of(2023, 6, 29)),
-                repayment(5, LocalDate.of(2023, 6, 29), LocalDate.of(2023, 8, 29)),
-                repayment(6, LocalDate.of(2023, 8, 29), LocalDate.of(2023, 10, 29)));
+                periodData(LocalDate.of(2022, 10, 29), LocalDate.of(2022, 12, 29)),
+                periodData(LocalDate.of(2022, 12, 29), LocalDate.of(2023, 2, 28)),
+                periodData(LocalDate.of(2023, 2, 28), LocalDate.of(2023, 4, 29)),
+                periodData(LocalDate.of(2023, 4, 29), LocalDate.of(2023, 6, 29)),
+                periodData(LocalDate.of(2023, 6, 29), LocalDate.of(2023, 8, 29)),
+                periodData(LocalDate.of(2023, 8, 29), LocalDate.of(2023, 10, 29)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7);
         final Integer installmentAmountInMultiplesOf = null;
@@ -2439,12 +2435,12 @@ class ProgressiveEMICalculatorTest {
     public void test_actual_actual_fraction_period_calculation_with_interestRecognitionFromDisbursementDate_false() {
         MathContext mc = new MathContext(12, RoundingMode.HALF_UP);
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2023, 11, 13), LocalDate.of(2023, 12, 13)),
-                repayment(2, LocalDate.of(2023, 12, 13), LocalDate.of(2024, 1, 13)),
-                repayment(3, LocalDate.of(2024, 1, 13), LocalDate.of(2024, 2, 13)),
-                repayment(4, LocalDate.of(2024, 2, 13), LocalDate.of(2024, 3, 13)),
-                repayment(5, LocalDate.of(2024, 3, 13), LocalDate.of(2024, 4, 13)),
-                repayment(6, LocalDate.of(2024, 4, 13), LocalDate.of(2024, 5, 13)));
+                periodData(LocalDate.of(2023, 11, 13), LocalDate.of(2023, 12, 13)),
+                periodData(LocalDate.of(2023, 12, 13), LocalDate.of(2024, 1, 13)),
+                periodData(LocalDate.of(2024, 1, 13), LocalDate.of(2024, 2, 13)),
+                periodData(LocalDate.of(2024, 2, 13), LocalDate.of(2024, 3, 13)),
+                periodData(LocalDate.of(2024, 3, 13), LocalDate.of(2024, 4, 13)),
+                periodData(LocalDate.of(2024, 4, 13), LocalDate.of(2024, 5, 13)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(9.99);
 
@@ -2471,12 +2467,12 @@ class ProgressiveEMICalculatorTest {
     public void test_actual_actual_fraction_period_calculation_with_interestRecognitionFromDisbursementDate_true() {
         MathContext mc = new MathContext(12, RoundingMode.HALF_UP);
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2023, 11, 13), LocalDate.of(2023, 12, 13)),
-                repayment(2, LocalDate.of(2023, 12, 13), LocalDate.of(2024, 1, 13)),
-                repayment(3, LocalDate.of(2024, 1, 13), LocalDate.of(2024, 2, 13)),
-                repayment(4, LocalDate.of(2024, 2, 13), LocalDate.of(2024, 3, 13)),
-                repayment(5, LocalDate.of(2024, 3, 13), LocalDate.of(2024, 4, 13)),
-                repayment(6, LocalDate.of(2024, 4, 13), LocalDate.of(2024, 5, 13)));
+                periodData(LocalDate.of(2023, 11, 13), LocalDate.of(2023, 12, 13)),
+                periodData(LocalDate.of(2023, 12, 13), LocalDate.of(2024, 1, 13)),
+                periodData(LocalDate.of(2024, 1, 13), LocalDate.of(2024, 2, 13)),
+                periodData(LocalDate.of(2024, 2, 13), LocalDate.of(2024, 3, 13)),
+                periodData(LocalDate.of(2024, 3, 13), LocalDate.of(2024, 4, 13)),
+                periodData(LocalDate.of(2024, 4, 13), LocalDate.of(2024, 5, 13)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(9.99);
 
@@ -2506,12 +2502,12 @@ class ProgressiveEMICalculatorTest {
         @Test
         public void test_S1_full_chargeback_on_due_date_before_maturity_date() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                    repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                    repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                    repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                    repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                    repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                    repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                    periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                    periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                    periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                    periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                    periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                    periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(7.0);
             final Integer installmentAmountInMultiplesOf = null;
@@ -2564,12 +2560,12 @@ class ProgressiveEMICalculatorTest {
         @Test
         public void test_S2_S3_partial_and_full_chargeback_on_due_date_before_maturity_date() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                    repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                    repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                    repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                    repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                    repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                    repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                    periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                    periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                    periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                    periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                    periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                    periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(7.0);
             final Integer installmentAmountInMultiplesOf = null;
@@ -2633,12 +2629,12 @@ class ProgressiveEMICalculatorTest {
         @Test
         public void test_S4_full_chargeback_in_middle_of_instalment_before_maturity_date() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                    repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                    repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                    repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                    repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                    repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                    repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                    periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                    periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                    periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                    periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                    periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                    periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(7.0);
             final Integer installmentAmountInMultiplesOf = null;
@@ -2693,12 +2689,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_chargeback_principalAndInterest_Amt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -2751,12 +2747,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_chargeback_principalAndInterest_Amt100_dayInYears360_daysInMonth30_repayEvery1Month__() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -2803,12 +2799,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_chargeback_less_principal_Amt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -2861,12 +2857,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_chargeback_less_principal_and_no_chargeback_interest_Amt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -2918,12 +2914,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_multi_chargeback_Amt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -2984,12 +2980,12 @@ class ProgressiveEMICalculatorTest {
         @Test
         public void test_leap_year_only_actual_for_loan_S1() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                    repayment(1, LocalDate.of(2023, 12, 12), LocalDate.of(2024, 1, 12)),
-                    repayment(1, LocalDate.of(2024, 1, 12), LocalDate.of(2024, 2, 12)),
-                    repayment(1, LocalDate.of(2024, 2, 12), LocalDate.of(2024, 3, 12)),
-                    repayment(1, LocalDate.of(2024, 3, 12), LocalDate.of(2024, 4, 12)),
-                    repayment(1, LocalDate.of(2024, 4, 12), LocalDate.of(2024, 5, 12)),
-                    repayment(1, LocalDate.of(2024, 5, 12), LocalDate.of(2024, 6, 12)));
+                    periodData(LocalDate.of(2023, 12, 12), LocalDate.of(2024, 1, 12)),
+                    periodData(LocalDate.of(2024, 1, 12), LocalDate.of(2024, 2, 12)),
+                    periodData(LocalDate.of(2024, 2, 12), LocalDate.of(2024, 3, 12)),
+                    periodData(LocalDate.of(2024, 3, 12), LocalDate.of(2024, 4, 12)),
+                    periodData(LocalDate.of(2024, 4, 12), LocalDate.of(2024, 5, 12)),
+                    periodData(LocalDate.of(2024, 5, 12), LocalDate.of(2024, 6, 12)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(9.482);
             final Integer installmentAmountInMultiplesOf = null;
@@ -3025,10 +3021,10 @@ class ProgressiveEMICalculatorTest {
         @Test
         public void test_leap_year_only_actual_for_loan_S2() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                    repayment(1, LocalDate.of(2024, 7, 23), LocalDate.of(2024, 8, 23)),
-                    repayment(1, LocalDate.of(2024, 8, 23), LocalDate.of(2024, 9, 23)),
-                    repayment(1, LocalDate.of(2024, 9, 23), LocalDate.of(2024, 10, 23)),
-                    repayment(1, LocalDate.of(2024, 10, 23), LocalDate.of(2024, 11, 23)));
+                    periodData(LocalDate.of(2024, 7, 23), LocalDate.of(2024, 8, 23)),
+                    periodData(LocalDate.of(2024, 8, 23), LocalDate.of(2024, 9, 23)),
+                    periodData(LocalDate.of(2024, 9, 23), LocalDate.of(2024, 10, 23)),
+                    periodData(LocalDate.of(2024, 10, 23), LocalDate.of(2024, 11, 23)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(12.0);
             final Integer installmentAmountInMultiplesOf = null;
@@ -3061,12 +3057,12 @@ class ProgressiveEMICalculatorTest {
         @Test
         public void test_leap_year_only_actual_for_loan_S3() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                    repayment(1, LocalDate.of(2023, 10, 31), LocalDate.of(2023, 11, 30)),
-                    repayment(1, LocalDate.of(2023, 11, 30), LocalDate.of(2023, 12, 31)),
-                    repayment(1, LocalDate.of(2023, 12, 31), LocalDate.of(2024, 1, 31)),
-                    repayment(1, LocalDate.of(2024, 1, 31), LocalDate.of(2024, 2, 29)),
-                    repayment(1, LocalDate.of(2024, 2, 29), LocalDate.of(2024, 3, 31)),
-                    repayment(1, LocalDate.of(2024, 3, 31), LocalDate.of(2024, 4, 30)));
+                    periodData(LocalDate.of(2023, 10, 31), LocalDate.of(2023, 11, 30)),
+                    periodData(LocalDate.of(2023, 11, 30), LocalDate.of(2023, 12, 31)),
+                    periodData(LocalDate.of(2023, 12, 31), LocalDate.of(2024, 1, 31)),
+                    periodData(LocalDate.of(2024, 1, 31), LocalDate.of(2024, 2, 29)),
+                    periodData(LocalDate.of(2024, 2, 29), LocalDate.of(2024, 3, 31)),
+                    periodData(LocalDate.of(2024, 3, 31), LocalDate.of(2024, 4, 30)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(45.00);
             final Integer installmentAmountInMultiplesOf = null;
@@ -3102,12 +3098,12 @@ class ProgressiveEMICalculatorTest {
         @Test
         public void test_leap_year_only_actual_for_loan_S4() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                    repayment(1, LocalDate.of(2024, 10, 31), LocalDate.of(2024, 11, 30)),
-                    repayment(1, LocalDate.of(2024, 11, 30), LocalDate.of(2024, 12, 31)),
-                    repayment(1, LocalDate.of(2024, 12, 31), LocalDate.of(2025, 1, 31)),
-                    repayment(1, LocalDate.of(2025, 1, 31), LocalDate.of(2025, 2, 28)),
-                    repayment(1, LocalDate.of(2025, 2, 28), LocalDate.of(2025, 3, 31)),
-                    repayment(1, LocalDate.of(2025, 3, 31), LocalDate.of(2025, 4, 30)));
+                    periodData(LocalDate.of(2024, 10, 31), LocalDate.of(2024, 11, 30)),
+                    periodData(LocalDate.of(2024, 11, 30), LocalDate.of(2024, 12, 31)),
+                    periodData(LocalDate.of(2024, 12, 31), LocalDate.of(2025, 1, 31)),
+                    periodData(LocalDate.of(2025, 1, 31), LocalDate.of(2025, 2, 28)),
+                    periodData(LocalDate.of(2025, 2, 28), LocalDate.of(2025, 3, 31)),
+                    periodData(LocalDate.of(2025, 3, 31), LocalDate.of(2025, 4, 30)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(9.99);
             final Integer installmentAmountInMultiplesOf = null;
@@ -3142,12 +3138,12 @@ class ProgressiveEMICalculatorTest {
         @Test
         public void test_leap_year_only_actual_for_loan_S5() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                    repayment(1, LocalDate.of(2022, 10, 29), LocalDate.of(2022, 12, 29)),
-                    repayment(1, LocalDate.of(2022, 12, 29), LocalDate.of(2023, 2, 28)),
-                    repayment(1, LocalDate.of(2023, 2, 28), LocalDate.of(2023, 4, 29)),
-                    repayment(1, LocalDate.of(2023, 4, 29), LocalDate.of(2023, 6, 29)),
-                    repayment(1, LocalDate.of(2023, 6, 29), LocalDate.of(2023, 8, 29)),
-                    repayment(1, LocalDate.of(2023, 8, 29), LocalDate.of(2023, 10, 29)));
+                    periodData(LocalDate.of(2022, 10, 29), LocalDate.of(2022, 12, 29)),
+                    periodData(LocalDate.of(2022, 12, 29), LocalDate.of(2023, 2, 28)),
+                    periodData(LocalDate.of(2023, 2, 28), LocalDate.of(2023, 4, 29)),
+                    periodData(LocalDate.of(2023, 4, 29), LocalDate.of(2023, 6, 29)),
+                    periodData(LocalDate.of(2023, 6, 29), LocalDate.of(2023, 8, 29)),
+                    periodData(LocalDate.of(2023, 8, 29), LocalDate.of(2023, 10, 29)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(7.00);
             final Integer installmentAmountInMultiplesOf = null;
@@ -3179,12 +3175,12 @@ class ProgressiveEMICalculatorTest {
         @Test
         public void test_leap_year_only_actual_no_effect_on_360_loan() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                    repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                    repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                    repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                    repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                    repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                    repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                    periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                    periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                    periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                    periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                    periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                    periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(7.0);
             final Integer installmentAmountInMultiplesOf = null;
@@ -3218,12 +3214,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_s5_chargeback_in_period_Amt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -3283,12 +3279,12 @@ class ProgressiveEMICalculatorTest {
     @Test
     public void test_interest_schedule_model_service_serialization() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
-                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
-                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
-                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
-                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
-                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
-                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+                periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(7.0);
         final Integer installmentAmountInMultiplesOf = null;
@@ -4313,12 +4309,12 @@ class ProgressiveEMICalculatorTest {
         private ProgressiveLoanInterestScheduleModel generateSchedule() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-            expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-            expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-            expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-            expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-            expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-            expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(15.678);
             final Integer installmentAmountInMultiplesOf = null;
@@ -4364,8 +4360,8 @@ class ProgressiveEMICalculatorTest {
             OutstandingDetails outstandingAmountsTillDate = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
                     interestSchedule.getMaturityDate());
 
-            LoanReAgeParameter reageParameter = new LoanReAgeParameter(null, PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
-                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST, null);
+            LoanReAgeParameterData reageParameter = LoanReAgeParameterData.of(PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
+                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST);
 
             // Update the existing model with re-aged periods
             emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
@@ -4399,8 +4395,8 @@ class ProgressiveEMICalculatorTest {
             OutstandingDetails outstandingAmountsTillDate = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
                     interestSchedule.getMaturityDate());
 
-            LoanReAgeParameter reageParameter = new LoanReAgeParameter(null, PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
-                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST, null);
+            LoanReAgeParameterData reageParameter = LoanReAgeParameterData.of(PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
+                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST);
 
             // Update the existing model with re-aged periods
             emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
@@ -4434,8 +4430,8 @@ class ProgressiveEMICalculatorTest {
             OutstandingDetails outstandingAmountsTillDate = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
                     interestSchedule.getMaturityDate());
 
-            LoanReAgeParameter reageParameter = new LoanReAgeParameter(null, PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
-                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST, null);
+            LoanReAgeParameterData reageParameter = LoanReAgeParameterData.of(PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
+                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST);
 
             // Update the existing model with re-aged periods
             emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
@@ -4455,12 +4451,12 @@ class ProgressiveEMICalculatorTest {
         public void test_transactionInMiddleOfPeriod_EQUAL_AMORTIZATION_FULL_INTEREST_noTransactionTilDate_noInterestRecalc() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-            expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-            expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-            expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-            expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-            expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-            expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(15.678);
             final Integer installmentAmountInMultiplesOf = null;
@@ -4488,22 +4484,17 @@ class ProgressiveEMICalculatorTest {
 
             // No repayment no interest recalculation
             LocalDate reAgingStartDate = LocalDate.of(2024, 4, 20);
+            LocalDate transactionDate = LocalDate.of(2024, 4, 15);
 
             OutstandingDetails outstandingAmountsTillDate = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
                     interestSchedule.getMaturityDate());
 
-            LoanTransaction loanTransaction = new LoanTransaction(null, null, LoanTransactionType.REAGE, LocalDate.of(2024, 4, 15),
-                    outstandingAmountsTillDate.getOutstandingPrincipal().add(outstandingAmountsTillDate.getOutstandingInterest())
-                            .getAmount(),
-                    outstandingAmountsTillDate.getOutstandingPrincipal().getAmount(),
-                    outstandingAmountsTillDate.getOutstandingInterest().getAmount(), ZERO, ZERO, ZERO, false, null, null);
-            LoanReAgeParameter reageParameter = new LoanReAgeParameter(loanTransaction, PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
-                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST, null);
-            loanTransaction.setLoanReAgeParameter(reageParameter);
+            LoanReAgeParameterData reageParameter = LoanReAgeParameterData.of(PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
+                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST);
 
             // Update the existing model with re-aged periods
-            emiCalculator.reAgeEqualAmortization(interestSchedule, loanTransaction.getTransactionDate(), reageParameter,
-                    Money.zero(currency), new EqualAmortizationValues(Money.zero(currency), 6, Money.zero(currency), Money.zero(currency)));
+            emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
+                    new EqualAmortizationValues(Money.zero(currency), 6, Money.zero(currency), Money.zero(currency)));
 
             OutstandingDetails outstandingAmountsTillDateAfterReage = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
                     interestSchedule.getMaturityDate());
@@ -4519,12 +4510,12 @@ class ProgressiveEMICalculatorTest {
         public void test_transactionInMiddleOfPeriod_EQUAL_AMORTIZATION_FULL_INTEREST() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-            expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-            expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-            expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-            expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-            expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-            expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(15.678);
             final Integer installmentAmountInMultiplesOf = null;
@@ -4577,22 +4568,17 @@ class ProgressiveEMICalculatorTest {
                             .getDuePrincipal().negated());
 
             LocalDate reAgingStartDate = LocalDate.of(2024, 4, 20);
+            LocalDate transactionDate = LocalDate.of(2024, 4, 15);
 
             OutstandingDetails outstandingAmountsTillDate = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
                     interestSchedule.getMaturityDate());
 
-            LoanTransaction loanTransaction = new LoanTransaction(null, null, LoanTransactionType.REAGE, LocalDate.of(2024, 4, 15),
-                    outstandingAmountsTillDate.getOutstandingPrincipal().add(outstandingAmountsTillDate.getOutstandingInterest())
-                            .getAmount(),
-                    outstandingAmountsTillDate.getOutstandingPrincipal().getAmount(),
-                    outstandingAmountsTillDate.getOutstandingInterest().getAmount(), ZERO, ZERO, ZERO, false, null, null);
-            LoanReAgeParameter reageParameter = new LoanReAgeParameter(loanTransaction, PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
-                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST, null);
-            loanTransaction.setLoanReAgeParameter(reageParameter);
+            LoanReAgeParameterData reageParameter = LoanReAgeParameterData.of(PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
+                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST);
 
             // Update the existing model with re-aged periods
-            emiCalculator.reAgeEqualAmortization(interestSchedule, loanTransaction.getTransactionDate(), reageParameter,
-                    Money.zero(currency), new EqualAmortizationValues(Money.zero(currency), 6, Money.zero(currency), Money.zero(currency)));
+            emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
+                    new EqualAmortizationValues(Money.zero(currency), 6, Money.zero(currency), Money.zero(currency)));
 
             OutstandingDetails outstandingAmountsTillDateAfterReage = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
                     interestSchedule.getMaturityDate());
@@ -4608,12 +4594,12 @@ class ProgressiveEMICalculatorTest {
         public void test_chargeback_transactionInMiddleOfPeriod_EQUAL_EQUAL_AMORTIZATION_PAYABLE_INTEREST() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-            expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-            expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-            expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-            expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-            expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-            expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(7.0);
             final Integer installmentAmountInMultiplesOf = null;
@@ -4646,8 +4632,8 @@ class ProgressiveEMICalculatorTest {
 
             OutstandingDetails outstandingAmountsTillDate = emiCalculator.getOutstandingAmountsTillDate(interestSchedule, transactionDate);
 
-            LoanReAgeParameter reageParameter = new LoanReAgeParameter(null, PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
-                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_PAYABLE_INTEREST, null);
+            LoanReAgeParameterData reageParameter = LoanReAgeParameterData.of(PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
+                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_PAYABLE_INTEREST);
 
             // Update the existing model with re-aged periods
             emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
@@ -4667,12 +4653,12 @@ class ProgressiveEMICalculatorTest {
         public void test_chargebackPartial_transactionInMiddleOfPeriod_EQUAL_EQUAL_AMORTIZATION_FULL_INTEREST() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-            expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-            expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-            expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-            expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-            expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-            expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(7.0);
             final Integer installmentAmountInMultiplesOf = null;
@@ -4706,8 +4692,8 @@ class ProgressiveEMICalculatorTest {
             OutstandingDetails outstandingAmountsTillDate = emiCalculator.getOutstandingAmountsTillDate(interestSchedule,
                     interestSchedule.getMaturityDate());
 
-            LoanReAgeParameter reageParameter = new LoanReAgeParameter(null, PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
-                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST, null);
+            LoanReAgeParameterData reageParameter = LoanReAgeParameterData.of(PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
+                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST);
 
             // Update the existing model with re-aged periods
             emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
@@ -4727,12 +4713,12 @@ class ProgressiveEMICalculatorTest {
         public void test_transactionInMiddleOfPeriod_EQUAL_EQUAL_AMORTIZATION_PAYABLE_INTEREST() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-            expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-            expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-            expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-            expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-            expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-            expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(15.678);
             final Integer installmentAmountInMultiplesOf = null;
@@ -4789,8 +4775,8 @@ class ProgressiveEMICalculatorTest {
 
             OutstandingDetails outstandingAmountsTillDate = emiCalculator.getOutstandingAmountsTillDate(interestSchedule, transactionDate);
 
-            LoanReAgeParameter reageParameter = new LoanReAgeParameter(null, PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
-                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_PAYABLE_INTEREST, null);
+            LoanReAgeParameterData reageParameter = LoanReAgeParameterData.of(PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
+                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_PAYABLE_INTEREST);
 
             // Update the existing model with re-aged periods
             emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
@@ -4810,12 +4796,12 @@ class ProgressiveEMICalculatorTest {
         public void test_transactionInMiddleOfPeriod_stringOnNextDueDate_EQUAL_EQUAL_AMORTIZATION_PAYABLE_INTEREST() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-            expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-            expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-            expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-            expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-            expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-            expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(15.678);
             final Integer installmentAmountInMultiplesOf = null;
@@ -4872,8 +4858,8 @@ class ProgressiveEMICalculatorTest {
 
             OutstandingDetails outstandingAmountsTillDate = emiCalculator.getOutstandingAmountsTillDate(interestSchedule, transactionDate);
 
-            LoanReAgeParameter reageParameter = new LoanReAgeParameter(null, PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
-                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_PAYABLE_INTEREST, null);
+            LoanReAgeParameterData reageParameter = LoanReAgeParameterData.of(PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
+                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_PAYABLE_INTEREST);
 
             // Update the existing model with re-aged periods
             emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
@@ -4893,12 +4879,12 @@ class ProgressiveEMICalculatorTest {
         public void test_transactionOnMaturityDate_stringAfterMaturityDate_EQUAL_EQUAL_AMORTIZATION_PAYABLE_INTEREST() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-            expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-            expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-            expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-            expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-            expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-            expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(15.678);
             final Integer installmentAmountInMultiplesOf = null;
@@ -4945,8 +4931,8 @@ class ProgressiveEMICalculatorTest {
 
             OutstandingDetails outstandingAmountsTillDate = emiCalculator.getOutstandingAmountsTillDate(interestSchedule, transactionDate);
 
-            LoanReAgeParameter reageParameter = new LoanReAgeParameter(null, PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
-                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_PAYABLE_INTEREST, null);
+            LoanReAgeParameterData reageParameter = LoanReAgeParameterData.of(PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
+                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_PAYABLE_INTEREST);
 
             // Update the existing model with re-aged periods
             emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
@@ -4966,12 +4952,12 @@ class ProgressiveEMICalculatorTest {
         public void test_transactionAfterMaturityDate_EQUAL_EQUAL_AMORTIZATION_PAYABLE_INTEREST() {
             final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-            expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-            expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-            expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-            expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-            expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-            expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+            expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
 
             final BigDecimal interestRate = BigDecimal.valueOf(15.678);
             final Integer installmentAmountInMultiplesOf = null;
@@ -5018,8 +5004,8 @@ class ProgressiveEMICalculatorTest {
 
             OutstandingDetails outstandingAmountsTillDate = emiCalculator.getOutstandingAmountsTillDate(interestSchedule, transactionDate);
 
-            LoanReAgeParameter reageParameter = new LoanReAgeParameter(null, PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
-                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_PAYABLE_INTEREST, null);
+            LoanReAgeParameterData reageParameter = LoanReAgeParameterData.of(PeriodFrequencyType.MONTHS, 1, reAgingStartDate, 6,
+                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_PAYABLE_INTEREST);
 
             // Update the existing model with re-aged periods
             emiCalculator.reAgeEqualAmortization(interestSchedule, transactionDate, reageParameter, Money.zero(currency),
@@ -5095,29 +5081,27 @@ class ProgressiveEMICalculatorTest {
     List<LoanScheduleModelRepaymentPeriod> expectedRepaymentDays(final LocalDate disbursementDate, final int periods, final int length) {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>(periods);
         IntStream.range(0, periods).forEach(i -> expectedRepaymentPeriods
-                .add(repayment(i + 1, disbursementDate.plusDays((long) i * length), disbursementDate.plusDays((long) (i + 1) * length))));
+                .add(periodData(disbursementDate.plusDays((long) i * length), disbursementDate.plusDays((long) (i + 1) * length))));
         return expectedRepaymentPeriods;
     }
 
     List<LoanScheduleModelRepaymentPeriod> expectedRepaymentsMonthly(final LocalDate disbursementDate, final int periods,
             final int length) {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>(periods);
-        IntStream.range(0, periods).forEach(i -> expectedRepaymentPeriods.add(
-                repayment(i + 1, disbursementDate.plusMonths((long) i * length), disbursementDate.plusMonths((long) (i + 1) * length))));
+        IntStream.range(0, periods).forEach(i -> expectedRepaymentPeriods
+                .add(periodData(disbursementDate.plusMonths((long) i * length), disbursementDate.plusMonths((long) (i + 1) * length))));
         return expectedRepaymentPeriods;
     }
 
     List<LoanScheduleModelRepaymentPeriod> expectedRepaymentWeeks(final LocalDate disbursementDate, final int periods, final int length) {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>(periods);
         IntStream.range(0, periods).forEach(i -> expectedRepaymentPeriods
-                .add(repayment(i + 1, disbursementDate.plusWeeks((long) i * length), disbursementDate.plusWeeks((long) (i + 1) * length))));
+                .add(periodData(disbursementDate.plusWeeks((long) i * length), disbursementDate.plusWeeks((long) (i + 1) * length))));
         return expectedRepaymentPeriods;
     }
 
-    private static LoanScheduleModelRepaymentPeriod repayment(int periodNumber, LocalDate fromDate, LocalDate dueDate) {
-        final Money zeroAmount = Money.zero(currency);
-        return LoanScheduleModelRepaymentPeriod.repayment(periodNumber, fromDate, dueDate, zeroAmount, zeroAmount, zeroAmount, zeroAmount,
-                zeroAmount, zeroAmount, false, mc);
+    private static LoanScheduleModelRepaymentPeriod periodData(LocalDate fromDate, LocalDate dueDate) {
+        return LoanScheduleModelRepaymentPeriod.repayment(0, fromDate, dueDate, null, null, null, null, null, null, false, mc);
     }
 
     @NonNull
@@ -5228,13 +5212,13 @@ class ProgressiveEMICalculatorTest {
         // Create 7 periods (6 original + 1 extension for second tranche)
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
-        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
-        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
-        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
-        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
-        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
-        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
-        expectedRepaymentPeriods.add(repayment(7, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 8, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 7, 1), LocalDate.of(2024, 8, 1)));
 
         final BigDecimal interestRate = BigDecimal.valueOf(9.4822);
         final Integer installmentAmountInMultiplesOf = null;

@@ -112,6 +112,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
 import org.apache.fineract.portfolio.loanaccount.service.schedule.LoanScheduleComponent;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
+import org.apache.fineract.portfolio.loanproduct.calc.EMICalculatorDataMapper;
 import org.apache.fineract.portfolio.loanproduct.calc.data.EqualAmortizationValues;
 import org.apache.fineract.portfolio.loanproduct.calc.data.OutstandingDetails;
 import org.apache.fineract.portfolio.loanproduct.calc.data.PeriodDueDetails;
@@ -228,8 +229,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         List<LoanTermVariationsData> loanTermVariations = loan.getActiveLoanTermVariations().stream().map(LoanTermVariations::toData)
                 .collect(Collectors.toCollection(ArrayList::new));
         final Integer installmentAmountInMultiplesOf = loan.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf();
-        ProgressiveLoanInterestScheduleModel scheduleModel = emiCalculator.generateInstallmentInterestScheduleModel(installments,
-                LoanConfigurationDetailsMapper.map(loan), installmentAmountInMultiplesOf, overpaymentHolder.getMoneyObject().getMc());
+        ProgressiveLoanInterestScheduleModel scheduleModel = emiCalculator.generateInstallmentInterestScheduleModel(
+                EMICalculatorDataMapper.toRepaymentScheduleInstallmentDataList(installments), LoanConfigurationDetailsMapper.map(loan),
+                installmentAmountInMultiplesOf, overpaymentHolder.getMoneyObject().getMc());
         List<Long> loanChargeIdProcessed = new ArrayList<>();
 
         ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, charges, overpaymentHolder,
@@ -407,7 +409,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         final LocalDate interestRateChangeSubmittedOnDate = termVariationsData.getTermVariationApplicableFrom();
         final int repaymentPeriodsToAdd = termVariationsData.getDecimalValue().intValue();
         emiCalculator.addRepaymentPeriods(scheduleModel, interestRateChangeSubmittedOnDate, repaymentPeriodsToAdd,
-                alreadyProcessedTransactions);
+                EMICalculatorDataMapper.toProcessedTransactionDataList(alreadyProcessedTransactions));
         final Loan loan = installments.getFirst().getLoan();
 
         int nextInstallmentNumber = installments.stream().mapToInt(LoanRepaymentScheduleInstallment::getInstallmentNumber).max().orElse(0)
@@ -3714,7 +3716,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         LocalDate transactionDate = loanTransaction.getTransactionDate();
 
         OutstandingDetails outstandingDetails = emiCalculator.precalculateReAgeEqualAmortizationAmount(model, transactionDate,
-                loanReAgeParameter);
+                EMICalculatorDataMapper.toLoanReAgeParameterData(loanReAgeParameter));
 
         OutstandingBalances outstandingBalances = liftOutstandingBalances(installments, transactionDate, currency,
                 settings.isSkipDownPayments(), settings.isOnlyPayableInterest(), settings.isEqualInstallmentForInterest(),
@@ -3748,7 +3750,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         BalancesWithPaidInAdvance paidInAdvanceBalances = liftEarlyRepaidBalances(installments, transactionDate, currency,
                 ctx.getAlreadyProcessedTransactions());
 
-        emiCalculator.reAgeEqualAmortization(model, transactionDate, loanReAgeParameter,
+        emiCalculator.reAgeEqualAmortization(model, transactionDate, EMICalculatorDataMapper.toLoanReAgeParameterData(loanReAgeParameter),
                 outstandingBalances.fees.add(outstandingBalances.penalties), calculatedFees.add(calculatedPenalties));
 
         installments.removeIf(i -> (i.getInstallmentNumber() != null && !i.isDownPayment() && !i.getDueDate().isBefore(transactionDate)

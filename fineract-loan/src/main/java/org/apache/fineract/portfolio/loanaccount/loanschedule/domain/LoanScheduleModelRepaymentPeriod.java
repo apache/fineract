@@ -25,7 +25,7 @@ import java.util.HashSet;
 import java.util.Set;
 import lombok.Getter;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalcualtionAdditionalDetails;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.InterestRecalculationAdditionalDetailData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 
 /**
@@ -44,7 +44,7 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
     private Money penaltyChargesDue;
     private Money totalDue;
     private final boolean recalculatedInterestComponent;
-    private final Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new HashSet<>();
+    private final Set<InterestRecalculationAdditionalDetailData> loanCompoundingDetails = new HashSet<>();
     private boolean isEMIFixedSpecificToInstallment = false;
     BigDecimal rescheduleInterestPortion;
     private final MathContext mc;
@@ -179,7 +179,7 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
     }
 
     @Override
-    public Set<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails() {
+    public Set<InterestRecalculationAdditionalDetailData> getLoanCompoundingDetails() {
         return this.loanCompoundingDetails;
     }
 
