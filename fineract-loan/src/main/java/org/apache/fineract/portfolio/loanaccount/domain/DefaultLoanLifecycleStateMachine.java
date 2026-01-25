@@ -202,6 +202,18 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
                     newState = activeTransition();
                 }
             break;
+            case LOAN_COMPLETE_TRANSFER:
+                if (anyOfAllowedWhenComingFrom(from, LoanStatus.TRANSFER_IN_PROGRESS)) {
+                    boolean isOverpaid = loan.getTotalOverpaid() != null && loan.getTotalOverpaid().compareTo(BigDecimal.ZERO) > 0;
+                    if (isOverpaid) {
+                        newState = overpaidTransition();
+                    } else if (loan.getSummary().isRepaidInFull(loan.getCurrency())) {
+                        newState = closeObligationsMetTransition();
+                    } else {
+                        newState = activeTransition();
+                    }
+                }
+            break;
             case WRITE_OFF_OUTSTANDING_UNDO:
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_WRITTEN_OFF)) {
                     newState = activeTransition();
