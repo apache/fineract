@@ -16,20 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanorigination.service;
+package org.apache.fineract.portfolio.loanorigination.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
-import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public interface LoanOriginatorReadPlatformService {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class LoanOriginatorsResponse implements Serializable {
 
-    List<LoanOriginatorData> retrieveAll();
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    LoanOriginatorData retrieveById(Long id);
+    private List<LoanOriginatorData> originators;
 
-    LoanOriginatorData retrieveByExternalId(String externalId);
-
-    Long resolveIdByExternalId(String externalId);
-
-    List<LoanOriginatorData> retrieveByLoanId(Long loanId);
+    public static LoanOriginatorsResponse of(List<LoanOriginatorData> originators) {
+        return new LoanOriginatorsResponse(originators);
+    }
 }

@@ -39,4 +39,13 @@ public interface LoanOriginatorMappingRepository
     boolean existsByLoanIdAndOriginatorId(Long loanId, Long originatorId);
 
     void deleteByLoanIdAndOriginatorId(Long loanId, Long originatorId);
+
+    @org.springframework.data.jpa.repository.Query("""
+            SELECT m FROM LoanOriginatorMapping m
+            JOIN FETCH m.originator o
+            LEFT JOIN FETCH o.originatorType
+            LEFT JOIN FETCH o.channelType
+            WHERE m.loanId = :loanId
+            """)
+    List<LoanOriginatorMapping> findByLoanIdWithOriginator(@org.springframework.data.repository.query.Param("loanId") Long loanId);
 }

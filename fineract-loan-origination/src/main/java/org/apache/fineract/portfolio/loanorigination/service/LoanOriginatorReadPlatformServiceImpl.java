@@ -18,11 +18,14 @@
  */
 package org.apache.fineract.portfolio.loanorigination.service;
 
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
 import org.apache.fineract.portfolio.loanorigination.domain.LoanOriginator;
+import org.apache.fineract.portfolio.loanorigination.domain.LoanOriginatorMapping;
+import org.apache.fineract.portfolio.loanorigination.domain.LoanOriginatorMappingRepository;
 import org.apache.fineract.portfolio.loanorigination.domain.LoanOriginatorRepository;
 import org.apache.fineract.portfolio.loanorigination.exception.LoanOriginatorNotFoundException;
 import org.apache.fineract.portfolio.loanorigination.mapper.LoanOriginatorMapper;
@@ -37,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class LoanOriginatorReadPlatformServiceImpl implements LoanOriginatorReadPlatformService {
 
     private final LoanOriginatorRepository loanOriginatorRepository;
+    private final LoanOriginatorMappingRepository loanOriginatorMappingRepository;
     private final LoanOriginatorMapper loanOriginatorMapper;
 
     @Override
@@ -64,5 +68,14 @@ public class LoanOriginatorReadPlatformServiceImpl implements LoanOriginatorRead
         final LoanOriginator originator = this.loanOriginatorRepository.findByExternalId(new ExternalId(externalId))
                 .orElseThrow(() -> new LoanOriginatorNotFoundException(externalId));
         return originator.getId();
+    }
+
+    @Override
+    public List<LoanOriginatorData> retrieveByLoanId(final Long loanId) {
+        final List<LoanOriginatorMapping> mappings = this.loanOriginatorMappingRepository.findByLoanIdWithOriginator(loanId);
+        if (mappings.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return mappings.stream().map(LoanOriginatorMapping::getOriginator).map(this.loanOriginatorMapper::toData).toList();
     }
 }
