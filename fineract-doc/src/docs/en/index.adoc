@@ -72,4 +72,7 @@ ifdef::backend-pdf[]
 include::indices.adoc[leveloffset=+1]
 endif::[]
 
+
+include::chapters/slack_archive/index.adoc[leveloffset=+1]
+
 include::chapters/appendix/index.adoc[]

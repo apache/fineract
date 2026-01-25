@@ -37,6 +37,7 @@ plugins {
 
 apply plugin: 'org.asciidoctor.jvm.convert'
 apply plugin: 'org.asciidoctor.jvm.pdf'
+apply from: 'slack.gradle'
 
 // Configure resolution strategy for all configurations
 configurations.all {
@@ -104,7 +105,7 @@ asciidoctor {
 
     logging.captureStandardError LogLevel.INFO
 
-    dependsOn copyImages, copyDiagrams
+    dependsOn copyImages, copyDiagrams, updateSlackArchive
 
     dependsOn(':fineract-client:clean', ':fineract-client:buildAsciidoc')
 }

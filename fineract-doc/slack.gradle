@@ -1,0 +1,165 @@
+
+import groovy.json.JsonSlurper
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+
+task updateSlackArchive {
+    group = 'documentation'
+    description = 'Fetches Slack messages and generates AsciiDoc archives'
+
+    def outputDir = file("${projectDir}/src/docs/en/chapters/slack_archive")
+    outputs.dir outputDir
+
+    doLast {
+        def token = providers.environmentVariable('SLACK_TOKEN').getOrNull()
+        def archiveChannelsEnv = providers.environmentVariable('SLACK_ARCHIVE_CHANNELS').getOrNull()
+        def allowedChannels = archiveChannelsEnv ? archiveChannelsEnv.split(',')*.trim() : []
+
+        if (!token) {
+            logger.lifecycle("SLACK_TOKEN not set. Skipping Slack archive fetch.")
+            def indexFile = new File(outputDir, "index.adoc")
+            if (!indexFile.exists()) {
+                outputDir.mkdirs()
+                indexFile.text = """
+= Slack Archive
+
+This section contains an archive of public Slack conversations.
+
+_No Slack token provided during build. Archive not updated._
+"""
+            }
+            return
+        }
+
+        logger.lifecycle("Updating Slack archive in ${outputDir}...")
+        outputDir.mkdirs()
+
+        def allChannels = fetchChannels(token)
+        if (!allChannels) {
+            return
+        }
+
+        def targetChannels = allowedChannels ?
+                allChannels.findAll { allowedChannels.contains(it.name) } :
+                allChannels
+
+        if (!allowedChannels) {
+            logger.lifecycle("SLACK_ARCHIVE_CHANNELS not set. Processing ${allChannels.size()} public channels.")
+        }
+
+        def userCache = [:]
+        StringBuilder indexContent = new StringBuilder()
+
+        indexContent.append("= Slack Archive\n\n")
+        indexContent.append("Archive of ASF Fineract Slack public channels.\n\n")
+        indexContent.append("IMPORTANT: This archive contains public discussions intended for knowledge sharing. ")
+        indexContent.append("It does not include private channels or direct messages.\n\n")
+
+        targetChannels.each { channel ->
+            logger.lifecycle("Processing channel #${channel.name}...")
+            def messages = fetchMessages(token, channel.id)
+            if (messages) {
+                def channelFile = new File(outputDir, "${channel.name}.adoc")
+                generateChannelPage(channel, messages, channelFile, token, userCache)
+                indexContent.append("* <<${channel.name}.adoc#, #${channel.name}>>\n")
+            }
+        }
+
+        new File(outputDir, "index.adoc").text = indexContent.toString()
+    }
+}
+
+def fetchChannels(String token) {
+    try {
+        def url = new URL("https://slack.com/api/conversations.list?types=public_channel&exclude_archived=true&limit=1000")
+        def connection = url.openConnection()
+        connection.setRequestProperty("Authorization", "Bearer ${token}")
+        def response = new JsonSlurper().parseText(connection.inputStream.text)
+
+        if (response.ok) {
+            return response.channels
+        } else {
+            logger.error("Error fetching channels: ${response.error}")
+            return []
+        }
+    } catch (Exception e) {
+        logger.error("Exception fetching channels", e)
+        return []
+    }
+}
+
+def fetchMessages(String token, String channelId) {
+    try {
+        def url = new URL("https://slack.com/api/conversations.history?channel=${channelId}&limit=200")
+        def connection = url.openConnection()
+        connection.setRequestProperty("Authorization", "Bearer ${token}")
+        def response = new JsonSlurper().parseText(connection.inputStream.text)
+
+        if (response.ok) {
+            return response.messages.reverse()
+        } else {
+            logger.warn("Error fetching messages for ${channelId}: ${response.error}")
+            return []
+        }
+    } catch (Exception e) {
+        logger.error("Exception fetching messages for ${channelId}", e)
+        return []
+    }
+}
+
+def getUserName(String token, String userId, Map cache) {
+    if (cache.containsKey(userId)) return cache[userId]
+
+    try {
+        def url = new URL("https://slack.com/api/users.info?user=${userId}")
+        def connection = url.openConnection()
+        connection.setRequestProperty("Authorization", "Bearer ${token}")
+        def response = new JsonSlurper().parseText(connection.inputStream.text)
+
+        def name = userId
+        if (response.ok && response.user) {
+            name = response.user.real_name ?: response.user.name
+        }
+        cache[userId] = name
+        return name
+    } catch (Exception e) {
+        cache[userId] = userId
+        return userId
+    }
+}
+
+def generateChannelPage(def channel, def messages, File file, String token, Map userCache) {
+    StringBuilder sb = new StringBuilder()
+    sb.append("= Channel: #${channel.name}\n\n")
+    if (channel.topic?.value) {
+        sb.append("_Topic: ${channel.topic.value}_\n\n")
+    }
+
+    sb.append("[cols=\"15,85\", options=\"header\"]\n")
+    sb.append("|===\n")
+    sb.append("| User | Message\n\n")
+
+    def dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.of("UTC"))
+
+    messages.each { msg ->
+        if (msg.type == "message" && !msg.subtype) {
+            def userId = msg.user ?: "Unknown"
+            def userName = userId
+
+            if (userId != "Unknown" && userId.startsWith("U")) {
+                userName = getUserName(token, userId, userCache)
+            }
+
+            def text = (msg.text ?: "").replaceAll("\\|", "\\\\|")
+            def ts = msg.ts.split("\\.")[0].toLong()
+            def time = dateFormatter.format(Instant.ofEpochSecond(ts))
+
+            sb.append("| *${userName}* +\n${time}\n")
+            sb.append("| ${text}\n\n")
+        }
+    }
+    sb.append("|===\n")
+
+    file.text = sb.toString()
+}
