@@ -461,6 +461,8 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
             case SAVINGS_TRANSACTION:
                 log.error("TODO Implement getNoteForDelete for SAVINGS_TRANSACTION");
             break;
+            default:
+                throw new UnsupportedOperationException("Note type not supported: " + type);
         }
         if (noteForUpdate == null) {
             throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase());

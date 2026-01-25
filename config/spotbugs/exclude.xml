@@ -102,4 +102,9 @@
     <Match>
         <Bug pattern="UR_UNINIT_READ" />
     </Match>
+    <Match>
+        <Class name="org.apache.fineract.commands.domain.CommandWrapper" />
+        <Field name="centerId" />
+        <Bug pattern="URF_UNREAD_FIELD" />
+    </Match>
 </FindBugsFilter>

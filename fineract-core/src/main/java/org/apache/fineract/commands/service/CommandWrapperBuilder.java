@@ -41,6 +41,7 @@ public class CommandWrapperBuilder {
     private Long clientId;
     private Long loanId;
     private Long savingsId;
+    private Long centerId;
     private String actionName;
     private String entityName;
     private Long entityId;
@@ -59,15 +60,15 @@ public class CommandWrapperBuilder {
 
     @SuppressFBWarnings(value = "UWF_UNWRITTEN_FIELD", justification = "TODO: fix this!")
     public CommandWrapper build() {
-        return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName, this.entityName,
-                this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId,
+        return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.centerId, this.actionName,
+                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId,
                 this.creditBureauId, this.organisationCreditBureauId, this.jobName, this.idempotencyKey, this.loanExternalId,
                 this.sanitizeJsonKeys);
     }
 
     public CommandWrapper build(String idempotencyKey) {
-        return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName, this.entityName,
-                this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId,
+        return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.centerId, this.actionName,
+                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId,
                 this.creditBureauId, this.organisationCreditBureauId, this.jobName, idempotencyKey, this.loanExternalId,
                 this.sanitizeJsonKeys);
     }
@@ -200,6 +201,11 @@ public class CommandWrapperBuilder {
 
     public CommandWrapperBuilder withClientId(final Long withClientId) {
         this.clientId = withClientId;
+        return this;
+    }
+
+    public CommandWrapperBuilder withCenterId(final Long centerId) {
+        this.centerId = centerId;
         return this;
     }
 

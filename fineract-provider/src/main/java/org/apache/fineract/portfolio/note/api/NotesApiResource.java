@@ -65,6 +65,7 @@ public class NotesApiResource {
     public static final String LOANTRANSACTIONNOTE = "LOANTRANSACTIONNOTE";
     public static final String SAVINGNOTE = "SAVINGNOTE";
     public static final String GROUPNOTE = "GROUPNOTE";
+    public static final String CENTERNOTE = "CENTERNOTE";
     public static final String INVALIDNOTE = "INVALIDNOTE";
     private static final Set<String> NOTE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList("id", "resourceId", "clientId", "groupId", "loanId", "loanTransactionId", "depositAccountId", "savingAccountId",
@@ -228,7 +229,11 @@ public class NotesApiResource {
                 resourceNameForPermissions = GROUPNOTE;
                 resourceDetails.withGroupId(resourceId);
             }
-            default -> resourceNameForPermissions = INVALIDNOTE;
+            case CENTER -> {
+                resourceNameForPermissions = CENTERNOTE;
+                resourceDetails.withCenterId(resourceId);
+            }
+            default -> throw new NoteResourceNotSupportedException(type.name());
         }
         return resourceDetails.withEntityName(resourceNameForPermissions).build();
     }

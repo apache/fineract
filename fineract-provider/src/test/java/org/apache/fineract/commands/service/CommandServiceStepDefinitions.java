@@ -106,7 +106,7 @@ public class CommandServiceStepDefinitions implements En {
     public static class DummyCommand extends CommandWrapper {
 
         public DummyCommand() {
-            super(null, null, null, null, null, null, null, null, null, null, "{}", null, null, null, null, null, null,
+            super(null, null, null, null, null, null, null, null, null, null, null, "{}", null, null, null, null, null, null,
                     UUID.randomUUID().toString(), null, null);
         }
 

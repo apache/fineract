@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.commands.domain;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Set;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -33,6 +34,8 @@ public class CommandWrapper {
     private final Long clientId;
     private final Long loanId;
     private final Long savingsId;
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "Will be used for center-specific permissions")
+    private final Long centerId;
     private final String actionName;
     private final String entityName;
     private final String taskPermissionName;
@@ -80,6 +83,7 @@ public class CommandWrapper {
         this.clientId = null;
         this.loanId = null;
         this.savingsId = null;
+        this.centerId = null;
         this.actionName = actionName;
         this.entityName = entityName;
         this.taskPermissionName = actionName + "_" + entityName;
@@ -98,10 +102,10 @@ public class CommandWrapper {
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
-            final String actionName, final String entityName, final Long entityId, final Long subentityId, final String href,
-            final String json, final String transactionId, final Long productId, final Long templateId, final Long creditBureauId,
-            final Long organisationCreditBureauId, final String jobName, final String idempotencyKey, final ExternalId loanExternalId,
-            final Set<String> sanitizeJsonKeys) {
+            final Long centerId, final String actionName, final String entityName, final Long entityId, final Long subentityId,
+            final String href, final String json, final String transactionId, final Long productId, final Long templateId,
+            final Long creditBureauId, final Long organisationCreditBureauId, final String jobName, final String idempotencyKey,
+            final ExternalId loanExternalId, final Set<String> sanitizeJsonKeys) {
 
         this.commandId = null;
         this.officeId = officeId;
@@ -109,6 +113,7 @@ public class CommandWrapper {
         this.clientId = clientId;
         this.loanId = loanId;
         this.savingsId = savingsId;
+        this.centerId = centerId;
         this.actionName = actionName;
         this.entityName = entityName;
         this.taskPermissionName = actionName + "_" + entityName;
@@ -139,6 +144,7 @@ public class CommandWrapper {
         this.clientId = clientId;
         this.loanId = loanId;
         this.savingsId = savingsId;
+        this.centerId = null;
         this.actionName = actionName;
         this.entityName = entityName;
         this.taskPermissionName = actionName + "_" + entityName;

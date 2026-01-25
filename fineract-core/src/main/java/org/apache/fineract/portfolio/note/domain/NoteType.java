@@ -28,6 +28,7 @@ public enum NoteType {
     CLIENT(100, "noteType.client", "clients", "Client note"), //
     LOAN(200, "noteType.loan", "loans", "Loan note"), //
     LOAN_TRANSACTION(300, "noteType.loan.transaction", "loanTransactions", "Loan transaction note"), //
+    CENTER(400, "noteType.center", "centers", "Center note"), //
     SAVING_ACCOUNT(500, "noteType.saving", "savings", " account note"), //
     GROUP(600, "noteType.group", "groups", "Group note"), //
     SHARE_ACCOUNT(700, "noteType.shares", "accounts/share", "Share account note"), //
