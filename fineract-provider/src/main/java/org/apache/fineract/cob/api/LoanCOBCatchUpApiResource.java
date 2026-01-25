@@ -20,7 +20,6 @@ package org.apache.fineract.cob.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -61,9 +60,9 @@ public class LoanCOBCatchUpApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Executes Loan COB Catch Up", description = "Executes the Loan COB job on every day from the oldest Loan to the current COB business date")
-    @ApiResponses({ @ApiResponse(responseCode = "200", description = "All loans are up to date"),
-            @ApiResponse(responseCode = "202", description = "Catch Up has been started"),
-            @ApiResponse(responseCode = "400", description = "Catch Up is already running") })
+    @ApiResponse(responseCode = "200", description = "All loans are up to date")
+    @ApiResponse(responseCode = "202", description = "Catch Up has been started")
+    @ApiResponse(responseCode = "400", description = "Catch Up is already running")
     public Response executeLoanCOBCatchUp() {
         return loanCOBCatchUpServiceOp.map(loanCOBCatchUpService -> {
             if (loanCOBCatchUpService.isCatchUpRunning().isCatchUpRunning()) {
