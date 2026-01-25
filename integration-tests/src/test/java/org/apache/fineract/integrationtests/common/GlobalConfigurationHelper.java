@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetGlobalConfigurationsResponse;
@@ -62,11 +63,23 @@ public class GlobalConfigurationHelper {
 
         GetGlobalConfigurationsResponse actualGlobalConfigurations = getAllGlobalConfigurations();
         final ArrayList<HashMap> defaults = getAllDefaultGlobalConfigurations();
-        int changedNo = 0;
-        for (int i = 0; i < actualGlobalConfigurations.getGlobalConfiguration().size(); i++) {
 
-            HashMap defaultGlobalConfiguration = defaults.get(i);
-            GlobalConfigurationPropertyData actualGlobalConfiguration = actualGlobalConfigurations.getGlobalConfiguration().get(i);
+        Map<String, HashMap> defaultMap = new HashMap<>();
+        for (HashMap config : defaults) {
+            defaultMap.put((String) config.get("name"), config);
+        }
+
+        int changedNo = 0;
+        for (GlobalConfigurationPropertyData actualGlobalConfiguration : actualGlobalConfigurations.getGlobalConfiguration()) {
+
+            HashMap defaultGlobalConfiguration = defaultMap.get(actualGlobalConfiguration.getName());
+            if (defaultGlobalConfiguration == null) {
+                String message = "Global configuration '" + actualGlobalConfiguration.getName()
+                        + "' found in database but not in integration test defaults. "
+                        + "You must add it to GlobalConfigurationHelper.getAllDefaultGlobalConfigurations() to ensure test isolation.";
+                log.error(message);
+                throw new RuntimeException(message);
+            }
 
             if (!isMatching(defaultGlobalConfiguration, actualGlobalConfiguration)) {
 
@@ -101,19 +114,23 @@ public class GlobalConfigurationHelper {
     }
 
     public void verifyAllDefaultGlobalConfigurations() {
-
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         GetGlobalConfigurationsResponse actualGlobalConfigurations = getAllGlobalConfigurations();
 
-        Assertions.assertEquals(59, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(59, actualGlobalConfigurations.getGlobalConfiguration().size());
+        Assertions.assertEquals(expectedGlobalConfigurations.size(), actualGlobalConfigurations.getGlobalConfiguration().size());
 
-        for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
+        Map<String, HashMap> expectedConfigMap = new HashMap<>();
+        for (HashMap config : expectedGlobalConfigurations) {
+            expectedConfigMap.put((String) config.get("name"), config);
+        }
 
-            HashMap expectedGlobalConfiguration = expectedGlobalConfigurations.get(i);
-            GlobalConfigurationPropertyData actualGlobalConfiguration = actualGlobalConfigurations.getGlobalConfiguration().get(i);
+        for (GlobalConfigurationPropertyData actualGlobalConfiguration : actualGlobalConfigurations.getGlobalConfiguration()) {
+            String configName = actualGlobalConfiguration.getName();
+            HashMap expectedGlobalConfiguration = expectedConfigMap.get(configName);
 
-            final String assertionFailedMessage = "Assertion failed for configName:<" + expectedGlobalConfiguration.get("name") + ">";
+            assertNotNull(expectedGlobalConfiguration, "Configuration found in API but not in expected defaults: " + configName);
+
+            final String assertionFailedMessage = "Assertion failed for configName:<" + configName + ">";
             Assertions.assertEquals(expectedGlobalConfiguration.get("name"), actualGlobalConfiguration.getName(), assertionFailedMessage);
             Assertions.assertEquals(expectedGlobalConfiguration.get("value"), actualGlobalConfiguration.getValue(), assertionFailedMessage);
             Assertions.assertEquals(expectedGlobalConfiguration.get("enabled"), actualGlobalConfiguration.getEnabled(),
