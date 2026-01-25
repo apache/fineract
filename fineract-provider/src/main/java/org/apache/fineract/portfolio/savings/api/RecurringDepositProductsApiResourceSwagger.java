@@ -87,10 +87,6 @@ final class RecurringDepositProductsApiResourceSwagger {
         public Integer interestCalculationDaysInYearType;
         @Schema(example = "1")
         public Integer accountingRule;
-        @Schema(example = "1")
-        public Integer recurringDepositFrequency;
-        @Schema(example = "2")
-        public Integer recurringDepositFrequencyTypeId;
         @Schema(example = "true")
         public Boolean preClosurePenalApplicable;
         @Schema(example = "1.75")
@@ -267,18 +263,6 @@ final class RecurringDepositProductsApiResourceSwagger {
             public String description;
         }
 
-        static final class GetRecurringDepositProductsRecurringDepositFrequencyType {
-
-            private GetRecurringDepositProductsRecurringDepositFrequencyType() {}
-
-            @Schema(example = "1")
-            public Integer id;
-            @Schema(example = "recurring.deposit.savingsPeriodFrequencyType.months")
-            public String code;
-            @Schema(example = "Months")
-            public String description;
-        }
-
         @Schema(example = "3")
         public Long id;
         @Schema(example = "RD01")
@@ -288,9 +272,6 @@ final class RecurringDepositProductsApiResourceSwagger {
         @Schema(example = "RD01")
         public String description;
         public GetRecurringDepositProductsCurrency currency;
-        @Schema(example = "1")
-        public Integer recurringDepositFrequency;
-        public GetRecurringDepositProductsRecurringDepositFrequencyType recurringDepositFrequencyType;
         @Schema(example = "false")
         public Boolean preClosurePenalApplicable;
         @Schema(example = "3")
@@ -523,10 +504,6 @@ final class RecurringDepositProductsApiResourceSwagger {
         public GetRecurringDepositProductsProductIdAccountingMappings accountingMappings;
         public Set<GetRecurringDepositProductsProductIdFeeToIncomeAccountMappings> feeToIncomeAccountMappings;
         public Set<GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappings> penaltyToIncomeAccountMappings;
-        @Schema(example = "1")
-        public Integer recurringDepositFrequency;
-        public GetRecurringDepositProductsResponse.GetRecurringDepositProductsRecurringDepositFrequencyType recurringDepositFrequencyType;
-        @Schema(example = "true")
         public Boolean preClosurePenalApplicable;
         @Schema(example = "1.75")
         public Double preClosurePenalInterest;
