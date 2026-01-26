@@ -4484,6 +4484,40 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INT_DAILY_EMI_360_30_INT_RECALC_DAILY_MULTIDISB_FULL_TERM_TRANCHE_DEFERRED_INCOME,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburseFullTermTrancheDeferredIncome);
+
+        // LP2 with progressive loan schedule + horizontal + interest recalculation daily EMI + 360/30 +
+        // multidisbursement with full term tranche enabled + chargeback allocation rules
+        // Frequency for recalculate Outstanding Principal: Daily, Frequency Interval for recalculation: 1
+        String name175 = DefaultLoanProduct.LP2_ADV_PYMNT_INT_DAILY_EMI_360_30_INT_RECALC_DAILY_MULTIDISB_FULL_TERM_TRANCHE_CHARGEBACK
+                .getName();
+        PostLoanProductsRequest loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburseFullTermTrancheChargeback = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2Emi()//
+                .name(name175)//
+                .daysInYearType(DaysInYearType.DAYS360.value)//
+                .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                .isInterestRecalculationEnabled(true)//
+                .preClosureInterestCalculationStrategy(1)//
+                .rescheduleStrategyMethod(4)//
+                .interestRecalculationCompoundingMethod(0)//
+                .recalculationRestFrequencyType(2)//
+                .recalculationRestFrequencyInterval(1)//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")))//
+                .creditAllocation(List.of(//
+                        createCreditAllocation("CHARGEBACK", List.of("INTEREST", "FEE", "PRINCIPAL", "PENALTY")))) //
+                .multiDisburseLoan(true)//
+                .disallowExpectedDisbursements(true)//
+                .allowFullTermForTranche(true)//
+                .maxTrancheCount(10)//
+                .outstandingLoanBalance(10000.0);//
+        PostLoanProductsResponse responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburseFullTermTrancheChargeback = createLoanProductIdempotent(
+                loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburseFullTermTrancheChargeback);
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INT_DAILY_EMI_360_30_INT_RECALC_DAILY_MULTIDISB_FULL_TERM_TRANCHE_CHARGEBACK,
+                responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburseFullTermTrancheChargeback);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,
