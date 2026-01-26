@@ -28,7 +28,6 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
-import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,15 +49,11 @@ class ProgressiveLoanRescheduleRequestDataValidatorTest {
     @Mock
     private FromJsonHelper fromJsonHelper;
 
-    @Mock
-    private LoanRescheduleRequestRepository loanRescheduleRequestRepository;
-
     private ProgressiveLoanRescheduleRequestDataValidator progressiveLoanRescheduleRequestDataValidator;
 
     @BeforeEach
     void setUp() {
-        progressiveLoanRescheduleRequestDataValidator = new ProgressiveLoanRescheduleRequestDataValidator(fromJsonHelper,
-                loanRescheduleRequestRepository);
+        progressiveLoanRescheduleRequestDataValidator = new ProgressiveLoanRescheduleRequestDataValidator(fromJsonHelper);
         when(dataValidatorBuilder.reset()).thenReturn(dataValidatorBuilder);
         when(dataValidatorBuilder.parameter(anyString())).thenReturn(dataValidatorBuilder);
     }

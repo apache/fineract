@@ -74,6 +74,7 @@ import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansA
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidator;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
+import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanTermVariationsRepository;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.exception.LoanRescheduleRequestNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
@@ -117,6 +118,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     private final LoanScheduleComponent loanSchedule;
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanLifecycleStateMachine loanLifecycleStateMachine;
+    private final LoanTermVariationsRepository loanTermVariationsRepository;
 
     /**
      * create a new instance of the LoanRescheduleRequest object from the JsonCommand object and persist
@@ -397,6 +399,17 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 LoanTermVariationType termType = mapping.getLoanTermVariations().getTermType();
                 if (termType.isInterestRateVariation() || termType.isInterestRateFromInstallment() || termType.isExtendRepaymentPeriod()) {
                     hasInterestRateChange = true;
+                }
+            }
+            if (hasInterestRateChange && loan.isProgressiveSchedule()) {
+                final LocalDate termApplicableFromDate = rescheduleFromDate;
+                LoanTermVariations previousLoanTermVariations = activeLoanTermVariations.stream()
+                        .filter(lt -> lt.getTermType().isInterestRateFromInstallment() //
+                                && lt.getTermApplicableFrom().equals(termApplicableFromDate))
+                        .findFirst().orElse(null);
+                if (previousLoanTermVariations != null) {
+                    previousLoanTermVariations.markAsInactive();
+                    loanTermVariationsRepository.save(previousLoanTermVariations);
                 }
             }
             BigDecimal annualNominalInterestRate = null;

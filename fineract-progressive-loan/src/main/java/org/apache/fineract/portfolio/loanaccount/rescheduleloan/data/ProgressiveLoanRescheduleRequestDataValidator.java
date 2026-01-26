@@ -33,7 +33,6 @@ import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.Loan
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateSupportedParameters;
 
 import com.google.gson.JsonElement;
-import jakarta.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -44,17 +43,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
-import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRescheduleRequestToTermVariationMapping;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
-import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
 import org.springframework.stereotype.Component;
 
 @Component("progressiveLoanRescheduleRequestDataValidatorImpl")
@@ -62,7 +58,6 @@ import org.springframework.stereotype.Component;
 public class ProgressiveLoanRescheduleRequestDataValidator implements LoanRescheduleRequestDataValidator {
 
     private final FromJsonHelper fromJsonHelper;
-    private final LoanRescheduleRequestRepository loanRescheduleRequestRepository;
 
     @Override
     public void validateForCreateAction(JsonCommand jsonCommand, Loan loan) {
@@ -115,9 +110,6 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
 
     private void validateInterestRate(DataValidatorBuilder dataValidatorBuilder, Loan loan, LocalDate rescheduleFromDate) {
         validateLoanStatusIsActiveOrClosed(loan, dataValidatorBuilder);
-        if (rescheduleFromDate != null) {
-            validateInterestRateChangeRescheduleFromDate(loan, rescheduleFromDate);
-        }
         LoanRepaymentScheduleInstallment installment;
         installment = loan.getRelatedRepaymentScheduleInstallment(rescheduleFromDate);
         validateReschedulingInstallment(dataValidatorBuilder, installment);
@@ -221,20 +213,6 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
     @Override
     public void validateForRejectAction(JsonCommand jsonCommand, LoanRescheduleRequest loanRescheduleRequest) {
         throw new UnsupportedOperationException("Nothing to override here");
-    }
-
-    private void validateInterestRateChangeRescheduleFromDate(Loan loan, LocalDate rescheduleFromDate) {
-        boolean alreadyExistInterestRateChange = loanRescheduleRequestRepository.exists((root, query, criteriaBuilder) -> {
-            Predicate loanPredicate = criteriaBuilder.equal(root.get("loan"), loan);
-            Predicate statusPredicate = root.get("statusEnum")
-                    .in(List.of(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), LoanStatus.APPROVED.getValue()));
-            Predicate datePredicate = criteriaBuilder.equal(root.get("rescheduleFromDate"), rescheduleFromDate);
-            return criteriaBuilder.and(loanPredicate, statusPredicate, datePredicate);
-        });
-        if (alreadyExistInterestRateChange) {
-            throw new GeneralPlatformDomainRuleException("loan.reschedule.interest.rate.change.already.exists",
-                    "Interest rate change for the provided date is already exists.", rescheduleFromDate);
-        }
     }
 
     private BigDecimal validateInterestRateParam(final FromJsonHelper fromJsonHelper, final JsonElement jsonElement,

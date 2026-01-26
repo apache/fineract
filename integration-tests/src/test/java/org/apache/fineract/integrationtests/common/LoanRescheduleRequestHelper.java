@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
+import java.util.List;
 import org.apache.fineract.client.models.GetLoanRescheduleRequestResponse;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
@@ -118,4 +119,9 @@ public class LoanRescheduleRequestHelper {
         return Calls
                 .ok(FineractClientHelper.getFineractClient().rescheduleLoans.updateLoanRescheduleRequest(scheduleId, request, "reject"));
     }
+
+    public List<GetLoanRescheduleRequestResponse> retrieveLoanRescheduleRequestsByLoan(final String command, final Long loanId) {
+        return Calls.ok(FineractClientHelper.getFineractClient().rescheduleLoans.retrieveAllRescheduleRequest(command, loanId));
+    }
+
 }
