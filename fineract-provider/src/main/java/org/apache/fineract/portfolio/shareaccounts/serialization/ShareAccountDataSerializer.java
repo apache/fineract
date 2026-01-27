@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -706,16 +707,8 @@ public class ShareAccountDataSerializer {
             }
         }
         boolean isTransactionBeforeExistingTransactions = false;
-        Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions();
-        for (ShareAccountTransaction transaction : transactions) {
-            if (!transaction.isChargeTransaction()) {
-                LocalDate transactionDate = transaction.getPurchasedDate();
-                if (DateUtils.isBefore(requestedDate, transactionDate)) {
-                    isTransactionBeforeExistingTransactions = true;
-                    break;
-                }
-            }
-        }
+        isTransactionBeforeExistingTransactions = isTransactionBeforeExistingTransactions(requestedDate,
+                isTransactionBeforeExistingTransactions, account);
         if (isTransactionBeforeExistingTransactions) {
             baseDataValidator.reset().parameter(ShareAccountApiConstants.requesteddate_paramname).value(requestedDate)
                     .failWithCodeNoParameterAddedToErrorCode("purchase.transaction.date.cannot.be.before.existing.transactions");
@@ -730,6 +723,23 @@ public class ShareAccountDataSerializer {
         handleAdditionalSharesChargeTransactions(account, purchaseTransaction);
         actualChanges.put(ShareAccountApiConstants.additionalshares_paramname, purchaseTransaction);
         return actualChanges;
+    }
+
+    private boolean isTransactionBeforeExistingTransactions(LocalDate requestedDate, boolean isTransactionBeforeExistingTransactions,
+            ShareAccount shareAccount) {
+        Collection<ShareAccountTransaction> activeTransactions = shareAccount.getShareAccountTransactions().stream()
+                .filter(tr -> tr.isActive() && !tr.isChargeTransaction() && !tr.isPurchaseRejectedTransaction()).toList();
+
+        for (ShareAccountTransaction transaction : activeTransactions) {
+            if (!transaction.isChargeTransaction() && transaction.isActive() && !transaction.isPurchaseRejectedTransaction()) {
+                LocalDate transactionDate = transaction.getPurchasedDate();
+                if (DateUtils.isBefore(requestedDate, transactionDate)) {
+                    isTransactionBeforeExistingTransactions = true;
+                    break;
+                }
+            }
+        }
+        return isTransactionBeforeExistingTransactions;
     }
 
     private void handleAdditionalSharesChargeTransactions(final ShareAccount account, final ShareAccountTransaction purchaseTransaction) {
@@ -863,16 +873,8 @@ public class ShareAccountDataSerializer {
         baseDataValidator.reset().parameter(ShareAccountApiConstants.requestedshares_paramname).value(sharesRequested).notNull()
                 .longGreaterThanZero();
         boolean isTransactionBeforeExistingTransactions = false;
-        Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions();
-        for (ShareAccountTransaction transaction : transactions) {
-            if (!transaction.isChargeTransaction() && transaction.isActive()) {
-                LocalDate transactionDate = transaction.getPurchasedDate();
-                if (DateUtils.isBefore(requestedDate, transactionDate)) {
-                    isTransactionBeforeExistingTransactions = true;
-                    break;
-                }
-            }
-        }
+        isTransactionBeforeExistingTransactions = isTransactionBeforeExistingTransactions(requestedDate,
+                isTransactionBeforeExistingTransactions, account);
         if (isTransactionBeforeExistingTransactions) {
             baseDataValidator.reset().parameter(ShareAccountApiConstants.requesteddate_paramname).value(requestedDate)
                     .failWithCodeNoParameterAddedToErrorCode("redeem.transaction.date.cannot.be.before.existing.transactions");
@@ -1018,16 +1020,8 @@ public class ShareAccountDataSerializer {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
         boolean isTransactionBeforeExistingTransactions = false;
-        Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions();
-        for (ShareAccountTransaction transaction : transactions) {
-            if (!transaction.isChargeTransaction()) {
-                LocalDate transactionDate = transaction.getPurchasedDate();
-                if (DateUtils.isBefore(closedDate, transactionDate)) {
-                    isTransactionBeforeExistingTransactions = true;
-                    break;
-                }
-            }
-        }
+        isTransactionBeforeExistingTransactions = isTransactionBeforeExistingTransactions(closedDate,
+                isTransactionBeforeExistingTransactions, account);
         if (isTransactionBeforeExistingTransactions) {
             baseDataValidator.reset().parameter(ShareAccountApiConstants.closeddate_paramname).value(closedDate)
                     .failWithCodeNoParameterAddedToErrorCode("share.account.cannot.be.closed.before.existing.transactions");
