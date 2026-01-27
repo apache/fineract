@@ -69,7 +69,8 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
     @Getter
     private final MathContext mc;
 
-    private final boolean isPaused;
+    @Setter
+    private boolean isPaused;
 
     public static InterestPeriod copy(@NotNull RepaymentPeriod repaymentPeriod, @NotNull InterestPeriod interestPeriod, MathContext mc) {
         return new InterestPeriod(repaymentPeriod, interestPeriod.getFromDate(), interestPeriod.getDueDate(),
@@ -102,13 +103,6 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
         final Money zero = repaymentPeriod.getZero();
         return new InterestPeriod(repaymentPeriod, fromDate, dueDate, BigDecimal.ZERO, BigDecimal.ZERO, zero, zero, zero, zero, zero, zero,
                 zero.getMc(), isPaused);
-    }
-
-    public static InterestPeriod withPausedAndEmptyAmounts(@NotNull RepaymentPeriod repaymentPeriod, @NotNull LocalDate fromDate,
-            LocalDate dueDate) {
-        final Money zero = repaymentPeriod.getZero();
-        return new InterestPeriod(repaymentPeriod, fromDate, dueDate, BigDecimal.ZERO, BigDecimal.ZERO, zero, zero, zero, zero, zero, zero,
-                zero.getMc(), true);
     }
 
     @Override

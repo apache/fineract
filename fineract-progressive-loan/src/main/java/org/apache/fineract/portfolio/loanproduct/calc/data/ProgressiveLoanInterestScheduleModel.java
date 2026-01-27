@@ -29,7 +29,6 @@ import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -253,39 +252,33 @@ public class ProgressiveLoanInterestScheduleModel {
         interestPeriods.add(previousIndex + 1, interestPeriod);
     }
 
+    private void insertInterestPausePeriodsByAdjustedDates(final RepaymentPeriod repaymentPeriod, final LocalDate pauseStart,
+            final LocalDate pauseEnd) {
+        boolean hasStartInterestPeriod = repaymentPeriod.getInterestPeriods().stream().filter(ip -> ip.getFromDate().isEqual(pauseStart))
+                .findFirst().isPresent();
+        if (!hasStartInterestPeriod) {
+            insertInterestPeriod(repaymentPeriod, pauseStart, repaymentPeriod.getZero(), repaymentPeriod.getZero(),
+                    repaymentPeriod.getZero());
+        }
+        boolean hasEndInterestPeriod = repaymentPeriod.getInterestPeriods().stream().filter(ip -> ip.getDueDate().isEqual(pauseEnd))
+                .findFirst().isPresent();
+        if (!hasEndInterestPeriod) {
+            insertInterestPeriod(repaymentPeriod, pauseEnd, repaymentPeriod.getZero(), repaymentPeriod.getZero(),
+                    repaymentPeriod.getZero());
+        }
+        repaymentPeriod.getInterestPeriods().stream()
+                .filter(ip -> !ip.getFromDate().isBefore(pauseStart) && !ip.getDueDate().isAfter(pauseEnd))
+                .forEach(ip -> ip.setPaused(true));
+    }
+
     private void insertInterestPausePeriods(final RepaymentPeriod repaymentPeriod, final LocalDate pauseStart, final LocalDate pauseEnd) {
-        final boolean isPauseStartOnFirstDayOfPeriod = pauseStart.isEqual(repaymentPeriod.getFromDate().plusDays(1));
-        final LocalDate effectivePauseStart = isPauseStartOnFirstDayOfPeriod ? pauseStart : pauseStart.minusDays(1);
+        final LocalDate effectivePauseStart = pauseStart.minusDays(1);
 
         final LocalDate finalPauseStart = effectivePauseStart.isBefore(repaymentPeriod.getFromDate()) ? repaymentPeriod.getFromDate()
                 : effectivePauseStart;
         final LocalDate finalPauseEnd = pauseEnd.isAfter(repaymentPeriod.getDueDate()) ? repaymentPeriod.getDueDate() : pauseEnd;
 
-        final List<InterestPeriod> newInterestPeriods = new ArrayList<>();
-        for (final InterestPeriod interestPeriod : repaymentPeriod.getInterestPeriods()) {
-            if (interestPeriod.getDueDate().isBefore(finalPauseStart) || !interestPeriod.getFromDate().isBefore(finalPauseEnd)) {
-                newInterestPeriods.add(interestPeriod);
-            } else {
-                if (interestPeriod.getFromDate().isBefore(finalPauseStart)) {
-                    final InterestPeriod leftSlice = InterestPeriod.copy(repaymentPeriod, interestPeriod);
-                    leftSlice.setDueDate(finalPauseStart);
-
-                    newInterestPeriods.add(leftSlice);
-                }
-                if (interestPeriod.getDueDate().isAfter(finalPauseEnd)) {
-                    final InterestPeriod rightSlice = InterestPeriod.copy(repaymentPeriod, interestPeriod);
-                    rightSlice.setFromDate(finalPauseEnd);
-                    newInterestPeriods.add(rightSlice);
-                }
-            }
-        }
-
-        final InterestPeriod pausedSlice = InterestPeriod.withPausedAndEmptyAmounts(repaymentPeriod, finalPauseStart, finalPauseEnd);
-        newInterestPeriods.add(pausedSlice);
-
-        newInterestPeriods.sort(Comparator.comparing(InterestPeriod::getFromDate));
-
-        repaymentPeriod.setInterestPeriods(newInterestPeriods);
+        insertInterestPausePeriodsByAdjustedDates(repaymentPeriod, finalPauseStart, finalPauseEnd);
     }
 
     private InterestPeriod findPreviousInterestPeriod(final RepaymentPeriod repaymentPeriod, final LocalDate date) {
