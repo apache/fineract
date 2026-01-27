@@ -34,6 +34,7 @@ import org.apache.fineract.command.sample.command.DummyCommand;
 import org.apache.fineract.command.sample.data.DummyRequest;
 import org.apache.fineract.command.sample.data.DummyResponse;
 import org.apache.fineract.command.sample.service.DefaultDummyTenantService;
+import org.apache.fineract.command.sample.service.DefaultDummyUserService;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,17 +52,24 @@ class DummyApiController {
 
     private final DefaultDummyTenantService tenantService;
 
+    private final DefaultDummyUserService userService;
+
     private final CommandPipeline pipeline;
 
     @PostMapping("/sync")
     DummyResponse dummySync(@RequestHeader(value = COMMAND_REQUEST_ID, required = false) UUID requestId,
-            @RequestHeader(value = "x-fineract-tenant-id", required = false) String tenantId, @RequestBody DummyRequest request) {
+            @RequestHeader(value = "x-fineract-tenant-id", required = false) String tenantId,
+            @RequestHeader(value = "x-fineract-username", required = false) String username, @RequestBody DummyRequest request) {
         var command = new DummyCommand();
         command.setId(requestId);
         command.setPayload(request);
         command.setCreatedAt(OffsetDateTime.now(ZoneId.of("UTC")));
 
         tenantService.set(tenantId);
+        userService.set(username);
+
+        command.setTenantId(tenantService.get());
+        command.setUsername(userService.get());
 
         Supplier<DummyResponse> result = pipeline.send(command);
 

@@ -32,6 +32,8 @@
             <column name="tenant_id" type="varchar(255)" />
             <column name="username" type="varchar(255)" />
             <column name="payload" type="text" />
+            <column name="result" type="text" />
+            <column name="error_message" type="text" />
         </createTable>
     </changeSet>
     <changeSet author="fineract" id="command-00002" context="mysql">
@@ -44,6 +46,8 @@
             <column name="tenant_id" type="varchar(255)" />
             <column name="username" type="varchar(255)" />
             <column name="payload" type="text" />
+            <column name="result" type="text" />
+            <column name="error_message" type="text" />
         </createTable>
     </changeSet>
 </databaseChangeLog>
