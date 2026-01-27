@@ -138,7 +138,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 .forEach(rp -> rp.setTotalDisbursedAmount(rp.getTotalDisbursedAmount().add(operation.getAmount())));
 
         final int numberOfRepayments = scheduleModel.loanProductRelatedDetail().getNumberOfRepayments();
-        if (scheduleModel.loanProductRelatedDetail().isAllowFullTermForTranche() && numberOfRepayments > 0) {
+        if (scheduleModel.loanProductRelatedDetail().isAllowFullTermForTranche() && numberOfRepayments > 0
+                && operation.getAction().equals(EmiChangeOperation.Action.DISBURSEMENT)) {
             addFullTermTrancheDisbursement(scheduleModel, operation);
         } else {
             scheduleModel
