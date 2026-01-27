@@ -470,6 +470,18 @@ public final class ErrorMessageHelper {
                 + "%nNumber of transaction tab lines: %s %nNumber of expected datatable lines: %s%n", resourceId, actual, expected);
     }
 
+    public static String wrongValueInLineInRescheduleTab(String resourceId, int line, List<List<String>> actualList,
+            List<String> expected) {
+        String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
+        return String.format("%nWrong value in Reschedule tab of resource %s line %s." //
+                + "%nActual values in line are: %n%s %nExpected values in line: %n%s", resourceId, line, actual, expected);
+    }
+
+    public static String nrOfLinesWrongInRescheduleTab(String resourceId, int actual, int expected) {
+        return String.format("%nNumber of lines does not match in Reschedule tab and expected datatable of resource %s." //
+                + "%nNumber of reschedule tab lines: %s %nNumber of expected datatable lines: %s%n", resourceId, actual, expected);
+    }
+
     public static String wrongValueInLineInChargesTab(String resourceId, int line, List<List<String>> actualList, List<String> expected) {
         String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
         return String.format("%nWrong value in Charges tab of resource %s line %s." //
