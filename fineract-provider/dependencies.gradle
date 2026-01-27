@@ -40,6 +40,7 @@ dependencies {
     implementation(project(path: ':fineract-report'))
     implementation(project(path: ':fineract-tax'))
     implementation(project(path: ':fineract-loan-origination'))
+    implementation(project(path: ':fineract-security'))
 
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
