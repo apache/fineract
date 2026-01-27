@@ -20,15 +20,14 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccrualData;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,19 +43,11 @@ import org.springframework.transaction.annotation.Transactional;
  * </p>
  */
 @Service
+@RequiredArgsConstructor
 public class SavingsAccountRepositoryWrapper {
 
     private final SavingsAccountRepository repository;
     private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
-    private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public SavingsAccountRepositoryWrapper(final SavingsAccountRepository repository,
-            final SavingsAccountTransactionRepository savingsAccountTransactionRepository, final JdbcTemplate jdbcTemplate) {
-        this.repository = repository;
-        this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Transactional(readOnly = true)
     public SavingsAccount findOneWithNotFoundDetection(final Long savingsId) {

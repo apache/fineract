@@ -662,6 +662,11 @@ public class ExternalEventConfigurationHelper {
         loanApprovedAmountChangedBusinessEvent.put("enabled", false);
         defaults.add(loanApprovedAmountChangedBusinessEvent);
 
+        Map<String, Object> savingsAccountsStayedLockedBusinessEvent = new HashMap<>();
+        savingsAccountsStayedLockedBusinessEvent.put("type", "SavingsAccountsStayedLockedBusinessEvent");
+        savingsAccountsStayedLockedBusinessEvent.put("enabled", false);
+        defaults.add(savingsAccountsStayedLockedBusinessEvent);
+
         return defaults;
     }
 

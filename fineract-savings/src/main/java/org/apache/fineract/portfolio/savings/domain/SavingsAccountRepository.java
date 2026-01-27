@@ -20,7 +20,9 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import jakarta.persistence.LockModeType;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.savings.data.SavingsAccrualData;
 import org.springframework.data.domain.Page;
@@ -97,4 +99,52 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
 
     @Query("SELECT sa.id FROM SavingsAccount sa WHERE sa.status = :status")
     List<Long> findSavingsAccountIdsByStatusId(Integer status);
+
+    // COB related queries
+    @Query("""
+            SELECT sa.id FROM SavingsAccount sa
+            WHERE sa.id BETWEEN :minSavingsId AND :maxSavingsId
+            AND sa.status IN :savingsStatuses
+            AND (:cobBusinessDate = sa.lastClosedBusinessDate OR sa.lastClosedBusinessDate IS NULL)
+            """)
+    List<Long> findAllSavingsByLastClosedBusinessDateAndMinAndMaxSavingsIdAndStatuses(@Param("minSavingsId") Long minSavingsId,
+            @Param("maxSavingsId") Long maxSavingsId, @Param("cobBusinessDate") LocalDate cobBusinessDate,
+            @Param("savingsStatuses") Collection<Integer> savingsStatuses);
+
+    @Query("""
+            SELECT sa.id FROM SavingsAccount sa
+            WHERE sa.id BETWEEN :minSavingsId AND :maxSavingsId
+            AND sa.status IN :savingsStatuses
+            AND sa.lastClosedBusinessDate = :cobBusinessDate
+            """)
+    List<Long> findAllSavingsByLastClosedBusinessDateNotNullAndMinAndMaxSavingsIdAndStatuses(@Param("minSavingsId") Long minSavingsId,
+            @Param("maxSavingsId") Long maxSavingsId, @Param("cobBusinessDate") LocalDate cobBusinessDate,
+            @Param("savingsStatuses") Collection<Integer> savingsStatuses);
+
+    @Query("""
+            SELECT sa.id, sa.lastClosedBusinessDate
+            FROM SavingsAccount sa
+            WHERE sa.id IN :savingsIds
+            AND (sa.lastClosedBusinessDate < :businessDate OR sa.lastClosedBusinessDate IS NULL)
+            """)
+    List<COBIdAndLastClosedBusinessDate> findAllSavingsIdsBehindDateOrNull(@Param("businessDate") LocalDate businessDate,
+            @Param("savingsIds") List<Long> savingsIds);
+
+    @Query("""
+            SELECT sa.id, sa.lastClosedBusinessDate
+            FROM SavingsAccount sa
+            WHERE sa.id IN :savingsIds
+            AND sa.lastClosedBusinessDate < :businessDate
+            """)
+    List<COBIdAndLastClosedBusinessDate> findAllSavingsIdsBehindDate(@Param("businessDate") LocalDate businessDate,
+            @Param("savingsIds") List<Long> savingsIds);
+
+    @Query("""
+            SELECT sa.id, sa.lastClosedBusinessDate
+            FROM SavingsAccount sa
+            WHERE sa.status IN (100, 200, 300, 303, 304)
+            AND sa.lastClosedBusinessDate IS NOT NULL
+            ORDER BY sa.lastClosedBusinessDate ASC
+            """)
+    List<COBIdAndLastClosedBusinessDate> findAllSavingsIdsOldestCobProcessed();
 }
