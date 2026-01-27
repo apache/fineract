@@ -153,4 +153,6 @@ public interface ConfigurationDomainService {
     String getAssetOwnerTransferOustandingInterestStrategy();
 
     Integer getPasswordReuseRestrictionCount();
+
+    boolean isForcePasswordResetOnFirstLoginEnabled();
 }

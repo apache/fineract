@@ -49,7 +49,7 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
     private final ConfigurationDomainService configurationDomainService;
 
     protected static final List<CommandWrapper> EXEMPT_FROM_PASSWORD_RESET_CHECK = new ArrayList<CommandWrapper>(
-            List.of(new CommandWrapperBuilder().updateUser(null).build()));
+            List.of(new CommandWrapperBuilder().changeUserPassword(null).build()));
 
     @Override
     public AppUser authenticatedUser() {
@@ -121,7 +121,7 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
             throw new UnAuthenticatedUserException();
         }
 
-        if (this.shouldCheckForPasswordForceReset(commandWrapper) && this.doesPasswordHasToBeRenewed(currentUser)) {
+        if (this.shouldCheckForPasswordForceReset(commandWrapper, currentUser) && this.doesPasswordHasToBeRenewed(currentUser)) {
             throw new ResetPasswordException(currentUser.getId());
         }
 
@@ -149,6 +149,10 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
     @Override
     public boolean doesPasswordHasToBeRenewed(AppUser currentUser) {
 
+        if (currentUser.isPasswordResetRequired()) {
+            return true;
+        }
+
         if (this.configurationDomainService.isPasswordForcedResetEnable() && !currentUser.getPasswordNeverExpires()) {
 
             Long passwordDurationDays = this.configurationDomainService.retrievePasswordLiveTime();
@@ -164,11 +168,11 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
 
     }
 
-    private boolean shouldCheckForPasswordForceReset(CommandWrapper commandWrapper) {
+    private boolean shouldCheckForPasswordForceReset(CommandWrapper commandWrapper, AppUser currentUser) {
         for (CommandWrapper commandItem : EXEMPT_FROM_PASSWORD_RESET_CHECK) {
             if (commandItem.actionName().equals(commandWrapper.actionName())
                     && commandItem.getEntityName().equals(commandWrapper.getEntityName())) {
-                return false;
+                return commandWrapper.getEntityId() == null || !commandWrapper.getEntityId().equals(currentUser.getId());
             }
         }
         return true;

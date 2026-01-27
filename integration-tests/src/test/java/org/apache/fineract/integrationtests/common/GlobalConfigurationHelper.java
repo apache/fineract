@@ -231,6 +231,13 @@ public class GlobalConfigurationHelper {
         graceOnPenaltyPostingDefault.put("trapDoor", false);
         defaults.add(graceOnPenaltyPostingDefault);
 
+        HashMap<String, Object> forcePasswordResetOnFirstLoginDefault = new HashMap<>();
+        forcePasswordResetOnFirstLoginDefault.put("name", GlobalConfigurationConstants.FORCE_PASSWORD_RESET_ON_FIRST_LOGIN);
+        forcePasswordResetOnFirstLoginDefault.put("value", 0L);
+        forcePasswordResetOnFirstLoginDefault.put("enabled", false);
+        forcePasswordResetOnFirstLoginDefault.put("trapDoor", false);
+        defaults.add(forcePasswordResetOnFirstLoginDefault);
+
         HashMap<String, Object> savingsInterestPostingCurrentPeriodEndDefault = new HashMap<>();
         savingsInterestPostingCurrentPeriodEndDefault.put("name", GlobalConfigurationConstants.SAVINGS_INTEREST_POSTING_CURRENT_PERIOD_END);
         savingsInterestPostingCurrentPeriodEndDefault.put("value", 0L);
