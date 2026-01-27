@@ -21,6 +21,7 @@ package org.apache.fineract.test.data;
 public enum ChargeOffBehaviour {
 
     ZERO_INTEREST("ZERO_INTEREST"), //
+    ACCELERATE_MATURITY("ACCELERATE_MATURITY"), //
     REGULAR("REGULAR"); //
 
     public final String value;
