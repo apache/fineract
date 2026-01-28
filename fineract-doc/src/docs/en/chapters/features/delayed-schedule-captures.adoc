@@ -1,0 +1,94 @@
+= Delayed Schedule Captures / Full Term Tranches
+
+== Overview
+
+Full Term Tranche is a feature for **multi-disbursement Progressive loans** where each disbursement (tranche) is amortized over the full original term of the loan, instead of over the remaining term only. This supports use cases where captures (disbursements) can happen later in the loan lifecycle, while still granting the customer the full intended term for each captured amount.
+
+== Configuration
+
+=== Loan Product Level
+
+The Full Term Tranche feature is configured on the loan product.
+
+The following conditions apply:
+
+* **Multi-disbursement must be enabled**
+* **Loan schedule type must be PROGRESSIVE** (which requires the advanced payment allocation strategy)
+
+A boolean configuration flag is available on the loan product:
+
+* `allowFullTermForTranche` – *Allow full term length for each tranche disbursement*  
+  * Default value: `false`
+  * When set to `true`, the system enables full term schedule calculation for each disbursement
+  * Validation rules:
+  ** If multi-disbursement is not enabled, enabling this flag is rejected
+  ** If the schedule type is not PROGRESSIVE, enabling this flag is rejected
+
+=== Loan Account Level
+
+On loan creation, the loan-level flag is determined as follows:
+
+* By default, the loan **inherits** the `allowFullTermForTranche` value from the loan product
+* The loan application request may optionally include a boolean `allowFullTermForTranche`:
+  * If present, it overrides the inherited value for that specific loan
+  * If set to `true` while the product-level flag is `false`, the request is rejected with validation error
+
+The loan entity stores this value as a persistent field.
+
+== Behavior
+
+=== Base Schedule Generation
+
+For the **first disbursement**, the repayment schedule is generated according to the standard Progressive EMI calculation rules:
+
+* The number of repayments and term are taken from the loan product configuration
+* Installment dates follow the pattern defined by:
+  * Loan term frequency and type
+  * Repayment frequency and type
+* The first installment due date is derived from the loan configuration (disbursement date, repayment frequency, minimum days between disbursement and first repayment, calendar settings if applicable)
+
+When `allowFullTermForTranche` is **disabled** (`false`), subsequent disbursements behave as in the existing multi-disbursement implementation:
+
+* The new amount is distributed over the **remaining** future installments
+* The original maturity date is **not** extended due to additional disbursements
+
+=== Full Term Tranche Behavior (Enabled)
+
+When `allowFullTermForTranche` is **enabled** (`true`) and the product has a positive number of repayments configured:
+
+* For **each new disbursement**:
+  * The system determines the period in the current schedule where the disbursement date falls
+  * A **temporary full-term schedule** is calculated for the disbursed amount:
+    * Principal: equal to the disbursed amount
+    * Term length (number of repayments): equal to the loan product’s number of repayments
+    * Term frequency and repayment frequency: copied from the loan product
+    * Start date: the start date of the period that contains the disbursement date (or the current maturity date if no such period exists)
+  * The temporary schedule covers the full term for that disbursement, starting from the identified start date
+
+* The temporary schedule is then merged into the existing loan schedule:
+  * If a period in the temporary schedule has the same from-date and due-date as an existing period, the principal and interest due amounts are added to the existing period
+  * If a period in the temporary schedule does not match any existing period, a new period is added to the schedule
+  * When installments are created from the merged schedule, only periods with due dates on or after the disbursement date become installments
+
+As a result, overlapping installments from multiple disbursements on the same due date are aggregated into a single installment with summed amounts, and the maturity date can move later than originally configured to accommodate the full term of later disbursements.
+
+=== Disbursement Scenarios
+
+When full term tranche is enabled:
+
+* **Disbursement on an existing installment date**: The due amounts (principal and interest) for that date are increased according to the full-term calculation for the new tranche
+* **Disbursement between installment dates (mid-period)**: A new full-term schedule is calculated from the start of the period that contains the disbursement date, and the newly generated installments are merged into the existing schedule
+* **Multiple disbursements before the first repayment date**: Each disbursement contributes its own full-term schedule from the same starting point, and the resulting installments reflect the aggregated principal and interest across all tranches
+
+== API
+
+The `allowFullTermForTranche` field is available in:
+
+* **Loan Product API**: Create/update requests and read responses
+* **Loan API**: 
+  * Create/update requests (optional, inherits from product if not provided)
+  * Read responses (indicates whether the feature is active for the loan)
+
+The repayment schedule returned by the loan read endpoint reflects the merged full-term schedule when this feature is enabled, showing increased installment amounts on overlapping due dates and extended number of installments when later disbursements extend the term.
+
+
