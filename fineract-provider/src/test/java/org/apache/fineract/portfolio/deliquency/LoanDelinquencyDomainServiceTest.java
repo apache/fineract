@@ -139,6 +139,7 @@ public class LoanDelinquencyDomainServiceTest {
         // then
         assertEquals(0L, collectionData.getDelinquentDays());
         assertEquals(null, collectionData.getDelinquentDate());
+        assertEquals(null, collectionData.getPastDueDate());
         assertEquals(collectionData.getDelinquentDays(), collectionData.getPastDueDays());
 
     }
@@ -170,6 +171,7 @@ public class LoanDelinquencyDomainServiceTest {
         // then
         assertEquals(daysDiff, collectionData.getDelinquentDays());
         assertEquals(dueDate, collectionData.getDelinquentDate());
+        assertEquals(dueDate, collectionData.getPastDueDate());
         assertEquals(collectionData.getDelinquentDays(), collectionData.getPastDueDays());
 
     }
@@ -206,6 +208,7 @@ public class LoanDelinquencyDomainServiceTest {
         // then
         assertEquals(0L, collectionData.getDelinquentDays());
         assertEquals(null, collectionData.getDelinquentDate());
+        assertEquals(null, collectionData.getPastDueDate());
         assertEquals(collectionData.getDelinquentDays(), collectionData.getPastDueDays());
 
     }
@@ -248,10 +251,12 @@ public class LoanDelinquencyDomainServiceTest {
 
         assertEquals(daysDiff, loanCollectionData.getDelinquentDays());
         assertEquals(dueDate, loanCollectionData.getDelinquentDate());
+        assertEquals(dueDate, loanCollectionData.getPastDueDate());
         assertEquals(loanCollectionData.getDelinquentDays(), loanCollectionData.getPastDueDays());
 
         assertEquals(daysDiff, installmentCollectionData.getDelinquentDays());
         assertEquals(dueDate, installmentCollectionData.getDelinquentDate());
+        assertEquals(dueDate, installmentCollectionData.getPastDueDate());
         assertEquals(installmentCollectionData.getDelinquentDays(), installmentCollectionData.getPastDueDays());
 
     }
@@ -301,11 +306,13 @@ public class LoanDelinquencyDomainServiceTest {
 
         assertEquals(daysDiff, loanCollectionData.getDelinquentDays());
         assertEquals(transactionDate, loanCollectionData.getDelinquentDate());
+        assertEquals(transactionDate, loanCollectionData.getPastDueDate());
         assertEquals(loanCollectionData.getDelinquentDays(), loanCollectionData.getPastDueDays());
 
         // then
         assertEquals(daysDiff, installmentCollectionData.getDelinquentDays());
         assertEquals(transactionDate, installmentCollectionData.getDelinquentDate());
+        assertEquals(transactionDate, installmentCollectionData.getPastDueDate());
         assertEquals(installmentCollectionData.getDelinquentDays(), installmentCollectionData.getPastDueDays());
         assertEquals(0, principal.compareTo(installmentCollectionData.getDelinquentAmount()));
 
@@ -353,6 +360,7 @@ public class LoanDelinquencyDomainServiceTest {
         CollectionData loanCollectionData = collectionData.getLoanCollectionData();
         assertEquals(35L, loanCollectionData.getDelinquentDays());
         assertEquals(LocalDate.of(2022, 1, 16), loanCollectionData.getDelinquentDate());
+        assertEquals(LocalDate.of(2022, 1, 16), loanCollectionData.getPastDueDate());
 
         Map<Long, CollectionData> installments = collectionData.getLoanInstallmentsCollectionData();
         assertNotNull(installments);
@@ -408,6 +416,7 @@ public class LoanDelinquencyDomainServiceTest {
         CollectionData loanCollectionData = delinquencyData.getLoanCollectionData();
         assertEquals(16L, loanCollectionData.getDelinquentDays());
         assertEquals(LocalDate.of(2022, 1, 10), loanCollectionData.getDelinquentDate());
+        assertEquals(LocalDate.of(2022, 1, 10), loanCollectionData.getPastDueDate());
 
         Map<Long, CollectionData> installmentData = delinquencyData.getLoanInstallmentsCollectionData();
         assertEquals(3, installmentData.size());

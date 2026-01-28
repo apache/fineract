@@ -1027,6 +1027,8 @@ final class LoansApiResourceSwagger {
             @Schema(example = "12")
             public Integer pastDueDays;
             @Schema(example = "[2022, 07, 01]")
+            public LocalDate pastDueDate;
+            @Schema(example = "[2022, 07, 01]")
             public LocalDate nextPaymentDueDate;
             @Schema(example = "123.23")
             public BigDecimal nextPaymentAmount;

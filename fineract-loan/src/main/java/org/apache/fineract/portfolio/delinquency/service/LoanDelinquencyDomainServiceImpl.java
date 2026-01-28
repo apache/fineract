@@ -126,6 +126,7 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
                 overdueDays = 0L;
             }
             collectionData.setPastDueDays(overdueDays);
+            collectionData.setPastDueDate(overdueSinceDate);
             LocalDate delinquentStartDate = overdueSinceDate.plusDays(graceDays.longValue());
             collectionData.setDelinquentDate(delinquentStartDate);
         }
@@ -205,6 +206,7 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
                 overdueDays = 0L;
             }
             collectionData.setPastDueDays(overdueDays);
+            collectionData.setPastDueDate(overdueSinceDate);
             LocalDate delinquentStartDate = overdueSinceDate.plusDays(graceDays.longValue());
             collectionData.setDelinquentDate(delinquentStartDate);
         }
@@ -244,6 +246,7 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
                 overdueDays = 0L;
             }
             collectionData.setPastDueDays(overdueDays);
+            collectionData.setPastDueDate(overdueSinceDate);
             collectionData.setDelinquentDate(overdueSinceDate);
         }
         collectionData.setDelinquentAmount(outstandingAmount);

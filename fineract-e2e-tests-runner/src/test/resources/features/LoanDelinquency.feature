@@ -2176,3 +2176,48 @@ Feature: LoanDelinquency
     And Loan has the following LOAN level delinquency data:
       | classification | delinquentAmount | delinquentDate   | delinquentDays | pastDueDays |
       | RANGE_90       | 666.68           | 06 February 2025 | 98             | 103         |
+
+  Scenario: Verify that pastDueDate is returned correctly for overdue loan
+    When Admin sets the business date to "01 October 2023"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL_INSTALLMENT_LEVEL_DELINQUENCY | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
+    When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
+    When Admin sets the business date to "10 October 2023"
+    When Admin runs inline COB job for Loan
+    Then Loan has the following LOAN level delinquency data:
+      | classification | delinquentAmount | delinquentDate  | pastDueDate     | delinquentDays | pastDueDays |
+      | RANGE_3        | 250.0            | 04 October 2023 | 01 October 2023 | 6              | 9           |
+
+  Scenario: Verify that pastDueDate is null when loan has no overdue
+    When Admin sets the business date to "01 October 2023"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL_INSTALLMENT_LEVEL_DELINQUENCY | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
+    When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "01 October 2023" with 250 EUR transaction amount
+    When Admin runs inline COB job for Loan
+    Then Loan has the following LOAN level delinquency data:
+      | classification | delinquentAmount | delinquentDate | pastDueDate | delinquentDays | pastDueDays |
+      | NO_DELINQUENCY | 0.0              | null           | null        | 0              | 0           |
+
+  Scenario: Verify that pastDueDate equals chargeback date when chargeback creates overdue
+    When Admin sets the business date to "01 October 2023"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL_INSTALLMENT_LEVEL_DELINQUENCY | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
+    When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "01 October 2023" with 250 EUR transaction amount
+    When Admin sets the business date to "05 October 2023"
+    When Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 250 EUR transaction amount
+    When Admin sets the business date to "10 October 2023"
+    When Admin runs inline COB job for Loan
+    Then Loan has the following LOAN level delinquency data:
+      | classification | delinquentAmount | delinquentDate  | pastDueDate     | delinquentDays | pastDueDays |
+      | RANGE_1        | 250.0            | 08 October 2023 | 05 October 2023 | 2              | 5           |
