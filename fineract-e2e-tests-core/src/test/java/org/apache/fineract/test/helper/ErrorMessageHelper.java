@@ -994,4 +994,8 @@ public final class ErrorMessageHelper {
     public static String reAmortizeClosedLoanFailure() {
         return "Loan re-amortization can only be done on active loans";
     }
+
+    public static String reAmortizeSameDateFailure() {
+        return "Validation errors: [id] Loan reamortization can only be done once a day. There has already been a reamortization done for today";
+    }
 }

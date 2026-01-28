@@ -70,6 +70,18 @@ public class LoanReAmortizationStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_REAMORTIZATION_RESPONSE, response);
     }
 
+    @When("Admin creates a Loan re-amortization transaction on current business date with reAmortizationInterestHandling {string} should FAIL")
+    public void createLoanReAmortizationWithInterestHandlingShouldFail(final String reAmortizationInterestHandling) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final Long loanId = loanResponse.getLoanId();
+
+        final PostLoansLoanIdTransactionsRequest reAmortizationRequest = LoanRequestFactory.defaultLoanReAmortizationRequest()
+                .reAmortizationInterestHandling(reAmortizationInterestHandling);
+
+        fail(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, reAmortizationRequest,
+                Map.of("command", "reAmortize")));
+    }
+
     @When("Admin creates a Loan re-amortization transaction on current business date with reAmortizationInterestHandling {string}")
     public void createLoanReAmortizationWithInterestHandling(final String reAmortizationInterestHandling) {
         final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
@@ -155,6 +167,11 @@ public class LoanReAmortizationStepDef extends AbstractStepDef {
     @When("Admin creates a Loan re-amortization transaction on current business date is forbidden as loan was closed")
     public void reAmortizationClosedLoanFailure() {
         reAmortizationFailure(ErrorMessageHelper.reAmortizeClosedLoanFailure());
+    }
+
+    @When("Admin creates a Loan re-amortization transaction on current business date is forbidden as re-amortization already done for today")
+    public void reAmortizationSameDateFailure() {
+        reAmortizationFailure(ErrorMessageHelper.reAmortizeSameDateFailure());
     }
 
     @When("Admin creates re-amortization trn on current business date with reAmortizationInterestHandling {string} is forbidden as loan was closed")
