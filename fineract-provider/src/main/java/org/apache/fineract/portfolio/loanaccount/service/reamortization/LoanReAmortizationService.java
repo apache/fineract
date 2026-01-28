@@ -150,7 +150,7 @@ public class LoanReAmortizationService {
     }
 
     private LoanScheduleData previewReAmortization(final Loan loan, final ReAmortizationPreviewRequest reAmortizationPreviewRequest) {
-        reAmortizationValidator.validateReAmortize(loan);
+        reAmortizationValidator.validateReAmortize(loan, reAmortizationPreviewRequest);
 
         final LoanTransaction reAmortizeTransaction = createReAmortizeTransactionFromPreviewRequest(loan, reAmortizationPreviewRequest);
         processReAmortizationTransaction(loan, reAmortizeTransaction, false);

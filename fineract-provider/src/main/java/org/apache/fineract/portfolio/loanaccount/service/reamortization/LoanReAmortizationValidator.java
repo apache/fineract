@@ -34,9 +34,11 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanReAmortizationApiConstants;
+import org.apache.fineract.portfolio.loanaccount.api.request.ReAmortizationPreviewRequest;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.reamortization.LoanReAmortizationInterestHandlingType;
+import org.apache.fineract.portfolio.loanaccount.domain.reamortization.LoanReAmortizationParameter;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.springframework.stereotype.Component;
@@ -49,11 +51,9 @@ public class LoanReAmortizationValidator {
 
     public void validateReAmortize(Loan loan, JsonCommand command) {
         validateReAmortizeRequest(command);
-        validateReAmortizeBusinessRules(loan);
-    }
-
-    public void validateReAmortize(final Loan loan) {
-        validateReAmortizeBusinessRules(loan);
+        LoanReAmortizationInterestHandlingType interestHandlingType = command.enumValueOfParameterNamed(
+                LoanReAmortizationApiConstants.reAmortizationInterestHandlingParamName, LoanReAmortizationInterestHandlingType.class);
+        validateReAmortizeBusinessRules(loan, interestHandlingType);
     }
 
     private void validateReAmortizeRequest(JsonCommand command) {
@@ -84,7 +84,7 @@ public class LoanReAmortizationValidator {
         throwExceptionIfValidationErrorsExist(dataValidationErrors);
     }
 
-    private void validateReAmortizeBusinessRules(Loan loan) {
+    private void validateReAmortizeBusinessRules(Loan loan, LoanReAmortizationInterestHandlingType interestHandlingType) {
         // validate reamortization shouldn't happen after maturity
         if (DateUtils.isAfter(getBusinessLocalDate(), loan.getMaturityDate())) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.reamortize.cannot.be.submitted.after.maturity",
@@ -118,6 +118,22 @@ public class LoanReAmortizationValidator {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.reamortize.reamortize.transaction.already.present.for.today",
                     "Loan reamortization can only be done once a day. There has already been a reamortization done for today",
                     loan.getId());
+        }
+
+        // validate if there is active re-amortization transaction, it should have the same interest handling strategy
+        Optional<LoanTransaction> previousReAmortizationTransaction = loan.getLoanTransactions().stream()
+                .filter(LoanTransaction::isNotReversed).filter(LoanTransaction::isReAmortize).findAny();
+        if (previousReAmortizationTransaction.isPresent()) {
+            LoanReAmortizationInterestHandlingType previousInterestHandlingType = Optional
+                    .ofNullable(previousReAmortizationTransaction.get().getLoanReAmortizationParameter())
+                    .map(LoanReAmortizationParameter::getInterestHandlingType).orElse(LoanReAmortizationInterestHandlingType.DEFAULT);
+            LoanReAmortizationInterestHandlingType currentInterestHandlingType = Optional.ofNullable(interestHandlingType)
+                    .orElse(LoanReAmortizationInterestHandlingType.DEFAULT);
+            if (!previousInterestHandlingType.equals(currentInterestHandlingType)) {
+                throw new GeneralPlatformDomainRuleException(
+                        "error.msg.loan.reamortize.reamortize.transaction.interest.handling.strategy.missmatch",
+                        "Previous active reamortization transactiuon has different interest handling strategy.", loan.getId());
+            }
         }
 
         // validate loan is not charged-off
@@ -163,4 +179,9 @@ public class LoanReAmortizationValidator {
         }
     }
 
+    public void validateReAmortize(Loan loan, ReAmortizationPreviewRequest reAmortizationPreviewRequest) {
+        LoanReAmortizationInterestHandlingType interestHandlingType = LoanReAmortizationInterestHandlingType
+                .valueOf(reAmortizationPreviewRequest.getReAmortizationInterestHandling());
+        validateReAmortizeBusinessRules(loan, interestHandlingType);
+    }
 }
