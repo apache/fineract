@@ -3952,4 +3952,24 @@ public class CommandWrapperBuilder {
         this.href = "/loan-originators/" + originatorId;
         return this;
     }
+
+    public CommandWrapperBuilder attachLoanOriginator(final Long loanId, final Long originatorId) {
+        this.actionName = "ATTACH";
+        this.entityName = "LOAN_ORIGINATOR";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.subentityId = originatorId;
+        this.href = "/loans/" + loanId + "/originators/" + originatorId;
+        return this;
+    }
+
+    public CommandWrapperBuilder detachLoanOriginator(final Long loanId, final Long originatorId) {
+        this.actionName = "DETACH";
+        this.entityName = "LOAN_ORIGINATOR";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.subentityId = originatorId;
+        this.href = "/loans/" + loanId + "/originators/" + originatorId;
+        return this;
+    }
 }

@@ -16,20 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanorigination.service;
+package org.apache.fineract.portfolio.loanorigination.exception;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-public interface LoanOriginatorWritePlatformService {
+public class LoanOriginatorMappingNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    CommandProcessingResult create(JsonCommand command);
-
-    CommandProcessingResult update(Long id, JsonCommand command);
-
-    CommandProcessingResult delete(Long id);
-
-    CommandProcessingResult attachOriginatorToLoan(Long loanId, Long originatorId);
-
-    CommandProcessingResult detachOriginatorFromLoan(Long loanId, Long originatorId);
+    public LoanOriginatorMappingNotFoundException(Long loanId, Long originatorId) {
+        super("error.msg.loan.originator.mapping.not.found",
+                "Originator with id " + originatorId + " is not attached to loan with id " + loanId, loanId, originatorId);
+    }
 }

@@ -35,12 +35,19 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanorigination.domain.LoanOriginator;
+import org.apache.fineract.portfolio.loanorigination.domain.LoanOriginatorMapping;
 import org.apache.fineract.portfolio.loanorigination.domain.LoanOriginatorMappingRepository;
 import org.apache.fineract.portfolio.loanorigination.domain.LoanOriginatorRepository;
 import org.apache.fineract.portfolio.loanorigination.domain.LoanOriginatorStatus;
+import org.apache.fineract.portfolio.loanorigination.exception.LoanNotInSubmittedStatusException;
 import org.apache.fineract.portfolio.loanorigination.exception.LoanOriginatorCannotBeDeletedException;
 import org.apache.fineract.portfolio.loanorigination.exception.LoanOriginatorDuplicateExternalIdException;
+import org.apache.fineract.portfolio.loanorigination.exception.LoanOriginatorMappingAlreadyExistsException;
+import org.apache.fineract.portfolio.loanorigination.exception.LoanOriginatorMappingNotFoundException;
+import org.apache.fineract.portfolio.loanorigination.exception.LoanOriginatorNotActiveException;
 import org.apache.fineract.portfolio.loanorigination.exception.LoanOriginatorNotFoundException;
 import org.apache.fineract.portfolio.loanorigination.serialization.LoanOriginatorDataValidator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -57,6 +64,7 @@ public class LoanOriginatorWritePlatformServiceImpl implements LoanOriginatorWri
     private final LoanOriginatorMappingRepository loanOriginatorMappingRepository;
     private final LoanOriginatorDataValidator loanOriginatorDataValidator;
     private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
+    private final LoanRepositoryWrapper loanRepositoryWrapper;
 
     @Override
     public CommandProcessingResult create(final JsonCommand command) {
@@ -142,6 +150,52 @@ public class LoanOriginatorWritePlatformServiceImpl implements LoanOriginatorWri
         this.loanOriginatorRepository.delete(originator);
 
         return new CommandProcessingResultBuilder().withEntityId(id).withEntityExternalId(externalId).build();
+    }
+
+    @Override
+    public CommandProcessingResult attachOriginatorToLoan(final Long loanId, final Long originatorId) {
+        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+
+        if (!loan.isSubmittedAndPendingApproval()) {
+            throw new LoanNotInSubmittedStatusException(loanId, loan.getStatus().getCode());
+        }
+
+        final LoanOriginator originator = this.loanOriginatorRepository.findById(originatorId)
+                .orElseThrow(() -> new LoanOriginatorNotFoundException(originatorId));
+
+        if (originator.getStatus() != LoanOriginatorStatus.ACTIVE) {
+            throw new LoanOriginatorNotActiveException(originatorId, originator.getStatus().getValue());
+        }
+
+        if (this.loanOriginatorMappingRepository.existsByLoanIdAndOriginatorId(loanId, originatorId)) {
+            throw new LoanOriginatorMappingAlreadyExistsException(loanId, originatorId);
+        }
+
+        final LoanOriginatorMapping mapping = LoanOriginatorMapping.create(loanId, originator);
+        this.loanOriginatorMappingRepository.saveAndFlush(mapping);
+
+        return new CommandProcessingResultBuilder().withEntityId(loanId).withEntityExternalId(loan.getExternalId())
+                .withSubEntityId(originatorId).withSubEntityExternalId(originator.getExternalId()).build();
+    }
+
+    @Override
+    public CommandProcessingResult detachOriginatorFromLoan(final Long loanId, final Long originatorId) {
+        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+
+        if (!loan.isSubmittedAndPendingApproval()) {
+            throw new LoanNotInSubmittedStatusException(loanId, loan.getStatus().getCode());
+        }
+
+        final LoanOriginator originator = this.loanOriginatorRepository.findById(originatorId)
+                .orElseThrow(() -> new LoanOriginatorNotFoundException(originatorId));
+
+        final LoanOriginatorMapping mapping = this.loanOriginatorMappingRepository.findByLoanIdAndOriginatorId(loanId, originatorId)
+                .orElseThrow(() -> new LoanOriginatorMappingNotFoundException(loanId, originatorId));
+
+        this.loanOriginatorMappingRepository.delete(mapping);
+
+        return new CommandProcessingResultBuilder().withEntityId(loanId).withEntityExternalId(loan.getExternalId())
+                .withSubEntityId(originatorId).withSubEntityExternalId(originator.getExternalId()).build();
     }
 
     private CodeValue resolveCodeValue(final JsonCommand command, final String paramName, final String codeName) {

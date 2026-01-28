@@ -105,4 +105,32 @@ public class FeignLoanOriginatorHelper {
     public static String generateUniqueExternalId() {
         return "EXT-" + UUID.randomUUID().toString().substring(0, 8);
     }
+
+    public void attachOriginatorToLoan(Long loanId, Long originatorId) {
+        ok(() -> {
+            fineractClient.loanOriginators().attachOriginatorToLoan(loanId, originatorId);
+            return null;
+        });
+    }
+
+    public CallFailedRuntimeException attachOriginatorToLoanExpectingError(Long loanId, Long originatorId) {
+        return fail(() -> {
+            fineractClient.loanOriginators().attachOriginatorToLoan(loanId, originatorId);
+            return null;
+        });
+    }
+
+    public void detachOriginatorFromLoan(Long loanId, Long originatorId) {
+        ok(() -> {
+            fineractClient.loanOriginators().detachOriginatorFromLoan(loanId, originatorId);
+            return null;
+        });
+    }
+
+    public CallFailedRuntimeException detachOriginatorFromLoanExpectingError(Long loanId, Long originatorId) {
+        return fail(() -> {
+            fineractClient.loanOriginators().detachOriginatorFromLoan(loanId, originatorId);
+            return null;
+        });
+    }
 }

@@ -16,20 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanorigination.service;
+package org.apache.fineract.portfolio.loanorigination.exception;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface LoanOriginatorWritePlatformService {
+public class LoanOriginatorNotActiveException extends AbstractPlatformDomainRuleException {
 
-    CommandProcessingResult create(JsonCommand command);
-
-    CommandProcessingResult update(Long id, JsonCommand command);
-
-    CommandProcessingResult delete(Long id);
-
-    CommandProcessingResult attachOriginatorToLoan(Long loanId, Long originatorId);
-
-    CommandProcessingResult detachOriginatorFromLoan(Long loanId, Long originatorId);
+    public LoanOriginatorNotActiveException(Long originatorId, String status) {
+        super("error.msg.loan.originator.not.active",
+                "Originator with id " + originatorId + " has status " + status + ". Only ACTIVE originators can be attached to loans.",
+                originatorId, status);
+    }
 }

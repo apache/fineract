@@ -16,20 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanorigination.service;
+package org.apache.fineract.portfolio.loanorigination.exception;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface LoanOriginatorWritePlatformService {
+public class LoanOriginatorMappingAlreadyExistsException extends AbstractPlatformDomainRuleException {
 
-    CommandProcessingResult create(JsonCommand command);
-
-    CommandProcessingResult update(Long id, JsonCommand command);
-
-    CommandProcessingResult delete(Long id);
-
-    CommandProcessingResult attachOriginatorToLoan(Long loanId, Long originatorId);
-
-    CommandProcessingResult detachOriginatorFromLoan(Long loanId, Long originatorId);
+    public LoanOriginatorMappingAlreadyExistsException(Long loanId, Long originatorId) {
+        super("error.msg.loan.originator.mapping.already.exists",
+                "Originator with id " + originatorId + " is already attached to loan with id " + loanId, loanId, originatorId);
+    }
 }

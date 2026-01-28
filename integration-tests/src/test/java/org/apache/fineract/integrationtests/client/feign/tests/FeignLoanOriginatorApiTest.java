@@ -19,12 +19,15 @@
 package org.apache.fineract.integrationtests.client.feign.tests;
 
 import java.util.List;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoanOriginatorsResponse;
 import org.apache.fineract.client.models.PostLoanOriginatorsRequest;
 import org.apache.fineract.client.models.PutLoanOriginatorsRequest;
 import org.apache.fineract.client.models.PutLoanOriginatorsResponse;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignLoanHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignLoanOriginatorHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.BeforeAll;
@@ -35,10 +38,15 @@ import org.junit.jupiter.api.Test;
 public class FeignLoanOriginatorApiTest extends FeignIntegrationTest {
 
     private static FeignLoanOriginatorHelper originatorHelper;
+    private static FeignClientHelper clientHelper;
+    private static FeignLoanHelper loanHelper;
 
     @BeforeAll
     public static void setup() {
-        originatorHelper = new FeignLoanOriginatorHelper(FineractFeignClientHelper.getFineractFeignClient());
+        FineractFeignClient fineractClient = FineractFeignClientHelper.getFineractFeignClient();
+        originatorHelper = new FeignLoanOriginatorHelper(fineractClient);
+        clientHelper = new FeignClientHelper(fineractClient);
+        loanHelper = new FeignLoanHelper(fineractClient);
     }
 
     @Test
@@ -244,5 +252,95 @@ public class FeignLoanOriginatorApiTest extends FeignIntegrationTest {
 
         final CallFailedRuntimeException exception = originatorHelper.createOriginatorExpectingError(request);
         assertThat(exception.getStatus()).isEqualTo(404);
+    }
+
+    @Test
+    public void testAttachOriginatorToSubmittedLoan() {
+        final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
+        final Long originatorId = originatorHelper.createOriginator(originatorExternalId);
+
+        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long loanId = loanHelper.createSubmittedLoan(clientId);
+
+        originatorHelper.attachOriginatorToLoan(loanId, originatorId);
+
+        originatorHelper.detachOriginatorFromLoan(loanId, originatorId);
+        originatorHelper.deleteOriginator(originatorId);
+    }
+
+    @Test
+    public void testDetachOriginatorFromLoan() {
+        final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
+        final Long originatorId = originatorHelper.createOriginator(originatorExternalId);
+
+        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long loanId = loanHelper.createSubmittedLoan(clientId);
+
+        originatorHelper.attachOriginatorToLoan(loanId, originatorId);
+        originatorHelper.detachOriginatorFromLoan(loanId, originatorId);
+
+        originatorHelper.deleteOriginator(originatorId);
+    }
+
+    @Test
+    public void testAttachInactiveOriginatorReturns403() {
+        final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
+        final Long originatorId = originatorHelper.createOriginator(originatorExternalId, "Inactive Test", "INACTIVE");
+
+        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long loanId = loanHelper.createSubmittedLoan(clientId);
+
+        final CallFailedRuntimeException exception = originatorHelper.attachOriginatorToLoanExpectingError(loanId, originatorId);
+        assertThat(exception.getStatus()).isEqualTo(403);
+
+        originatorHelper.deleteOriginator(originatorId);
+    }
+
+    @Test
+    public void testAttachSameOriginatorTwiceReturns403() {
+        final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
+        final Long originatorId = originatorHelper.createOriginator(originatorExternalId);
+
+        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long loanId = loanHelper.createSubmittedLoan(clientId);
+
+        originatorHelper.attachOriginatorToLoan(loanId, originatorId);
+
+        final CallFailedRuntimeException exception = originatorHelper.attachOriginatorToLoanExpectingError(loanId, originatorId);
+        assertThat(exception.getStatus()).isEqualTo(403);
+
+        originatorHelper.detachOriginatorFromLoan(loanId, originatorId);
+        originatorHelper.deleteOriginator(originatorId);
+    }
+
+    @Test
+    public void testDetachNonAttachedOriginatorReturns404() {
+        final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
+        final Long originatorId = originatorHelper.createOriginator(originatorExternalId);
+
+        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long loanId = loanHelper.createSubmittedLoan(clientId);
+
+        final CallFailedRuntimeException exception = originatorHelper.detachOriginatorFromLoanExpectingError(loanId, originatorId);
+        assertThat(exception.getStatus()).isEqualTo(404);
+
+        originatorHelper.deleteOriginator(originatorId);
+    }
+
+    @Test
+    public void testAttachOriginatorToApprovedLoanReturns403() {
+        final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
+        final Long originatorId = originatorHelper.createOriginator(originatorExternalId);
+
+        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long loanProductId = loanHelper.createSimpleLoanProduct();
+        final String todayDate = org.apache.fineract.integrationtests.common.Utils.dateFormatter
+                .format(org.apache.fineract.integrationtests.common.Utils.getLocalDateOfTenant());
+        final Long loanId = loanHelper.applyAndApproveLoan(clientId, loanProductId, todayDate, 10000.0, 12);
+
+        final CallFailedRuntimeException exception = originatorHelper.attachOriginatorToLoanExpectingError(loanId, originatorId);
+        assertThat(exception.getStatus()).isEqualTo(403);
+
+        originatorHelper.deleteOriginator(originatorId);
     }
 }

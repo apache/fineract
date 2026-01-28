@@ -24,4 +24,5 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
   <include relativeToChangelogFile="true" file="parts/0001_initial_schema.xml"/>
   <include relativeToChangelogFile="true" file="parts/0002_permissions.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0003_mapping_permissions.xml"/>
 </databaseChangeLog>

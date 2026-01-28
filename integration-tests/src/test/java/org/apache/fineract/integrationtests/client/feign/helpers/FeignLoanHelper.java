@@ -39,6 +39,32 @@ public class FeignLoanHelper {
         this.fineractClient = fineractClient;
     }
 
+    public Long createSimpleLoanProduct() {
+        PostLoanProductsRequest request = new PostLoanProductsRequest()//
+                .name("Simple Loan Product " + System.currentTimeMillis())//
+                .shortName(java.util.UUID.randomUUID().toString().substring(0, 4).toUpperCase())//
+                .currencyCode("USD")//
+                .digitsAfterDecimal(2)//
+                .inMultiplesOf(1)//
+                .principal(10000.0)//
+                .numberOfRepayments(12)//
+                .repaymentEvery(1)//
+                .repaymentFrequencyType(2L)//
+                .interestRatePerPeriod(1.0)//
+                .interestRateFrequencyType(2)//
+                .amortizationType(1)//
+                .interestType(0)//
+                .interestCalculationPeriodType(1)//
+                .transactionProcessingStrategyCode("mifos-standard-strategy")//
+                .daysInYearType(365)//
+                .daysInMonthType(30)//
+                .isInterestRecalculationEnabled(false)//
+                .accountingRule(1)//
+                .locale("en")//
+                .dateFormat("dd MMMM yyyy");
+        return createLoanProduct(request);
+    }
+
     public Long createLoanProduct(PostLoanProductsRequest request) {
         PostLoanProductsResponse response = ok(() -> fineractClient.loanProducts().createLoanProduct(request));
         return response.getResourceId();
@@ -105,5 +131,35 @@ public class FeignLoanHelper {
 
         approveLoan(loanId, approveRequest);
         return loanId;
+    }
+
+    public Long createSubmittedLoan(Long clientId, Long productId, String submittedOnDate, Double principal, Integer numberOfRepayments) {
+        PostLoansRequest applyRequest = new PostLoansRequest()//
+                .clientId(clientId)//
+                .productId(productId)//
+                .loanType("individual")//
+                .submittedOnDate(submittedOnDate)//
+                .expectedDisbursementDate(submittedOnDate)//
+                .principal(BigDecimal.valueOf(principal))//
+                .loanTermFrequency(numberOfRepayments)//
+                .loanTermFrequencyType(2)//
+                .numberOfRepayments(numberOfRepayments)//
+                .repaymentEvery(1)//
+                .repaymentFrequencyType(2)//
+                .interestRatePerPeriod(BigDecimal.ZERO)//
+                .amortizationType(1)//
+                .interestType(0)//
+                .interestCalculationPeriodType(1)//
+                .transactionProcessingStrategyCode("mifos-standard-strategy")//
+                .locale("en")//
+                .dateFormat("dd MMMM yyyy");
+        return applyForLoan(applyRequest);
+    }
+
+    public Long createSubmittedLoan(Long clientId) {
+        Long productId = createSimpleLoanProduct();
+        String todayDate = org.apache.fineract.integrationtests.common.Utils.dateFormatter
+                .format(org.apache.fineract.integrationtests.common.Utils.getLocalDateOfTenant());
+        return createSubmittedLoan(clientId, productId, todayDate, 10000.0, 12);
     }
 }
