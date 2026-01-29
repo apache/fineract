@@ -47,12 +47,12 @@ public class CommandStrategyProvider {
     /**
      * Regex pattern for specifying any number of query params or not specific any query param
      */
-    private static final String OPTIONAL_QUERY_PARAM_REGEX = "(\\?(\\w+=[^&]+)(?:&\\w+=[^&]+)*)?";
+    private static final String OPTIONAL_QUERY_PARAM_REGEX = "(\\?([\\w-]+=[^&]+)(?:&[\\w-]+=[^&]+)*)?";
 
     /**
      * Regex pattern for specifying query params
      */
-    private static final String MANDATORY_QUERY_PARAM_REGEX = "(\\?(\\w+=[^&]+)(?:&\\w+=[^&]+)*)";
+    private static final String MANDATORY_QUERY_PARAM_REGEX = "(\\?([\\w-]+=[^&]+)(?:&[\\w-]+=[^&]+)*)";
 
     /**
      * Regex pattern for specifying any query param that has key = 'command' or not specific anything.

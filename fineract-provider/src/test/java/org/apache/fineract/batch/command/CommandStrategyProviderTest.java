@@ -225,6 +225,10 @@ public class CommandStrategyProviderTest {
                 Arguments.of(
                         "loans/external-id/0083477d-ea2a-45a4-a244-cb79a9ecf741/transactions/reage-preview?frequencyType=MONTHS&locale=en_US&frequencyNumber=1&dateFormat=MM%2Fdd%2Fyyyy&startDate=02%2F05%2F2026&numberOfInstallments=6",
                         HttpMethod.GET, "getReagePreviewByLoanExternalIdCommandStrategy",
+                        mock(GetReagePreviewByLoanExternalIdCommandStrategy.class)),
+                Arguments.of(
+                        "loans/external-id/8dfad438-2319-48ce-8520-10a62801e9a1/transactions/reage-preview?frequency-number=2&frequencyType=long-string",
+                        HttpMethod.GET, "getReagePreviewByLoanExternalIdCommandStrategy",
                         mock(GetReagePreviewByLoanExternalIdCommandStrategy.class)));
     }
 
