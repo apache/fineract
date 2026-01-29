@@ -19,10 +19,13 @@
 package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
@@ -50,6 +53,7 @@ public class ProgressiveTransactionCtx extends TransactionCtx {
     @Setter
     private boolean isPrepayAttempt = false;
     private final List<LoanRepaymentScheduleInstallment> skipRepaymentScheduleInstallments = new ArrayList<>();
+    private final List<Long> processedLoanChargeIds;
 
     public ProgressiveTransactionCtx(MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
             Set<LoanCharge> charges, MoneyHolder overpaymentHolder, ChangedTransactionDetail changedTransactionDetail,
@@ -62,8 +66,33 @@ public class ProgressiveTransactionCtx extends TransactionCtx {
             Set<LoanCharge> charges, MoneyHolder overpaymentHolder, ChangedTransactionDetail changedTransactionDetail,
             ProgressiveLoanInterestScheduleModel model, Money sumOfInterestRefundAmount,
             List<LoanTermVariations> activeLoanTermVariations) {
+        this(currency, installments, charges, overpaymentHolder, changedTransactionDetail, model, sumOfInterestRefundAmount,
+                activeLoanTermVariations,
+                charges == null ? new ArrayList<>() : charges.stream().map(AbstractPersistableCustom::getId).toList());
+    }
+
+    public ProgressiveTransactionCtx(MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
+            Set<LoanCharge> charges, MoneyHolder overpaymentHolder, ChangedTransactionDetail changedTransactionDetail,
+            ProgressiveLoanInterestScheduleModel model, Money sumOfInterestRefundAmount, List<LoanTermVariations> activeLoanTermVariations,
+            List<Long> processedLoanChargeIds) {
         super(currency, installments, charges, overpaymentHolder, changedTransactionDetail, activeLoanTermVariations);
         this.sumOfInterestRefundAmount = sumOfInterestRefundAmount;
         this.model = model;
+        this.processedLoanChargeIds = processedLoanChargeIds;
     }
+
+    public Set<LoanCharge> getProcessedLoanCharges() {
+        if (getCharges() == null) {
+            return new HashSet<>();
+        }
+        if (getCharges().size() == getProcessedLoanChargeIds().size()) {
+            return getCharges();
+        }
+        return getCharges().stream().filter(this::isLoanChargeProcessed).collect(Collectors.toSet());
+    }
+
+    public boolean isLoanChargeProcessed(final LoanCharge loanCharge) {
+        return getProcessedLoanChargeIds().contains(loanCharge.getId());
+    }
+
 }

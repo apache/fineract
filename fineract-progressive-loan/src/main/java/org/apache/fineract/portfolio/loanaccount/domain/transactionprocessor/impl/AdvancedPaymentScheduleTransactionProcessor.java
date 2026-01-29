@@ -44,6 +44,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -228,12 +229,13 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         final Integer installmentAmountInMultiplesOf = loan.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf();
         ProgressiveLoanInterestScheduleModel scheduleModel = emiCalculator.generateInstallmentInterestScheduleModel(installments,
                 LoanConfigurationDetailsMapper.map(loan), installmentAmountInMultiplesOf, overpaymentHolder.getMoneyObject().getMc());
+        List<Long> loanChargeIdProcessed = new ArrayList<>();
+
         ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, charges, overpaymentHolder,
-                changedTransactionDetail, scheduleModel, loan.getActiveLoanTermVariations());
+                changedTransactionDetail, scheduleModel, Money.zero(currency), loan.getActiveLoanTermVariations(), loanChargeIdProcessed);
 
         List<ChangeOperation> changeOperations = createSortedChangeList(loanTermVariations, loanTransactions, charges);
 
-        List<Long> loanChargeIdProcessed = new ArrayList<>();
         List<LoanTransaction> overpaidTransactions = new ArrayList<>();
         for (final ChangeOperation changeOperation : changeOperations) {
             if (changeOperation.isLoanTermVariationsData()) {
@@ -1595,7 +1597,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
 
         disbursementTransaction.resetDerivedComponents();
-        recalculateRepaymentPeriodsWithEMICalculation(amortizableAmount, model, installments, disbursementTransaction, currency);
+        recalculateRepaymentPeriodsWithEMICalculation(amortizableAmount, model, installments, disbursementTransaction, currency,
+                ((ProgressiveTransactionCtx) transactionCtx).getProcessedLoanCharges());
         allocateOverpayment(disbursementTransaction, transactionCtx);
     }
 
@@ -1668,7 +1671,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         Money amortizableAmount = capitalizedIncomeTransaction.getAmount(currency);
         emiCalculator.addCapitalizedIncome(model, transactionDate, amortizableAmount);
 
-        recalculateRepaymentPeriodsWithEMICalculation(amortizableAmount, model, installments, capitalizedIncomeTransaction, currency);
+        recalculateRepaymentPeriodsWithEMICalculation(amortizableAmount, model, installments, capitalizedIncomeTransaction, currency,
+                ((ProgressiveTransactionCtx) transactionCtx).getProcessedLoanCharges());
         allocateOverpayment(capitalizedIncomeTransaction, transactionCtx);
     }
 
@@ -1690,7 +1694,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     private void recalculateRepaymentPeriodsWithEMICalculation(final Money amortizableAmount,
             final ProgressiveLoanInterestScheduleModel model, final List<LoanRepaymentScheduleInstallment> installments,
-            final LoanTransaction loanTransaction, final MonetaryCurrency currency) {
+            final LoanTransaction loanTransaction, final MonetaryCurrency currency, final Set<LoanCharge> processedLoanCharges) {
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
         final boolean isPostMaturityDisbursement = installments.stream().filter(i -> !i.isDownPayment() && !i.isAdditional())
                 .allMatch(i -> i.getDueDate().isBefore(transactionDate));
@@ -1708,6 +1712,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             final AtomicInteger installmentCounter = new AtomicInteger();
             final ILoanConfigurationDetails loanProductRelatedDetail = model.loanProductRelatedDetail();
 
+            List<LoanRepaymentScheduleInstallment> newInstallments = new LinkedList<>();
+
             model.repaymentPeriods().forEach(rm -> {
                 LoanRepaymentScheduleInstallment installment = null;
                 while (iterator.hasNext() && (installment == null || installment.isAdditional() || installment.isDownPayment())) {
@@ -1723,7 +1729,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 } else {
                     if (loanProductRelatedDetail != null && loanProductRelatedDetail.isAllowFullTermForTranche()
                             && loanProductRelatedDetail.getNumberOfRepayments() > 0 && !rm.getDueDate().isBefore(transactionDate)) {
-                        installmentCounter.getAndIncrement();
+                        if (installment == null || !installment.isAdditional()) {
+                            installmentCounter.getAndIncrement();
+                        }
                         final LoanRepaymentScheduleInstallment newInstallment = new LoanRepaymentScheduleInstallment(
                                 loanTransaction.getLoan(), installmentCounter.get(), rm.getFromDate(), rm.getDueDate(),
                                 rm.getDuePrincipal().getAmount(), rm.getDueInterest().getAmount(), null, null, null, null, null, null,
@@ -1731,9 +1739,27 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
                         newInstallment.updateObligationsMet(currency, transactionDate);
                         iterator.add(newInstallment);
+                        newInstallments.add(newInstallment);
                     }
                 }
             });
+            // fix additional installment
+            Optional<LoanRepaymentScheduleInstallment> additionalInstallmentOptional = installments.stream()
+                    .filter(LoanRepaymentScheduleInstallment::isAdditional).findFirst();
+            if (additionalInstallmentOptional.isPresent() && !newInstallments.isEmpty()) {
+                LoanRepaymentScheduleInstallment additional = additionalInstallmentOptional.get();
+                // iterate trough new installments to fix charges
+                for (LoanRepaymentScheduleInstallment installment : newInstallments) {
+                    moveRelatedChargesToInstallment(processedLoanCharges, installment, List.of(additional), currency);
+                    additional.setFromDate(installment.getDueDate());
+                    additional.setInstallmentNumber(installment.getInstallmentNumber() + 1);
+                }
+                installments.remove(additional);
+                if (additional.getDueDate().isAfter(model.getMaturityDate())) {
+                    // step is needed to move the additional installment to the end of the list.
+                    installments.add(additional);
+                }
+            }
         }
     }
 
@@ -3866,11 +3892,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     private void moveRelatedChargesToInstallment(Set<LoanCharge> charges, LoanRepaymentScheduleInstallment target,
-            List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency) {
-        int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper.fetchFirstNormalInstallmentNumber(installments);
+            List<LoanRepaymentScheduleInstallment> sources, MonetaryCurrency currency) {
+        int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper.fetchFirstNormalInstallmentNumber(sources);
         Set<LoanCharge> chargesOfNewInstallment = getLoanChargesOfInstallment(charges, target, firstNormalInstallmentNumber);
         Integer targetInstallmentNumber = target.getInstallmentNumber();
-        installments.stream().filter(i -> Objects.equals(i.getInstallmentNumber(), targetInstallmentNumber)).findFirst()
+        sources.stream().filter(source -> Objects.equals(source.getInstallmentNumber(), targetInstallmentNumber)).findFirst()
                 .filter(source -> source != target).ifPresent(source -> {
                     // move fees
                     chargesOfNewInstallment.stream().filter(LoanCharge::isNotFullyPaid).filter(LoanCharge::isFeeCharge)
