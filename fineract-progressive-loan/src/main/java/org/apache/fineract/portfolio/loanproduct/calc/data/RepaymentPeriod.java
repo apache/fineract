@@ -331,10 +331,26 @@ public class RepaymentPeriod {
      * @return
      */
     public Money getDuePrincipal() {
-        // Due principal might be the maximum paid if there is pay-off or early repayment
-        return MathUtil.max(MathUtil
-                .negativeToZero(getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest().minus(getDueInterest(), getMc()), getMc()),
-                getPaidPrincipal(), false);
+        final Money calculatedDuePrincipal = MathUtil
+                .negativeToZero(getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest().minus(getDueInterest(), getMc()), getMc());
+        final Money paidPrincipal = getPaidPrincipal();
+
+        // For early repayment/pay-off scenarios where paid > calculated
+        if (paidPrincipal.isGreaterThan(calculatedDuePrincipal)) {
+            return paidPrincipal;
+        }
+
+        // For recalculation scenarios (like backdated interest rate change).
+        // If the period was fully paid based on original EMI, use paid principal to avoid negative balance.
+        final Money originalEmi = getOriginalEmi();
+        final Money currentEmi = getEmi();
+        if (paidPrincipal.isGreaterThanZero() && originalEmi.isGreaterThanZero()
+                && getTotalPaidAmount().isGreaterThanOrEqualTo(originalEmi.plus(getTotalCreditedAmount(), getMc()))
+                && !paidPrincipal.isLessThan(currentEmi)) {
+            return paidPrincipal;
+        }
+
+        return calculatedDuePrincipal;
     }
 
     /**
@@ -522,4 +538,5 @@ public class RepaymentPeriod {
         setCreditedPrincipalMovedDueReAge(getCreditedPrincipal());
         setCreditedInterestMovedDueReAge(getCreditedInterest());
     }
+
 }
