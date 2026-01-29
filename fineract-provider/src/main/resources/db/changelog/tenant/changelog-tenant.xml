@@ -226,4 +226,5 @@
     <include file="parts/0205_add_read_familymembers_permission.xml" relativeToChangelogFile="true" />
     <include file="parts/0206_transaction_summary_with_asset_owner_classification_name_bug_fix.xml" relativeToChangelogFile="true" />
     <include file="parts/0207_add_allow_full_term_for_tranche.xml" relativeToChangelogFile="true" />
+    <include file="parts/0208_trial_balance_summary_with_asset_owner_journal_entry_aggregation_fix.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
