@@ -481,7 +481,7 @@ public class LoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Loans", description = "The list capability of loans can support pagination and sorting.\n"
             + "Example Requests:\n" + "\n" + "loans\n" + "\n" + "loans?fields=accountNo\n" + "\n" + "loans?offset=10&limit=50\n" + "\n"
-            + "loans?orderBy=accountNo&sortOrder=DESC")
+            + "loans?orderBy=accountNo&sortOrder=DESC\n" + "\n" + "loans?productId=1\n" + "\n" + "loans?productId=1&status=300")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.GetLoansResponse.class))) })
     public String retrieveAll(@Context final UriInfo uriInfo,
@@ -494,7 +494,8 @@ public class LoansApiResource {
             @QueryParam("accountNo") @Parameter(description = "accountNo") final String accountNo,
             @QueryParam("associations") @Parameter(description = "associations") final String associations,
             @QueryParam("clientId") @Parameter(description = "clientId") final Long clientId,
-            @QueryParam("status") @Parameter(description = "status") final String status) {
+            @QueryParam("status") @Parameter(description = "status") final String status,
+            @QueryParam("productId") @Parameter(description = "productId") final Long productId) {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
@@ -503,7 +504,8 @@ public class LoansApiResource {
         sqlValidator.validate(accountNo);
         sqlValidator.validate(externalId);
         final SearchParameters searchParameters = SearchParameters.builder().accountNo(accountNo).sortOrder(sortOrder)
-                .externalId(externalId).offset(offset).limit(limit).orderBy(orderBy).status(status).clientId(clientId).build();
+                .externalId(externalId).offset(offset).limit(limit).orderBy(orderBy).status(status).clientId(clientId)
+                .productId(productId).build();
 
         final Page<LoanAccountData> loanBasicDetails = this.loanReadPlatformService.retrieveAll(searchParameters);
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
