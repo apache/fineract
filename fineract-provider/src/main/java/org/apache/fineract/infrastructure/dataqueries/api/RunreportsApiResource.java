@@ -25,7 +25,6 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
@@ -70,10 +69,9 @@ public class RunreportsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Return all available export types for the specific report", description = "Returns the list of all available export types for a given report.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ReportExportType.class)))),
-            @ApiResponse(responseCode = "400", description = "Bad Request - Invalid report name or parameters"),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error") })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ReportExportType.class))))
+    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid report name or parameters")
+    @ApiResponse(responseCode = "500", description = "Internal Server Error")
     public Response retrieveAllAvailableExports(
             @PathParam("reportName") @Parameter(description = "Name of the report to get available export types for", example = "Client Listing", required = true) final String reportName,
             @Context final UriInfo uriInfo,
@@ -98,11 +96,10 @@ public class RunreportsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON, "text/csv", "application/vnd.ms-excel", "application/pdf", "text/html" })
     @Operation(summary = "Run a predefined report", description = ReportParameters.FULL_DESCRIPTION)
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK - Report executed successfully", content = @Content(schema = @Schema(implementation = RunreportsApiResourceSwagger.RunReportsResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Bad Request - Missing or invalid parameters"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized - Not authorized to run this report"),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error") })
+    @ApiResponse(responseCode = "200", description = "OK - Report executed successfully", content = @Content(schema = @Schema(implementation = RunreportsApiResourceSwagger.RunReportsResponse.class)))
+    @ApiResponse(responseCode = "400", description = "Bad Request - Missing or invalid parameters")
+    @ApiResponse(responseCode = "401", description = "Unauthorized - Not authorized to run this report")
+    @ApiResponse(responseCode = "500", description = "Internal Server Error")
     public Response runReport(
             @PathParam("reportName") @Parameter(description = "The name of the report to execute (e.g., 'Client Listing', 'Expected Payments By Date')", example = "Client Listing", required = true) final String reportName,
             @Context final UriInfo uriInfo,

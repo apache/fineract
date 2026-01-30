@@ -24,7 +24,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -76,8 +75,7 @@ public class RescheduleLoansApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve all reschedule loan reasons", description = "Retrieve all reschedule loan reasons as a template")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.GetRescheduleReasonsTemplateResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.GetRescheduleReasonsTemplateResponse.class)))
     public String retrieveTemplate(@Context final UriInfo uriInfo) {
 
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(RescheduleLoansApiConstants.ENTITY_NAME);
@@ -94,8 +92,7 @@ public class RescheduleLoansApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve loan reschedule request by schedule id", description = "Retrieve loan reschedule request by schedule id")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.GetLoanRescheduleRequestResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.GetLoanRescheduleRequestResponse.class)))
     public String readLoanRescheduleRequest(@Context final UriInfo uriInfo, @PathParam("scheduleId") final Long scheduleId,
             @QueryParam("command") final String command) {
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(RescheduleLoansApiConstants.ENTITY_NAME);
@@ -119,8 +116,7 @@ public class RescheduleLoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create loan reschedule request", description = "Create a loan reschedule request.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.PostCreateRescheduleLoansRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.PostCreateRescheduleLoansResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.PostCreateRescheduleLoansResponse.class)))
     public String createLoanRescheduleRequest(final String apiRequestBodyAsJson) {
         final CommandWrapper commandWrapper = new CommandWrapperBuilder()
                 .createLoanRescheduleRequest(RescheduleLoansApiConstants.ENTITY_NAME).withJson(apiRequestBodyAsJson).build();
@@ -136,8 +132,7 @@ public class RescheduleLoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update loan reschedule request", description = "Update a loan reschedule request by either approving/rejecting it.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.PostUpdateRescheduleLoansRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.PostUpdateRescheduleLoansResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.PostUpdateRescheduleLoansResponse.class)))
     public String updateLoanRescheduleRequest(@PathParam("scheduleId") final Long scheduleId, @QueryParam("command") final String command,
             final String apiRequestBodyAsJson) {
         CommandWrapper commandWrapper;
@@ -178,8 +173,7 @@ public class RescheduleLoansApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve all reschedule requests", description = "Retrieve all reschedule requests.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.GetLoanRescheduleRequestResponse.class)))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.GetLoanRescheduleRequestResponse.class))))
     public String retrieveAllRescheduleRequest(@Context final UriInfo uriInfo, @QueryParam("command") final String command,
             @QueryParam("loanId") Long loanId) {
 

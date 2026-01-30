@@ -23,7 +23,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -63,8 +62,7 @@ public class ReportMailingJobRunHistoryApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Report Mailing Job History", description = "The list capability of report mailing job history can support pagination and sorting.\n"
             + "\n" + "Example Requests:\n" + "\n" + "reportmailingjobrunhistory/1")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportMailingJobRunHistoryData.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportMailingJobRunHistoryData.class)))
     public String retrieveAllByReportMailingJobId(@Context final UriInfo uriInfo,
             @QueryParam("reportMailingJobId") @Parameter(description = "reportMailingJobId") final Long reportMailingJobId,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,

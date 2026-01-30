@@ -25,7 +25,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -78,8 +77,7 @@ public class ProvisioningCriteriaApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieves a Provisioning Criteria", description = "Retrieves a Provisioning Criteria")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.GetProvisioningCriteriaCriteriaIdResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.GetProvisioningCriteriaCriteriaIdResponse.class)))
     public ProvisioningCriteriaData retrieveProvisioningCriteria(
             @PathParam("criteriaId") @Parameter(description = "criteriaId") final Long criteriaId, @Context final UriInfo uriInfo) {
         platformSecurityContext.authenticatedUser();
@@ -95,8 +93,7 @@ public class ProvisioningCriteriaApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieves all created Provisioning Criterias", description = "Retrieves all created Provisioning Criterias")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.GetProvisioningCriteriaResponse.class)))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.GetProvisioningCriteriaResponse.class))))
     public List<ProvisioningCriteriaData> retrieveAllProvisioningCriterias() {
         platformSecurityContext.authenticatedUser();
         return provisioningCriteriaReadPlatformService.retrieveAllProvisioningCriterias();
@@ -108,8 +105,7 @@ public class ProvisioningCriteriaApiResource {
     @Operation(summary = "Create a new Provisioning Criteria", description = "Creates a new Provisioning Criteria\n" + "\n"
             + "Mandatory Fields: \n" + "criteriaName\n" + "provisioningcriteria\n" + "\n" + "Optional Fields: \n" + "loanProducts")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.PostProvisioningCriteriaRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.PostProvisioningCriteriaResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.PostProvisioningCriteriaResponse.class)))
     public CommandProcessingResult createProvisioningCriteria(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
         platformSecurityContext.authenticatedUser();
         CommandWrapper commandWrapper = new CommandWrapperBuilder().createProvisioningCriteria().withJson(apiRequestBodyAsJson).build();
@@ -123,8 +119,7 @@ public class ProvisioningCriteriaApiResource {
     @Operation(summary = "Updates a new Provisioning Criteria", description = "Updates a new Provisioning Criteria\n" + "\n"
             + "Optional Fields\n" + "criteriaName, loanProducts, provisioningcriteria")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.PutProvisioningCriteriaRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.PutProvisioningCriteriaResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.PutProvisioningCriteriaResponse.class)))
     public CommandProcessingResult updateProvisioningCriteria(
             @PathParam("criteriaId") @Parameter(description = "criteriaId") final Long criteriaId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -139,8 +134,7 @@ public class ProvisioningCriteriaApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Deletes Provisioning Criteria", description = "Deletes Provisioning Criteria")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.DeleteProvisioningCriteriaResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.DeleteProvisioningCriteriaResponse.class)))
     public CommandProcessingResult deleteProvisioningCriteria(
             @PathParam("criteriaId") @Parameter(description = "criteriaId") final Long criteriaId) {
         platformSecurityContext.authenticatedUser();

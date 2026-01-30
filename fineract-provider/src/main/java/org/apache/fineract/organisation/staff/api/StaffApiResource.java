@@ -24,7 +24,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
@@ -104,8 +103,7 @@ public class StaffApiResource {
     @Operation(summary = "Create a staff member", description = "Creates a staff member.\n" + "\n" + "Mandatory Fields: \n"
             + "officeId, firstname, lastname\n" + "\n" + "Optional Fields: \n" + "isLoanOfficer, isActive")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = StaffRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.CreateStaffResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.CreateStaffResponse.class)))
     public CommandProcessingResult create(@Parameter(hidden = true) StaffRequest staffRequest) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createStaff()
                 .withJson(toApiJsonSerializer.serialize(staffRequest)).build();
@@ -136,8 +134,7 @@ public class StaffApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Staff Member", description = "Updates the details of a staff member.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.PutStaffRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.UpdateStaffResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.UpdateStaffResponse.class)))
     public CommandProcessingResult update(@PathParam("staffId") @Parameter(description = "staffId") final Long staffId,
             @Parameter(hidden = true) StaffRequest staffRequest) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateStaff(staffId)

@@ -24,7 +24,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -90,8 +89,7 @@ public class PaymentTypeApiResource {
     @Operation(summary = "Create a Payment Type", description = "Creates a new Payment type\n\n" + "Mandatory Fields: name\n\n"
             + "Optional Fields: Description, isCashPayment,Position")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = PaymentTypeRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PaymentTypeApiResourceSwagger.PostPaymentTypesResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PaymentTypeApiResourceSwagger.PostPaymentTypesResponse.class)))
     public CommandProcessingResult createPaymentType(@Parameter(hidden = true) PaymentTypeRequest paymentTypeRequest) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createPaymentType()
@@ -107,8 +105,7 @@ public class PaymentTypeApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Payment Type", description = "Updates a Payment Type")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = PaymentTypeApiResourceSwagger.PutPaymentTypesPaymentTypeIdRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PaymentTypeApiResourceSwagger.PutPaymentTypesPaymentTypeIdResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PaymentTypeApiResourceSwagger.PutPaymentTypesPaymentTypeIdResponse.class)))
     public CommandProcessingResult updatePaymentType(
             @PathParam("paymentTypeId") @Parameter(description = "paymentTypeId") final Long paymentTypeId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -125,8 +122,7 @@ public class PaymentTypeApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Payment Type", description = "Deletes payment type")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PaymentTypeApiResourceSwagger.DeletePaymentTypesPaymentTypeIdResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PaymentTypeApiResourceSwagger.DeletePaymentTypesPaymentTypeIdResponse.class)))
     public CommandProcessingResult deleteCode(
             @PathParam("paymentTypeId") @Parameter(description = "paymentTypeId") final Long paymentTypeId) {
 
