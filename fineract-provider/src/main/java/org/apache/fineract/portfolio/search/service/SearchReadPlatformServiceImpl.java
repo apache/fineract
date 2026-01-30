@@ -80,34 +80,34 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
         final String union = " union ";
         final String clientMatchSql = "( (select 'CLIENT' as entityType, c.id as entityId, c.display_name as entityName, c.external_id as entityExternalId, c.account_no as entityAccountNo "
                 + " , c.office_id as parentId, o.name as parentName, c.mobile_no as entityMobileNo,c.status_enum as entityStatusEnum, null as subEntityType, null as parentType, null as productId "
-                + " from m_client c join m_office o on o.id = c.office_id where o.hierarchy like :hierarchy and (c.account_no ILIKE :search or c.display_name ILIKE :search or c.external_id ILIKE :search or c.mobile_no ILIKE :search)) "
+                + " from m_client c join m_office o on o.id = c.office_id where o.hierarchy like :hierarchy and (UPPER(c.account_no) like UPPER(:search) or UPPER(c.display_name) like UPPER(:search) or UPPER(c.external_id) like UPPER(:search) or UPPER(c.mobile_no) like UPPER(:search))) "
                 + " order by c.id desc)";
 
         final String loanMatchSql = "( (select 'LOAN' as entityType, l.id as entityId, pl.name as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
                 + " , coalesce(c.id,g.id) as parentId, coalesce(c.display_name,g.display_name) as parentName, null as entityMobileNo, l.loan_status_id as entityStatusEnum, null as subEntityType, CASE WHEN g.id is null THEN 'client' ELSE 'group' END as parentType, pl.id as productId "
-                + " from m_loan l left join m_client c on l.client_id = c.id left join m_group g ON l.group_id = g.id left join m_office o on o.id = c.office_id left join m_product_loan pl on pl.id=l.product_id where (o.hierarchy IS NULL OR o.hierarchy like :hierarchy) and (l.account_no ILIKE :search or l.external_id ILIKE :search)) "
+                + " from m_loan l left join m_client c on l.client_id = c.id left join m_group g ON l.group_id = g.id left join m_office o on o.id = c.office_id left join m_product_loan pl on pl.id=l.product_id where (o.hierarchy IS NULL OR o.hierarchy like :hierarchy) and (UPPER(l.account_no) like UPPER(:search) or UPPER(l.external_id) like UPPER(:search))) "
                 + " order by l.id desc)";
 
         final String savingMatchSql = "( (select 'SAVING' as entityType, s.id as entityId, sp.name as entityName, s.external_id as entityExternalId, s.account_no as entityAccountNo "
                 + " , coalesce(c.id,g.id) as parentId, coalesce(c.display_name, g.display_name) as parentName, null as entityMobileNo, s.status_enum as entityStatusEnum, concat(s.deposit_type_enum, '') as subEntityType, CASE WHEN g.id is null THEN 'client' ELSE 'group' END as parentType, sp.id as productId "
                 + " from m_savings_account s left join m_client c on s.client_id = c.id left join m_group g ON s.group_id = g.id left join m_office o on o.id = c.office_id left join m_savings_product sp on sp.id=s.product_id "
-                + " where (o.hierarchy IS NULL OR o.hierarchy like :hierarchy) and (s.account_no ILIKE :search or s.external_id ILIKE :search)) "
+                + " where (o.hierarchy IS NULL OR o.hierarchy like :hierarchy) and (UPPER(s.account_no) like UPPER(:search) or UPPER(s.external_id) like UPPER(:search))) "
                 + " order by s.id desc)";
 
         final String shareMatchSql = "( (select 'SHARE' as entityType, s.id as entityId, sp.name as entityName, s.external_id as entityExternalId, s.account_no as entityAccountNo "
                 + " , c.id as parentId, c.display_name as parentName, null as entityMobileNo, s.status_enum as entityStatusEnum, null as subEntityType, 'client' as parentType, sp.id as productId "
                 + " from m_share_account s left join m_client c on s.client_id = c.id left join m_office o on o.id = c.office_id left join m_share_product sp on sp.id=s.product_id "
-                + " where (o.hierarchy IS NULL OR o.hierarchy like :hierarchy) and (s.account_no ILIKE :search or s.external_id ILIKE :search)) "
+                + " where (o.hierarchy IS NULL OR o.hierarchy like :hierarchy) and (UPPER(s.account_no) like UPPER(:search) or UPPER(s.external_id) like UPPER(:search))) "
                 + " order by s.id desc)";
 
         final String clientIdentifierMatchSql = "( (select 'CLIENTIDENTIFIER' as entityType, ci.id as entityId, ci.document_key as entityName, "
                 + " null as entityExternalId, null as entityAccountNo, c.id as parentId, c.display_name as parentName,null as entityMobileNo, c.status_enum as entityStatusEnum, null as subEntityType, null as parentType, null as productId "
                 + " from m_client_identifier ci join m_client c on ci.client_id=c.id join m_office o on o.id = c.office_id "
-                + " where o.hierarchy like :hierarchy and ci.document_key ILIKE :search ) " + " order by ci.id desc)";
+                + " where o.hierarchy like :hierarchy and UPPER(ci.document_key) like UPPER(:search) ) " + " order by ci.id desc)";
 
         final String groupMatchSql = "( (select CASE WHEN g.level_id=1 THEN 'CENTER' ELSE 'GROUP' END as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, g.account_no as entityAccountNo, "
                 + " g.office_id as parentId, o.name as parentName, null as entityMobileNo, g.status_enum as entityStatusEnum, null as subEntityType, null as parentType, null as productId "
-                + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and (g.account_no ILIKE :search or g.display_name ILIKE :search or g.external_id ILIKE :search)) "
+                + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and (UPPER(g.account_no) like UPPER(:search) or UPPER(g.display_name) like UPPER(:search) or UPPER(g.external_id) like UPPER(:search))) "
                 + " order by g.id desc)";
 
         final StringBuilder sql = new StringBuilder();
