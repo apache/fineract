@@ -90,6 +90,14 @@ public class FeignLoanHelper {
         return ok(() -> fineractClient.loans().retrieveLoan(loanId, Map.of("associations", "all", "exclude", "guarantors,futureSchedule")));
     }
 
+    public GetLoansLoanIdResponse getLoanDetailsWithAssociations(Long loanId, String associations) {
+        return ok(() -> fineractClient.loans().retrieveLoan(loanId, Map.of("associations", associations)));
+    }
+
+    public GetLoansLoanIdResponse getLoanDetailsWithAssociationsAndExclude(Long loanId, String associations, String exclude) {
+        return ok(() -> fineractClient.loans().retrieveLoan(loanId, Map.of("associations", associations, "exclude", exclude)));
+    }
+
     public void undoApproval(Long loanId) {
         PostLoansLoanIdRequest request = new PostLoansLoanIdRequest();
         ok(() -> fineractClient.loans().stateTransitions(loanId, request, Map.of("command", "undoApproval")));

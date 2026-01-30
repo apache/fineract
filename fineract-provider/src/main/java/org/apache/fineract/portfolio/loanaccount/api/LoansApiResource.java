@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -165,6 +166,8 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformS
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanSummaryDataProvider;
 import org.apache.fineract.portfolio.loanaccount.service.LoanSummaryProviderDelegate;
+import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
+import org.apache.fineract.portfolio.loanorigination.service.LoanOriginatorReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
@@ -255,9 +258,9 @@ public class LoansApiResource {
             "repaymentFrequencyNthDayTypeOptions", "repaymentFrequencyDaysOfWeekTypeOptions", "termFrequencyTypeOptions",
             "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions", "loanOfficerOptions",
             "loanPurposeOptions", "loanCollateralOptions", "chargeTemplate", "calendarOptions", "syncDisbursementWithMeeting",
-            "loanCounter", "loanProductCounter", "notes", "accountLinkingOptions", "linkedAccount", "interestRateDifferential",
-            "isFloatingInterestRate", "interestRatesPeriods", "lastClosedBusinessDate", LoanApiConstants.canUseForTopup,
-            LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose, LoanApiConstants.topupAmount,
+            "loanCounter", "loanProductCounter", "notes", "originators", "accountLinkingOptions", "linkedAccount",
+            "interestRateDifferential", "isFloatingInterestRate", "interestRatesPeriods", "lastClosedBusinessDate",
+            LoanApiConstants.canUseForTopup, LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose, LoanApiConstants.topupAmount,
             LoanApiConstants.clientActiveLoanOptions, LoanApiConstants.datatables, LoanProductConstants.RATES_PARAM_NAME,
             LoanApiConstants.MULTIDISBURSE_DETAILS_PARAMNAME, LoanApiConstants.EMI_AMOUNT_VARIATIONS_PARAMNAME,
             LoanApiConstants.COLLECTION_PARAMNAME, LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE,
@@ -310,6 +313,7 @@ public class LoansApiResource {
     private final LoanSummaryProviderDelegate loanSummaryProviderDelegate;
     private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
     private final LoanApprovedAmountHistoryRepository loanApprovedAmountHistoryRepository;
+    private final Optional<LoanOriginatorReadPlatformService> loanOriginatorReadPlatformService;
 
     /*
      * This template API is used for loan approval, ideally this should be invoked on loan that are pending for
@@ -1052,7 +1056,7 @@ public class LoansApiResource {
                         DataTableApiConstant.guarantorsAssociateParamName, DataTableApiConstant.collateralAssociateParamName,
                         DataTableApiConstant.notesAssociateParamName, DataTableApiConstant.linkedAccountAssociateParamName,
                         DataTableApiConstant.multiDisburseDetailsAssociateParamName, DataTableApiConstant.collectionAssociateParamName,
-                        DataTableApiConstant.loanTermVariationsAssociateParamName));
+                        DataTableApiConstant.loanTermVariationsAssociateParamName, DataTableApiConstant.originatorsAssociateParamName));
             }
 
             ApiParameterHelper.excludeAssociationsForResponseIfProvided(exclude, associationParameters);
@@ -1157,6 +1161,14 @@ public class LoansApiResource {
             if (associationParameters.contains(DataTableApiConstant.linkedAccountAssociateParamName)) {
                 mandatoryResponseParameters.add(DataTableApiConstant.linkedAccountAssociateParamName);
                 linkedAccount = this.accountAssociationsReadPlatformService.retriveLoanLinkedAssociation(resolvedLoanId);
+            }
+
+            if (associationParameters.contains(DataTableApiConstant.originatorsAssociateParamName)) {
+                mandatoryResponseParameters.add(DataTableApiConstant.originatorsAssociateParamName);
+                if (loanOriginatorReadPlatformService.isPresent()) {
+                    List<LoanOriginatorData> originatorList = loanOriginatorReadPlatformService.get().retrieveByLoanId(resolvedLoanId);
+                    loanBasicDetails.setOriginators(originatorList.isEmpty() ? Collections.emptyList() : originatorList);
+                }
             }
         }
 

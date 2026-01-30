@@ -50,6 +50,7 @@ import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.guarantor.data.IGuarantor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
+import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductBorrowerCycleVariationData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
@@ -151,6 +152,7 @@ public class LoanAccountData {
     private Collection<NoteData> notes;
     private Collection<DisbursementData> disbursementDetails;
     private LoanScheduleData originalSchedule;
+    private Collection<LoanOriginatorData> originators;
     // template
     private Collection<LoanProductData> productOptions;
     private Collection<StaffData> loanOfficerOptions;

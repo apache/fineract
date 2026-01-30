@@ -343,4 +343,74 @@ public class FeignLoanOriginatorApiTest extends FeignIntegrationTest {
 
         originatorHelper.deleteOriginator(originatorId);
     }
+
+    @Test
+    public void testRetrieveLoanWithOriginatorsAssociation() {
+        final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
+        final Long originatorId = originatorHelper.createOriginator(originatorExternalId);
+
+        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long loanId = loanHelper.createSubmittedLoan(clientId);
+
+        originatorHelper.attachOriginatorToLoan(loanId, originatorId);
+
+        final var loanDetails = loanHelper.getLoanDetailsWithAssociations(loanId, "originators");
+
+        assertThat(loanDetails.getOriginators()).isNotNull();
+        assertThat(loanDetails.getOriginators()).hasSize(1);
+        assertThat(loanDetails.getOriginators().get(0).getId()).isEqualTo(originatorId);
+        assertThat(loanDetails.getOriginators().get(0).getExternalId()).isEqualTo(originatorExternalId);
+
+        originatorHelper.detachOriginatorFromLoan(loanId, originatorId);
+        originatorHelper.deleteOriginator(originatorId);
+    }
+
+    @Test
+    public void testRetrieveLoanWithAllAssociationsIncludesOriginators() {
+        final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
+        final Long originatorId = originatorHelper.createOriginator(originatorExternalId);
+
+        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long loanId = loanHelper.createSubmittedLoan(clientId);
+
+        originatorHelper.attachOriginatorToLoan(loanId, originatorId);
+
+        final var loanDetails = loanHelper.getLoanDetailsWithAssociationsAndExclude(loanId, "all", "guarantors,futureSchedule");
+
+        assertThat(loanDetails.getOriginators()).isNotNull();
+        assertThat(loanDetails.getOriginators()).isNotEmpty();
+        assertThat(loanDetails.getOriginators().get(0).getId()).isEqualTo(originatorId);
+
+        originatorHelper.detachOriginatorFromLoan(loanId, originatorId);
+        originatorHelper.deleteOriginator(originatorId);
+    }
+
+    @Test
+    public void testRetrieveLoanWithNoOriginatorsReturnsEmptyList() {
+        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long loanId = loanHelper.createSubmittedLoan(clientId);
+
+        final var loanDetails = loanHelper.getLoanDetailsWithAssociations(loanId, "originators");
+
+        assertThat(loanDetails.getOriginators()).isNotNull();
+        assertThat(loanDetails.getOriginators()).isEmpty();
+    }
+
+    @Test
+    public void testRetrieveLoanExcludeOriginatorsFromAll() {
+        final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
+        final Long originatorId = originatorHelper.createOriginator(originatorExternalId);
+
+        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long loanId = loanHelper.createSubmittedLoan(clientId);
+
+        originatorHelper.attachOriginatorToLoan(loanId, originatorId);
+
+        final var loanDetails = loanHelper.getLoanDetailsWithAssociationsAndExclude(loanId, "all", "originators,guarantors,futureSchedule");
+
+        assertThat(loanDetails.getOriginators()).isNull();
+
+        originatorHelper.detachOriginatorFromLoan(loanId, originatorId);
+        originatorHelper.deleteOriginator(originatorId);
+    }
 }
