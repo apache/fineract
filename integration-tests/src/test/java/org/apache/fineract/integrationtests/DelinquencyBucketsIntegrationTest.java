@@ -120,7 +120,8 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
         assertNotNull(delinquencyRangeResponse01);
         assertNotNull(ranges);
         assertFalse(ranges.isEmpty());
-        DelinquencyRangeData range = ranges.get(ranges.size() - 1);
+        DelinquencyRangeData range = ranges.stream().filter(r -> r.getId().equals(delinquencyRangeResponse01.getResourceId())).findFirst()
+                .orElseThrow(() -> new AssertionError("Range with id " + delinquencyRangeResponse01.getResourceId() + " not found"));
         assertEquals(1, range.getMinimumAgeDays(), "Expected Min Age Days to 1");
         assertEquals(3, range.getMaximumAgeDays(), "Expected Max Age Days to 3");
     }
