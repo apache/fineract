@@ -20,7 +20,7 @@ dependencies {
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
-    tomcat 'org.apache.tomcat:tomcat:10.1.45@zip'
+    tomcat 'org.apache.tomcat:tomcat:10.1.47@zip'
     def providerMainOutput = project(':fineract-provider').extensions.getByType(SourceSetContainer).named('main').get().output
     testImplementation( providerMainOutput,
             project(path: ':fineract-core', configuration: 'runtimeElements'),
