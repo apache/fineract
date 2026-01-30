@@ -22,6 +22,7 @@ import jakarta.annotation.PostConstruct;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -131,14 +132,18 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
     @Override
     public List<SmsData> retrieveAllPending(final Long campaignId, final Integer limit) {
         final String sqlPlusLimit = limit > 0 ? " " + sqlGenerator.limit(limit) : "";
-        String sql = "select " + this.smsRowMapper.schema() + " where smo.status_enum = " + SmsMessageStatusType.PENDING.getValue();
+        String sql = "select " + this.smsRowMapper.schema() + " where smo.status_enum = ?";
+        List<Object> params = new ArrayList<>();
+        params.add(SmsMessageStatusType.PENDING.getValue());
+
         if (campaignId != null) {
-            sql += " and smo.campaign_id = " + campaignId;
+            sql += " and smo.campaign_id = ?";
+            params.add(campaignId);
         }
 
         sql += sqlPlusLimit;
 
-        return this.jdbcTemplate.query(sql, this.smsRowMapper); // NOSONAR
+        return this.jdbcTemplate.query(sql, this.smsRowMapper, params.toArray()); // NOSONAR
     }
 
     @Override
