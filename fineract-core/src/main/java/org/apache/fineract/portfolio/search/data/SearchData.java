@@ -35,10 +35,11 @@ public class SearchData {
     private final EnumOptionData entityStatus;
     private final String parentType;
     private final String subEntityType;
+    private final Long productId;
 
     public SearchData(final Long entityId, final String entityAccountNo, final String entityExternalId, final String entityName,
             final String entityType, final Long parentId, final String parentName, final String parentType, final String entityMobileNo,
-            final EnumOptionData entityStatus, final String subEntityType) {
+            final EnumOptionData entityStatus, final String subEntityType, final Long productId) {
 
         this.entityId = entityId;
         this.entityAccountNo = entityAccountNo;
@@ -51,6 +52,7 @@ public class SearchData {
         this.entityMobileNo = entityMobileNo;
         this.entityStatus = entityStatus;
         this.subEntityType = subEntityType;
+        this.productId = productId;
     }
 
 }
