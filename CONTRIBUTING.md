@@ -270,3 +270,15 @@ This project's committers typically prefer to bring your pull requests in throug
 We expect most proposed PRs to typically consist of a single commit. Committers may use _Squash and merge_ to combine your commits at merge time, and if they do so, will rewrite your commit message as they see fit.
 
 Neither of these two are hard absolute rules, but mere conventions. Multiple commits in single PRs make sense in certain cases (e.g. branch backports).
+
+### Signing Your Commits
+
+We encourage contributors to sign commits with GPG keys. Signed commits show a "Verified" badge on GitHub.
+
+For GPG setup instructions, see the [Fineract GPG Guide](https://fineract.apache.org/docs/current/#_gpg_2).
+
+To verify your commits locally before pushing:
+
+```bash
+./scripts/verify-signed-commits.sh
+```
