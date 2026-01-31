@@ -54,6 +54,7 @@ public final class CommandProperties implements Serializable {
     public enum CommandExecutorType {
         sync, //
         async, //
-        disruptor //
+        disruptor, //
+        audit
     }
 }

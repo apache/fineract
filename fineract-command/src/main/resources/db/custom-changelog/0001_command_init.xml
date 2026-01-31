@@ -46,4 +46,16 @@
             <column name="payload" type="text" />
         </createTable>
     </changeSet>
+    <changeSet author="fineract" id="command-00003" context="postgresql">
+        <addColumn tableName="m_command">
+            <column name="result" type="text" />
+            <column name="error_message" type="text" />
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="command-00004" context="mysql">
+        <addColumn tableName="m_command">
+            <column name="result" type="text" />
+            <column name="error_message" type="text" />
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

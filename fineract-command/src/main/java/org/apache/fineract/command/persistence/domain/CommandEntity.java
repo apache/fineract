@@ -75,6 +75,12 @@ public class CommandEntity implements Serializable {
     @Convert(converter = JsonAttributeConverter.class)
     private JsonNode payload;
 
+    @Column(name = "result")
+    private String result;
+
+    @Column(name = "error_message", columnDefinition = "TEXT")
+    private String errorMessage;
+
     @PrePersist
     @PostLoad
     void markNotNew() {
