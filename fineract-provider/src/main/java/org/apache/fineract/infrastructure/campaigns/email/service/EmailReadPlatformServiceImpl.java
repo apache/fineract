@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.campaigns.email.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -105,9 +106,7 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
 
     @Override
     public Collection<EmailData> retrieveAll() {
-
         final String sql = "select " + this.emailRowMapper.schema();
-
         return this.jdbcTemplate.query(sql, this.emailRowMapper); // NOSONAR
     }
 
@@ -115,7 +114,6 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
     public EmailData retrieveOne(final Long resourceId) {
         try {
             final String sql = "select " + this.emailRowMapper.schema() + " where emo.id = ?";
-
             return this.jdbcTemplate.queryForObject(sql, this.emailRowMapper, new Object[] { resourceId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new EmailNotFoundException(resourceId, e);
@@ -124,18 +122,14 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
 
     @Override
     public Collection<EmailData> retrieveAllPending(final SearchParameters searchParameters) {
-        final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " " + sqlGenerator.limit(searchParameters.getLimit()) : "";
-        final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum =? " + sqlPlusLimit;
-
-        return this.jdbcTemplate.query(sql, this.emailRowMapper, EmailMessageStatusType.PENDING.getValue()); // NOSONAR
+        // FIXED: Passing Integer limit instead of String SQL fragment
+        return retrieveEmailByStatus(EmailMessageStatusType.PENDING.getValue(), searchParameters.getLimit());
     }
 
     @Override
     public Collection<EmailData> retrieveAllSent(final SearchParameters searchParameters) {
-        final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " " + sqlGenerator.limit(searchParameters.getLimit()) : "";
-        final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = ?" + sqlPlusLimit;
-
-        return this.jdbcTemplate.query(sql, this.emailRowMapper, EmailMessageStatusType.SENT.getValue()); // NOSONAR
+        // FIXED: Passing Integer limit instead of String SQL fragment
+        return retrieveEmailByStatus(EmailMessageStatusType.SENT.getValue(), searchParameters.getLimit());
     }
 
     @Override
@@ -148,18 +142,14 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
 
     @Override
     public Collection<EmailData> retrieveAllDelivered(final Integer limit) {
-        final String sqlPlusLimit = (limit > 0) ? " " + sqlGenerator.limit(limit) : "";
-        final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = ?" + sqlPlusLimit;
-
-        return this.jdbcTemplate.query(sql, this.emailRowMapper, EmailMessageStatusType.DELIVERED.getValue()); // NOSONAR
+        // FIXED: Passing Integer limit instead of String SQL fragment
+        return retrieveEmailByStatus(EmailMessageStatusType.DELIVERED.getValue(), limit);
     }
 
     @Override
     public Collection<EmailData> retrieveAllFailed(final SearchParameters searchParameters) {
-        final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " " + sqlGenerator.limit(searchParameters.getLimit()) : "";
-        final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = ?" + sqlPlusLimit;
-
-        return this.jdbcTemplate.query(sql, this.emailRowMapper, EmailMessageStatusType.FAILED.getValue()); // NOSONAR
+        // FIXED: Passing Integer limit instead of String SQL fragment
+        return retrieveEmailByStatus(EmailMessageStatusType.FAILED.getValue(), searchParameters.getLimit());
     }
 
     @Override
@@ -184,5 +174,19 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
         }
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(),
                 new Object[] { status, fromDateString, toDateString }, this.emailRowMapper);
+    }
+
+    private Collection<EmailData> retrieveEmailByStatus(final Integer status, final Integer limit) {
+        StringBuilder sql = new StringBuilder("select " + this.emailRowMapper.schema() + " where emo.status_enum = ?");
+        List<Object> args = new ArrayList<>();
+        args.add(status);
+
+        if (limit != null && limit > 0) {
+            // Using sqlGenerator ensures cross-database compatibility
+            // (Postgres/MySQL/MSSQL)
+            sql.append(" ").append(sqlGenerator.limit(limit));
+        }
+
+        return this.jdbcTemplate.query(sql.toString(), this.emailRowMapper, args.toArray());
     }
 }
