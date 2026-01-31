@@ -187,7 +187,7 @@ public class LoanBalanceService {
                 charge.resetToOriginal(loan.getCurrency());
             }
         }
-        loan.getLoanRepaymentScheduleDetail().setPrincipal(loan.getDisbursedAmount().subtract(disbursementDetail.principal()));
+        loan.getLoanRepaymentScheduleDetail().setPrincipal(loan.getDisbursedAmount().subtract(disbursementDetail.getPrincipal()));
         disbursementDetail.updateActualDisbursementDate(null);
         disbursementDetail.reverse();
         updateLoanSummaryDerivedFields(loan);

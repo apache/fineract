@@ -88,7 +88,7 @@ public class LoanApprovedAmountWritePlatformServiceImpl implements LoanApprovedA
         changes.put("oldApprovedAmount", loan.getApprovedPrincipal());
 
         BigDecimal expectedDisbursementAmount = loan.getDisbursementDetails().stream().filter(t -> t.actualDisbursementDate() == null)
-                .map(LoanDisbursementDetails::principal).reduce(BigDecimal.ZERO, BigDecimal::add);
+                .map(LoanDisbursementDetails::getPrincipal).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal oldAvailableDisbursement = loan.getApprovedPrincipal().subtract(loan.getSummary().getTotalPrincipal())
                 .subtract(expectedDisbursementAmount);

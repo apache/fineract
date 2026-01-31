@@ -814,7 +814,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         if (isMultiDisburmentLoan()) {
             for (LoanDisbursementDetails disbursementDetail : getDisbursementDetails()) {
                 if (disbursementDetail.actualDisbursementDate() != null) {
-                    principal = principal.add(disbursementDetail.principal());
+                    principal = principal.add(disbursementDetail.getPrincipal());
                 }
             }
             return principal;
@@ -999,7 +999,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         if (!details.isEmpty()) {
             principal = BigDecimal.ZERO;
             for (LoanDisbursementDetails disbursementDetails : details) {
-                principal = principal.add(disbursementDetails.principal());
+                principal = principal.add(disbursementDetails.getPrincipal());
             }
         }
         return principal;
@@ -1303,7 +1303,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     public LoanDisbursementDetails getDisbursementDetails(final LocalDate transactionDate, final BigDecimal transactionAmount) {
         for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
             if (!disbursementDetail.isReversed() && disbursementDetail.getDisbursementDate().equals(transactionDate)
-                    && (disbursementDetail.principal().compareTo(transactionAmount) == 0)) {
+                    && (disbursementDetail.getPrincipal().compareTo(transactionAmount) == 0)) {
                 return disbursementDetail;
             }
         }
@@ -1317,7 +1317,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             Collection<LoanDisbursementDetails> loanDisburseDetails = this.getDisbursementDetails();
             for (LoanDisbursementDetails details : loanDisburseDetails) {
                 if (details.actualDisbursementDate() != null) {
-                    principalAmount = principalAmount.add(details.principal());
+                    principalAmount = principalAmount.add(details.getPrincipal());
                 }
             }
         } else if (isApproved()) {

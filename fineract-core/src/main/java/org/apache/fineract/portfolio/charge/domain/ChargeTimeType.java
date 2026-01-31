@@ -221,4 +221,9 @@ public enum ChargeTimeType {
     public boolean isSharesRedeem() {
         return this.equals(ChargeTimeType.SHARE_REDEEM);
     }
+
+    public boolean isDisbursementOrTrancheDisbursementCharge() {
+        return isTimeOfDisbursement() || isTrancheDisbursement();
+    }
+
 }

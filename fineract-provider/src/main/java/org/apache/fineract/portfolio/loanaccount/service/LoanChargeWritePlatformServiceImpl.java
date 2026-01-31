@@ -105,7 +105,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachin
 import org.apache.fineract.portfolio.loanaccount.domain.LoanOverdueInstallmentCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTrancheDisbursementCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -159,7 +158,6 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
     private final FromJsonHelper fromApiJsonHelper;
     private final ConfigurationDomainService configurationDomainService;
-    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final ExternalIdFactory externalIdFactory;
     private final AccountTransferDetailRepository accountTransferDetailRepository;
     private final LoanChargeAssembler loanChargeAssembler;
@@ -216,7 +214,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                         externalId = externalIdFactory.create();
                     }
                     LocalDate dueDate = disbursementDetail.expectedDisbursementDateAsLocalDate();
-                    loanCharge = loanChargeAssembler.createNewWithoutLoan(chargeDefinition, disbursementDetail.principal(), null, null,
+                    loanCharge = loanChargeAssembler.createNewWithoutLoan(chargeDefinition, disbursementDetail.getPrincipal(), null, null,
                             null, dueDate, null, null, externalId);
                     loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge, disbursementDetail);
                     loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);

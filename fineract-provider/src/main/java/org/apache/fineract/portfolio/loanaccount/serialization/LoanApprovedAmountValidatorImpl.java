@@ -97,7 +97,7 @@ public final class LoanApprovedAmountValidatorImpl implements LoanApprovedAmount
 
             BigDecimal totalPrincipalOnLoan = loan.getSummary().getTotalPrincipal();
             BigDecimal totalExpectedPrincipal = loan.getDisbursementDetails().stream().filter(t -> t.actualDisbursementDate() == null)
-                    .map(LoanDisbursementDetails::principal).reduce(BigDecimal.ZERO, BigDecimal::add);
+                    .map(LoanDisbursementDetails::getPrincipal).reduce(BigDecimal.ZERO, BigDecimal::add);
             if (MathUtil.isLessThan(newApprovedAmount, totalPrincipalOnLoan.add(totalExpectedPrincipal))) {
                 baseDataValidator.reset().parameter(LoanApiConstants.amountParameterName)
                         .failWithCode("less.than.disbursed.principal.and.capitalized.income");
@@ -145,7 +145,7 @@ public final class LoanApprovedAmountValidatorImpl implements LoanApprovedAmount
             }
 
             BigDecimal expectedDisbursementAmount = loan.getDisbursementDetails().stream().filter(t -> t.actualDisbursementDate() == null)
-                    .map(LoanDisbursementDetails::principal).reduce(BigDecimal.ZERO, BigDecimal::add);
+                    .map(LoanDisbursementDetails::getPrincipal).reduce(BigDecimal.ZERO, BigDecimal::add);
 
             BigDecimal maximumAvailableDisbursementThreshold = maximumThresholdForApprovedAmount
                     .subtract(loan.getSummary().getTotalPrincipal()).subtract(expectedDisbursementAmount);

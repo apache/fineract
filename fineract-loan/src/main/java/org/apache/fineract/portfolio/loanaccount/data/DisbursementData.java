@@ -22,6 +22,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 
@@ -30,6 +32,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
  */
 @RequiredArgsConstructor
 @Getter
+@Accessors(chain = true)
 public final class DisbursementData implements LoanPrincipalRelatedDataHolder, Comparable<DisbursementData> {
 
     private final Long id;
@@ -41,6 +44,8 @@ public final class DisbursementData implements LoanPrincipalRelatedDataHolder, C
     private final String loanChargeId;
     private final BigDecimal chargeAmount;
     private final BigDecimal waivedChargeAmount;
+    @Setter
+    private BigDecimal disburseChargeAmount;
 
     // import fields
     private transient Integer rowIndex;

@@ -175,8 +175,8 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         for (LoanRepaymentScheduleInstallment installment : installments) {
             if (loanDisbursementDetails != null
                     && !DateUtils.isAfter(loanDisbursementDetails.expectedDisbursementDateAsLocalDate(), installment.getDueDate())) {
-                outstanding = outstanding.plus(loanDisbursementDetails.principal());
-                principal = principal.plus(loanDisbursementDetails.principal());
+                outstanding = outstanding.plus(loanDisbursementDetails.getPrincipal());
+                principal = principal.plus(loanDisbursementDetails.getPrincipal());
                 if (disbursementItr.hasNext()) {
                     loanDisbursementDetails = disbursementItr.next();
                 } else {

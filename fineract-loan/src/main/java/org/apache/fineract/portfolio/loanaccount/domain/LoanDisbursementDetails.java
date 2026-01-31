@@ -26,10 +26,12 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 
+@Getter
 @Entity
 @Table(name = "m_loan_disbursement_detail")
 public class LoanDisbursementDetails extends AbstractPersistableCustom<Long> {
@@ -105,10 +107,6 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom<Long> {
 
     public LocalDate actualDisbursementDate() {
         return this.actualDisbursementDate;
-    }
-
-    public BigDecimal principal() {
-        return this.principal;
     }
 
     public void updatePrincipal(BigDecimal principal) {

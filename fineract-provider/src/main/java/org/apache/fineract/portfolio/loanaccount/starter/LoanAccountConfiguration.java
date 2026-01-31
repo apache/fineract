@@ -314,11 +314,10 @@ public class LoanAccountConfiguration {
             LoanWritePlatformService loanWritePlatformService, LoanUtilService loanUtilService,
             LoanChargeReadPlatformService loanChargeReadPlatformService, LoanLifecycleStateMachine loanLifecycleStateMachine,
             AccountAssociationsReadPlatformService accountAssociationsReadPlatformService, FromJsonHelper fromApiJsonHelper,
-            ConfigurationDomainService configurationDomainService,
-            LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
-            ExternalIdFactory externalIdFactory, AccountTransferDetailRepository accountTransferDetailRepository,
-            LoanChargeAssembler loanChargeAssembler, PaymentDetailWritePlatformService paymentDetailWritePlatformService,
-            NoteRepository noteRepository, LoanAccrualsProcessingService loanAccrualsProcessingService,
+            ConfigurationDomainService configurationDomainService, ExternalIdFactory externalIdFactory,
+            AccountTransferDetailRepository accountTransferDetailRepository, LoanChargeAssembler loanChargeAssembler,
+            PaymentDetailWritePlatformService paymentDetailWritePlatformService, NoteRepository noteRepository,
+            LoanAccrualsProcessingService loanAccrualsProcessingService,
             LoanDownPaymentTransactionValidator loanDownPaymentTransactionValidator, LoanChargeValidator loanChargeValidator,
             LoanScheduleService loanScheduleService, ReprocessLoanTransactionsService reprocessLoanTransactionsService,
             LoanAccountService loanAccountService, LoanAdjustmentService loanAdjustmentService, LoanChargeService loanChargeService,
@@ -327,10 +326,9 @@ public class LoanAccountConfiguration {
                 businessEventNotifierService, loanTransactionRepository, accountTransfersWritePlatformService, loanRepositoryWrapper,
                 loanAccountDomainService, loanChargeRepository, loanWritePlatformService, loanUtilService, loanChargeReadPlatformService,
                 loanLifecycleStateMachine, accountAssociationsReadPlatformService, fromApiJsonHelper, configurationDomainService,
-                loanRepaymentScheduleTransactionProcessorFactory, externalIdFactory, accountTransferDetailRepository, loanChargeAssembler,
-                paymentDetailWritePlatformService, noteRepository, loanAccrualsProcessingService, loanDownPaymentTransactionValidator,
-                loanChargeValidator, loanScheduleService, reprocessLoanTransactionsService, loanAccountService, loanAdjustmentService,
-                loanChargeService, loanJournalEntryPoster);
+                externalIdFactory, accountTransferDetailRepository, loanChargeAssembler, paymentDetailWritePlatformService, noteRepository,
+                loanAccrualsProcessingService, loanDownPaymentTransactionValidator, loanChargeValidator, loanScheduleService,
+                reprocessLoanTransactionsService, loanAccountService, loanAdjustmentService, loanChargeService, loanJournalEntryPoster);
     }
 
     @Bean

@@ -365,7 +365,12 @@ public class LoanRepaymentScheduleService {
             if (dataItem.isDisbursement()) {
                 // Process disbursement data
                 DisbursementData data = (DisbursementData) dataItem.getData();
-                periodData = createLoanSchedulePeriodData(data, disbursementChargeAmount, waivedChargeAmount);
+                if (periods.isEmpty()) {
+                    periodData = createLoanSchedulePeriodData(data, disbursementChargeAmount, waivedChargeAmount);
+                } else {
+                    periodData = createLoanSchedulePeriodData(data, disbursementChargeAmount.subtract(data.getDisburseChargeAmount()),
+                            waivedChargeAmount);
+                }
             } else {
                 // Process capitalized income data
                 LoanTransactionRepaymentPeriodData data = (LoanTransactionRepaymentPeriodData) dataItem.getData();

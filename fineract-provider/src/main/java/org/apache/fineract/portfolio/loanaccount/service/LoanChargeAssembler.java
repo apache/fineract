@@ -174,7 +174,7 @@ public class LoanChargeAssembler {
                                         } else {
                                             if (disbursementDetail.expectedDisbursementDateAsLocalDate().equals(expectedDisbursementDate)) {
                                                 final LoanCharge loanCharge = createNewWithoutLoan(chargeDefinition,
-                                                        disbursementDetail.principal(), amount, chargeTime, chargeCalculation,
+                                                        disbursementDetail.getPrincipal(), amount, chargeTime, chargeCalculation,
                                                         disbursementDetail.expectedDisbursementDateAsLocalDate(), chargePaymentModeEnum,
                                                         numberOfRepayments, externalId);
                                                 loanCharges.add(loanCharge);
@@ -191,8 +191,8 @@ public class LoanChargeAssembler {
                                 LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = null;
                                 for (LoanDisbursementDetails disbursementDetail : disbursementDetails) {
                                     if (ChargeTimeType.TRANCHE_DISBURSEMENT.getValue().equals(chargeDefinition.getChargeTimeType())) {
-                                        final LoanCharge loanCharge = createNewWithoutLoan(chargeDefinition, disbursementDetail.principal(),
-                                                amount, chargeTime, chargeCalculation,
+                                        final LoanCharge loanCharge = createNewWithoutLoan(chargeDefinition,
+                                                disbursementDetail.getPrincipal(), amount, chargeTime, chargeCalculation,
                                                 disbursementDetail.expectedDisbursementDateAsLocalDate(), chargePaymentModeEnum,
                                                 numberOfRepayments, externalId);
                                         loanCharges.add(loanCharge);
@@ -309,7 +309,7 @@ public class LoanChargeAssembler {
             amountPercentageAppliedTo = BigDecimal.ZERO;
             for (final LoanDisbursementDetails loanDisbursementDetails : loan.getDisbursementDetails()) {
                 if (!DateUtils.isAfter(loanDisbursementDetails.expectedDisbursementDate(), dueDate)) {
-                    amountPercentageAppliedTo = amountPercentageAppliedTo.add(loanDisbursementDetails.principal());
+                    amountPercentageAppliedTo = amountPercentageAppliedTo.add(loanDisbursementDetails.getPrincipal());
                 }
             }
         }

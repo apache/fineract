@@ -962,7 +962,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         for (LoanDisbursementDetails loanDisbursementDetails : loan.getDisbursementDetails()) {
             if (loanDisbursementDetails.actualDisbursementDate() == null) {
-                totalPrincipal = Money.of(currency, totalPrincipal.getAmount().subtract(loanDisbursementDetails.principal()));
+                totalPrincipal = Money.of(currency, totalPrincipal.getAmount().subtract(loanDisbursementDetails.getPrincipal()));
             }
         }
 

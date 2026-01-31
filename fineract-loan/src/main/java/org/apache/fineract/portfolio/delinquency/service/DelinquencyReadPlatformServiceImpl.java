@@ -216,7 +216,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
         // Calculate available amount: (approved + over applied) - expected tranches - disbursed - capitalized income
         if (loan.isMultiDisburmentLoan() && loan.getDisbursementDetails() != null) {
             final BigDecimal expectedDisbursementAmount = loan.getDisbursementDetails().stream()
-                    .filter(detail -> detail.actualDisbursementDate() == null).map(LoanDisbursementDetails::principal)
+                    .filter(detail -> detail.actualDisbursementDate() == null).map(LoanDisbursementDetails::getPrincipal)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             approvedWithOverApplied = approvedWithOverApplied.subtract(expectedDisbursementAmount);
         }

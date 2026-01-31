@@ -132,7 +132,7 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
             // Then we need to get as of this loan charge due date how much amount disbursed.
             for (final LoanDisbursementDetails loanDisbursementDetails : loan.getDisbursementDetails()) {
                 if (!DateUtils.isAfter(loanDisbursementDetails.expectedDisbursementDate(), loanCharge.getDueDate())) {
-                    baseAmount = MathUtil.add(baseAmount, loanDisbursementDetails.principal());
+                    baseAmount = MathUtil.add(baseAmount, loanDisbursementDetails.getPrincipal());
                 }
             }
         } else {
