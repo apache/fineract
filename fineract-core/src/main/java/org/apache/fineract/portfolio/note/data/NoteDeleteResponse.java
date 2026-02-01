@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.cache.data;
+package org.apache.fineract.portfolio.note.data;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -24,19 +24,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public final class CacheData implements Serializable {
+public class NoteDeleteResponse implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @SuppressWarnings("unused")
-    private EnumOptionData cacheType;
-    @SuppressWarnings("unused")
-    private boolean enabled;
+    private Long resourceId;
 }

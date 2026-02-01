@@ -21,9 +21,9 @@ package org.apache.fineract.integrationtests.common;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import org.apache.fineract.client.models.NoteData;
-import org.apache.fineract.client.models.PostResourceTypeResourceIdNotesResponse;
 import org.apache.fineract.client.util.JSON;
+import org.apache.fineract.portfolio.note.data.NoteCreateResponse;
+import org.apache.fineract.portfolio.note.data.NoteData;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public final class NotesHelper {
@@ -210,11 +210,11 @@ public final class NotesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static PostResourceTypeResourceIdNotesResponse createSavingsNote(RequestSpecification requestSpec,
-            ResponseSpecification responseSpec, Integer savingsId, String request) {
+    public static NoteCreateResponse createSavingsNote(RequestSpecification requestSpec, ResponseSpecification responseSpec,
+            Integer savingsId, String request) {
         final String noteURL = SAVINGS_URL + "/" + savingsId + "/notes?" + Utils.TENANT_IDENTIFIER;
         final String response = Utils.performServerPost(requestSpec, responseSpec, noteURL, request);
-        return GSON.fromJson(response, PostResourceTypeResourceIdNotesResponse.class);
+        return GSON.fromJson(response, NoteCreateResponse.class);
     }
 
     public static NoteData retrieveSavingsNote(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer savingsId,

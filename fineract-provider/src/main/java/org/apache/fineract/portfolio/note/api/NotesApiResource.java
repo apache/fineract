@@ -19,13 +19,8 @@
 package org.apache.fineract.portfolio.note.api;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -35,201 +30,160 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.command.core.CommandPipeline;
+import org.apache.fineract.portfolio.note.command.NoteCreateCommand;
+import org.apache.fineract.portfolio.note.command.NoteDeleteCommand;
+import org.apache.fineract.portfolio.note.command.NoteUpdateCommand;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.portfolio.note.data.NoteCreateResponse;
 import org.apache.fineract.portfolio.note.data.NoteData;
-import org.apache.fineract.portfolio.note.data.NoteRequest;
+import org.apache.fineract.portfolio.note.data.NoteDeleteRequest;
+import org.apache.fineract.portfolio.note.data.NoteDeleteResponse;
+import org.apache.fineract.portfolio.note.data.NoteUpdateRequest;
+import org.apache.fineract.portfolio.note.data.NoteUpdateResponse;
 import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.note.exception.NoteResourceNotSupportedException;
 import org.apache.fineract.portfolio.note.service.NoteReadPlatformService;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/{resourceType}/{resourceId}/notes")
+@Consumes({ MediaType.APPLICATION_JSON })
+@Produces({ MediaType.APPLICATION_JSON })
 @Component
-@Tag(name = "Notes", description = "Notes API allows to enter notes for supported resources.")
+@Tag(name = "Notes", description = """
+        Notes API allows to enter notes for supported resources.
+        """)
 @RequiredArgsConstructor
 public class NotesApiResource {
 
-    public static final String CLIENTNOTE = "CLIENTNOTE";
-    public static final String LOANNOTE = "LOANNOTE";
-    public static final String LOANTRANSACTIONNOTE = "LOANTRANSACTIONNOTE";
-    public static final String SAVINGNOTE = "SAVINGNOTE";
-    public static final String GROUPNOTE = "GROUPNOTE";
-    public static final String INVALIDNOTE = "INVALIDNOTE";
-    private static final Set<String> NOTE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList("id", "resourceId", "clientId", "groupId", "loanId", "loanTransactionId", "depositAccountId", "savingAccountId",
-                    "noteType", "note", "createdById", "createdByUsername", "createdOn", "updatedById", "updatedByUsername", "updatedOn"));
-    private final PlatformSecurityContext context;
     private final NoteReadPlatformService readPlatformService;
-    private final DefaultToApiJsonSerializer<NoteData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final CommandPipeline commandPipeline;
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Resource's description", description = "Retrieves a Resource's Notes\n\n"
-            + "Note: Notes are returned in descending createOn order.\n" + "\n" + "Example Requests:\n" + "\n" + "clients/2/notes\n" + "\n"
-            + "\n" + "groups/2/notes?fields=note,createdOn,createdByUsername")
-    public List<NoteData> retrieveNotesByResource(
-            @PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
-            @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId) {
+    @Operation(summary = "Retrieve a Resource's description", description = """
+            Retrieves a resource's notes
 
-        final NoteType noteType = NoteType.fromApiUrl(resourceType);
+            Note: results are returned in descending createOn order.
+
+            Example Requests:
+
+            - clients/2/notes
+            - groups/2/notes?fields=note,createdOn,createdByUsername
+            """)
+    public List<NoteData> retrieveNotesByResource(@PathParam("resourceType") final String resourceType,
+            @PathParam("resourceId") final Long resourceId) {
+        final var noteType = NoteType.fromApiUrl(resourceType);
 
         if (noteType == null) {
             throw new NoteResourceNotSupportedException(resourceType);
         }
 
-        this.context.authenticatedUser().validateHasReadPermission(getResourceDetails(noteType, resourceId).entityName());
-
-        final Integer noteTypeId = noteType.getValue();
-
-        return readPlatformService.retrieveNotesByResource(resourceId, noteTypeId);
+        return readPlatformService.retrieveNotesByResource(resourceId, noteType.getValue());
     }
 
     @GET
     @Path("{noteId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Resource Note", description = "Retrieves a Resource Note\n\n" + "Example Requests:\n" + "\n"
-            + "clients/1/notes/76\n" + "\n" + "\n" + "groups/1/notes/20\n" + "\n" + "\n"
-            + "clients/1/notes/76?fields=note,createdOn,createdByUsername\n" + "\n" + "\n"
-            + "groups/1/notes/20?fields=note,createdOn,createdByUsername")
-    public NoteData retrieveNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
-            @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId,
-            @PathParam("noteId") @Parameter(description = "noteId") final Long noteId) {
+    @Operation(summary = "Retrieve a Resource Note", description = """
+            Retrieves a resource Note
 
+            Example Requests:
+
+            - clients/1/notes/76
+            - groups/1/notes/20
+            - clients/1/notes/76?fields=note,createdOn,createdByUsername
+            - groups/1/notes/20?fields=note,createdOn,createdByUsername
+            """)
+    public NoteData retrieveNote(@PathParam("resourceType") final String resourceType, @PathParam("resourceId") final Long resourceId,
+            @PathParam("noteId") final Long noteId) {
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
         if (noteType == null) {
             throw new NoteResourceNotSupportedException(resourceType);
         }
 
-        this.context.authenticatedUser().validateHasReadPermission(getResourceDetails(noteType, resourceId).entityName());
-
-        final Integer noteTypeId = noteType.getValue();
-
-        final NoteData note = this.readPlatformService.retrieveNote(noteId, resourceId, noteTypeId);
-        return note;
+        return readPlatformService.retrieveNote(noteId, resourceId, noteType.getValue());
     }
 
     @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Add a Resource Note", description = "Adds a new note to a supported resource.\n\n" + "Example Requests:\n" + "\n"
-            + "clients/1/notes\n" + "\n" + "\n" + "groups/1/notes")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = NoteRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.PostResourceTypeResourceIdNotesResponse.class))) })
-    public CommandProcessingResult addNewNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
-            @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId,
-            @Parameter(hidden = true) final NoteRequest noteRequest) {
+    @Operation(summary = "Add a Resource Note", description = """
+            Adds a new note to a supported resource.
 
-        final NoteType noteType = NoteType.fromApiUrl(resourceType);
+            Example Requests:
 
-        if (noteType == null) {
+            - clients/1/notes
+            - groups/1/notes
+            """)
+    public NoteCreateResponse addNewNote(@PathParam("resourceType") final String resourceType,
+            @PathParam("resourceId") final Long resourceId, @Valid final NoteCreateRequest request) {
+        final var type = NoteType.fromApiUrl(resourceType);
+
+        if (type == null) {
             throw new NoteResourceNotSupportedException(resourceType);
         }
 
-        final CommandWrapper resourceDetails = getResourceDetails(noteType, resourceId);
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createNote(resourceDetails, resourceType, resourceId)
-                .withJson(toApiJsonSerializer.serialize(noteRequest)).build();
+        request.setResourceId(resourceId);
+        request.setType(type);
 
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final var command = new NoteCreateCommand();
+
+        command.setPayload(request);
+
+        final Supplier<NoteCreateResponse> response = commandPipeline.send(command);
+
+        return response.get();
     }
 
     @PUT
     @Path("{noteId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update a Resource Note", description = "Updates a Resource Note")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = NoteRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.PutResourceTypeResourceIdNotesNoteIdResponse.class))) })
-    public CommandProcessingResult updateNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
-            @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId,
-            @PathParam("noteId") @Parameter(description = "noteId") final Long noteId,
-            @Parameter(hidden = true) final NoteRequest noteRequest) {
+    @Operation(summary = "Update a Resource Note", description = """
+            Updates a Resource Note
+            """)
+    public NoteUpdateResponse updateNote(@PathParam("resourceType") final String resourceType,
+            @PathParam("resourceId") final Long resourceId, @PathParam("noteId") final Long noteId,
+            @Valid final NoteUpdateRequest request) {
+        final var type = NoteType.fromApiUrl(resourceType);
 
-        final NoteType noteType = NoteType.fromApiUrl(resourceType);
-
-        if (noteType == null) {
+        if (type == null) {
             throw new NoteResourceNotSupportedException(resourceType);
         }
 
-        final CommandWrapper resourceDetails = getResourceDetails(noteType, resourceId);
+        request.setId(noteId);
+        request.setResourceId(resourceId);
+        request.setType(type);
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateNote(resourceDetails, resourceType, resourceId, noteId)
-                .withJson(toApiJsonSerializer.serialize(noteRequest)).build();
+        final var command = new NoteUpdateCommand();
 
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        command.setPayload(request);
+
+        final Supplier<NoteUpdateResponse> response = commandPipeline.send(command);
+
+        return response.get();
     }
 
     @DELETE
     @Path("{noteId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete a Resource Note", description = "Deletes a Resource Note")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.DeleteResourceTypeResourceIdNotesNoteIdResponse.class))) })
-    public CommandProcessingResult deleteNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
-            @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId,
-            @PathParam("noteId") @Parameter(description = "noteId") final Long noteId) {
+    @Operation(summary = "Delete a Resource Note", description = """
+            Deletes a Resource Note
+            """)
+    public NoteDeleteResponse deleteNote(@PathParam("resourceType") final String resourceType,
+            @PathParam("resourceId") final Long resourceId, @PathParam("noteId") final Long noteId) {
+        final var type = NoteType.fromApiUrl(resourceType);
 
-        final NoteType noteType = NoteType.fromApiUrl(resourceType);
-
-        if (noteType == null) {
+        if (type == null) {
             throw new NoteResourceNotSupportedException(resourceType);
         }
 
-        final CommandWrapper resourceDetails = getResourceDetails(noteType, resourceId);
+        var request = NoteDeleteRequest.builder().id(noteId).resourceId(resourceId).type(type).build();
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteNote(resourceDetails, resourceType, resourceId, noteId)
-                .build();
+        final var command = new NoteDeleteCommand();
 
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
-    }
+        command.setPayload(request);
 
-    private CommandWrapper getResourceDetails(final NoteType type, final Long resourceId) {
-        CommandWrapperBuilder resourceDetails = new CommandWrapperBuilder();
-        String resourceNameForPermissions;
-        switch (type) {
-            case CLIENT -> {
-                resourceNameForPermissions = CLIENTNOTE;
-                resourceDetails.withClientId(resourceId);
-            }
-            case LOAN -> {
-                resourceNameForPermissions = LOANNOTE;
-                resourceDetails.withLoanId(resourceId);
-            }
-            case LOAN_TRANSACTION -> {
-                resourceNameForPermissions = LOANTRANSACTIONNOTE;
-                // updating loanId, to distinguish saving transaction note and
-                // loan transaction note as we are using subEntityId for both.
-                resourceDetails.withLoanId(resourceId);
-                resourceDetails.withSubEntityId(resourceId);
-            }
-            case SAVING_ACCOUNT -> {
-                resourceNameForPermissions = SAVINGNOTE;
-                resourceDetails.withSavingsId(resourceId);
-            }
-            case GROUP -> {
-                resourceNameForPermissions = GROUPNOTE;
-                resourceDetails.withGroupId(resourceId);
-            }
-            default -> resourceNameForPermissions = INVALIDNOTE;
-        }
-        return resourceDetails.withEntityName(resourceNameForPermissions).build();
+        final Supplier<NoteDeleteResponse> response = commandPipeline.send(command);
+
+        return response.get();
     }
 }

@@ -28,8 +28,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.fineract.client.models.NoteData;
-import org.apache.fineract.client.models.PostResourceTypeResourceIdNotesResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
@@ -41,6 +39,8 @@ import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtens
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
+import org.apache.fineract.portfolio.note.data.NoteCreateResponse;
+import org.apache.fineract.portfolio.note.data.NoteData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -217,8 +217,7 @@ public class NotesTest {
 
         // Notes
         final String payload = "{\"note\": \"" + noteText + "\"}";
-        final PostResourceTypeResourceIdNotesResponse postNoteResponse = NotesHelper.createSavingsNote(requestSpec, responseSpec, savingsId,
-                payload);
+        final NoteCreateResponse postNoteResponse = NotesHelper.createSavingsNote(requestSpec, responseSpec, savingsId, payload);
         Assertions.assertNotNull(postNoteResponse);
         Assertions.assertNotNull(postNoteResponse.getResourceId());
 

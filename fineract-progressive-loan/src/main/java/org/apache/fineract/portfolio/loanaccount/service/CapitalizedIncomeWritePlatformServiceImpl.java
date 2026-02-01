@@ -48,9 +48,11 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
-import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -62,7 +64,6 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
     private final LoanTransactionRepository loanTransactionRepository;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
     private final LoanJournalEntryPoster journalEntryPoster;
-    private final NoteWritePlatformService noteWritePlatformService;
     private final ExternalIdFactory externalIdFactory;
     private final LoanCapitalizedIncomeBalanceRepository capitalizedIncomeBalanceRepository;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
@@ -71,6 +72,7 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
     private final BusinessEventNotifierService businessEventNotifierService;
     private final CodeValueRepository codeValueRepository;
     private final LoanScheduleService loanScheduleService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     @Override
@@ -107,7 +109,8 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
         // Create a note if provided
         final String noteText = command.stringValueOfParameterNamed("note");
         if (noteText != null && !noteText.isEmpty()) {
-            noteWritePlatformService.createLoanTransactionNote(capitalizedIncomeTransaction.getId(), noteText);
+            eventPublisher.publishEvent(NoteCreateRequest.builder().type(NoteType.LOAN_TRANSACTION)
+                    .resourceId(capitalizedIncomeTransaction.getId()).note(noteText).build());
         }
 
         // Create journal entries immediately for this transaction
@@ -156,7 +159,8 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
         // Create a note if provided
         final String noteText = command.stringValueOfParameterNamed("note");
         if (noteText != null && !noteText.isEmpty()) {
-            noteWritePlatformService.createLoanTransactionNote(savedCapitalizedIncomeAdjustment.getId(), noteText);
+            eventPublisher.publishEvent(NoteCreateRequest.builder().type(NoteType.LOAN_TRANSACTION)
+                    .resourceId(savedCapitalizedIncomeAdjustment.getId()).note(noteText).build());
         }
         // Create journal entries immediately for this transaction
         journalEntryPoster.postJournalEntriesForLoanTransaction(savedCapitalizedIncomeAdjustment, false, false);

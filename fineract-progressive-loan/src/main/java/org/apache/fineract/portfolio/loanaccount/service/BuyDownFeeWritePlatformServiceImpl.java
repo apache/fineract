@@ -49,9 +49,11 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeeBalanceRepository;
-import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -63,11 +65,11 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
     private final LoanTransactionRepository loanTransactionRepository;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
     private final LoanJournalEntryPoster loanJournalEntryPoster;
-    private final NoteWritePlatformService noteWritePlatformService;
     private final ExternalIdFactory externalIdFactory;
     private final LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final CodeValueRepository codeValueRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     @Override
@@ -108,7 +110,8 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
         // Add note if provided
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
-            noteWritePlatformService.createLoanTransactionNote(buyDownFeeTransaction.getId(), noteText);
+            eventPublisher.publishEvent(NoteCreateRequest.builder().type(NoteType.LOAN_TRANSACTION)
+                    .resourceId(buyDownFeeTransaction.getId()).note(noteText).build());
         }
 
         loanJournalEntryPoster.postJournalEntriesForLoanTransaction(buyDownFeeTransaction, false, false);
@@ -177,7 +180,8 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
         // Create a note if provided
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
-            noteWritePlatformService.createLoanTransactionNote(savedBuyDownFeeAdjustment.getId(), noteText);
+            eventPublisher.publishEvent(NoteCreateRequest.builder().type(NoteType.LOAN_TRANSACTION)
+                    .resourceId(savedBuyDownFeeAdjustment.getId()).note(noteText).build());
         }
 
         loanJournalEntryPoster.postJournalEntriesForLoanTransaction(savedBuyDownFeeAdjustment, false, false);

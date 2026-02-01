@@ -18,31 +18,37 @@
  */
 package org.apache.fineract.portfolio.note.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.OffsetDateTime;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-/**
- * Immutable data object represent note or case information about a client, loan or loan transaction.
- */
-@Getter
 @Builder
-public class NoteData {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class NoteData implements Serializable {
 
-    private final Long id;
-    private final Long clientId;
-    private final Long groupId;
-    private final Long loanId;
-    private final Long loanTransactionId;
-    private final Long depositAccountId;
-    private final Long savingAccountId;
-    private final EnumOptionData noteType;
-    private final String note;
-    private final Long createdById;
-    private final String createdByUsername;
-    private final OffsetDateTime createdOn;
-    private final Long updatedById;
-    private final String updatedByUsername;
-    private final OffsetDateTime updatedOn;
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private Long id;
+    private Long clientId;
+    private Long groupId;
+    private Long loanId;
+    private Long loanTransactionId;
+    private Long depositAccountId;
+    private Long savingAccountId;
+    private EnumOptionData noteType;
+    private String note;
+    private Long createdById;
+    private String createdByUsername;
+    private OffsetDateTime createdOn;
+    private Long updatedById;
+    private String updatedByUsername;
+    private OffsetDateTime updatedOn;
 }

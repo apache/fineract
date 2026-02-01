@@ -18,29 +18,34 @@
  */
 package org.apache.fineract.portfolio.note.handler;
 
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import io.github.resilience4j.retry.annotation.Retry;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.note.data.NoteDeleteRequest;
+import org.apache.fineract.portfolio.note.data.NoteDeleteResponse;
 import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-public class UpdateNoteCommandHandler implements NewCommandSourceHandler {
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class NoteDeleteCommandHandler implements CommandHandler<NoteDeleteRequest, NoteDeleteResponse> {
 
     private final NoteWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateNoteCommandHandler(final NoteWritePlatformService noteWritePlatformService) {
-        this.writePlatformService = noteWritePlatformService;
-    }
-
-    @Transactional
+    @Retry(name = "commandNoteDelete", fallbackMethod = "fallback")
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-
-        return this.writePlatformService.updateNote(command);
+    @Transactional
+    public NoteDeleteResponse handle(Command<NoteDeleteRequest> command) {
+        return writePlatformService.deleteNote(command.getPayload());
     }
 
+    @Override
+    public NoteDeleteResponse fallback(Command<NoteDeleteRequest> command, Throwable t) {
+        // NOTE: fallback method needs to be in the same class
+        return CommandHandler.super.fallback(command, t);
+    }
 }

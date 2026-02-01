@@ -57,7 +57,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.service.LoanOfficerService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
-import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
@@ -67,6 +68,7 @@ import org.apache.fineract.portfolio.transfer.exception.ClientNotAwaitingTransfe
 import org.apache.fineract.portfolio.transfer.exception.ClientNotAwaitingTransferApprovalOrOnHoldException;
 import org.apache.fineract.portfolio.transfer.exception.TransferNotSupportedException;
 import org.apache.fineract.portfolio.transfer.exception.TransferNotSupportedException.TransferNotSupportedReason;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
@@ -81,11 +83,11 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper;
     private final TransfersDataValidator transfersDataValidator;
-    private final NoteWritePlatformService noteWritePlatformService;
     private final StaffRepositoryWrapper staffRepositoryWrapper;
     private final ClientTransferDetailsRepositoryWrapper clientTransferDetailsRepositoryWrapper;
     private final PlatformSecurityContext context;
     private final LoanOfficerService loanOfficerService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -466,7 +468,8 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                 client.updateProposedTransferDate(null);
         }
 
-        this.noteWritePlatformService.createAndPersistClientNote(client, jsonCommand);
+        this.eventPublisher.publishEvent(NoteCreateRequest.builder().type(NoteType.CLIENT).resourceId(client.getId())
+                .note(jsonCommand.stringValueOfParameterNamed("note")).build());
         this.clientTransferDetailsRepositoryWrapper
                 .save(ClientTransferDetails.instance(client.getId(), client.getOffice().getId(), destinationOffice.getId(), transferDate,
                         transferEventType.getValue(), DateUtils.getBusinessLocalDate(), this.context.authenticatedUser().getId()));

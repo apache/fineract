@@ -29,6 +29,7 @@ services:
       service: fineract
     ports:
       - "8443:8443"
+      - "5000:5000"
     depends_on:
       db:
         condition: service_healthy

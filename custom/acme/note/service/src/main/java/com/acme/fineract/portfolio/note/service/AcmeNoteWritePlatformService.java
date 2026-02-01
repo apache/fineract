@@ -19,9 +19,12 @@
 package com.acme.fineract.portfolio.note.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.portfolio.note.data.NoteCreateResponse;
+import org.apache.fineract.portfolio.note.data.NoteDeleteRequest;
+import org.apache.fineract.portfolio.note.data.NoteDeleteResponse;
+import org.apache.fineract.portfolio.note.data.NoteUpdateRequest;
+import org.apache.fineract.portfolio.note.data.NoteUpdateResponse;
 import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -38,27 +41,17 @@ public class AcmeNoteWritePlatformService implements NoteWritePlatformService, I
     }
 
     @Override
-    public CommandProcessingResult createNote(JsonCommand command) {
+    public NoteCreateResponse createNote(NoteCreateRequest request) {
         throw new UnsupportedOperationException("createNote() is not yet implemented.");
     }
 
     @Override
-    public void createLoanTransactionNote(Long loanTransactionId, String note) {
-        throw new UnsupportedOperationException("createLoanTransactionNote() is not yet implemented.");
-    }
-
-    @Override
-    public CommandProcessingResult updateNote(JsonCommand command) {
+    public NoteUpdateResponse updateNote(NoteUpdateRequest request) {
         throw new UnsupportedOperationException("updateNote() is not yet implemented.");
     }
 
     @Override
-    public CommandProcessingResult deleteNote(JsonCommand command) {
+    public NoteDeleteResponse deleteNote(NoteDeleteRequest request) {
         throw new UnsupportedOperationException("deleteNote() is not yet implemented.");
-    }
-
-    @Override
-    public void createAndPersistClientNote(Client client, JsonCommand command) {
-        log.warn("createAndPersistClientNote() is intentionally left empty and does nothing.");
     }
 }

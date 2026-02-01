@@ -28,13 +28,13 @@ import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.service.LoanOfficerService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
-import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.apache.fineract.portfolio.transfer.data.TransfersDataValidator;
 import org.apache.fineract.portfolio.transfer.service.TransferWritePlatformService;
 import org.apache.fineract.portfolio.transfer.service.TransferWritePlatformServiceJpaRepositoryImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -47,14 +47,13 @@ public class TransferConfiguration {
             OfficeRepositoryWrapper officeRepository, CalendarInstanceRepository calendarInstanceRepository,
             LoanWritePlatformService loanWritePlatformService, GroupRepositoryWrapper groupRepository,
             LoanRepositoryWrapper loanRepositoryWrapper, TransfersDataValidator transfersDataValidator,
-            NoteWritePlatformService noteWritePlatformService, StaffRepositoryWrapper staffRepositoryWrapper,
-            SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
+            StaffRepositoryWrapper staffRepositoryWrapper, SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
             SavingsAccountWritePlatformService savingsAccountWritePlatformService,
             ClientTransferDetailsRepositoryWrapper clientTransferDetailsRepositoryWrapper, PlatformSecurityContext context,
-            LoanOfficerService loanOfficerService) {
+            LoanOfficerService loanOfficerService, ApplicationEventPublisher eventPublisher) {
         return new TransferWritePlatformServiceJpaRepositoryImpl(clientRepositoryWrapper, officeRepository, calendarInstanceRepository,
                 groupRepository, loanWritePlatformService, savingsAccountWritePlatformService, loanRepositoryWrapper,
-                savingsAccountRepositoryWrapper, transfersDataValidator, noteWritePlatformService, staffRepositoryWrapper,
-                clientTransferDetailsRepositoryWrapper, context, loanOfficerService);
+                savingsAccountRepositoryWrapper, transfersDataValidator, staffRepositoryWrapper, clientTransferDetailsRepositoryWrapper,
+                context, loanOfficerService, eventPublisher);
     }
 }

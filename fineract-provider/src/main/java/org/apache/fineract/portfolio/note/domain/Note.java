@@ -23,10 +23,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.commons.lang3.Strings;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.group.domain.Group;
@@ -74,13 +73,11 @@ public class Note extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @JoinColumn(name = "share_account_id", nullable = true)
     private ShareAccount shareAccount;
 
-    public static Note clientNoteFromJson(final Client client, final JsonCommand command) {
-        final String note = command.stringValueOfParameterNamed("note");
+    public static Note clientNote(final Client client, final String note) {
         return new Note(client, note);
     }
 
-    public static Note groupNoteFromJson(final Group group, final JsonCommand command) {
-        final String note = command.stringValueOfParameterNamed("note");
+    public static Note groupNote(final Group group, final String note) {
         return new Note(group, note);
     }
 
@@ -164,20 +161,12 @@ public class Note extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         this.noteTypeId = NoteType.SHARE_ACCOUNT.getValue();
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
-
-        final String noteParamName = "note";
-        if (command.isChangeInStringParameterNamed(noteParamName, this.note)) {
-            final String newValue = command.stringValueOfParameterNamed(noteParamName);
-            actualChanges.put(noteParamName, newValue);
-            this.note = StringUtils.defaultIfEmpty(newValue, null);
+    public Map<String, Object> update(final String note) {
+        if (!Strings.CI.equals(note, this.note)) {
+            this.note = StringUtils.defaultIfEmpty(note, null);
+            return Map.of("note", note);
         }
-        return actualChanges;
-    }
-
-    public boolean isNotAgainstClientWithIdOf(final Long clientId) {
-        return !this.client.identifiedBy(clientId);
+        return Map.of();
     }
 
     public String getNote() {

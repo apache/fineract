@@ -16,20 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.note.service;
+package org.apache.fineract.portfolio.note.listener;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
-import org.apache.fineract.portfolio.note.data.NoteCreateResponse;
-import org.apache.fineract.portfolio.note.data.NoteDeleteRequest;
-import org.apache.fineract.portfolio.note.data.NoteDeleteResponse;
-import org.apache.fineract.portfolio.note.data.NoteUpdateRequest;
-import org.apache.fineract.portfolio.note.data.NoteUpdateResponse;
+import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
-public interface NoteWritePlatformService {
+@Slf4j
+@RequiredArgsConstructor
+@Component
+class NoteListener {
 
-    NoteCreateResponse createNote(NoteCreateRequest request);
+    private final NoteWritePlatformService noteWritePlatformService;
 
-    NoteUpdateResponse updateNote(NoteUpdateRequest request);
+    @EventListener
+    void onCreate(NoteCreateRequest request) {
+        noteWritePlatformService.createNote(request);
+    }
 
-    NoteDeleteResponse deleteNote(NoteDeleteRequest request);
+    @EventListener
+    void onUpdate(NoteCreateRequest request) {
+        noteWritePlatformService.createNote(request);
+    }
+
+    @EventListener
+    void onDelete(NoteCreateRequest request) {
+        noteWritePlatformService.createNote(request);
+    }
 }

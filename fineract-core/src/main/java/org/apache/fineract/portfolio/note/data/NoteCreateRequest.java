@@ -16,27 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.cache.data;
+package org.apache.fineract.portfolio.note.data;
 
+import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.io.Serial;
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.portfolio.note.domain.NoteType;
 
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public final class CacheData implements Serializable {
+public class NoteCreateRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @SuppressWarnings("unused")
-    private EnumOptionData cacheType;
-    @SuppressWarnings("unused")
-    private boolean enabled;
+    @Hidden
+    private Long resourceId;
+    @Hidden
+    private NoteType type;
+    @Size(max = 1000, message = "{org.apache.fineract.portfolio.note.note.size}")
+    @NotNull(message = "{org.apache.fineract.portfolio.note.note.not-null}")
+    private String note;
 }

@@ -18,16 +18,11 @@
  */
 package org.apache.fineract.portfolio.note.command;
 
-/**
- * Immutable command used for create or update of notes.
- */
-public class NoteCommand {
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.note.data.NoteUpdateRequest;
 
-    @SuppressWarnings("unused")
-    private final String note;
-
-    public NoteCommand(final String note) {
-        this.note = note;
-    }
-
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class NoteUpdateCommand extends Command<NoteUpdateRequest> {}
