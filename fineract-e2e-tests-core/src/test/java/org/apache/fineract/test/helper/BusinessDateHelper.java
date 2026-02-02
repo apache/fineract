@@ -48,7 +48,7 @@ public class BusinessDateHelper {
         BusinessDateUpdateRequest businessDateRequest = defaultBusinessDateRequest().date(businessDate);
         try {
             BusinessDateUpdateResponse response = ok(
-                    () -> fineractClient.businessDateManagement().updateBusinessDate(null, businessDateRequest, Map.of()));
+                    () -> fineractClient.businessDateManagement().updateBusinessDate(businessDateRequest, Map.of()));
             TestContext.INSTANCE.set(TestContextKey.BUSINESS_DATE_RESPONSE, response);
             ok(() -> fineractClient.businessDateManagement().getBusinessDate(BUSINESS_DATE, Map.of()));
 

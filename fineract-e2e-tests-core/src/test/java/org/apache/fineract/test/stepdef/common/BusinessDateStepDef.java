@@ -71,7 +71,7 @@ public class BusinessDateStepDef extends AbstractStepDef {
         BusinessDateUpdateRequest businessDateRequest = businessDateHelper.defaultBusinessDateRequest().date(businessDate);
 
         try {
-            fineractClient.businessDateManagement().updateBusinessDate(null, businessDateRequest, Map.of());
+            fineractClient.businessDateManagement().updateBusinessDate(businessDateRequest, Map.of());
             throw new AssertionError("Expected FeignException but request succeeded");
         } catch (FeignException e) {
             final ErrorResponse errorDetails = ErrorResponse.fromFeignException(e);
@@ -92,7 +92,7 @@ public class BusinessDateStepDef extends AbstractStepDef {
         Integer httpStatusCodeExpected = 400;
 
         try {
-            fineractClient.businessDateManagement().updateBusinessDate(null, businessDateRequest, Map.of());
+            fineractClient.businessDateManagement().updateBusinessDate(businessDateRequest, Map.of());
             throw new AssertionError("Expected FeignException but request succeeded");
         } catch (FeignException e) {
             ErrorResponse errorResponse = ErrorResponse.fromFeignException(e);

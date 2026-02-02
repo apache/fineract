@@ -16,27 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.command.sample.data;
+package org.apache.fineract.command.implementation;
 
-import jakarta.validation.constraints.NotBlank;
-import java.io.Serial;
-import java.io.Serializable;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.FieldNameConstants;
+import org.apache.fineract.command.core.CommandAuditor;
+import org.apache.fineract.command.core.CommandExecutor;
+import org.apache.fineract.command.core.CommandRouter;
 
-@Builder
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@FieldNameConstants
-public class DummyRequest implements Serializable {
+public abstract class BaseCommandExecutor implements CommandExecutor {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    protected final CommandRouter router;
+    protected final CommandAuditor auditor;
 
-    @NotBlank(message = "{org.apache.fineract.dummy.request.content.not-empty}")
-    private String content;
+    protected BaseCommandExecutor(CommandRouter router, CommandAuditor auditor) {
+        this.router = router;
+        this.auditor = auditor;
+    }
 }

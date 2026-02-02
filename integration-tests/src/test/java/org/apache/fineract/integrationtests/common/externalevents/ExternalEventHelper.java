@@ -123,7 +123,7 @@ public final class ExternalEventHelper {
 
     public void configureBusinessEvent(String eventName, boolean enabled) {
         ExternalEventConfigurationUpdateResponse result = Calls
-                .ok(FineractClientHelper.getFineractClient().externalEventConfigurationApi.updateExternalEventConfigurations("",
+                .ok(FineractClientHelper.getFineractClient().externalEventConfigurationApi.updateExternalEventConfigurations(
                         new ExternalEventConfigurationUpdateRequest().externalEventConfigurations(Map.of(eventName, enabled))));
         Map<String, Object> changes = result.getChanges();
         Assertions.assertNotNull(changes);

@@ -22,7 +22,6 @@ import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import lombok.Getter;
@@ -30,26 +29,38 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.Command;
-import org.apache.fineract.command.core.CommandExecutor;
-import org.apache.fineract.command.core.CommandMiddleware;
+import org.apache.fineract.command.core.CommandAuditor;
 import org.apache.fineract.command.core.CommandRouter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
 @Slf4j
-@RequiredArgsConstructor
-@Component
-@ConditionalOnProperty(value = "fineract.command.executor", havingValue = "disruptor")
+// TODO: not ready yet for prime time
+// @Component
+// @ConditionalOnProperty(value = "fineract.command.executor", havingValue = "disruptor")
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class DisruptorCommandExecutor implements CommandExecutor, Closeable {
+public class DisruptorCommandExecutor extends BaseCommandExecutor implements Closeable {
 
     private final Disruptor<CommandEvent> disruptor;
+
+    public DisruptorCommandExecutor(Disruptor<CommandEvent> disruptor, CommandRouter router, CommandAuditor auditor) {
+        super(router, auditor);
+        this.disruptor = disruptor;
+    }
 
     @Override
     public <REQ, RES> Supplier<RES> execute(Command<REQ> command) {
         CommandEvent<REQ, RES> processedEvent = next(command);
 
-        return processedEvent.getFuture()::join;
+        var future = processedEvent.getFuture().whenComplete((response, t) -> {
+            if (t == null) {
+                auditor.processed(command, response);
+            } else {
+                command.setError(t.getMessage());
+
+                auditor.error(command);
+            }
+        });
+
+        return future::join;
     }
 
     @Override
@@ -82,17 +93,11 @@ public class DisruptorCommandExecutor implements CommandExecutor, Closeable {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static class CompleteableCommandEventHandler implements EventHandler<CommandEvent> {
 
-        private final List<CommandMiddleware> middlewares;
-
         private final CommandRouter router;
 
         @Override
-        public void onEvent(CommandEvent event, long sequence, boolean endOfBatch) throws Exception {
+        public void onEvent(CommandEvent event, long sequence, boolean endOfBatch) {
             try {
-                for (CommandMiddleware middleware : middlewares) {
-                    middleware.invoke(event.getCommand());
-                }
-
                 var handler = router.route(event.getCommand());
 
                 event.getFuture().complete(handler.handle(event.getCommand()));

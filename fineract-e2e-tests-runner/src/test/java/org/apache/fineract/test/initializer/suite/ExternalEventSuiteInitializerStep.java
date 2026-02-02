@@ -71,7 +71,7 @@ public class ExternalEventSuiteInitializerStep implements FineractSuiteInitializ
         ExternalEventConfigurationUpdateRequest request = new ExternalEventConfigurationUpdateRequest()
                 .externalEventConfigurations(eventConfigMap);
 
-        executeVoid(() -> fineractClient.externalEventConfiguration().updateExternalEventConfigurations(null, request, Map.of()));
+        executeVoid(() -> fineractClient.externalEventConfiguration().updateExternalEventConfigurations(request, Map.of()));
         log.debug("=== External event configuration updated - all events enabled ===");
 
         // Step 2: Wait for JMS Listener to be ready before proceeding

@@ -20,7 +20,6 @@ package org.apache.fineract.command.sample.data;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,11 +36,7 @@ public class DummyResponse implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private UUID requestId;
-
     private String tenantId;
-
     private String content;
-
     private String error;
 }

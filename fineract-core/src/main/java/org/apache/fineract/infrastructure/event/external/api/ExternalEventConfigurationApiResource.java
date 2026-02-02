@@ -23,16 +23,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import java.util.UUID;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandPipeline;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.external.command.ExternalConfigurationsUpdateCommand;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationResponse;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationUpdateRequest;
@@ -61,13 +58,10 @@ public class ExternalEventConfigurationApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Enable/Disable external events posting", description = "")
-    public ExternalEventConfigurationUpdateResponse updateExternalEventConfigurations(@HeaderParam("Idempotency-Key") String idempotencyKey,
+    public ExternalEventConfigurationUpdateResponse updateExternalEventConfigurations(
             @Valid ExternalEventConfigurationUpdateRequest request) {
         final var command = new ExternalConfigurationsUpdateCommand();
 
-        command.setId(UUID.randomUUID());
-        command.setIdempotencyKey(idempotencyKey);
-        command.setCreatedAt(DateUtils.getAuditOffsetDateTime());
         command.setPayload(request);
 
         final Supplier<ExternalEventConfigurationUpdateResponse> response = commandPipeline.send(command);

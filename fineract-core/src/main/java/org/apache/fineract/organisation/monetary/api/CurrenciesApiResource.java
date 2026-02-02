@@ -27,11 +27,9 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import java.util.UUID;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandPipeline;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.command.CurrencyUpdateCommand;
 import org.apache.fineract.organisation.monetary.data.CurrencyConfigurationData;
 import org.apache.fineract.organisation.monetary.data.CurrencyUpdateRequest;
@@ -70,8 +68,6 @@ public class CurrenciesApiResource {
     public CurrencyUpdateResponse updateCurrencies(@Valid CurrencyUpdateRequest request) {
         final var command = new CurrencyUpdateCommand();
 
-        command.setId(UUID.randomUUID());
-        command.setCreatedAt(DateUtils.getAuditOffsetDateTime());
         command.setPayload(request);
 
         final Supplier<CurrencyUpdateResponse> response = commandPipeline.send(command);

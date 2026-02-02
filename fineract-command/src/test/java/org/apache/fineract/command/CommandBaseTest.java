@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.command;
 
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.persistence.domain.CommandRepository;
 import org.apache.fineract.command.persistence.mapping.CommandMapper;
@@ -27,9 +26,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.MariaDBContainer;
+import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.containers.Network;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.utility.DockerImageName;
 
 @Slf4j
 @SpringBootTest
@@ -40,9 +42,16 @@ abstract class CommandBaseTest {
     protected static Network network = Network.newNetwork();
 
     @Container
-    protected static final GenericContainer POSTGRES_CONTAINER = new GenericContainer("postgres:16").withNetwork(network)
-            .withNetworkAliases("postgres").withExposedPorts(5432)
-            .withEnv(Map.of("POSTGRES_DB", "fineract-test", "POSTGRES_USER", "root", "POSTGRES_PASSWORD", "mifos"));
+    private static final PostgreSQLContainer<?> POSTGRES_CONTAINER = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16"))
+            .withNetwork(network).withUsername("root").withPassword("mifos").withDatabaseName("fineract-test");
+
+    @Container
+    private static final MariaDBContainer<?> MARIADB_CONTAINER = new MariaDBContainer<>(DockerImageName.parse("mariadb:11.4"))
+            .withNetwork(network).withUsername("root").withPassword("mifos").withDatabaseName("fineract-test");
+
+    @Container
+    private static final MySQLContainer<?> MYSQL_CONTAINER = new MySQLContainer<>(DockerImageName.parse("mysql:8")).withNetwork(network)
+            .withUsername("root").withPassword("mifos").withDatabaseName("fineract-test");
 
     @Autowired
     protected CommandRepository commandRepository;
@@ -52,13 +61,43 @@ abstract class CommandBaseTest {
 
     @DynamicPropertySource
     protected static void configure(DynamicPropertyRegistry registry) {
+        postgres(registry);
+        // mariadb(registry);
+        // mysql(registry);
+    }
+
+    private static void postgres(DynamicPropertyRegistry registry) {
         POSTGRES_CONTAINER.start();
 
-        registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
-        registry.add("spring.datasource.username", () -> "root");
-        registry.add("spring.datasource.password", () -> "mifos");
-        registry.add("spring.datasource.url", () -> "jdbc:postgresql://" + POSTGRES_CONTAINER.getHost() + ":"
-                + POSTGRES_CONTAINER.getMappedPort(5432) + "/fineract-test");
+        registry.add("spring.datasource.driver-class-name", POSTGRES_CONTAINER::getDriverClassName);
+        registry.add("spring.datasource.username", POSTGRES_CONTAINER::getUsername);
+        registry.add("spring.datasource.password", POSTGRES_CONTAINER::getPassword);
+        registry.add("spring.datasource.url", POSTGRES_CONTAINER::getJdbcUrl);
         registry.add("spring.datasource.platform", () -> "postgresql");
+        registry.add("spring.liquibase.contexts", () -> "postgresql");
+    }
+
+    @SuppressWarnings("UnusedMethod")
+    private static void mariadb(DynamicPropertyRegistry registry) {
+        MARIADB_CONTAINER.start();
+
+        registry.add("spring.datasource.driver-class-name", MARIADB_CONTAINER::getDriverClassName);
+        registry.add("spring.datasource.username", MARIADB_CONTAINER::getUsername);
+        registry.add("spring.datasource.password", MARIADB_CONTAINER::getPassword);
+        registry.add("spring.datasource.url", MARIADB_CONTAINER::getJdbcUrl);
+        registry.add("spring.datasource.platform", () -> "mysql");
+        registry.add("spring.liquibase.contexts", () -> "mysql");
+    }
+
+    @SuppressWarnings("UnusedMethod")
+    private static void mysql(DynamicPropertyRegistry registry) {
+        MYSQL_CONTAINER.start();
+
+        registry.add("spring.datasource.driver-class-name", MYSQL_CONTAINER::getDriverClassName);
+        registry.add("spring.datasource.username", MYSQL_CONTAINER::getUsername);
+        registry.add("spring.datasource.password", MYSQL_CONTAINER::getPassword);
+        registry.add("spring.datasource.url", MYSQL_CONTAINER::getJdbcUrl);
+        registry.add("spring.datasource.platform", () -> "mysql");
+        registry.add("spring.liquibase.contexts", () -> "mysql");
     }
 }

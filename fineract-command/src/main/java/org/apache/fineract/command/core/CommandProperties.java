@@ -51,6 +51,18 @@ public final class CommandProperties implements Serializable {
     @Builder.Default
     private ProducerType producerType = ProducerType.SINGLE;
 
+    @Builder.Default
+    private Boolean auditable = true;
+
+    @Builder.Default
+    private Boolean fileDeadLetterQueueEnabled = false;
+
+    @Builder.Default
+    private String fileDeadLetterQueuePath = "/tmp/fineract-command-audit";
+
+    @Builder.Default
+    private String idemPotencyKeyHeaderName = "Idempotency-Key";
+
     public enum CommandExecutorType {
         sync, //
         async, //

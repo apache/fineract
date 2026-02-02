@@ -57,7 +57,7 @@ public final class BusinessDateHelper {
     public static BusinessDateUpdateResponse updateBusinessDate(final BusinessDateUpdateRequest request) {
         log.info("------------------UPDATE BUSINESS DATE----------------------");
         log.info("------------------Type: {}, date: {}----------------------", request.getType(), request.getDate());
-        return Calls.ok(FineractClientHelper.getFineractClient().businessDateManagement.updateBusinessDate(null, request));
+        return Calls.ok(FineractClientHelper.getFineractClient().businessDateManagement.updateBusinessDate(request));
     }
 
     // TODO: Rewrite to use fineract-client instead!

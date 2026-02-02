@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.command.persistence.domain;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import java.util.Optional;
+import org.springframework.data.repository.ListCrudRepository;
+import org.springframework.data.repository.query.QueryByExampleExecutor;
 
-public interface CommandRepository extends JpaRepository<CommandEntity, Long>, JpaSpecificationExecutor<CommandEntity> {}
+public interface CommandRepository extends ListCrudRepository<CommandEntity, Long>, QueryByExampleExecutor<CommandEntity> {
+
+    Optional<CommandEntity> findOneByIdempotencyKey(String idempotencyKey);
+}

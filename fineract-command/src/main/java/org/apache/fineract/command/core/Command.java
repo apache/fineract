@@ -20,8 +20,7 @@ package org.apache.fineract.command.core;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.time.Instant;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
@@ -32,15 +31,31 @@ public class Command<T> implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private UUID id;
+    private Long commandId;
 
     private String idempotencyKey;
 
-    private OffsetDateTime createdAt;
+    private String ipAddress;
 
-    private String tenantId;
+    private Instant createdAt;
 
-    private String username;
+    private Instant updatedAt;
+
+    private Instant executedAt;
+
+    private Instant approvedAt;
+
+    private Instant rejectedAt;
+
+    private String initiatedByUsername;
+
+    private String executedByUsername;
+
+    private String approvedByUsername;
+
+    private String rejectedByUsername;
+
+    private String error;
 
     private T payload;
 }

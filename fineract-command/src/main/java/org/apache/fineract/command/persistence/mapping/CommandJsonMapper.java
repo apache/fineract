@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.command.persistence.mapping;
 
+import static org.apache.fineract.command.core.CommandConstants.COMMAND_JSON_CLASS_ATTRIBUTE;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -29,9 +31,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-final class CommandJsonMapper {
+public final class CommandJsonMapper {
 
-    private static final String CLASS_ATTRIBUTE = "@class";
     private final ObjectMapper mapper;
 
     @SuppressWarnings("unchecked")
@@ -40,7 +41,7 @@ final class CommandJsonMapper {
             return null;
         }
 
-        var canonicalName = source.get(CLASS_ATTRIBUTE).asText();
+        var canonicalName = source.get(COMMAND_JSON_CLASS_ATTRIBUTE).asText();
 
         try {
             return (T) mapper.convertValue(source, Class.forName(canonicalName));
@@ -58,7 +59,7 @@ final class CommandJsonMapper {
 
         var json = mapper.convertValue(source, ObjectNode.class);
 
-        json.set(CLASS_ATTRIBUTE, new TextNode(source.getClass().getCanonicalName()));
+        json.set(COMMAND_JSON_CLASS_ATTRIBUTE, new TextNode(source.getClass().getCanonicalName()));
 
         return json;
     }

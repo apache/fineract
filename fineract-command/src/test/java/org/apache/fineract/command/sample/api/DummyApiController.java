@@ -18,13 +18,10 @@
  */
 package org.apache.fineract.command.sample.api;
 
-import static org.apache.fineract.command.core.CommandConstants.COMMAND_REQUEST_ID;
+import static org.apache.fineract.command.core.CommandConstants.COMMAND_HTTP_HEADER_TENANT_ID;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
@@ -47,19 +44,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/test/dummy", consumes = APPLICATION_JSON_VALUE, produces = { APPLICATION_JSON_VALUE,
         APPLICATION_PROBLEM_JSON_VALUE })
 class DummyApiController {
-    // "application/vnd.fineract+json;charset=UTF-8;version=1.0"
 
     private final DefaultDummyTenantService tenantService;
 
     private final CommandPipeline pipeline;
 
     @PostMapping("/sync")
-    DummyResponse dummySync(@RequestHeader(value = COMMAND_REQUEST_ID, required = false) UUID requestId,
-            @RequestHeader(value = "x-fineract-tenant-id", required = false) String tenantId, @RequestBody DummyRequest request) {
+    DummyResponse dummySync(@RequestHeader(value = COMMAND_HTTP_HEADER_TENANT_ID, required = false) String tenantId,
+            @RequestBody DummyRequest request) {
         var command = new DummyCommand();
-        command.setId(requestId);
         command.setPayload(request);
-        command.setCreatedAt(OffsetDateTime.now(ZoneId.of("UTC")));
 
         tenantService.set(tenantId);
 
@@ -70,10 +64,9 @@ class DummyApiController {
 
     @Async
     @PostMapping("/async")
-    CompletableFuture<DummyResponse> dummyAsync(@RequestHeader(value = COMMAND_REQUEST_ID, required = false) UUID requestId,
-            @RequestHeader(value = "x-fineract-tenant-id", required = false) String tenantId, @RequestBody DummyRequest request) {
+    CompletableFuture<DummyResponse> dummyAsync(@RequestHeader(value = COMMAND_HTTP_HEADER_TENANT_ID, required = false) String tenantId,
+            @RequestBody DummyRequest request) {
         var command = new DummyCommand();
-        command.setId(requestId);
         command.setPayload(request);
 
         tenantService.set(tenantId);

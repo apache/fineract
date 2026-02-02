@@ -16,35 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.command.sample.middleware;
+package org.apache.fineract.command.sample.handler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.Command;
-import org.apache.fineract.command.core.CommandMiddleware;
-import org.apache.fineract.command.core.exception.CommandIllegalArgumentException;
-import org.apache.fineract.command.sample.command.DummyCommand;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.command.sample.data.DummyErrorRequest;
+import org.apache.fineract.command.sample.data.DummyErrorResponse;
+import org.apache.fineract.command.sample.exception.DummyException;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class DummyIdempotencyMiddleware implements CommandMiddleware {
-
-    // NOTE: in production you would use of course a database or Redis
-    private static final List<UUID> IDS = new ArrayList<>();
+public class DummyErrorCommandHandler implements CommandHandler<DummyErrorRequest, DummyErrorResponse> {
 
     @Override
-    public void invoke(Command<?> command) {
-        if (command instanceof DummyCommand c) {
-            if (IDS.contains(c.getId())) {
-                throw new CommandIllegalArgumentException(c, "Duplicate request ID: " + c.getId());
-            }
-
-            IDS.add(c.getId());
-        }
+    public DummyErrorResponse handle(Command<DummyErrorRequest> command) {
+        throw new DummyException("Simulating a business logic error: " + command.getPayload().getContent());
     }
 }

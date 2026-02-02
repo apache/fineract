@@ -23,8 +23,6 @@ import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.YieldingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.util.DaemonThreadFactory;
-import java.util.List;
-import org.apache.fineract.command.core.CommandMiddleware;
 import org.apache.fineract.command.core.CommandProperties;
 import org.apache.fineract.command.core.CommandRouter;
 import org.apache.fineract.command.implementation.DisruptorCommandExecutor;
@@ -50,15 +48,14 @@ class CommandConfiguration {
 
     @Bean
     @ConditionalOnProperty(value = "fineract.command.executor", havingValue = "disruptor")
-    Disruptor<?> disruptor(CommandProperties properties, WaitStrategy waitStrategy, List<CommandMiddleware> middlewares,
-            CommandRouter router) {
+    Disruptor<?> disruptor(CommandProperties properties, WaitStrategy waitStrategy, CommandRouter router) {
         // TODO: make this more configurable
 
         // Create the disruptor
         Disruptor<DisruptorCommandExecutor.CommandEvent> disruptor = new Disruptor<>(DisruptorCommandExecutor.CommandEvent::new,
                 properties.getRingBufferSize(), DaemonThreadFactory.INSTANCE, properties.getProducerType(), waitStrategy);
 
-        disruptor.handleEventsWith(new DisruptorCommandExecutor.CompleteableCommandEventHandler(middlewares, router));
+        disruptor.handleEventsWith(new DisruptorCommandExecutor.CompleteableCommandEventHandler(router));
         disruptor.setDefaultExceptionHandler(new IgnoreExceptionHandler());
 
         // Start the disruptor

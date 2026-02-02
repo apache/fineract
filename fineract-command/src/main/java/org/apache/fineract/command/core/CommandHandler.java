@@ -19,10 +19,18 @@
 package org.apache.fineract.command.core;
 
 import com.google.common.reflect.TypeToken;
+import lombok.SneakyThrows;
 
 public interface CommandHandler<REQ, RES> {
 
     RES handle(Command<REQ> command);
+
+    @SneakyThrows
+    default RES fallback(Command<REQ> command, Throwable t) {
+        // NOTE: I think this should be enough for now; the errors bubble up and will eventually be handled the global
+        // error handler. Any command handler can override this default to implement more specialized fallbacks.
+        throw t;
+    }
 
     default boolean matches(Command<REQ> command) {
         TypeToken<REQ> handlerType = new TypeToken<>(getClass()) {};

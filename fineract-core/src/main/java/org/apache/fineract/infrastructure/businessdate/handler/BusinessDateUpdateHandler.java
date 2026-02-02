@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.businessdate.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.Command;
@@ -38,11 +39,18 @@ public class BusinessDateUpdateHandler implements CommandHandler<BusinessDateUpd
     private final BusinessDateWritePlatformService businessDateWritePlatformService;
     private final BusinessDateMapper businessDateMapper;
 
+    @Retry(name = "commandBusinessDateUpdate", fallbackMethod = "fallback")
     @Transactional
     @Override
     public BusinessDateUpdateResponse handle(Command<BusinessDateUpdateRequest> command) {
         BusinessDateDTO businessDateDto = businessDateMapper.mapUpdateRequest(command.getPayload());
         businessDateDto = businessDateWritePlatformService.updateBusinessDate(businessDateDto);
         return businessDateMapper.mapUpdateResponse(businessDateDto);
+    }
+
+    @Override
+    public BusinessDateUpdateResponse fallback(Command<BusinessDateUpdateRequest> command, Throwable t) {
+        // NOTE: fallback method needs to be in the same class
+        return CommandHandler.super.fallback(command, t);
     }
 }

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.monetary.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.Command;
@@ -35,9 +36,17 @@ public class CurrencyUpdateCommandHandler implements CommandHandler<CurrencyUpda
 
     private final CurrencyWritePlatformService writePlatformService;
 
+    @Retry(name = "commandCurrencyUpdate", fallbackMethod = "fallback")
     @Transactional
     @Override
     public CurrencyUpdateResponse handle(final Command<CurrencyUpdateRequest> command) {
+        // NOTE: fallback method needs to be in the same class
         return writePlatformService.updateAllowedCurrencies(command.getPayload());
+    }
+
+    @Override
+    public CurrencyUpdateResponse fallback(Command<CurrencyUpdateRequest> command, Throwable t) {
+        // NOTE: fallback method needs to be in the same class
+        return CommandHandler.super.fallback(command, t);
     }
 }

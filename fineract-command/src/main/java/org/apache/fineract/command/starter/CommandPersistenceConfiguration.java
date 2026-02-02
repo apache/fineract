@@ -18,9 +18,23 @@
  */
 package org.apache.fineract.command.starter;
 
+import java.util.List;
+import org.apache.fineract.command.persistence.converter.JsonNodeReadingConverter;
+import org.apache.fineract.command.persistence.converter.JsonNodeWritingConverter;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jdbc.core.convert.JdbcCustomConversions;
+import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories;
 
 @Configuration
+@EnableJdbcRepositories(basePackages = { "org.apache.fineract.command.persistence" })
 @ComponentScan("org.apache.fineract.command.persistence")
-class CommandPersistenceConfiguration {}
+class CommandPersistenceConfiguration {
+
+    @Bean
+    JdbcCustomConversions customConversions(JsonNodeReadingConverter jsonNodeReadingConverter,
+            JsonNodeWritingConverter jsonNodeWritingConverter) {
+        return new JdbcCustomConversions(List.of(jsonNodeReadingConverter, jsonNodeWritingConverter));
+    }
+}

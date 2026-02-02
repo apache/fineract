@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.event.external.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.Command;
@@ -36,9 +37,16 @@ public class ExternalEventConfigurationUpdateHandler
 
     private final ExternalEventConfigurationWritePlatformService writePlatformService;
 
+    @Retry(name = "commandExternalEventConfigurationUpdate", fallbackMethod = "fallback")
     @Transactional
     @Override
     public ExternalEventConfigurationUpdateResponse handle(Command<ExternalEventConfigurationUpdateRequest> command) {
         return writePlatformService.updateConfigurations(command.getPayload());
+    }
+
+    @Override
+    public ExternalEventConfigurationUpdateResponse fallback(Command<ExternalEventConfigurationUpdateRequest> command, Throwable t) {
+        // NOTE: fallback method needs to be in the same class
+        return CommandHandler.super.fallback(command, t);
     }
 }

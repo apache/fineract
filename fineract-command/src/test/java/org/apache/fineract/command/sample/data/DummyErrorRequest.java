@@ -32,7 +32,7 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldNameConstants
-public class DummyRequest implements Serializable {
+public class DummyErrorRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;

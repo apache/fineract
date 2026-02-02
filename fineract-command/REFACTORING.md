@@ -52,7 +52,6 @@ Please make sure to always follow this package structure pattern:
 - `handler`: contains all command handlers
 - `service`: contains business logic services
 - `mapping`: contains MapStruct interfaces
-- `middleware`: contains middleware related to command processing; I am not expecting that we will need any of this during the refactoring process
 - `security`: might contain later so called Spring Security "authorization managers" for more complex use cases
 - `serialization`: technically we should not need this package anymore after we are done with the refactorings; in theory there could be very complex data structures that are not easily digestable by Jackson; for those case we could still use this package to add de-/serialization helpers (Jackson provides a proper API for this)
 - `starter`: Spring Java configuration that allows us to make Fineract customizable (make parts of the system replaceable)
@@ -237,7 +236,7 @@ Command Pipeline preserving Type Information
 public class DummyApiResource {
     ...
     @GET
-    DummyResponse dummy(@HeaderParam("x-fineract-request-id") UUID requestId, @HeaderParam("x-fineract-tenant-id") String tenantId, DummyRequest request) {
+    DummyResponse dummy(@HeaderParam("x-fineract-request-id") UUID requestId, @HeaderParam("Fineract-Platform-TenantId") String tenantId, DummyRequest request) {
         var command = new DummyCommand();
         command.setId(requestId);
         command.setPayload(request);

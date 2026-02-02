@@ -19,65 +19,73 @@
 package org.apache.fineract.command.persistence.domain;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.PostLoad;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.OffsetDateTime;
-import java.util.UUID;
-import lombok.AccessLevel;
+import java.time.Instant;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
-import org.apache.fineract.command.persistence.converter.JsonAttributeConverter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 @Getter
 @Setter
 @ToString
 @FieldNameConstants
-@Entity
-@Table(name = "m_command")
+@Table("m_command")
 public class CommandEntity implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @jakarta.persistence.Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Id
+    @Column("id")
     private Long id;
 
-    @Transient
-    @Setter(value = AccessLevel.NONE)
-    private boolean isNew = true;
+    @Column("created_at")
+    private Instant createdAt;
 
-    @Column(name = "command_id")
-    private UUID commandId;
+    @Column("updated_at")
+    private Instant updatedAt;
 
-    @Column(name = "created_at")
-    private OffsetDateTime createdAt;
+    @Column("executed_at")
+    private Instant executedAt;
 
-    @Column(name = "tenant_id")
-    private String tenantId;
+    @Column("approved_at")
+    private Instant approvedAt;
 
-    @Column(name = "username")
-    private String username;
+    @Column("rejected_at")
+    private Instant rejectedAt;
 
-    @Column(name = "payload")
-    @Convert(converter = JsonAttributeConverter.class)
-    private JsonNode payload;
+    @Column("initiated_by_username")
+    private String initiatedByUsername;
 
-    @PrePersist
-    @PostLoad
-    void markNotNew() {
-        this.isNew = false;
-    }
+    @Column("executed_by_username")
+    private String executedByUsername;
+
+    @Column("approved_by_username")
+    private String approvedByUsername;
+
+    @Column("rejected_by_username")
+    private String rejectedByUsername;
+
+    @Column("idempotency_key")
+    private String idempotencyKey;
+
+    @Column("state")
+    private CommandEntityState state;
+
+    @Column("error")
+    private String error;
+
+    @Column("ip_address")
+    private String ipAddress;
+
+    @Column("request")
+    private JsonNode request;
+
+    @Column("response")
+    private JsonNode response;
 }

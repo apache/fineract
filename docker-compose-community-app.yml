@@ -16,7 +16,6 @@
 # under the License.
 #
 
-version: "3.8"
 services:
   # Frontend service
   community-app:

@@ -16,24 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.command.sample.middleware;
+package org.apache.fineract.command.sample.command;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.apache.fineract.command.core.Command;
-import org.apache.fineract.command.core.CommandMiddleware;
-import org.apache.fineract.command.sample.command.DummyCommand;
-import org.springframework.stereotype.Component;
+import org.apache.fineract.command.sample.data.DummyErrorRequest;
 
-@Slf4j
-@RequiredArgsConstructor
-@Component
-public class DummyMiddleware implements CommandMiddleware {
-
-    @Override
-    public void invoke(Command<?> command) {
-        if (command instanceof DummyCommand c) {
-            c.getPayload().setId(command.getId());
-        }
-    }
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class DummyErrorCommand extends Command<DummyErrorRequest> {}

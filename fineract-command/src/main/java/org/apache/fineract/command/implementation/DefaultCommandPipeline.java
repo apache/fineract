@@ -21,25 +21,28 @@ package org.apache.fineract.command.implementation;
 import static java.util.Objects.requireNonNull;
 
 import java.util.function.Supplier;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.Command;
 import org.apache.fineract.command.core.CommandExecutor;
 import org.apache.fineract.command.core.CommandPipeline;
+import org.apache.fineract.command.core.CommandProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 @Slf4j
-@RequiredArgsConstructor
 @Component
 @ConditionalOnBean(CommandPipeline.class)
-public class DefaultCommandPipeline implements CommandPipeline {
+public class DefaultCommandPipeline extends BaseCommandPipeline {
 
-    private final CommandExecutor executor;
+    public DefaultCommandPipeline(CommandExecutor executor, CommandProperties properties) {
+        super(executor, properties);
+    }
 
     @Override
     public <REQ, RES> Supplier<RES> send(final Command<REQ> command) {
         requireNonNull(command, "Command must not be null");
+
+        setAttributes(command);
 
         return executor.execute(command);
     }

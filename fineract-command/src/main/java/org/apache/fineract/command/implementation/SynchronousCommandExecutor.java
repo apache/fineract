@@ -18,37 +18,45 @@
  */
 package org.apache.fineract.command.implementation;
 
-import java.util.List;
 import java.util.function.Supplier;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.Command;
-import org.apache.fineract.command.core.CommandExecutor;
+import org.apache.fineract.command.core.CommandAuditor;
 import org.apache.fineract.command.core.CommandHandler;
-import org.apache.fineract.command.core.CommandMiddleware;
 import org.apache.fineract.command.core.CommandRouter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Slf4j
-@RequiredArgsConstructor
 @Component
 @ConditionalOnProperty(value = "fineract.command.executor", havingValue = "sync")
 @SuppressWarnings({ "unchecked" })
-public class SynchronousCommandExecutor implements CommandExecutor {
+public class SynchronousCommandExecutor extends BaseCommandExecutor {
 
-    private final List<CommandMiddleware> middlewares;
-
-    private final CommandRouter router;
+    public SynchronousCommandExecutor(CommandRouter router, CommandAuditor auditor) {
+        super(router, auditor);
+    }
 
     @Override
-    public <REQ, RES> Supplier<RES> execute(Command<REQ> command) {
-        for (CommandMiddleware middleware : middlewares) {
-            middleware.invoke(command);
-        }
-
+    public <REQ, RES> Supplier<RES> execute(final Command<REQ> command) {
         CommandHandler<REQ, RES> handler = router.route(command);
 
-        return () -> handler.handle(command);
+        return () -> {
+            try {
+                auditor.processing(command);
+
+                RES response = handler.handle(command);
+
+                auditor.processed(command, response);
+
+                return response;
+            } catch (Exception e) {
+                command.setError(e.getMessage());
+
+                auditor.error(command);
+
+                throw e;
+            }
+        };
     }
 }

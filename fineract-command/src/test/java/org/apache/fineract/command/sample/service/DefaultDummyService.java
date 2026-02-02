@@ -34,7 +34,6 @@ public class DefaultDummyService implements DummyService {
 
     @Override
     public DummyResponse process(DummyRequest request) {
-        return DummyResponse.builder().requestId(request.getId()).tenantId(tenantService.get())
-                .content(request.getContent().toUpperCase(Locale.ROOT)).build();
+        return DummyResponse.builder().tenantId(tenantService.get()).content(request.getContent().toUpperCase(Locale.ROOT)).build();
     }
 }

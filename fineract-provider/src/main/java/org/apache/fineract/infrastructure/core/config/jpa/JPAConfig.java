@@ -58,8 +58,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
 @EnableJpaAuditing
-@EnableJpaRepositories(basePackages = { "org.apache.fineract.**.domain", "org.apache.fineract.**.repository",
-        "org.apache.fineract.command.persistence" })
+@EnableJpaRepositories(basePackages = { "org.apache.fineract.**.domain", "org.apache.fineract.**.repository" })
 @EnableConfigurationProperties(JpaProperties.class)
 @Import(JpaAuditingHandlerRegistrar.class)
 public class JPAConfig extends JpaBaseConfiguration {

@@ -21,13 +21,16 @@ dependencies {
     implementation(
             'org.springframework.boot:spring-boot-starter',
             'org.springframework.boot:spring-boot-starter-validation',
-            'org.springframework.boot:spring-boot-starter-data-jpa',
+            'org.springframework.boot:spring-boot-starter-data-jdbc',
+            'org.springframework.boot:spring-boot-starter-web',
+            'org.springframework.security:spring-security-core',
             'io.github.resilience4j:resilience4j-spring-boot3',
 
             'org.liquibase:liquibase-core',
 
             'com.mysql:mysql-connector-j',
             'org.postgresql:postgresql',
+            'org.mariadb.jdbc:mariadb-java-client',
 
             'com.fasterxml.jackson.core:jackson-databind',
 
@@ -66,6 +69,7 @@ dependencies {
             'org.openjdk.jmh:jmh-core',
             'org.testcontainers:junit-jupiter',
             'org.testcontainers:postgresql',
+            'org.testcontainers:mariadb',
             'org.testcontainers:mysql',
             'org.springframework.restdocs:spring-restdocs-mockmvc',
             'org.springframework.restdocs:spring-restdocs-webtestclient',

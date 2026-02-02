@@ -16,10 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.command.core;
+package org.apache.fineract.command.persistence.converter;
 
-@FunctionalInterface
-public interface CommandMiddleware {
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.convert.WritingConverter;
+import org.springframework.stereotype.Component;
 
-    void invoke(Command<?> command);
+@Component
+@RequiredArgsConstructor
+@WritingConverter
+public class JsonNodeWritingConverter implements Converter<JsonNode, String> {
+
+    private final ObjectMapper mapper;
+
+    @SneakyThrows
+    @Override
+    public String convert(JsonNode source) {
+        return mapper.writeValueAsString(source);
+    }
 }

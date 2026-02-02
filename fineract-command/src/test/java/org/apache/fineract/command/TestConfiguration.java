@@ -21,19 +21,16 @@ package org.apache.fineract.command;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.CommandProperties;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @Slf4j
 @Configuration
-@EnableConfigurationProperties({ CommandProperties.class, JpaProperties.class })
+@EnableConfigurationProperties({ CommandProperties.class })
 @EnableAutoConfiguration
-@EnableJpaRepositories(basePackages = { "org.apache.fineract.command.persistence" })
 @EnableAsync
 @PropertySource("classpath:application-test.properties")
 @ComponentScan("org.apache.fineract.command.sample")

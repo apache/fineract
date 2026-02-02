@@ -17,7 +17,6 @@
 #
 
 # You can replace and test a more recent version of docker compose
-version: "3.8"
 services:
   db:
     extends:

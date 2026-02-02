@@ -18,27 +18,31 @@
  */
 package org.apache.fineract.command;
 
+import static org.mockito.Mockito.mock;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lmax.disruptor.YieldingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import com.lmax.disruptor.util.DaemonThreadFactory;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.CommandPipeline;
-import org.apache.fineract.command.core.CommandRouter;
+import org.apache.fineract.command.core.CommandProperties;
+import org.apache.fineract.command.implementation.DefaultCommandAuditor;
 import org.apache.fineract.command.implementation.DefaultCommandPipeline;
 import org.apache.fineract.command.implementation.DefaultCommandRouter;
 import org.apache.fineract.command.implementation.DisruptorCommandExecutor;
+import org.apache.fineract.command.persistence.domain.CommandRepository;
+import org.apache.fineract.command.persistence.mapping.CommandJsonMapper;
+import org.apache.fineract.command.persistence.mapping.CommandMapperImpl;
 import org.apache.fineract.command.sample.command.DummyCommand;
 import org.apache.fineract.command.sample.data.DummyRequest;
 import org.apache.fineract.command.sample.data.DummyResponse;
 import org.apache.fineract.command.sample.handler.DummyCommandHandler;
-import org.apache.fineract.command.sample.middleware.DummyIdempotencyMiddleware;
-import org.apache.fineract.command.sample.middleware.DummyMiddleware;
 import org.apache.fineract.command.sample.service.DefaultDummyService;
 import org.apache.fineract.command.sample.service.DefaultDummyTenantService;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -58,26 +62,37 @@ import org.openjdk.jmh.annotations.TearDown;
 @SuppressWarnings({ "raw" })
 public class CommandPipelineBenchmark {
 
-    private CommandRouter router;
     private Disruptor<DisruptorCommandExecutor.CommandEvent> disruptor;
 
     private CommandPipeline pipeline;
 
     @Setup(Level.Iteration)
     public void setUp() {
-        this.router = new DefaultCommandRouter(List.of(new DummyCommandHandler(new DefaultDummyService(new DefaultDummyTenantService()))));
+        // create router
+        var router = new DefaultCommandRouter(List.of(new DummyCommandHandler(new DefaultDummyService(new DefaultDummyTenantService()))));
 
-        // Create the disruptor
+        // create mapper
+        var mapper = new CommandMapperImpl(new CommandJsonMapper(new ObjectMapper()));
+
+        // mock repository
+        var repository = mock(CommandRepository.class);
+
+        // default properties
+        var properties = new CommandProperties();
+
+        // create auditor
+        var auditor = new DefaultCommandAuditor(mapper, repository, properties, new ObjectMapper());
+
+        // create the disruptor
         this.disruptor = new Disruptor<>(DisruptorCommandExecutor.CommandEvent::new, 2048, DaemonThreadFactory.INSTANCE, ProducerType.MULTI,
                 new YieldingWaitStrategy());
 
-        disruptor.handleEventsWith(new DisruptorCommandExecutor.CompleteableCommandEventHandler(
-                List.of(new DummyMiddleware(), new DummyIdempotencyMiddleware()), router));
+        disruptor.handleEventsWith(new DisruptorCommandExecutor.CompleteableCommandEventHandler(router));
 
-        // Start the disruptor
+        // start the disruptor
         disruptor.start();
 
-        pipeline = new DefaultCommandPipeline(new DisruptorCommandExecutor(disruptor));
+        pipeline = new DefaultCommandPipeline(new DisruptorCommandExecutor(disruptor, router, auditor), properties);
     }
 
     @TearDown(Level.Iteration)
@@ -89,7 +104,6 @@ public class CommandPipelineBenchmark {
     @Benchmark
     public void processCommand() {
         var command = new DummyCommand();
-        command.setId(UUID.randomUUID());
         command.setPayload(DummyRequest.builder().content("hello").build());
 
         Supplier<DummyResponse> result = pipeline.send(command);

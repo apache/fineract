@@ -30,13 +30,41 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = SPRING, injectionStrategy = CONSTRUCTOR, uses = { CommandJsonMapper.class })
 public interface CommandMapper {
 
-    @Mapping(ignore = true, target = "id")
-    @Mapping(source = "id", target = "commandId")
+    @Mapping(source = "commandId", target = "id")
     @Mapping(source = "createdAt", target = "createdAt")
-    @Mapping(source = "tenantId", target = "tenantId")
-    @Mapping(source = "username", target = "username")
-    @Mapping(source = "payload", target = "payload")
+    @Mapping(source = "updatedAt", target = "updatedAt")
+    @Mapping(source = "executedAt", target = "executedAt")
+    @Mapping(source = "approvedAt", target = "approvedAt")
+    @Mapping(source = "rejectedAt", target = "rejectedAt")
+    @Mapping(source = "initiatedByUsername", target = "initiatedByUsername")
+    @Mapping(source = "executedByUsername", target = "executedByUsername")
+    @Mapping(source = "approvedByUsername", target = "approvedByUsername")
+    @Mapping(source = "rejectedByUsername", target = "rejectedByUsername")
+    @Mapping(source = "payload", target = "request")
+    @Mapping(source = "ipAddress", target = "ipAddress")
+    @Mapping(source = "idempotencyKey", target = "idempotencyKey")
+    @Mapping(source = "error", target = "error")
+    @Mapping(ignore = true, target = "state")
+    @Mapping(ignore = true, target = "response")
     CommandEntity map(Command source);
+
+    @Mapping(source = "source.commandId", target = "id")
+    @Mapping(source = "source.createdAt", target = "createdAt")
+    @Mapping(source = "source.updatedAt", target = "updatedAt")
+    @Mapping(source = "source.executedAt", target = "executedAt")
+    @Mapping(source = "source.approvedAt", target = "approvedAt")
+    @Mapping(source = "source.rejectedAt", target = "rejectedAt")
+    @Mapping(source = "source.initiatedByUsername", target = "initiatedByUsername")
+    @Mapping(source = "source.executedByUsername", target = "executedByUsername")
+    @Mapping(source = "source.approvedByUsername", target = "approvedByUsername")
+    @Mapping(source = "source.rejectedByUsername", target = "rejectedByUsername")
+    @Mapping(source = "source.payload", target = "request")
+    @Mapping(source = "source.ipAddress", target = "ipAddress")
+    @Mapping(source = "source.idempotencyKey", target = "idempotencyKey")
+    @Mapping(source = "source.error", target = "error")
+    @Mapping(source = "response", target = "response")
+    @Mapping(ignore = true, target = "state")
+    CommandEntity map(Command source, Object response);
 
     @InheritInverseConfiguration
     Command map(CommandEntity source);

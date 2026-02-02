@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.command.sample.data;
 
-import jakarta.validation.constraints.NotBlank;
 import java.io.Serial;
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
@@ -32,11 +31,11 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldNameConstants
-public class DummyRequest implements Serializable {
+public class DummyErrorResponse implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @NotBlank(message = "{org.apache.fineract.dummy.request.content.not-empty}")
     private String content;
+    private String error;
 }

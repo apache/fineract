@@ -66,10 +66,6 @@
         <class>org.apache.fineract.infrastructure.businessdate.domain.BusinessDate</class>
         <class>org.apache.fineract.infrastructure.codes.domain.CodeValue</class>
 
-        <!-- Command Module Entities -->
-        <class>org.apache.fineract.command.persistence.domain.CommandEntity</class>
-        <class>org.apache.fineract.command.persistence.converter.JsonAttributeConverter</class>
-
         <!-- Validation Module Entities -->
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>

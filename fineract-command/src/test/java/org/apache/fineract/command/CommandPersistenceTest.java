@@ -18,10 +18,13 @@
  */
 package org.apache.fineract.command;
 
-import java.util.UUID;
+import static org.apache.fineract.command.persistence.domain.CommandEntityState.ERROR;
+
+import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.sample.command.DummyCommand;
 import org.apache.fineract.command.sample.data.DummyRequest;
+import org.apache.fineract.command.sample.data.DummyResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -35,10 +38,25 @@ class CommandPersistenceTest extends CommandBaseTest {
     void save() {
         var content = "hello";
         var command = new DummyCommand();
-        command.setId(UUID.randomUUID());
-        command.setPayload(DummyRequest.builder().content(content).build());
+        var now = Instant.now();
 
-        var commandEntity = commandMapper.map(command);
+        command.setPayload(DummyRequest.builder().content(content).build());
+        command.setIdempotencyKey("1234567890");
+        command.setIpAddress("127.0.0.1");
+        command.setCreatedAt(now);
+        command.setExecutedAt(now);
+        command.setApprovedAt(now);
+        command.setRejectedAt(now);
+        command.setInitiatedByUsername("abc");
+        command.setExecutedByUsername("abc");
+        command.setApprovedByUsername("abc");
+        command.setRejectedByUsername("abc");
+
+        var response = DummyResponse.builder().tenantId("dummy").content(content).build();
+
+        var commandEntity = commandMapper.map(command, response);
+        commandEntity.setState(ERROR);
+        commandEntity.setError("Some error message");
 
         var result = commandRepository.save(commandEntity);
 

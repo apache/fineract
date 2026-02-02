@@ -18,41 +18,57 @@
  */
 package org.apache.fineract.command.implementation;
 
-import java.util.List;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.Command;
-import org.apache.fineract.command.core.CommandExecutor;
+import org.apache.fineract.command.core.CommandAuditor;
 import org.apache.fineract.command.core.CommandHandler;
-import org.apache.fineract.command.core.CommandMiddleware;
 import org.apache.fineract.command.core.CommandRouter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
 @Slf4j
-@RequiredArgsConstructor
-@Component
-@ConditionalOnProperty(value = "fineract.command.executor", havingValue = "async")
-public class AsynchronousCommandExecutor implements CommandExecutor {
+// TODO: not ready yet for prime time
+// @Component
+// @ConditionalOnProperty(value = "fineract.command.executor", havingValue = "async")
+public class AsynchronousCommandExecutor extends BaseCommandExecutor {
 
-    private final List<CommandMiddleware> middlewares;
-
-    private final CommandRouter router;
+    public AsynchronousCommandExecutor(CommandRouter router, CommandAuditor auditor) {
+        super(router, auditor);
+    }
 
     @Override
-    public <REQ, RES> Supplier<RES> execute(Command<REQ> command) {
+    public <REQ, RES> Supplier<RES> execute(final Command<REQ> command) {
         CompletableFuture<RES> future = CompletableFuture.supplyAsync(() -> {
-            for (CommandMiddleware middleware : middlewares) {
-                middleware.invoke(command);
-            }
+            auditor.processing(command);
 
             CommandHandler<REQ, RES> handler = router.route(command);
 
             return handler.handle(command);
+        }).whenComplete((response, t) -> {
+            if (t == null) {
+                auditor.processed(command, response);
+            } else {
+                command.setError(t.getMessage());
+
+                auditor.error(command);
+            }
         });
 
-        return future::join;
+        return () -> {
+            try {
+                // TODO: make this configurable
+                return future.get(3, SECONDS);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            } catch (TimeoutException e) {
+                throw new RuntimeException(e);
+            }
+        };
     }
 }

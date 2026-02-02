@@ -23,6 +23,11 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <changeSet author="fineract" id="command-00001" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_command"/>
+            </not>
+        </preConditions>
         <createTable tableName="m_command">
             <column autoIncrement="true" name="id" type="bigint" remarks="Internal ID">
                 <constraints nullable="false" primaryKey="true"/>
@@ -35,6 +40,11 @@
         </createTable>
     </changeSet>
     <changeSet author="fineract" id="command-00002" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="command"/>
+            </not>
+        </preConditions>
         <createTable tableName="command">
             <column autoIncrement="true" name="id" type="bigint" remarks="Internal ID">
                 <constraints nullable="false" primaryKey="true"/>

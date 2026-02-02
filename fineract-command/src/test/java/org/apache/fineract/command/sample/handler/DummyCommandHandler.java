@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.command.sample.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.Command;
@@ -26,6 +27,7 @@ import org.apache.fineract.command.sample.data.DummyRequest;
 import org.apache.fineract.command.sample.data.DummyResponse;
 import org.apache.fineract.command.sample.service.DummyService;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -34,8 +36,16 @@ public class DummyCommandHandler implements CommandHandler<DummyRequest, DummyRe
 
     private final DummyService dummyService;
 
+    @Retry(name = "commandDummy", fallbackMethod = "fallback")
+    @Transactional
     @Override
     public DummyResponse handle(Command<DummyRequest> command) {
         return dummyService.process(command.getPayload());
+    }
+
+    @Override
+    public DummyResponse fallback(Command<DummyRequest> command, Throwable t) {
+        // NOTE: fallback method needs to be in the same class
+        return CommandHandler.super.fallback(command, t);
     }
 }
