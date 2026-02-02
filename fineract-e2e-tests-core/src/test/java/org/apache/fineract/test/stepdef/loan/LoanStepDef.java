@@ -2290,6 +2290,17 @@ public class LoanStepDef extends AbstractStepDef {
                 .isEqualTo(expectedAccruals.size());
     }
 
+    @Then("Loan has {double} total Accruals")
+    public void loanTransactionsTabCheckTotalAccruals(Double totalAccruedExpected) {
+        PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.getLoanId();
+        List<GetLoansLoanIdTransactions> transactions = getAccrualTransactions(loanId);
+        BigDecimal totalAccruedActual = transactions.stream().map(t -> isLoanTransactionAccrual(t) ? t.getAmount() : t.getAmount().negate())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        assertEquals(totalAccruedExpected, totalAccruedActual.doubleValue());
+    }
+
     @Then("Loan Transactions tab has no new accrual data")
     public void loanTransactionsTabCheckNoNewAccruals() {
         PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
@@ -2335,12 +2346,19 @@ public class LoanStepDef extends AbstractStepDef {
         checkLoanTransactionTab(data, transactions, header, resourceId);
     }
 
+    private boolean isLoanTransactionAccrual(GetLoansLoanIdTransactions lt) {
+        return "Accrual".equalsIgnoreCase(lt.getType().getValue());
+    }
+
+    private boolean isLoanTransactionAccrualAdjustment(GetLoansLoanIdTransactions lt) {
+        return "Accrual Adjustment".equalsIgnoreCase(lt.getType().getValue());
+    }
+
     public List<GetLoansLoanIdTransactions> getAccrualTransactions(Long loanId) {
         GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveLoan(loanId,
                 Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions")));
-        return loanDetailsResponse.getTransactions().stream().filter(
-                lt -> "Accrual".equalsIgnoreCase(lt.getType().getValue()) || "Accrual Adjustment".equalsIgnoreCase(lt.getType().getValue()))
-                .toList();
+        return loanDetailsResponse.getTransactions().stream()
+                .filter(lt -> isLoanTransactionAccrual(lt) || isLoanTransactionAccrualAdjustment(lt)).toList();
     }
 
     public void checkLoanTransactionTabRows(List<List<String>> data, List<GetLoansLoanIdTransactions> transactions, List<String> header,
