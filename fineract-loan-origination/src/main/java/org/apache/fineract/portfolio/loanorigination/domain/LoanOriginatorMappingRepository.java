@@ -22,11 +22,22 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface LoanOriginatorMappingRepository
         extends JpaRepository<LoanOriginatorMapping, Long>, JpaSpecificationExecutor<LoanOriginatorMapping> {
 
     List<LoanOriginatorMapping> findByLoanId(Long loanId);
+
+    @Query("""
+            SELECT m FROM LoanOriginatorMapping m
+            JOIN FETCH m.originator o
+            LEFT JOIN FETCH o.originatorType
+            LEFT JOIN FETCH o.channelType
+            WHERE m.loanId = :loanId
+            """)
+    List<LoanOriginatorMapping> findByLoanIdWithOriginatorDetails(@Param("loanId") Long loanId);
 
     boolean existsByLoanId(Long loanId);
 
