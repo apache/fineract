@@ -168,6 +168,7 @@ import org.apache.fineract.test.messaging.store.EventStore;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
 import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
@@ -2174,6 +2175,15 @@ public class LoanStepDef extends AbstractStepDef {
         assertThat(lastPaymentAmountActual)
                 .as(ErrorMessageHelper.wrongLastPaymentAmount(lastPaymentAmountActual, lastPaymentAmountExpected))
                 .isEqualTo(lastPaymentAmountExpected);
+    }
+
+    @Then("Loan has {int} active number of terms")
+    public void loanActualNoTermCheck(Integer activeNoTermExpected) {
+        PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        Long loanId = loanCreateResponse.getLoanId();
+        GetLoansLoanIdResponse loanIdResponse = ok(() -> fineractClient.loans().retrieveLoan(loanId, Map.of()));
+        Assertions.assertNotNull(loanIdResponse);
+        Assertions.assertEquals(activeNoTermExpected, loanIdResponse.getActualNoTerm());
     }
 
     @Then("Loan Repayment schedule has {int} periods, with the following data for periods:")
