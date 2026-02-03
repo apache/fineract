@@ -1622,6 +1622,7 @@ public class LoanStepDef extends AbstractStepDef {
                 .isEqualTo(statusExpected);//
         eventCheckHelper.disburseLoanEventCheck(loanId);
         eventCheckHelper.loanDisbursalTransactionEventCheck(loanDisburseResponse);
+        eventCheckHelper.loanBalanceChangedEventCheck(loanId);
     }
 
     @And("Admin successfully add disbursement detail to the loan on {string} with {double} EUR transaction amount")
