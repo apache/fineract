@@ -585,6 +585,14 @@ public class GlobalConfigurationHelper {
                 "ACTIVE,TRANSFER_IN_PROGRESS,TRANSFER_ON_HOLD,OVERPAID,CLOSED_OBLIGATIONS_MET");
         defaults.add(allowedLoanStatusesForDelayedSettlementExternalAssetTransfer);
 
+        HashMap<String, Object> enableOriginatorCreationDuringLoanApplication = new HashMap<>();
+        enableOriginatorCreationDuringLoanApplication.put("name",
+                GlobalConfigurationConstants.ENABLE_ORIGINATOR_CREATION_DURING_LOAN_APPLICATION);
+        enableOriginatorCreationDuringLoanApplication.put("value", 0L);
+        enableOriginatorCreationDuringLoanApplication.put("enabled", false);
+        enableOriginatorCreationDuringLoanApplication.put("trapDoor", false);
+        defaults.add(enableOriginatorCreationDuringLoanApplication);
+
         return defaults;
     }
 

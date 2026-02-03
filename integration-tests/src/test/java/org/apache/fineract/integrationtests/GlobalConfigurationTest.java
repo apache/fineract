@@ -125,4 +125,35 @@ public class GlobalConfigurationTest {
         assertEquals(403, exception.getResponse().code());
         assertTrue(exception.getMessage().contains("error.msg.password.reset.days.value.must.be.greater.than.zero"));
     }
+
+    @Test
+    public void testOriginatorCreationConfigurationExists() {
+        String configName = GlobalConfigurationConstants.ENABLE_ORIGINATOR_CREATION_DURING_LOAN_APPLICATION;
+        GlobalConfigurationPropertyData config = globalConfigurationHelper.getGlobalConfigurationByName(configName);
+
+        Assertions.assertNotNull(config, "Configuration should exist");
+        assertEquals(configName, config.getName(), "Configuration name should match");
+        assertEquals(false, config.getEnabled(), "Configuration should be disabled by default");
+        assertEquals(false, config.getTrapDoor(), "Configuration should not be a trap door");
+    }
+
+    @Test
+    public void testOriginatorCreationConfigurationCanBeEnabled() {
+        String configName = GlobalConfigurationConstants.ENABLE_ORIGINATOR_CREATION_DURING_LOAN_APPLICATION;
+        GlobalConfigurationPropertyData config = globalConfigurationHelper.getGlobalConfigurationByName(configName);
+        Assertions.assertNotNull(config);
+
+        try {
+            globalConfigurationHelper.updateGlobalConfiguration(configName, new PutGlobalConfigurationsRequest().enabled(true));
+            GlobalConfigurationPropertyData enabledConfig = globalConfigurationHelper.getGlobalConfigurationByName(configName);
+            assertEquals(true, enabledConfig.getEnabled(), "Configuration should be enabled after update");
+
+            globalConfigurationHelper.updateGlobalConfiguration(configName, new PutGlobalConfigurationsRequest().enabled(false));
+            GlobalConfigurationPropertyData disabledConfig = globalConfigurationHelper.getGlobalConfigurationByName(configName);
+            assertEquals(false, disabledConfig.getEnabled(), "Configuration should be disabled after update");
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(configName,
+                    new PutGlobalConfigurationsRequest().enabled(config.getEnabled()));
+        }
+    }
 }
