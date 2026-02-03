@@ -122,13 +122,11 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
 
     @Override
     public Collection<EmailData> retrieveAllPending(final SearchParameters searchParameters) {
-        // FIXED: Passing Integer limit instead of String SQL fragment
         return retrieveEmailByStatus(EmailMessageStatusType.PENDING.getValue(), searchParameters.getLimit());
     }
 
     @Override
     public Collection<EmailData> retrieveAllSent(final SearchParameters searchParameters) {
-        // FIXED: Passing Integer limit instead of String SQL fragment
         return retrieveEmailByStatus(EmailMessageStatusType.SENT.getValue(), searchParameters.getLimit());
     }
 
@@ -142,13 +140,11 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
 
     @Override
     public Collection<EmailData> retrieveAllDelivered(final Integer limit) {
-        // FIXED: Passing Integer limit instead of String SQL fragment
         return retrieveEmailByStatus(EmailMessageStatusType.DELIVERED.getValue(), limit);
     }
 
     @Override
     public Collection<EmailData> retrieveAllFailed(final SearchParameters searchParameters) {
-        // FIXED: Passing Integer limit instead of String SQL fragment
         return retrieveEmailByStatus(EmailMessageStatusType.FAILED.getValue(), searchParameters.getLimit());
     }
 
@@ -182,8 +178,6 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
         args.add(status);
 
         if (limit != null && limit > 0) {
-            // Using sqlGenerator ensures cross-database compatibility
-            // (Postgres/MySQL/MSSQL)
             sql.append(" ").append(sqlGenerator.limit(limit));
         }
 
