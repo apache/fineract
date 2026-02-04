@@ -600,6 +600,12 @@ public class GlobalConfigurationHelper {
                 "ACTIVE,TRANSFER_IN_PROGRESS,TRANSFER_ON_HOLD,OVERPAID,CLOSED_OBLIGATIONS_MET");
         defaults.add(allowedLoanStatusesForDelayedSettlementExternalAssetTransfer);
 
+        HashMap<String, Object> maxLoginRetryAttempts = new HashMap<>();
+        maxLoginRetryAttempts.put("name", GlobalConfigurationConstants.MAX_LOGIN_RETRY_ATTEMPTS);
+        maxLoginRetryAttempts.put("value", 5L);
+        maxLoginRetryAttempts.put("enabled", false);
+        maxLoginRetryAttempts.put("trapDoor", false);
+        defaults.add(maxLoginRetryAttempts);
         HashMap<String, Object> enableOriginatorCreationDuringLoanApplication = new HashMap<>();
         enableOriginatorCreationDuringLoanApplication.put("name",
                 GlobalConfigurationConstants.ENABLE_ORIGINATOR_CREATION_DURING_LOAN_APPLICATION);

@@ -238,4 +238,5 @@
     <include file="parts/0217_force_withdrawal_configs.xml" relativeToChangelogFile="true" />
     <include file="parts/0218_standardize_character_set_and_collation.xml" relativeToChangelogFile="true" />
     <include file="parts/0219_remove_self_service_feature.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0220_add_login_retry_configuration.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

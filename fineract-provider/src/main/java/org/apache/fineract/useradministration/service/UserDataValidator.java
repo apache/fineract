@@ -59,10 +59,12 @@ public final class UserDataValidator {
     /**
      * The parameters supported for this command.
      */
-    private static final Set<String> CREATE_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(USERNAME, FIRSTNAME, LASTNAME, PASSWORD,
-            REPEAT_PASSWORD, EMAIL, OFFICE_ID, NOT_SELECTED_ROLES, ROLES, SEND_PASSWORD_TO_EMAIL, STAFF_ID, PASSWORD_NEVER_EXPIRES));
-    private static final Set<String> UPDATE_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(USERNAME, FIRSTNAME, LASTNAME, PASSWORD,
-            REPEAT_PASSWORD, EMAIL, OFFICE_ID, NOT_SELECTED_ROLES, ROLES, SEND_PASSWORD_TO_EMAIL, STAFF_ID, PASSWORD_NEVER_EXPIRES));
+    private static final Set<String> CREATE_SUPPORTED_PARAMETERS = new HashSet<>(
+            Arrays.asList(USERNAME, FIRSTNAME, LASTNAME, PASSWORD, REPEAT_PASSWORD, EMAIL, OFFICE_ID, NOT_SELECTED_ROLES, ROLES,
+                    SEND_PASSWORD_TO_EMAIL, STAFF_ID, PASSWORD_NEVER_EXPIRES, AppUserConstants.IS_LOGIN_RETRIES_ENABLED));
+    private static final Set<String> UPDATE_SUPPORTED_PARAMETERS = new HashSet<>(
+            Arrays.asList(USERNAME, FIRSTNAME, LASTNAME, PASSWORD, REPEAT_PASSWORD, EMAIL, OFFICE_ID, NOT_SELECTED_ROLES, ROLES,
+                    SEND_PASSWORD_TO_EMAIL, STAFF_ID, PASSWORD_NEVER_EXPIRES, AppUserConstants.IS_LOGIN_RETRIES_ENABLED));
     private static final Set<String> CHANGE_PASSWORD_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(PASSWORD, REPEAT_PASSWORD));
     public static final String PASSWORD_NEVER_EXPIRE = "passwordNeverExpire";
 
@@ -126,6 +128,16 @@ public final class UserDataValidator {
             baseDataValidator.reset().parameter(PASSWORD_NEVER_EXPIRE).value(passwordNeverExpire).validateForBooleanValue();
         }
 
+        if (this.fromApiJsonHelper.parameterExists(AppUserConstants.IS_LOGIN_RETRIES_ENABLED, element)) {
+            final Boolean isLoginRetriesEnabled = this.fromApiJsonHelper.extractBooleanNamed(AppUserConstants.IS_LOGIN_RETRIES_ENABLED,
+                    element);
+            if (isLoginRetriesEnabled == null) {
+                baseDataValidator.reset().parameter(AppUserConstants.IS_LOGIN_RETRIES_ENABLED).trueOrFalseRequired(false);
+            } else {
+                baseDataValidator.reset().parameter(AppUserConstants.IS_LOGIN_RETRIES_ENABLED).value(isLoginRetriesEnabled)
+                        .validateForBooleanValue();
+            }
+        }
         final String[] roles = this.fromApiJsonHelper.extractArrayNamed(ROLES, element);
         baseDataValidator.reset().parameter(ROLES).value(roles).arrayNotEmpty();
 
@@ -239,6 +251,16 @@ public final class UserDataValidator {
             baseDataValidator.reset().parameter(PASSWORD_NEVER_EXPIRE).value(passwordNeverExpire).validateForBooleanValue();
         }
 
+        if (this.fromApiJsonHelper.parameterExists(AppUserConstants.IS_LOGIN_RETRIES_ENABLED, element)) {
+            final Boolean isLoginRetriesEnabled = this.fromApiJsonHelper.extractBooleanNamed(AppUserConstants.IS_LOGIN_RETRIES_ENABLED,
+                    element);
+            if (isLoginRetriesEnabled == null) {
+                baseDataValidator.reset().parameter(AppUserConstants.IS_LOGIN_RETRIES_ENABLED).trueOrFalseRequired(false);
+            } else {
+                baseDataValidator.reset().parameter(AppUserConstants.IS_LOGIN_RETRIES_ENABLED).value(isLoginRetriesEnabled)
+                        .validateForBooleanValue();
+            }
+        }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
         validateFieldLevelACL(json, authenticatedUser);
     }
