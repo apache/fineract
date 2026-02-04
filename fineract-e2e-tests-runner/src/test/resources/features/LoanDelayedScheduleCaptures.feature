@@ -1082,10 +1082,8 @@ Feature: Full Term Tranche - Schedule handling and Calculations
     And Customer makes "AUTOPAY" repayment on "01 February 2024" with 17.13 EUR transaction amount
     #   --- 2nd disbursement  --- #
     When Admin successfully disburse the loan on "01 February 2024" with "100" EUR transaction amount
-
     When Admin sets the business date to "02 February 2024"
     And Create an interest pause period with start date "02 April 2024" and end date "01 May 2024"
-
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -1106,29 +1104,25 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.13  | 16.34     | 0.79     | 0.0  | 0.0       | 83.66        | false    | false    |
       | 01 February 2024 | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 183.66       | false    | false    |
-
     When Loan Pay-off is made on "02 February 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     When Customer undo "2"th repayment on "02 February 2024"
-
     When Admin sets the business date to "28 February 2024"
     When Loan Pay-off is made on "28 February 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     When Customer undo "3"th repayment on "28 February 2024"
-
     When Admin sets the business date to "01 April 2024"
     When Loan Pay-off is made on "01 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     When Customer undo "4"th repayment on "01 April 2024"
-
     When Admin sets the business date to "02 April 2024"
     When Loan Pay-off is made on "02 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     When Customer undo "5"th repayment on "02 April 2024"
-
     When Admin sets the business date to "01 May 2024"
     When Loan Pay-off is made on "01 May 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
   @TestRailId:C4546 @AdvancedPaymentAllocation
   Scenario: Verify that Loan full term tranche with BuyDownFee transaction - UC15
     When Admin sets the business date to "01 January 2024"
@@ -3275,6 +3269,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE_FULL_TERM_TRANCHE | 01 January 2024   | 200            | 9.4822                 | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2024" with "200" amount and expected disbursement date on "01 January 2024"
     When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
@@ -3292,6 +3287,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
 # -- snooze charge on Jan 1, 2024 with due date Jul 15, 1024 --- #
     And Admin adds "LOAN_SNOOZE_FEE" due date charge with "15 July 2024" due date and 10 EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
@@ -3314,6 +3310,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
 # ---- repayment on Feb 1, 2024 --- #
     When Admin sets the business date to "01 February 2024"
     And Customer makes "AUTOPAY" repayment on "01 February 2024" with 17.13 EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -3333,6 +3330,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 01 February 2024 | Repayment        | 17.13  | 16.34     | 0.79     | 0.0  | 0.0       | 83.66        | false    | false    |
 # --- 2nd disbursement on installment date ---#
     When Admin successfully disburse the loan on "01 February 2024" with "100" EUR transaction amount
+    Then Loan has 7 active number of terms
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -3353,6 +3351,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 01 February 2024 | Repayment        | 17.13  | 16.34     | 0.79     | 0.0  | 0.0       | 83.66        | false    | false    |
       | 01 February 2024 | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 183.66       | false    | false    |
     When Loan Pay-off is made on "01 February 2024"
+    Then Loan has 7 active number of terms
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -3385,6 +3384,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE_FULL_TERM_TRANCHE | 01 January 2024   | 200            | 9.4822                 | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2024" with "200" amount and expected disbursement date on "01 January 2024"
     When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
@@ -3402,6 +3402,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
 # -- snooze charge on Jan 1, 2024 with due date Jul 15, 1024 --- #
     And Admin adds "LOAN_NSF_FEE" due date charge with "15 August 2024" due date and 10 EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
@@ -3424,6 +3425,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
 # ---- repayment on Feb 1, 2024 --- #
     When Admin sets the business date to "01 February 2024"
     And Customer makes "AUTOPAY" repayment on "01 February 2024" with 17.13 EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -3443,6 +3445,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 01 February 2024 | Repayment        | 17.13  | 16.34     | 0.79     | 0.0  | 0.0       | 83.66        | false    | false    |
 # --- 2nd disbursement on installment date ---#
     When Admin successfully disburse the loan on "01 February 2024" with "100" EUR transaction amount
+    Then Loan has 7 active number of terms
     Then Loan Repayment schedule has 8 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -3464,6 +3467,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 01 February 2024 | Repayment        | 17.13  | 16.34     | 0.79     | 0.0  | 0.0       | 83.66        | false    | false    |
       | 01 February 2024 | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 183.66       | false    | false    |
     When Loan Pay-off is made on "01 February 2024"
+    Then Loan has 7 active number of terms
     Then Loan Repayment schedule has 8 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -3497,6 +3501,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE_FULL_TERM_TRANCHE | 01 January 2024   | 200            | 9.4822                 | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2024" with "200" amount and expected disbursement date on "01 January 2024"
     When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
@@ -3516,6 +3521,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
     And Admin adds "LOAN_SNOOZE_FEE" due date charge with "15 July 2024" due date and 10 EUR transaction amount
     And Admin adds "LOAN_NSF_FEE" due date charge with "15 August 2024" due date and 15 EUR transaction amount
     And Admin adds "LOAN_NSF_FEE" due date charge with "15 September 2024" due date and 18 EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024   |           | 100.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
@@ -3540,6 +3546,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
 # ---- repayment on Feb 1, 2024 --- #
     When Admin sets the business date to "01 February 2024"
     And Customer makes "AUTOPAY" repayment on "01 February 2024" with 17.13 EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -3559,6 +3566,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 01 February 2024 | Repayment        | 17.13  | 16.34     | 0.79     | 0.0  | 0.0       | 83.66        | false    | false    |
 # --- 2nd disbursement on installment date ---#
     When Admin successfully disburse the loan on "01 February 2024" with "100" EUR transaction amount
+    Then Loan has 7 active number of terms
     Then Loan Repayment schedule has 8 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                   | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -3580,6 +3588,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 01 February 2024 | Repayment        | 17.13  | 16.34     | 0.79     | 0.0  | 0.0       | 83.66        | false    | false    |
       | 01 February 2024 | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 183.66       | false    | false    |
     When Loan Pay-off is made on "01 February 2024"
+    Then Loan has 7 active number of terms
     Then Loan Repayment schedule has 8 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -3613,6 +3622,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | LP2_ADV_PYMNT_INT_DAILY_EMI_360_30_INT_RECALC_DAILY_MULTIDISB_FULL_TERM_TRANCHE_CHARGEBACK | 01 January 2024   | 200            | 9.4822                 | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2024" with "200" amount and expected disbursement date on "01 January 2024"
     When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
@@ -3630,6 +3640,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
     When Admin sets the business date to "01 February 2024"
     And Customer makes "AUTOPAY" repayment on "01 February 2024" with 17.13 EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -3648,6 +3659,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 01 February 2024 | Repayment        | 17.13  | 16.34     | 0.79     | 0.0  | 0.0       | 83.66        | false    | false    |
 # --- 2nd disbursement  --- #
     When Admin successfully disburse the loan on "01 February 2024" with "100" EUR transaction amount
+    Then Loan has 7 active number of terms
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -3670,6 +3682,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
 # --- add chargeback transaction --- #
     When Admin sets the business date to "15 August 2024"
     When Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 17.13 EUR transaction amount
+    Then Loan has 7 active number of terms
     Then Loan Repayment schedule has 8 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -3703,6 +3716,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | LP2_ADV_PYMNT_INT_DAILY_EMI_360_30_INT_RECALC_DAILY_MULTIDISB_FULL_TERM_TRANCHE_CHARGEBACK | 01 January 2024   | 200            | 9.4822                 | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2024" with "200" amount and expected disbursement date on "01 January 2024"
     When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
@@ -3720,6 +3734,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
     When Admin sets the business date to "01 February 2024"
     And Customer makes "AUTOPAY" repayment on "01 February 2024" with 17.13 EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -3739,6 +3754,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
 # --- add chargeback transaction --- #
     When Admin sets the business date to "15 July 2024"
     When Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 17.13 EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -3759,6 +3775,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 15 July 2024     | Chargeback       | 17.13  | 16.34     | 0.79     | 0.0  | 0.0       | 100.0        | false    | false    |
 # --- 2nd disbursement  --- #
     When Admin successfully disburse the loan on "01 February 2024" with "100" EUR transaction amount
+    Then Loan has 7 active number of terms
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -3791,6 +3808,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | LP2_ADV_PYMNT_INT_DAILY_EMI_360_30_INT_RECALC_DAILY_MULTIDISB_FULL_TERM_TRANCHE_CHARGEBACK | 01 January 2024   | 200            | 9.4822                 | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2024" with "200" amount and expected disbursement date on "01 January 2024"
     When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
@@ -3808,6 +3826,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
     When Admin sets the business date to "01 February 2024"
     And Customer makes "AUTOPAY" repayment on "01 February 2024" with 17.13 EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -3827,6 +3846,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
 # --- add chargeback transaction --- #
     When Admin sets the business date to "15 August 2024"
     When Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 17.13 EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -3847,6 +3867,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 15 August 2024   | Chargeback       | 17.13  | 16.34     | 0.79     | 0.0  | 0.0       | 100.0        | false    | false    |
 # --- backdated 2nd disbursement --- #
     When Admin successfully disburse the loan on "01 February 2024" with "100" EUR transaction amount
+    Then Loan has 7 active number of terms
     Then Loan Repayment schedule has 8 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -3880,6 +3901,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE_FULL_TERM_TRANCHE | 01 January 2024   | 200            | 9.4822                 | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2024" with "200" amount and expected disbursement date on "01 January 2024"
     When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
@@ -3897,6 +3919,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
 # -- snooze charge on Jan 1, 2024 with due date Jul 15, 1024 --- #
     And Admin adds "LOAN_NSF_FEE" due date charge with "15 August 2024" due date and 10 EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
@@ -3919,6 +3942,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
 # ---- repayment on Feb 1, 2024 --- #
     When Admin sets the business date to "01 February 2024"
     And Customer makes "AUTOPAY" repayment on "01 February 2024" with 17.13 EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -3941,6 +3965,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
     And Admin adds "LOAN_SNOOZE_FEE" due date charge with "15 August 2024" due date and 15 EUR transaction amount
     And Admin adds "LOAN_NSF_FEE" due date charge with "15 September 2024" due date and 33.3 EUR transaction amount
     And Admin adds "LOAN_SNOOZE_FEE" due date charge with "20 September 2024" due date and 2.2 EUR transaction amount
+    Then Loan has 6 active number of terms
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -3986,6 +4011,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 01 February 2024 | Repayment        | 17.13  | 16.34     | 0.79     | 0.0  | 0.0       | 83.66        | false    | false    |
 # --- 2nd disbursement on installment date ---#
     When Admin successfully disburse the loan on "01 March 2024" with "100" EUR transaction amount
+    Then Loan has 8 active number of terms
     Then Loan Repayment schedule has 9 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -4012,6 +4038,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
     And Admin adds "LOAN_SNOOZE_FEE" due date charge with "15 August 2024" due date and 9 EUR transaction amount
     And Admin adds "LOAN_NSF_FEE" due date charge with "15 September 2024" due date and 21.1 EUR transaction amount
     And Admin adds "LOAN_SNOOZE_FEE" due date charge with "20 September 2024" due date and 60.4 EUR transaction amount
+    Then Loan has 8 active number of terms
     Then Loan Repayment schedule has 9 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -4045,6 +4072,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | NSF fee    | true      | Specified due date | 15 September 2024 | Flat             | 21.1 | 0.0  | 0.0    | 21.1        |
       | Snooze fee | false     | Specified due date | 20 September 2024 | Flat             | 60.4 | 0.0  | 0.0    | 60.4         |
     And Customer makes "AUTOPAY" repayment on "01 February 2024" with 17.13 EUR transaction amount
+    Then Loan has 8 active number of terms
     Then Loan Repayment schedule has 9 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -4069,6 +4097,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 01 March 2024    | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 166.53       | false    | false    |
     When Admin sets the business date to "01 April 2024"
     When Loan Pay-off is made on "01 April 2024"
+    Then Loan has 8 active number of terms
     Then Loan Repayment schedule has 9 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
@@ -4143,7 +4172,6 @@ Feature: Full Term Tranche - Schedule handling and Calculations
       | 01 February 2024 | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 200.0        | false    | false    |
     When Loan Pay-off is made on "01 February 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
-
 
   @TestRailId:C4591
   Scenario: Verify full term tranche interest bearing progressive loan with charges/penalties - UC2 (NSF penalty added between disbursements)
