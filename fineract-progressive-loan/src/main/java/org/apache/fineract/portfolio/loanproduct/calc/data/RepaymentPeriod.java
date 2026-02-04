@@ -78,6 +78,9 @@ public class RepaymentPeriod {
     @Getter
     @Setter
     private boolean isInterestMovedUpward = false;
+    @Getter
+    @Setter
+    private boolean interestPaymentGrace = false;
 
     @Setter
     private Money totalDisbursedAmount;
@@ -158,6 +161,7 @@ public class RepaymentPeriod {
         newRepaymentPeriod.setTotalDisbursedAmount(repaymentPeriod.getTotalDisbursedAmount());
         newRepaymentPeriod.setTotalCapitalizedIncomeAmount(repaymentPeriod.getTotalCapitalizedIncomeAmount());
         newRepaymentPeriod.setInterestMovedUpward(repaymentPeriod.isInterestMovedUpward());
+        newRepaymentPeriod.setInterestPaymentGrace(repaymentPeriod.isInterestPaymentGrace());
         newRepaymentPeriod.setCurrency(repaymentPeriod.getCurrency());
         // There is always at least 1 interest period, by default with same from-due date as repayment period
         for (InterestPeriod interestPeriod : repaymentPeriod.getInterestPeriods()) {
@@ -180,6 +184,7 @@ public class RepaymentPeriod {
         newRepaymentPeriod.setTotalDisbursedAmount(repaymentPeriod.getTotalDisbursedAmount());
         newRepaymentPeriod.setTotalCapitalizedIncomeAmount(repaymentPeriod.getTotalCapitalizedIncomeAmount());
         newRepaymentPeriod.setInterestMovedUpward(repaymentPeriod.isInterestMovedUpward());
+        newRepaymentPeriod.setInterestPaymentGrace(repaymentPeriod.isInterestPaymentGrace());
         newRepaymentPeriod.setCurrency(repaymentPeriod.getCurrency());
         // There is always at least 1 interest period, by default with same from-due date as repayment period
         for (InterestPeriod interestPeriod : repaymentPeriod.getInterestPeriods()) {
@@ -265,6 +270,9 @@ public class RepaymentPeriod {
      * @return
      */
     public Money getDueInterest() {
+        if (isInterestPaymentGrace()) {
+            return getPaidInterest();
+        }
         if (dueInterestCalculation == null) {
             // Due interest might be the maximum paid if there is pay-off or early repayment
             dueInterestCalculation = Memo.of(
@@ -272,7 +280,7 @@ public class RepaymentPeriod {
                             : MathUtil.min(getCalculatedDueInterest(), getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest(), false),
                             getPaidInterest(), false),
                     () -> new Object[] { paidPrincipal, paidInterest, interestPeriods, futureUnrecognizedInterest, totalDisbursedAmount,
-                            fixedInterest, reAged, emi });
+                            fixedInterest, reAged, emi, interestPaymentGrace });
         }
         return dueInterestCalculation.get();
     }

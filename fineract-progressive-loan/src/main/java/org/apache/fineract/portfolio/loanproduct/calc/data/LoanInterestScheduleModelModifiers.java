@@ -21,5 +21,6 @@ package org.apache.fineract.portfolio.loanproduct.calc.data;
 public enum LoanInterestScheduleModelModifiers { //
     EMI_RECALCULATION, //
     COPY, //
-    INTEREST_RECALCULATION_ENABLED //
+    INTEREST_RECALCULATION_ENABLED, //
+    INTEREST_PAUSE_FOR_EMI_CALCULATION //
 }

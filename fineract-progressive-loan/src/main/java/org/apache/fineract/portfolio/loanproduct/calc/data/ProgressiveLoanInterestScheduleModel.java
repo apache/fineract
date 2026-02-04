@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanproduct.calc.data;
 import static org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper.isInPeriod;
 import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestScheduleModelModifiers.COPY;
 import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestScheduleModelModifiers.EMI_RECALCULATION;
+import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestScheduleModelModifiers.INTEREST_PAUSE_FOR_EMI_CALCULATION;
 import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestScheduleModelModifiers.INTEREST_RECALCULATION_ENABLED;
 
 import jakarta.validation.constraints.NotNull;
@@ -78,8 +79,11 @@ public class ProgressiveLoanInterestScheduleModel {
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.mc = mc;
         this.zero = Money.zero(loanProductRelatedDetail.getCurrencyData(), mc);
+        final boolean interestPauseForEmiCalculation = loanProductRelatedDetail.getGraceOnInterestPayment() != null
+                && loanProductRelatedDetail.getGraceOnInterestPayment() > 0;
         modifiers = new HashMap<>(Map.of(EMI_RECALCULATION, true, COPY, false, INTEREST_RECALCULATION_ENABLED,
-                loanProductRelatedDetail.isInterestRecalculationEnabled()));
+                loanProductRelatedDetail.isInterestRecalculationEnabled(), INTEREST_PAUSE_FOR_EMI_CALCULATION,
+                interestPauseForEmiCalculation));
     }
 
     private ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods, final TreeSet<InterestRate> interestRates,
@@ -92,8 +96,11 @@ public class ProgressiveLoanInterestScheduleModel {
         this.loanProductRelatedDetail = loanProductRelatedDetail;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.zero = Money.zero(loanProductRelatedDetail.getCurrencyData(), mc);
+        final boolean interestPauseForEmiCalculation = loanProductRelatedDetail.getGraceOnInterestPayment() != null
+                && loanProductRelatedDetail.getGraceOnInterestPayment() > 0;
         modifiers = new HashMap<>(Map.of(EMI_RECALCULATION, true, COPY, isCopiedForCalculation, INTEREST_RECALCULATION_ENABLED,
-                loanProductRelatedDetail.isInterestRecalculationEnabled()));
+                loanProductRelatedDetail.isInterestRecalculationEnabled(), INTEREST_PAUSE_FOR_EMI_CALCULATION,
+                interestPauseForEmiCalculation));
     }
 
     public void recordOverdueCorrection(final LocalDate correctionDate, final Money amount, final LocalDate affectedRpDueDate) {
@@ -444,6 +451,10 @@ public class ProgressiveLoanInterestScheduleModel {
 
     public boolean isCopy() {
         return this.modifiers.get(COPY);
+    }
+
+    public boolean isInterestPauseForEmiCalculationEnabled() {
+        return this.modifiers.get(INTEREST_PAUSE_FOR_EMI_CALCULATION);
     }
 
     public Function<Long, LocalDate> resolveRepaymentPeriodLengthGeneratorFunction(final LocalDate instance) {
