@@ -48,6 +48,8 @@ import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -145,8 +147,7 @@ public class SavingsImportHandlerTest {
                 .setCellValue(savingsProductSheet.getRow(1).getCell(10).getStringCellValue());
         firstSavingsRow.createCell(SavingsConstants.DECIMAL_PLACES_COL)
                 .setCellValue(savingsProductSheet.getRow(1).getCell(11).getNumericCellValue());
-        firstSavingsRow.createCell(SavingsConstants.IN_MULTIPLES_OF_COL)
-                .setCellValue(savingsProductSheet.getRow(1).getCell(12).getNumericCellValue());
+        safeNumericValueSetter(firstSavingsRow, SavingsConstants.IN_MULTIPLES_OF_COL, savingsProductSheet, 1, 12);
         firstSavingsRow.createCell(SavingsConstants.NOMINAL_ANNUAL_INTEREST_RATE_COL)
                 .setCellValue(savingsProductSheet.getRow(1).getCell(2).getNumericCellValue());
         firstSavingsRow.createCell(SavingsConstants.INTEREST_COMPOUNDING_PERIOD_COL)
@@ -181,7 +182,7 @@ public class SavingsImportHandlerTest {
         Assertions.assertNotNull(importDocumentId);
 
         // Wait for the creation of output excel
-        Thread.sleep(10000);
+        Thread.sleep(1000);
 
         // check status column of output excel
         String location = savingsAccountHelper.getOutputTemplateLocation(importDocumentId);
@@ -195,5 +196,19 @@ public class SavingsImportHandlerTest {
 
         Assertions.assertEquals("Imported", row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
         Outputworkbook.close();
+    }
+
+    private void safeNumericValueSetter(Row targetRow, int targetColId, Sheet sourceSheet, int rowId, int colId) {
+        Row row = sourceSheet.getRow(rowId);
+        if (row == null) {
+            targetRow.createCell(targetColId).setBlank();
+        } else {
+            Cell cell = row.getCell(colId);
+            if (cell == null || cell.getCellType() == CellType.BLANK) {
+                targetRow.createCell(targetColId).setBlank();
+            } else {
+                targetRow.createCell(targetColId).setCellValue(cell.getNumericCellValue());
+            }
+        }
     }
 }

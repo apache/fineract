@@ -129,6 +129,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
     private final LoanDownPaymentTransactionValidator loanDownPaymentTransactionValidator;
     private final LoanScheduleService loanScheduleService;
+    private final LoanOriginatorLinkingService loanOriginatorLinkingService;
 
     @Transactional
     @Override
@@ -166,6 +167,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             // Check mandatory datatable entries were created
             this.entityDatatableChecksWritePlatformService.runTheCheckForProduct(loan.getId(), EntityTables.LOAN.getName(),
                     StatusEnum.CREATE.getValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
+            // Process originators if provided
+            if (command.parameterExists(LoanApiConstants.ORIGINATORS_PARAM)) {
+                final JsonArray originatorsArray = command.arrayOfParameterNamed(LoanApiConstants.ORIGINATORS_PARAM);
+                if (originatorsArray != null && !originatorsArray.isEmpty()) {
+                    this.loanOriginatorLinkingService.processOriginatorsForLoanApplication(loan.getId(), originatorsArray);
+                }
+            }
             // Trigger business event
             businessEventNotifierService.notifyPostBusinessEvent(new LoanCreatedBusinessEvent(loan));
             // Building response

@@ -18,16 +18,20 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoansOriginatorData;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 
@@ -169,5 +173,44 @@ public class FeignLoanHelper {
         String todayDate = org.apache.fineract.integrationtests.common.Utils.dateFormatter
                 .format(org.apache.fineract.integrationtests.common.Utils.getLocalDateOfTenant());
         return createSubmittedLoan(clientId, productId, todayDate, 10000.0, 12);
+    }
+
+    public Long createSubmittedLoanWithOriginators(Long clientId, List<PostLoansOriginatorData> originators) {
+        PostLoansRequest request = buildSubmittedLoanRequest(clientId);
+        request.setOriginators(originators);
+        PostLoansResponse response = ok(() -> fineractClient.loans().calculateLoanScheduleOrSubmitLoanApplication(request, (String) null));
+        return response.getLoanId();
+    }
+
+    public CallFailedRuntimeException createSubmittedLoanWithOriginatorsExpectingError(Long clientId,
+            List<PostLoansOriginatorData> originators) {
+        PostLoansRequest request = buildSubmittedLoanRequest(clientId);
+        request.setOriginators(originators);
+        return fail(() -> fineractClient.loans().calculateLoanScheduleOrSubmitLoanApplication(request, (String) null));
+    }
+
+    private PostLoansRequest buildSubmittedLoanRequest(Long clientId) {
+        Long productId = createSimpleLoanProduct();
+        String todayDate = org.apache.fineract.integrationtests.common.Utils.dateFormatter
+                .format(org.apache.fineract.integrationtests.common.Utils.getLocalDateOfTenant());
+        return new PostLoansRequest()//
+                .clientId(clientId)//
+                .productId(productId)//
+                .loanType("individual")//
+                .submittedOnDate(todayDate)//
+                .expectedDisbursementDate(todayDate)//
+                .principal(BigDecimal.valueOf(10000.0))//
+                .loanTermFrequency(12)//
+                .loanTermFrequencyType(2)//
+                .numberOfRepayments(12)//
+                .repaymentEvery(1)//
+                .repaymentFrequencyType(2)//
+                .interestRatePerPeriod(BigDecimal.ZERO)//
+                .amortizationType(1)//
+                .interestType(0)//
+                .interestCalculationPeriodType(1)//
+                .transactionProcessingStrategyCode("mifos-standard-strategy")//
+                .locale("en")//
+                .dateFormat("dd MMMM yyyy");
     }
 }
