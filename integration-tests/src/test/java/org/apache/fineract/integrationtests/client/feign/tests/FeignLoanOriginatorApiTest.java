@@ -259,7 +259,7 @@ public class FeignLoanOriginatorApiTest extends FeignIntegrationTest {
         final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
         final Long originatorId = originatorHelper.createOriginator(originatorExternalId);
 
-        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long clientId = clientHelper.createClient();
         final Long loanId = loanHelper.createSubmittedLoan(clientId);
 
         originatorHelper.attachOriginatorToLoan(loanId, originatorId);
@@ -273,7 +273,7 @@ public class FeignLoanOriginatorApiTest extends FeignIntegrationTest {
         final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
         final Long originatorId = originatorHelper.createOriginator(originatorExternalId);
 
-        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long clientId = clientHelper.createClient();
         final Long loanId = loanHelper.createSubmittedLoan(clientId);
 
         originatorHelper.attachOriginatorToLoan(loanId, originatorId);
@@ -287,7 +287,7 @@ public class FeignLoanOriginatorApiTest extends FeignIntegrationTest {
         final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
         final Long originatorId = originatorHelper.createOriginator(originatorExternalId, "Inactive Test", "INACTIVE");
 
-        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long clientId = clientHelper.createClient();
         final Long loanId = loanHelper.createSubmittedLoan(clientId);
 
         final CallFailedRuntimeException exception = originatorHelper.attachOriginatorToLoanExpectingError(loanId, originatorId);
@@ -301,7 +301,7 @@ public class FeignLoanOriginatorApiTest extends FeignIntegrationTest {
         final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
         final Long originatorId = originatorHelper.createOriginator(originatorExternalId);
 
-        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long clientId = clientHelper.createClient();
         final Long loanId = loanHelper.createSubmittedLoan(clientId);
 
         originatorHelper.attachOriginatorToLoan(loanId, originatorId);
@@ -318,7 +318,7 @@ public class FeignLoanOriginatorApiTest extends FeignIntegrationTest {
         final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
         final Long originatorId = originatorHelper.createOriginator(originatorExternalId);
 
-        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long clientId = clientHelper.createClient();
         final Long loanId = loanHelper.createSubmittedLoan(clientId);
 
         final CallFailedRuntimeException exception = originatorHelper.detachOriginatorFromLoanExpectingError(loanId, originatorId);
@@ -332,7 +332,7 @@ public class FeignLoanOriginatorApiTest extends FeignIntegrationTest {
         final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
         final Long originatorId = originatorHelper.createOriginator(originatorExternalId);
 
-        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long clientId = clientHelper.createClient();
         final Long loanProductId = loanHelper.createSimpleLoanProduct();
         final String todayDate = org.apache.fineract.integrationtests.common.Utils.dateFormatter
                 .format(org.apache.fineract.integrationtests.common.Utils.getLocalDateOfTenant());
@@ -349,7 +349,7 @@ public class FeignLoanOriginatorApiTest extends FeignIntegrationTest {
         final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
         final Long originatorId = originatorHelper.createOriginator(originatorExternalId);
 
-        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long clientId = clientHelper.createClient();
         final Long loanId = loanHelper.createSubmittedLoan(clientId);
 
         originatorHelper.attachOriginatorToLoan(loanId, originatorId);
@@ -370,7 +370,7 @@ public class FeignLoanOriginatorApiTest extends FeignIntegrationTest {
         final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
         final Long originatorId = originatorHelper.createOriginator(originatorExternalId);
 
-        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long clientId = clientHelper.createClient();
         final Long loanId = loanHelper.createSubmittedLoan(clientId);
 
         originatorHelper.attachOriginatorToLoan(loanId, originatorId);
@@ -387,7 +387,7 @@ public class FeignLoanOriginatorApiTest extends FeignIntegrationTest {
 
     @Test
     public void testRetrieveLoanWithNoOriginatorsReturnsEmptyList() {
-        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long clientId = clientHelper.createClient();
         final Long loanId = loanHelper.createSubmittedLoan(clientId);
 
         final var loanDetails = loanHelper.getLoanDetailsWithAssociations(loanId, "originators");
@@ -401,7 +401,7 @@ public class FeignLoanOriginatorApiTest extends FeignIntegrationTest {
         final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
         final Long originatorId = originatorHelper.createOriginator(originatorExternalId);
 
-        final Long clientId = clientHelper.createClient("Test", "Client");
+        final Long clientId = clientHelper.createClient();
         final Long loanId = loanHelper.createSubmittedLoan(clientId);
 
         originatorHelper.attachOriginatorToLoan(loanId, originatorId);

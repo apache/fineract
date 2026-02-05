@@ -34,8 +34,8 @@ public class ClientRequestFactory {
         return new PostClientsRequest()//
                 .officeId(HEAD_OFFICE_ID)//
                 .legalFormId(LEGAL_FORM_ID_PERSON)//
-                .firstname(Utils.randomNameGenerator("Client_FirstName_", 5))//
-                .lastname(Utils.randomNameGenerator("Client_LastName_", 5))//
+                .firstname(Utils.randomFirstNameGenerator())//
+                .lastname(Utils.randomLastNameGenerator())//
                 .externalId(randomClientId("ID_", 7))//
                 .dateFormat(DATE_FORMAT)//
                 .locale(DEFAULT_LOCALE)//

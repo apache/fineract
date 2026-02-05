@@ -93,8 +93,8 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return getAccounts().getExpenseAccountId(accountName);
     }
 
-    protected Long createClient(String firstName, String lastName) {
-        return clientHelper.createClient(firstName, lastName);
+    protected Long createClient() {
+        return clientHelper.createClient();
     }
 
     protected Long createLoanProduct(PostLoanProductsRequest request) {

@@ -3161,7 +3161,7 @@ public class LoanStepDef extends AbstractStepDef {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
 
-        String reversalExternalId = Utils.randomNameGenerator("reversalExtId_", 3);
+        String reversalExternalId = Utils.randomStringGenerator("reversalExtId_", 10);
         PostLoansLoanIdTransactionsRequest chargeOffUndoRequest = LoanRequestFactory.defaultUndoChargeOffRequest()
                 .reversalExternalId(reversalExternalId);
 

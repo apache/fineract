@@ -115,7 +115,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         // if user created transferExternalId previously, it will use that, otherwise create a new one
         String transferExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_USER_GENERATED);
         if (transferExternalId == null) {
-            transferExternalId = Utils.randomNameGenerator("TestTransferExtId_", 3);
+            transferExternalId = Utils.randomStringGenerator("TestTransferExtId_", 10);
             testContext().set(TestContextKey.ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_USER_GENERATED, transferExternalId);
         }
 
@@ -155,7 +155,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         } else if ((transferData.get(0).equals(TRANSACTION_TYPE_SALE) || transferData.get(0).equals(TRANSACTION_TYPE_INTERMEDIARY_SALE))) {
             String ownerExternalId;
             if (regenerateOwner) {
-                ownerExternalId = Utils.randomNameGenerator(OWNER_EXTERNAL_ID_PREFIX, 3);
+                ownerExternalId = Utils.randomStringGenerator(OWNER_EXTERNAL_ID_PREFIX, 10);
             } else {
                 ownerExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_OWNER_EXTERNAL_ID);
             }
@@ -208,7 +208,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         // if user created transferExternalId previously, it will use that, otherwise create a new one
         String transferExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_USER_GENERATED);
         if (transferExternalId == null) {
-            transferExternalId = Utils.randomNameGenerator("TestTransferExtId_", 3);
+            transferExternalId = Utils.randomStringGenerator("TestTransferExtId_", 10);
             testContext().set(TestContextKey.ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_USER_GENERATED, transferExternalId);
         }
 
@@ -240,7 +240,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
             testContext().set(TestContextKey.ASSET_EXTERNALIZATION_BUYBACK_TRANSFER_EXTERNAL_ID_FROM_RESPONSE,
                     response.getResourceExternalId());
         } else if (transferData.get(0).equals(TRANSACTION_TYPE_SALE)) {
-            String ownerExternalId = Utils.randomNameGenerator(OWNER_EXTERNAL_ID_PREFIX, 3);
+            String ownerExternalId = Utils.randomStringGenerator(OWNER_EXTERNAL_ID_PREFIX, 10);
 
             request.settlementDate(transferData.get(1))//
                     .ownerExternalId(ownerExternalId)//
@@ -494,7 +494,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
                     .dateFormat(DATE_FORMAT_ASSET_EXT)//
                     .locale(DEFAULT_LOCALE);//
         } else if (transferData.get(0).equals(TRANSACTION_TYPE_SALE)) {
-            String ownerExternalId = Utils.randomNameGenerator(OWNER_EXTERNAL_ID_PREFIX, 3);
+            String ownerExternalId = Utils.randomStringGenerator(OWNER_EXTERNAL_ID_PREFIX, 10);
 
             request.settlementDate(transferData.get(1))//
                     .ownerExternalId(ownerExternalId)//
@@ -788,7 +788,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         String transferExternalId = testContext()
                 .get(TestContextKey.ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_USER_GENERATED + "_" + type);
         if (transferExternalId == null) {
-            transferExternalId = Utils.randomNameGenerator("TestTransferExtId_", 3);
+            transferExternalId = Utils.randomStringGenerator("TestTransferExtId_", 10);
             testContext().set(TestContextKey.ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_USER_GENERATED + "_" + type, transferExternalId);
         }
 
@@ -923,7 +923,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
     public void createAssetExternalizationRequestByLoanIdUserGeneratedExtIdForceTransferIdNoTestOwner(String type, DataTable table)
             throws IOException {
         // if user created transferExternalId previously, it will use that, otherwise create a new one
-        String transferExternalId = Utils.randomNameGenerator("TestTransferExtId_", 3);
+        String transferExternalId = Utils.randomStringGenerator("TestTransferExtId_", 10);
         testContext().set(TestContextKey.ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_USER_GENERATED + "_" + type, transferExternalId);
 
         createAssetExternalizationRequestByLoanId(table, transferExternalId, false);

@@ -39,7 +39,7 @@ public class FeignLoanTestBaseSmokeTest extends FeignLoanTestBase {
 
     @Test
     void testCreateClient() {
-        Long clientId = createClient("Test", "User");
+        Long clientId = createClient();
         assertNotNull(clientId);
     }
 }

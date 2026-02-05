@@ -63,10 +63,9 @@ public class NotificationApiTest {
         String username = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
         String password = Utils.randomStringGenerator("A1b2c3d4e5f$", 1); // prefix is to conform with the password
                                                                           // rules
-        PostUsersRequest createUserRequest = new PostUsersRequest().username(username)
-                .firstname(Utils.randomStringGenerator("NotificationFN", 4)).lastname(Utils.randomStringGenerator("NotificationLN", 4))
-                .email("whatever@mifos.org").password(password).repeatPassword(password).sendPasswordToEmail(false)
-                .roles(List.of(SUPER_USER_ROLE_ID)).officeId(headOffice.getId());
+        PostUsersRequest createUserRequest = new PostUsersRequest().username(username).firstname(Utils.randomFirstNameGenerator())
+                .lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org").password(password).repeatPassword(password)
+                .sendPasswordToEmail(false).roles(List.of(SUPER_USER_ROLE_ID)).officeId(headOffice.getId());
 
         PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
         Assertions.assertNotNull(userCreationResponse.getResourceId());

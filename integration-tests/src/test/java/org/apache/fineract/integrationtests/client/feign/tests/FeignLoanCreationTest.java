@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.time.LocalDate;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -32,7 +33,7 @@ public class FeignLoanCreationTest extends FeignLoanTestBase {
 
     @Test
     void testCreateAndDisburseLoan_OnePeriodNoInterest() {
-        Long clientId = createClient("John", "Doe");
+        Long clientId = createClient();
         assertNotNull(clientId);
 
         PostLoanProductsRequest productRequest = onePeriod30DaysNoInterest();
@@ -45,7 +46,7 @@ public class FeignLoanCreationTest extends FeignLoanTestBase {
 
         GetLoansLoanIdResponse loan = getLoanDetails(loanId);
         assertNotNull(loan);
-        verifyLoanStatus(loan, status -> status.getActive());
+        verifyLoanStatus(loan, GetLoansLoanIdStatus::getActive);
 
         LocalDate expectedRepaymentDate = Utils.getLocalDateOfTenant().plusMonths(1);
         validateRepaymentPeriod(loan, 1, expectedRepaymentDate, 1000.0, 0.0, 1000.0);
@@ -56,7 +57,7 @@ public class FeignLoanCreationTest extends FeignLoanTestBase {
 
     @Test
     void testLoanRepayment_FullRepayment() {
-        Long clientId = createClient("Jane", "Smith");
+        Long clientId = createClient();
         Long productId = createLoanProduct(onePeriod30DaysNoInterest());
         String todayDate = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
         Long loanId = createApproveAndDisburseLoan(clientId, productId, todayDate, 1000.0, 1);
@@ -65,7 +66,7 @@ public class FeignLoanCreationTest extends FeignLoanTestBase {
         assertNotNull(repaymentId);
 
         GetLoansLoanIdResponse loan = getLoanDetails(loanId);
-        verifyLoanStatus(loan, status -> status.getClosedObligationsMet());
+        verifyLoanStatus(loan, GetLoansLoanIdStatus::getClosedObligationsMet);
 
         assertEquals(0.0, Utils.getDoubleValue(loan.getSummary().getTotalOutstanding()));
         assertEquals(1000.0, Utils.getDoubleValue(loan.getSummary().getTotalRepayment()));
@@ -73,45 +74,45 @@ public class FeignLoanCreationTest extends FeignLoanTestBase {
 
     @Test
     void testLoanUndoApproval() {
-        Long clientId = createClient("Bob", "Johnson");
+        Long clientId = createClient();
         Long productId = createLoanProduct(onePeriod30DaysNoInterest());
         String todayDate = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
         Long loanId = createApprovedLoan(clientId, productId, todayDate, 1000.0, 1);
 
         GetLoansLoanIdResponse loanBeforeUndo = getLoanDetails(loanId);
-        verifyLoanStatus(loanBeforeUndo, status -> status.getWaitingForDisbursal());
+        verifyLoanStatus(loanBeforeUndo, GetLoansLoanIdStatus::getWaitingForDisbursal);
 
         undoApproval(loanId);
 
         GetLoansLoanIdResponse loanAfterUndo = getLoanDetails(loanId);
-        verifyLoanStatus(loanAfterUndo, status -> status.getPendingApproval());
+        verifyLoanStatus(loanAfterUndo, GetLoansLoanIdStatus::getPendingApproval);
     }
 
     @Test
     void testLoanUndoDisbursement() {
-        Long clientId = createClient("Alice", "Williams");
+        Long clientId = createClient();
         Long productId = createLoanProduct(onePeriod30DaysNoInterest());
         String todayDate = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
         Long loanId = createApproveAndDisburseLoan(clientId, productId, todayDate, 1000.0, 1);
 
         GetLoansLoanIdResponse loanBeforeUndo = getLoanDetails(loanId);
-        verifyLoanStatus(loanBeforeUndo, status -> status.getActive());
+        verifyLoanStatus(loanBeforeUndo, GetLoansLoanIdStatus::getActive);
 
         undoDisbursement(loanId);
 
         GetLoansLoanIdResponse loanAfterUndo = getLoanDetails(loanId);
-        verifyLoanStatus(loanAfterUndo, status -> status.getWaitingForDisbursal());
+        verifyLoanStatus(loanAfterUndo, GetLoansLoanIdStatus::getWaitingForDisbursal);
     }
 
     @Test
     void testFourInstallmentLoan_CumulativeInterest() {
-        Long clientId = createClient("Charlie", "Brown");
+        Long clientId = createClient();
         Long productId = createLoanProduct(fourInstallmentsCumulative());
         String todayDate = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
         Long loanId = createApproveAndDisburseLoan(clientId, productId, todayDate, 1000.0, 4);
 
         GetLoansLoanIdResponse loan = getLoanDetails(loanId);
-        verifyLoanStatus(loan, status -> status.getActive());
+        verifyLoanStatus(loan, GetLoansLoanIdStatus::getActive);
 
         assertNotNull(loan.getRepaymentSchedule());
         assertNotNull(loan.getRepaymentSchedule().getPeriods());
@@ -120,7 +121,7 @@ public class FeignLoanCreationTest extends FeignLoanTestBase {
 
     @Test
     void testPartialRepayment() {
-        Long clientId = createClient("David", "Miller");
+        Long clientId = createClient();
         Long productId = createLoanProduct(onePeriod30DaysNoInterest());
         String todayDate = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
         Long loanId = createApproveAndDisburseLoan(clientId, productId, todayDate, 1000.0, 1);
@@ -129,7 +130,7 @@ public class FeignLoanCreationTest extends FeignLoanTestBase {
         assertNotNull(repaymentId);
 
         GetLoansLoanIdResponse loan = getLoanDetails(loanId);
-        verifyLoanStatus(loan, status -> status.getActive());
+        verifyLoanStatus(loan, GetLoansLoanIdStatus::getActive);
 
         assertEquals(500.0, Utils.getDoubleValue(loan.getSummary().getTotalOutstanding()));
         assertEquals(500.0, Utils.getDoubleValue(loan.getSummary().getTotalRepayment()));
@@ -137,7 +138,7 @@ public class FeignLoanCreationTest extends FeignLoanTestBase {
 
     @Test
     void testUndoRepayment() {
-        Long clientId = createClient("Eva", "Davis");
+        Long clientId = createClient();
         Long productId = createLoanProduct(onePeriod30DaysNoInterest());
         String todayDate = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
         Long loanId = createApproveAndDisburseLoan(clientId, productId, todayDate, 1000.0, 1);
@@ -146,12 +147,12 @@ public class FeignLoanCreationTest extends FeignLoanTestBase {
         assertNotNull(repaymentId);
 
         GetLoansLoanIdResponse loanAfterRepayment = getLoanDetails(loanId);
-        verifyLoanStatus(loanAfterRepayment, status -> status.getClosedObligationsMet());
+        verifyLoanStatus(loanAfterRepayment, GetLoansLoanIdStatus::getClosedObligationsMet);
 
         undoRepayment(loanId, repaymentId, todayDate);
 
         GetLoansLoanIdResponse loanAfterUndo = getLoanDetails(loanId);
-        verifyLoanStatus(loanAfterUndo, status -> status.getActive());
+        verifyLoanStatus(loanAfterUndo, GetLoansLoanIdStatus::getActive);
 
         LocalDate expectedRepaymentDate = Utils.getLocalDateOfTenant().plusMonths(1);
         validateRepaymentPeriod(loanAfterUndo, 1, expectedRepaymentDate, 1000.0, 0.0, 1000.0);

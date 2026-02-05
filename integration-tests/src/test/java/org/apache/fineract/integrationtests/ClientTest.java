@@ -270,9 +270,9 @@ public class ClientTest {
 
     @Test
     public void testClientName() {
-        String firstName = Utils.randomStringGenerator("FN", 48);
-        String middleName = Utils.randomStringGenerator("MN", 48);
-        String lastName = Utils.randomStringGenerator("LN", 48);
+        String firstName = Utils.randomFirstNameGenerator();
+        String middleName = Utils.randomFirstNameGenerator();
+        String lastName = Utils.randomLastNameGenerator();
         String fullName = firstName + ' ' + middleName + ' ' + lastName;
 
         PostClientsRequest request = new PostClientsRequest().officeId(1L).legalFormId(LEGALFORM_ID_PERSON).firstname(firstName)

@@ -49,7 +49,7 @@ public class FeignDocumentTest extends FeignIntegrationTest {
     @Order(1)
     void setupClient() {
         FeignClientHelper clientHelper = new FeignClientHelper(fineractClient());
-        clientId = clientHelper.createClient("Feign", "Test");
+        clientId = clientHelper.createClient();
         assertThat(clientId).isNotNull();
     }
 

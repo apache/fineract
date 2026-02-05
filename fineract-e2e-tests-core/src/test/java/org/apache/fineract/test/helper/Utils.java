@@ -21,10 +21,28 @@ package org.apache.fineract.test.helper;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.List;
 
 public final class Utils {
 
     private static final SecureRandom random = new SecureRandom();
+    private static final List<String> firstNames = List.of("Adam", "Alex", "Andrew", "Anthony", "Arthur", "Benjamin", "Brian", "Brandon",
+            "Bruce", "Caleb", "Charles", "Christian", "Christopher", "Daniel", "David", "Dennis", "Dominic", "Edward", "Ethan", "Felix",
+            "Frank", "Gabriel", "George", "Gregory", "Harry", "Henry", "Isaac", "Jack", "Jacob", "James", "Jason", "John", "Jonathan",
+            "Joseph", "Joshua", "Julian", "Kevin", "Kyle", "Leo", "Liam", "Logan", "Lucas", "Luke", "Marcus", "Mark", "Martin", "Matthew",
+            "Michael", "Nathan", "Nicholas", "Noah", "Oliver", "Oscar", "Patrick", "Paul", "Peter", "Philip", "Raymond", "Richard",
+            "Robert", "Ryan", "Samuel", "Scott", "Sean", "Simon", "Stephen", "Steven", "Thomas", "Timothy", "Victor", "William", "Zachary",
+            "Aaron", "Adrian", "Alan", "Albert", "Allen", "Antonio", "Austin", "Blake", "Cameron", "Carlos", "Colin", "Dylan", "Eric",
+            "Harrison", "Ian", "Jeremy", "Jordan", "Kevin", "Louis", "Mitchell", "Neil", "Roger", "Trevor");
+
+    private static final List<String> lastNames = List.of("Anderson", "Armstrong", "Baker", "Barnes", "Bell", "Bennett", "Brooks", "Brown",
+            "Bryant", "Butler", "Campbell", "Carter", "Clark", "Collins", "Cook", "Cooper", "Cox", "Davis", "Diaz", "Edwards", "Evans",
+            "Fisher", "Foster", "Garcia", "Gomez", "Gonzalez", "Gray", "Green", "Hall", "Harris", "Hernandez", "Hill", "Howard", "Hughes",
+            "Jackson", "James", "Jenkins", "Johnson", "Jones", "Kelly", "Kim", "King", "Lee", "Lewis", "Lopez", "Martin", "Martinez",
+            "Miller", "Mitchell", "Moore", "Morgan", "Morris", "Murphy", "Nelson", "Nguyen", "Parker", "Perez", "Peterson", "Phillips",
+            "Powell", "Price", "Ramirez", "Reed", "Richardson", "Rivera", "Roberts", "Robinson", "Rodriguez", "Rogers", "Ross", "Russell",
+            "Sanchez", "Scott", "Smith", "Stewart", "Taylor", "Thomas", "Thompson", "Torres", "Turner", "Walker", "Ward", "Watson", "White",
+            "Williams", "Wilson", "Wood", "Wright", "Young", "Zhang");
 
     private Utils() {}
 
@@ -41,8 +59,12 @@ public final class Utils {
         return randomStringGenerator(prefix, len, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     }
 
-    public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
-        return randomStringGenerator(prefix, lenOfRandomSuffix);
+    public static String randomFirstNameGenerator() {
+        return firstNames.get(random.nextInt(firstNames.size()));
+    }
+
+    public static String randomLastNameGenerator() {
+        return lastNames.get(random.nextInt(lastNames.size()));
     }
 
     public static LocalDate now() {

@@ -368,8 +368,8 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         Calls.ok(fineractClient().roles.updateRolePermissions(roleId,
                 new PutRolesRoleIdPermissionsRequest().putPermissionsItem(permission, false)));
         // create user with role
-        String firstname = "Test";
-        String lastname = Utils.uniqueRandomStringGenerator("User", 6);
+        String firstname = Utils.randomFirstNameGenerator();
+        String lastname = Utils.randomLastNameGenerator();
         String userName = Utils.uniqueRandomStringGenerator("testUserName", 4);
         String password = "AKleRbDhK421$";
         String email = firstname + "." + lastname + "@whatever.mifos.org";

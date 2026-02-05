@@ -220,9 +220,9 @@ public final class UserHelper {
             GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
             String simpleRoleId = createSimpleRole(requestSpec, responseSpec);
             PostUsersRequest createUserRequest = new PostUsersRequest().username(SIMPLE_USER_NAME)
-                    .firstname(Utils.randomStringGenerator("NotificationFN", 4)).lastname(Utils.randomStringGenerator("NotificationLN", 4))
-                    .email("whatever@mifos.org").password(password).repeatPassword(password).sendPasswordToEmail(false)
-                    .roles(List.of(Long.valueOf(simpleRoleId))).officeId(headOffice.getId());
+                    .firstname(Utils.randomFirstNameGenerator()).lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org")
+                    .password(password).repeatPassword(password).sendPasswordToEmail(false).roles(List.of(Long.valueOf(simpleRoleId)))
+                    .officeId(headOffice.getId());
 
             PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
             Assertions.assertNotNull(userCreationResponse.getResourceId());
@@ -243,9 +243,9 @@ public final class UserHelper {
         String uniqueUsername = Utils.uniqueRandomStringGenerator("TestUser", 4);
         GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
 
-        return new PostUsersRequest().username(uniqueUsername).firstname("Test").lastname("User").email("testuser@example.com")
-                .password(password).repeatPassword(password).sendPasswordToEmail(false).officeId(headOffice.getId())
-                .roles(List.of(roleId.longValue()));
+        return new PostUsersRequest().username(uniqueUsername).firstname(Utils.randomFirstNameGenerator())
+                .lastname(Utils.randomLastNameGenerator()).email("testuser@example.com").password(password).repeatPassword(password)
+                .sendPasswordToEmail(false).officeId(headOffice.getId()).roles(List.of(roleId.longValue()));
     }
 
     // TODO: Rewrite to use fineract-client instead!

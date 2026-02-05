@@ -191,10 +191,10 @@ public class UserAdministrationTest extends IntegrationTest {
         String originalPassword = "QwE!5rTy#9uP0";
         String simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
         GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
-        PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername)
-                .firstname(Utils.randomStringGenerator("NotificationFN", 4)).lastname(Utils.randomStringGenerator("NotificationLN", 4))
-                .email("whatever@mifos.org").password(originalPassword).repeatPassword(originalPassword).sendPasswordToEmail(false)
-                .officeId(headOffice.getId()).roles(List.of(Long.valueOf(roleId)));
+        PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername).firstname(Utils.randomFirstNameGenerator())
+                .lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org").password(originalPassword)
+                .repeatPassword(originalPassword).sendPasswordToEmail(false).officeId(headOffice.getId())
+                .roles(List.of(Long.valueOf(roleId)));
 
         PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
         Long userId = userCreationResponse.getResourceId();
@@ -224,10 +224,10 @@ public class UserAdministrationTest extends IntegrationTest {
         String originalPassword = "QwE!5rTy#9uP0";
         String simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
         GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
-        PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername)
-                .firstname(Utils.randomStringGenerator("NotificationFN", 4)).lastname(Utils.randomStringGenerator("NotificationLN", 4))
-                .email("whatever@mifos.org").password(originalPassword).repeatPassword(originalPassword).sendPasswordToEmail(false)
-                .officeId(headOffice.getId()).roles(List.of(Long.valueOf(roleId)));
+        PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername).firstname(Utils.randomFirstNameGenerator())
+                .lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org").password(originalPassword)
+                .repeatPassword(originalPassword).sendPasswordToEmail(false).officeId(headOffice.getId())
+                .roles(List.of(Long.valueOf(roleId)));
 
         PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
         Long userId = userCreationResponse.getResourceId();
@@ -258,10 +258,9 @@ public class UserAdministrationTest extends IntegrationTest {
         String password = "QwE!5rTy#9uP0";
         String simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
         GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
-        PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername)
-                .firstname(Utils.randomStringGenerator("NotificationFN", 4)).lastname(Utils.randomStringGenerator("NotificationLN", 4))
-                .email("whatever@mifos.org").password(password).repeatPassword(password).sendPasswordToEmail(false)
-                .officeId(headOffice.getId()).roles(List.of(Long.valueOf(roleId)));
+        PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername).firstname(Utils.randomFirstNameGenerator())
+                .lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org").password(password).repeatPassword(password)
+                .sendPasswordToEmail(false).officeId(headOffice.getId()).roles(List.of(Long.valueOf(roleId)));
 
         PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
         Long userId = userCreationResponse.getResourceId();

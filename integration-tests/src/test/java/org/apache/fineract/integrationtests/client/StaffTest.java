@@ -52,8 +52,8 @@ public class StaffTest extends IntegrationTest {
     }
 
     Long create() {
-        return ok(fineractClient().staff.create3(new StaffRequest().officeId(1L).firstname(Utils.randomStringGenerator("StaffTest", 6))
-                .lastname(Utils.randomStringGenerator("Staffer_", 6)).externalId(Utils.randomStringGenerator("", 12))
+        return ok(fineractClient().staff.create3(new StaffRequest().officeId(1L).firstname(Utils.randomFirstNameGenerator())
+                .lastname(Utils.randomLastNameGenerator()).externalId(Utils.randomStringGenerator("", 12))
                 .joiningDate(LocalDate.now(ZoneId.of("UTC")).toString()).dateFormat("yyyy-MM-dd").locale("en_US"))).getResourceId();
     }
 
