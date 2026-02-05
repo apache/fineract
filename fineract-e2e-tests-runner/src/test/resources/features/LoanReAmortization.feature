@@ -4818,13 +4818,13 @@ Feature: LoanReAmortization
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024  | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           |  0.0          | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024     |                  | 69.84           | 13.73         | 0.57     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 4  | 30   | 01 May 2024       |                  | 56.03           | 13.81         | 0.49     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 5  | 31   | 01 June 2024      |                  | 42.14           | 13.89         | 0.41     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 6  | 30   | 01 July 2024      |                  | 28.17           | 13.97         | 0.33     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 7  | 31   | 01 August 2024    |                  | 14.11           | 14.06         | 0.24     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 8  | 31   | 01 September 2024 |                  | 0.0             | 14.11         | 0.16     | 0.0  | 0.0       | 14.27 | 0.0   | 0.0        | 0.0  | 14.27       |
+      | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024     |                  | 69.85           | 13.72         | 0.57     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
+      | 4  | 30   | 01 May 2024       |                  | 56.05           | 13.8          | 0.49     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
+      | 5  | 31   | 01 June 2024      |                  | 42.17           | 13.88         | 0.41     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
+      | 6  | 30   | 01 July 2024      |                  | 28.21           | 13.96         | 0.33     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
+      | 7  | 31   | 01 August 2024    |                  | 14.16           | 14.05         | 0.24     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
+      | 8  | 31   | 01 September 2024 |                  | 0.0             | 14.16         | 0.16     | 0.0  | 0.0       | 14.32 | 0.0   | 0.0        | 0.0  | 14.32       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 100.0         | 2.78     | 0.0  | 0.0       | 102.78 | 17.01 | 0.0        | 0.0  | 85.77       |
@@ -4842,15 +4842,15 @@ Feature: LoanReAmortization
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024  | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           |  0.0          | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024     |                  | 69.84           | 13.73         | 0.57     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 4  | 30   | 01 May 2024       |                  | 56.03           | 13.81         | 0.49     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 5  | 31   | 01 June 2024      |                  | 42.14           | 13.89         | 0.41     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 6  | 30   | 01 July 2024      |                  | 33.84           | 8.3           | 0.33     | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
-      | 7  | 31   | 01 August 2024    |                  | 25.49           | 8.35          | 0.28     | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
-      | 8  | 31   | 01 September 2024 |                  | 17.09           | 8.4           | 0.23     | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
-      | 9  | 30   | 01 October 2024   |                  | 8.56            | 8.53          | 0.1      | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
-      | 10 | 31   | 01 November 2024  |                  | 0.0             | 8.56          | 0.05     | 0.0  | 0.0       | 8.61  | 0.0   | 0.0        | 0.0  | 8.61        |
+      | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024     |                  | 69.85           | 13.72         | 0.57     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
+      | 4  | 30   | 01 May 2024       |                  | 56.05           | 13.8          | 0.49     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
+      | 5  | 31   | 01 June 2024      |                  | 42.17           | 13.88         | 0.41     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
+      | 6  | 30   | 01 July 2024      |                  | 33.87           | 8.3           | 0.33     | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
+      | 7  | 31   | 01 August 2024    |                  | 25.52           | 8.35          | 0.28     | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
+      | 8  | 31   | 01 September 2024 |                  | 17.12           | 8.4           | 0.23     | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
+      | 9  | 30   | 01 October 2024   |                  | 8.59            | 8.53          | 0.1      | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
+      | 10 | 31   | 01 November 2024  |                  | 0.0             | 8.59          | 0.05     | 0.0  | 0.0       | 8.64  | 0.0   | 0.0        | 0.0  | 8.64        |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 100.0         | 3.04     | 0.0  | 0.0       | 103.04 | 17.01 | 0.0        | 0.0  | 86.03       |
@@ -7129,14 +7129,14 @@ Feature: LoanReAmortization
     When Admin runs inline COB job for Loan
     Then Loan Transactions tab has the following new accrual data:
       | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
-      | 01 April 2024    | Accrual Adjustment | 0.42   | 0.0       | 0.42     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 April 2024    | Accrual Adjustment | 0.86   | 0.0       | 0.86     | 0.0  | 0.0       | 0.0          | false    | false    |
 
     When Admin sets the business date to "01 May 2024"
     When Admin runs inline COB job for Loan
     ## Why we have accrual adjustment on 02 april
     Then Loan Transactions tab has the following new accrual data:
       | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
-      | 02 April 2024    | Accrual Adjustment | 0.4    | 0.0       | 0.4      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 April 2024    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 03 April 2024    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 04 April 2024    | Accrual            | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 05 April 2024    | Accrual            | 0.05   | 0.0       | 0.05     | 0.0  | 0.0       | 0.0          | false    | false    |

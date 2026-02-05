@@ -9366,16 +9366,16 @@ Feature: LoanReAgingEqualAmortization
       | frequencyNumber | frequencyType | startDate        | numberOfInstallments | reAgeInterestHandling            |
       | 1               | MONTHS        | 15 February 2024 | 6                    | EQUAL_AMORTIZATION_FULL_INTEREST |
     Then Loan Repayment schedule has 8 periods, with the following data for periods:
-      | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
-      |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
-      | 1  | 31   | 01 February 2024  | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
-      | 2  | 14   | 15 February 2024  | 15 February 2024 | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
-      | 3  |  0   | 15 February 2024  |                  | 69.64           | 13.93         | 0.24     | 0.0  | 0.0       | 14.17 | 0.0   | 0.0        | 0.0  | 14.17       |
-      | 4  | 29   | 15 March 2024     |                  | 55.71           | 13.93         | 0.24     | 0.0  | 0.0       | 14.17 | 0.0   | 0.0        | 0.0  | 14.17       |
-      | 5  | 31   | 15 April 2024     |                  | 41.77           | 13.94         | 0.24     | 0.0  | 0.0       | 14.18 | 0.0   | 0.0        | 0.0  | 14.18       |
-      | 6  | 30   | 15 May 2024       |                  | 27.83           | 13.94         | 0.24     | 0.0  | 0.0       | 14.18 | 0.0   | 0.0        | 0.0  | 14.18       |
-      | 7  | 31   | 15 June 2024      |                  | 13.89           | 13.94         | 0.24     | 0.0  | 0.0       | 14.18 | 0.0   | 0.0        | 0.0  | 14.18       |
-      | 8  | 30   | 15 July 2024      |                  | 0.0             | 13.89         | 0.27     | 0.0  | 0.0       | 14.16 | 0.0   | 0.0        | 0.0  | 14.16       |
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2024 | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
+      | 2  | 14   | 15 February 2024 | 15 February 2024 | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
+      | 3  | 0    | 15 February 2024 |                  | 69.64           | 13.93         | 0.24     | 0.0  | 0.0       | 14.17 | 0.0   | 0.0        | 0.0  | 14.17       |
+      | 4  | 29   | 15 March 2024    |                  | 55.71           | 13.93         | 0.24     | 0.0  | 0.0       | 14.17 | 0.0   | 0.0        | 0.0  | 14.17       |
+      | 5  | 31   | 15 April 2024    |                  | 41.78           | 13.93         | 0.24     | 0.0  | 0.0       | 14.17 | 0.0   | 0.0        | 0.0  | 14.17       |
+      | 6  | 30   | 15 May 2024      |                  | 27.85           | 13.93         | 0.24     | 0.0  | 0.0       | 14.17 | 0.0   | 0.0        | 0.0  | 14.17       |
+      | 7  | 31   | 15 June 2024     |                  | 13.92           | 13.93         | 0.24     | 0.0  | 0.0       | 14.17 | 0.0   | 0.0        | 0.0  | 14.17       |
+      | 8  | 30   | 15 July 2024     |                  | 0.0             | 13.92         | 0.27     | 0.0  | 0.0       | 14.19 | 0.0   | 0.0        | 0.0  | 14.19       |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 100.0         | 2.05     | 0.0  | 0.0       | 102.05 | 17.01 | 0.0        | 0.0  | 85.04       |
