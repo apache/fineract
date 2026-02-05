@@ -40,6 +40,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
 import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
+import org.apache.fineract.cob.loan.LoanCOBConstant;
 import org.apache.fineract.cob.loan.RetrieveLoanIdService;
 import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
@@ -84,8 +85,6 @@ public class LoanCOBFilterHelper implements InitializingBean {
     public static final Pattern LOAN_GLIMACCOUNT_PATH_PATTERN = Pattern.compile("/v[1-9][0-9]*/loans/glimAccount/(\\d+).*");
     private static final Predicate<String> URL_FUNCTION = s -> LOAN_PATH_PATTERN.matcher(s).find()
             || LOAN_GLIMACCOUNT_PATH_PATTERN.matcher(s).find();
-
-    private static final String JOB_NAME = "INLINE_LOAN_COB";
 
     private Long getLoanId(boolean isGlim, String pathInfo) {
         if (!isGlim) {
@@ -197,8 +196,12 @@ public class LoanCOBFilterHelper implements InitializingBean {
     public boolean isLoanBehind(List<Long> loanIds) {
         List<COBIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDates = new ArrayList<>();
         List<List<Long>> partitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());
-        partitions.forEach(partition -> loanIdAndLastClosedBusinessDates.addAll(retrieveLoanIdService
-                .retrieveLoanIdsBehindDate(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE), partition)));
+        partitions.forEach(partition -> {
+            loanIdAndLastClosedBusinessDates.addAll(retrieveLoanIdService
+                    .retrieveLoanIdsBehindDate(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE), partition));
+            loanIdAndLastClosedBusinessDates.addAll(retrieveLoanIdService.retrieveLoanBehindOnDisbursementDate(
+                    ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE), partition));
+        });
         return CollectionUtils.isNotEmpty(loanIdAndLastClosedBusinessDates);
     }
 
@@ -269,7 +272,7 @@ public class LoanCOBFilterHelper implements InitializingBean {
     }
 
     public void executeInlineCob(List<Long> loanIds) {
-        inlineLoanCOBExecutorService.execute(loanIds, JOB_NAME);
+        inlineLoanCOBExecutorService.execute(loanIds, LoanCOBConstant.INLINE_LOAN_COB_JOB_NAME);
     }
 
     @Override

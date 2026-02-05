@@ -40,4 +40,5 @@ public interface RetrieveLoanIdService {
 
     List<COBIdAndExternalIdAndAccountNo> findAllStayedLockedByCobBusinessDate(@Param("cobBusinessDate") LocalDate cobBusinessDate);
 
+    List<COBIdAndLastClosedBusinessDate> retrieveLoanBehindOnDisbursementDate(LocalDate businessDateByType, List<Long> loanIds);
 }

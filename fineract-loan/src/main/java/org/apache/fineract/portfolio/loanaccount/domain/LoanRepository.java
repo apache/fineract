@@ -100,6 +100,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     String FIND_ALL_LOANS_BY_LAST_CLOSED_BUSINESS_DATE_NOT_NULL_AND_MIN_AND_MAX_LOAN_ID_AND_STATUSES = "select loan.id from Loan loan where loan.id BETWEEN :minLoanId and :maxLoanId and loan.loanStatus in :loanStatuses and :cobBusinessDate = loan.lastClosedBusinessDate";
     String FIND_ALL_LOANS_BEHIND_BY_LOAN_IDS_AND_STATUSES = "select loan.id, loan.lastClosedBusinessDate from Loan loan where loan.id IN :loanIds and loan.loanStatus in :loanStatuses and loan.lastClosedBusinessDate < :cobBusinessDate";
+    String FIND_ALL_LOANS_BEHIND_ON_DISBURSEMENT_DATE = "select loan.id, loan.lastClosedBusinessDate from Loan loan where loan.id IN :loanIds and loan.loanStatus in :loanStatuses and loan.lastClosedBusinessDate IS NULL and loan.actualDisbursementDate = :cobBusinessDate";
 
     String FIND_ALL_STAYED_LOCKED_BY_COB_BUSINESS_DATE = "select loan.id, loan.externalId, loan.accountNumber from LoanAccountLock lock left join Loan loan on lock.loanId = loan.id where lock.lockPlacedOnCobBusinessDate = :cobBusinessDate";
 
@@ -275,4 +276,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query("select loan.loanRepaymentScheduleDetail.enableBuyDownFee from Loan loan where loan.id = :loanId")
     Boolean isEnabledBuyDownFee(@Param("loanId") Long loanId);
 
+    @Query(FIND_ALL_LOANS_BEHIND_ON_DISBURSEMENT_DATE)
+    List<COBIdAndLastClosedBusinessDate> findAllLoansBehindOnDisbursementDate(@Param("cobBusinessDate") LocalDate cobBusinessDate,
+            @Param("loanIds") List<Long> loanIds, @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 }
