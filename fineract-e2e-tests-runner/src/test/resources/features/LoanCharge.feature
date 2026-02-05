@@ -7163,6 +7163,7 @@ Feature: LoanCharge
       | LIABILITY | 145023       | Suspense/Clearing account | 27.36 |        |
     When Admin sets the business date to "1 March 2024"
     And Admin does charge-off the loan on "1 March 2024"
+    Then LoanBalanceChangedBusinessEvent is created on "01 March 2024"
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees  | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0   |           | 0.0   | 0.0   |            |      |             |
@@ -7254,6 +7255,7 @@ Feature: LoanCharge
       | LIABILITY | 145023       | Suspense/Clearing account | 27.36 |        |
     When Admin sets the business date to "1 March 2024"
     And Admin does charge-off the loan on "1 March 2024"
+    Then LoanBalanceChangedBusinessEvent is created on "01 March 2024"
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees  | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0   |           | 0.0   | 0.0   |            |      |             |

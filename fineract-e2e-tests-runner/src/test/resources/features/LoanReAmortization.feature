@@ -2905,6 +2905,7 @@ Feature: LoanReAmortization
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    |
     When Admin sets the business date to "01 March 2024"
     And Admin does charge-off the loan on "01 March 2024"
+    Then LoanBalanceChangedBusinessEvent is created on "01 March 2024"
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date            | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024 |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -3043,6 +3044,7 @@ Feature: LoanReAmortization
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    |
     When Admin sets the business date to "01 March 2024"
     And Admin does charge-off the loan on "01 March 2024"
+    Then LoanBalanceChangedBusinessEvent is created on "01 March 2024"
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date            | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024 |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -3107,6 +3109,7 @@ Feature: LoanReAmortization
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    |
     When Admin sets the business date to "01 March 2024"
     And Admin does charge-off the loan on "01 March 2024"
+    Then LoanBalanceChangedBusinessEvent is created on "01 March 2024"
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date            | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024 |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -3245,6 +3248,7 @@ Feature: LoanReAmortization
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    |
     When Admin sets the business date to "01 March 2024"
     And Admin does charge-off the loan on "01 March 2024"
+    Then LoanBalanceChangedBusinessEvent is created on "01 March 2024"
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date            | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024 |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -5288,6 +5292,7 @@ Feature: LoanReAmortization
 # --- charge-off the loan --- #
     When Admin sets the business date to "15 April 2024"
     And Admin does charge-off the loan on "15 April 2024"
+    Then LoanBalanceChangedBusinessEvent is created on "15 April 2024"
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -5379,6 +5384,7 @@ Feature: LoanReAmortization
 # --- charge-off the loan --- #
     When Admin sets the business date to "15 April 2024"
     And Admin does charge-off the loan on "15 April 2024"
+    Then LoanBalanceChangedBusinessEvent is created on "15 April 2024"
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -5886,6 +5892,7 @@ Feature: LoanReAmortization
       | 15 March 2024    | Re-amortize      | 17.01  | 16.52     | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin sets the business date to "15 April 2024"
     And Admin does charge-off the loan on "15 April 2024"
+    Then LoanBalanceChangedBusinessEvent is created on "15 April 2024"
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -5971,6 +5978,7 @@ Feature: LoanReAmortization
       | 15 March 2024    | Re-amortize      | 17.01  | 16.52     | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin sets the business date to "15 April 2024"
     And Admin does charge-off the loan on "15 April 2024"
+    Then LoanBalanceChangedBusinessEvent is created on "15 April 2024"
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |

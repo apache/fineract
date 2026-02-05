@@ -226,6 +226,7 @@
         | 100           | 2.05     | 0    | 0         | 102.05 | 17.01 | 0          | 0    | 85.04       |
       When Admin sets the business date to "1 March 2024"
       And Admin does charge-off the loan on "1 March 2024"
+      Then LoanBalanceChangedBusinessEvent is created on "01 March 2024"
       Then Loan Repayment schedule has 6 periods, with the following data for periods:
         | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
         |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -300,6 +301,7 @@
       Then Admin can successfully set Fraud flag to the loan
       When Admin sets the business date to "03 February 2024"
       And Admin does charge-off the loan with reason "DELINQUENT" on "03 February 2024"
+      Then LoanBalanceChangedBusinessEvent is created on "03 February 2024"
       Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
         | Type    | Account code | Account name               | Debit | Credit |
         | ASSET   | 112601       | Loans Receivable           |       | 100.0  |
