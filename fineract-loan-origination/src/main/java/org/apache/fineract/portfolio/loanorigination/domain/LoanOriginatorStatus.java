@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.loanorigination.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public enum LoanOriginatorStatus {
 
     ACTIVE("ACTIVE"), PENDING("PENDING"), INACTIVE("INACTIVE");
@@ -28,8 +31,20 @@ public enum LoanOriginatorStatus {
         this.value = value;
     }
 
+    private static final Set<String> values = new HashSet<>();
+
+    static {
+        for (final LoanOriginatorStatus type : LoanOriginatorStatus.values()) {
+            values.add(type.value);
+        }
+    }
+
     public String getValue() {
         return value;
+    }
+
+    public static Set<String> getAllValues() {
+        return values;
     }
 
     public static LoanOriginatorStatus fromString(String text) {

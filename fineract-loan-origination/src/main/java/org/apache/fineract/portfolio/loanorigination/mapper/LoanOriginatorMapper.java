@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanorigination.mapper;
 
 import java.util.List;
+import org.apache.fineract.infrastructure.codes.mapper.CodeValueMapper;
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
 import org.apache.fineract.portfolio.loanorigination.domain.LoanOriginator;
@@ -26,12 +27,12 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
-@Mapper(config = MapstructMapperConfig.class)
+@Mapper(config = MapstructMapperConfig.class, uses = { CodeValueMapper.class })
 @ConditionalOnProperty(value = "fineract.module.loan-origination.enabled", havingValue = "true")
 public interface LoanOriginatorMapper {
 
-    @Mapping(target = "originatorTypeId", source = "originatorType.id")
-    @Mapping(target = "channelTypeId", source = "channelType.id")
+    @Mapping(target = "originatorType", source = "originatorType")
+    @Mapping(target = "channelType", source = "channelType")
     @Mapping(target = "externalId", source = "externalId")
     @Mapping(target = "status", expression = "java(entity.getStatus().getValue())")
     LoanOriginatorData toData(LoanOriginator entity);

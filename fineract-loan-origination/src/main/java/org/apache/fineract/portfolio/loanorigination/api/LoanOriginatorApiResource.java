@@ -43,6 +43,7 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
+import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorTemplateData;
 import org.apache.fineract.portfolio.loanorigination.service.LoanOriginatorReadPlatformService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -81,6 +82,19 @@ public class LoanOriginatorApiResource {
         this.context.authenticatedUser().validateHasReadPermission(LoanOriginatorApiConstants.RESOURCE_NAME);
 
         return this.loanOriginatorReadPlatformService.retrieveAll();
+    }
+
+    @GET
+    @Path("template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Get loan originator template data", description = "Retrieves the Loan Originator template data")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanOriginatorApiResourceSwagger.GetLoanOriginatorTemplateResponse.class)))
+    @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+    public LoanOriginatorTemplateData retrieveLoanOriginatorTemplate() {
+        this.context.authenticatedUser().validateHasReadPermission(LoanOriginatorApiConstants.RESOURCE_NAME);
+
+        return this.loanOriginatorReadPlatformService.retrieveTemplate();
     }
 
     @GET

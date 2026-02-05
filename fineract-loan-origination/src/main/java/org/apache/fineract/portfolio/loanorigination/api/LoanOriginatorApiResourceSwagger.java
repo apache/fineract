@@ -19,6 +19,9 @@
 package org.apache.fineract.portfolio.loanorigination.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+import java.util.Set;
+import org.apache.fineract.infrastructure.codes.api.CodeValuesApiResourceSwagger.GetCodeValuesDataResponse;
 
 final class LoanOriginatorApiResourceSwagger {
 
@@ -38,9 +41,21 @@ final class LoanOriginatorApiResourceSwagger {
         @Schema(example = "ACTIVE")
         public String status;
         @Schema(example = "1")
-        public Long originatorTypeId;
+        public GetCodeValuesDataResponse originatorType;
         @Schema(example = "1")
-        public Long channelTypeId;
+        public GetCodeValuesDataResponse channelType;
+    }
+
+    @Schema(description = "GetLoanOriginatorTemplateResponse")
+    public static final class GetLoanOriginatorTemplateResponse {
+
+        private GetLoanOriginatorTemplateResponse() {}
+
+        @Schema(example = "EXT-001")
+        public String externalId;
+        public Set<String> statusOptions;
+        public List<GetCodeValuesDataResponse> originatorTypeOptions;
+        public List<GetCodeValuesDataResponse> channelTypeOptions;
     }
 
     @Schema(description = "PostLoanOriginatorsRequest")

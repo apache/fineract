@@ -24,6 +24,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 
 @Data
 @Builder
@@ -38,6 +39,6 @@ public class LoanOriginatorData implements Serializable {
     private String externalId;
     private String name;
     private String status;
-    private Long originatorTypeId;
-    private Long channelTypeId;
+    private CodeValueData originatorType;
+    private CodeValueData channelType;
 }

@@ -21,12 +21,18 @@ package org.apache.fineract.portfolio.loanorigination.service;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
+import org.apache.fineract.infrastructure.codes.mapper.CodeValueMapper;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.portfolio.loanorigination.api.LoanOriginatorApiConstants;
 import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
+import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorTemplateData;
 import org.apache.fineract.portfolio.loanorigination.domain.LoanOriginator;
 import org.apache.fineract.portfolio.loanorigination.domain.LoanOriginatorMapping;
 import org.apache.fineract.portfolio.loanorigination.domain.LoanOriginatorMappingRepository;
 import org.apache.fineract.portfolio.loanorigination.domain.LoanOriginatorRepository;
+import org.apache.fineract.portfolio.loanorigination.domain.LoanOriginatorStatus;
 import org.apache.fineract.portfolio.loanorigination.exception.LoanOriginatorNotFoundException;
 import org.apache.fineract.portfolio.loanorigination.mapper.LoanOriginatorMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -42,6 +48,8 @@ public class LoanOriginatorReadPlatformServiceImpl implements LoanOriginatorRead
     private final LoanOriginatorRepository loanOriginatorRepository;
     private final LoanOriginatorMappingRepository loanOriginatorMappingRepository;
     private final LoanOriginatorMapper loanOriginatorMapper;
+    private final CodeValueRepository codeValueRepository;
+    private final CodeValueMapper codeValueMapper;
 
     @Override
     public List<LoanOriginatorData> retrieveAll() {
@@ -77,5 +85,15 @@ public class LoanOriginatorReadPlatformServiceImpl implements LoanOriginatorRead
             return Collections.emptyList();
         }
         return mappings.stream().map(LoanOriginatorMapping::getOriginator).map(this.loanOriginatorMapper::toData).toList();
+    }
+
+    @Override
+    public LoanOriginatorTemplateData retrieveTemplate() {
+        final List<CodeValueData> originationTypeOptions = codeValueMapper
+                .map(codeValueRepository.findByCodeName(LoanOriginatorApiConstants.ORIGINATOR_TYPE_CODE_NAME));
+        final List<CodeValueData> channelTypeOptions = codeValueMapper
+                .map(codeValueRepository.findByCodeName(LoanOriginatorApiConstants.CHANNEL_TYPE_CODE_NAME));
+        return new LoanOriginatorTemplateData(ExternalId.generate().getValue(), LoanOriginatorStatus.getAllValues(), originationTypeOptions,
+                channelTypeOptions);
     }
 }

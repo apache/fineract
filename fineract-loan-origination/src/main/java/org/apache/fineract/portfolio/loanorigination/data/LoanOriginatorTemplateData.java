@@ -16,23 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanorigination.service;
+package org.apache.fineract.portfolio.loanorigination.data;
 
 import java.util.List;
-import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
-import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorTemplateData;
+import java.util.Set;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 
-public interface LoanOriginatorReadPlatformService {
+@Data
+@RequiredArgsConstructor
+public class LoanOriginatorTemplateData {
 
-    List<LoanOriginatorData> retrieveAll();
-
-    LoanOriginatorData retrieveById(Long id);
-
-    LoanOriginatorData retrieveByExternalId(String externalId);
-
-    Long resolveIdByExternalId(String externalId);
-
-    List<LoanOriginatorData> retrieveByLoanId(Long loanId);
-
-    LoanOriginatorTemplateData retrieveTemplate();
+    private final String externalId;
+    private final Set<String> statusOptions;
+    private final List<CodeValueData> originatorTypeOptions;
+    private final List<CodeValueData> channelTypeOptions;
 }

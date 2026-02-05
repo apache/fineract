@@ -19,8 +19,11 @@
 package org.apache.fineract.integrationtests.client.feign.tests;
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetCodeValuesDataResponse;
+import org.apache.fineract.client.models.GetLoanOriginatorTemplateResponse;
 import org.apache.fineract.client.models.GetLoanOriginatorsResponse;
 import org.apache.fineract.client.models.PostLoanOriginatorsRequest;
 import org.apache.fineract.client.models.PutLoanOriginatorsRequest;
@@ -30,10 +33,12 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelp
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignLoanHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignLoanOriginatorHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
+@Slf4j
 @Order(1)
 public class FeignLoanOriginatorApiTest extends FeignIntegrationTest {
 
@@ -80,6 +85,32 @@ public class FeignLoanOriginatorApiTest extends FeignIntegrationTest {
         assertThat(originator.getExternalId()).isEqualTo(externalId);
         assertThat(originator.getName()).isEqualTo(name);
         assertThat(originator.getStatus()).isEqualTo(status);
+
+        originatorHelper.deleteOriginator(originatorId);
+    }
+
+    @Test
+    public void testCreateOriginatorWithAllFieldsUsingTemplate() {
+        final String name = Utils.randomStringGenerator("Originator ", 30);
+
+        final GetLoanOriginatorTemplateResponse originatorTemplate = originatorHelper.retrieveLoanOriginatorTemplate();
+        assertThat(originatorTemplate).isNotNull();
+
+        final String status = originatorTemplate.getStatusOptions().iterator().next();
+        final GetCodeValuesDataResponse originatorTypeCode = originatorTemplate.getOriginatorTypeOptions().get(0);
+        final GetCodeValuesDataResponse channelTypeCode = originatorTemplate.getChannelTypeOptions().get(0);
+
+        final Long originatorId = originatorHelper
+                .createOriginator(new PostLoanOriginatorsRequest().externalId(originatorTemplate.getExternalId()).name(name).status(status)
+                        .originatorTypeId(originatorTypeCode.getId()).channelTypeId(channelTypeCode.getId()));
+
+        final GetLoanOriginatorsResponse originator = originatorHelper.getOriginatorById(originatorId);
+
+        assertThat(originator.getExternalId()).isEqualTo(originatorTemplate.getExternalId());
+        assertThat(originator.getName()).isEqualTo(name);
+        assertThat(originator.getStatus()).isEqualTo(status);
+        assertThat(originator.getOriginatorType().getName()).isEqualTo(originatorTypeCode.getName());
+        assertThat(originator.getChannelType().getName()).isEqualTo(channelTypeCode.getName());
 
         originatorHelper.deleteOriginator(originatorId);
     }

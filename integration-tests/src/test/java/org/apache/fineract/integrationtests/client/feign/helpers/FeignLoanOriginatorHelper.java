@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetLoanOriginatorTemplateResponse;
 import org.apache.fineract.client.models.GetLoanOriginatorsResponse;
 import org.apache.fineract.client.models.PostLoanOriginatorsRequest;
 import org.apache.fineract.client.models.PostLoanOriginatorsResponse;
@@ -132,5 +133,9 @@ public class FeignLoanOriginatorHelper {
             fineractClient.loanOriginators().detachOriginatorFromLoan(loanId, originatorId);
             return null;
         });
+    }
+
+    public GetLoanOriginatorTemplateResponse retrieveLoanOriginatorTemplate() {
+        return ok(() -> fineractClient.loanOriginators().retrieveLoanOriginatorTemplate());
     }
 }
