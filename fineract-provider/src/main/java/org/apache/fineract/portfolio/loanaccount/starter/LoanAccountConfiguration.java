@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.starter;
 
+import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
@@ -374,9 +375,10 @@ public class LoanAccountConfiguration {
     @ConditionalOnMissingBean(LoanAccrualEventService.class)
     public LoanAccrualEventService loanAccrualEventService(BusinessEventNotifierService businessEventNotifierService,
             LoanAccrualsProcessingService loanAccrualsProcessingService,
-            LoanAccrualActivityProcessingService loanAccrualActivityProcessingService) {
+            LoanAccrualActivityProcessingService loanAccrualActivityProcessingService,
+            InlineLoanCOBExecutorServiceImpl inlineLoanCOBExecutorService) {
         return new LoanAccrualEventService(businessEventNotifierService, loanAccrualsProcessingService,
-                loanAccrualActivityProcessingService);
+                loanAccrualActivityProcessingService, inlineLoanCOBExecutorService);
     }
 
     @Bean

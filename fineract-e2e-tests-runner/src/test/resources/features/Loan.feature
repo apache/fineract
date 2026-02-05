@@ -6543,6 +6543,7 @@ Feature: Loan
       | 11 March 2025     | Disbursement              | 200.0  | 0.0       | 0.0      | 0.0  | 0.0       | 200.0        |
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_REFUND_FULL" loan product "MERCHANT_ISSUED_REFUND" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
+  @temp3
   @TestRailId:C3570
   Scenario: Verify Loan is fully paid and closed after full Merchant issued refund 1 day after disbursement
     When Admin sets the business date to "29 March 2025"
@@ -6620,9 +6621,9 @@ Feature: Loan
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type           | Amount  | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 28 March 2025    | Disbursement               | 1383.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1383.0       | false    | false    |
+      | 28 March 2025    | Accrual Activity           | 0.45    | 0.0       | 0.45     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 March 2025    | Merchant Issued Refund     | 1383.0  | 1383.0    | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 March 2025    | Interest Refund            | 0.45    | 0.0       | 0.45     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 29 March 2025    | Accrual Activity           | 0.45    | 0.0       | 0.45     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 March 2025    | Accrual                    | 0.45    | 0.0       | 0.45     | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Loan has 0 outstanding amount

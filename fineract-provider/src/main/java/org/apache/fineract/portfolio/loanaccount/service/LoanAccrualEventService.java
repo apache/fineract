@@ -19,8 +19,13 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import jakarta.annotation.PostConstruct;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.cob.loan.LoanCOBConstant;
+import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanCloseBusinessEvent;
@@ -35,6 +40,7 @@ public class LoanAccrualEventService {
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
     private final LoanAccrualActivityProcessingService loanAccrualActivityProcessingService;
+    private final InlineLoanCOBExecutorServiceImpl inlineLoanCOBExecutorService;
 
     @PostConstruct
     public void addListeners() {
@@ -49,6 +55,7 @@ public class LoanAccrualEventService {
             final Loan loan = event.get();
             LoanStatus status = loan.getStatus();
             if (status.isClosedObligationsMet() || status.isOverpaid()) {
+                validateAnRunInlineCOBIfRequired(loan, DateUtils.getBusinessLocalDate());
                 log.debug("Loan closure on accrual for loan {}", loan.getId());
                 loanAccrualsProcessingService.processAccrualsOnLoanClosure(loan, true);
                 loanAccrualActivityProcessingService.processAccrualActivityForLoanClosure(loan);
@@ -63,10 +70,19 @@ public class LoanAccrualEventService {
             final Loan loan = event.get();
             LoanStatus status = loan.getStatus();
             if (status.isClosedObligationsMet() || status.isOverpaid()) {
+                validateAnRunInlineCOBIfRequired(loan, DateUtils.getBusinessLocalDate());
                 log.debug("Loan balance change on accrual for loan {}", loan.getId());
                 loanAccrualsProcessingService.processAccrualsOnLoanClosure(loan, true);
                 loanAccrualActivityProcessingService.processAccrualActivityForLoanClosure(loan);
             }
         }
+    }
+
+    private void validateAnRunInlineCOBIfRequired(Loan loan, final LocalDate businessDate) {
+        if (loan.getLastClosedBusinessDate() == null || loan.getLastClosedBusinessDate().compareTo(businessDate.minusDays(1)) < 0) {
+            log.debug("Inline COB execution for loan {}", loan.getId());
+            inlineLoanCOBExecutorService.execute(List.of(loan.getId()), LoanCOBConstant.INLINE_LOAN_COB_JOB_NAME);
+        }
+
     }
 }

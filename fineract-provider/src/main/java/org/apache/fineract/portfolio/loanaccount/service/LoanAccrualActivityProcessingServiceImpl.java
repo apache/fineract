@@ -187,6 +187,10 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
         }
 
         LocalDate closureDate = loanBalanceService.isOverPaid(loan) ? loan.getOverpaidOnDate() : loan.getClosedOnDate();
+        if (loan.getLastClosedBusinessDate() == null
+                && loan.getDisbursementDate().compareTo(DateUtils.getBusinessLocalDate().minusDays(1)) == 0) {
+            closureDate = closureDate.minusDays(1);
+        }
 
         // Reverse accrual activities posted after the closure date
         loanTransactionRepository.findNonReversedByLoanAndTypeAndAfterDate(loan, LoanTransactionType.ACCRUAL_ACTIVITY, closureDate)

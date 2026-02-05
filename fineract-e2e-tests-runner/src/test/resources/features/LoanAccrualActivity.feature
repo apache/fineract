@@ -9546,3 +9546,33 @@ Feature: LoanAccrualActivity
     #   --- Close loan ---
     When Loan Pay-off is made on "23 October 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C12341234
+  Scenario: Verify accrual activity date matches charge creation date when repayment happens before COB run
+      When Admin sets the business date to "17 November 2025"
+      When Admin creates a client with random data
+      When Admin creates a fully customized loan with the following data:
+        | LoanProduct                                                     | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+        | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_ACCRUAL_ACTIVITY | 17 November 2025  | 100            | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      And Admin successfully approves the loan on "17 November 2025" with "100" amount and expected disbursement date on "17 November 2025"
+      When Admin successfully disburse the loan on "17 November 2025" with "100" EUR transaction amount
+      When Admin adds "LOAN_SNOOZE_FEE" due date charge with "17 November 2025" due date and 10 EUR transaction amount
+      Then Loan Transactions tab has the following data:
+        | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+        | 17 November 2025 | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        |
+  #   --- Date changes to next day (post-midnight but before COB) ---
+      When Admin sets the business date to "18 November 2025"
+  #   --- Full repayment made before COB runs ---
+      And Customer makes "AUTOPAY" repayment on "18 November 2025" with 110 EUR transaction amount
+      Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+  #   --- COB runs for the previous day (17 November 2025) ---
+      When Admin runs inline COB job for Loan
+  #   --- Expected: Accrual Activity transaction date should be 17 November 2025 (charge creation date) ---
+  #   --- Bug: Currently Accrual Activity gets 18 November 2025 (repayment date) ---
+      Then Loan Transactions tab has the following data:
+        | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+        | 17 November 2025 | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        |
+        | 17 November 2025 | Accrual Activity | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
+        | 18 November 2025 | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
+        | 18 November 2025 | Repayment        | 110.0  | 100.0     | 0.0      | 10.0 | 0.0       | 0.0          |
+      Then LoanTransactionAccrualActivityPostBusinessEvent is raised on "17 November 2025"
