@@ -237,7 +237,7 @@ dependencyManagement {
 
         dependency 'com.mysql:mysql-connector-j:9.3.0'
 
-        dependency 'org.assertj:assertj-core:3.26.3'
+        dependency 'org.assertj:assertj-core:3.27.7'
 
         dependency 'org.apache.commons:commons-math3:3.6.1'
         dependency 'commons-beanutils:commons-beanutils:1.11.0'
