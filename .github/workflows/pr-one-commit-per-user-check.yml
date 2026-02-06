@@ -1,0 +1,57 @@
+name: Fineract PR One Commit Per User Check
+
+
+on:
+ pull_request:
+   types: [opened, reopened, synchronize]
+
+
+permissions:
+ pull-requests: write
+
+
+jobs:
+ verify-commits:
+   name: Validate One Commit Per User
+   runs-on: ubuntu-latest
+   timeout-minutes: 1
+   steps:
+     - name: Verify Commit Policy
+       id: check
+       env:
+         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+       run: |
+
+         commits=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/commits") || { echo "::error::GitHub API request failed"; exit 1; }
+
+         if echo "$commits" | jq -e '.[] | select(.author == null)' > /dev/null; then
+           echo "null_authors=true" >> $GITHUB_OUTPUT
+           echo "::error::Some commits have a git email that is not linked to a GitHub account. Please ensure your git email matches one of your GitHub Account emails.\n\nPlease also squash your commits to prevent this message again."
+           exit 1
+         fi
+
+         user_ids=$(echo "$commits" | jq -r '.[] | select(.author.type != "Bot") | .author.id')
+         if echo "$user_ids" | sort | uniq -d | grep -q .; then
+           echo "multiple_commits=true" >> $GITHUB_OUTPUT
+           echo "::error::Multiple commits from the same author have been detected."
+           exit 1
+         fi
+
+         echo "Success: Each author has exactly one commit."
+
+     - name: Comment on PR
+       if: failure()
+       env:
+         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+       run: |
+
+         if [ "${{ steps.check.outputs.null_authors }}" == "true" ]; then
+           gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body \
+         $'**One Commit Per User Check Failed**\n\nSome committers have a git email that does not match their GitHub account. Please ensure your git email matches one of your GitHub Account emails. Please also squash your commits to prevent this message again.'
+         fi
+
+
+         if [ "${{ steps.check.outputs.multiple_commits }}" == "true" ]; then
+           gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body \
+         $'**One Commit Per User Check Failed**\n\nEach user may only have one commit per PR. Please squash your commits.'
+         fi
