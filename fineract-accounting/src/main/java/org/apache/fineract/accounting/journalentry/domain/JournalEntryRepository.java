@@ -57,11 +57,11 @@ public interface JournalEntryRepository extends JpaRepository<JournalEntry, Long
                                 ELSE je.amount
                        END),
                        je.transactionDate,
-                       je.createdDate,
+                       je.transactionDate,
                        SUM(je.amount)
                 FROM JournalEntry je
                 WHERE je.transactionDate = :transactionDate
-                GROUP BY je.office.id, je.glAccount.id, je.transactionDate, je.createdDate
+                GROUP BY je.office.id, je.glAccount.id, je.transactionDate
             """)
     List<Object[]> findTrialBalanceLinesForDate(@Param("transactionDate") LocalDate transactionDate);
 
