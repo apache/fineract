@@ -72,7 +72,7 @@ public class CreditBureauLoanProductCommandFromApiJsonDeserializer {
 
         baseDataValidator.reset().value(cb_id).notBlank().integerGreaterThanZero();
 
-        final long loanProductId = this.fromApiJsonHelper.extractLongNamed(LOAN_PRODUCT_ID, element);
+        final Long loanProductId = this.fromApiJsonHelper.extractLongNamed(LOAN_PRODUCT_ID, element);
         baseDataValidator.reset().parameter(LOAN_PRODUCT_ID).value(loanProductId).notBlank().integerGreaterThanZero();
 
         if (this.fromApiJsonHelper.extractBooleanNamed(IS_CREDITCHECK_MANDATORY, element) != null) {
