@@ -1,0 +1,155 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements. See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership. The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+name: Fineract PR Commit Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate-commits:
+    name: Validate One Commit Per Author
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Validate commit count per author
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            // Fetch all commits in the PR
+            const commits = await github.rest.pulls.listCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              per_page: 100
+            });
+
+            console.log(`Total commits in PR: ${commits.data.length}`);
+
+            // Count commits per author email
+            const authorCommits = new Map();
+            
+            for (const commit of commits.data) {
+              const authorEmail = commit.commit.author.email;
+              const commitSha = commit.sha.substring(0, 7);
+              const commitMessage = commit.commit.message.split('\n')[0]; // First line only
+              
+              if (!authorCommits.has(authorEmail)) {
+                authorCommits.set(authorEmail, []);
+              }
+              
+              authorCommits.get(authorEmail).push({
+                sha: commitSha,
+                message: commitMessage
+              });
+              
+              console.log(`  - ${commitSha}: ${authorEmail} - "${commitMessage}"`);
+            }
+
+            console.log(`\nUnique authors: ${authorCommits.size}`);
+
+            // Check for violations (authors with more than 1 commit)
+            const violations = [];
+            
+            for (const [authorEmail, commitList] of authorCommits.entries()) {
+              console.log(`Author ${authorEmail}: ${commitList.length} commit(s)`);
+              
+              if (commitList.length > 1) {
+                violations.push({
+                  author: authorEmail,
+                  commitCount: commitList.length,
+                  commits: commitList
+                });
+              }
+            }
+
+            // If violations found, fail the check and post comment
+            if (violations.length > 0) {
+              let errorMessage = '## ❌ Commit Validation Failed\n\n';
+              errorMessage += 'This PR violates the **"one commit per author"** guideline.\n\n';
+              errorMessage += '### 🚫 Violations Detected\n\n';
+              
+              for (const violation of violations) {
+                errorMessage += `**Author:** \`${violation.author}\`\n`;
+                errorMessage += `**Commit Count:** ${violation.commitCount}\n\n`;
+                errorMessage += '**Commits:**\n';
+                
+                for (const commit of violation.commits) {
+                  errorMessage += `- \`${commit.sha}\`: ${commit.message}\n`;
+                }
+                
+                errorMessage += '\n';
+              }
+              
+              errorMessage += '---\n\n';
+              errorMessage += '### 📖 How to Fix This\n\n';
+              errorMessage += 'You need to **squash your commits** into a single commit. Here\'s how:\n\n';
+              errorMessage += '#### Option 1: Interactive Rebase (Recommended)\n\n';
+              errorMessage += '```bash\n';
+              errorMessage += '# Squash your last N commits (replace N with the number above)\n';
+              errorMessage += 'git rebase -i HEAD~N\n\n';
+              errorMessage += '# In the editor that opens:\n';
+              errorMessage += '# - Leave the first commit as "pick"\n';
+              errorMessage += '# - Change all other commits from "pick" to "squash" (or just "s")\n';
+              errorMessage += '# - Save and close the editor\n';
+              errorMessage += '# - Edit the commit message in the next editor\n';
+              errorMessage += '# - Save and close\n\n';
+              errorMessage += '# Force push the squashed commit\n';
+              errorMessage += 'git push --force-with-lease origin <your-branch-name>\n';
+              errorMessage += '```\n\n';
+              errorMessage += '#### Option 2: Reset and Re-commit\n\n';
+              errorMessage += '```bash\n';
+              errorMessage += '# Soft reset to N commits back (keeps your changes)\n';
+              errorMessage += 'git reset --soft HEAD~N\n\n';
+              errorMessage += '# Create a new single commit with all changes\n';
+              errorMessage += 'git commit -m "FINERACT-XXXX: Your commit message"\n\n';
+              errorMessage += '# Force push\n';
+              errorMessage += 'git push --force-with-lease origin <your-branch-name>\n';
+              errorMessage += '```\n\n';
+              errorMessage += '---\n\n';
+              errorMessage += '### ℹ️ About This Rule\n\n';
+              errorMessage += 'Apache Fineract follows a **"one commit per author"** policy for clean git history.\n\n';
+              errorMessage += '- ✅ **Allowed:** Multiple authors, each with exactly one commit\n';
+              errorMessage += '- ❌ **Not Allowed:** Single author with multiple commits\n\n';
+              errorMessage += 'For more details, see our [Contributing Guidelines](https://github.com/apache/fineract/blob/develop/CONTRIBUTING.md).\n\n';
+              errorMessage += '---\n\n';
+              errorMessage += '*This check will automatically re-run when you push changes to this PR.*\n';
+              
+              // Post the comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: errorMessage
+              });
+              
+              // Fail the workflow
+              core.setFailed(`Found ${violations.length} author(s) with multiple commits. Please squash commits as described in the comment above.`);
+              
+            } else {
+              console.log('\n✅ Validation passed! All authors have exactly one commit.');
+              console.log('Summary:');
+              for (const [authorEmail, commitList] of authorCommits.entries()) {
+                console.log(`  - ${authorEmail}: 1 commit ✓`);
+              }
+            }
