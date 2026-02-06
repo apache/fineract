@@ -20,6 +20,9 @@ package org.apache.fineract.commands.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
@@ -39,7 +42,7 @@ import org.apache.fineract.commands.service.AuditReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
 import org.springframework.stereotype.Component;
@@ -59,7 +62,6 @@ public class AuditsApiResource {
     private final PlatformSecurityContext context;
     private final AuditReadPlatformService auditReadPlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final ToApiJsonSerializer<String> toApiJsonSerializer;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -68,22 +70,20 @@ public class AuditsApiResource {
             + "\n" + "Example Requests:\n" + "\n" + "audits\n" + "\n" + "audits?fields=madeOnDate,maker,processingResult\n" + "\n"
             + "audits?makerDateTimeFrom=2013-03-25 08:00:00&makerDateTimeTo=2013-04-04 18:00:00\n" + "\n" + "audits?officeId=1\n" + "\n"
             + "audits?officeId=1&includeJson=true")
-    public String retrieveAuditEntries(@Context final UriInfo uriInfo, @BeanParam AuditRequest auditRequest,
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AuditData.class)))
+    public Page<AuditData> retrieveAuditEntries(@Context final UriInfo uriInfo, @BeanParam AuditRequest auditRequest,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
-            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
-            @QueryParam("paged") @Parameter(description = "paged") final Boolean paged) {
+            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
 
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
-        final PaginationParameters parameters = PaginationParameters.builder().paged(Boolean.TRUE.equals(paged)).limit(limit).offset(offset)
-                .orderBy(orderBy).sortOrder(sortOrder).build();
+        final PaginationParameters parameters = PaginationParameters.builder().paged(true).limit(limit).offset(offset).orderBy(orderBy)
+                .sortOrder(sortOrder).build();
         final SQLBuilder extraCriteria = getExtraCriteria(auditRequest);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        return toApiJsonSerializer.serialize(parameters.isPaged()
-                ? auditReadPlatformService.retrievePaginatedAuditEntries(extraCriteria, settings.isIncludeJson(), parameters)
-                : auditReadPlatformService.retrieveAuditEntries(extraCriteria, settings.isIncludeJson()));
+        return auditReadPlatformService.retrievePaginatedAuditEntries(extraCriteria, settings.isIncludeJson(), parameters);
     }
 
     @GET
@@ -92,6 +92,7 @@ public class AuditsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve an Audit Entry", description = "Example Requests:\n" + "\n" + "audits/20\n"
             + "audits/20?fields=madeOnDate,maker,processingResult")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AuditData.class)))
     public AuditData retrieveAuditEntry(@PathParam("auditId") @Parameter final Long auditId) {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         return auditReadPlatformService.retrieveAuditEntry(auditId);
@@ -104,6 +105,7 @@ public class AuditsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Audit Search Template", description = "This is a convenience resource. It can be useful when building an Audit Search UI. \"appUsers\" are data scoped to the office/branch the requestor is associated with.\n"
             + "\n" + "Example Requests:\n" + "\n" + "audits/searchtemplate\n" + "audits/searchtemplate?fields=actionNames")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AuditSearchData.class)))
     public AuditSearchData retrieveAuditSearchTemplate() {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         return this.auditReadPlatformService.retrieveSearchTemplate("audit");
@@ -119,35 +121,35 @@ public class AuditsApiResource {
         extraCriteria.addNonNullCriteria("aud.resource_id = ", auditRequest.getResourceId());
         extraCriteria.addNonNullCriteria("aud.maker_id = ", auditRequest.getMakerId());
         extraCriteria.addNonNullCriteria("aud.checker_id = ", auditRequest.getCheckerId());
-        if (auditRequest.getMakerDateTimeFrom() != null) {
+        if (auditRequest.hasMakerDateTimeFrom()) {
             extraCriteria.addSubOperation((SQLBuilder criteria) -> {
                 criteria.addNonNullCriteria("aud.made_on_date >= ", auditRequest.getMakerDateTimeFrom(),
                         SQLBuilder.WhereLogicalOperator.NONE);
-                criteria.addNonNullCriteria("aud.made_on_date_utc >= ", auditRequest.getMakerDateTimeFrom(),
+                criteria.addNonNullCriteria("aud.made_on_date_utc >= ", auditRequest.getMakerDateTimeFromOffset(),
                         SQLBuilder.WhereLogicalOperator.OR);
             });
         }
-        if (auditRequest.getMakerDateTimeTo() != null) {
+        if (auditRequest.hasMakerDateTimeTo()) {
             extraCriteria.addSubOperation((SQLBuilder criteria) -> {
                 criteria.addNonNullCriteria("aud.made_on_date <= ", auditRequest.getMakerDateTimeTo(),
                         SQLBuilder.WhereLogicalOperator.NONE);
-                criteria.addNonNullCriteria("aud.made_on_date_utc <= ", auditRequest.getMakerDateTimeTo(),
+                criteria.addNonNullCriteria("aud.made_on_date_utc <= ", auditRequest.getMakerDateTimeToOffset(),
                         SQLBuilder.WhereLogicalOperator.OR);
             });
         }
-        if (auditRequest.getCheckerDateTimeFrom() != null) {
+        if (auditRequest.hasCheckerDateTimeFrom()) {
             extraCriteria.addSubOperation((SQLBuilder criteria) -> {
                 criteria.addNonNullCriteria("aud.checked_on_date >= ", auditRequest.getCheckerDateTimeFrom(),
                         SQLBuilder.WhereLogicalOperator.NONE);
-                criteria.addNonNullCriteria("aud.checked_on_date_utc >= ", auditRequest.getCheckerDateTimeFrom(),
+                criteria.addNonNullCriteria("aud.checked_on_date_utc >= ", auditRequest.getCheckerDateTimeFromOffset(),
                         SQLBuilder.WhereLogicalOperator.OR);
             });
         }
-        if (auditRequest.getCheckerDateTimeTo() != null) {
+        if (auditRequest.hasCheckerDateTimeTo()) {
             extraCriteria.addSubOperation((SQLBuilder criteria) -> {
                 criteria.addNonNullCriteria("aud.checked_on_date <= ", auditRequest.getCheckerDateTimeTo(),
                         SQLBuilder.WhereLogicalOperator.NONE);
-                criteria.addNonNullCriteria("aud.checked_on_date_utc <= ", auditRequest.getCheckerDateTimeTo(),
+                criteria.addNonNullCriteria("aud.checked_on_date_utc <= ", auditRequest.getCheckerDateTimeToOffset(),
                         SQLBuilder.WhereLogicalOperator.OR);
             });
         }

@@ -134,8 +134,22 @@ public class MakercheckersApiResource {
         }
         extraCriteria.addNonNullCriteria("aud.resource_id = ", makerCheckerRequest.getResourceId());
         extraCriteria.addNonNullCriteria("aud.maker_id = ", makerCheckerRequest.getMakerId());
-        extraCriteria.addNonNullCriteria("aud.made_on_date >= ", makerCheckerRequest.getMakerDateTimeFrom());
-        extraCriteria.addNonNullCriteria("aud.made_on_date <= ", makerCheckerRequest.getMakerDateTimeTo());
+        if (makerCheckerRequest.hasMakerDateTimeFrom()) {
+            extraCriteria.addSubOperation((SQLBuilder criteria) -> {
+                criteria.addNonNullCriteria("aud.made_on_date >= ", makerCheckerRequest.getMakerDateTimeFromLocal(),
+                        SQLBuilder.WhereLogicalOperator.NONE);
+                criteria.addNonNullCriteria("aud.made_on_date_utc >= ", makerCheckerRequest.getMakerDateTimeFromOffset(),
+                        SQLBuilder.WhereLogicalOperator.OR);
+            });
+        }
+        if (makerCheckerRequest.hasMakerDateTimeTo()) {
+            extraCriteria.addSubOperation((SQLBuilder criteria) -> {
+                criteria.addNonNullCriteria("aud.made_on_date <= ", makerCheckerRequest.getMakerDateTimeToLocal(),
+                        SQLBuilder.WhereLogicalOperator.NONE);
+                criteria.addNonNullCriteria("aud.made_on_date_utc <= ", makerCheckerRequest.getMakerDateTimeToOffset(),
+                        SQLBuilder.WhereLogicalOperator.OR);
+            });
+        }
         extraCriteria.addNonNullCriteria("aud.office_id = ", makerCheckerRequest.getOfficeId());
         extraCriteria.addNonNullCriteria("aud.group_id = ", makerCheckerRequest.getGroupId());
         extraCriteria.addNonNullCriteria("aud.client_id = ", makerCheckerRequest.getClientId());

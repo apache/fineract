@@ -23,6 +23,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -72,6 +74,24 @@ public class AuditRequest implements Serializable {
     private String dateFormat;
     @QueryParam("locale")
     private String locale;
+    @QueryParam("timeZone")
+    private String timeZone;
+
+    public boolean hasMakerDateTimeFrom() {
+        return makerDateTimeFrom != null && !makerDateTimeFrom.isBlank();
+    }
+
+    public boolean hasMakerDateTimeTo() {
+        return makerDateTimeTo != null && !makerDateTimeTo.isBlank();
+    }
+
+    public boolean hasCheckerDateTimeFrom() {
+        return checkerDateTimeFrom != null && !checkerDateTimeFrom.isBlank();
+    }
+
+    public boolean hasCheckerDateTimeTo() {
+        return checkerDateTimeTo != null && !checkerDateTimeTo.isBlank();
+    }
 
     public LocalDateTime getMakerDateTimeFrom() {
         return DateUtils.convertDateTimeStringToLocalDateTime(makerDateTimeFrom, dateFormat, locale, LocalTime.MIN);
@@ -87,5 +107,29 @@ public class AuditRequest implements Serializable {
 
     public LocalDateTime getCheckerDateTimeTo() {
         return DateUtils.convertDateTimeStringToLocalDateTime(checkerDateTimeTo, dateFormat, locale, LocalTime.MAX);
+    }
+
+    public LocalDateTime getMakerDateTimeFromOffset() {
+        OffsetDateTime result = DateUtils.convertDateTimeStringToOffsetDateTime(makerDateTimeFrom, dateFormat, locale, LocalTime.MIN,
+                timeZone);
+        return result != null ? result.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime() : null;
+    }
+
+    public LocalDateTime getMakerDateTimeToOffset() {
+        OffsetDateTime result = DateUtils.convertDateTimeStringToOffsetDateTime(makerDateTimeTo, dateFormat, locale, LocalTime.MAX,
+                timeZone);
+        return result != null ? result.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime() : null;
+    }
+
+    public LocalDateTime getCheckerDateTimeFromOffset() {
+        OffsetDateTime result = DateUtils.convertDateTimeStringToOffsetDateTime(checkerDateTimeFrom, dateFormat, locale, LocalTime.MIN,
+                timeZone);
+        return result != null ? result.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime() : null;
+    }
+
+    public LocalDateTime getCheckerDateTimeToOffset() {
+        OffsetDateTime result = DateUtils.convertDateTimeStringToOffsetDateTime(checkerDateTimeTo, dateFormat, locale, LocalTime.MAX,
+                timeZone);
+        return result != null ? result.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime() : null;
     }
 }

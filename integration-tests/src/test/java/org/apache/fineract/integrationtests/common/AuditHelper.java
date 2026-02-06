@@ -62,11 +62,12 @@ public class AuditHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
+    @SuppressWarnings("unchecked")
     public List getAuditDetails(final Integer resourceId, final String actionName, final String entityName) {
         final String AUDIT_URL = AUDIT_BASE_URL + "&entityName=" + entityName + "&resourceId=" + resourceId + "&actionName=" + actionName
                 + "&orderBy=id&sortBy=DSC";
-        List<HashMap<String, Object>> responseAudits = Utils.performServerGet(requestSpec, responseSpec, AUDIT_URL, "");
-        return responseAudits;
+        LinkedHashMap<String, Object> response = Utils.performServerGet(requestSpec, responseSpec, AUDIT_URL, "");
+        return (List<HashMap<String, Object>>) response.get("pageItems");
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -141,6 +142,54 @@ public class AuditHelper {
     public void verifyOrderBysupported(final String orderByValue) {
         final String AUDIT_URL = AUDIT_BASE_URL + "&paged=true&orderBy=" + orderByValue;
         Utils.performServerGet(requestSpec, responseSpec, AUDIT_URL, "");
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<HashMap<String, Object>> getAuditsWithDateTimeRange(final String makerDateTimeFrom, final String makerDateTimeTo,
+            final String dateFormat, final String timeZone) {
+        io.restassured.specification.RequestSpecification request = io.restassured.RestAssured.given().spec(requestSpec);
+        request.queryParam("paged", "true");
+        request.queryParam("limit", "10");
+
+        if (makerDateTimeFrom != null) {
+            request.queryParam("makerDateTimeFrom", makerDateTimeFrom);
+        }
+        if (makerDateTimeTo != null) {
+            request.queryParam("makerDateTimeTo", makerDateTimeTo);
+        }
+        if (dateFormat != null) {
+            request.queryParam("dateFormat", dateFormat);
+        }
+        if (timeZone != null) {
+            request.queryParam("timeZone", timeZone);
+        }
+
+        String json = request.expect().spec(responseSpec).log().ifError().when()
+                .get("/fineract-provider/api/v1/audits?" + Utils.TENANT_IDENTIFIER).andReturn().asString();
+        LinkedHashMap<String, Object> response = io.restassured.path.json.JsonPath.from(json).get("");
+        return (List<HashMap<String, Object>>) response.get("pageItems");
+    }
+
+    public void verifyAuditsWithDateTimeRangeReturnsError(final String makerDateTimeFrom, final String makerDateTimeTo,
+            final String dateFormat, final String timeZone, final ResponseSpecification errorResponseSpec) {
+        io.restassured.specification.RequestSpecification request = io.restassured.RestAssured.given().spec(requestSpec);
+        request.queryParam("paged", "true");
+        request.queryParam("limit", "10");
+
+        if (makerDateTimeFrom != null) {
+            request.queryParam("makerDateTimeFrom", makerDateTimeFrom);
+        }
+        if (makerDateTimeTo != null) {
+            request.queryParam("makerDateTimeTo", makerDateTimeTo);
+        }
+        if (dateFormat != null) {
+            request.queryParam("dateFormat", dateFormat);
+        }
+        if (timeZone != null) {
+            request.queryParam("timeZone", timeZone);
+        }
+
+        request.expect().spec(errorResponseSpec).log().ifError().when().get("/fineract-provider/api/v1/audits?" + Utils.TENANT_IDENTIFIER);
     }
 
 }

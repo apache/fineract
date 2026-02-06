@@ -21,10 +21,14 @@ package org.apache.fineract.commands.data.request;
 import jakarta.ws.rs.QueryParam;
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Setter
 @Getter
@@ -43,9 +47,9 @@ public class MakerCheckerRequest implements Serializable {
     @QueryParam("makerId")
     private Long makerId;
     @QueryParam("makerDateTimeFrom")
-    private ZonedDateTime makerDateTimeFrom;
+    private String makerDateTimeFrom;
     @QueryParam("makerDateTimeTo")
-    private ZonedDateTime makerDateTimeTo;
+    private String makerDateTimeTo;
     @QueryParam("clientId")
     private Long clientId;
     @QueryParam("loanid")
@@ -56,4 +60,38 @@ public class MakerCheckerRequest implements Serializable {
     private Long groupId;
     @QueryParam("savingsAccountId")
     private Long savingsAccountId;
+    @QueryParam("dateFormat")
+    private String dateFormat;
+    @QueryParam("locale")
+    private String locale;
+    @QueryParam("timeZone")
+    private String timeZone;
+
+    public boolean hasMakerDateTimeFrom() {
+        return makerDateTimeFrom != null && !makerDateTimeFrom.isBlank();
+    }
+
+    public boolean hasMakerDateTimeTo() {
+        return makerDateTimeTo != null && !makerDateTimeTo.isBlank();
+    }
+
+    public LocalDateTime getMakerDateTimeFromLocal() {
+        return DateUtils.convertDateTimeStringToLocalDateTime(makerDateTimeFrom, dateFormat, locale, LocalTime.MIN);
+    }
+
+    public LocalDateTime getMakerDateTimeToLocal() {
+        return DateUtils.convertDateTimeStringToLocalDateTime(makerDateTimeTo, dateFormat, locale, LocalTime.MAX);
+    }
+
+    public LocalDateTime getMakerDateTimeFromOffset() {
+        OffsetDateTime result = DateUtils.convertDateTimeStringToOffsetDateTime(makerDateTimeFrom, dateFormat, locale, LocalTime.MIN,
+                timeZone);
+        return result != null ? result.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime() : null;
+    }
+
+    public LocalDateTime getMakerDateTimeToOffset() {
+        OffsetDateTime result = DateUtils.convertDateTimeStringToOffsetDateTime(makerDateTimeTo, dateFormat, locale, LocalTime.MAX,
+                timeZone);
+        return result != null ? result.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime() : null;
+    }
 }

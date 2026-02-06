@@ -20,6 +20,8 @@ package org.apache.fineract.infrastructure.core.service;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
+import java.time.DateTimeException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -36,6 +38,8 @@ import java.time.temporal.TemporalAccessor;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -442,9 +446,10 @@ public final class DateUtils {
         if (dateTimeStr == null || dateTimeStr.isBlank()) {
             return null;
         }
+        String dateTimeStrWithoutOffset = removeOffsetFromString(dateTimeStr);
         final Locale locale = localeStr == null ? null : JsonParserHelper.localeFromString(localeStr);
         DateTimeFormatter formatter = getDateFormatter(dateFormat, locale);
-        TemporalAccessor parsed = formatter.parse(dateTimeStr);
+        TemporalAccessor parsed = formatter.parse(dateTimeStrWithoutOffset);
 
         boolean hasTime = parsed.isSupported(ChronoField.HOUR_OF_DAY) && parsed.isSupported(ChronoField.MINUTE_OF_HOUR);
 
@@ -460,6 +465,146 @@ public final class DateUtils {
                     "The parameter date (" + dateTimeStr + ") format is invalid", "date", dateTimeStr));
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", errors, e);
         }
+    }
+
+    public static OffsetDateTime convertDateTimeStringToOffsetDateTime(String dateTimeStr, String dateFormat, String localeStr,
+            LocalTime fallbackTime, ZoneOffset defaultOffset) {
+        if (dateTimeStr == null || dateTimeStr.isBlank()) {
+            return null;
+        }
+        String dateTimeStrWithoutOffset = removeOffsetFromString(dateTimeStr);
+        ZoneOffset offset = extractOffsetFromString(dateTimeStr, defaultOffset);
+        LocalDateTime localDateTime = convertDateTimeStringToLocalDateTime(dateTimeStrWithoutOffset, dateFormat, localeStr, fallbackTime);
+        if (localDateTime == null) {
+            return null;
+        }
+        return OffsetDateTime.of(localDateTime, offset);
+    }
+
+    public static OffsetDateTime convertDateTimeStringToOffsetDateTime(String dateTimeStr, String dateFormat, String localeStr,
+            LocalTime fallbackTime, String timeZone) {
+        if (dateTimeStr == null || dateTimeStr.isBlank()) {
+            return null;
+        }
+        String dateTimeStrWithoutOffset = removeOffsetFromString(dateTimeStr);
+        LocalDateTime localDateTime = convertDateTimeStringToLocalDateTime(dateTimeStrWithoutOffset, dateFormat, localeStr, fallbackTime);
+        if (localDateTime == null) {
+            return null;
+        }
+        ZoneOffset inlineOffset = extractOffsetFromStringOrNull(dateTimeStr);
+        if (inlineOffset != null) {
+            return OffsetDateTime.of(localDateTime, inlineOffset);
+        }
+        ZoneOffset defaultOffset = resolveOffset(timeZone, localDateTime);
+        return OffsetDateTime.of(localDateTime, defaultOffset);
+    }
+
+    public static ZoneOffset resolveOffset(String timeZone) {
+        return resolveOffset(timeZone, null);
+    }
+
+    public static ZoneOffset resolveOffset(String timeZone, LocalDateTime dateTime) {
+        if (timeZone == null || timeZone.isBlank()) {
+            return ZoneOffset.UTC;
+        }
+        try {
+            return ZoneOffset.of(timeZone);
+        } catch (DateTimeException e) {
+            try {
+                ZoneId zoneId = ZoneId.of(timeZone);
+                Instant instant = dateTime != null ? dateTime.atZone(zoneId).toInstant() : Instant.now();
+                return zoneId.getRules().getOffset(instant);
+            } catch (DateTimeException ex) {
+                final List<ApiParameterError> errors = List.of(ApiParameterError.parameterError("validation.msg.invalid.timezone",
+                        "The parameter timeZone (" + timeZone + ") is invalid", "timeZone", timeZone));
+                throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", errors,
+                        ex);
+            }
+        }
+    }
+
+    private static ZoneOffset extractOffsetFromStringOrNull(String dateTimeStr) {
+        int offsetIndex = findOffsetIndex(dateTimeStr);
+        if (offsetIndex < 0) {
+            return null;
+        }
+        String offsetStr = dateTimeStr.substring(offsetIndex);
+        try {
+            return parseOffset(offsetStr);
+        } catch (DateTimeException e) {
+            final List<ApiParameterError> errors = List.of(ApiParameterError.parameterError("validation.msg.invalid.offset",
+                    "The inline offset (" + offsetStr + ") is invalid", "offset", offsetStr));
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", errors, e);
+        }
+    }
+
+    private static final Pattern OFFSET_PATTERN = Pattern
+            .compile("(?<=[:\\s]\\d{2}|\\s)(Z|[+-][\\w:]+)$|(?<=\\d{2}:\\d{2}:\\d{2})(Z|[+-][\\w:]+)$", Pattern.CASE_INSENSITIVE);
+
+    private static int findOffsetIndex(String str) {
+        if (str == null || str.isEmpty()) {
+            return -1;
+        }
+        Matcher matcher = OFFSET_PATTERN.matcher(str);
+        if (matcher.find()) {
+            return matcher.start();
+        }
+        return -1;
+    }
+
+    private static ZoneOffset parseOffset(String offsetStr) {
+        if (offsetStr == null || offsetStr.isBlank()) {
+            return ZoneOffset.UTC;
+        }
+        offsetStr = offsetStr.trim();
+        if ("Z".equalsIgnoreCase(offsetStr)) {
+            return ZoneOffset.UTC;
+        }
+        char sign = offsetStr.charAt(0);
+        if (sign != '+' && sign != '-') {
+            throw new DateTimeException("Invalid offset format: " + offsetStr);
+        }
+        String numPart = offsetStr.substring(1);
+        if (numPart.contains(":")) {
+            return ZoneOffset.of(offsetStr);
+        }
+        if (!numPart.matches("\\d+")) {
+            throw new DateTimeException("Invalid offset format: " + offsetStr);
+        }
+        int hours;
+        int minutes = 0;
+        if (numPart.length() <= 2) {
+            hours = Integer.parseInt(numPart);
+        } else if (numPart.length() == 4) {
+            hours = Integer.parseInt(numPart.substring(0, 2));
+            minutes = Integer.parseInt(numPart.substring(2, 4));
+        } else {
+            return ZoneOffset.of(offsetStr);
+        }
+        return ZoneOffset.ofHoursMinutes(sign == '-' ? -hours : hours, sign == '-' ? -minutes : minutes);
+    }
+
+    private static ZoneOffset extractOffsetFromString(String dateTimeStr, ZoneOffset defaultOffset) {
+        int offsetIndex = findOffsetIndex(dateTimeStr);
+        if (offsetIndex < 0) {
+            return defaultOffset;
+        }
+        String offsetStr = dateTimeStr.substring(offsetIndex);
+        try {
+            return parseOffset(offsetStr);
+        } catch (DateTimeException e) {
+            final List<ApiParameterError> errors = List.of(ApiParameterError.parameterError("validation.msg.invalid.offset",
+                    "The inline offset (" + offsetStr + ") is invalid", "offset", offsetStr));
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", errors, e);
+        }
+    }
+
+    private static String removeOffsetFromString(String dateTimeStr) {
+        int offsetIndex = findOffsetIndex(dateTimeStr);
+        if (offsetIndex < 0) {
+            return dateTimeStr;
+        }
+        return dateTimeStr.substring(0, offsetIndex).trim();
     }
 
     /**
