@@ -27,6 +27,8 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.services.CreditBureauConfigurationApi;
+import org.apache.fineract.client.util.Calls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -214,4 +216,26 @@ public class CreditBureauConfigurationHelper {
         return new Gson().toJson(map);
     }
 
+    private static CreditBureauConfigurationApi api() {
+        return FineractClientHelper.getFineractClient().creditBureauConfiguration;
+    }
+
+    public static String addOrganisationCreditBureau(Long creditBureauId, String alias, boolean isActive) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("alias", alias);
+        map.put("isActive", isActive);
+        return Calls.ok(api().addOrganisationCreditBureau(creditBureauId, new Gson().toJson(map)));
+    }
+
+    public static String createCreditBureauConfigurationRaw(Long creditBureauId, String jsonBody) {
+        return Calls.ok(api().createCreditBureauConfiguration(creditBureauId, jsonBody));
+    }
+
+    public static String addOrganisationCreditBureauRaw(Long creditBureauId, String jsonBody) {
+        return Calls.ok(api().addOrganisationCreditBureau(creditBureauId, jsonBody));
+    }
+
+    public static String createLoanProductMappingRaw(Long organisationCreditBureauId, String jsonBody) {
+        return Calls.ok(api().createCreditBureauLoanProductMapping(organisationCreditBureauId, jsonBody));
+    }
 }
