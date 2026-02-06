@@ -45,7 +45,7 @@ public class PostgreSQLQueryService implements DatabaseQueryService {
     public boolean isTablePresent(DataSource dataSource, String tableName) {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         Integer result = jdbcTemplate.queryForObject(
-                "SELECT COUNT(table_name) FROM information_schema.tables " + "WHERE table_schema = 'public' AND table_name = ?",
+                "SELECT COUNT(table_name) FROM information_schema.tables " + "WHERE table_schema = current_schema() AND table_name = ?",
                 Integer.class, tableName);
         return Objects.equals(result, 1);
     }
@@ -55,7 +55,7 @@ public class PostgreSQLQueryService implements DatabaseQueryService {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         String sql = "SELECT column_name, is_nullable, data_type,"
                 + " coalesce(character_maximum_length, numeric_precision, datetime_precision) AS max_length, ordinal_position = 1 AS column_key"
-                + " FROM information_schema.columns WHERE table_catalog = current_catalog AND table_schema = current_schema AND table_name = ? ORDER BY ordinal_position";
+                + " FROM information_schema.columns WHERE table_catalog = current_catalog AND table_schema = current_schema() AND table_name = ? ORDER BY ordinal_position";
         final SqlRowSet columnDefinitions = jdbcTemplate.queryForRowSet(sql, tableName); // NOSONAR
         if (columnDefinitions.next()) {
             return columnDefinitions;
@@ -67,7 +67,7 @@ public class PostgreSQLQueryService implements DatabaseQueryService {
     @Override
     public List<IndexDetail> getTableIndexes(DataSource dataSource, String tableName) {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        String sql = "SELECT indexname FROM pg_indexes WHERE schemaname = 'public' AND tablename = ?";
+        String sql = "SELECT indexname FROM pg_indexes WHERE schemaname = current_schema() AND tablename = ?";
         final SqlRowSet indexDefinitions = jdbcTemplate.queryForRowSet(sql, tableName); // NOSONAR
         if (indexDefinitions.next()) {
             return DatabaseIndexMapper.getIndexDetails(indexDefinitions);
