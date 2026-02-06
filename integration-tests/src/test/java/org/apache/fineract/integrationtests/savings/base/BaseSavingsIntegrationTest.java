@@ -115,6 +115,7 @@ public class BaseSavingsIntegrationTest extends IntegrationTest {
                 .description("Daily interest posting product") //
                 .nominalAnnualInterestRate(10.0) //
                 .digitsAfterDecimal(0) //
+                .inMultiplesOf(0) //
                 .currencyCode("EUR") //
                 .accountingRule(1) // none
                 .interestCalculationDaysInYearType(DaysInYearType.DAYS_365).interestCompoundingPeriodType(InterestPeriodType.DAILY)
