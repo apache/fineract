@@ -25,7 +25,6 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -93,8 +92,7 @@ public class SelfShareAccountsApiResource {
             + "productId:Integer optionalIf entered, productId, productName and selectedProduct fields are returned.\n"
             + "Example Requests:\n" + "\n" + "self/shareaccounts/template?clientId=14\n" + "\n"
             + "self/shareaccounts/template?clientId=14&productId=3\n")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SelfShareAccountsApiResourceSwagger.GetShareAccountsClientIdProductIdResponse.class)))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SelfShareAccountsApiResourceSwagger.GetShareAccountsClientIdProductIdResponse.class))))
     public String template(@QueryParam("clientId") @Parameter(name = "clientId") final Long clientId,
             @QueryParam("productId") @Parameter(name = "productId") final Long productId, @Context final UriInfo uriInfo) {
 
@@ -124,8 +122,7 @@ public class SelfShareAccountsApiResource {
             + "clientId, productId, submittedDate, savingsAccountId, requestedShares, applicationDate\n" + "\n" + "\n" + "Optional Fields\n"
             + "\n" + "accountNo, externalId\n" + "\n" + "\n" + "Inherited from Product (if not provided)\n" + "\n"
             + "minimumActivePeriod, minimumActivePeriodFrequencyType, lockinPeriodFrequency, lockinPeriodFrequencyType.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SelfShareAccountsApiResourceSwagger.PostNewShareApplicationResponse.class)))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SelfShareAccountsApiResourceSwagger.PostNewShareApplicationResponse.class))))
     public CommandProcessingResult createAccount(AccountRequest accountRequest) {
         HashMap<String, Object> attr = selfShareAccountsDataValidator
                 .validateShareAccountApplication(toApiJsonSerializer.serialize(accountRequest));

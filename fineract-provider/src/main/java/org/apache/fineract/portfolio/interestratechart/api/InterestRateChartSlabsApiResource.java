@@ -26,7 +26,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -112,8 +111,7 @@ public class InterestRateChartSlabsApiResource {
             + "Mandatory Fields\n" + "periodType, fromPeriod, annualInterestRate\n" + "Optional Fields\n" + "toPeriod and description\n"
             + "Example Requests:\n" + "\n" + "interestratecharts/1/chartslabs")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = InterestRateChartStabRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartSlabsApiResourceSwagger.PostInterestRateChartsChartIdChartSlabsResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartSlabsApiResourceSwagger.PostInterestRateChartsChartIdChartSlabsResponse.class)))
     public CommandProcessingResult create(@PathParam("chartId") @Parameter(description = "chartId") final Long chartId,
             @Parameter(hidden = true) InterestRateChartStabRequest interestRateChartStabRequest) {
 
@@ -129,8 +127,7 @@ public class InterestRateChartSlabsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Slab", description = "It updates the Slab from chart")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = InterestRateChartStabRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartSlabsApiResourceSwagger.PutInterestRateChartsChartIdChartSlabsChartSlabIdResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartSlabsApiResourceSwagger.PutInterestRateChartsChartIdChartSlabsChartSlabIdResponse.class)))
     public CommandProcessingResult update(@PathParam("chartId") @Parameter(description = "chartId") final Long chartId,
             @PathParam("chartSlabId") @Parameter(description = "chartSlabId") final Long chartSlabId,
             @Parameter(hidden = true) InterestRateChartStabRequest request) {
@@ -146,8 +143,7 @@ public class InterestRateChartSlabsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Slab", description = "Delete a Slab from a chart")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartSlabsApiResourceSwagger.DeleteInterestRateChartsChartIdChartSlabsResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartSlabsApiResourceSwagger.DeleteInterestRateChartsChartIdChartSlabsResponse.class)))
     public CommandProcessingResult delete(@PathParam("chartId") @Parameter(description = "chartId") final Long chartId,
             @PathParam("chartSlabId") @Parameter(description = "chartSlabId") final Long chartSlabId) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteInterestRateChartSlab(chartId, chartSlabId).build();

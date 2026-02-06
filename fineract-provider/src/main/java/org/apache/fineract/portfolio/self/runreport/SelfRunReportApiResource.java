@@ -23,7 +23,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -66,8 +65,7 @@ public class SelfRunReportApiResource {
     @Operation(summary = "Running A Report", description = "" + "Example Requests:\n" + "\n" + "\n"
             + "self/runreports/Client%20Details?R_officeId=1" + "\n" + "\n" + "\n"
             + "self/runreports/Client%20Details?R_officeId=1&exportCSV=true")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfRunReportApiResourceSwagger.GetRunReportResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfRunReportApiResourceSwagger.GetRunReportResponse.class)))
     public Response runReport(@PathParam("reportName") @Parameter(description = "reportName") final String reportName,
             @Context final UriInfo uriInfo) {
         this.context.authenticatedUser();

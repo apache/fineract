@@ -24,7 +24,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -65,8 +64,7 @@ public class PocketApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Link/delink accounts to/from pocket", description = "Pockets behave as favourites. An user can link his/her Loan, Savings and Share accounts to pocket for faster access. In a similar way linked accounts can be delinked from the pocket.\n\n"
             + "Example Requests:\n" + "\n" + "self/pockets?command=linkAccounts\n" + "\n" + "self/pockets?command=delinkAccounts")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PocketApiResourceSwagger.PostLinkDelinkAccountsToFromPocketResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PocketApiResourceSwagger.PostLinkDelinkAccountsToFromPocketResponse.class)))
     public String handleCommands(@QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Context final UriInfo uriInfo, final String apiRequestBodyAsJson) {
 
@@ -94,8 +92,7 @@ public class PocketApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve accounts linked to pocket", description = "All linked loan\n\n" + "Example Requests:\n" + "\n" + "\n"
             + "self/pockets")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PocketApiResourceSwagger.GetAccountsLinkedToPocketResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PocketApiResourceSwagger.GetAccountsLinkedToPocketResponse.class)))
     public String retrieveAll() {
         return this.toApiJsonSerializer.serialize(this.pocketAccountMappingReadPlatformService.retrieveAll());
     }
