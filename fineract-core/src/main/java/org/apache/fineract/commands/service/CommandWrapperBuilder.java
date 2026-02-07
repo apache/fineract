@@ -3732,6 +3732,13 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createExternalAssetOwner() {
+        this.actionName = "CREATE";
+        this.entityName = "EXTERNAL_ASSET_OWNER";
+        this.href = "/external-asset-owners";
+        return this;
+    }
+
     public CommandWrapperBuilder buybackLoanToExternalAssetOwner(final Long loanId) {
         this.actionName = "BUYBACK";
         this.entityName = "LOAN";

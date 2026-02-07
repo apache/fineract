@@ -2019,3 +2019,26 @@ Feature: Asset Externalization
     Then LoanOwnershipTransferBusinessEvent with transfer type: "BUYBACK" and transfer asset owner based on intermediarySale is created
     When Admin set external asset owner loan product attribute "SETTLEMENT_MODEL" value "DEFAULT_SETTLEMENT" for loan product "LP1_DUE_DATE"
 
+  @TestRailId:C4640
+  Scenario: Verify creation of new external asset owner and it presence in the list
+    When Admin creates a new external asset owner with a unique ownerExternalId
+    Then External asset owner creation response has a non-null resourceId
+    Then External asset owner list contains the created owner
+
+  @TestRailId:C4641
+  Scenario: Verify creation of an external asset owner fails for null, duplicate and empty ownerExternalId
+    When Admin tries to create an external asset owner with null ownerExternalId then it should fail with 400 status code
+    When Admin tries to create an external asset owner with empty JSON body then it should fail with 400 status code
+    When Admin creates a new external asset owner with a unique ownerExternalId
+    Then External asset owner creation response has a non-null resourceId
+    When Admin tries to create an external asset owner with a duplicate ownerExternalId then it should fail with 403 status code
+
+  @TestRailId:C4642
+  Scenario: Verify creation of multiple external asset owners and presence of all items the list
+    When Admin creates a new external asset owner with a unique ownerExternalId
+    Then External asset owner creation response has a non-null resourceId
+    Then External asset owner list contains the created owner
+    When Admin creates a new external asset owner with a unique ownerExternalId
+    Then External asset owner creation response has a non-null resourceId
+    Then External asset owner list contains the created owner
+    Then Admin retrieves all external asset owners successfully

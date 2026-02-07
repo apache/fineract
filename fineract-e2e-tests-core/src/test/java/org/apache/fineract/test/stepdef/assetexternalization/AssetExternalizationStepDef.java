@@ -37,6 +37,7 @@
 package org.apache.fineract.test.stepdef.assetexternalization;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.fail;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.cucumber.datatable.DataTable;
@@ -60,11 +61,14 @@ import org.apache.fineract.client.models.ExternalOwnerJournalEntryData;
 import org.apache.fineract.client.models.ExternalOwnerTransferJournalEntryData;
 import org.apache.fineract.client.models.ExternalTransferData;
 import org.apache.fineract.client.models.ExternalTransferLoanProductAttributesData;
+import org.apache.fineract.client.models.ExternalTransferOwnerData;
 import org.apache.fineract.client.models.GetLoanProductsResponse;
 import org.apache.fineract.client.models.JournalEntryData;
 import org.apache.fineract.client.models.PageExternalTransferData;
 import org.apache.fineract.client.models.PageExternalTransferLoanProductAttributesData;
 import org.apache.fineract.client.models.PostExternalAssetOwnerLoanProductAttributeRequest;
+import org.apache.fineract.client.models.PostExternalAssetOwnerRequest;
+import org.apache.fineract.client.models.PostExternalAssetOwnerResponse;
 import org.apache.fineract.client.models.PostInitiateTransferResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutExternalAssetOwnerLoanProductAttributeRequest;
@@ -927,6 +931,80 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_USER_GENERATED + "_" + type, transferExternalId);
 
         createAssetExternalizationRequestByLoanId(table, transferExternalId, false);
+    }
+
+    @When("Admin creates a new external asset owner with a unique ownerExternalId")
+    public void createExternalAssetOwnerWithUniqueId() {
+        String ownerExternalId = Utils.randomStringGenerator(OWNER_EXTERNAL_ID_PREFIX, 20);
+        testContext().set(TestContextKey.EXTERNAL_ASSET_OWNER_EXTERNAL_ID, ownerExternalId);
+
+        PostExternalAssetOwnerRequest request = new PostExternalAssetOwnerRequest().ownerExternalId(ownerExternalId);
+        PostExternalAssetOwnerResponse response = ok(() -> externalAssetOwnersApi().createExternalAssetOwner(request));
+        testContext().set(TestContextKey.EXTERNAL_ASSET_OWNER_CREATE_RESPONSE, response);
+
+        log.debug("Created external asset owner with externalId: {}, resourceId: {}", ownerExternalId, response.getResourceId());
+    }
+
+    @Then("External asset owner creation response has a non-null resourceId")
+    public void verifyCreateResponseHasResourceId() {
+        PostExternalAssetOwnerResponse response = testContext().get(TestContextKey.EXTERNAL_ASSET_OWNER_CREATE_RESPONSE);
+        assertThat(response).as("External asset owner create response should not be null").isNotNull();
+        assertThat(response.getResourceId()).as("resourceId should not be null").isNotNull();
+    }
+
+    @Then("External asset owner list contains the created owner")
+    public void verifyOwnerExistsInList() {
+        String ownerExternalId = testContext().get(TestContextKey.EXTERNAL_ASSET_OWNER_EXTERNAL_ID);
+        PostExternalAssetOwnerResponse createResponse = testContext().get(TestContextKey.EXTERNAL_ASSET_OWNER_CREATE_RESPONSE);
+
+        List<ExternalTransferOwnerData> owners = ok(() -> externalAssetOwnersApi().retrieveExternalAssetOwners());
+        assertThat(owners).as("Owners list should not be empty").isNotEmpty();
+
+        ExternalTransferOwnerData found = owners.stream().filter(o -> ownerExternalId.equals(o.getExternalId())).findFirst().orElse(null);
+
+        assertThat(found).as("Owner with externalId '%s' should exist in the list", ownerExternalId).isNotNull();
+        assertThat(found.getId()).as("Owner id from GET should match resourceId from create").isEqualTo(createResponse.getResourceId());
+    }
+
+    @When("Admin tries to create an external asset owner with null ownerExternalId then it should fail with {int} status code")
+    public void createExternalAssetOwnerWithNullIdFails(int expectedStatusCode) {
+        PostExternalAssetOwnerRequest request = new PostExternalAssetOwnerRequest().ownerExternalId(null);
+
+        CallFailedRuntimeException exception = fail(() -> externalAssetOwnersApi().createExternalAssetOwner(request));
+
+        assertThat(exception.getStatus()).as("Expected HTTP %d for null ownerExternalId", expectedStatusCode).isEqualTo(expectedStatusCode);
+        assertThat(exception.getDeveloperMessage()).as("Error message should indicate ownerExternalId cannot be blank")
+                .containsAnyOf("validation.msg.externalAssetOwner.ownerExternalId.cannot.be.blank", "ownerExternalId");
+    }
+
+    @When("Admin tries to create an external asset owner with a duplicate ownerExternalId then it should fail with {int} status code")
+    public void createExternalAssetOwnerWithDuplicateIdFails(int expectedStatusCode) {
+        String ownerExternalId = testContext().get(TestContextKey.EXTERNAL_ASSET_OWNER_EXTERNAL_ID);
+
+        PostExternalAssetOwnerRequest request = new PostExternalAssetOwnerRequest().ownerExternalId(ownerExternalId);
+
+        CallFailedRuntimeException exception = fail(() -> externalAssetOwnersApi().createExternalAssetOwner(request));
+
+        assertThat(exception.getStatus()).as("Expected HTTP %d for duplicate ownerExternalId", expectedStatusCode)
+                .isEqualTo(expectedStatusCode);
+        assertThat(exception.getDeveloperMessage()).as("Error message should indicate duplicate external id")
+                .contains("External Asset Owner id already exist");
+    }
+
+    @When("Admin tries to create an external asset owner with empty JSON body then it should fail with {int} status code")
+    public void createExternalAssetOwnerWithEmptyBodyFails(int expectedStatusCode) {
+        PostExternalAssetOwnerRequest request = new PostExternalAssetOwnerRequest();
+
+        CallFailedRuntimeException exception = fail(() -> externalAssetOwnersApi().createExternalAssetOwner(request));
+
+        assertThat(exception.getStatus()).as("Expected HTTP %d for missing ownerExternalId", expectedStatusCode)
+                .isEqualTo(expectedStatusCode);
+    }
+
+    @Then("Admin retrieves all external asset owners successfully")
+    public void retrieveAllExternalAssetOwners() {
+        List<ExternalTransferOwnerData> owners = ok(() -> externalAssetOwnersApi().retrieveExternalAssetOwners());
+        assertThat(owners).as("Owners list should not be null").isNotNull();
     }
 
 }

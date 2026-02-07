@@ -59,7 +59,9 @@ import org.apache.fineract.investor.domain.ExternalAssetOwner;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerRepository;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
+import org.apache.fineract.investor.exception.ExternalAssetOwnerDuplicateException;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerInitiateTransferException;
+import org.apache.fineract.investor.serialization.ExternalAssetOwnerValidator;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
@@ -82,6 +84,7 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     private final DelayedSettlementAttributeService delayedSettlementAttributeService;
     private final ConfigurationDomainService configurationDomainService;
     private final ExternalAssetOwnersReadService externalAssetOwnersReadService;
+    private final ExternalAssetOwnerValidator externalAssetOwnerValidator;
 
     @Override
     @Transactional
@@ -600,5 +603,19 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     private List<LoanStatus> getAllowedLoanStatusesForDelayedSettlement() {
         return configurationDomainService.getAllowedLoanStatusesOfDelayedSettlementForExternalAssetTransfer().stream()
                 .map(LoanStatus::valueOf).collect(Collectors.toList());
+    }
+
+    @Override
+    public CommandProcessingResult createExternalAssetOwner(JsonCommand command) {
+        externalAssetOwnerValidator.validateForCreate(command);
+        String ownerExternalId = command.stringValueOfParameterNamed(ExternalTransferRequestParameters.OWNER_EXTERNAL_ID);
+        Optional<ExternalAssetOwner> optExternalId = externalAssetOwnerRepository
+                .findByExternalId(ExternalIdFactory.produce(ownerExternalId));
+        if (!optExternalId.isEmpty()) {
+            throw new ExternalAssetOwnerDuplicateException(ownerExternalId);
+        }
+
+        final ExternalAssetOwner externalAssetOwner = createAndGetAssetOwner(ownerExternalId);
+        return new CommandProcessingResultBuilder().withEntityId(externalAssetOwner.getId()).build();
     }
 }

@@ -16,20 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.service;
+package org.apache.fineract.investor.exception;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface ExternalAssetOwnersWriteService {
+/**
+ * A {@link RuntimeException} thrown when a GL Closure for a given date and Office combination is already present
+ */
+public class ExternalAssetOwnerDuplicateException extends AbstractPlatformDomainRuleException {
 
-    CommandProcessingResult intermediarySaleLoanByLoanId(JsonCommand jsonCommand);
+    public ExternalAssetOwnerDuplicateException(final String externalId) {
+        super("error.msg.provided.external.id.already.exists", "Provided external id already exists with Id " + externalId);
+    }
 
-    CommandProcessingResult saleLoanByLoanId(JsonCommand command);
-
-    CommandProcessingResult buybackLoanByLoanId(JsonCommand command);
-
-    CommandProcessingResult cancelTransactionById(JsonCommand command);
-
-    CommandProcessingResult createExternalAssetOwner(JsonCommand command);
 }

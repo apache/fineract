@@ -30,6 +30,7 @@ public final class CommandParameterUtil {
     public static final String CANCEL_COMMAND_VALUE = "cancel";
     public static final String UPDATE_COMMAND_VALUE = "update";
     public static final String DELETE_COMMAND_VALUE = "delete";
+    public static final String CREATE_COMMAND_VALUE = "create";
 
     private CommandParameterUtil() {}
 

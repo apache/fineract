@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.investor.service;
 
+import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.investor.data.ExternalOwnerJournalEntryData;
 import org.apache.fineract.investor.data.ExternalOwnerTransferJournalEntryData;
 import org.apache.fineract.investor.data.ExternalTransferData;
+import org.apache.fineract.investor.data.ExternalTransferOwnerData;
 import org.springframework.data.domain.Page;
 
 public interface ExternalAssetOwnersReadService {
@@ -40,4 +42,7 @@ public interface ExternalAssetOwnersReadService {
     ExternalTransferData retrieveFirstTransferByExternalId(ExternalId externalTransferId);
 
     Long retrieveLastTransferIdByExternalId(ExternalId externalTransferId);
+
+    List<ExternalTransferOwnerData> retrieveAllExternalOwners();
+
 }

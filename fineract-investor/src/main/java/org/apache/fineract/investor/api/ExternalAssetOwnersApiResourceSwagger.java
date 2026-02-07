@@ -68,4 +68,22 @@ final class ExternalAssetOwnersApiResourceSwagger {
         }
     }
 
+    @Schema(description = "PostExternalAssetOwnerRequest")
+    public static final class PostExternalAssetOwnerRequest {
+
+        private PostExternalAssetOwnerRequest() {}
+
+        @Schema(example = "36efeb06-d835-48a1-99eb-09bd1d348c1e", description = "External Asset Owner External Id")
+        public String ownerExternalId;
+    }
+
+    @Schema(description = "PostExternalAssetOwnerResponse")
+    public static final class PostExternalAssetOwnerResponse {
+
+        private PostExternalAssetOwnerResponse() {}
+
+        @Schema(example = "1", description = "External Asset Owner Id")
+        public Long resourceId;
+    }
+
 }
