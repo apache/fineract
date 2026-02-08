@@ -29,12 +29,18 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GetSearchResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.SearchHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
+import org.apache.fineract.integrationtests.common.shares.ShareAccountHelper;
+import org.apache.fineract.integrationtests.common.shares.ShareAccountTransactionHelper;
+import org.apache.fineract.integrationtests.common.shares.ShareProductHelper;
+import org.apache.fineract.integrationtests.common.shares.ShareProductTransactionHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -100,6 +106,83 @@ public class SearchResourcesTest {
                 getResources(resources));
         assertNotNull(searchResponse);
         assertEquals(0, searchResponse.size());
+    }
+
+    @Test
+    public void searchOverSavingsResources() {
+        final List<String> resources = Arrays.asList("savings");
+
+        String jsonPayload = ClientHelper.getBasicClientAsJSON(ClientHelper.DEFAULT_OFFICE_ID, ClientHelper.LEGALFORM_ID_PERSON, null);
+        final PostClientsResponse clientResponse = ClientHelper.addClientAsPerson(requestSpec, responseSpec, jsonPayload);
+        final Long clientId = clientResponse.getClientId();
+
+        final Integer savingsId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId.intValue(), "1000");
+        final SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        final String query = (String) savingsAccountHelper.getSavingsAccountDetail(savingsId, "accountNo");
+
+        final ArrayList<GetSearchResponse> searchResponse = SearchHelper.getSearch(requestSpec, responseSpec, query, Boolean.FALSE,
+                getResources(resources));
+
+        assertNotNull(searchResponse);
+        assertEquals(1, searchResponse.size());
+
+        final GetSearchResponse result = searchResponse.getFirst();
+
+        assertEquals("SAVING", result.getEntityType());
+        assertNotNull(result.getEntityStatus());
+        assertNotNull(result.getEntityStatus().getId());
+        assertNotNull(result.getEntityStatus().getCode());
+        assertNotNull(result.getEntityStatus().getValue());
+    }
+
+    @Test
+    public void searchOverSharesResources() {
+        final List<String> resources = Arrays.asList("shares");
+
+        String jsonPayload = ClientHelper.getBasicClientAsJSON(ClientHelper.DEFAULT_OFFICE_ID, ClientHelper.LEGALFORM_ID_PERSON, null);
+        final PostClientsResponse clientsResponse = ClientHelper.addClientAsPerson(requestSpec, responseSpec, jsonPayload);
+        final Long clientId = clientsResponse.getClientId();
+
+        final ShareProductHelper shareProductHelper = new ShareProductHelper();
+        final Integer productId = ShareProductTransactionHelper.createShareProduct(shareProductHelper.build(), requestSpec, responseSpec);
+
+        final Integer savingsId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId.intValue(), "1000");
+
+        final String shareJson = new ShareAccountHelper().withClientId(String.valueOf(clientId)).withProductId(String.valueOf(productId))
+                .withSavingsAccountId(String.valueOf(savingsId)).withSubmittedDate("01 January 2026").withApplicationDate("01 January 2026")
+                .withRequestedShares("10").build();
+
+        final Integer shareAccountId = ShareAccountTransactionHelper.createShareAccount(shareJson, requestSpec, responseSpec);
+
+        final String approveJson = "{}";
+        ShareAccountTransactionHelper.postCommand("approve", shareAccountId, approveJson, requestSpec, responseSpec);
+
+        final String activateJson = """
+                {
+                  "activatedDate": "01 January 2026",
+                  "dateFormat": "dd MMMM yyyy",
+                  "locale": "en"
+                }
+                """;
+        ShareAccountTransactionHelper.postCommand("activate", shareAccountId, activateJson, requestSpec, responseSpec);
+
+        final Map<String, Object> shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec,
+                responseSpec);
+        final String query = (String) shareAccountData.get("accountNo");
+
+        final ArrayList<GetSearchResponse> searchResponse = SearchHelper.getSearch(requestSpec, responseSpec, query, Boolean.FALSE,
+                getResources(resources));
+
+        assertNotNull(searchResponse);
+        assertEquals(1, searchResponse.size());
+
+        final GetSearchResponse result = searchResponse.getFirst();
+
+        assertEquals("SHARE", result.getEntityType());
+        assertNotNull(result.getEntityStatus());
+        assertNotNull(result.getEntityStatus().getId());
+        assertNotNull(result.getEntityStatus().getCode());
+        assertNotNull(result.getEntityStatus().getValue());
     }
 
     private String getResources(final List<String> resources) {
