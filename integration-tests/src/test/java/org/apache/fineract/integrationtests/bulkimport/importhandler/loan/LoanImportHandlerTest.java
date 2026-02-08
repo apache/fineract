@@ -45,6 +45,7 @@ import org.apache.fineract.client.models.PaymentTypeRequest;
 import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.infrastructure.bulkimport.constants.LoanConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
+import org.apache.fineract.integrationtests.bulkimport.importhandler.LocalContentStorageUtil;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.OfficeDomain;
@@ -246,7 +247,7 @@ public class LoanImportHandlerTest {
         Thread.sleep(10000);
 
         // check status column of output excel
-        String location = loanTransactionHelper.getOutputTemplateLocation(importDocumentId);
+        String location = LocalContentStorageUtil.path(loanTransactionHelper.getOutputTemplateLocation(importDocumentId));
         FileInputStream fileInputStream = new FileInputStream(location);
         Workbook outputworkbook = new HSSFWorkbook(fileInputStream);
         Sheet outputLoanSheet = outputworkbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);

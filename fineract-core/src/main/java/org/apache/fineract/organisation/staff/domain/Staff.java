@@ -22,7 +22,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
@@ -33,7 +32,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.documentmanagement.domain.Image;
 import org.apache.fineract.organisation.office.domain.Office;
 
 @Getter
@@ -81,9 +79,8 @@ public class Staff extends AbstractPersistableCustom<Long> {
     @JoinColumn(name = "organisational_role_parent_staff_id")
     private Staff organisationalRoleParentStaff;
 
-    @OneToOne(optional = true)
-    @JoinColumn(name = "image_id")
-    private Image image;
+    @Column(name = "image_id")
+    private Long imageId;
 
     public static Staff fromJson(final Office staffOffice, final JsonCommand command) {
 
@@ -260,10 +257,6 @@ public class Staff extends AbstractPersistableCustom<Long> {
 
     public Office office() {
         return this.office;
-    }
-
-    public void setImage(Image image) {
-        this.image = image;
     }
 
 }

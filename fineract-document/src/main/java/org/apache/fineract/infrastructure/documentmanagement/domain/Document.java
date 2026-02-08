@@ -18,150 +18,58 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldNameConstants;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
-@Entity
-@Table(name = "m_document")
-public class Document extends AbstractPersistableCustom<Long> {
+@Table("m_document")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
+@FieldNameConstants
+public final class Document implements Serializable {
 
-    @Column(name = "parent_entity_type", length = 50)
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @Column("id")
+    private Long id;
+
+    @Column("parent_entity_type")
     private String parentEntityType;
 
-    @Column(name = "parent_entity_id", length = 1000)
+    @Column("parent_entity_id")
     private Long parentEntityId;
 
-    @Column(name = "name", length = 250)
+    @Column("name")
     private String name;
 
-    @Column(name = "file_name", length = 250)
+    @Column("file_name")
     private String fileName;
 
-    @Column(name = "size")
+    @Column("size")
     private Long size;
 
-    @Column(name = "type", length = 50)
+    @Column("type")
     private String type;
 
-    @Column(name = "description", length = 1000)
+    @Column("description")
     private String description;
 
-    @Column(name = "location", length = 500)
+    @Column("location")
     private String location;
 
-    @Column(name = "storage_type_enum")
+    @Column("storage_type_enum")
     private Integer storageType;
-
-    public Document() {}
-
-    public static Document createNew(final String parentEntityType, final Long parentEntityId, final String name, final String fileName,
-            final Long size, final String type, final String description, final String location, final StorageType storageType) {
-        return new Document(parentEntityType, parentEntityId, name, fileName, size, type, description, location, storageType);
-    }
-
-    private Document(final String parentEntityType, final Long parentEntityId, final String name, final String fileName, final Long size,
-            final String type, final String description, final String location, final StorageType storageType) {
-        this.parentEntityType = StringUtils.defaultIfEmpty(parentEntityType, null);
-        this.parentEntityId = parentEntityId;
-        this.name = StringUtils.defaultIfEmpty(name, null);
-        this.fileName = StringUtils.defaultIfEmpty(fileName, null);
-        this.size = size;
-        this.type = StringUtils.defaultIfEmpty(type, null);
-        this.description = StringUtils.defaultIfEmpty(description, null);
-        this.location = StringUtils.defaultIfEmpty(location, null);
-        this.storageType = storageType.getValue();
-    }
-
-    public void update(final DocumentCommand command) {
-        if (command.isDescriptionChanged()) {
-            this.description = command.getDescription();
-        }
-        if (command.isFileNameChanged()) {
-            this.fileName = command.getFileName();
-        }
-        if (command.isFileTypeChanged()) {
-            this.type = command.getType();
-        }
-        if (command.isLocationChanged()) {
-            this.location = command.getLocation();
-        }
-        if (command.isNameChanged()) {
-            this.name = command.getName();
-        }
-        if (command.isSizeChanged()) {
-            this.size = command.getSize();
-        }
-    }
-
-    public String getParentEntityType() {
-        return this.parentEntityType;
-    }
-
-    public void setParentEntityType(final String parentEntityType) {
-        this.parentEntityType = parentEntityType;
-    }
-
-    public Long getParentEntityId() {
-        return this.parentEntityId;
-    }
-
-    public void setParentEntityId(final Long parentEntityId) {
-        this.parentEntityId = parentEntityId;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public String getFileName() {
-        return this.fileName;
-    }
-
-    public void setFileName(final String fileName) {
-        this.fileName = fileName;
-    }
-
-    public Long getSize() {
-        return this.size;
-    }
-
-    public void setSize(final Long size) {
-        this.size = size;
-    }
-
-    public String getType() {
-        return this.type;
-    }
-
-    public void setType(final String type) {
-        this.type = type;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    public void setDescription(final String description) {
-        this.description = description;
-    }
-
-    public String getLocation() {
-        return this.location;
-    }
-
-    public void setLocation(final String location) {
-        this.location = location;
-    }
-
-    public StorageType storageType() {
-        return StorageType.fromInt(this.storageType);
-    }
 }

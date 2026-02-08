@@ -114,6 +114,7 @@ public class DefaultCommandAuditor implements CommandAuditor {
             final var now = Instant.now();
             final var commandEntity = mapper.map(command);
 
+            commandEntity.setExecutedAt(now);
             commandEntity.setUpdatedAt(now);
             commandEntity.setState(ERROR);
 
@@ -138,7 +139,17 @@ public class DefaultCommandAuditor implements CommandAuditor {
 
     @Retry(name = "commandAuditFallback", fallbackMethod = "fatal")
     @SuppressWarnings("UnusedMethod")
-    private void fallback(Command<?> command, Throwable t) throws Exception {
+    void fallback(Command<?> command, Throwable t) throws Exception {
+        if (Boolean.TRUE.equals(properties.getFileDeadLetterQueueEnabled())) {
+            fallback(command, null, t);
+        } else {
+            fatal(command, t);
+        }
+    }
+
+    @Retry(name = "commandAuditFallback", fallbackMethod = "fatal")
+    @SuppressWarnings("UnusedMethod")
+    void fallback(Command<?> command, Object response, Throwable t) throws Exception {
         if (Boolean.TRUE.equals(properties.getFileDeadLetterQueueEnabled())) {
             setError(command, t);
             write(command);
@@ -148,7 +159,12 @@ public class DefaultCommandAuditor implements CommandAuditor {
     }
 
     @SuppressWarnings("UnusedMethod")
-    private void fatal(Command<?> command, Throwable t) {
+    void fatal(Command<?> command, Throwable t) {
+        fatal(command, null, t);
+    }
+
+    @SuppressWarnings("UnusedMethod")
+    void fatal(Command<?> command, Object response, Throwable t) {
         // note: last line of defense; if this fails then all is lost
         setError(command, t);
         log.error("Command audit error: {}", command, t);

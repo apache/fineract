@@ -33,7 +33,6 @@
         <!-- Core Module Entities -->
         <class>org.apache.fineract.useradministration.domain.Role</class>
         <class>org.apache.fineract.portfolio.fund.domain.Fund</class>
-        <class>org.apache.fineract.infrastructure.documentmanagement.domain.Image</class>
         <class>org.apache.fineract.organisation.workingdays.domain.WorkingDays</class>
         <class>org.apache.fineract.useradministration.domain.Permission</class>
         <class>org.apache.fineract.useradministration.domain.AppUserClientMapping</class>

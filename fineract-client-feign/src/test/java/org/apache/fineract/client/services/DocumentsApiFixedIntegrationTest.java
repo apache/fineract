@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.fineract.client.feign.FineractFeignClientConfig;
 import org.apache.fineract.client.feign.services.DocumentsApiFixed;
-import org.apache.fineract.client.models.DeleteEntityTypeEntityIdDocumentsResponse;
 import org.apache.fineract.client.models.DocumentData;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -149,7 +148,7 @@ class DocumentsApiFixedIntegrationTest {
                 .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(responseBody)));
 
         DocumentsApiFixed api = config.createClient(DocumentsApiFixed.class);
-        DeleteEntityTypeEntityIdDocumentsResponse response = api.deleteDocument("clients", 123L, 456L);
+        var response = api.deleteDocument("clients", 123L, 456L);
 
         assertThat(response).isNotNull();
         assertThat(response.getResourceId()).isEqualTo(456L);
@@ -162,7 +161,7 @@ class DocumentsApiFixedIntegrationTest {
                 .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(responseBody)));
 
         DocumentsApiFixed api = config.createClient(DocumentsApiFixed.class);
-        DeleteEntityTypeEntityIdDocumentsResponse response = api.deleteDocument("loans", 789L, 999L);
+        var response = api.deleteDocument("loans", 789L, 999L);
 
         assertThat(response).isNotNull();
         assertThat(response.getResourceId()).isEqualTo(999L);

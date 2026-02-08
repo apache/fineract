@@ -55,7 +55,7 @@ public class JerseyConfig extends ResourceConfig {
 
     @PostConstruct
     public void setup() {
-        appCtx.getBeansWithAnnotation(Path.class).values().forEach(component -> register(component.getClass()));
+        appCtx.getBeansWithAnnotation(Path.class).values().forEach(this::register);
 
         appCtx.getBeansWithAnnotation(Provider.class).values().forEach(this::register);
     }

@@ -364,6 +364,7 @@ public class FineractProperties {
         private List<String> regexWhitelist;
         private boolean mimeWhitelistEnabled;
         private List<String> mimeWhitelist;
+        private Integer defaultBufferSize;
         private FineractContentFilesystemProperties filesystem;
         private FineractContentS3Properties s3;
     }

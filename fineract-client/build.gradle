@@ -17,6 +17,7 @@
  * under the License.
  */
 apply plugin: 'org.openapi.generator'
+apply plugin: 'idea'
 description = 'Fineract Client'
 
 apply from: 'dependencies.gradle'
@@ -33,6 +34,19 @@ openApiMeta {
 openApiValidate {
     inputSpec = "file:///$swaggerFile"
     recommend = true
+}
+
+openApiGenerate {
+    outputDir = "$buildDir/generated/temp-java".toString()
+}
+
+idea {
+    module {
+        // Marks the generated directory as a Source Root
+        sourceDirs += file("$buildDir/generated/temp-java/src/main/java")
+        // Or use generatedSourceDirs for explicit "Generated Source" marking
+        generatedSourceDirs += file("$buildDir/generated/temp-java/src/main/java")
+    }
 }
 
 task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {

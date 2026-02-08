@@ -494,9 +494,8 @@ public final class Utils {
     @Deprecated(forRemoval = true)
     public static String performServerOutputTemplateLocationGet(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String getURL, final String importDocumentId) {
-        final String templateLocation = given().spec(requestSpec).queryParam("importDocumentId", importDocumentId).expect()
-                .spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
-        return templateLocation.substring(1, templateLocation.length() - 1);
+        return given().spec(requestSpec).queryParam("importDocumentId", importDocumentId).expect().spec(responseSpec).log().ifError().when()
+                .get(getURL).andReturn().asString();
     }
 
     @Deprecated(forRemoval = true)

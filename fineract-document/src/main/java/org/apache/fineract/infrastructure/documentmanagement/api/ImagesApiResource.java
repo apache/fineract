@@ -18,9 +18,30 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.api;
 
+import static java.util.Objects.requireNonNull;
+import static org.apache.fineract.infrastructure.contentstore.processor.DataUrlEncoderContentProcessor.DATA_URL_ENCODE_PARAM_CONTENT_TYPE;
+import static org.apache.fineract.infrastructure.contentstore.processor.DataUrlEncoderContentProcessor.DATA_URL_ENCODE_PARAM_ENCODING;
+import static org.apache.fineract.infrastructure.contentstore.processor.ImageResizeContentProcessor.IMAGE_RESIZE_PARAM_FORMAT;
+import static org.apache.fineract.infrastructure.contentstore.processor.ImageResizeContentProcessor.IMAGE_RESIZE_PARAM_MAX_HEIGHT;
+import static org.apache.fineract.infrastructure.contentstore.processor.ImageResizeContentProcessor.IMAGE_RESIZE_PARAM_MAX_WIDTH;
+import static org.apache.fineract.infrastructure.documentmanagement.api.DocumentApiConstants.DOCUMENT_API_PARAM_ENTITY_ID;
+import static org.apache.fineract.infrastructure.documentmanagement.api.DocumentApiConstants.DOCUMENT_API_PARAM_ENTITY_TYPE;
+import static org.apache.fineract.infrastructure.documentmanagement.api.DocumentApiConstants.DOCUMENT_API_PARAM_FILE;
+import static org.apache.fineract.infrastructure.documentmanagement.api.ImageApiConstants.IMAGE_API_PARAM_MAX_HEIGHT;
+import static org.apache.fineract.infrastructure.documentmanagement.api.ImageApiConstants.IMAGE_API_PARAM_MAX_WIDTH;
+import static org.apache.fineract.infrastructure.documentmanagement.api.ImageApiConstants.IMAGE_API_PARAM_OUTPUT;
+import static org.apache.fineract.infrastructure.documentmanagement.api.ImageApiConstants.IMAGE_API_VALUE_ENCODING_BASE64;
+import static org.apache.fineract.infrastructure.documentmanagement.api.ImageApiConstants.IMAGE_API_VALUE_OUTPUT_INLINE_OCTET;
+import static org.apache.fineract.util.StreamResponseUtil.DISPOSITION_TYPE_ATTACHMENT;
+import static org.apache.fineract.util.StreamResponseUtil.DISPOSITION_TYPE_INLINE;
+import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
+import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
+
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -33,196 +54,175 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Base64;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.data.UploadRequest;
-import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
-import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils;
-import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils.ImageFileExtension;
-import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
-import org.apache.fineract.infrastructure.documentmanagement.data.ImageResizer;
-import org.apache.fineract.infrastructure.documentmanagement.exception.ContentManagementException;
-import org.apache.fineract.infrastructure.documentmanagement.exception.InvalidEntityTypeForImageManagementException;
+import org.apache.fineract.command.core.CommandPipeline;
+import org.apache.fineract.infrastructure.contentstore.processor.Base64DecoderContentProcessor;
+import org.apache.fineract.infrastructure.contentstore.processor.Base64EncoderContentProcessor;
+import org.apache.fineract.infrastructure.contentstore.processor.ContentProcessorContext;
+import org.apache.fineract.infrastructure.contentstore.processor.DataUrlDecoderContentProcessor;
+import org.apache.fineract.infrastructure.contentstore.processor.DataUrlEncoderContentProcessor;
+import org.apache.fineract.infrastructure.contentstore.processor.ImageResizeContentProcessor;
+import org.apache.fineract.infrastructure.documentmanagement.command.ImageCreateCommand;
+import org.apache.fineract.infrastructure.documentmanagement.command.ImageDeleteCommand;
+import org.apache.fineract.infrastructure.documentmanagement.data.ImageCreateRequest;
+import org.apache.fineract.infrastructure.documentmanagement.data.ImageCreateResponse;
+import org.apache.fineract.infrastructure.documentmanagement.data.ImageDeleteRequest;
+import org.apache.fineract.infrastructure.documentmanagement.data.ImageDeleteResponse;
 import org.apache.fineract.infrastructure.documentmanagement.service.ImageReadPlatformService;
-import org.apache.fineract.infrastructure.documentmanagement.service.ImageWritePlatformService;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.util.StreamResponseUtil;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.stereotype.Component;
 
+// NOTE: left for backward compatibility only, could be unified with documents
+@Deprecated
 @Slf4j
 @RequiredArgsConstructor
 @Component
-@Path("/v1/{entity}/{entityId}/images")
+@Path("/v1/{entityType}/{entityId}/images")
 public class ImagesApiResource {
 
-    private final PlatformSecurityContext context;
     private final ImageReadPlatformService imageReadPlatformService;
-    private final ImageWritePlatformService imageWritePlatformService;
+    private final CommandPipeline commandPipeline;
+    private final ImageResizeContentProcessor imageResizeContentProcessor;
+    private final Base64EncoderContentProcessor base64EncoderContentProcessor;
+    private final DataUrlEncoderContentProcessor dataUrlEncoderContentProcessor;
+    private final Base64DecoderContentProcessor base64DecoderContentProcessor;
+    private final DataUrlDecoderContentProcessor dataUrlDecoderContentProcessor;
     private final FileUploadValidator fileUploadValidator;
-    private final ImageResizer imageResizer;
 
-    /**
-     * Upload images through multi-part form upload
-     */
-    @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(MediaType.APPLICATION_JSON)
-    @RequestBody(description = "Upload new client image", content = {
-            @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
-    public CommandProcessingResult addNewClientImage(@PathParam("entity") final String entityName,
-            @PathParam("entityId") final Long entityId, @HeaderParam("Content-Length") final Long fileSize,
-            @FormDataParam("file") final InputStream inputStream, @FormDataParam("file") final FormDataContentDisposition fileDetails,
-            @FormDataParam("file") final FormDataBodyPart bodyPart) {
-        validateEntityTypeforImage(entityName);
-        fileUploadValidator.validate(fileSize, inputStream, fileDetails, bodyPart);
-        // TODO: vishwas might need more advances validation (like reading magic
-        // number) for handling malicious clients
-        // and clients not setting mime type
-        ContentRepositoryUtils.validateClientImageNotEmpty(fileDetails.getFileName());
-        ContentRepositoryUtils.validateImageMimeType(bodyPart.getMediaType().toString());
-
-        return imageWritePlatformService.saveOrUpdateImage(entityName, entityId, fileDetails.getFileName(), inputStream, fileSize);
-    }
-
-    /**
-     * Upload image as a Data URL (essentially a base64 encoded stream)
-     */
-    @POST
-    @Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
-    @Produces(MediaType.APPLICATION_JSON)
-    public CommandProcessingResult addNewClientImage(@PathParam("entity") final String entityName,
-            @PathParam("entityId") final Long entityId, final String jsonRequestBody) {
-        validateEntityTypeforImage(entityName);
-
-        final Base64EncodedImage base64EncodedImage = ContentRepositoryUtils.extractImageFromDataURL(jsonRequestBody);
-
-        return imageWritePlatformService.saveOrUpdateImage(entityName, entityId, base64EncodedImage);
-    }
-
-    /**
-     * Returns a images, either as Base64 encoded text/plain or as inline or attachment with image MIME type as
-     * Content-Type.
-     */
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
     // FINERACT-1265: Do NOT specify @Produces(TEXT_PLAIN) here - it may actually not (if it calls the next methods it's
     // octet-stream)
-    public Response retrieveImage(@PathParam("entity") final String entityName, @PathParam("entityId") final Long entityId,
-            @QueryParam("maxWidth") final Integer maxWidth, @QueryParam("maxHeight") final Integer maxHeight,
-            @QueryParam("output") final String output, @HeaderParam("Accept") String acceptHeader) {
-        validateEntityTypeforImage(entityName);
-        if (EntityTypeForImages.CLIENTS.toString().equalsIgnoreCase(entityName)) {
-            context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
-        } else if (EntityTypeForImages.STAFF.toString().equalsIgnoreCase(entityName)) {
-            context.authenticatedUser().validateHasReadPermission("STAFFIMAGE");
+    public Response retrieveImage(@PathParam(DOCUMENT_API_PARAM_ENTITY_TYPE) final String entityName,
+            @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId, @QueryParam(IMAGE_API_PARAM_MAX_WIDTH) final Integer maxWidth,
+            @QueryParam(IMAGE_API_PARAM_MAX_HEIGHT) final Integer maxHeight, @QueryParam(IMAGE_API_PARAM_OUTPUT) String output,
+            @HeaderParam(ACCEPT) String acceptHeader) {
+
+        // TODO: pass resize information here and do all the processing in the service
+        final var content = imageReadPlatformService.retrieveImage(entityName, entityId);
+
+        String dispositionType = null;
+        ContentProcessorContext ctx = new ContentProcessorContext(content.getStream());
+        String type;
+
+        // prevent clients sending non-sense
+        if (!"octet".equalsIgnoreCase(output) && !"inline_octet".equalsIgnoreCase(output)) {
+            output = null;
         }
 
-        final FileData imageData = imageReadPlatformService.retrieveImage(entityName, entityId);
-        final FileData resizedImage = imageResizer.resize(imageData, maxWidth, maxHeight);
-
-        // If client wants (Accept header) octet-stream, or output="octet" or "inline_octet", then send that instead of
-        // text
-        if (MediaType.APPLICATION_OCTET_STREAM.equalsIgnoreCase(acceptHeader)
-                || (output != null && (output.equals("octet") || output.equals("inline_octet")))) {
-            return ContentResources.fileDataToResponse(resizedImage, resizedImage.name() + ImageFileExtension.JPEG,
-                    "inline_octet".equals(output) ? "inline" : "attachment");
-        }
-
-        // Else return response with Base64 encoded
-        // TODO: Need a better way of determining image type
-        String imageDataURISuffix = ContentRepositoryUtils.ImageDataURIsuffix.JPEG.getValue();
-        if (StringUtils.endsWith(imageData.name(), ContentRepositoryUtils.ImageFileExtension.GIF.getValue())) {
-            imageDataURISuffix = ContentRepositoryUtils.ImageDataURIsuffix.GIF.getValue();
-        } else if (StringUtils.endsWith(imageData.name(), ContentRepositoryUtils.ImageFileExtension.PNG.getValue())) {
-            imageDataURISuffix = ContentRepositoryUtils.ImageDataURIsuffix.PNG.getValue();
-        }
-
-        try {
-            byte[] resizedImageBytes = resizedImage.getByteSource().read();
-            if (resizedImageBytes != null) {
-                final String clientImageAsBase64Text = imageDataURISuffix + Base64.getMimeEncoder().encodeToString(resizedImageBytes);
-                return Response.ok(clientImageAsBase64Text, MediaType.TEXT_PLAIN_TYPE).build();
-            } else {
-                log.error("resizedImageBytes is null for entityName={}, entityId={}, maxWidth={}, maxHeight={}", entityName, entityId,
-                        maxWidth, maxHeight);
-                return Response.serverError().build();
+        if ((StringUtils.isNotEmpty(output) && output.contains("octet")) || APPLICATION_OCTET_STREAM_VALUE.equalsIgnoreCase(acceptHeader)) {
+            if (maxWidth != null && maxHeight != null) {
+                ctx = imageResizeContentProcessor.process(content.getStream(), Map.of(IMAGE_RESIZE_PARAM_MAX_WIDTH, maxWidth,
+                        IMAGE_RESIZE_PARAM_MAX_HEIGHT, maxHeight, IMAGE_RESIZE_PARAM_FORMAT, content.getFormat()));
             }
-        } catch (IOException e) {
-            throw new ContentManagementException(imageData.name(), e.getMessage(), e);
+
+            if (IMAGE_API_VALUE_OUTPUT_INLINE_OCTET.equalsIgnoreCase(output)) {
+                dispositionType = DISPOSITION_TYPE_INLINE;
+            } else {
+                dispositionType = DISPOSITION_TYPE_ATTACHMENT;
+            }
+
+            type = content.getContentType();
+        } else {
+            // else stream base64 encoded original format
+            if (maxWidth != null && maxHeight != null) {
+                ctx = imageResizeContentProcessor.then(base64EncoderContentProcessor).then(dataUrlEncoderContentProcessor).process(
+                        content.getStream(),
+                        Map.of(IMAGE_RESIZE_PARAM_MAX_WIDTH, maxWidth, IMAGE_RESIZE_PARAM_MAX_HEIGHT, maxHeight, IMAGE_RESIZE_PARAM_FORMAT,
+                                content.getFormat(), DATA_URL_ENCODE_PARAM_CONTENT_TYPE, content.getContentType(),
+                                DATA_URL_ENCODE_PARAM_ENCODING, IMAGE_API_VALUE_ENCODING_BASE64));
+            } else {
+                ctx = base64EncoderContentProcessor.then(dataUrlEncoderContentProcessor).process(content.getStream(),
+                        Map.of(DATA_URL_ENCODE_PARAM_CONTENT_TYPE, content.getContentType(), DATA_URL_ENCODE_PARAM_ENCODING,
+                                IMAGE_API_VALUE_ENCODING_BASE64));
+            }
+
+            type = TEXT_PLAIN_VALUE;
         }
+
+        // make sure we use the transformed input stream ("ctx.getInputStream()")
+        return StreamResponseUtil.ok(StreamResponseUtil.StreamResponseData.builder().fileName(content.getDisplayName()).type(type)
+                .stream(ctx.getInputStream()).dispositionType(dispositionType).build());
     }
 
-    /**
-     * This method is added only for consistency with other URL patterns and for maintaining consistency of usage of the
-     * HTTP "verb" at the client side
-     */
+    @POST
+    @Consumes({ MediaType.MULTIPART_FORM_DATA })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @ApiResponse(responseCode = "200", description = "Not Shown (multi-part form data)")
+    public ImageCreateResponse createImage(@PathParam(DOCUMENT_API_PARAM_ENTITY_TYPE) final String entityType,
+            @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId, @HeaderParam(CONTENT_LENGTH) final Long fileSize,
+            @FormDataParam(DOCUMENT_API_PARAM_FILE) final InputStream is,
+            @FormDataParam(DOCUMENT_API_PARAM_FILE) final FormDataContentDisposition fileDetails,
+            @FormDataParam(DOCUMENT_API_PARAM_FILE) final FormDataBodyPart filePart) {
+
+        fileUploadValidator.validate(fileSize, is, fileDetails, filePart);
+
+        final var command = new ImageCreateCommand();
+
+        command.setPayload(
+                ImageCreateRequest.builder().entityId(entityId).entityType(entityType).fileName(fileDetails.getFileName()).size(fileSize)
+                        .type(Optional.ofNullable(filePart.getMediaType()).map(MediaType::toString).orElse(null)).stream(is).build());
+
+        final Supplier<ImageCreateResponse> response = commandPipeline.send(command);
+
+        return response.get();
+    }
+
+    @POST
+    @Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
+    public ImageCreateResponse createImage(@PathParam(DOCUMENT_API_PARAM_ENTITY_TYPE) final String entityType,
+            @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId, final InputStream body) {
+
+        requireNonNull(body, "Missing input stream");
+
+        final var command = new ImageCreateCommand();
+
+        var ctx = dataUrlDecoderContentProcessor.then(base64DecoderContentProcessor).process(new ContentProcessorContext(body));
+
+        command.setPayload(ImageCreateRequest.builder().entityId(entityId).entityType(entityType).stream(ctx.getInputStream()).build());
+
+        final Supplier<ImageCreateResponse> response = commandPipeline.send(command);
+
+        return response.get();
+    }
+
     @PUT
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(MediaType.APPLICATION_JSON)
-    @RequestBody(description = "Update client image", content = {
-            @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
-    public CommandProcessingResult updateClientImage(@PathParam("entity") final String entityName,
-            @PathParam("entityId") final Long entityId, @HeaderParam("Content-Length") final Long fileSize,
-            @FormDataParam("file") final InputStream inputStream, @FormDataParam("file") final FormDataContentDisposition fileDetails,
-            @FormDataParam("file") final FormDataBodyPart bodyPart) {
-        return addNewClientImage(entityName, entityId, fileSize, inputStream, fileDetails, bodyPart);
+    @RequestBody(description = "Update image", content = { @Content(mediaType = MediaType.MULTIPART_FORM_DATA) })
+    public ImageCreateResponse updateImage(@PathParam(DOCUMENT_API_PARAM_ENTITY_TYPE) final String entityName,
+            @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId, @HeaderParam(CONTENT_LENGTH) final Long fileSize,
+            @FormDataParam(DOCUMENT_API_PARAM_FILE) final InputStream inputStream,
+            @FormDataParam(DOCUMENT_API_PARAM_FILE) final FormDataContentDisposition fileDetails,
+            @FormDataParam(DOCUMENT_API_PARAM_FILE) final FormDataBodyPart bodyPart) {
+        return createImage(entityName, entityId, fileSize, inputStream, fileDetails, bodyPart);
     }
 
-    /**
-     * This method is added only for consistency with other URL patterns and for maintaining consistency of usage of the
-     * HTTP "verb" at the client side
-     *
-     * Upload image as a Data URL (essentially a base64 encoded stream)
-     */
     @PUT
     @Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
-    @Produces(MediaType.APPLICATION_JSON)
-    public CommandProcessingResult updateClientImage(@PathParam("entity") final String entityName,
-            @PathParam("entityId") final Long entityId, final String jsonRequestBody) {
-        return addNewClientImage(entityName, entityId, jsonRequestBody);
+    public ImageCreateResponse updateImage(@PathParam(DOCUMENT_API_PARAM_ENTITY_TYPE) final String entityName,
+            @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId, final InputStream body) {
+        return createImage(entityName, entityId, body);
     }
 
     @DELETE
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public CommandProcessingResult deleteClientImage(@PathParam("entity") final String entityName,
-            @PathParam("entityId") final Long entityId) {
-        validateEntityTypeforImage(entityName);
-        imageWritePlatformService.deleteImage(entityName, entityId);
-        return CommandProcessingResult.resourceResult(entityId);
-    }
+    public ImageDeleteResponse deleteImage(@PathParam(DOCUMENT_API_PARAM_ENTITY_TYPE) final String entityType,
+            @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId) {
 
-    /*** Entities for document Management **/
-    public enum EntityTypeForImages {
+        final var command = new ImageDeleteCommand();
 
-        STAFF, //
-        CLIENTS; //
+        command.setPayload(ImageDeleteRequest.builder().entityId(entityId).entityType(entityType).build());
 
-        @Override
-        public String toString() {
-            return name().toLowerCase();
-        }
-    }
+        final Supplier<ImageDeleteResponse> response = commandPipeline.send(command);
 
-    private void validateEntityTypeforImage(final String entityName) {
-        if (!checkValidEntityType(entityName)) {
-            throw new InvalidEntityTypeForImageManagementException(entityName);
-        }
-    }
-
-    private static boolean checkValidEntityType(final String entityType) {
-        for (final EntityTypeForImages entities : EntityTypeForImages.values()) {
-            if (entities.name().equalsIgnoreCase(entityType)) {
-                return true;
-            }
-        }
-        return false;
+        return response.get();
     }
 }

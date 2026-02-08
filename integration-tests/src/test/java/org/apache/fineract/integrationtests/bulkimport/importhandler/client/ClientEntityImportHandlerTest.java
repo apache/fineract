@@ -37,6 +37,7 @@ import java.util.Locale;
 import org.apache.fineract.infrastructure.bulkimport.constants.ClientEntityConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
+import org.apache.fineract.integrationtests.bulkimport.importhandler.LocalContentStorageUtil;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -144,7 +145,7 @@ public class ClientEntityImportHandlerTest {
         Thread.sleep(10000);
 
         // check status column of output excel
-        String location = clientHelper.getOutputTemplateLocation(importDocumentId);
+        String location = LocalContentStorageUtil.path(clientHelper.getOutputTemplateLocation(importDocumentId));
         FileInputStream fileInputStream = new FileInputStream(location);
         Workbook outputWorkbook = new HSSFWorkbook(fileInputStream);
         Sheet outputClientEntitySheet = outputWorkbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);

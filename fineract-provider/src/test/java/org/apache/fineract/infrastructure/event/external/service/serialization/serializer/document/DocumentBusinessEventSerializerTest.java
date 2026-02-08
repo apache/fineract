@@ -27,10 +27,8 @@ import static org.mockito.Mockito.when;
 
 import org.apache.fineract.avro.document.v1.DocumentDataV1;
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
+import org.apache.fineract.infrastructure.contentstore.data.ContentStoreType;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
-import org.apache.fineract.infrastructure.documentmanagement.domain.Document;
-import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
-import org.apache.fineract.infrastructure.documentmanagement.service.DocumentReadPlatformService;
 import org.apache.fineract.infrastructure.event.business.domain.document.DocumentCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.document.DocumentDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
@@ -47,15 +45,13 @@ import org.mockito.quality.Strictness;
 class DocumentBusinessEventSerializerTest {
 
     @Mock
-    private DocumentReadPlatformService readService;
-    @Mock
     private DocumentDataMapper mapper;
 
     private BusinessEventSerializer serializer;
 
     @BeforeEach
     void setUp() {
-        serializer = new DocumentBusinessEventSerializer(readService, mapper);
+        serializer = new DocumentBusinessEventSerializer(mapper);
     }
 
     @Test
@@ -68,9 +64,9 @@ class DocumentBusinessEventSerializerTest {
         String fileName = "test_document.pdf";
         String fileType = "application/pdf";
         String description = "Test document description";
-        Integer storageTypeInt = StorageType.FILE_SYSTEM.getValue();
+        Integer storageTypeInt = ContentStoreType.FILE_SYSTEM.getValue();
 
-        Document document = mock(Document.class);
+        var document = mock(DocumentData.class);
         when(document.getId()).thenReturn(docId);
         when(document.getParentEntityType()).thenReturn(parentEntity);
         when(document.getParentEntityId()).thenReturn(parentEntityId);
@@ -78,16 +74,12 @@ class DocumentBusinessEventSerializerTest {
         when(document.getFileName()).thenReturn(fileName);
         when(document.getType()).thenReturn(fileType);
         when(document.getDescription()).thenReturn(description);
-        when(document.storageType()).thenReturn(StorageType.fromInt(storageTypeInt));
 
         DocumentCreatedBusinessEvent event = new DocumentCreatedBusinessEvent(document);
 
-        DocumentData dtoFromReadService = mock(DocumentData.class);
-        when(readService.retrieveDocument(parentEntity, parentEntityId, docId)).thenReturn(dtoFromReadService);
-
         DocumentDataV1 avroFromMapper = DocumentDataV1.newBuilder().setId(docId).setParentEntityType(parentEntity)
                 .setParentEntityId(parentEntityId).setName(name).setFileName(fileName).setType(fileType).setDescription(description)
-                .build();
+                .setStorageType(storageTypeInt).build();
         when(mapper.map(any(DocumentData.class))).thenReturn(avroFromMapper);
 
         ByteBufferSerializable serialised = serializer.toAvroDTO(event);

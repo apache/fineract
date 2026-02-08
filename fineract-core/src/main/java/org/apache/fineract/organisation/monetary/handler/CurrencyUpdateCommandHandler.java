@@ -40,7 +40,6 @@ public class CurrencyUpdateCommandHandler implements CommandHandler<CurrencyUpda
     @Transactional
     @Override
     public CurrencyUpdateResponse handle(final Command<CurrencyUpdateRequest> command) {
-        // NOTE: fallback method needs to be in the same class
         return writePlatformService.updateAllowedCurrencies(command.getPayload());
     }
 
