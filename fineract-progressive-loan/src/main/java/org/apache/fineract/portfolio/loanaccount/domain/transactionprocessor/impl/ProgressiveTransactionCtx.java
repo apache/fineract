@@ -52,6 +52,8 @@ public class ProgressiveTransactionCtx extends TransactionCtx {
     private boolean isContractTerminated = false;
     @Setter
     private boolean isPrepayAttempt = false;
+    @Setter
+    private boolean isReprocessing = false;
     private final List<LoanRepaymentScheduleInstallment> skipRepaymentScheduleInstallments = new ArrayList<>();
     private final List<Long> processedLoanChargeIds;
 

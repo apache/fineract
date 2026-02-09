@@ -393,9 +393,9 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         }
         Optional<RepaymentPeriod> repaymentPeriod = findRepaymentPeriod(scheduleModel, repaymentPeriodFromDate, repaymentPeriodDueDate);
         repaymentPeriod.ifPresent(rp -> rp.addPaidPrincipalAmount(principalAmount));
+        boolean isPastDue = DateUtils.isBefore(repaymentPeriodDueDate, transactionDate);
         // If it is paid late, we need to calculate with the period due date
-        LocalDate balanceCorrectionDate = DateUtils.isBefore(repaymentPeriodDueDate, transactionDate) ? repaymentPeriodDueDate
-                : transactionDate;
+        LocalDate balanceCorrectionDate = isPastDue ? repaymentPeriodDueDate : transactionDate;
         addBalanceCorrection(scheduleModel, balanceCorrectionDate, principalAmount.negated());
         long notFullyRepaidRepaymentPeriodCount = scheduleModel.repaymentPeriods().stream().filter(rp -> !rp.isFullyPaid()).count();
         boolean multiplePeriodsAreUnpaid = notFullyRepaidRepaymentPeriodCount > 1L;
@@ -710,6 +710,12 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     @Override
     public boolean recalculateModelOverdueAmountsTillDate(final ProgressiveLoanInterestScheduleModel scheduleModel,
             final LocalDate targetDate, boolean prepayAttempt) {
+        return recalculateModelOverdueAmountsTillDate(scheduleModel, targetDate, prepayAttempt, false);
+    }
+
+    @Override
+    public boolean recalculateModelOverdueAmountsTillDate(final ProgressiveLoanInterestScheduleModel scheduleModel,
+            final LocalDate targetDate, boolean prepayAttempt, boolean allowOverdueCleanup) {
         boolean hasChange = false;
         LocalDate recalculatedTargetDate = DateUtils.isAfter(targetDate, scheduleModel.getLastRepaymentPeriod().getDueDate())
                 ? scheduleModel.getLastRepaymentPeriod().getDueDate()
@@ -734,7 +740,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 aggregatedOverDuePrincipal = aggregatedOverDuePrincipal.add(overDuePrincipal);
             }
 
-            if (!currentPeriod.equals(lastPeriod) || !recalculatedTargetDate.isAfter(lastPeriod.getDueDate())) {
+            boolean willExecuteFinal = !currentPeriod.equals(lastPeriod) || !recalculatedTargetDate.isAfter(lastPeriod.getDueDate());
+            if (willExecuteFinal) {
                 final boolean currentChanges = adjustOverduePrincipal(recalculatedTargetDate, currentPeriod, overDuePrincipal,
                         aggregatedOverDuePrincipal, scheduleModel, prepayAttempt);
                 hasChange = hasChange || currentChanges;
@@ -743,6 +750,35 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             if (aggregatedOverDuePrincipal.isGreaterThanZero() && (scheduleModel.lastOverdueBalanceChange() == null
                     || scheduleModel.lastOverdueBalanceChange().isBefore(recalculatedTargetDate))) {
                 scheduleModel.lastOverdueBalanceChange(recalculatedTargetDate);
+            }
+
+            List<RepaymentPeriod> allPeriods = scheduleModel.repaymentPeriods();
+            int eatingVictimIndex = allPeriods.indexOf(overdueInstallmentsSortedByInstallmentNumber.get(0)) + 1;
+            boolean allPeriodsEssentiallyPaid = true;
+            for (int i = 0; i < allPeriods.size(); i++) {
+                if (i == eatingVictimIndex) {
+                    continue;
+                }
+                if (!allPeriods.get(i).isFullyPaid()) {
+                    allPeriodsEssentiallyPaid = false;
+                    break;
+                }
+            }
+            if (allowOverdueCleanup //
+                    && allPeriodsEssentiallyPaid //
+                    && scheduleModel.lastOverdueAmount() != null //
+                    && scheduleModel.lastOverdueAmount().isGreaterThanZero() //
+                    && scheduleModel.lastOverdueBalanceChange() != null) {
+                Money overdueAmount = scheduleModel.lastOverdueAmount();
+                LocalDate positiveDate = overdueInstallmentsSortedByInstallmentNumber.get(0).getDueDate();
+                LocalDate negativeDate = scheduleModel.lastOverdueBalanceChange();
+
+                addBalanceCorrection(scheduleModel, positiveDate, overdueAmount.negated());
+                addBalanceCorrection(scheduleModel, negativeDate, overdueAmount);
+
+                scheduleModel.lastOverdueAmount(scheduleModel.zero());
+                scheduleModel.lastOverdueBalanceChange(null);
+                hasChange = true;
             }
         }
 
@@ -923,7 +959,6 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             } else {
                 addBalanceCorrection(model, model.lastOverdueBalanceChange(), overduePrincipal);
             }
-
             if (currentDate.isAfter(fromDate) && !currentDate.isAfter(toDate)) {
                 LocalDate lastOverdueBalanceChange;
                 if (shouldRecalculateTillInstallmentDueDate(model.loanProductRelatedDetail(), prepayAttempt)) {
@@ -933,6 +968,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 }
                 addBalanceCorrection(model, lastOverdueBalanceChange, aggregatedOverDuePrincipal.negated());
                 model.lastOverdueBalanceChange(lastOverdueBalanceChange);
+                model.lastOverdueAmount(aggregatedOverDuePrincipal);
             }
             return true;
         }

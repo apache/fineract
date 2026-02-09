@@ -155,6 +155,11 @@ public interface EMICalculator {
 
     boolean recalculateModelOverdueAmountsTillDate(ProgressiveLoanInterestScheduleModel ctx, LocalDate targetDate, boolean prepayAttempt);
 
+    default boolean recalculateModelOverdueAmountsTillDate(ProgressiveLoanInterestScheduleModel ctx, LocalDate targetDate,
+            boolean prepayAttempt, boolean allowOverdueCleanup) {
+        return recalculateModelOverdueAmountsTillDate(ctx, targetDate, prepayAttempt);
+    }
+
     /**
      * Gives back the sum of the outstanding interest from the whole model till the provided date.
      */

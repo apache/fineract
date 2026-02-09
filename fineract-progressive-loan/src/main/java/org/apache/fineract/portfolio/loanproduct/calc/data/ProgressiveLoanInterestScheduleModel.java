@@ -68,6 +68,9 @@ public class ProgressiveLoanInterestScheduleModel {
     @Setter
     private LocalDate lastOverdueBalanceChange;
 
+    @Setter
+    private Money lastOverdueAmount;
+
     public ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods,
             final ILoanConfigurationDetails loanProductRelatedDetail, final Integer installmentAmountInMultiplesOf, final MathContext mc) {
         this.repaymentPeriods = new ArrayList<>(repaymentPeriods);

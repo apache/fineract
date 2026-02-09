@@ -183,7 +183,7 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
             this.outstandingLoanBalance = MathUtil.negativeToZero(previousInterestPeriod.getOutstandingLoanBalance() //
                     .plus(previousInterestPeriod.getBalanceCorrectionAmount(), getMc()) //
                     .plus(previousInterestPeriod.getCapitalizedIncomePrincipal(), getMc()) //
-                    .plus(previousInterestPeriod.getDisbursementAmount(), getMc())); //
+                    .plus(previousInterestPeriod.getDisbursementAmount(), getMc()), getMc()); //
         }
     }
 
