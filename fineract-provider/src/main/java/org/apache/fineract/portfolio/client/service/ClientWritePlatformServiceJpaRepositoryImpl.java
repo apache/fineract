@@ -26,7 +26,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -52,8 +51,13 @@ import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.event.business.domain.client.ClientActivateBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.client.ClientCloseBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.client.ClientCreateBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.client.ClientReactivateBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.client.ClientRejectBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.client.ClientUndoRejectionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.client.ClientUndoWithdrawalBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.client.ClientWithdrawBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -91,12 +95,13 @@ import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.portfolio.savings.service.SavingsApplicationProcessWritePlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@AllArgsConstructor
 @Service
 @Slf4j
 public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWritePlatformService {
@@ -124,6 +129,47 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final BusinessEventNotifierService businessEventNotifierService;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
     private final ExternalIdFactory externalIdFactory;
+
+    @Autowired
+    public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
+            final ClientRepositoryWrapper clientRepository, final ClientNonPersonRepositoryWrapper clientNonPersonRepository,
+            final OfficeRepositoryWrapper officeRepositoryWrapper, final NoteRepository noteRepository,
+            final GroupRepository groupRepository, final ClientDataValidator fromApiJsonDeserializer,
+            final AccountNumberGenerator accountNumberGenerator, final StaffRepositoryWrapper staffRepository,
+            final CodeValueRepositoryWrapper codeValueRepository, final LoanRepositoryWrapper loanRepositoryWrapper,
+            final SavingsAccountRepositoryWrapper savingsRepositoryWrapper, final SavingsProductRepository savingsProductRepository,
+            final SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService,
+            final CommandProcessingService commandProcessingService, final ConfigurationDomainService configurationDomainService,
+            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final FromJsonHelper fromApiJsonHelper,
+            final AddressWritePlatformService addressWritePlatformService,
+            final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService,
+            @Lazy final BusinessEventNotifierService businessEventNotifierService, // BREAKS THE CYCLE
+            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
+            final ExternalIdFactory externalIdFactory) {
+        this.context = context;
+        this.clientRepository = clientRepository;
+        this.clientNonPersonRepository = clientNonPersonRepository;
+        this.officeRepositoryWrapper = officeRepositoryWrapper;
+        this.noteRepository = noteRepository;
+        this.groupRepository = groupRepository;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.accountNumberGenerator = accountNumberGenerator;
+        this.staffRepository = staffRepository;
+        this.codeValueRepository = codeValueRepository;
+        this.loanRepositoryWrapper = loanRepositoryWrapper;
+        this.savingsRepositoryWrapper = savingsRepositoryWrapper;
+        this.savingsProductRepository = savingsProductRepository;
+        this.savingsApplicationProcessWritePlatformService = savingsApplicationProcessWritePlatformService;
+        this.commandProcessingService = commandProcessingService;
+        this.configurationDomainService = configurationDomainService;
+        this.accountNumberFormatRepository = accountNumberFormatRepository;
+        this.fromApiJsonHelper = fromApiJsonHelper;
+        this.addressWritePlatformService = addressWritePlatformService;
+        this.clientFamilyMembersWritePlatformService = clientFamilyMembersWritePlatformService;
+        this.businessEventNotifierService = businessEventNotifierService;
+        this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
+        this.externalIdFactory = externalIdFactory;
+    }
 
     @Transactional
     @Override
@@ -885,6 +931,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             client.close(currentUser, closureReason, closureDate);
             this.clientRepository.saveAndFlush(client);
+            businessEventNotifierService.notifyPostBusinessEvent(new ClientCloseBusinessEvent(client));
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withClientId(clientId) //
@@ -1014,6 +1061,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         }
         client.withdraw(currentUser, withdrawalReason, withdrawalDate);
         this.clientRepository.saveAndFlush(client);
+        businessEventNotifierService.notifyPostBusinessEvent(new ClientWithdrawBusinessEvent(client));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withClientId(entityId) //
@@ -1040,6 +1088,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         }
         client.reActivate(currentUser, reactivateDate);
         this.clientRepository.saveAndFlush(client);
+        businessEventNotifierService.notifyPostBusinessEvent(new ClientReactivateBusinessEvent(client));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withClientId(entityId) //
@@ -1067,7 +1116,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
         client.reOpened(currentUser, undoRejectDate);
         this.clientRepository.saveAndFlush(client);
-
+        businessEventNotifierService.notifyPostBusinessEvent(new ClientUndoRejectionBusinessEvent(client));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withClientId(entityId) //
@@ -1094,7 +1143,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         }
         client.reOpened(currentUser, undoWithdrawalDate);
         this.clientRepository.saveAndFlush(client);
-
+        businessEventNotifierService.notifyPostBusinessEvent(new ClientUndoWithdrawalBusinessEvent(client));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withClientId(entityId) //
