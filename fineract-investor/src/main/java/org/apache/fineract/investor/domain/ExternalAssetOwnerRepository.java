@@ -22,10 +22,14 @@ import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
 public interface ExternalAssetOwnerRepository
         extends JpaRepository<ExternalAssetOwner, Long>, JpaSpecificationExecutor<ExternalAssetOwner> {
 
     Optional<ExternalAssetOwner> findByExternalId(ExternalId externalId);
+
+    @Query("SELECT e.id FROM ExternalAssetOwner e WHERE e.externalId = :externalId")
+    Optional<Long> findIdByExternalId(ExternalId externalId);
 
 }

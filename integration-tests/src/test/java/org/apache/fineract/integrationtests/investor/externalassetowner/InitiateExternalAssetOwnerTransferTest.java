@@ -46,12 +46,17 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import okhttp3.ResponseBody;
 import org.apache.fineract.accounting.common.AccountingConstants;
@@ -1359,6 +1364,78 @@ public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationT
             journalEntryItem = journalEntriesTransactionIdResponse.getPageItems().get(1);
             assertEquals(externalAssetOwner, journalEntryItem.getExternalAssetOwner());
         });
+    }
+
+    @Test
+    public void saleTransferWithSameOwnerExternalIdInParallelShouldNotFail() {
+        try {
+            globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
+            setInitialBusinessDate("2020-03-02");
+
+            final int threadCount = 10;
+            final String sharedOwnerExternalId = UUID.randomUUID().toString();
+
+            final List<Integer> loanIDs = new ArrayList<>();
+            for (int i = 0; i < threadCount; i++) {
+                Integer clientID = createClient();
+                Integer loanID = createLoanForClient(clientID);
+                loanIDs.add(loanID);
+            }
+
+            final ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+            final CountDownLatch startLatch = new CountDownLatch(1);
+            final CountDownLatch doneLatch = new CountDownLatch(threadCount);
+            final List<PostInitiateTransferResponse> results = Collections.synchronizedList(new ArrayList<>());
+            final List<Exception> exceptions = Collections.synchronizedList(new ArrayList<>());
+
+            for (int i = 0; i < threadCount; i++) {
+                final Integer loanID = loanIDs.get(i);
+                executorService.execute(() -> {
+                    try {
+                        startLatch.await();
+                        PostInitiateTransferResponse response = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanID.longValue(),
+                                "sale",
+                                new ExternalAssetOwnerRequest().settlementDate("2020-03-02").dateFormat("yyyy-MM-dd").locale("en")
+                                        .transferExternalId(UUID.randomUUID().toString())
+                                        .transferExternalGroupId(UUID.randomUUID().toString()).ownerExternalId(sharedOwnerExternalId)
+                                        .purchasePriceRatio("1.0"));
+                        results.add(response);
+                    } catch (Exception e) {
+                        exceptions.add(e);
+                    } finally {
+                        doneLatch.countDown();
+                    }
+                });
+            }
+
+            startLatch.countDown();
+            assertTrue(doneLatch.await(30, TimeUnit.SECONDS), "All threads should complete within timeout");
+            executorService.shutdown();
+            assertTrue(executorService.awaitTermination(10, TimeUnit.SECONDS), "ExecutorService should terminate");
+
+            assertTrue(exceptions.isEmpty(),
+                    "Expected no exceptions but got " + exceptions.size() + ": " + exceptions.stream().map(Throwable::getMessage).toList());
+            assertEquals(threadCount, results.size(), "All transfers should succeed");
+            results.forEach(response -> {
+                assertNotNull(response.getResourceId());
+                assertNotNull(response.getResourceExternalId());
+            });
+
+            // Verify all transfers reference the same owner
+            for (Integer loanID : loanIDs) {
+                PageExternalTransferData transfers = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID.longValue());
+                assertEquals(1, transfers.getTotalElements());
+                assertNotNull(transfers.getContent());
+                assertNotNull(transfers.getContent().getFirst().getOwner());
+                assertEquals(sharedOwnerExternalId, transfers.getContent().getFirst().getOwner().getExternalId(),
+                        "All transfers should reference the same owner");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } finally {
+            cleanUpAndRestoreBusinessDate();
+        }
     }
 
     private void updateBusinessDateAndExecuteCOBJob(String date) {
