@@ -166,7 +166,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         sqlBuilder.append(" join m_office o on o.id = c.office_id");
         sqlBuilder.append(" where o.hierarchy like ?");
 
-        final Object[] objectArray = new Object[3];
+        final Object[] objectArray = new Object[6];
         objectArray[0] = hierarchySearchString;
         int arrayPos = 1;
         if (searchParameters != null) {
@@ -203,6 +203,21 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 } else {
                     sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
                 }
+            }
+
+            if (searchParameters.getBirthDay() != null) {
+                sqlBuilder.append(" AND DAY(c.date_of_birth) = ?");
+                objectArray[arrayPos++] = searchParameters.getBirthDay();
+            }
+            if (searchParameters.getBirthMonth() != null) {
+                sqlBuilder.append(" AND MONTH(c.date_of_birth) = ?");
+                objectArray[arrayPos++] = searchParameters.getBirthMonth();
+
+            }
+            if (searchParameters.getBirthYear() != null) {
+                sqlBuilder.append(" AND YEAR(c.date_of_birth) = ?");
+                objectArray[arrayPos++] = searchParameters.getBirthYear();
+
             }
         }
         final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
@@ -682,7 +697,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId, ");
             sqlBuilder.append("sa.deposit_type_enum as depositType, ");
-            sqlBuilder.append("c.id as clientId, c.display_name as clientName, ");
+            sqlBuilder.append("c.id as clientId, c.display_name as clientName, c.date_of_birth as dateOfBirth, ");
             sqlBuilder.append("g.id as groupId, g.display_name as groupName, ");
             sqlBuilder.append("sp.id as productId, sp.name as productName, ");
             sqlBuilder.append("s.id fieldOfficerId, s.display_name as fieldOfficerName, ");

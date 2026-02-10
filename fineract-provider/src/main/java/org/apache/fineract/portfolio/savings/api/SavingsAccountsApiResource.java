@@ -133,7 +133,10 @@ public class SavingsAccountsApiResource {
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
-            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
+            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
+            @QueryParam("birthDay") @Parameter(description = "birthDay") final Integer birthDay,
+            @QueryParam("birthMonth") @Parameter(description = "birthMonth") final Integer birthMonth,
+            @QueryParam("birthYear") @Parameter(description = "birthYear") final Integer birthYear) {
 
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
@@ -141,7 +144,11 @@ public class SavingsAccountsApiResource {
         sqlValidator.validate(sortOrder);
         sqlValidator.validate(externalId);
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).externalId(externalId).offset(offset)
-                .orderBy(orderBy).sortOrder(sortOrder).build();
+                .orderBy(orderBy).sortOrder(sortOrder)
+                .birthDay(birthDay)
+                .birthMonth(birthMonth)
+                .birthYear(birthYear)
+                .build();
 
         final Page<SavingsAccountData> products = savingsAccountReadPlatformService.retrieveAll(searchParameters);
 

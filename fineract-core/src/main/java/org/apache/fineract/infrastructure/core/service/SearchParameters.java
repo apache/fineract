@@ -57,6 +57,9 @@ public class SearchParameters {
     @Getter(AccessLevel.NONE)
     private Boolean isSelfUser;
     private Integer legalForm;
+    private  Integer birthDay;
+    private  Integer birthMonth;
+    private  Integer birthYear;
 
     public Integer getLimit() {
         if (limit == null) {
