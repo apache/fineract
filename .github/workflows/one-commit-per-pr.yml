@@ -1,0 +1,14 @@
+- name: Fetch base branch
+  run: |
+    git fetch origin ${{ github.base_ref }}
+
+- name: Check number of commits in PR
+  run: |
+    COMMIT_COUNT=$(git rev-list --count origin/${{ github.base_ref }}..HEAD)
+    echo "Commit count in PR: $COMMIT_COUNT"
+
+    if [ "$COMMIT_COUNT" -gt 1 ]; then
+      echo "This pull request contains more than one commit."
+      echo "Please squash your commits into a single commit before updating the PR."
+      exit 1
+    fi
