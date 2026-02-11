@@ -250,6 +250,8 @@ public class CommandStrategyProvider {
         commandStrategies.put(CommandContext
                 .resource("v1\\/loans\\/external-id\\/" + UUID_PARAM_REGEX + "\\/interest-pauses\\/" + NUMBER_REGEX).method(PUT).build(),
                 "updateLoanInterestPauseByExternalIdCommandStrategy");
+        commandStrategies.put(CommandContext.resource("v1\\/journalentries" + OPTIONAL_COMMAND_PARAM_REGEX).method(POST).build(),
+                "createJournalEntryCommandStrategy");
     }
 
 }
