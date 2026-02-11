@@ -988,7 +988,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         assertThat(exception.getStatus()).as("Expected HTTP %d for duplicate ownerExternalId", expectedStatusCode)
                 .isEqualTo(expectedStatusCode);
         assertThat(exception.getDeveloperMessage()).as("Error message should indicate duplicate external id")
-                .contains("External Asset Owner id already exist");
+                .contains("Provided external id already exists");
     }
 
     @When("Admin tries to create an external asset owner with empty JSON body then it should fail with {int} status code")
