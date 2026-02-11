@@ -39,6 +39,7 @@ import org.apache.fineract.batch.command.internal.CreateChargeByLoanExternalIdCo
 import org.apache.fineract.batch.command.internal.CreateChargeCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateClientCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateDatatableEntryCommandStrategy;
+import org.apache.fineract.batch.command.internal.CreateJournalEntryCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateLoanRescheduleRequestCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateTransactionByLoanExternalIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
@@ -229,7 +230,13 @@ public class CommandStrategyProviderTest {
                 Arguments.of(
                         "loans/external-id/8dfad438-2319-48ce-8520-10a62801e9a1/transactions/reage-preview?frequency-number=2&frequencyType=long-string",
                         HttpMethod.GET, "getReagePreviewByLoanExternalIdCommandStrategy",
-                        mock(GetReagePreviewByLoanExternalIdCommandStrategy.class)));
+                        mock(GetReagePreviewByLoanExternalIdCommandStrategy.class)),
+                Arguments.of("journalentries", HttpMethod.POST, "createJournalEntryCommandStrategy",
+                        mock(CreateJournalEntryCommandStrategy.class)),
+                Arguments.of("journalentries?command=updateRunningBalance", HttpMethod.POST, "createJournalEntryCommandStrategy",
+                        mock(CreateJournalEntryCommandStrategy.class)),
+                Arguments.of("journalentries?command=defineOpeningBalance", HttpMethod.POST, "createJournalEntryCommandStrategy",
+                        mock(CreateJournalEntryCommandStrategy.class)));
     }
 
     /**
