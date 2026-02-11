@@ -238,7 +238,7 @@ public class LoanReAmortizationService {
 
     private void processReAmortizationTransaction(final Loan loan, final LoanTransaction reAmortizationTransaction,
             final boolean withPostTransactionChecks) {
-        if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
+        if (loan.isInterestBearingAndInterestRecalculationEnabled() || reprocessLoanTransactionsService.shouldReprocessLoan(loan)) {
             loanScheduleService.regenerateRepaymentSchedule(loan);
             if (withPostTransactionChecks) {
                 reprocessLoanTransactionsService.reprocessTransactions(loan, List.of(reAmortizationTransaction));

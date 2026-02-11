@@ -30,4 +30,6 @@ public interface ProgressiveLoanModelRepository
     Optional<ProgressiveLoanModel> findOneByLoanId(Long loanId);
 
     Optional<ProgressiveLoanModel> findOneByLoan(Loan loan);
+
+    Long removeByLoanId(Long loanId);
 }

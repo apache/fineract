@@ -90,6 +90,11 @@ public class InterestScheduleModelRepositoryWrapperImpl implements InterestSched
     }
 
     @Override
+    public Long removeByLoanId(Long loanId) {
+        return loanModelRepository.removeByLoanId(loanId);
+    }
+
+    @Override
     public Optional<ProgressiveLoanInterestScheduleModel> extractModel(Optional<ProgressiveLoanModel> progressiveLoanModel) {
         return progressiveLoanModel.map(ProgressiveLoanModel::getJsonModel) //
                 .map(jsonModel -> progressiveLoanInterestScheduleModelParserService.fromJson(jsonModel,

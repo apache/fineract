@@ -68,9 +68,9 @@ class LoanScheduleGeneratorTest {
                 InterestMethod.DECLINING_BALANCE, true, false);
 
         ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
-        ProgressiveLoanScheduleGenerator generator = new ProgressiveLoanScheduleGenerator(scheduledDateGenerator, emiCalculator,
-                interestScheduleModelRepositoryWrapperMock);
+        ProgressiveLoanScheduleGenerator generator = new ProgressiveLoanScheduleGenerator(scheduledDateGenerator, emiCalculator);
         generator.setLoanTransactionProcessingService(loanTransactionProcessingService);
+        generator.setInterestScheduleModelRepositoryWrapper(interestScheduleModelRepositoryWrapperMock);
 
         LoanSchedulePlan loanSchedule = generator.generate(mc, modelData);
 
@@ -106,9 +106,9 @@ class LoanScheduleGeneratorTest {
                 null, InterestMethod.DECLINING_BALANCE, true, false);
 
         ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
-        ProgressiveLoanScheduleGenerator generator = new ProgressiveLoanScheduleGenerator(scheduledDateGenerator, emiCalculator,
-                interestScheduleModelRepositoryWrapperMock);
+        ProgressiveLoanScheduleGenerator generator = new ProgressiveLoanScheduleGenerator(scheduledDateGenerator, emiCalculator);
         generator.setLoanTransactionProcessingService(loanTransactionProcessingService);
+        generator.setInterestScheduleModelRepositoryWrapper(interestScheduleModelRepositoryWrapperMock);
 
         LoanSchedulePlan loanSchedule = generator.generate(mc, modelData);
 

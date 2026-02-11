@@ -5926,6 +5926,13 @@ public class LoanStepDef extends AbstractStepDef {
         assertEquals(Integer.valueOf(numberOfRelations), relationshipOptional.size(), "Missed relationship for transaction");
     }
 
+    @When("Call Internal API to remove progressive loan model by loan Id")
+    public void callInternalAPIToRemoveProgressiveLoanModelByLoanId() {
+        final PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanCreateResponse.getLoanId();
+        ok(() -> fineractClient.progressiveLoan().deleteModel(loanId));
+    }
+
     public static AdvancedPaymentData editPaymentAllocationFutureInstallment(String transactionType, String futureInstallmentAllocationRule,
             List<PaymentAllocationOrder> paymentAllocationOrder) {
         AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();

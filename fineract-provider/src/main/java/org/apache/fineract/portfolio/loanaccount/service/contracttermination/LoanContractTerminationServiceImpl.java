@@ -92,7 +92,7 @@ public class LoanContractTerminationServiceImpl {
         loan.setLoanSubStatus(LoanSubStatus.CONTRACT_TERMINATION);
         changes.put(LoanApiConstants.subStatusAttributeName, loan.getLoanSubStatus().getCode());
 
-        if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
+        if (loan.isInterestBearingAndInterestRecalculationEnabled() || reprocessLoanTransactionsService.shouldReprocessLoan(loan)) {
             loanScheduleService.regenerateRepaymentSchedule(loan);
             reprocessLoanTransactionsService.reprocessTransactions(loan, List.of(contractTermination));
             loan.addLoanTransaction(contractTermination);

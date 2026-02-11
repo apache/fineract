@@ -870,7 +870,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT);
         loanChargeAdjustmentTransaction.getLoanTransactionRelations().add(loanTransactionRelation);
 
-        if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
+        if (loan.isInterestBearingAndInterestRecalculationEnabled() || reprocessLoanTransactionsService.shouldReprocessLoan(loan)) {
             if (loan.isProgressiveSchedule()) {
                 final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
                 loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);

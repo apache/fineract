@@ -31,6 +31,8 @@ public interface InterestScheduleModelRepositoryWrapper {
 
     Optional<ProgressiveLoanModel> findOneByLoan(Loan loan);
 
+    Long removeByLoanId(Long loanId);
+
     Optional<ProgressiveLoanInterestScheduleModel> extractModel(Optional<ProgressiveLoanModel> progressiveLoanModel);
 
     ProgressiveLoanInterestScheduleModel writeInterestScheduleModel(Loan loan, ProgressiveLoanInterestScheduleModel model);

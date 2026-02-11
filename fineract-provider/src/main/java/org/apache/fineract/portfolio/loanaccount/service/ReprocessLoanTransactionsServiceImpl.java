@@ -86,6 +86,11 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
     }
 
     @Override
+    public boolean shouldReprocessLoan(final Loan loan) {
+        return loan.isProgressiveSchedule() && interestScheduleModelRepositoryWrapper.findOneByLoan(loan).isEmpty();
+    }
+
+    @Override
     public void processLatestTransaction(final LoanTransaction loanTransaction, final Loan loan) {
         LoanRepaymentScheduleTransactionProcessor transactionProcessor = loanTransactionProcessingService
                 .getTransactionProcessor(loan.getTransactionProcessingStrategyCode());

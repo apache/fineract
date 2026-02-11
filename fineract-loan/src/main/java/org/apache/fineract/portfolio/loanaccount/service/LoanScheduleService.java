@@ -44,6 +44,10 @@ public class LoanScheduleService {
     private final LoanTransactionRepository loanTransactionRepository;
     private final ILoanUtilService loanUtilService;
 
+    public boolean shouldReprocessLoan(final Loan loan) {
+        return reprocessLoanTransactionsService.shouldReprocessLoan(loan);
+    }
+
     /**
      * Ability to regenerate the repayment schedule based on the loans current details/state.
      */
@@ -81,7 +85,7 @@ public class LoanScheduleService {
             existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
             existingReversedTransactionIds.addAll(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
         }
-        if (!loan.isProgressiveSchedule()) {
+        if (!loan.isProgressiveSchedule() || reprocessLoanTransactionsService.shouldReprocessLoan(loan)) {
             if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isChargedOff()) {
                 regenerateRepaymentScheduleWithInterestRecalculation(loan, generatorDTO);
             } else {

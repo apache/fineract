@@ -19,16 +19,9 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.MathContext;
-import java.time.LocalDate;
-import java.util.Optional;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.ProgressiveLoanModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlan;
-import org.apache.fineract.portfolio.loanaccount.service.InterestScheduleModelRepositoryWrapper;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
 import org.apache.fineract.portfolio.loanproduct.calc.ProgressiveEMICalculator;
-import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
-import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 
 @SuppressWarnings("unused")
 public class EmbeddableProgressiveLoanScheduleGenerator {
@@ -38,50 +31,10 @@ public class EmbeddableProgressiveLoanScheduleGenerator {
     public EmbeddableProgressiveLoanScheduleGenerator() {
         final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
         final EMICalculator emiCalculator = new ProgressiveEMICalculator(scheduledDateGenerator);
-        this.scheduleGenerator = new ProgressiveLoanScheduleGenerator(scheduledDateGenerator, emiCalculator,
-                new NoopInterestScheduleModelRepositoryWrapper());
+        this.scheduleGenerator = new ProgressiveLoanScheduleGenerator(scheduledDateGenerator, emiCalculator);
     }
 
     public LoanSchedulePlan generate(final MathContext mc, final LoanRepaymentScheduleModelData modelData) {
         return scheduleGenerator.generate(mc, modelData);
-    }
-
-    private static final class NoopInterestScheduleModelRepositoryWrapper implements InterestScheduleModelRepositoryWrapper {
-
-        @Override
-        public Optional<ProgressiveLoanModel> findOneByLoanId(Long loanId) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<ProgressiveLoanModel> findOneByLoan(Loan loan) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<ProgressiveLoanInterestScheduleModel> extractModel(Optional<ProgressiveLoanModel> progressiveLoanModel) {
-            return Optional.empty();
-        }
-
-        @Override
-        public ProgressiveLoanInterestScheduleModel writeInterestScheduleModel(Loan loan, ProgressiveLoanInterestScheduleModel model) {
-            return null;
-        }
-
-        @Override
-        public Optional<ProgressiveLoanInterestScheduleModel> readProgressiveLoanInterestScheduleModel(Long loanId,
-                ILoanConfigurationDetails detail, Integer installmentAmountInMultipliesOf) {
-            return Optional.empty();
-        }
-
-        @Override
-        public boolean hasValidModelForDate(Long loanId, LocalDate targetDate) {
-            return false;
-        }
-
-        @Override
-        public Optional<ProgressiveLoanInterestScheduleModel> getSavedModel(Loan loan, LocalDate businessDate) {
-            return Optional.empty();
-        }
     }
 }

@@ -962,8 +962,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             reprocess = false;
         }
 
-        if (isTransactionChronologicallyLatest && (!reprocess || !loan.isInterestBearingAndInterestRecalculationEnabled())
-                && !loan.isForeclosure()) {
+        boolean missingModel = reprocessLoanTransactionsService.shouldReprocessLoan(loan);
+
+        if (missingModel || (isTransactionChronologicallyLatest && (!reprocess || !loan.isInterestBearingAndInterestRecalculationEnabled())
+                && !loan.isForeclosure())) {
             loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(),
                     newInterestPaymentWaiverTransaction,
                     new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
@@ -985,7 +987,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 loan.addLoanTransaction(newInterestPaymentWaiverTransaction);
             }
         }
-        if (reprocess) {
+        if (missingModel || reprocess) {
             reprocessChangedLoanTransactions(loan, newInterestPaymentWaiverTransaction, scheduleGeneratorDTO);
         }
 
@@ -2344,10 +2346,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         businessEventNotifierService.notifyPreBusinessEvent(new LoanInterestRecalculationBusinessEvent(loan));
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
+        LocalDate recalculateFrom = loan.fetchInterestRecalculateFromDate();
+        ScheduleGeneratorDTO generatorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
 
         if (loan.isCumulativeSchedule()) {
-            LocalDate recalculateFrom = loan.fetchInterestRecalculateFromDate();
-            ScheduleGeneratorDTO generatorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
             loanScheduleService.recalculateScheduleFromLastTransaction(loan, generatorDTO, existingTransactionIds,
                     existingReversedTransactionIds);
             loanAccrualsProcessingService.reprocessExistingAccruals(loan, true);
@@ -2360,8 +2362,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     loan.isInterestBearingAndInterestRecalculationEnabled(), true);
             businessEventNotifierService.notifyPostBusinessEvent(new LoanInterestRecalculationBusinessEvent(loan));
         } else {
-            loanScheduleService.recalculateScheduleFromLastTransaction(loan, null, existingTransactionIds, existingReversedTransactionIds,
-                    true);
+            loanScheduleService.recalculateScheduleFromLastTransaction(loan, generatorDTO, existingTransactionIds,
+                    existingReversedTransactionIds, true);
             loanBalanceService.updateLoanSummaryDerivedFields(loan);
             loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
             businessEventNotifierService.notifyPostBusinessEvent(new LoanInterestRecalculationBusinessEvent(loan));
@@ -2746,7 +2748,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LoanTransaction chargeOffTransaction;
 
-        if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
+        if (loan.isInterestBearingAndInterestRecalculationEnabled() || reprocessLoanTransactionsService.shouldReprocessLoan(loan)) {
             final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null, null);
             loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
             chargeOffTransaction = LoanTransaction.chargeOff(loan, transactionDate, txnExternalId);
@@ -3053,7 +3055,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public void handleChargebackTransaction(final Loan loan, LoanTransaction chargebackTransaction) {
         loanTransactionValidator.validateIfTransactionIsChargeback(chargebackTransaction);
 
-        if (loan.isInterestBearing() && loan.isInterestRecalculationEnabled()) {
+        if ((loan.isInterestBearing() && loan.isInterestRecalculationEnabled())
+                || reprocessLoanTransactionsService.shouldReprocessLoan(loan)) {
             loan.addLoanTransaction(chargebackTransaction);
             reprocessLoanTransactionsService.reprocessTransactions(loan);
         } else {
@@ -3249,8 +3252,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     writtenOffOnLocalDate);
         }
 
-        if (loan.isInterestBearingAndInterestRecalculationEnabled()
-                && DateUtils.isBeforeBusinessDate(loanTransaction.getTransactionDate())) {
+        if ((loan.isInterestBearingAndInterestRecalculationEnabled()
+                && DateUtils.isBeforeBusinessDate(loanTransaction.getTransactionDate()))
+                || reprocessLoanTransactionsService.shouldReprocessLoan(loan)) {
             if (loan.isProgressiveSchedule()) {
                 loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
             }

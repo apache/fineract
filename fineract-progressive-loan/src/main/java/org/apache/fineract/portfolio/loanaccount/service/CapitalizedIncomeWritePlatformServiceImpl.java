@@ -189,7 +189,8 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
     }
 
     private void recalculateLoanTransactions(Loan loan, LoanTransaction transaction) {
-        if (loan.isInterestRecalculationEnabled() || DateUtils.isBeforeBusinessDate(transaction.getTransactionDate())) {
+        if (loan.isInterestRecalculationEnabled() || DateUtils.isBeforeBusinessDate(transaction.getTransactionDate())
+                || reprocessLoanTransactionsService.shouldReprocessLoan(loan)) {
             loanScheduleService.regenerateRepaymentSchedule(loan);
             reprocessLoanTransactionsService.reprocessTransactions(loan, List.of(transaction));
         } else {

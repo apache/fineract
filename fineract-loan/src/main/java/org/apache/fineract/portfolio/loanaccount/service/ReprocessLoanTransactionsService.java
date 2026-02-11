@@ -30,6 +30,8 @@ public interface ReprocessLoanTransactionsService {
 
     void reprocessTransactionsWithoutChecks(Loan loan, List<LoanTransaction> newTransactions);
 
+    boolean shouldReprocessLoan(Loan loan);
+
     void processLatestTransaction(LoanTransaction loanTransaction, Loan loan);
 
     void updateModel(Loan loan);

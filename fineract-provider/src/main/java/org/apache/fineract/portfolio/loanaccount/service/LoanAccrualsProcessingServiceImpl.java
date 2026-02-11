@@ -108,6 +108,8 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanScheduleGeneratorFactory loanScheduleFactory;
+    private final LoanScheduleService loanScheduleService;
+    private final ProgressiveLoanModelProcessingServiceWrapper modelProcessingServiceWrapper;
 
     @Qualifier(TaskExecutorConstant.CONFIGURABLE_TASK_EXECUTOR_BEAN_NAME)
     private final ThreadPoolTaskExecutor taskExecutor;
@@ -437,6 +439,12 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         return loan.getLoanCharges(t -> t.isActive() && DateUtils.isEqual(t.getDueDate(), accrualDate)).isEmpty();
     }
 
+    private void reprocessProgressiveModelIfItsMissing(Loan loan, LocalDate tillDate) {
+        if (loanScheduleService.shouldReprocessLoan(loan)) {
+            modelProcessingServiceWrapper.recalculateModelAndSave(loan);
+        }
+    }
+
     private AccrualPeriodsData calculateAccrualAmounts(@NonNull final Loan loan, @NonNull final LocalDate tillDate, final boolean periodic,
             final boolean isFinal, final boolean chargeOnDueDate) {
         final LoanProductRelatedDetail productDetail = loan.getLoanProductRelatedDetail();
@@ -493,6 +501,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
             interest = installment.getInterestCharged(currency).minus(installment.getCreditedInterest());
         } else {
             if (isInPeriod) { // first period first day is not accrued
+                reprocessProgressiveModelIfItsMissing(loan, tillDate);
                 interest = scheduleGenerator.getPeriodInterestTillDate(installment, tillDate);
             }
         }

@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -58,18 +59,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
 
     private final ScheduledDateGenerator scheduledDateGenerator;
     private final EMICalculator emiCalculator;
-    private final InterestScheduleModelRepositoryWrapper interestScheduleModelRepositoryWrapper;
 
+    private InterestScheduleModelRepositoryWrapper interestScheduleModelRepositoryWrapper;
     private LoanTransactionProcessingService loanTransactionProcessingService;
 
-    public ProgressiveLoanScheduleGenerator(ScheduledDateGenerator scheduledDateGenerator, EMICalculator emiCalculator,
-            InterestScheduleModelRepositoryWrapper interestScheduleModelRepositoryWrapper) {
-        this.scheduledDateGenerator = scheduledDateGenerator;
-        this.emiCalculator = emiCalculator;
+    @Autowired(required = false)
+    public void setInterestScheduleModelRepositoryWrapper(InterestScheduleModelRepositoryWrapper interestScheduleModelRepositoryWrapper) {
         this.interestScheduleModelRepositoryWrapper = interestScheduleModelRepositoryWrapper;
     }
 
@@ -251,6 +251,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
             return Money.zero(loan.getCurrency());
         }
         Optional<ProgressiveLoanInterestScheduleModel> savedModel = interestScheduleModelRepositoryWrapper.getSavedModel(loan, targetDate);
+
         ProgressiveLoanInterestScheduleModel model = savedModel.orElseThrow();
         return emiCalculator.getPeriodInterestTillDate(model, installment.getFromDate(), installment.getDueDate(), targetDate, false, true);
     }
