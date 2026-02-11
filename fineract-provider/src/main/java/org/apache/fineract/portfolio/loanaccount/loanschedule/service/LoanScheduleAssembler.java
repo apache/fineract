@@ -314,8 +314,6 @@ public class LoanScheduleAssembler {
             calculatedRepaymentsStartingFromDate = deriveFirstRepaymentDate(loanType, repaymentEvery, expectedDisbursementDate,
                     repaymentPeriodFrequencyType, loanProduct.getMinimumDaysBetweenDisbursalAndFirstRepayment(), calendar, submittedOnDate,
                     repaymentStartDateType);
-            // If calculated repayment start date does not match due to minimum days between disbursal and first
-            // repayment rule, we set repaymentsStartingFromDate (which will be used as seed date later)
             if (!tmpCalculatedRepaymentsStartingFromDate.equals(calculatedRepaymentsStartingFromDate)) {
                 repaymentsStartingFromDate = calculatedRepaymentsStartingFromDate;
             }
@@ -748,18 +746,9 @@ public class LoanScheduleAssembler {
         final MathContext mc = MoneyHelper.getMathContext();
         HolidayDetailDTO detailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
 
-        LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getLoanScheduleType(),
-                loanApplicationTerms.getInterestMethod());
+        LoanScheduleGenerator loanScheduleGenerator;
         if (loanApplicationTerms.isEqualAmortization()) {
-            if (loanApplicationTerms.getInterestMethod().isDecliningBalance()) {
-                final LoanScheduleGenerator decliningLoanScheduleGenerator = this.loanScheduleFactory
-                        .create(loanApplicationTerms.getLoanScheduleType(), InterestMethod.DECLINING_BALANCE);
-                LoanScheduleModel loanSchedule = decliningLoanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges, detailDTO);
-
-                loanApplicationTerms
-                        .updateTotalInterestDue(Money.of(loanApplicationTerms.getCurrency(), loanSchedule.getTotalInterestCharged()));
-
-            }
+            updateInterestForEqualAmortization(mc, loanApplicationTerms, loanCharges, detailDTO);
             loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getLoanScheduleType(), InterestMethod.FLAT);
         } else {
             loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getLoanScheduleType(),
@@ -1599,6 +1588,18 @@ public class LoanScheduleAssembler {
                     loanScheduleModelPeriod.addLoanCharges(loanCharge.getAmountOutstanding(), BigDecimal.ZERO);
                 }
             }
+        }
+    }
+
+    private void updateInterestForEqualAmortization(final MathContext mc, final LoanApplicationTerms loanApplicationTerms,
+            final Set<LoanCharge> loanCharges, final HolidayDetailDTO detailDTO) {
+        if (loanApplicationTerms.getInterestMethod().isDecliningBalance()) {
+            final LoanScheduleGenerator decliningLoanScheduleGenerator = this.loanScheduleFactory
+                    .create(loanApplicationTerms.getLoanScheduleType(), InterestMethod.DECLINING_BALANCE);
+            LoanScheduleModel loanSchedule = decliningLoanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges, detailDTO);
+
+            loanApplicationTerms
+                    .updateTotalInterestDue(Money.of(loanApplicationTerms.getCurrency(), loanSchedule.getTotalInterestCharged()));
         }
     }
 
