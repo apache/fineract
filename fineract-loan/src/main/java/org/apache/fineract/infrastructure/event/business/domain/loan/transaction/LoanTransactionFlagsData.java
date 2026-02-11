@@ -18,33 +18,6 @@
  */
 package org.apache.fineract.infrastructure.event.business.domain.loan.transaction;
 
-import lombok.Getter;
-import org.apache.fineract.infrastructure.event.business.domain.AbstractBusinessEvent;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+public record LoanTransactionFlagsData(boolean changedTerms) {
 
-@Getter
-public abstract class LoanTransactionBusinessEvent extends AbstractBusinessEvent<LoanTransaction> {
-
-    private static final String CATEGORY = "Loan";
-
-    private final LoanTransactionFlagsData flags;
-
-    public LoanTransactionBusinessEvent(LoanTransaction value) {
-        this(value, null);
-    }
-
-    public LoanTransactionBusinessEvent(LoanTransaction value, LoanTransactionFlagsData flags) {
-        super(value);
-        this.flags = flags;
-    }
-
-    @Override
-    public String getCategory() {
-        return CATEGORY;
-    }
-
-    @Override
-    public Long getAggregateRootId() {
-        return get().getLoan().getId();
-    }
 }

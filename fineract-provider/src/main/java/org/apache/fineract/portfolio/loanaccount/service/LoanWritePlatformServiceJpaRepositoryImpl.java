@@ -95,6 +95,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeOffPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanDisbursalTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionFlagsData;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionInterestPaymentWaiverPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionInterestPaymentWaiverPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionInterestRefundPostBusinessEvent;
@@ -368,6 +369,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
 
+        final long termsBefore = loan.getTermsCount();
+
         if (canDisburse(loan)) {
             // Get netDisbursalAmount from disbursal screen field.
             final BigDecimal netDisbursalAmount = command
@@ -511,7 +514,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     .filter(e -> LoanTransactionType.DISBURSEMENT.equals(e.getTypeOf())).findFirst().orElseThrow();
             disbursalTransactionId = disbursalTransaction.getId();
             disbursalTransactionExternalId = disbursalTransaction.getExternalId();
-            businessEventNotifierService.notifyPostBusinessEvent(new LoanDisbursalTransactionBusinessEvent(disbursalTransaction));
+            final long termsAfter = loan.getTermsCount();
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanDisbursalTransactionBusinessEvent(disbursalTransaction,
+                    new LoanTransactionFlagsData(termsAfter != termsBefore)));
         }
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
@@ -757,17 +762,17 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 Money disburseAmount = loanDisbursementService.adjustDisburseAmount(loan, command, actualDisbursementDate);
                 boolean recalculateSchedule = amountBeforeAdjust.isNotEqualTo(loan.getPrincipal());
                 final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
+                final long termsBefore = loan.getTermsCount();
+                LoanTransaction disbursementTransaction = null;
                 if (isAccountTransfer) {
                     disburseLoanToSavings(loan, command, disburseAmount, paymentDetail);
                 } else {
-                    LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan, disburseAmount, paymentDetail,
-                            actualDisbursementDate, txnExternalId, loan.getTotalOverpaidAsMoney());
+                    disbursementTransaction = LoanTransaction.disbursement(loan, disburseAmount, paymentDetail, actualDisbursementDate,
+                            txnExternalId, loan.getTotalOverpaidAsMoney());
                     disbursementTransaction.updateLoan(loan);
                     loan.addLoanTransaction(disbursementTransaction);
                     loanTransactionRepository.saveAndFlush(disbursementTransaction);
                     journalEntryPoster.postJournalEntriesForLoanTransaction(disbursementTransaction, false, false);
-                    businessEventNotifierService
-                            .notifyPostBusinessEvent(new LoanDisbursalTransactionBusinessEvent(disbursementTransaction));
                 }
                 LocalDate recalculateFrom = null;
                 final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
@@ -779,6 +784,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 }
                 disburseLoan(command, configurationDomainService.isPaymentTypeApplicableForDisbursementCharge(), paymentDetail, loan,
                         currentUser, changes, scheduleGeneratorDTO);
+                if (disbursementTransaction != null) {
+                    final long termsAfter = loan.getTermsCount();
+                    final LoanTransactionFlagsData additionalDisbursalFlags = new LoanTransactionFlagsData(termsAfter != termsBefore);
+                    businessEventNotifierService.notifyPostBusinessEvent(
+                            new LoanDisbursalTransactionBusinessEvent(disbursementTransaction, additionalDisbursalFlags));
+                }
 
                 loanAccrualsProcessingService.reprocessExistingAccruals(loan, true);
 

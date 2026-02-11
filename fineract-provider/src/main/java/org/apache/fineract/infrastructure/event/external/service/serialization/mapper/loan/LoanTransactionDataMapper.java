@@ -33,6 +33,7 @@ public interface LoanTransactionDataMapper {
     @Mapping(target = "customData", ignore = true)
     @Mapping(target = "reversed", expression = "java(isReversed(source))")
     @Mapping(target = "originators", ignore = true)
+    @Mapping(target = "flags", ignore = true)
     LoanTransactionDataV1 map(LoanTransactionData source);
 
     default boolean isReversed(LoanTransactionData source) {

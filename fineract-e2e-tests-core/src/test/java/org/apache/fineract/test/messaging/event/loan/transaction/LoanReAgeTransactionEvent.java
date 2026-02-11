@@ -16,24 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.business.domain.loan.transaction;
+package org.apache.fineract.test.messaging.event.loan.transaction;
 
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-
-public class LoanDisbursalTransactionBusinessEvent extends LoanTransactionBusinessEvent {
-
-    private static final String TYPE = "LoanDisbursalTransactionBusinessEvent";
-
-    public LoanDisbursalTransactionBusinessEvent(LoanTransaction value) {
-        super(value);
-    }
-
-    public LoanDisbursalTransactionBusinessEvent(final LoanTransaction value, final LoanTransactionFlagsData flags) {
-        super(value, flags);
-    }
+public class LoanReAgeTransactionEvent extends AbstractLoanTransactionEvent {
 
     @Override
-    public String getType() {
-        return TYPE;
+    public String getEventName() {
+        return "LoanReAgeTransactionBusinessEvent";
     }
+
 }

@@ -46,7 +46,7 @@ Feature: LoanReAging
       | 01 January 2024  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        | false    |
       | 20 February 2024 | Re-age           | 750.0  | 750.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
     Then Admin checks that delinquency range is: "NO_DELINQUENCY" and has delinquentDate ""
-
+    Then LoanReAgeTransactionBusinessEvent has changedTerms "true"
     When Loan Pay-off is made on "20 February 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 

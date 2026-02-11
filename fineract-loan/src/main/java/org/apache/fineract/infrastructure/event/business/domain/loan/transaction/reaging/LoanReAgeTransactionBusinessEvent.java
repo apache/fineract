@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.event.business.domain.loan.transaction.reaging;
 
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionFlagsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
 public class LoanReAgeTransactionBusinessEvent extends LoanTransactionBusinessEvent {
@@ -27,6 +28,10 @@ public class LoanReAgeTransactionBusinessEvent extends LoanTransactionBusinessEv
 
     public LoanReAgeTransactionBusinessEvent(LoanTransaction value) {
         super(value);
+    }
+
+    public LoanReAgeTransactionBusinessEvent(LoanTransaction value, LoanTransactionFlagsData flags) {
+        super(value, flags);
     }
 
     @Override

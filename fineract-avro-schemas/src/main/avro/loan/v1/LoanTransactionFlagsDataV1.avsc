@@ -1,0 +1,15 @@
+{
+    "name": "LoanTransactionFlagsDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "doc": "Optional flags associated with a loan transaction event",
+    "type": "record",
+    "fields": [{
+        "default": null,
+        "name": "changedTerms",
+        "doc": "True if the transaction changed the number of loan repayment terms (installments excluding downpayment and additional)",
+        "type": [
+            "null",
+            "boolean"
+        ]
+    }]
+}

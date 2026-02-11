@@ -9022,3 +9022,40 @@ Feature: Loan
       | 01 February 2025 | Disbursement      |  500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       | false    | false    |
       | 01 February 2025 | Repayment         | 1525.89 | 1500.0    | 25.89    | 0.0  | 0.0       |    0.0       | false    | false    |
       | 01 February 2025 | Accrual           |  25.89  | 0.0       | 25.89    | 0.0  | 0.0       |    0.0       | false    | false    |
+
+  Scenario: Verify that changedTerms is false in LoanDisbursalTransactionBusinessEvent for initial disbursement
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "1000" amount and expected disbursement date on "01 January 2024"
+    When Admin disburses the loan on "01 January 2024" with "1000" EUR transaction amount
+    Then LoanDisbursalTransactionBusinessEvent has changedTerms "false"
+
+  Scenario: Verify that changedTerms is true in LoanDisbursalTransactionBusinessEvent when additional disbursement adds new terms
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE_FULL_TERM_TRANCHE | 01 January 2024   | 200            | 9.4822                 | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "200" amount and expected disbursement date on "01 January 2024"
+    When Admin disburses the loan on "01 January 2024" with "100" EUR transaction amount
+    Then LoanDisbursalTransactionBusinessEvent has changedTerms "false"
+    When Admin sets the business date to "01 February 2024"
+    When Admin disburses the loan on "01 February 2024" with "100" EUR transaction amount
+    Then LoanDisbursalTransactionBusinessEvent has changedTerms "true"
+
+  Scenario: Verify that changedTerms is false in LoanDisbursalTransactionBusinessEvent when additional disbursement does not change terms
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_MULTIDISBURSE" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_MULTIDISBURSE | 01 January 2024   | 300            | 9.4822                 | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "300" amount and expected disbursement date on "01 January 2024"
+    When Admin disburses the loan on "01 January 2024" with "100" EUR transaction amount
+    Then LoanDisbursalTransactionBusinessEvent has changedTerms "false"
+    When Admin sets the business date to "08 January 2024"
+    When Admin disburses the loan on "08 January 2024" with "200" EUR transaction amount
+    Then LoanDisbursalTransactionBusinessEvent has changedTerms "false"
