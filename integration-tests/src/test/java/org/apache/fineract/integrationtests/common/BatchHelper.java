@@ -1754,4 +1754,73 @@ public final class BatchHelper {
 
         return br;
     }
+
+    /**
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.CreateJournalEntryCommandStrategy}
+     * Request for creating a journal entry in batch.
+     *
+     * @param requestId
+     *            the request ID
+     * @param officeId
+     *            the office ID
+     * @param transactionDate
+     *            the transaction date (e.g., "08 January 2026")
+     * @param comments
+     *            the journal entry comments
+     * @param currencyCode
+     *            the currency code (e.g., "USD")
+     * @param debits
+     *            JSON string for debits array (e.g., "[{\"glAccountId\":123,\"amount\":100}]")
+     * @param credits
+     *            JSON string for credits array (e.g., "[{\"glAccountId\":456,\"amount\":100}]")
+     * @return BatchRequest the batch request
+     */
+    public static BatchRequest createJournalEntryRequest(final Long requestId, final Integer officeId, final String transactionDate,
+            final String comments, final String currencyCode, final String debits, final String credits) {
+        return createJournalEntryRequest(requestId, officeId, transactionDate, comments, currencyCode, debits, credits, null);
+    }
+
+    /**
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.CreateJournalEntryCommandStrategy}
+     * Request for creating a journal entry in batch with optional command parameter.
+     *
+     * @param requestId
+     *            the request ID
+     * @param officeId
+     *            the office ID
+     * @param transactionDate
+     *            the transaction date (e.g., "08 January 2026")
+     * @param comments
+     *            the journal entry comments
+     * @param currencyCode
+     *            the currency code (e.g., "USD")
+     * @param debits
+     *            JSON string for debits array (e.g., "[{\"glAccountId\":123,\"amount\":100}]")
+     * @param credits
+     *            JSON string for credits array (e.g., "[{\"glAccountId\":456,\"amount\":100}]")
+     * @param command
+     *            optional command parameter (e.g., "updateRunningBalance", "defineOpeningBalance")
+     * @return BatchRequest the batch request
+     */
+    public static BatchRequest createJournalEntryRequest(final Long requestId, final Integer officeId, final String transactionDate,
+            final String comments, final String currencyCode, final String debits, final String credits, final String command) {
+
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        String relativeUrl = "v1/journalentries";
+        if (command != null && !command.isEmpty()) {
+            relativeUrl += "?command=" + command;
+        }
+        br.setRelativeUrl(relativeUrl);
+        br.setMethod(HttpMethod.POST);
+
+        final String body = "{\"officeId\":" + officeId + ",\"transactionDate\":\"" + transactionDate
+                + "\",\"dateFormat\":\"dd MMMM yyyy\",\"locale\":\"en\"," + "\"comments\":\"" + comments + "\",\"currencyCode\":\""
+                + currencyCode + "\"," + "\"debits\":" + debits + ",\"credits\":" + credits + "}";
+
+        br.setBody(body);
+
+        return br;
+    }
 }
