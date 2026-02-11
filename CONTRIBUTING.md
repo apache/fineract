@@ -210,6 +210,18 @@ The project uses Jacoco to measure unit tests code coverage. To generate a repor
 Generated reports can be found in the build/code-coverage directory.
 
 
+### Lombok
+
+The project uses [Lombok](https://projectlombok.org/) to reduce boilerplate code. Configuration is in [lombok.config](lombok.config).
+
+* Use `@Getter` / `@Setter` / `@NoArgsConstructor` on JPA entities. Never use `@Data` on entities (causes JPA lazy loading issues).
+* Use `@RequiredArgsConstructor` on service classes for constructor-based dependency injection.
+* Use `@Slf4j` for logging instead of manually declaring loggers.
+* Use `@Data` for simple DTOs (includes getters, setters, toString, equals, hashCode).
+* Use `@Builder` with `@Builder.Default` for configuration classes and complex object construction.
+* Never use `@SneakyThrows` - handle exceptions explicitly.
+
+
 ### Error Handling
 
 * When catching exceptions, either rethrow them, or log them.  Either way, include the root cause by using `catch (SomeException e)` and then either `throw AnotherException("..details..", e)` or `LOG.error("...context...", e)`.
