@@ -20,8 +20,11 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
+import org.apache.fineract.client.models.InlineJobRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
@@ -32,6 +35,16 @@ public class FeignTransactionHelper {
 
     public FeignTransactionHelper(FineractFeignClient fineractClient) {
         this.fineractClient = fineractClient;
+    }
+
+    public void executeInlineCOB(Long loanId) {
+        InlineJobRequest request = new InlineJobRequest().loanIds(List.of(loanId));
+        ok(() -> fineractClient.inlineJob().executeInlineJob("LOAN_COB", request));
+    }
+
+    public GetLoansLoanIdTransactionsTemplateResponse getPrepaymentAmount(Long loanId, String transactionDate, String dateFormat) {
+        return ok(() -> fineractClient.loanTransactions().retrieveTransactionTemplate(loanId, "prepayLoan", dateFormat, transactionDate,
+                "en", null));
     }
 
     public Long addRepayment(Long loanId, PostLoansLoanIdTransactionsRequest request) {

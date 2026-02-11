@@ -111,6 +111,7 @@ public final class LoanTestData {
 
     public static final class AmortizationType {
 
+        public static final Integer EQUAL_PRINCIPAL = 0;
         public static final Integer EQUAL_INSTALLMENTS = 1;
 
         private AmortizationType() {}

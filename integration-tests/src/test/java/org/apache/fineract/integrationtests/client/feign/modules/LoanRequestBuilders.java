@@ -67,7 +67,7 @@ public final class LoanRequestBuilders {
                 .amortizationType(LoanTestData.AmortizationType.EQUAL_INSTALLMENTS)//
                 .interestType(LoanTestData.InterestType.DECLINING_BALANCE)//
                 .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.DAILY)//
-                .transactionProcessingStrategyCode("DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY")//
+                .transactionProcessingStrategyCode("due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy")//
                 .loanType("individual")//
                 .locale(LoanTestData.LOCALE)//
                 .dateFormat(LoanTestData.DATETIME_PATTERN);
