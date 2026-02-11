@@ -71,6 +71,12 @@ public class FeignAccountHelper {
         return new Account(account.getId().intValue(), getAccountType(type));
     }
 
+    public String getGlCode(Account account) {
+        GetGLAccountsResponse response = ok(
+                () -> fineractClient.generalLedgerAccount().retreiveAccount(account.getAccountID().longValue(), Collections.emptyMap()));
+        return response.getGlCode();
+    }
+
     private Integer getAccountTypeId(String type) {
         return switch (type) {
             case "ASSET" -> 1;
