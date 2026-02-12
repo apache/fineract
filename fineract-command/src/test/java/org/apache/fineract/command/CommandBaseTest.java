@@ -21,11 +21,14 @@ package org.apache.fineract.command;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.persistence.domain.CommandRepository;
 import org.apache.fineract.command.persistence.mapping.CommandMapper;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.containers.Network;
@@ -64,6 +67,11 @@ abstract class CommandBaseTest {
         postgres(registry);
         // mariadb(registry);
         // mysql(registry);
+    }
+
+    @BeforeAll
+    static void requireDocker() {
+        Assumptions.assumeTrue(DockerClientFactory.instance().isDockerAvailable(), "Docker not available, skipping Testcontainers tests");
     }
 
     private static void postgres(DynamicPropertyRegistry registry) {
