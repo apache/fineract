@@ -67,6 +67,7 @@ public class SearchingClientRepositoryImpl implements SearchingClientRepository 
         Path<Office> office = root.get("office");
 
         Specification<Client> spec = (r, q, builder) -> {
+            q.distinct(true);
             Path<Office> o = r.get("office");
             Join<Client, ClientIdentifier> identity = r.join("identifiers", JoinType.LEFT);
 
