@@ -41,4 +41,6 @@ public interface InterestScheduleModelRepositoryWrapper {
     boolean hasValidModelForDate(Long loanId, LocalDate targetDate);
 
     Optional<ProgressiveLoanInterestScheduleModel> getSavedModel(Loan loan, LocalDate businessDate);
+
+    Long removeByLoanId(Long loanId);
 }

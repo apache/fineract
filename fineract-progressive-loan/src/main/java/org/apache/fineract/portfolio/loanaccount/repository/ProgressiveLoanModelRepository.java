@@ -23,6 +23,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.ProgressiveLoanModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ProgressiveLoanModelRepository
         extends JpaSpecificationExecutor<ProgressiveLoanModel>, JpaRepository<ProgressiveLoanModel, Long> {
@@ -30,4 +32,9 @@ public interface ProgressiveLoanModelRepository
     Optional<ProgressiveLoanModel> findOneByLoanId(Long loanId);
 
     Optional<ProgressiveLoanModel> findOneByLoan(Loan loan);
+
+    Long removeByLoanId(Long loanId);
+
+    @Query("SELECT CASE WHEN COUNT(plm) > 0 THEN TRUE ELSE FALSE END FROM ProgressiveLoanModel plm WHERE plm.loan.id = :loanId AND plm.jsonModelVersion = :modelVersion")
+    Boolean hasValidModel(@Param("loanId") Long loanId, @Param("modelVersion") String modelVersion);
 }

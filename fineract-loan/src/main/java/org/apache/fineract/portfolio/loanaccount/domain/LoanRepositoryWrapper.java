@@ -313,4 +313,8 @@ public class LoanRepositoryWrapper {
     public boolean isEnabledCapitalizedIncome(Long loanId) {
         return repository.isEnabledCapitalizedIncome(loanId);
     }
+
+    public boolean isLoanInAllowedStatus(Long loanId, List<LoanStatus> allowedLoanStatuses) {
+        return repository.isLoanInAllowedStatus(loanId, allowedLoanStatuses);
+    }
 }

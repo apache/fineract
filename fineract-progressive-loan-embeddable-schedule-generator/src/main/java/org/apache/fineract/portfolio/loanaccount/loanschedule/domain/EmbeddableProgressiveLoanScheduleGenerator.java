@@ -83,5 +83,10 @@ public class EmbeddableProgressiveLoanScheduleGenerator {
         public Optional<ProgressiveLoanInterestScheduleModel> getSavedModel(Loan loan, LocalDate businessDate) {
             return Optional.empty();
         }
+
+        @Override
+        public Long removeByLoanId(Long loanId) {
+            return 0L;
+        }
     }
 }

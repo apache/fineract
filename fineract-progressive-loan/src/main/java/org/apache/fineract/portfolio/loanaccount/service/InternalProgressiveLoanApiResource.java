@@ -22,6 +22,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -98,5 +99,14 @@ public class InternalProgressiveLoanApiResource implements InitializingBean {
         ProgressiveLoanInterestScheduleModel model = reprocessTransactionsAndGetModel(loan);
 
         return writePlatformService.writeInterestScheduleModel(loan, model);
+    }
+
+    @DELETE
+    @Path("{loanId}/model")
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Delete ProgressiveLoanInterestScheduleModel By Loan ID", description = "DO NOT USE THIS IN PRODUCTION!")
+    @Transactional
+    public Long deleteModel(@PathParam("loanId") @Parameter(description = "loanId") long loanId) {
+        return writePlatformService.removeByLoanId(loanId);
     }
 }

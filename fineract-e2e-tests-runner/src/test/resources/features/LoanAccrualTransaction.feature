@@ -1619,6 +1619,7 @@ Feature: LoanAccrualTransaction
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
 #    --- Early repayment with 17.01 EUR on 15 Jan ---
     When Admin sets the business date to "15 January 2024"
+    When Call Internal API to remove progressive loan model by loan Id
     When Admin makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "15 January 2024" with 17.01 EUR transaction amount
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
@@ -1660,6 +1661,7 @@ Feature: LoanAccrualTransaction
       | 01 May 2024      | Accrual Activity          | 0.48   |  0.0      | 0.48     | 0.0  | 0.0       |  0.0         | false    | false    |
       | 31 May 2024      | Accrual                   | 1.87   |  0.0      | 1.87     | 0.0  | 0.0       |  0.0         | false    | false    |
     When Admin sets the business date to "02 June 2024"
+    When Call Internal API to remove progressive loan model by loan Id
     And Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |

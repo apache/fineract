@@ -28,6 +28,7 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;
@@ -65,9 +66,10 @@ public class LoanInlineCOBConfig {
     private CustomJobParameterRepository customJobParameterRepository;
     @Autowired
     private CustomJobParameterResolver customJobParameterResolver;
-
     @Autowired
     private LoanLockingService loanLockingService;
+    @Autowired
+    private ProgressiveLoanModelProcessingService progressiveLoanModelProcessingService;
 
     @Bean
     public InlineLoanCOBBuildExecutionContextTasklet inlineLoanCOBBuildExecutionContextTasklet() {
@@ -106,7 +108,7 @@ public class LoanInlineCOBConfig {
     @JobScope
     @Bean
     public InlineCOBLoanItemProcessor inlineCobWorkerItemProcessor() {
-        return new InlineCOBLoanItemProcessor(cobBusinessStepService);
+        return new InlineCOBLoanItemProcessor(cobBusinessStepService, progressiveLoanModelProcessingService);
     }
 
     @Bean

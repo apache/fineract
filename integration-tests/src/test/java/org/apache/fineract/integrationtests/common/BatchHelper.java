@@ -202,15 +202,15 @@ public final class BatchHelper {
         br.setMethod("POST");
 
         final String extId;
-        if (externalId.equals("")) {
-            extId = "ext" + String.valueOf((10000 * secureRandom.nextDouble())) + String.valueOf((10000 * secureRandom.nextDouble()));
+        if (externalId.isEmpty()) {
+            extId = UUID.randomUUID().toString();
         } else {
             extId = externalId;
         }
 
-        final String body = "{ \"officeId\": 1, \"legalFormId\":1, \"firstname\": \"Petra\", \"lastname\": \"Yton\"," + "\"externalId\": "
-                + extId + ",  \"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en\","
-                + "\"active\": false, \"submittedOnDate\": \"04 March 2009\"}";
+        final String body = "{ \"officeId\": 1, \"legalFormId\":1, \"firstname\": \"Petra\", \"lastname\": \"Yton\"," + "\"externalId\": \""
+                + extId
+                + "\",  \"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en\",\"active\": false, \"submittedOnDate\": \"04 March 2009\"}";
 
         br.setBody(body);
 

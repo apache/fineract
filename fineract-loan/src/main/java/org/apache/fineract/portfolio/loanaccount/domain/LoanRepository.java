@@ -279,4 +279,10 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query(FIND_ALL_LOANS_BEHIND_ON_DISBURSEMENT_DATE)
     List<COBIdAndLastClosedBusinessDate> findAllLoansBehindOnDisbursementDate(@Param("cobBusinessDate") LocalDate cobBusinessDate,
             @Param("loanIds") List<Long> loanIds, @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
+
+    @Query("SELECT CASE WHEN COUNT(l) > 0 THEN TRUE ELSE FALSE END FROM Loan l WHERE l.id = :loanId and l.loanRepaymentScheduleDetail.loanScheduleType = org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType.PROGRESSIVE")
+    Boolean isProgressiveLoan(@Param("loanId") Long loanId);
+
+    @Query("SELECT CASE WHEN COUNT(l) > 0 THEN TRUE ELSE FALSE END FROM Loan l WHERE l.id = :loanId and l.loanStatus in :allowedLoanStatuses")
+    Boolean isLoanInAllowedStatus(@Param("loanId") Long loanId, @Param("allowedLoanStatuses") List<LoanStatus> allowedLoanStatuses);
 }

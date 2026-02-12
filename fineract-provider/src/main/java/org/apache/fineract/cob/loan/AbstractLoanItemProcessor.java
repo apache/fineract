@@ -32,6 +32,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
+import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.AfterStep;
@@ -44,6 +46,7 @@ import org.springframework.lang.NonNull;
 public abstract class AbstractLoanItemProcessor implements ItemProcessor<Loan, Loan> {
 
     private final COBBusinessStepService cobBusinessStepService;
+    private final ProgressiveLoanModelProcessingService progressiveLoanModelProcessingService;
 
     @Setter(AccessLevel.PROTECTED)
     private ExecutionContext executionContext;
@@ -51,16 +54,24 @@ public abstract class AbstractLoanItemProcessor implements ItemProcessor<Loan, L
 
     @SuppressWarnings({ "unchecked" })
     @Override
-    public Loan process(@NonNull Loan item) throws Exception {
+    public Loan process(@NonNull Loan loan) throws Exception {
+        if (needToRebuildModel(loan)) {
+            progressiveLoanModelProcessingService.recalculateModelAndSave(loan.getId());
+        }
         Set<BusinessStepNameAndOrder> businessSteps = (Set<BusinessStepNameAndOrder>) executionContext.get(LoanCOBConstant.BUSINESS_STEPS);
         if (businessSteps == null) {
             throw new IllegalStateException("No business steps found in the execution context");
         }
         TreeMap<Long, String> businessStepMap = getBusinessStepMap(businessSteps);
 
-        Loan alreadyProcessedLoan = cobBusinessStepService.run(businessStepMap, item);
+        Loan alreadyProcessedLoan = cobBusinessStepService.run(businessStepMap, loan);
         alreadyProcessedLoan.setLastClosedBusinessDate(businessDate);
         return alreadyProcessedLoan;
+    }
+
+    private boolean needToRebuildModel(Loan loan) {
+        return loan.isProgressiveSchedule() && !progressiveLoanModelProcessingService.hasValidModel(loan.getId(),
+                ProgressiveLoanInterestScheduleModel.getModelVersion());
     }
 
     private TreeMap<Long, String> getBusinessStepMap(Set<BusinessStepNameAndOrder> businessSteps) {

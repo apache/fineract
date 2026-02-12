@@ -52,4 +52,7 @@ public class ProgressiveLoanModel extends AbstractPersistableCustom<Long> {
     @Column(name = "last_modified_on_utc", nullable = false)
     private OffsetDateTime lastModifiedDate;
 
+    @Column(name = "json_model_version", nullable = false)
+    private String jsonModelVersion;
+
 }

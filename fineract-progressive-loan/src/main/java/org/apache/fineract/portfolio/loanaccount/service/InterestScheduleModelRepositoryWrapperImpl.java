@@ -61,11 +61,13 @@ public class InterestScheduleModelRepositoryWrapperImpl implements InterestSched
             ProgressiveLoanModel progressiveLoanModel = loanModelRepository.findOneByLoanId(loan.getId()).orElseGet(() -> {
                 ProgressiveLoanModel plm = new ProgressiveLoanModel();
                 plm.setLoan(loan);
+                plm.setJsonModelVersion(ProgressiveLoanInterestScheduleModel.getModelVersion());
                 return plm;
             });
             progressiveLoanModel.setBusinessDate(ThreadLocalContextUtil.getBusinessDate());
             progressiveLoanModel.setLastModifiedDate(DateUtils.getAuditOffsetDateTime());
             progressiveLoanModel.setJsonModel(jsonModel);
+            progressiveLoanModel.setJsonModelVersion(ProgressiveLoanInterestScheduleModel.getModelVersion());
             loanModelRepository.save(progressiveLoanModel);
         });
         return model;
@@ -132,5 +134,10 @@ public class InterestScheduleModelRepositoryWrapperImpl implements InterestSched
                 .map(ProgressiveLoanModel::getJsonModel) //
                 .map(jsonModel -> progressiveLoanInterestScheduleModelParserService.fromJson(jsonModel, detail,
                         MoneyHelper.getMathContext(), installmentAmountInMultipliesOf)); //
+    }
+
+    @Override
+    public Long removeByLoanId(Long loanId) {
+        return loanModelRepository.removeByLoanId(loanId);
     }
 }

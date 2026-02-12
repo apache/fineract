@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.core.service.MDCWrapper;
 import org.apache.fineract.infrastructure.instancemode.filter.FineractInstanceModeApiFilter;
 import org.apache.fineract.infrastructure.jobs.filter.LoanCOBApiFilter;
 import org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelper;
+import org.apache.fineract.infrastructure.jobs.filter.ProgressiveLoanModelCheckerFilter;
 import org.apache.fineract.infrastructure.security.converter.FineractJwtAuthenticationTokenConverter;
 import org.apache.fineract.infrastructure.security.data.TenantAuthenticationDetails;
 import org.apache.fineract.infrastructure.security.filter.BusinessDateFilter;
@@ -118,6 +119,9 @@ public class AuthorizationServerConfig {
     @Autowired
     private BusinessDateReadPlatformService businessDateReadPlatformService;
 
+    @Autowired
+    ProgressiveLoanModelCheckerFilter progressiveLoanModelCheckerFilter;
+
     @Bean
     @Order(1)
     public SecurityFilterChain publicEndpoints(HttpSecurity http) throws Exception {
@@ -173,9 +177,12 @@ public class AuthorizationServerConfig {
         if (!Objects.isNull(loanCOBFilterHelper)) {
             http.addFilterAfter(loanCOBApiFilter(), FineractInstanceModeApiFilter.class) //
                     .addFilterAfter(idempotencyStoreFilter(), LoanCOBApiFilter.class); //
+            http.addFilterBefore(progressiveLoanModelCheckerFilter, LoanCOBApiFilter.class);
         } else {
             http.addFilterAfter(idempotencyStoreFilter(), FineractInstanceModeApiFilter.class); //
+            http.addFilterAfter(progressiveLoanModelCheckerFilter, FineractInstanceModeApiFilter.class);
         }
+
         if (fineractProperties.getIpTracking().isEnabled()) {
             http.addFilterAfter(callerIpTrackingFilter(), RequestResponseFilter.class);
         }
