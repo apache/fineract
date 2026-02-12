@@ -209,7 +209,7 @@ allprojects  {
     spotless {
         format 'misc', {
             target '**/*.md', '**/*.properties', '**/.gitignore', '**/.openapi-generator-ignore', '**/*.yml', '**/*.xml', '**/**.json', '**/*.sql'
-            targetExclude '**/build/**', '**/bin/**', '**/.settings/**', '**/.idea/**', '**/.gradle/**', '**/gradlew.bat', '**/licenses/**', '**/banner.txt', '.vscode/**', '.profileconfig.json'
+            targetExclude '**/build/**', '**/build/generated/**', '**/bin/**', '**/.settings/**', '**/.idea/**', '**/.gradle/**', '**/gradlew.bat', '**/licenses/**', '**/banner.txt', '.vscode/**', '.profileconfig.json', '**/.gitkeep'
             indentWithSpaces(4)
             endWithNewline()
             trimTrailingWhitespace()
@@ -217,7 +217,7 @@ allprojects  {
 
         groovyGradle {
             target '*.gradle', '**/*.gradle'
-            targetExclude '**/build/**', '/**/build.gradle' // TODO: temporary disabled on build.gradle until someone fix this issue: https://github.com/diffplug/spotless/issues/1807
+            targetExclude '**/build/**', '/**/build.gradle', '**/.gitkeep' // TODO: temporary disabled on build.gradle until someone fix this issue: https://github.com/diffplug/spotless/issues/1807
             greclipse()
             indentWithSpaces(4)
             endWithNewline()
@@ -226,6 +226,23 @@ allprojects  {
 
         lineEndings 'UNIX'
     }
+  
+    // Prevent sporadic failures in `clean build` where Spotless tasks snapshot/read files
+    // while `clean` deletes `build/**` outputs in parallel.
+    //
+    // Important: `clean` is present in every subproject, and Gradle may execute them in parallel
+    // with Spotless tasks. Ensure Spotless runs after *all* `clean` tasks across the build.
+    if (project == rootProject) {
+        gradle.projectsEvaluated {
+            def allCleanTasks = rootProject.allprojects.collect { it.tasks.findByName('clean') }.findAll { it != null }
+            rootProject.allprojects.each { p ->
+                p.tasks.matching { it.name.startsWith('spotless') }.configureEach {
+                    mustRunAfter(allCleanTasks)
+                }
+            }
+        }
+    }
+
 
     // Configuration for Gradle license plug-in
     // https://github.com/hierynomus/license-gradle-plugin
