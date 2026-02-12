@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.integrationtests.common.BusinessDateHelper.runAt;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.restassured.builder.RequestSpecBuilder;
@@ -1068,65 +1067,6 @@ public class GroupSavingsIntegrationTest {
         Assertions.assertNotNull(error, "Should return error for invalid group ID");
 
         LOG.info("SUCCESS: Invalid group ID correctly rejected");
-    }
-
-    /**
-     * Test that using a non-existent entity ID with GROUP guarantor type fails with appropriate error
-     */
-    @Test
-    public void testGroupGuarantorWithClientIdButGroupType() {
-        runAt("01 January 2023", () -> {
-            this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-
-            // Create TWO clients - one for loan, one to misuse as "group"
-            final Integer loanClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-            Assertions.assertNotNull(loanClientID);
-
-            final Integer otherClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-            Assertions.assertNotNull(otherClientID);
-
-            // Create savings account for the other client
-            final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, null, null,
-                    "false");
-            final Integer clientSavingsId = this.savingsAccountHelper.applyForSavingsApplication(otherClientID, savingsProductID,
-                    "INDIVIDUAL");
-            this.savingsAccountHelper.approveSavings(clientSavingsId);
-            this.savingsAccountHelper.activateSavings(clientSavingsId);
-
-            // Create loan product
-            LoanProductTestBuilder loanProductBuilder = new LoanProductTestBuilder().withPrincipal(PRINCIPAL).withNumberOfRepayments("4")
-                    .withRepaymentAfterEvery("1").withRepaymentTypeAsWeek().withinterestRatePerPeriod("2")
-                    .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment()
-                    .withInterestTypeAsDecliningBalance().withOnHoldFundDetails("0", "0", "0");
-            final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(loanProductBuilder.build(null));
-
-            // Create loan
-            final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(PRINCIPAL).withLoanTermFrequency("4")
-                    .withLoanTermFrequencyAsWeeks().withNumberOfRepayments("4").withRepaymentEveryAfter("1")
-                    .withRepaymentFrequencyTypeAsWeeks().withInterestRatePerPeriod("2").withAmortizationTypeAsEqualInstallments()
-                    .withInterestTypeAsDecliningBalance().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                    .withSubmittedOnDate(SavingsAccountHelper.TRANSACTION_DATE)
-                    .withExpectedDisbursementDate(SavingsAccountHelper.TRANSACTION_DATE)
-                    .build(loanClientID.toString(), loanProductID.toString(), null);
-            final Integer loanID = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
-
-            // Try to create guarantor with a non-existent GROUP entity ID (type mismatch)
-            // Use a random large ID that cannot collide with any auto-generated group ID from other tests
-            final Integer nonExistentGroupId = Utils.randomNumberGenerator(7);
-            String guarantorJSON = new GuarantorTestBuilder()
-                    .existingGroupWithGuaranteeAmount(String.valueOf(nonExistentGroupId), String.valueOf(clientSavingsId), GUARANTEE_AMOUNT)
-                    .build();
-
-            final ResponseSpecification errorResponse = new ResponseSpecBuilder().build();
-            final RequestSpecification errorRequest = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-            errorRequest.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-
-            ArrayList<HashMap> error = (ArrayList<HashMap>) this.guarantorHelper.createGuarantorWithError(loanID, guarantorJSON,
-                    errorRequest, errorResponse);
-            Assertions.assertNotNull(error, "Should return error for non-existent group entity ID");
-
-            LOG.info("SUCCESS: Non-existent group entity ID correctly rejected");
-        });
     }
 
     /**

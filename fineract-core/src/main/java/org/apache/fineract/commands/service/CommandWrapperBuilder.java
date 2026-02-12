@@ -546,6 +546,30 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createWorkingCapitalLoanProduct() {
+        this.actionName = "CREATE";
+        this.entityName = "WORKINGCAPITALLOANPRODUCT";
+        this.entityId = null;
+        this.href = "/working-capital-loan-products/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateWorkingCapitalLoanProduct(final Long productId) {
+        this.actionName = "UPDATE";
+        this.entityName = "WORKINGCAPITALLOANPRODUCT";
+        this.entityId = productId;
+        this.href = "/working-capital-loan-products/" + productId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteWorkingCapitalLoanProduct(final Long productId) {
+        this.actionName = "DELETE";
+        this.entityName = "WORKINGCAPITALLOANPRODUCT";
+        this.entityId = productId;
+        this.href = "/working-capital-loan-products/" + productId;
+        return this;
+    }
+
     public CommandWrapperBuilder createClientIdentifier(final Long clientId) {
         this.actionName = "CREATE";
         this.entityName = "CLIENTIDENTIFIER";
