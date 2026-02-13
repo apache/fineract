@@ -366,6 +366,10 @@ public class DepositProductDataValidator {
             final JsonArray array = this.fromApiJsonHelper.extractJsonArrayNamed(chartsParamName, element);
             baseDataValidator.reset().parameter(chartsParamName).value(array).notNull().jsonArrayNotEmpty();
 
+            if (array == null) {
+                return;
+            }
+
             for (int i = 0; i < array.size(); i++) {
                 final JsonObject interestRateChartElement = array.get(i).getAsJsonObject();
                 final String json = this.fromApiJsonHelper.toJson(interestRateChartElement);
