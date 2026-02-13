@@ -146,7 +146,7 @@ public class FeignTrialBalanceSummaryReportTest extends FeignIntegrationTest {
         assertFalse(response.getColumnHeaders().isEmpty());
 
         List<String> expectedColumns = List.of("postingdate", "product", "glacct", "description", "assetowner", "beginningbalance",
-                "debitmovement", "creditmovement", "endingbalance");
+                "debitmovement", "creditmovement", "endingbalance", "originators");
         List<String> actualColumns = response.getColumnHeaders().stream().map(ResultsetColumnHeaderData::getColumnName).toList();
         Assertions.assertEquals(expectedColumns, actualColumns);
     }
