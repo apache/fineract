@@ -63,6 +63,7 @@ public final class StandingInstructionData {
     private final EnumOptionData transferType;
     private final EnumOptionData priority;
     private final EnumOptionData instructionType;
+    @Getter
     private final EnumOptionData status;
     @Getter
     private final BigDecimal amount;
