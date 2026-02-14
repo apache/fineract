@@ -298,6 +298,12 @@ public abstract class TestContextKey {
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADVANCED_CUSTOM_PAYMENT_ALLOCATION_PROGRESSIVE_LOAN_SCHEDULE_PRINCIPAL_FIRST = "loanProductCreateResponseLP2AdvancedPaymentHorizontalPrincipalFirst";
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE_FULL_TERM_TRANCHE = "loanProductCreateResponseLP2AdvancedPaymentInterestDailyEmi36030InterestRecalculationDailyMultidisburseFullTermTranche";
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL_360_30_USD = "loanProductCreateResponseLP2AdvancedPaymentHorizontal36030Usd";
+    public static final String ORIGINATOR_CREATE_RESPONSE = "originatorCreateResponse";
+    public static final String ORIGINATOR_EXTERNAL_ID = "originatorExternalId";
+    public static final String ORIGINATOR_TYPE_NAME = "originatorTypeName";
+    public static final String ORIGINATOR_CHANNEL_TYPE_NAME = "originatorChannelTypeName";
+    public static final String ORIGINATOR_SECOND_CREATE_RESPONSE = "originatorSecondCreateResponse";
+    public static final String ORIGINATOR_SECOND_EXTERNAL_ID = "originatorSecondExternalId";
     public static final String VERIFIED_LOAN_ACCRUALS = "VERIFIED_LOAN_ACCRUALS";
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INT_DAILY_EMI_360_30_INT_RECALC_DAILY_MULTIDISB_FULL_TERM_TRANCHE_DOWNPAYMENT = "loanProductCreateResponseLP2AdvancedPaymentInterestDailyEmi36030InterestRecalculationDailyMultidisburseFullTermTrancheDownPayment";
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INT_DAILY_EMI_360_30_INT_RECALC_DAILY_MULTIDISB_FULL_TERM_TRANCHE_DOWNPAYMENT_AUTO = "loanProductCreateResponseLP2AdvancedPaymentInterestDailyEmi36030InterestRecalculationDailyMultidisburseFullTermTrancheDownPaymentAuto";
