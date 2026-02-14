@@ -31,6 +31,8 @@ public interface GenericDataService {
 
     List<ResultsetRowData> fillResultsetRowData(String sql, List<ResultsetColumnHeaderData> columnHeaders);
 
+    List<ResultsetRowData> fillResultsetRowData(String sql, List<ResultsetColumnHeaderData> columnHeaders, Object... args);
+
     String generateJsonFromGenericResultsetData(GenericResultsetData grs);
 
     String replace(String str, String pattern, String replace);

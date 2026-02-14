@@ -263,8 +263,8 @@ public class DatatableReadServiceImpl implements DatatableReadService {
     @Override
     public Long countDatatableEntries(final String datatableName, final Long appTableId, String foreignKeyColumn) {
         final String sqlString = "SELECT COUNT(" + sqlGenerator.escape(foreignKeyColumn) + ") FROM " + sqlGenerator.escape(datatableName)
-                + " WHERE " + sqlGenerator.escape(foreignKeyColumn) + " = " + appTableId;
-        return this.jdbcTemplate.queryForObject(sqlString, Long.class); // NOSONAR
+                + " WHERE " + sqlGenerator.escape(foreignKeyColumn) + " = ?";
+        return this.jdbcTemplate.queryForObject(sqlString, Long.class, appTableId); // NOSONAR
     }
 
     @Override

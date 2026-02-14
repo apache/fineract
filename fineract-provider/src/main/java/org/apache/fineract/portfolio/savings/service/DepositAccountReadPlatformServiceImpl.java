@@ -134,6 +134,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final PaginationParameters paginationParameters) {
 
         this.context.authenticatedUser();
+        this.paginationParametersDataValidator.validateParameterValues(paginationParameters, supportedOrderByValues,
+                depositAccountType.resourceName());
+
         final DepositAccountMapper depositAccountMapper = this.getDepositAccountMapper(depositAccountType);
         if (depositAccountMapper == null) {
             return null;
