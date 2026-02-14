@@ -415,6 +415,14 @@ final class GroupsApiResourceSwagger {
             public String productName;
             public GetGroupsGroupIdAccountsSavingStatus status;
             public GetGroupsGroupIdAccountsSavingCurrency currency;
+            @Schema(example = "5000.00")
+            public java.math.BigDecimal accountBalance;
+            @Schema(example = "300.00")
+            public java.math.BigDecimal onHoldFunds;
+            @Schema(example = "200.00")
+            public java.math.BigDecimal savingsAmountOnHold;
+            @Schema(example = "4500.00")
+            public java.math.BigDecimal availableBalance;
             public GetGroupsGroupIdAccountsSavingAccountType accountType;
         }
 

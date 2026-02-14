@@ -311,6 +311,8 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             accountsSummary.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId, sa.status_enum as statusEnum, ");
             accountsSummary.append("sa.account_type_enum as accountType, ");
             accountsSummary.append("sa.account_balance_derived as accountBalance, ");
+            accountsSummary.append("sa.on_hold_funds_derived as onHoldFunds, ");
+            accountsSummary.append("sa.total_savings_amount_on_hold as onHoldAmount, ");
 
             accountsSummary.append("sa.submittedon_date as submittedOnDate,");
             accountsSummary.append("sbu.username as submittedByUsername,");
@@ -377,6 +379,18 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             final String shortProductName = rs.getString("shortProductName");
             final Integer statusId = JdbcSupport.getInteger(rs, "statusEnum");
             final BigDecimal accountBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "accountBalance");
+            final BigDecimal onHoldFunds = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "onHoldFunds");
+            final BigDecimal onHoldAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "onHoldAmount");
+
+            BigDecimal availableBalance = accountBalance;
+            if (availableBalance != null && onHoldFunds != null) {
+                availableBalance = availableBalance.subtract(onHoldFunds);
+            }
+
+            if (availableBalance != null && onHoldAmount != null) {
+                availableBalance = availableBalance.subtract(onHoldAmount);
+            }
+
             final SavingsAccountStatusEnumData status = SavingsEnumerations.status(statusId);
             final Integer accountType = JdbcSupport.getInteger(rs, "accountType");
             final EnumOptionData accountTypeData = AccountEnumerations.loanType(accountType);
@@ -433,7 +447,8 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     activatedByLastname, closedOnDate, closedByUsername, closedByFirstname, closedByLastname);
 
             return new SavingsAccountSummaryData(id, accountNo, externalId, productId, productName, shortProductName, status, currency,
-                    accountBalance, accountTypeData, timeline, depositTypeData, subStatus, lastActiveTransactionDate);
+                    accountBalance, onHoldFunds, onHoldAmount, availableBalance, accountTypeData, timeline, depositTypeData, subStatus,
+                    lastActiveTransactionDate);
         }
     }
 

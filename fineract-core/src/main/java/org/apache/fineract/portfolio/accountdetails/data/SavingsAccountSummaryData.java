@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.accountdetails.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountApplicationTimelineData;
@@ -29,6 +30,7 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountSubStatusEnumDat
 /**
  * Immutable data object for savings accounts.
  */
+@Getter
 @SuppressWarnings("unused")
 public class SavingsAccountSummaryData {
 
@@ -40,7 +42,27 @@ public class SavingsAccountSummaryData {
     private final String shortProductName;
     private final SavingsAccountStatusEnumData status;
     private final CurrencyData currency;
+    /**
+     * The total balance of the savings account.
+     */
     private final BigDecimal accountBalance;
+    /**
+     * Funds held as collateral for loan guarantees. When a savings account is used as a guarantor for a loan, the
+     * guarantee amount is held here and unavailable for withdrawal until the loan is repaid or the guarantee is
+     * released. Sourced from the database column on_hold_funds_derived.
+     */
+    private final BigDecimal onHoldFunds;
+    /**
+     * User-initiated holds explicitly placed on the account, including lien holds. These are manual holds placed
+     * through hold/release transactions to restrict withdrawals for specific purposes. Sourced from the database column
+     * total_savings_amount_on_hold.
+     */
+    private final BigDecimal savingsAmountOnHold;
+    /**
+     * The actual available balance that can be withdrawn, accounting for all holds. Calculated as: accountBalance -
+     * onHoldFunds (guarantor holds) - savingsAmountOnHold (user/lien holds)
+     */
+    private final BigDecimal availableBalance;
     // differentiate Individual, JLG or Group account
     private final EnumOptionData accountType;
     private final SavingsAccountApplicationTimelineData timeline;
@@ -52,7 +74,8 @@ public class SavingsAccountSummaryData {
 
     public SavingsAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
             final String productName, final String shortProductName, final SavingsAccountStatusEnumData status, final CurrencyData currency,
-            final BigDecimal accountBalance, final EnumOptionData accountType, final SavingsAccountApplicationTimelineData timeline,
+            final BigDecimal accountBalance, final BigDecimal onHoldFunds, final BigDecimal savingsAmountOnHold,
+            final BigDecimal availableBalance, final EnumOptionData accountType, final SavingsAccountApplicationTimelineData timeline,
             final EnumOptionData depositType, final SavingsAccountSubStatusEnumData subStatus, final LocalDate lastActiveTransactionDate) {
         this.id = id;
         this.accountNo = accountNo;
@@ -63,18 +86,13 @@ public class SavingsAccountSummaryData {
         this.status = status;
         this.currency = currency;
         this.accountBalance = accountBalance;
+        this.onHoldFunds = onHoldFunds;
+        this.savingsAmountOnHold = savingsAmountOnHold;
+        this.availableBalance = availableBalance;
         this.accountType = accountType;
         this.timeline = timeline;
         this.depositType = depositType;
         this.subStatus = subStatus;
         this.lastActiveTransactionDate = lastActiveTransactionDate;
-    }
-
-    public String getAccountNo() {
-        return accountNo;
-    }
-
-    public Long getId() {
-        return id;
     }
 }
