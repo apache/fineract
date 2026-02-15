@@ -32,8 +32,8 @@ public class SavingsHelperNPExceptionTest {
 
         SavingsHelper helper = new SavingsHelper(null);
 
-        LocalDate start = LocalDate.now();
-        LocalDate end = LocalDate.now().plusMonths(3);
+        LocalDate start = LocalDate.of(2025, 1, 1);
+        LocalDate end = LocalDate.of(2025, 4, 1);
         try {
             helper.determineInterestPostingPeriods(start, end, null, 1, new ArrayList<>());
             System.out.println("SUCCESS: The method survived!");
