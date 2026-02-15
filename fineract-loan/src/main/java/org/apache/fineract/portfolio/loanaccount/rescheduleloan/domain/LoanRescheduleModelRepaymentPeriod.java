@@ -20,9 +20,11 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Setter;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 
+@Setter
 public final class LoanRescheduleModelRepaymentPeriod implements LoanRescheduleModalPeriod {
 
     private int periodNumber;

@@ -20,12 +20,14 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.data;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 
 /**
  * Immutable data object representing loan reschedule request data.
  **/
+@Getter
 public final class LoanRescheduleRequestData {
 
     private final Long id;
@@ -127,80 +129,10 @@ public final class LoanRescheduleRequestData {
     }
 
     /**
-     * @return the id
-     */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * @return the loanId
-     */
-    public Long getLoanId() {
-        return loanId;
-    }
-
-    /**
-     * @return the statusEnum
-     */
-    public LoanRescheduleRequestStatusEnumData getStatusEnum() {
-        return statusEnum;
-    }
-
-    /**
-     * @return the reschedule from installment number
-     */
-    public Integer getRescheduleFromInstallment() {
-        return rescheduleFromInstallment;
-    }
-
-    /**
-     * @return the reschedule from date
-     */
-    public LocalDate getRescheduleFromDate() {
-        return rescheduleFromDate;
-    }
-
-    /**
      * @return the rescheduleReasonCodeValueId
      */
     public CodeValueData getRescheduleReasonCodeValueId() {
         return rescheduleReasonCodeValue;
-    }
-
-    /**
-     * @return the rescheduleReasonText
-     */
-    public String getRescheduleReasonComment() {
-        return rescheduleReasonComment;
-    }
-
-    /**
-     * @return the timeline
-     **/
-    public LoanRescheduleRequestTimelineData getTimeline() {
-        return this.timeline;
-    }
-
-    /**
-     * @return the clientName
-     */
-    public String getClientName() {
-        return clientName;
-    }
-
-    /**
-     * @return the loanAccountNumber
-     */
-    public String getLoanAccountNumber() {
-        return loanAccountNumber;
-    }
-
-    /**
-     * @return the clientId
-     */
-    public Long getClientId() {
-        return clientId;
     }
 
     /**

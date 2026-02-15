@@ -18,11 +18,15 @@
  */
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.data;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 
 /**
  * Immutable data object represent loan reschedule request status enumerations.
  **/
+@Getter
+@Accessors(fluent = true)
 public class LoanRescheduleRequestStatusEnumData {
 
     private final Long id;
@@ -44,18 +48,6 @@ public class LoanRescheduleRequestStatusEnumData {
         this.pendingApproval = Long.valueOf(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue()).equals(this.id);
         this.approved = Long.valueOf(LoanStatus.APPROVED.getValue()).equals(this.id);
         this.rejected = Long.valueOf(LoanStatus.REJECTED.getValue()).equals(this.id);
-    }
-
-    public Long id() {
-        return this.id;
-    }
-
-    public String code() {
-        return this.code;
-    }
-
-    public String value() {
-        return this.value;
     }
 
     public boolean isPendingApproval() {

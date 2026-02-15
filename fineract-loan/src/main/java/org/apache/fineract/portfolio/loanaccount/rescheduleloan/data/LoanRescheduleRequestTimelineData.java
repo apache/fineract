@@ -19,11 +19,13 @@
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.data;
 
 import java.time.LocalDate;
+import lombok.Data;
 
 /**
  * Immutable data object represent the timeline events of a loan reschedule request
  **/
 @SuppressWarnings("unused")
+@Data
 public class LoanRescheduleRequestTimelineData {
 
     private final LocalDate submittedOnDate;
