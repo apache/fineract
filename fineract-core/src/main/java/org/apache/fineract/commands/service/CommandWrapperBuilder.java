@@ -2352,6 +2352,14 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder executeSchedulerJob(final Long jobId) {
+        this.actionName = "EXECUTEJOB";
+        this.entityName = "SCHEDULER";
+        this.entityId = jobId;
+        this.href = "/jobs/" + jobId + "?command=executeJob";
+        return this;
+    }
+
     public CommandWrapperBuilder createMeeting(final CommandWrapper resourceDetails, final String supportedEntityType,
             final Long supportedEntityId) {
         this.actionName = "CREATE";
