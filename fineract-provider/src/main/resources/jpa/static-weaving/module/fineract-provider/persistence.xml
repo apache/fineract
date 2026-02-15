@@ -36,7 +36,6 @@
         <class>org.apache.fineract.portfolio.fund.domain.Fund</class>
         <class>org.apache.fineract.organisation.workingdays.domain.WorkingDays</class>
         <class>org.apache.fineract.useradministration.domain.Permission</class>
-        <class>org.apache.fineract.useradministration.domain.AppUserClientMapping</class>
         <class>org.apache.fineract.commands.domain.CommandSource</class>
         <class>org.apache.fineract.useradministration.domain.AppUser</class>
         <class>org.apache.fineract.accounting.glaccount.domain.GLAccount</class>
@@ -144,12 +143,6 @@
         <class>org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMapping</class>
         <class>org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccess</class>
 
-        <!-- Self Service Module Entities -->
-        <class>org.apache.fineract.portfolio.self.account.domain.SelfBeneficiariesTPT</class>
-        <class>org.apache.fineract.portfolio.self.device.domain.DeviceRegistration</class>
-        <class>org.apache.fineract.portfolio.self.pockets.domain.Pocket</class>
-        <class>org.apache.fineract.portfolio.self.pockets.domain.PocketAccountMapping</class>
-        <class>org.apache.fineract.portfolio.self.registration.domain.SelfServiceRegistration</class>
 
         <!-- Charge Module Entities -->
         <class>org.apache.fineract.portfolio.charge.domain.Charge</class>
@@ -323,8 +316,6 @@
         <!-- Office -->
         <class>org.apache.fineract.organisation.office.domain.OfficeTransaction</class>
 
-        <!-- Self Registration -->
-        <class>org.apache.fineract.portfolio.self.registration.domain.SelfServiceRegistration</class>
 
         <!-- Note -->
         <class>org.apache.fineract.portfolio.note.domain.Note</class>

@@ -2845,7 +2845,7 @@ public class LoanTransactionHelper {
         assertEquals(numItems, getLoansLoanIdResponse.getDisbursementDetails().size());
         Double amount = Double.valueOf("0.0");
         for (GetLoansLoanIdDisbursementDetails disbursementDetails : getLoansLoanIdResponse.getDisbursementDetails()) {
-            amount = amount + disbursementDetails.getPrincipal();
+            amount = amount + disbursementDetails.getPrincipal().doubleValue();
             log.info("Disbursement details with principal {} {}", disbursementDetails.getExpectedDisbursementDate(),
                     disbursementDetails.getPrincipal());
         }

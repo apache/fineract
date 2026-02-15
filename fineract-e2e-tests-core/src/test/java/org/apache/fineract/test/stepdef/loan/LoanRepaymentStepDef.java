@@ -145,7 +145,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
 
         PostUsersResponse createUserResponse = testContext().get(TestContextKey.CREATED_SIMPLE_USER_RESPONSE);
         Long createdUserId = createUserResponse.getResourceId();
-        GetUsersUserIdResponse user = ok(() -> fineractClient.users().retrieveOne32(createdUserId));
+        GetUsersUserIdResponse user = ok(() -> fineractClient.users().retrieveOne30(createdUserId));
 
         String apiBaseUrl = apiProperties.getBaseUrl() + "/fineract-provider/api/";
         FineractFeignClient userClient = FineractFeignClient.builder().baseUrl(apiBaseUrl)
@@ -200,7 +200,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
 
         PostUsersResponse createUserResponse = testContext().get(TestContextKey.CREATED_SIMPLE_USER_RESPONSE);
         Long createdUserId = createUserResponse.getResourceId();
-        GetUsersUserIdResponse user = ok(() -> fineractClient.users().retrieveOne32(createdUserId));
+        GetUsersUserIdResponse user = ok(() -> fineractClient.users().retrieveOne30(createdUserId));
 
         String apiBaseUrl = apiProperties.getBaseUrl() + "/fineract-provider/api/";
         FineractFeignClient userClient = FineractFeignClient.builder().baseUrl(apiBaseUrl)

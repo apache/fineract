@@ -28,7 +28,6 @@ public final class ReportParameters {
         throw new AssertionError("Utility class should not be instantiated");
     }
 
-    private static final String IS_SELF_SERVICE_USER_REPORT = "isSelfServiceUserReport";
     private static final String EXPORT_CSV = "exportCSV";
     private static final String PARAMETER_TYPE = "parameterType";
     private static final String OUTPUT_TYPE = "output-type";
@@ -56,7 +55,6 @@ public final class ReportParameters {
             + "\n" + "\n"
             + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=PDF&R_officeId=1"
             + "\n\n**Available Parameters (All Optional):**\n\n" + "**Common Control Parameters:**\n"
-            + "- `isSelfServiceUserReport`: Indicates if this is a self-service user report (default: false)\n"
             + "- `exportCSV`: Set to true to export results as CSV (default: false)\n"
             + "- `parameterType`: Indicates if this is a parameter type request (default: false)\n"
             + "- `output-type`: Output format type (HTML, XLS, CSV, PDF)\n" + "- `enable-business-date`: Enable business date filtering\n"
@@ -80,9 +78,7 @@ public final class ReportParameters {
             + "The exact parameters required depend on the specific report being executed.\n"
             + "Some reports may accept additional parameters not listed here.";
 
-    @Parameters({
-            @Parameter(name = IS_SELF_SERVICE_USER_REPORT, description = "Optional - Indicates if this is a self-service user report", example = "false"),
-            @Parameter(name = EXPORT_CSV, description = "Optional - Set to true to export results as CSV", example = "true"),
+    @Parameters({ @Parameter(name = EXPORT_CSV, description = "Optional - Set to true to export results as CSV", example = "true"),
             @Parameter(name = PARAMETER_TYPE, description = "Optional - Indicates if this is a parameter type request", example = "false"),
             @Parameter(name = OUTPUT_TYPE, description = "Optional - Output format type (HTML, XLS, CSV, PDF)", example = "HTML"),
             @Parameter(name = ENABLE_BUSINESS_DATE, description = "Optional - Enable business date filtering", example = "true"),
@@ -125,10 +121,6 @@ public final class ReportParameters {
 
     }
 
-    public static String getIsSelfServiceUserReport() {
-        return IS_SELF_SERVICE_USER_REPORT;
-    }
-
     public static String getExportCsv() {
         return EXPORT_CSV;
     }
@@ -161,9 +153,7 @@ public final class ReportParameters {
         return FULL_DESCRIPTION;
     }
 
-    @Parameters({
-            @Parameter(name = IS_SELF_SERVICE_USER_REPORT, description = "Optional - Indicates if this is a self-service user report", example = "false"),
-            @Parameter(name = EXPORT_CSV, description = "Optional - Set to true to export results as CSV", example = "true"),
+    @Parameters({ @Parameter(name = EXPORT_CSV, description = "Optional - Set to true to export results as CSV", example = "true"),
             @Parameter(name = PARAMETER_TYPE, description = "Optional - Indicates if this is a parameter type request", example = "false"),
             @Parameter(name = OUTPUT_TYPE, description = "Optional - Output format type (HTML, XLS, CSV, PDF)", example = "HTML"),
             @Parameter(name = "R_*", description = "Optional - Report-specific parameters prefixed with 'R_'") })

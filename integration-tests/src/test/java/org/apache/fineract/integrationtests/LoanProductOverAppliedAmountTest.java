@@ -134,7 +134,7 @@ public class LoanProductOverAppliedAmountTest extends BaseLoanIntegrationTest {
             assert loanDetails.getDisbursementDetails() != null;
             double disbursementPrincipalSum = loanDetails.getDisbursementDetails().stream().mapToDouble(detail -> {
                 assert detail.getPrincipal() != null;
-                return detail.getPrincipal();
+                return detail.getPrincipal().doubleValue();
             }).sum();
             assertEquals(1500.0, disbursementPrincipalSum);
 

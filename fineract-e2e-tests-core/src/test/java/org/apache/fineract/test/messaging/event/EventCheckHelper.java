@@ -173,8 +173,8 @@ public class EventCheckHelper {
                 .extractingData(loanAccountDataV1 -> {
                     Long idActual = loanAccountDataV1.getId();
                     Long idExpected = body.getId();
-                    Integer statusIdActual = loanAccountDataV1.getStatus().getId();
-                    Integer statusIdExpected = body.getStatus().getId();
+                    Long statusIdActual = loanAccountDataV1.getStatus().getId().longValue();
+                    Long statusIdExpected = body.getStatus().getId();
                     String statusCodeActual = loanAccountDataV1.getStatus().getCode();
                     String statusCodeExpected = body.getStatus().getCode();
                     Long clientIdActual = loanAccountDataV1.getClientId();
@@ -579,7 +579,8 @@ public class EventCheckHelper {
 
         eventAssertion.assertEvent(LoanCreatedEvent.class, createLoanResponse.getLoanId())//
                 .extractingData(LoanAccountDataV1::getId).isEqualTo(body.getId())//
-                .extractingData(loanAccountDataV1 -> loanAccountDataV1.getStatus().getId()).isEqualTo(body.getStatus().getId())//
+                .extractingData(loanAccountDataV1 -> loanAccountDataV1.getStatus().getId().intValue())
+                .isEqualTo(body.getStatus().getId().intValue())//
                 .extractingData(LoanAccountDataV1::getClientId).isEqualTo(body.getClientId())//
                 .extractingBigDecimal(LoanAccountDataV1::getPrincipal).isEqualTo(body.getPrincipal())//
                 .extractingData(loanAccountDataV1 -> loanAccountDataV1.getSummary().getCurrency().getCode())
@@ -593,7 +594,8 @@ public class EventCheckHelper {
 
         eventAssertion.assertEvent(LoanApprovedEvent.class, loanApproveResponse.getLoanId())//
                 .extractingData(LoanAccountDataV1::getId).isEqualTo(body.getId())//
-                .extractingData(loanAccountDataV1 -> loanAccountDataV1.getStatus().getId()).isEqualTo(body.getStatus().getId())//
+                .extractingData(loanAccountDataV1 -> loanAccountDataV1.getStatus().getId().intValue())
+                .isEqualTo(body.getStatus().getId().intValue())//
                 .extractingData(loanAccountDataV1 -> loanAccountDataV1.getStatus().getCode()).isEqualTo(body.getStatus().getCode())//
                 .extractingData(LoanAccountDataV1::getClientId).isEqualTo(Long.valueOf(body.getClientId()))//
                 .extractingBigDecimal(LoanAccountDataV1::getApprovedPrincipal).isEqualTo(body.getApprovedPrincipal())//

@@ -152,7 +152,7 @@ public class ClientsApiResource {
             @QueryParam("legalForm") final Integer legalForm) {
 
         return retrieveAll(uriInfo, officeId, externalId, displayName, firstname, lastname, status, legalForm, hierarchy, offset, limit,
-                orderBy, sortOrder, orphansOnly, false);
+                orderBy, sortOrder, orphansOnly);
     }
 
     @GET
@@ -426,8 +426,7 @@ public class ClientsApiResource {
 
     public String retrieveAll(final UriInfo uriInfo, final Long officeId, final String externalId, final String displayName,
             final String firstname, final String lastname, final String status, final Integer legalForm, final String hierarchy,
-            final Integer offset, final Integer limit, final String orderBy, final String sortOrder, final Boolean orphansOnly,
-            final boolean isSelfUser) {
+            final Integer offset, final Integer limit, final String orderBy, final String sortOrder, final Boolean orphansOnly) {
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
         sqlValidator.validate(orderBy);
         sqlValidator.validate(sortOrder);
@@ -435,7 +434,7 @@ public class ClientsApiResource {
         sqlValidator.validate(hierarchy);
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).officeId(officeId).externalId(externalId)
                 .name(displayName).hierarchy(hierarchy).firstname(firstname).lastname(lastname).status(status).orphansOnly(orphansOnly)
-                .isSelfUser(isSelfUser).offset(offset).orderBy(orderBy).sortOrder(sortOrder).legalForm(legalForm).build();
+                .offset(offset).orderBy(orderBy).sortOrder(sortOrder).legalForm(legalForm).build();
         final Page<ClientData> clientData = clientReadPlatformService.retrieveAll(searchParameters);
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);

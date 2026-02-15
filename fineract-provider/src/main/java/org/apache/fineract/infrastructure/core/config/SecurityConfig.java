@@ -19,7 +19,6 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
-import static org.apache.fineract.infrastructure.security.vote.SelfServiceUserAuthorizationManager.selfServiceUserAuthManager;
 import static org.springframework.security.authorization.AuthenticatedAuthorizationManager.fullyAuthenticated;
 import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAuthority;
 import static org.springframework.security.authorization.AuthorizationManagers.allOf;
@@ -130,13 +129,6 @@ public class SecurityConfig {
 
             if (fineractProperties.getSecurity().getTwoFactor().isEnabled()) {
                 authorizationManagers.add(hasAuthority("TWOFACTOR_AUTHENTICATED"));
-            }
-
-            if (fineractProperties.getModule().getSelfService().isEnabled()) {
-                auth.requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/self/authentication")).permitAll()
-                        .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/self/registration")).permitAll()
-                        .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/self/registration/user")).permitAll();
-                authorizationManagers.add(selfServiceUserAuthManager());
             }
 
             auth.requestMatchers(API_MATCHER.matcher(HttpMethod.OPTIONS, "/api/**")).permitAll()

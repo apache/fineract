@@ -42,10 +42,10 @@ public class JsonDatatableReportExportService implements DatatableReportExportSe
 
     @Override
     public ResponseHolder export(String reportName, MultivaluedMap<String, String> queryParams, Map<String, String> reportParams,
-            boolean isSelfServiceUserReport, String parameterTypeValue) {
+            String parameterTypeValue) {
 
         final GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(reportName, parameterTypeValue,
-                reportParams, isSelfServiceUserReport);
+                reportParams);
         String json;
         final boolean genericResultSetIsPassed = ApiParameterHelper.genericResultSetPassed(queryParams);
         final boolean genericResultSet = ApiParameterHelper.genericResultSet(queryParams);

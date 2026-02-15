@@ -58,8 +58,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RunreportsApiResource {
 
-    public static final String IS_SELF_SERVICE_USER_REPORT_PARAMETER = "isSelfServiceUserReport";
-
     private final PlatformSecurityContext context;
     private final ReadReportingService readExtraDataAndReportingService;
     private final ReportingProcessServiceProvider reportingProcessServiceProvider;
@@ -74,14 +72,12 @@ public class RunreportsApiResource {
     @ApiResponse(responseCode = "500", description = "Internal Server Error")
     public Response retrieveAllAvailableExports(
             @PathParam("reportName") @Parameter(description = "Name of the report to get available export types for", example = "Client Listing", required = true) final String reportName,
-            @Context final UriInfo uriInfo,
-            @DefaultValue("false") @QueryParam(IS_SELF_SERVICE_USER_REPORT_PARAMETER) @Parameter(description = "Indicates if this is a self-service user report", example = "false") final boolean isSelfServiceUserReport) {
-
+            @Context final UriInfo uriInfo) {
         MultivaluedMap<String, String> queryParams = new MultivaluedStringMap();
         queryParams.putAll(uriInfo.getQueryParameters());
 
         final boolean parameterType = ApiParameterHelper.parameterType(queryParams);
-        String reportType = readExtraDataAndReportingService.getReportType(reportName, isSelfServiceUserReport, parameterType);
+        String reportType = readExtraDataAndReportingService.getReportType(reportName, parameterType);
         ReportingProcessService reportingProcessService = reportingProcessServiceProvider.findReportingProcessService(reportType);
         if (reportingProcessService == null) {
             throw new PlatformServiceUnavailableException("err.msg.report.service.implementation.missing",
@@ -104,8 +100,6 @@ public class RunreportsApiResource {
             @PathParam("reportName") @Parameter(description = "The name of the report to execute (e.g., 'Client Listing', 'Expected Payments By Date')", example = "Client Listing", required = true) final String reportName,
             @Context final UriInfo uriInfo,
 
-            @DefaultValue("false") @QueryParam(IS_SELF_SERVICE_USER_REPORT_PARAMETER) @Parameter(description = "Whether this is a self-service user report", example = "false") final boolean isSelfServiceUserReport,
-
             @DefaultValue("false") @QueryParam("exportCSV") @Parameter(description = "Set to true to export results as CSV", example = "false") final Boolean exportCSV,
 
             @DefaultValue("false") @QueryParam("parameterType") @Parameter(description = "Indicates if this is a parameter type request", example = "false") final Boolean parameterType,
@@ -124,15 +118,15 @@ public class RunreportsApiResource {
 
             @QueryParam("R_accountNo") @Parameter(description = "Account number filter", example = "00010001") final String rAccountNo) {
 
-        return processReportRequest(reportName, uriInfo, isSelfServiceUserReport);
+        return processReportRequest(reportName, uriInfo);
     }
 
-    public Response runReport(final String reportName, final UriInfo uriInfo, final boolean isSelfServiceUserReport) {
+    public Response runReport(final String reportName, final UriInfo uriInfo) {
 
-        return processReportRequest(reportName, uriInfo, isSelfServiceUserReport);
+        return processReportRequest(reportName, uriInfo);
     }
 
-    private Response processReportRequest(final String reportName, final UriInfo uriInfo, final boolean isSelfServiceUserReport) {
+    private Response processReportRequest(final String reportName, final UriInfo uriInfo) {
         MultivaluedMap<String, String> queryParams = new MultivaluedStringMap();
         queryParams.putAll(uriInfo.getQueryParameters());
 
@@ -140,10 +134,7 @@ public class RunreportsApiResource {
 
         checkUserPermissionForReport(reportName, parameterTypeValue);
 
-        // Pass through isSelfServiceUserReport so that ReportingProcessService implementations can use it
-        queryParams.putSingle(IS_SELF_SERVICE_USER_REPORT_PARAMETER, Boolean.toString(isSelfServiceUserReport));
-
-        String reportType = readExtraDataAndReportingService.getReportType(reportName, isSelfServiceUserReport, parameterTypeValue);
+        String reportType = readExtraDataAndReportingService.getReportType(reportName, parameterTypeValue);
         ReportingProcessService reportingProcessService = reportingProcessServiceProvider.findReportingProcessService(reportType);
         if (reportingProcessService == null) {
             throw new PlatformServiceUnavailableException("err.msg.report.service.implementation.missing",

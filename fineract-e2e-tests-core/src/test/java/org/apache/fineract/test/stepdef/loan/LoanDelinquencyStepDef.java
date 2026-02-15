@@ -90,7 +90,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
         Long loanId = loanResponse.getLoanId();
 
         GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveLoan(loanId, Map.of("associations", "collection")));
-        Integer loanStatus = loanDetails.getStatus().getId();
+        Integer loanStatus = loanDetails.getStatus().getId() == null ? null : loanDetails.getStatus().getId().intValue();
 
         if (!LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.value.equals(loanStatus) && !LoanStatus.APPROVED.value.equals(loanStatus)) {
             String delinquentDateExpectedValue = "".equals(delinquentDateExpected) ? null : delinquentDateExpected;

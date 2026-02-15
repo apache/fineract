@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
@@ -49,7 +48,6 @@ class DatatableReportingProcessServiceTest {
                 sqlValidator);
 
         MultivaluedMap<String, String> queryParams = new MultivaluedStringMap();
-        queryParams.put("isSelfServiceUserReport", List.of("false"));
         queryParams.put("R_officeId", List.of("2"));
         queryParams.put("exportS3", List.of("true"));
 
@@ -70,14 +68,13 @@ class DatatableReportingProcessServiceTest {
         ResponseHolder responseHolder = new ResponseHolder(Response.Status.CREATED);
 
         // ContentType.APPLICATION_JSON.toString(), "export.json"
-        Mockito.doReturn(responseHolder).when(jsonExportService).export(any(), any(), any(), anyBoolean(), any());
+        Mockito.doReturn(responseHolder).when(jsonExportService).export(any(), any(), any(), any());
         SqlValidator sqlValidator = Mockito.mock(SqlValidator.class);
 
         DatatableReportingProcessService datatableReportingProcessService = new DatatableReportingProcessService(List.of(jsonExportService),
                 sqlValidator);
 
         MultivaluedMap<String, String> queryParams = new MultivaluedStringMap();
-        queryParams.put("isSelfServiceUserReport", List.of("false"));
         queryParams.put("R_officeId", List.of("2"));
         queryParams.put("exportS3", List.of("true"));
 

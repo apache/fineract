@@ -204,9 +204,9 @@ public class GroupsApiResource {
                 .orderBy(orderBy).sortOrder(sortOrder).build();
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        final SearchParameters searchParameters = SearchParameters.builder().limit(limit).isSelfUser(false).officeId(officeId)
-                .externalId(externalId).name(name).hierarchy(hierarchy).offset(offset).orderBy(orderBy).sortOrder(sortOrder)
-                .staffId(staffId).orphansOnly(orphansOnly).build();
+        final SearchParameters searchParameters = SearchParameters.builder().limit(limit).officeId(officeId).externalId(externalId)
+                .name(name).hierarchy(hierarchy).offset(offset).orderBy(orderBy).sortOrder(sortOrder).staffId(staffId)
+                .orphansOnly(orphansOnly).build();
         if (parameters.isPaged()) {
             final Page<GroupGeneralData> groups = groupReadPlatformService.retrievePagedAll(searchParameters, parameters);
             return toApiJsonSerializer.serialize(settings, groups, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);

@@ -20,7 +20,6 @@ package org.apache.fineract.integrationtests.common.loans;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -74,8 +73,7 @@ public class LoanTestLifecycleExtension implements AfterEachCallback, BeforeEach
                         loanTransactionHelper.disburseLoan((long) loanId,
                                 new PostLoansLoanIdRequest()
                                         .actualDisbursementDate(dateFormatter.format(disbursementDetail.getExpectedDisbursementDate()))
-                                        .dateFormat(DATE_FORMAT).locale("en")
-                                        .transactionAmount(BigDecimal.valueOf(disbursementDetail.getPrincipal())));
+                                        .dateFormat(DATE_FORMAT).locale("en").transactionAmount(disbursementDetail.getPrincipal()));
                     }
                 });
                 loanResponse = Calls

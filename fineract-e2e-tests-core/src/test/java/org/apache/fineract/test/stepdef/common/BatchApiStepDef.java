@@ -552,7 +552,7 @@ public class BatchApiStepDef extends AbstractStepDef {
         // Create new user which cannot bypass loan COB execution
         PostUsersResponse createUserResponse = testContext().get(TestContextKey.CREATED_SIMPLE_USER_RESPONSE);
         Long createdUserId = createUserResponse.getResourceId();
-        GetUsersUserIdResponse user = fineractFeignClient.users().retrieveOne32(createdUserId);
+        GetUsersUserIdResponse user = fineractFeignClient.users().retrieveOne30(createdUserId);
         String authorizationString = user.getUsername() + ":" + PWD_USER_WITH_ROLE;
         Base64 base64 = new Base64();
         headerMap.put("Authorization",
@@ -885,11 +885,12 @@ public class BatchApiStepDef extends AbstractStepDef {
         loanQueryParams.put("staffInSelectedOfficeOnly", false);
         GetLoansLoanIdResponse response = loansApi().retrieveLoan1(loanExternalId, loanQueryParams);
         GetLoansLoanIdStatus status = response.getStatus();
-        Integer statusIdActual = status.getId();
-        Integer statusIdExpected = LoanStatus.APPROVED.value;
+        Long statusIdActual = status.getId();
+        Long statusIdExpected = LoanStatus.APPROVED.value.longValue();
 
         String resourceId = String.valueOf(response.getId());
-        assertThat(statusIdActual).as(ErrorMessageHelper.wrongLoanStatus(resourceId, statusIdActual, statusIdExpected))
+        assertThat(statusIdActual)
+                .as(ErrorMessageHelper.wrongLoanStatus(resourceId, statusIdActual.intValue(), statusIdExpected.intValue()))
                 .isEqualTo(statusIdExpected);
     }
 

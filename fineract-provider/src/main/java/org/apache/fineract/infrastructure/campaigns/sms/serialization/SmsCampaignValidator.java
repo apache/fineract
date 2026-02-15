@@ -38,8 +38,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
 import org.apache.fineract.portfolio.client.domain.Client;
-import org.apache.fineract.portfolio.self.device.domain.DeviceRegistration;
-import org.apache.fineract.portfolio.self.device.domain.DeviceRegistrationRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -72,7 +70,6 @@ public class SmsCampaignValidator {
     public static final String isNotificationParamName = "isNotification";
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final DeviceRegistrationRepositoryWrapper deviceRegistrationRepository;
 
     protected static final Set<String> supportedParams = new HashSet<>(Arrays.asList(campaignName, campaignType, localeParamName,
             dateFormatParamName, runReportId, paramValue, message, recurrenceStartDate, activationDateParamName, submittedOnDateParamName,
@@ -92,9 +89,8 @@ public class SmsCampaignValidator {
     protected static final Set<String> PREVIEW_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(paramValue, message));
 
     @Autowired
-    public SmsCampaignValidator(FromJsonHelper fromApiJsonHelper, final DeviceRegistrationRepositoryWrapper deviceRegistrationRepository) {
+    public SmsCampaignValidator(FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
-        this.deviceRegistrationRepository = deviceRegistrationRepository;
     }
 
     public void validateCreate(String json) {
@@ -331,10 +327,6 @@ public class SmsCampaignValidator {
 
     public boolean isValidNotificationOrSms(Client client, SmsCampaign smsCampaign, Object mobileNo) {
         if (smsCampaign.isNotification()) {
-            if (client != null) {
-                DeviceRegistration deviceRegistration = this.deviceRegistrationRepository.findDeviceRegistrationByClientId(client.getId());
-                return deviceRegistration != null;
-            }
             return false;
         }
         return mobileNo != null;

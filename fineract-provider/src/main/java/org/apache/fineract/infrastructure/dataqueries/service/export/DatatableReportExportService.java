@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.dataqueries.service.DatatableExportTar
 public interface DatatableReportExportService {
 
     ResponseHolder export(String reportName, MultivaluedMap<String, String> queryParams, Map<String, String> reportParams,
-            boolean isSelfServiceUserReport, String parameterTypeValue);
+            String parameterTypeValue);
 
     boolean supports(DatatableExportTargetParameter exportType);
 }

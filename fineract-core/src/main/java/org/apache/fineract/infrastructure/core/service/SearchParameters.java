@@ -54,8 +54,6 @@ public class SearchParameters {
     private Long provisioningEntryId;
     private Long productId;
     private Long categoryId;
-    @Getter(AccessLevel.NONE)
-    private Boolean isSelfUser;
     private Integer legalForm;
 
     public Integer getLimit() {
@@ -72,10 +70,6 @@ public class SearchParameters {
 
     public Boolean getOrphansOnly() {
         return Boolean.TRUE.equals(orphansOnly);
-    }
-
-    public Boolean getIsSelfUser() {
-        return Boolean.TRUE.equals(isSelfUser);
     }
 
     public boolean hasOrderBy() {

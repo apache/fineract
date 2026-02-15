@@ -53,14 +53,14 @@ public class ReportsTest extends IntegrationTest {
 
     @Test
     void runClientListingTableReport() {
-        assertThat(ok(fineractClient().reportsRun.runReportGetData("Client Listing", Map.of("R_officeId", "1"), false)).getColumnHeaders()
-                .get(0).getColumnName()).isEqualTo("Office/Branch");
+        assertThat(ok(fineractClient().reportsRun.runReportGetData("Client Listing", Map.of("R_officeId", "1"))).getColumnHeaders().get(0)
+                .getColumnName()).isEqualTo("Office/Branch");
     }
 
     @Test
     void runClientListingTableReportCSV() throws IOException {
         Response<ResponseBody> result = okR(
-                fineractClient().reportsRun.runReportGetFile("Client Listing", Map.of("R_officeId", "1", "exportCSV", "true"), false));
+                fineractClient().reportsRun.runReportGetFile("Client Listing", Map.of("R_officeId", "1", "exportCSV", "true")));
         assertThat(result.body().contentType()).isEqualTo(MediaType.parse("text/csv"));
         assertThat(result.body().string()).contains("Office/Branch");
     }
@@ -81,8 +81,7 @@ public class ReportsTest extends IntegrationTest {
     void runExpectedPaymentsPentahoReportWithoutPlugin() {
         CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                 () -> ok(fineractClient().reportsRun.runReportGetFile("Expected Payments By Date - Formatted", Map.of("R_endDate",
-                        "2013-04-30", "R_loanOfficerId", "-1", "R_officeId", "1", "R_startDate", "2013-04-16", "output-type", "PDF"),
-                        false)));
+                        "2013-04-30", "R_loanOfficerId", "-1", "R_officeId", "1", "R_startDate", "2013-04-16", "output-type", "PDF"))));
         assertEquals(404, exception.getResponse().code());
     }
 
@@ -90,35 +89,35 @@ public class ReportsTest extends IntegrationTest {
     @Disabled
     void runExpectedPaymentsPentahoReport() {
         ResponseBody r = ok(fineractClient().reportsRun.runReportGetFile("Expected Payments By Date - Formatted", Map.of("R_endDate",
-                "2013-04-30", "R_loanOfficerId", "-1", "R_officeId", "1", "R_startDate", "2013-04-16", "output-type", "PDF"), false));
+                "2013-04-30", "R_loanOfficerId", "-1", "R_officeId", "1", "R_startDate", "2013-04-16", "output-type", "PDF")));
         assertThat(r.contentType()).isEqualTo(MediaType.get("application/pdf"));
     }
 
     @Test
     void testTrialBalanceTableReportRunsSuccessfully() {
         Response<RunReportsResponse> response = okR(fineractClient().reportsRun.runReportGetData("Trial Balance Table",
-                Map.of("R_endDate", "2013-04-30", "R_officeId", "1", "R_startDate", "2013-04-16"), false));
+                Map.of("R_endDate", "2013-04-30", "R_officeId", "1", "R_startDate", "2013-04-16")));
         assertEquals(200, response.code());
     }
 
     @Test
     void testIncomeStatementTableReportRunsSuccessfully() {
         Response<RunReportsResponse> response = okR(fineractClient().reportsRun.runReportGetData("Income Statement Table",
-                Map.of("R_endDate", "2013-04-30", "R_officeId", "1", "R_startDate", "2013-04-16"), false));
+                Map.of("R_endDate", "2013-04-30", "R_officeId", "1", "R_startDate", "2013-04-16")));
         assertEquals(200, response.code());
     }
 
     @Test
     void testGeneralLedgerReportTableReportRunsSuccessfully() {
         Response<RunReportsResponse> response = okR(fineractClient().reportsRun.runReportGetData("GeneralLedgerReport Table",
-                Map.of("R_endDate", "2013-04-30", "R_officeId", "1", "R_startDate", "2013-04-16", "R_GLAccountNO", "1"), false));
+                Map.of("R_endDate", "2013-04-30", "R_officeId", "1", "R_startDate", "2013-04-16", "R_GLAccountNO", "1")));
         assertEquals(200, response.code());
     }
 
     @Test
     void testBalanceSheetTableReportRunsSuccessfully() {
-        Response<RunReportsResponse> response = okR(fineractClient().reportsRun.runReportGetData("Balance Sheet Table",
-                Map.of("R_endDate", "2013-04-30", "R_officeId", "1"), false));
+        Response<RunReportsResponse> response = okR(
+                fineractClient().reportsRun.runReportGetData("Balance Sheet Table", Map.of("R_endDate", "2013-04-30", "R_officeId", "1")));
         assertEquals(200, response.code());
     }
 }

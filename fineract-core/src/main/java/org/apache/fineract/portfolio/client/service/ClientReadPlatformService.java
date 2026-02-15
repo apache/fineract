@@ -43,21 +43,9 @@ public interface ClientReadPlatformService {
 
     Collection<ClientData> retrieveActiveClientMembersOfCenter(Long centerId);
 
-    ClientData retrieveAllNarrations(String clientNarrations);
-
-    /**
-     * Gets a list of Client IDs associated with a user ID.
-     * <p>
-     * This is used in self service authentication
-     *
-     * @param aUserID
-     *            the user id (not null)
-     * @return client IDs listing (may be null)
-     */
-    Collection<Long> retrieveUserClients(Long aUserID);
-
     LocalDate retrieveClientTransferProposalDate(Long clientId);
 
     Long retrieveClientIdByExternalId(ExternalId externalId);
 
+    ClientData retrieveAllNarrations(String clientNarrations);
 }

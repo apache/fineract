@@ -30,7 +30,6 @@ import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNum
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
-import org.apache.fineract.portfolio.self.pockets.api.PocketApiConstants;
 import org.apache.fineract.useradministration.api.PasswordPreferencesApiConstants;
 
 public class CommandWrapperBuilder {
@@ -3209,30 +3208,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder addSelfServiceBeneficiaryTPT() {
-        this.actionName = "CREATE";
-        this.entityName = "SSBENEFICIARYTPT";
-        this.entityId = null;
-        this.href = "/self/beneficiaries/tpt";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateSelfServiceBeneficiaryTPT(final Long beneficiaryId) {
-        this.actionName = "UPDATE";
-        this.entityName = "SSBENEFICIARYTPT";
-        this.entityId = beneficiaryId;
-        this.href = "/self/beneficiaries/tpt/" + beneficiaryId;
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteSelfServiceBeneficiaryTPT(final Long beneficiaryId) {
-        this.actionName = "DELETE";
-        this.entityName = "SSBENEFICIARYTPT";
-        this.entityId = beneficiaryId;
-        this.href = "/self/beneficiaries/tpt/" + beneficiaryId;
-        return this;
-    }
-
     public CommandWrapperBuilder createReportMailingJob(final String entityName) {
         this.actionName = "CREATE";
         this.entityName = entityName;
@@ -3510,20 +3485,6 @@ public class CommandWrapperBuilder {
         this.actionName = "UPDATE";
         this.entityName = "TWOFACTOR_CONFIGURATION";
         this.href = "/twofactor/configure";
-        return this;
-    }
-
-    public CommandWrapperBuilder linkAccountsToPocket() {
-        this.actionName = PocketApiConstants.linkAccountsActionName;
-        this.entityName = PocketApiConstants.pocketEntityName;
-        this.href = "/self/pocket?command=" + PocketApiConstants.linkAccountsToPocketCommandParam;
-        return this;
-    }
-
-    public CommandWrapperBuilder delinkAccountsFromPocket() {
-        this.actionName = PocketApiConstants.delinkAccountsActionName;
-        this.entityName = PocketApiConstants.pocketEntityName;
-        this.href = "/self/pocket?command=" + PocketApiConstants.delinkAccountsFromPocketCommandParam;
         return this;
     }
 

@@ -43,7 +43,6 @@ import org.apache.fineract.infrastructure.security.service.AuthTenantDetailsServ
 import org.apache.fineract.notification.service.UserNotificationService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -179,13 +178,5 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
             response.addHeader("X-Notification-Refresh", "false");
         }
 
-        String pathURL = request.getRequestURI();
-        boolean isSelfServiceRequest = pathURL != null && pathURL.contains("/self/");
-
-        boolean notAllowed = (isSelfServiceRequest && !user.isSelfServiceUser()) || (!isSelfServiceRequest && user.isSelfServiceUser());
-
-        if (notAllowed) {
-            throw new BadCredentialsException("User not authorised to use the requested resource.");
-        }
     }
 }

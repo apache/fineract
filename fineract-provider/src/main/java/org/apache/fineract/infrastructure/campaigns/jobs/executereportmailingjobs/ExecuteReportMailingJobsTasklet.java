@@ -124,8 +124,7 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
             final ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat, final MultivaluedMap<String, String> reportParams,
             final String reportName, final StringBuilder errorLog) {
         try {
-            final boolean isSelfServiceUserReport = false;
-            final String reportType = readReportingService.getReportType(reportName, isSelfServiceUserReport, false);
+            final String reportType = readReportingService.getReportType(reportName, false);
             final ReportingProcessService reportingProcessService = reportingProcessServiceProvider.findReportingProcessService(reportType);
 
             if (reportingProcessService != null) {

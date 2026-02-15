@@ -73,9 +73,6 @@ public final class Report extends AbstractPersistableCustom<Long> {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "report", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<ReportParameterUsage> reportParameterUsages = new HashSet<>();
 
-    @Column(name = "self_service_user_report")
-    private boolean isSelfServiceUserReport;
-
     public static Report fromJson(final JsonCommand command, final Collection<String> reportTypes) {
 
         String reportName = null;

@@ -316,7 +316,7 @@ public class DelinquencyAndChargebackIntegrationTest extends BaseLoanIntegration
             loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, transactionAmount, loanId);
             assertNotNull(loanIdTransactionsResponse);
             getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
-            assertEquals(LoanStatus.CLOSED_OBLIGATIONS_MET.getValue(), getLoansLoanIdResponse.getStatus().getId());
+            assertEquals(Long.valueOf(LoanStatus.CLOSED_OBLIGATIONS_MET.getValue()), getLoansLoanIdResponse.getStatus().getId());
             log.info("Loan id {} with status {}", loanId, getLoansLoanIdResponse.getStatus().getCode());
 
             // Evaluate Installments

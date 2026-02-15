@@ -69,7 +69,8 @@ public class ProgressiveLoanTrancheTest extends BaseLoanIntegrationTest {
                 disbursementDetails.add(new DisbursementDetail().id(disbursementDetail.getId()).principal(disbursementDetail.getPrincipal())
                         .expectedDisbursementDate(dateTimeFormatter.format(disbursementDetail.getExpectedDisbursementDate())));
             }
-            disbursementDetails.add(new DisbursementDetail().expectedDisbursementDate("20 January 2025").principal(100.0));
+            disbursementDetails
+                    .add(new DisbursementDetail().expectedDisbursementDate("20 January 2025").principal(BigDecimal.valueOf(100.0)));
 
             loanTransactionHelper.addAndDeleteDisbursementDetail(loanId, disbursementDetails);
 

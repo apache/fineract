@@ -36,7 +36,6 @@
         <class>org.apache.fineract.portfolio.fund.domain.Fund</class>
         <class>org.apache.fineract.organisation.workingdays.domain.WorkingDays</class>
         <class>org.apache.fineract.useradministration.domain.Permission</class>
-        <class>org.apache.fineract.useradministration.domain.AppUserClientMapping</class>
         <class>org.apache.fineract.commands.domain.CommandSource</class>
         <class>org.apache.fineract.useradministration.domain.AppUser</class>
         <class>org.apache.fineract.accounting.glaccount.domain.GLAccount</class>

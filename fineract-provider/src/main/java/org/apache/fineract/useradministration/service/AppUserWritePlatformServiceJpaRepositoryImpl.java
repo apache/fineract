@@ -18,12 +18,7 @@
  */
 package org.apache.fineract.useradministration.service;
 
-import static org.apache.fineract.useradministration.service.AppUserConstants.CLIENTS;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import jakarta.persistence.PersistenceException;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -47,8 +42,6 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
-import org.apache.fineract.portfolio.client.domain.Client;
-import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserPreviousPassword;
 import org.apache.fineract.useradministration.domain.AppUserPreviousPasswordRepository;
@@ -82,7 +75,6 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     private final UserDataValidator fromApiJsonDeserializer;
     private final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository;
     private final StaffRepositoryWrapper staffRepositoryWrapper;
-    private final ClientRepositoryWrapper clientRepositoryWrapper;
     private final ConfigurationDomainService configurationDomainService;
 
     @Override
@@ -112,21 +104,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                 linkedStaff = null;
             }
 
-            Collection<Client> clients;
-            if (command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)
-                    && command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER)
-                    && command.hasParameter(CLIENTS)) {
-                JsonArray clientsArray = command.arrayOfParameterNamed(CLIENTS);
-                Collection<Long> clientIds = new HashSet<>();
-                for (JsonElement clientElement : clientsArray) {
-                    clientIds.add(clientElement.getAsLong());
-                }
-                clients = this.clientRepositoryWrapper.findAll(clientIds);
-            } else {
-                clients = null;
-            }
-
-            AppUser appUser = AppUser.fromJson(userOffice, linkedStaff, allRoles, clients, command);
+            AppUser appUser = AppUser.fromJson(userOffice, linkedStaff, allRoles, command);
             if (this.configurationDomainService.isForcePasswordResetOnFirstLoginEnabled()) {
                 appUser.updatePasswordResetRequired(true);
             }
@@ -203,22 +181,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
             final AppUserPreviousPassword currentPasswordToSaveAsPreview = getCurrentPasswordToSaveAsPreview(userToUpdate, command);
 
-            Collection<Client> clients = null;
-            boolean isSelfServiceUser = userToUpdate.isSelfServiceUser();
-            if (command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)) {
-                isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
-            }
-
-            if (isSelfServiceUser && command.hasParameter(CLIENTS)) {
-                JsonArray clientsArray = command.arrayOfParameterNamed(CLIENTS);
-                Collection<Long> clientIds = new HashSet<>();
-                for (JsonElement clientElement : clientsArray) {
-                    clientIds.add(clientElement.getAsLong());
-                }
-                clients = this.clientRepositoryWrapper.findAll(clientIds);
-            }
-
-            final Map<String, Object> changes = userToUpdate.update(command, this.platformPasswordEncoder, clients);
+            final Map<String, Object> changes = userToUpdate.update(command, this.platformPasswordEncoder);
 
             if (changes.containsKey("officeId")) {
                 final Long officeId = (Long) changes.get("officeId");
@@ -342,13 +305,6 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             final String defaultMessage = "User with username " + username + " already exists.";
             return new PlatformDataIntegrityException("error.msg.user.duplicate.username", defaultMessage, "username", username);
         }
-        // TODO: this needs to be fixed. The error condition should be independent from the underlying message and
-        // naming of the constraint
-        if (realCause.getMessage().contains("unique_self_client")) {
-            return new PlatformDataIntegrityException("error.msg.user.self.service.user.already.exist",
-                    "Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.");
-        }
-
         log.error("handleDataIntegrityIssues: Neither duplicate username nor existing user; unknown error occured", dve);
         return ErrorHandler.getMappable(dve, "error.msg.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
     }

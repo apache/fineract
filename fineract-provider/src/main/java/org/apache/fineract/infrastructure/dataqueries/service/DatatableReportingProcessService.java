@@ -28,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
-import org.apache.fineract.infrastructure.dataqueries.api.RunreportsApiResource;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportExportType;
 import org.apache.fineract.infrastructure.dataqueries.service.export.DatatableReportExportService;
 import org.apache.fineract.infrastructure.dataqueries.service.export.ResponseHolder;
@@ -53,8 +52,6 @@ public class DatatableReportingProcessService extends AbstractReportingProcessSe
 
     @Override
     public Response processRequest(String reportName, MultivaluedMap<String, String> queryParams) {
-        boolean isSelfServiceUserReport = Boolean.parseBoolean(
-                queryParams.getOrDefault(RunreportsApiResource.IS_SELF_SERVICE_USER_REPORT_PARAMETER, List.of("false")).get(0));
 
         DatatableExportTargetParameter exportMode = DatatableExportTargetParameter.resolverExportTarget(queryParams);
         final String parameterTypeValue = ApiParameterHelper.parameterType(queryParams) ? "parameter" : "report";
@@ -62,7 +59,7 @@ public class DatatableReportingProcessService extends AbstractReportingProcessSe
         ResponseHolder response = findReportExportService(exportMode) //
                 .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.report.export.mode.unavailable",
                         "Export mode %s unavailable".formatted(exportMode.name()))) //
-                .export(reportName, queryParams, reportParams, isSelfServiceUserReport, parameterTypeValue);
+                .export(reportName, queryParams, reportParams, parameterTypeValue);
         Response.ResponseBuilder builder = Response.status(response.status().getStatusCode());
         if (StringUtils.isNotBlank(response.contentType())) {
             builder = builder.type(response.contentType());

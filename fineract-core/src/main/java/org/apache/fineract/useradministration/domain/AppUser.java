@@ -20,7 +20,6 @@ package org.apache.fineract.useradministration.domain;
 
 import static org.apache.fineract.useradministration.service.AppUserConstants.PASSWORD;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,7 +27,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
@@ -52,7 +50,6 @@ import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncod
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
-import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.useradministration.service.AppUserConstants;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -121,12 +118,6 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
     private boolean passwordNeverExpires;
 
     @Getter
-    @Column(name = "is_self_service_user", nullable = false)
-    private boolean isSelfServiceUser;
-
-    @Getter
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "appUser")
-    private Set<AppUserClientMapping> appUserClientMappings = new HashSet<>();
 
     @Column(name = "cannot_change_password", nullable = true)
     private Boolean cannotChangePassword;
@@ -142,8 +133,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         this.passwordResetRequired = required;
     }
 
-    public static AppUser fromJson(final Office userOffice, final Staff linkedStaff, final Set<Role> allRoles,
-            final Collection<Client> clients, final JsonCommand command) {
+    public static AppUser fromJson(final Office userOffice, final Staff linkedStaff, final Set<Role> allRoles, final JsonCommand command) {
 
         final String username = command.stringValueOfParameterNamed("username");
         String password = command.stringValueOfParameterNamed("password");
@@ -175,10 +165,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         final String firstname = command.stringValueOfParameterNamed("firstname");
         final String lastname = command.stringValueOfParameterNamed("lastname");
 
-        final boolean isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
-
-        return new AppUser(userOffice, user, allRoles, email, firstname, lastname, linkedStaff, passwordNeverExpire, isSelfServiceUser,
-                clients, cannotChangePassword);
+        return new AppUser(userOffice, user, allRoles, email, firstname, lastname, linkedStaff, passwordNeverExpire, cannotChangePassword);
     }
 
     protected AppUser() {
@@ -188,8 +175,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
     }
 
     public AppUser(final Office office, final User user, final Set<Role> roles, final String email, final String firstname,
-            final String lastname, final Staff staff, final boolean passwordNeverExpire, final boolean isSelfServiceUser,
-            final Collection<Client> clients, final Boolean cannotChangePassword) {
+            final String lastname, final Staff staff, final boolean passwordNeverExpire, final Boolean cannotChangePassword) {
         this.office = office;
         this.email = email.trim();
         this.username = user.getUsername().trim();
@@ -205,8 +191,6 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         this.lastTimePasswordUpdated = DateUtils.getLocalDateOfTenant();
         this.staff = staff;
         this.passwordNeverExpires = passwordNeverExpire;
-        this.isSelfServiceUser = isSelfServiceUser;
-        this.appUserClientMappings = createAppUserClientMappings(clients);
         this.cannotChangePassword = cannotChangePassword;
     }
 
@@ -262,8 +246,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         }
     }
 
-    public Map<String, Object> update(final JsonCommand command, final PlatformPasswordEncoder platformPasswordEncoder,
-            final Collection<Client> clients) {
+    public Map<String, Object> update(final JsonCommand command, final PlatformPasswordEncoder platformPasswordEncoder) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
         // unencoded password provided
@@ -328,29 +311,6 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(passwordNeverExpire);
             actualChanges.put(passwordNeverExpire, newValue);
             this.passwordNeverExpires = newValue;
-        }
-
-        if (command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)
-                && command.isChangeInBooleanParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER, this.isSelfServiceUser)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
-            actualChanges.put(AppUserConstants.IS_SELF_SERVICE_USER, newValue);
-            this.isSelfServiceUser = newValue;
-        }
-
-        if (this.isSelfServiceUser && command.hasParameter(AppUserConstants.CLIENTS)) {
-            actualChanges.put(AppUserConstants.CLIENTS, command.arrayValueOfParameterNamed(AppUserConstants.CLIENTS));
-            Set<AppUserClientMapping> newClients = createAppUserClientMappings(clients);
-            if (this.appUserClientMappings == null) {
-                this.appUserClientMappings = new HashSet<>();
-            } else {
-                this.appUserClientMappings.retainAll(newClients);
-            }
-            this.appUserClientMappings.addAll(newClients);
-        } else if (!this.isSelfServiceUser && actualChanges.containsKey(AppUserConstants.IS_SELF_SERVICE_USER)) {
-            actualChanges.put(AppUserConstants.CLIENTS, new ArrayList<>());
-            if (this.appUserClientMappings != null) {
-                this.appUserClientMappings.clear();
-            }
         }
 
         return actualChanges;
@@ -682,17 +642,6 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
 
     public boolean isNotEnabled() {
         return !isEnabled();
-    }
-
-    private Set<AppUserClientMapping> createAppUserClientMappings(Collection<Client> clients) {
-        Set<AppUserClientMapping> newAppUserClientMappings = null;
-        if (clients != null && !clients.isEmpty()) {
-            newAppUserClientMappings = new HashSet<>();
-            for (Client client : clients) {
-                newAppUserClientMappings.add(new AppUserClientMapping(this, client));
-            }
-        }
-        return newAppUserClientMappings;
     }
 
     @Override

@@ -35,9 +35,9 @@ public class CsvDatatableReportExportServiceImpl implements DatatableReportExpor
 
     @Override
     public ResponseHolder export(String reportName, MultivaluedMap<String, String> queryParams, Map<String, String> reportParams,
-            boolean isSelfServiceUserReport, String parameterTypeValue) {
-        final StreamingOutput result = this.readExtraDataAndReportingService.retrieveReportCSV(reportName, parameterTypeValue, reportParams,
-                isSelfServiceUserReport);
+            String parameterTypeValue) {
+        final StreamingOutput result = this.readExtraDataAndReportingService.retrieveReportCSV(reportName, parameterTypeValue,
+                reportParams);
         return new ResponseHolder(Response.Status.OK).contentType("text/csv")
                 .addHeader("Content-Disposition",
                         "attachment;filename=" + DatatableExportUtil.generatePlainExportFileName(255, "csv", reportName, reportParams))

@@ -106,16 +106,6 @@ public final class UserHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static Object createUserForSelfService(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            int roleId, int staffId, int clientId, String attribute) {
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL,
-                getTestCreateUserAsJSONForSelfService(roleId, staffId, clientId), attribute);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static Integer getUserId(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, String userName) {
         String json = Utils.performServerGet(requestSpec, responseSpec, CREATE_USER_URL, null);
         Assertions.assertNotNull(json);
@@ -169,17 +159,6 @@ public final class UserHelper {
     private static String getTestUpdateUserAsJSON(String username) {
         return "{ \"username\": \"" + username + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
                 + " \"officeId\": \"1\"}";
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String getTestCreateUserAsJSONForSelfService(int roleId, int staffId, int clientId) {
-        return "{ \"username\": \"" + Utils.uniqueRandomStringGenerator("User_Name_", 3)
-                + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
-                + " \"officeId\": \"1\", \"staffId\": " + "\"" + staffId + "\",\"roles\": [\"" + roleId
-                + "\"], \"sendPasswordToEmail\": false," + "\"isSelfServiceUser\" : true," + "\"clients\" : [\"" + clientId + "\"]}";
     }
 
     // TODO: Rewrite to use fineract-client instead!

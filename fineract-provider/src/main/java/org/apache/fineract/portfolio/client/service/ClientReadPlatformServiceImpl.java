@@ -98,7 +98,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         final String userOfficeHierarchy = this.context.officeHierarchy();
         final String underHierarchySearchString = userOfficeHierarchy + "%";
-        final String appUserID = String.valueOf(context.authenticatedUser().getId());
 
         // if (searchParameters.isScopedByOfficeHierarchy()) {
         // this.context.validateAccessRights(searchParameters.getHierarchy());
@@ -111,11 +110,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         sqlBuilder.append(" where (o.hierarchy like ? or transferToOffice.hierarchy like ?) ");
 
         if (searchParameters != null) {
-            if (searchParameters.getIsSelfUser()) {
-                sqlBuilder.append(
-                        " and c.id in (select umap.client_id from m_selfservice_user_client_mapping as umap where umap.appuser_id = ? ) ");
-                paramList.add(appUserID);
-            }
 
             final String extraCriteria = buildSqlStringFromClientCriteria(this.clientToDataMapper.schema(), searchParameters, paramList);
 
@@ -559,41 +553,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String lastname = rs.getString("lastname");
             final String fullname = rs.getString("fullname");
             final String displayName = rs.getString("displayName");
-
             final Long officeId = rs.getLong("officeId");
             final String officeName = rs.getString("officeName");
 
             return ClientData.clientIdentifier(id, accountNo, firstname, middlename, lastname, fullname, displayName, officeId, officeName);
         }
-    }
-
-    @Override
-    public ClientData retrieveAllNarrations(final String clientNarrations) {
-        final List<CodeValueData> narrations = new ArrayList<>(
-                this.codeValueReadPlatformService.retrieveCodeValuesByCode(clientNarrations));
-        final Collection<CodeValueData> clientTypeOptions = null;
-        final Collection<CodeValueData> clientClassificationOptions = null;
-        final Collection<CodeValueData> clientNonPersonConstitutionOptions = null;
-        final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions = null;
-        final List<EnumOptionData> clientLegalFormOptions = null;
-        return ClientData.template(null, null, null, null, narrations, null, null, clientTypeOptions, clientClassificationOptions,
-                clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions, clientLegalFormOptions, null, null, null, null);
-    }
-
-    @Override
-    public LocalDate retrieveClientTransferProposalDate(Long clientId) {
-        final String sql = "SELECT cl.proposed_transfer_date FROM m_client cl WHERE cl.id = ? ";
-        try {
-            return this.jdbcTemplate.queryForObject(sql, LocalDate.class, clientId);
-        } catch (final EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
-    @Override
-    public Collection<Long> retrieveUserClients(Long aUserID) {
-        String sql = "SELECT  m.client_id FROM m_selfservice_user_client_mapping m INNER JOIN m_client c ON c.id = m.client_id WHERE m.appuser_id = ?";
-        return jdbcTemplate.queryForList(sql, Long.class, aUserID);
     }
 
     @Override
@@ -774,4 +738,26 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
     }
 
+    @Override
+    public ClientData retrieveAllNarrations(final String clientNarrations) {
+        final List<CodeValueData> narrations = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(clientNarrations));
+        final Collection<CodeValueData> clientTypeOptions = null;
+        final Collection<CodeValueData> clientClassificationOptions = null;
+        final Collection<CodeValueData> clientNonPersonConstitutionOptions = null;
+        final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions = null;
+        final List<EnumOptionData> clientLegalFormOptions = null;
+        return ClientData.template(null, null, null, null, narrations, null, null, clientTypeOptions, clientClassificationOptions,
+                clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions, clientLegalFormOptions, null, null, null, null);
+    }
+
+    @Override
+    public LocalDate retrieveClientTransferProposalDate(final Long clientId) {
+        final String sql = "SELECT cl.proposed_transfer_date FROM m_client cl WHERE cl.id = ?";
+        try {
+            return this.jdbcTemplate.queryForObject(sql, LocalDate.class, clientId);
+        } catch (final EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
 }

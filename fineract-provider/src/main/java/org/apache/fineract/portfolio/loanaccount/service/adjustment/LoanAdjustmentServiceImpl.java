@@ -238,9 +238,9 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
             Note note;
-            /**
+            /*
              * If a new transaction is not created, associate note with the transaction to be adjusted
-             **/
+             */
             if (thereIsNewTransaction) {
                 note = Note.loanTransactionNote(loan, newTransactionDetail, noteText);
             } else {
@@ -367,7 +367,7 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
-            if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
+            if (realCause.getMessage().toLowerCase(java.util.Locale.ROOT).contains("external_id_unique")) {
                 baseDataValidator.reset().parameter(LoanApiConstants.externalIdParameterName).failWithCode("value.must.be.unique");
             }
             if (!dataValidationErrors.isEmpty()) {

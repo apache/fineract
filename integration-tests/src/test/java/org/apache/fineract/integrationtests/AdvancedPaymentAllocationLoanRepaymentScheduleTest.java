@@ -5559,7 +5559,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
             GetLoansLoanIdInterestRateFrequencyType interestRateFrequencyType = loanDetails.getInterestRateFrequencyType();
             assertNotNull(interestRateFrequencyType);
-            assertEquals(interestRateFrequencyType.getId(), WHOLE_TERM);
+            assertEquals(interestRateFrequencyType.getId(), Long.valueOf(WHOLE_TERM));
 
             // Annual Interest rate validation, in this case It must be 12 %
             assertEquals(BigDecimal.valueOf(12), loanDetails.getAnnualInterestRate().stripTrailingZeros());

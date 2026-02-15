@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 import java.util.List;
 
 public final class LoanDisbursementDetailApiResourceSwagger {
@@ -50,6 +51,6 @@ public final class LoanDisbursementDetailApiResourceSwagger {
         @Schema(example = "1 January 2024")
         public String expectedDisbursementDate;
         @Schema(example = "100")
-        public Double principal;
+        public BigDecimal principal;
     }
 }

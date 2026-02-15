@@ -56,8 +56,6 @@ public class AuthenticatedUserData {
     @SuppressWarnings("unused")
     private Collection<String> permissions;
 
-    private Collection<Long> clients;
-
     @SuppressWarnings("unused")
     private boolean shouldRenewPassword;
 

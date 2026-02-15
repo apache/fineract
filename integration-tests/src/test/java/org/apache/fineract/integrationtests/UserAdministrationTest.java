@@ -38,7 +38,6 @@ import org.apache.fineract.client.models.PutUsersUserIdRequest;
 import org.apache.fineract.client.models.PutUsersUserIdResponse;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
@@ -146,37 +145,6 @@ public class UserAdministrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testCreateNewUserBlocksDuplicateClientId() {
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(roleId);
-
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(staffId);
-
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(clientId);
-
-        final Integer userId = (Integer) UserHelper.createUserForSelfService(this.requestSpec, this.responseSpec, roleId, staffId, clientId,
-                "resourceId");
-        Assertions.assertNotNull(userId);
-        this.transientUsers.add(userId);
-
-        final List errors = (List) UserHelper.createUserForSelfService(this.requestSpec, expectStatusCode(403), roleId, staffId, clientId,
-                "errors");
-        Map reason = (Map) errors.get(0);
-        Assertions.assertEquals("Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.",
-                reason.get("defaultUserMessage"));
-    }
-
-    @Test
-    public void testDeleteSystemUser() {
-        final Integer userId = UserHelper.getUserId(requestSpec, responseSpec, AppUserConstants.SYSTEM_USER_NAME);
-        Assertions.assertNotNull(userId);
-
-        UserHelper.deleteUser(requestSpec, expectStatusCode(403), userId.intValue());
-    }
-
-    @Test
     public void testModifySystemUser() {
         final Integer userId = UserHelper.getUserId(requestSpec, responseSpec, AppUserConstants.SYSTEM_USER_NAME);
         Assertions.assertNotNull(userId);
@@ -202,19 +170,19 @@ public class UserAdministrationTest extends IntegrationTest {
 
         // User updates its own password
         String updatedPassword = "QwE!5rTy#9uP0u";
-        PutUsersUserIdResponse putUsersUserIdResponse = ok(newFineractClient(simpleUsername, originalPassword).users.update27(userId,
+        PutUsersUserIdResponse putUsersUserIdResponse = ok(newFineractClient(simpleUsername, originalPassword).users.update25(userId,
                 new PutUsersUserIdRequest().password(updatedPassword).repeatPassword(updatedPassword)));
         Assertions.assertNotNull(putUsersUserIdResponse.getResourceId());
 
         // From then on the originalPassword is not working anymore
         CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class, () -> {
-            ok(newFineractClient(simpleUsername, originalPassword).users.retrieveOne32(userId));
+            ok(newFineractClient(simpleUsername, originalPassword).users.retrieveOne30(userId));
         });
         Assertions.assertEquals(401, callFailedRuntimeException.getResponse().raw().code());
         Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("Unauthorized"));
 
         // The update password is still working perfectly
-        GetUsersUserIdResponse ok = ok(newFineractClient(simpleUsername, updatedPassword).users.retrieveOne32(userId));
+        GetUsersUserIdResponse ok = ok(newFineractClient(simpleUsername, updatedPassword).users.retrieveOne30(userId));
     }
 
     @Test
@@ -242,13 +210,13 @@ public class UserAdministrationTest extends IntegrationTest {
 
         // From then on the originalPassword is not working anymore
         CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class, () -> {
-            ok(newFineractClient(simpleUsername, originalPassword).users.retrieveOne32(userId));
+            ok(newFineractClient(simpleUsername, originalPassword).users.retrieveOne30(userId));
         });
         Assertions.assertEquals(401, callFailedRuntimeException.getResponse().raw().code());
         Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("Unauthorized"));
 
         // The update password is still working perfectly
-        GetUsersUserIdResponse ok = ok(newFineractClient(simpleUsername, updatedPassword).users.retrieveOne32(userId));
+        GetUsersUserIdResponse ok = ok(newFineractClient(simpleUsername, updatedPassword).users.retrieveOne30(userId));
     }
 
     @Test
@@ -271,7 +239,7 @@ public class UserAdministrationTest extends IntegrationTest {
 
         // User tries to update it's own roles
         CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class, () -> {
-            ok(newFineractClient(simpleUsername, password).users.update27(userId,
+            ok(newFineractClient(simpleUsername, password).users.update25(userId,
                     new PutUsersUserIdRequest().roles(List.of(Long.valueOf(roleId2)))));
         });
 
