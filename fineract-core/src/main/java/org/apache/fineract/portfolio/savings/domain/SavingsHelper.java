@@ -48,12 +48,12 @@ public final class SavingsHelper {
     private static final CompoundInterestHelper COMPOUND_INTEREST_HELPER = new CompoundInterestHelper();
 
     public List<LocalDateInterval> determineInterestPostingPeriods(final LocalDate startInterestCalculationLocalDate,
-            final LocalDate interestPostingUpToDate, final SavingsPostingInterestPeriodType postingPeriodType,
-            final Integer financialYearBeginningMonth, List<LocalDate> postInterestAsOn) {
+                                                                   final LocalDate interestPostingUpToDate, final SavingsPostingInterestPeriodType postingPeriodType,
+                                                                   final Integer financialYearBeginningMonth, List<LocalDate> postInterestAsOn) {
 
         final List<LocalDateInterval> postingPeriods = new ArrayList<>();
 
-        if (startInterestCalculationLocalDate == null || interestPostingUpToDate == null) {
+        if (startInterestCalculationLocalDate == null || interestPostingUpToDate == null || postingPeriodType == null) {
             return postingPeriods;
         }
 
@@ -92,8 +92,8 @@ public final class SavingsHelper {
     }
 
     private LocalDate determineInterestPostingPeriodEndDateFrom(final LocalDate periodStartDate,
-            final SavingsPostingInterestPeriodType interestPostingPeriodType, final LocalDate interestPostingUpToDate,
-            Integer financialYearBeginningMonth) {
+                                                                final SavingsPostingInterestPeriodType interestPostingPeriodType, final LocalDate interestPostingUpToDate,
+                                                                Integer financialYearBeginningMonth) {
 
         LocalDate periodEndDate = interestPostingUpToDate;
         final Integer monthOfYear = periodStartDate.getMonthValue();
@@ -121,15 +121,15 @@ public final class SavingsHelper {
 
         switch (interestPostingPeriodType) {
             case INVALID:
-            break;
+                break;
             case DAILY:
                 // produce period end date on current day
                 periodEndDate = periodStartDate;
-            break;
+                break;
             case MONTHLY:
                 // produce period end date on last day of current month
                 periodEndDate = periodStartDate.with(TemporalAdjusters.lastDayOfMonth());
-            break;
+                break;
             case QUATERLY:
                 for (LocalDate quarterlyDate : quarterlyDates) {
                     if (DateUtils.isAfter(quarterlyDate, periodStartDate)) {
@@ -142,7 +142,7 @@ public final class SavingsHelper {
                 if (!isEndDateSet) {
                     periodEndDate = quarterlyDates.get(0).plusYears(1).with(TemporalAdjusters.lastDayOfMonth());
                 }
-            break;
+                break;
             case BIANNUAL:
                 for (LocalDate biannualDate : biannualDates) {
                     if (DateUtils.isAfter(biannualDate, periodStartDate)) {
@@ -155,7 +155,7 @@ public final class SavingsHelper {
                 if (!isEndDateSet) {
                     periodEndDate = biannualDates.get(0).plusYears(1).with(TemporalAdjusters.lastDayOfMonth());
                 }
-            break;
+                break;
             case ANNUAL:
                 if (financialYearBeginningMonth < monthOfYear) {
                     periodEndDate = periodStartDate.withMonth(financialYearBeginningMonth);
@@ -164,7 +164,7 @@ public final class SavingsHelper {
                     periodEndDate = periodStartDate.withMonth(financialYearBeginningMonth);
                 }
                 periodEndDate = periodEndDate.with(TemporalAdjusters.lastDayOfMonth());
-            break;
+                break;
         }
         // interest posting always occurs on next day after the period end date.
         periodEndDate = periodEndDate.plusDays(1);
@@ -172,7 +172,7 @@ public final class SavingsHelper {
     }
 
     public Money calculateInterestForAllPostingPeriods(final MonetaryCurrency currency, final List<PostingPeriod> allPeriods,
-            LocalDate accountLockedUntil, Boolean immediateWithdrawalOfInterest) {
+                                                       LocalDate accountLockedUntil, Boolean immediateWithdrawalOfInterest) {
         return COMPOUND_INTEREST_HELPER.calculateInterestForAllPostingPeriods(currency, allPeriods, accountLockedUntil,
                 immediateWithdrawalOfInterest);
     }
