@@ -65,6 +65,7 @@ public class ImageWritePlatformServiceImpl implements ImageWritePlatformService 
                 // TODO: keeping the path segment always "clients" not consistent how this works with documents
                 request.setEntityType(DEFAULT_ENTITY_TYPE);
             }
+            final var imageEntityType = normalizeImageEntityType(request.getEntityType());
 
             if (StringUtils.isEmpty(request.getFileName())) {
                 // NOTE: defacto limiting the uploads to JPEG files, same behavior as before
@@ -83,12 +84,11 @@ public class ImageWritePlatformServiceImpl implements ImageWritePlatformService 
             }
 
             // TODO: make "prefix" configurable?
-            var path = getPath(STORE_PREFIX, request.getEntityType(), request.getEntityId(), request.getFileName(),
-                    storeService.getDelimiter());
+            var path = getPath(STORE_PREFIX, imageEntityType, request.getEntityId(), request.getFileName(), storeService.getDelimiter());
 
             final var imagePath = storeService.upload(path, request.getStream(), request.getType());
 
-            final var result = imageIdAdapters.stream().filter(imageIdAdapter -> imageIdAdapter.accept(request.getEntityType())).findFirst()
+            final var result = imageIdAdapters.stream().filter(imageIdAdapter -> imageIdAdapter.accept(imageEntityType)).findFirst()
                     .flatMap(imageIdAdapter -> imageIdAdapter.get(request.getEntityId()))
                     .flatMap(imageIdResult -> imageRepository.findById(imageIdResult.getId())).map(image -> {
                         // delete old image
@@ -99,7 +99,7 @@ public class ImageWritePlatformServiceImpl implements ImageWritePlatformService 
                     .map(image -> image.setLocation(imagePath).setStorageType(storeService.getType().getValue())).map(imageRepository::save)
                     .map(image -> ImageCreateResponse.builder().resourceId(image.getId()).build());
 
-            imageIdAdapters.stream().filter(imageIdAdapter -> imageIdAdapter.accept(request.getEntityType())).findFirst()
+            imageIdAdapters.stream().filter(imageIdAdapter -> imageIdAdapter.accept(imageEntityType)).findFirst()
                     .ifPresent(imageIdAdapter -> result.ifPresent(
                             imageCreateResponse -> imageIdAdapter.set(request.getEntityId(), imageCreateResponse.getResourceId())));
 
@@ -133,6 +133,16 @@ public class ImageWritePlatformServiceImpl implements ImageWritePlatformService 
 
                     return ImageDeleteResponse.builder().resourceId(entityId).resourceIdentifier(entityType).build();
                 });
+    }
+
+    private String normalizeImageEntityType(final String entityType) {
+        if ("staff".equalsIgnoreCase(entityType)) {
+            return "staff";
+        }
+        if ("clients".equalsIgnoreCase(entityType)) {
+            return DEFAULT_ENTITY_TYPE;
+        }
+        return entityType;
     }
 
     private String getPath(final String prefix, final String entityType, final Long entityId, final String fileName, String delimiter) {
