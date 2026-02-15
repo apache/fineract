@@ -107,6 +107,7 @@ public class SavingsAccountHelper {
     public static final String TRANSACTION_DATE_PLUS_ONE = "02 March 2013";
     public static final String LAST_TRANSACTION_DATE = "01 March 2013";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
+    public static final String ACCOUNT_TYPE_GROUP = "GROUP";
     public static final Long PAYMENT_TYPE_ID = 1L;
 
     public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
@@ -1280,6 +1281,31 @@ public class SavingsAccountHelper {
         SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
 
         final Integer savingsId = savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assertions.assertNotNull(savingsProductID);
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        savingsStatusHashMap = savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        return savingsId;
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    public static Integer openGroupSavingsAccount(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer groupId, final String minimumOpeningBalance) {
+        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, minimumOpeningBalance);
+        Assertions.assertNotNull(savingsProductID);
+
+        SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+
+        final Integer savingsId = savingsAccountHelper.applyForSavingsApplication(groupId, savingsProductID, ACCOUNT_TYPE_GROUP);
         Assertions.assertNotNull(savingsProductID);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);

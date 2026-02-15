@@ -3366,6 +3366,10 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return !isAccountLocked(transactionDate);
     }
 
+    public boolean isGroupAccount() {
+        return (this.getGroupId() != null);
+    }
+
     public BigDecimal minBalanceForInterestCalculation() {
         return this.minBalanceForInterestCalculation;
     }

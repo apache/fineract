@@ -39,6 +39,7 @@ import java.util.Locale;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
@@ -236,6 +237,45 @@ public class GuarantorTest {
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
 
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void testGuarantor_GROUP_SAVINGS_ACCOUNT_WITH_NON_ZERO_GUARANTEE() {
+        Float group_hold_funds = Float.valueOf((float) 0);
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        final Integer groupId = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
+        GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupId.toString(), clientID.toString());
+
+        final Integer groupSavingsId = SavingsAccountHelper.openGroupSavingsAccount(this.requestSpec, this.responseSpec, groupId, "10000");
+
+        final Integer loanProductID = createLoanProductWithHoldFunds("20", "10", "10");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        Calendar todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.DAY_OF_MONTH, -7 * 4);
+        final String loanDisbursementDate = dateFormat.format(todaysDate.getTime());
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID, loanDisbursementDate);
+        Assertions.assertNotNull(loanID);
+
+        ArrayList<HashMap> errorData = (ArrayList<HashMap>) this.loanTransactionHelper.approveLoan(loanDisbursementDate, null, loanID,
+                CommonConstants.RESPONSE_ERROR);
+        assertTrue(checkForErrorCode(errorData, "validation.msg.loan.guarantor.min.self.guarantee.required"));
+        assertTrue(checkForErrorCode(errorData, "validation.msg.loan.guarantor.min.external.guarantee.required"));
+        assertTrue(checkForErrorCode(errorData, "validation.msg.loan.guarantor.mandated.guarantee.required"));
+
+        String guarantorJSON = new GuarantorTestBuilder()
+                .existingCustomerWithGuaranteeAmount(String.valueOf(clientID), String.valueOf(groupSavingsId), "2500").build();
+        Integer groupGuarantee = this.guarantorHelper.createGuarantor(loanID, guarantorJSON);
+        Assertions.assertNotNull(groupGuarantee);
+        verifySavingsOnHoldBalance(groupSavingsId, null);
+        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
+        HashMap loanStatusHashMap = this.loanTransactionHelper.approveLoan(loanDisbursementDate, loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+        group_hold_funds += Float.valueOf((float) 2500);
+        verifySavingsOnHoldBalance(groupSavingsId, group_hold_funds);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

@@ -116,7 +116,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
             BigDecimal minSelfAmount = principal.multiply(guaranteeData.getMinimumGuaranteeFromOwnFunds()).divide(BigDecimal.valueOf(100));
             BigDecimal minExtGuarantee = principal.multiply(guaranteeData.getMinimumGuaranteeFromGuarantor())
                     .divide(BigDecimal.valueOf(100));
-
+            boolean hasGroupSavingsAccountGuarantor = false;
             BigDecimal actualAmount = BigDecimal.ZERO;
             BigDecimal actualSelfAmount = BigDecimal.ZERO;
             BigDecimal actualExtGuarantee = BigDecimal.ZERO;
@@ -125,7 +125,12 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                 for (GuarantorFundingDetails guarantorFundingDetails : fundingDetails) {
                     if (guarantorFundingDetails.getStatus().isActive() || guarantorFundingDetails.getStatus().isWithdrawn()
                             || guarantorFundingDetails.getStatus().isCompleted()) {
-                        if (guarantor.isSelfGuarantee()) {
+                        SavingsAccount savingsAccount = guarantorFundingDetails.getLinkedSavingsAccount();
+                        if (savingsAccount.isGroupAccount()) {
+                            hasGroupSavingsAccountGuarantor = true;
+                            actualExtGuarantee = actualExtGuarantee.add(guarantorFundingDetails.getAmount())
+                                    .subtract(guarantorFundingDetails.getAmountTransfered());
+                        } else if (guarantor.isSelfGuarantee()) {
                             actualSelfAmount = actualSelfAmount.add(guarantorFundingDetails.getAmount())
                                     .subtract(guarantorFundingDetails.getAmountTransfered());
                         } else {
@@ -138,7 +143,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.guarantor");
-            if (actualSelfAmount.compareTo(minSelfAmount) < 0) {
+            if (!hasGroupSavingsAccountGuarantor && actualSelfAmount.compareTo(minSelfAmount) < 0) {
                 baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(GuarantorConstants.GUARANTOR_SELF_GUARANTEE_ERROR,
                         minSelfAmount);
             }
