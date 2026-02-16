@@ -59,33 +59,22 @@ public final class SavingsEnumerations {
     public static final String INTEREST_CALCULATION_DAYS_IN_YEAR = "interestCalculationDaysInYearType";
     public static final String RECURRING_FREQUENCY_TYPE = "recurringFrequencyType";
 
-    public static EnumOptionData savingEnumueration(final String typeName, final int id) {
-        if (typeName.equals(INTEREST_COMPOUNDING_PERIOD_TYPE)) {
-            return compoundingInterestPeriodType(id);
-        } else if (typeName.equals(INTEREST_POSTING_PERIOD_TYPE)) {
-            return interestPostingPeriodType(id);
-        } else if (typeName.equals(INTEREST_CALCULATION_TYPE)) {
-            return interestCalculationType(id);
-        } else if (typeName.equals(MIN_DEPOSIT_TERM_TYPE)) {
-            return depositTermFrequencyType(id);
-        } else if (typeName.equals(MAX_DEPOSIT_TERM_TYPE)) {
-            return depositTermFrequencyType(id);
-        } else if (typeName.equals(IN_MULTIPLES_OF_DEPOSIT_TERM_TYPE)) {
-            return inMultiplesOfDepositTermFrequencyType(id);
-        } else if (typeName.equals(DEPOSIT_PERIOD_FREQUNCY_TYPE)) {
-            return depositPeriodFrequency(id);
-        } else if (typeName.equals(LOCKIN_PERIOD_FREQUNCY_TYPE)) {
-            return lockinPeriodFrequencyType(id);
-        } else if (typeName.equals(ACCOUNTING_RULE_TYPE)) {
-            return AccountingEnumerations.accountingRuleType(id);
-        } else if (typeName.equals(PRE_CLOSURE_PENAL_INTEREST_TYPE)) {
-            return preClosurePenaltyInterestOnType(id);
-        } else if (typeName.equals(INTEREST_CALCULATION_DAYS_IN_YEAR)) {
-            return interestCalculationDaysInYearType(id);
-        } else if (typeName.equals(RECURRING_FREQUENCY_TYPE)) {
-            return depositPeriodFrequency(id);
-        }
-        return null;
+    public static EnumOptionData savingEnumeration(final String typeName, final int id) {
+        return switch (typeName) {
+            case INTEREST_COMPOUNDING_PERIOD_TYPE -> compoundingInterestPeriodType(id);
+            case INTEREST_POSTING_PERIOD_TYPE -> interestPostingPeriodType(id);
+            case INTEREST_CALCULATION_TYPE -> interestCalculationType(id);
+            case MIN_DEPOSIT_TERM_TYPE -> depositTermFrequencyType(id);
+            case MAX_DEPOSIT_TERM_TYPE -> depositTermFrequencyType(id);
+            case IN_MULTIPLES_OF_DEPOSIT_TERM_TYPE -> inMultiplesOfDepositTermFrequencyType(id);
+            case DEPOSIT_PERIOD_FREQUNCY_TYPE -> depositPeriodFrequency(id);
+            case LOCKIN_PERIOD_FREQUNCY_TYPE -> lockinPeriodFrequencyType(id);
+            case ACCOUNTING_RULE_TYPE -> AccountingEnumerations.accountingRuleType(id);
+            case PRE_CLOSURE_PENAL_INTEREST_TYPE -> preClosurePenaltyInterestOnType(id);
+            case INTEREST_CALCULATION_DAYS_IN_YEAR -> interestCalculationDaysInYearType(id);
+            case RECURRING_FREQUENCY_TYPE -> depositPeriodFrequency(id);
+            default -> null;
+        };
     }
 
     public static EnumOptionData lockinPeriodFrequencyType(final int id) {
