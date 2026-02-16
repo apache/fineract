@@ -1195,16 +1195,16 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         businessEventNotifierService.notifyPreBusinessEvent(
                 new LoanAdjustTransactionBusinessEvent(new LoanAdjustTransactionBusinessEvent.Data(transactionToAdjust)));
         if (this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.LOAN)) {
-            throw new PlatformServiceUnavailableException("error.msg.loan.transfer.transaction.update.not.allowed",
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.transfer.transaction.update.not.allowed",
                     "Loan transaction: " + transactionId + " update not allowed as it involves in account transfer", transactionId);
         }
         if (loan.isClosedWrittenOff()) {
-            throw new PlatformServiceUnavailableException("error.msg.loan.written.off.update.not.allowed",
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.written.off.update.not.allowed",
                     "Loan transaction: " + transactionId + " update not allowed as loan status is written off", transactionId);
         }
 
         if (transactionToAdjust.hasChargebackLoanTransactionRelations()) {
-            throw new PlatformServiceUnavailableException("error.msg.loan.transaction.update.not.allowed",
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.update.not.allowed",
                     "Loan transaction: " + transactionId + " update not allowed as loan transaction is linked to other transactions",
                     transactionId);
         }

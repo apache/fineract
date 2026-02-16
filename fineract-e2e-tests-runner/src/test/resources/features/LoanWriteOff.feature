@@ -16,9 +16,9 @@
       And Admin does write-off the loan on "29 January 2023"
       Then Loan status will be "CLOSED_WRITTEN_OFF"
       Then Loan Transactions tab has a transaction with date: "29 January 2023", and with the following data:
-        | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+        | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
         | Close (as written-off) | 650.0  | 650.0     | 0.0      | 0.0  | 0.0       | 0.0          |
-      Then Admin fails to undo "1"th transaction made on "22 January 2023"
+      Then Customer undo "1"th transaction made on "22 January 2023" results a 403 error and "update not allowed as loan status is written off" error message
 
 
     @TestRailId:C2935
@@ -56,9 +56,9 @@
       And Admin does write-off the loan on "29 January 2023"
       Then Loan status will be "CLOSED_WRITTEN_OFF"
       Then Loan Transactions tab has a transaction with date: "29 January 2023", and with the following data:
-        | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+        | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
         | Close (as written-off) | 650.0  | 650.0     | 0.0      | 0.0  | 0.0       | 0.0          |
-      Then Admin fails to undo "1"th transaction made on "29 January 2023"
+      Then Customer undo "1"th transaction made on "29 January 2023" results a 403 error and "update not allowed as loan status is written off" error message
 
     @TestRailId:C4006
     Scenario: Verify accounting journal entries are not duplicated during write-off in case the cumulative loan was already charged-off

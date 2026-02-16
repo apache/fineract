@@ -679,6 +679,36 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
                     loanTransactionAdjustmentDataV1 -> loanTransactionAdjustmentDataV1.getNewTransactionDetail().getExternalOwnerId())
                     .isEqualTo(externalOwnerId);
         }
+    }
 
+    @Then("Customer undo {string}th transaction made on {string} results a {int} error and {string} error message")
+    public void undoTransactionResultsError(final String nthItemStr, final String transactionDate, final int errorCodeExpected,
+            final String errorMessageCode) {
+        eventStore.reset();
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanResponse != null;
+        final long loanId = loanResponse.getLoanId();
+        final List<GetLoansLoanIdTransactions> transactions = ok(
+                () -> fineractClient.loans().retrieveLoan(loanId, Map.<String, Object>of("associations", "transactions")))
+                .getTransactions();
+
+        final int nthItem = Integer.parseInt(nthItemStr) - 1;
+        assert transactions != null;
+        final GetLoansLoanIdTransactions targetTransaction = transactions.stream().filter(t -> {
+            assert t.getDate() != null;
+            return transactionDate.equals(formatter.format(t.getDate()));
+        }).toList().get(nthItem);
+
+        final PostLoansLoanIdTransactionsTransactionIdRequest transactionUndoRequest = LoanRequestFactory.defaultTransactionUndoRequest()
+                .transactionDate(transactionDate);
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.loanTransactions().adjustLoanTransaction(loanId,
+                targetTransaction.getId(), transactionUndoRequest, Map.of()));
+
+        assertThat(exception.getStatus()).as(ErrorMessageHelper.wrongErrorCode(exception.getStatus(), errorCodeExpected))
+                .isEqualTo(errorCodeExpected);
+        assertThat(exception.getDeveloperMessage())
+                .as(ErrorMessageHelper.wrongErrorMessage(exception.getDeveloperMessage(), errorMessageCode)).contains(errorMessageCode);
     }
 }

@@ -157,7 +157,7 @@ public class LoanTransactionChargebackTest extends BaseLoanIntegrationTest {
                 chargebackTransactionId, operationDate, responseSpecErr403);
 
         // Try to reverse a Loan Transaction repayment with linked transactions
-        reverseTransactionResponse = loanTransactionHelper.reverseLoanTransaction(loanId, transactionId, operationDate, responseSpecErr503);
+        reverseTransactionResponse = loanTransactionHelper.reverseLoanTransaction(loanId, transactionId, operationDate, responseSpecErr403);
     }
 
     @ParameterizedTest

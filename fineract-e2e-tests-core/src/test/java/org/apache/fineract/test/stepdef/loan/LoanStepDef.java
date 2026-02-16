@@ -3319,26 +3319,6 @@ public class LoanStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_WRITE_OFF_RESPONSE, writeOffResponse);
     }
 
-    @Then("Admin fails to undo {string}th transaction made on {string}")
-    public void undoTransaction(String nthTransaction, String transactionDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        long loanId = loanResponse.getLoanId();
-        List<GetLoansLoanIdTransactions> transactions = ok(() -> fineractClient.loans().retrieveLoan(loanId,
-                Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions"))).getTransactions();
-
-        int nthItem = Integer.parseInt(nthTransaction) - 1;
-        GetLoansLoanIdTransactions targetTransaction = transactions.stream()
-                .filter(t -> transactionDate.equals(formatter.format(t.getDate()))).toList().get(nthItem);
-
-        PostLoansLoanIdTransactionsTransactionIdRequest transactionUndoRequest = LoanRequestFactory.defaultTransactionUndoRequest()
-                .transactionDate(transactionDate);
-
-        CallFailedRuntimeException exception = fail(() -> fineractClient.loanTransactions().adjustLoanTransaction(loanId,
-                targetTransaction.getId(), transactionUndoRequest, Map.of()));
-        assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(503);
-    }
-
     @Then("Loan {string} repayment transaction on {string} with {double} EUR transaction amount results in error")
     public void loanTransactionWithErrorCheck(String repaymentType, String transactionDate, double transactionAmount) {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
