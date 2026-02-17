@@ -368,6 +368,18 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 });
     }
 
+    public void addOverdueBalanceCorrection(final ProgressiveLoanInterestScheduleModel scheduleModel, final LocalDate correctionDate,
+            final Money overdueAmount) {
+        scheduleModel
+                .changeOutstandingBalanceAndUpdateInterestPeriods(correctionDate, scheduleModel.zero(), overdueAmount, scheduleModel.zero())
+                .ifPresent(repaymentPeriod -> {
+                    scheduleModel.recordOverdueCorrection(correctionDate, overdueAmount, repaymentPeriod.getDueDate());
+                    calculateRateFactorForRepaymentPeriod(repaymentPeriod, scheduleModel);
+                    calculateOutstandingBalance(scheduleModel);
+                    calculateLastUnpaidRepaymentPeriodEMI(scheduleModel, correctionDate);
+                });
+    }
+
     @Override
     public void payInterest(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate repaymentPeriodFromDate,
             LocalDate repaymentPeriodDueDate, LocalDate transactionDate, Money interestAmount) {
@@ -919,9 +931,9 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
         if (!currentDate.equals(model.lastOverdueBalanceChange())) {
             if (model.lastOverdueBalanceChange() == null || currentInstallment.getFromDate().isAfter(model.lastOverdueBalanceChange())) {
-                addBalanceCorrection(model, fromDate, overduePrincipal);
+                addOverdueBalanceCorrection(model, fromDate, overduePrincipal);
             } else {
-                addBalanceCorrection(model, model.lastOverdueBalanceChange(), overduePrincipal);
+                addOverdueBalanceCorrection(model, model.lastOverdueBalanceChange(), overduePrincipal);
             }
 
             if (currentDate.isAfter(fromDate) && !currentDate.isAfter(toDate)) {
@@ -931,7 +943,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 } else {
                     lastOverdueBalanceChange = currentDate;
                 }
-                addBalanceCorrection(model, lastOverdueBalanceChange, aggregatedOverDuePrincipal.negated());
+                addOverdueBalanceCorrection(model, lastOverdueBalanceChange, aggregatedOverDuePrincipal.negated());
                 model.lastOverdueBalanceChange(lastOverdueBalanceChange);
             }
             return true;
@@ -1125,7 +1137,24 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             RepaymentPeriod repaymentPeriod, LocalDate tillDate) {
         MathContext mc = scheduleModel.mc();
         ProgressiveLoanInterestScheduleModel scheduleModelCopy = scheduleModel.deepCopy(mc);
+
+        // Reverse overdue corrections on the copy when they exist ON the target period
+        // but NOT beyond it. Beyond-target corrections provide legitimate cascading interest.
+        // Without reversal, overdue-inflated IPs create phantom futureUnrecognizedInterest.
+        final boolean hasOverdueCorrectionsBeyondTarget = scheduleModelCopy.hasOverdueCorrectionsBeyondDate(repaymentPeriod.getDueDate());
+        final boolean hasOverdueCorrectionsOnTarget = scheduleModelCopy.hasOverdueCorrectionsOnDate(repaymentPeriod.getDueDate());
+        final boolean shouldResetOverdue = !hasOverdueCorrectionsBeyondTarget && hasOverdueCorrectionsOnTarget;
+
+        if (shouldResetOverdue) {
+            scheduleModelCopy.reverseOverdueCorrections();
+        }
+
         calculateRateFactorForScheduleTillDateInclusive(scheduleModelCopy, tillDate);
+
+        if (shouldResetOverdue) {
+            calculateOutstandingBalance(scheduleModelCopy);
+        }
+
         Optional<RepaymentPeriod> futureUnrecognizedInterestPeriod = getPeriodWithUnrecognizedInterest(repaymentPeriod, scheduleModelCopy);
 
         futureUnrecognizedInterestPeriod.ifPresent(period -> {

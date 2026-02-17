@@ -68,6 +68,7 @@ public class ProgressiveLoanInterestScheduleModel {
 
     @Setter
     private LocalDate lastOverdueBalanceChange;
+    private List<OverdueBalanceCorrection> overdueCorrections = new ArrayList<>();
 
     public ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods,
             final ILoanConfigurationDetails loanProductRelatedDetail, final Integer installmentAmountInMultiplesOf, final MathContext mc) {
@@ -95,9 +96,35 @@ public class ProgressiveLoanInterestScheduleModel {
                 loanProductRelatedDetail.isInterestRecalculationEnabled()));
     }
 
-    public ProgressiveLoanInterestScheduleModel deepCopy(MathContext mc) {
-        return new ProgressiveLoanInterestScheduleModel(repaymentPeriods, interestRates, loanProductRelatedDetail,
-                installmentAmountInMultiplesOf, mc, false);
+    public void recordOverdueCorrection(final LocalDate correctionDate, final Money amount, final LocalDate affectedRpDueDate) {
+        overdueCorrections.add(new OverdueBalanceCorrection(correctionDate, amount, affectedRpDueDate));
+    }
+
+    public boolean hasOverdueCorrectionsBeyondDate(final LocalDate targetDueDate) {
+        return overdueCorrections.stream().anyMatch(oc -> oc.affectedRpDueDate().isAfter(targetDueDate));
+    }
+
+    public boolean hasOverdueCorrectionsOnDate(final LocalDate targetDueDate) {
+        return overdueCorrections.stream().anyMatch(oc -> oc.affectedRpDueDate().isEqual(targetDueDate));
+    }
+
+    /**
+     * Reverses all recorded overdue corrections on this model by subtracting each correction's amount from the
+     * corresponding InterestPeriod's balanceCorrectionAmount.
+     */
+    public void reverseOverdueCorrections() {
+        for (final OverdueBalanceCorrection oc : overdueCorrections) {
+            changeOutstandingBalanceAndUpdateInterestPeriods(oc.correctionDate(), zero(), oc.amount().negated(), zero());
+        }
+        overdueCorrections.clear();
+        this.lastOverdueBalanceChange = null;
+    }
+
+    public ProgressiveLoanInterestScheduleModel deepCopy(final MathContext mc) {
+        final ProgressiveLoanInterestScheduleModel copy = new ProgressiveLoanInterestScheduleModel(repaymentPeriods, interestRates,
+                loanProductRelatedDetail, installmentAmountInMultiplesOf, mc, false);
+        copy.overdueCorrections = new ArrayList<>(this.overdueCorrections);
+        return copy;
     }
 
     public ProgressiveLoanInterestScheduleModel copyWithoutPaidAmounts() {
