@@ -109,7 +109,7 @@ import org.apache.fineract.portfolio.loanproduct.productmix.service.ProductMixRe
 import org.apache.fineract.portfolio.loanproduct.service.LoanDropdownReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.rate.data.RateData;
 import org.apache.fineract.portfolio.rate.service.RateReadService;
 import org.springframework.stereotype.Component;
@@ -165,7 +165,7 @@ public class LoanProductsApiResource {
     private final DefaultToApiJsonSerializer<ProductMixData> productMixDataApiJsonSerializer;
     private final ProductMixReadPlatformService productMixReadPlatformService;
     private final DropdownReadPlatformService commonDropdownReadPlatformService;
-    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private final PaymentTypeReadService paymentTypeReadPlatformService;
     private final FloatingRatesReadPlatformService floatingRateReadPlatformService;
     private final RateReadService rateReadService;
     private final ConfigurationDomainService configurationDomainService;

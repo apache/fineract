@@ -41,12 +41,11 @@ import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.LoanProductChargeToGLAccountMapper;
-import org.apache.fineract.client.models.PaymentTypeRequest;
+import org.apache.fineract.client.models.PaymentTypeCreateRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
-import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
@@ -211,10 +210,10 @@ public class UndoRepaymentWithDownPaymentIntegrationTest extends BaseLoanIntegra
         String paymentTypeName = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
         Boolean isCashPayment = false;
-        Integer position = 1;
+        Long position = 1L;
 
-        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
-                new PaymentTypeRequest().name(paymentTypeName).description(description).isCashPayment(isCashPayment).position(position));
+        var paymentTypesResponse = paymentTypeHelper.createPaymentType(new PaymentTypeCreateRequest().name(paymentTypeName)
+                .description(description).isCashPayment(isCashPayment).position(position));
         Long paymentTypeIdOne = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeIdOne);
 

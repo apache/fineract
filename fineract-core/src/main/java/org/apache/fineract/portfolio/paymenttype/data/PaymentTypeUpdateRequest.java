@@ -16,14 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.documentmanagement.data;
+package org.apache.fineract.portfolio.paymenttype.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.Hidden;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
-import java.io.InputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
@@ -35,29 +34,27 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DocumentUpdateRequest implements Serializable {
+public class PaymentTypeUpdateRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @NotNull(message = "{org.apache.fineract.document.id.not-null}")
-    private Long id;
-    @NotNull(message = "{org.apache.fineract.document.entity-type.not-null}")
-    @Size(max = 50, message = "{org.apache.fineract.document.entity-type.size}")
-    private String entityType;
-    @NotNull(message = "{org.apache.fineract.document.entity-id.not-null}")
-    private Long entityId;
-    @Size(max = 250, message = "{org.apache.fineract.document.name.size}")
-    private String name;
-    @Size(max = 250, message = "{org.apache.fineract.document.description.size}")
-    private String description;
-    @Size(max = 250, message = "{org.apache.fineract.document.file-name.size}")
-    private String fileName;
-    @NotNull(message = "{org.apache.fineract.document.size.not-null}")
-    @Min(value = 1, message = "{org.apache.fineract.document.size.min}")
-    private Long size;
-    private String type;
     @Hidden
-    @JsonIgnore
-    private InputStream stream;
+    @NotNull(message = "{org.apache.fineract.portfolio.paymenttype.id.not-null}")
+    private Long id;
+    @NotBlank(message = "{org.apache.fineract.portfolio.paymenttype.name.not-blank}")
+    private String name;
+    @Size(max = 500, message = "{org.apache.fineract.portfolio.paymenttype.description.size}")
+    private String description;
+    private Boolean isCashPayment;
+    @PositiveOrZero(message = "{org.apache.fineract.portfolio.paymenttype.position.positive-or-zero}")
+    private Long position;
+    // @JsonProperty("code_name") // TODO: fix this, for backwards compatibility only... leave this for Jackson config
+    @Size(max = 100, message = "{org.apache.fineract.portfolio.paymenttype.code-name.size}")
+    private String codeName;
+    // @JsonProperty("system_defined") // TODO: fix this, for backwards compatibility only... leave this for Jackson
+    // config
+    @Builder.Default
+    @NotNull(message = "{org.apache.fineract.portfolio.is-system-defined.not-null}")
+    private Boolean isSystemDefined = false;
 }

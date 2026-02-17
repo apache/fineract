@@ -67,7 +67,7 @@ import org.apache.fineract.portfolio.interestratechart.service.InterestRateChart
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.savings.data.DepositAccountDataValidator;
 import org.apache.fineract.portfolio.savings.data.DepositAccountTransactionDataValidator;
 import org.apache.fineract.portfolio.savings.data.DepositProductDataValidator;
@@ -190,7 +190,7 @@ public class SavingsConfiguration {
     public DepositAccountPreMatureCalculationPlatformService depositAccountPreMatureCalculationPlatformService(
             FromJsonHelper fromJsonHelper, DepositAccountTransactionDataValidator depositAccountTransactionDataValidator,
             DepositAccountAssembler depositAccountAssembler, SavingsAccountReadPlatformService savingsAccountReadPlatformService,
-            ConfigurationDomainService configurationDomainService, PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
+            ConfigurationDomainService configurationDomainService, PaymentTypeReadService paymentTypeReadPlatformService) {
         return new DepositAccountPreMatureCalculationPlatformServiceImpl(fromJsonHelper, depositAccountTransactionDataValidator,
                 depositAccountAssembler, savingsAccountReadPlatformService, configurationDomainService, paymentTypeReadPlatformService);
 
@@ -207,7 +207,7 @@ public class SavingsConfiguration {
             SavingsDropdownReadPlatformService savingsDropdownReadPlatformService, ChargeReadPlatformService chargeReadPlatformService,
             StaffReadPlatformService staffReadPlatformService, DepositsDropdownReadPlatformService depositsDropdownReadPlatformService,
             SavingsAccountReadPlatformService savingsAccountReadPlatformService, DropdownReadPlatformService dropdownReadPlatformService,
-            CalendarReadPlatformService calendarReadPlatformService, PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
+            CalendarReadPlatformService calendarReadPlatformService, PaymentTypeReadService paymentTypeReadPlatformService) {
         return new DepositAccountReadPlatformServiceImpl(context, jdbcTemplate, chartReadPlatformService, productChartReadPlatformService,
                 paginationParametersDataValidator, sqlGenerator, paginationHelper, clientReadPlatformService, groupReadPlatformService,
                 depositProductReadPlatformService, savingsDropdownReadPlatformService, chargeReadPlatformService, staffReadPlatformService,

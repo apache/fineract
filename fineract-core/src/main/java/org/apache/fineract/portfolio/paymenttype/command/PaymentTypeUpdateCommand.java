@@ -16,15 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.paymenttype.data.request;
+package org.apache.fineract.portfolio.paymenttype.command;
 
-import java.io.Serial;
-import java.io.Serializable;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeUpdateRequest;
 
-public record PaymentTypeRequest(String name, String description, Boolean isCashPayment, Integer position, String codeName,
-        Boolean isSystemDefined) implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class PaymentTypeUpdateCommand extends Command<PaymentTypeUpdateRequest> {}

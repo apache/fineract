@@ -66,7 +66,7 @@ import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartData;
 import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartReadPlatformService;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
@@ -108,7 +108,7 @@ public class FixedDepositProductsApiResource {
     private final InterestRateChartReadPlatformService interestRateChartReadPlatformService;
     private final DepositsDropdownReadPlatformService depositsDropdownReadPlatformService;
     private final DropdownReadPlatformService dropdownReadPlatformService;
-    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private final PaymentTypeReadService paymentTypeReadPlatformService;
     private final TaxReadPlatformService taxReadPlatformService;
 
     @POST

@@ -18,14 +18,18 @@
  */
 package org.apache.fineract.portfolio.paymenttype.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeCreateRequest;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeCreateResponse;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeDeleteRequest;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeDeleteResponse;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeUpdateRequest;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeUpdateResponse;
 
 public interface PaymentTypeWriteService {
 
-    CommandProcessingResult createPaymentType(JsonCommand command);
+    PaymentTypeCreateResponse createPaymentType(PaymentTypeCreateRequest request);
 
-    CommandProcessingResult updatePaymentType(Long id, JsonCommand command);
+    PaymentTypeUpdateResponse updatePaymentType(PaymentTypeUpdateRequest request);
 
-    CommandProcessingResult deletePaymentType(Long id);
+    PaymentTypeDeleteResponse deletePaymentType(PaymentTypeDeleteRequest request);
 }

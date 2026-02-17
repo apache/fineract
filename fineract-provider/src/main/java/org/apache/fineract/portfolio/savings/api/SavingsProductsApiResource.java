@@ -64,7 +64,7 @@ import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformSer
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
@@ -96,7 +96,7 @@ public class SavingsProductsApiResource {
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
     private final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService;
     private final ChargeReadPlatformService chargeReadPlatformService;
-    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private final PaymentTypeReadService paymentTypeReadPlatformService;
     private final TaxReadPlatformService taxReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
 

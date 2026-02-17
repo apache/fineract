@@ -29,7 +29,6 @@ import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNumberFormatConstants;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
-import org.apache.fineract.portfolio.paymenttype.api.PaymentTypeApiResourceConstants;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.self.pockets.api.PocketApiConstants;
 import org.apache.fineract.useradministration.api.PasswordPreferencesApiConstants;
@@ -2943,30 +2942,6 @@ public class CommandWrapperBuilder {
         this.actionName = "UPDATE";
         this.entityName = PasswordPreferencesApiConstants.ENTITY_NAME;
         this.href = "/" + PasswordPreferencesApiConstants.RESOURCE_NAME;
-        return this;
-    }
-
-    public CommandWrapperBuilder createPaymentType() {
-        this.actionName = "CREATE";
-        this.entityName = PaymentTypeApiResourceConstants.ENTITY_NAME;
-        this.entityId = null;
-        this.href = "/" + PaymentTypeApiResourceConstants.RESOURCE_NAME;
-        return this;
-    }
-
-    public CommandWrapperBuilder updatePaymentType(final Long paymentTypeId) {
-        this.actionName = "UPDATE";
-        this.entityName = PaymentTypeApiResourceConstants.ENTITY_NAME;
-        this.entityId = paymentTypeId;
-        this.href = "/" + PaymentTypeApiResourceConstants.RESOURCE_NAME + paymentTypeId;
-        return this;
-    }
-
-    public CommandWrapperBuilder deletePaymentType(final Long paymentTypeId) {
-        this.actionName = "DELETE";
-        this.entityName = "PAYMENTTYPE";
-        this.entityId = paymentTypeId;
-        this.href = "/" + PaymentTypeApiResourceConstants.RESOURCE_NAME + paymentTypeId;
         return this;
     }
 

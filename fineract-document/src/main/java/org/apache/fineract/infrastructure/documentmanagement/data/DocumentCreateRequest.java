@@ -40,19 +40,19 @@ public class DocumentCreateRequest implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @NotNull(message = "{org.apache.fineract.document.xxx.not-null}")
-    @Size(max = 50, message = "{org.apache.fineract.document.xxx.not-null}")
+    @NotNull(message = "{org.apache.fineract.document.entity-type.not-null}")
+    @Size(max = 50, message = "{org.apache.fineract.document.entity-type.size}")
     private String entityType;
-    @NotNull(message = "{org.apache.fineract.document.xxx.not-null}")
+    @NotNull(message = "{org.apache.fineract.document.entity-id.not-null}")
     private Long entityId;
-    @Size(max = 250, message = "{org.apache.fineract.document.xxx.not-null}")
+    @Size(max = 250, message = "{org.apache.fineract.document.name.size}")
     private String name;
-    @Size(max = 250, message = "{org.apache.fineract.document.xxx.not-null}")
+    @Size(max = 250, message = "{org.apache.fineract.document.description.size}")
     private String description;
-    @Size(max = 250, message = "{org.apache.fineract.document.xxx.not-null}")
+    @Size(max = 250, message = "{org.apache.fineract.document.file-name.size}")
     private String fileName;
-    @NotNull(message = "{org.apache.fineract.document.xxx.not-null}")
-    @Min(value = 1, message = "{org.apache.fineract.document.xxx.not-null}")
+    @NotNull(message = "{org.apache.fineract.document.size.not-null}")
+    @Min(value = 1, message = "{org.apache.fineract.document.size.min}")
     private Long size;
     private String type;
     @Hidden

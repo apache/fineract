@@ -16,29 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.paymenttype.data;
+package org.apache.fineract.portfolio.paymenttype.service;
 
-import java.io.Serial;
-import java.io.Serializable;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.List;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 
-@Builder
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class PaymentTypeData implements Serializable {
+public interface PaymentTypeReadService {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    List<PaymentTypeData> retrieveAllPaymentTypes();
 
-    private Long id;
-    private String name;
-    private String description;
-    private Boolean isCashPayment;
-    private Long position;
-    private String codeName;
-    private Boolean isSystemDefined;
+    List<PaymentTypeData> retrieveAllPaymentTypesWithCode();
+
+    PaymentTypeData retrieveOne(Long paymentTypeId);
+
 }

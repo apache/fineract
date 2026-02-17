@@ -96,8 +96,8 @@ public class LoanTransactionMapperTest {
         when(loanTransaction.getLoan().getNetDisbursalAmount()).thenReturn(BigDecimal.valueOf(2000));
 
         // Setup payment detail mocks
-        when(paymentDetail.toData()).thenReturn(new PaymentDetailData(1L, PaymentTypeData.instance(1L, "Cash"), "accountNumber",
-                "checkNumber", "routingCode", "receiptNumber", "bankNumber"));
+        when(paymentDetail.toData()).thenReturn(new PaymentDetailData(1L, PaymentTypeData.builder().id(1L).name("Cash").build(),
+                "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber"));
 
         // When
         LoanTransactionData result = mapper.mapLoanTransaction(loanTransaction);

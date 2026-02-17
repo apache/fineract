@@ -40,7 +40,7 @@ import org.apache.fineract.portfolio.meeting.attendance.service.AttendanceDropdo
 import org.apache.fineract.portfolio.meeting.service.MeetingWritePlatformService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetailAssembler;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.savings.domain.DepositAccountAssembler;
 import org.apache.fineract.portfolio.savings.service.DepositAccountWritePlatformService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -59,7 +59,7 @@ public class CollectionSheetConfiguration {
             CollectionSheetGenerateCommandFromApiJsonDeserializer collectionSheetGenerateCommandFromApiJsonDeserializer,
             CalendarRepositoryWrapper calendarRepositoryWrapper,
             AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService,
-            CodeValueReadPlatformService codeValueReadPlatformService, PaymentTypeReadPlatformService paymentTypeReadPlatformService,
+            CodeValueReadPlatformService codeValueReadPlatformService, PaymentTypeReadService paymentTypeReadPlatformService,
             CalendarReadPlatformService calendarReadPlatformService, ConfigurationDomainService configurationDomainService,
             CalendarInstanceRepository calendarInstanceRepository, DatabaseSpecificSQLGenerator sqlGenerator) {
         return new CollectionSheetReadPlatformServiceImpl(context, namedParameterJdbcTemplate, centerReadPlatformService,

@@ -16,29 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.paymenttype.data;
+package org.apache.fineract.portfolio.paymenttype.command;
 
-import java.io.Serial;
-import java.io.Serializable;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeDeleteRequest;
 
-@Builder
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class PaymentTypeData implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    private Long id;
-    private String name;
-    private String description;
-    private Boolean isCashPayment;
-    private Long position;
-    private String codeName;
-    private Boolean isSystemDefined;
-}
+@EqualsAndHashCode(callSuper = true)
+public class PaymentTypeDeleteCommand extends Command<PaymentTypeDeleteRequest> {}

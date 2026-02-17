@@ -23,9 +23,8 @@ import static io.restassured.RestAssured.given;
 import java.math.BigDecimal;
 import org.apache.fineract.client.models.AccountTransferRequest;
 import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.PaymentTypeRequest;
+import org.apache.fineract.client.models.PaymentTypeCreateRequest;
 import org.apache.fineract.client.models.PostChargesResponse;
-import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesResponse;
@@ -109,9 +108,9 @@ public class AccountTransferWithdrawalFeeTest extends BaseSavingsIntegrationTest
     public void testFromSavingsToSavingsAccountTransferWithPaymentTypeWithdrawalFee() {
         // Create Payment Type
         final PaymentTypeHelper paymentTypeHelper = new PaymentTypeHelper();
-        final PostPaymentTypesResponse paymentTypeResponse = paymentTypeHelper
-                .createPaymentType(new PaymentTypeRequest().name("Bank Transfer " + System.currentTimeMillis())
-                        .description("Payment via bank transfer").isCashPayment(false).position(1));
+        final var paymentTypeResponse = paymentTypeHelper
+                .createPaymentType(new PaymentTypeCreateRequest().name("Bank Transfer " + System.currentTimeMillis())
+                        .description("Payment via bank transfer").isCashPayment(false).position(1L));
         final Long paymentTypeId = paymentTypeResponse.getResourceId();
 
         // Create withdrawal fee charge WITH payment type binding

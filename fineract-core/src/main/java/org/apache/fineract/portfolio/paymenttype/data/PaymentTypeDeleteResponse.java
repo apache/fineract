@@ -16,40 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.paymenttype.domain;
+package org.apache.fineract.portfolio.paymenttype.data;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import java.io.Serial;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
-@Getter
-@Setter
-@Entity
-@Table(name = "m_payment_type")
+@Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentType extends AbstractPersistableCustom<Long> {
+public class PaymentTypeDeleteResponse implements Serializable {
 
-    @Column(name = "value")
-    private String name;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    @Column(name = "description")
-    private String description;
-
-    @Column(name = "is_cash_payment")
-    private Boolean isCashPayment;
-
-    @Column(name = "order_position")
-    private Long position;
-
-    @Column(name = "code_name")
-    private String codeName;
-
-    @Column(name = "is_system_defined")
-    private Boolean isSystemDefined;
+    private Long resourceId;
 }

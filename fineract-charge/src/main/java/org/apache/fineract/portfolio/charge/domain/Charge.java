@@ -647,7 +647,7 @@ public class Charge extends AbstractPersistableCustom<Long> {
 
         PaymentTypeData paymentTypeData = null;
         if (this.paymentType != null) {
-            paymentTypeData = PaymentTypeData.instance(paymentType.getId(), paymentType.getName());
+            paymentTypeData = PaymentTypeData.builder().id(paymentType.getId()).name(paymentType.getName()).build();
         }
 
         final CurrencyData currency = new CurrencyData(this.currencyCode, null, 0, 0, null, null);

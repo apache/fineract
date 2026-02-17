@@ -371,7 +371,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             final String paymentTypeName = rs.getString("paymentTypeName");
             PaymentTypeData paymentTypeData = null;
             if (paymentTypeId != null) {
-                paymentTypeData = PaymentTypeData.instance(paymentTypeId, paymentTypeName);
+                paymentTypeData = PaymentTypeData.builder().id(paymentTypeId).name(paymentTypeName).build();
             }
 
             return ChargeData.builder().id(id).name(name).amount(amount).currency(currency).chargeTimeType(chargeTimeType)

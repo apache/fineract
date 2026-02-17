@@ -176,7 +176,7 @@ import org.apache.fineract.portfolio.loanproduct.service.LoanDropdownReadPlatfor
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.rate.service.RateAssembler;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecksRepository;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.service.RepaymentWithPostDatedChecksAssembler;
@@ -342,15 +342,14 @@ public class LoanAccountConfiguration {
             FundReadPlatformService fundReadPlatformService, ChargeReadPlatformService chargeReadPlatformService,
             CodeValueReadPlatformService codeValueReadPlatformService, CalendarReadPlatformService calendarReadPlatformService,
             StaffReadPlatformService staffReadPlatformService, PaginationHelper paginationHelper,
-            PaymentTypeReadPlatformService paymentTypeReadPlatformService,
-            FloatingRatesReadPlatformService floatingRatesReadPlatformService, LoanUtilService loanUtilService,
-            ConfigurationDomainService configurationDomainService, AccountDetailsReadPlatformService accountDetailsReadPlatformService,
-            ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator,
-            DelinquencyReadPlatformService delinquencyReadPlatformService, LoanTransactionRepository loanTransactionRepository,
-            LoanChargePaidByReadService loanChargePaidByReadService, LoanTransactionRelationReadService loanTransactionRelationReadService,
-            LoanForeclosureValidator loanForeclosureValidator, LoanTransactionMapper loanTransactionMapper,
-            LoanTransactionProcessingService loanTransactionProcessingService, LoanBalanceService loanBalanceService,
-            LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository,
+            PaymentTypeReadService paymentTypeReadPlatformService, FloatingRatesReadPlatformService floatingRatesReadPlatformService,
+            LoanUtilService loanUtilService, ConfigurationDomainService configurationDomainService,
+            AccountDetailsReadPlatformService accountDetailsReadPlatformService, ColumnValidator columnValidator,
+            DatabaseSpecificSQLGenerator sqlGenerator, DelinquencyReadPlatformService delinquencyReadPlatformService,
+            LoanTransactionRepository loanTransactionRepository, LoanChargePaidByReadService loanChargePaidByReadService,
+            LoanTransactionRelationReadService loanTransactionRelationReadService, LoanForeclosureValidator loanForeclosureValidator,
+            LoanTransactionMapper loanTransactionMapper, LoanTransactionProcessingService loanTransactionProcessingService,
+            LoanBalanceService loanBalanceService, LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository,
             LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository,
             @Lazy InterestRefundServiceDelegate interestRefundServiceDelegate, LoanMaximumAmountCalculator loanMaximumAmountCalculator,
             LoanRepaymentScheduleService loanRepaymentScheduleService) {

@@ -18,29 +18,33 @@
  */
 package org.apache.fineract.portfolio.paymenttype.handler;
 
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import io.github.resilience4j.retry.annotation.Retry;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeCreateRequest;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeCreateResponse;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeWriteService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "PAYMENTTYPE", action = "DELETE")
-public class DeletePaymentTypeCommandHandler implements NewCommandSourceHandler {
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class PaymentTypeCreateCommandHandler implements CommandHandler<PaymentTypeCreateRequest, PaymentTypeCreateResponse> {
 
     private final PaymentTypeWriteService paymentTypeWriteService;
 
-    @Autowired
-    public DeletePaymentTypeCommandHandler(final PaymentTypeWriteService paymentTypeWriteService) {
-        this.paymentTypeWriteService = paymentTypeWriteService;
+    @Retry(name = "commandPaymentTypeCreate", fallbackMethod = "fallback")
+    @Override
+    @Transactional
+    public PaymentTypeCreateResponse handle(Command<PaymentTypeCreateRequest> command) {
+        return paymentTypeWriteService.createPaymentType(command.getPayload());
     }
 
     @Override
-    @Transactional
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.paymentTypeWriteService.deletePaymentType(command.entityId());
+    public PaymentTypeCreateResponse fallback(Command<PaymentTypeCreateRequest> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
     }
 }

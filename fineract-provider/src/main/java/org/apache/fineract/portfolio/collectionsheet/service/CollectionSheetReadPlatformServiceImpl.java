@@ -65,7 +65,7 @@ import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.meeting.attendance.service.AttendanceDropdownReadPlatformService;
 import org.apache.fineract.portfolio.meeting.attendance.service.AttendanceEnumerations;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.DataAccessException;
@@ -86,7 +86,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     private final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService;
     private final MandatorySavingsCollectionsheetExtractor mandatorySavingsExtractor;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
-    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private final PaymentTypeReadService paymentTypeReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
     private final CalendarInstanceRepository calendarInstanceRepository;
@@ -98,8 +98,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final CollectionSheetGenerateCommandFromApiJsonDeserializer collectionSheetGenerateCommandFromApiJsonDeserializer,
             final CalendarRepositoryWrapper calendarRepositoryWrapper,
             final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService,
-            final PaymentTypeReadPlatformService paymentTypeReadPlatformService,
+            final CodeValueReadPlatformService codeValueReadPlatformService, final PaymentTypeReadService paymentTypeReadPlatformService,
             final CalendarReadPlatformService calendarReadPlatformService, final ConfigurationDomainService configurationDomainService,
             final CalendarInstanceRepository calendarInstanceRepository, DatabaseSpecificSQLGenerator sqlGenerator) {
         this.context = context;
