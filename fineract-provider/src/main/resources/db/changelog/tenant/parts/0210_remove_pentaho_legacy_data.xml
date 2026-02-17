@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="fineract" id="0210">
+        <comment>FINERACT-2481: Precisely removing 44 core Pentaho reports and their associated permissions to clean up initial data</comment>
+        
+        <delete tableName="m_report_parameter">
+            <where>report_id IN (SELECT id FROM stretchy_report WHERE report_name IN (
+                'Balance Sheet', 'Income Statement', 'Trial Balance', 'Loan Account Schedule', 
+                'Branch Expected Cash Flow', 'Expected Payments By Date - Formatted', 'Savings Transactions', 
+                'Client Savings Summary', 'Active Loans - Details(Pentaho)', 'Active Loans - Summary(Pentaho)', 
+                'Active Loans by Disbursal Period(Pentaho)', 'Active Loans in last installment Summary(Pentaho)', 
+                'Active Loans in last installment(Pentaho)', 'Active Loans Passed Final Maturity Summary(Pentaho)', 
+                'Active Loans Passed Final Maturity(Pentaho)', 'Aging Detail(Pentaho)', 
+                'Aging Summary (Arrears in Months)(Pentaho)', 'Aging Summary (Arrears in Weeks)(Pentaho)', 
+                'Client Listing(Pentaho)', 'Client Loans Listing(Pentaho)', 'Expected Payments By Date - Basic(Pentaho)', 
+                'Funds Disbursed Between Dates Summary by Office(Pentaho)', 'Funds Disbursed Between Dates Summary(Pentaho)', 
+                'Loans Awaiting Disbursal Summary by Month(Pentaho)', 'Loans Awaiting Disbursal Summary(Pentaho)', 
+                'Loans Awaiting Disbursal(Pentaho)', 'Loans Pending Approval(Pentaho)', 
+                'Obligation Met Loans Details(Pentaho)', 'Obligation Met Loans Summary(Pentaho)', 
+                'Portfolio at Risk by Branch(Pentaho)', 'Portfolio at Risk(Pentaho)', 'Rescheduled Loans(Pentaho)', 
+                'TxnRunningBalances(Pentaho)', 'Written-Off Loans(Pentaho)', 'Client Saving Transactions', 
+                'Client Loan Account Schedule', 'Savings Transaction Receipt', 'Loan Transaction Receipt', 
+                'Staff Assignment History', 'GeneralLedgerReport', 'Active Loan Summary per Branch', 
+                'Balance Outstanding', 'Collection Report', 'Disbursal Report'
+            ))</where>
+        </delete>
+
+        <delete tableName="stretchy_report">
+            <where>report_name IN (
+                'Balance Sheet', 'Income Statement', 'Trial Balance', 'Loan Account Schedule', 
+                'Branch Expected Cash Flow', 'Expected Payments By Date - Formatted', 'Savings Transactions', 
+                'Client Savings Summary', 'Active Loans - Details(Pentaho)', 'Active Loans - Summary(Pentaho)', 
+                'Active Loans by Disbursal Period(Pentaho)', 'Active Loans in last installment Summary(Pentaho)', 
+                'Active Loans in last installment(Pentaho)', 'Active Loans Passed Final Maturity Summary(Pentaho)', 
+                'Active Loans Passed Final Maturity(Pentaho)', 'Aging Detail(Pentaho)', 
+                'Aging Summary (Arrears in Months)(Pentaho)', 'Aging Summary (Arrears in Weeks)(Pentaho)', 
+                'Client Listing(Pentaho)', 'Client Loans Listing(Pentaho)', 'Expected Payments By Date - Basic(Pentaho)', 
+                'Funds Disbursed Between Dates Summary by Office(Pentaho)', 'Funds Disbursed Between Dates Summary(Pentaho)', 
+                'Loans Awaiting Disbursal Summary by Month(Pentaho)', 'Loans Awaiting Disbursal Summary(Pentaho)', 
+                'Loans Awaiting Disbursal(Pentaho)', 'Loans Pending Approval(Pentaho)', 
+                'Obligation Met Loans Details(Pentaho)', 'Obligation Met Loans Summary(Pentaho)', 
+                'Portfolio at Risk by Branch(Pentaho)', 'Portfolio at Risk(Pentaho)', 'Rescheduled Loans(Pentaho)', 
+                'TxnRunningBalances(Pentaho)', 'Written-Off Loans(Pentaho)', 'Client Saving Transactions', 
+                'Client Loan Account Schedule', 'Savings Transaction Receipt', 'Loan Transaction Receipt', 
+                'Staff Assignment History', 'GeneralLedgerReport', 'Active Loan Summary per Branch', 
+                'Balance Outstanding', 'Collection Report', 'Disbursal Report'
+            )</where>
+        </delete>
+
+        <delete tableName="m_permission">
+            <where>code LIKE 'READ_%(Pentaho)' 
+                   OR code = 'READ_Staff Assignment History'</where>
+        </delete>
+    </changeSet>
+</databaseChangeLog>
