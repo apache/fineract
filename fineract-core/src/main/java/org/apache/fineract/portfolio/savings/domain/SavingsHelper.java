@@ -57,6 +57,9 @@ public final class SavingsHelper {
             return postingPeriods;
         }
 
+        if (postInterestAsOn == null) {
+            postInterestAsOn = Collections.emptyList();
+        }
         LocalDate periodStartDate = startInterestCalculationLocalDate;
         LocalDate periodEndDate = periodStartDate;
         LocalDate actualPeriodStartDate = periodStartDate;
