@@ -548,4 +548,15 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         return getGlobalConfigurationPropertyData(
                 GlobalConfigurationConstants.ASSET_OWNER_TRANSFER_OUTSTANDING_INTEREST_CALCULATION_STRATEGY).getStringValue();
     }
+
+    @Override
+    public Integer getPasswordReuseRestrictionCount() {
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(
+                GlobalConfigurationConstants.PASSWORD_REUSE_CHECK_HISTORY_COUNT);
+        if (!property.isEnabled()) {
+            return null;
+        }
+        Long value = property.getValue();
+        return value != null && value > 0 ? value.intValue() : 0;
+    }
 }

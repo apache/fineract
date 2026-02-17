@@ -31,8 +31,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.bulkimport.constants.OfficeConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
+import org.apache.fineract.integrationtests.bulkimport.importhandler.LocalContentStorageUtil;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -42,12 +44,9 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class OfficeImportHandlerTest {
-
-    private static final Logger LOG = LoggerFactory.getLogger(OfficeImportHandlerTest.class);
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -96,14 +95,14 @@ public class OfficeImportHandlerTest {
         Thread.sleep(10000);
 
         // check status column of output excel
-        String location = officeHelper.getOutputTemplateLocation(importDocumentId);
+        String location = LocalContentStorageUtil.path(officeHelper.getOutputTemplateLocation(importDocumentId));
         FileInputStream fileInputStream = new FileInputStream(location);
         Workbook outputWorkbook = new HSSFWorkbook(fileInputStream);
         Sheet officeSheet = outputWorkbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         Row row = officeSheet.getRow(1);
 
-        LOG.info("Output location: {}", location);
-        LOG.info("Failure reason column: {}", row.getCell(OfficeConstants.STATUS_COL).getStringCellValue());
+        log.info("Output location: {}", location);
+        log.info("Failure reason column: {}", row.getCell(OfficeConstants.STATUS_COL).getStringCellValue());
 
         Assertions.assertEquals("Imported", row.getCell(OfficeConstants.STATUS_COL).getStringCellValue());
         outputWorkbook.close();

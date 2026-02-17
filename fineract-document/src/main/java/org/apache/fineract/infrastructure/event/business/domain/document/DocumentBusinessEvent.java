@@ -18,14 +18,14 @@
  */
 package org.apache.fineract.infrastructure.event.business.domain.document;
 
-import org.apache.fineract.infrastructure.documentmanagement.domain.Document;
+import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
 import org.apache.fineract.infrastructure.event.business.domain.AbstractBusinessEvent;
 
-public abstract class DocumentBusinessEvent extends AbstractBusinessEvent<Document> {
+public abstract class DocumentBusinessEvent extends AbstractBusinessEvent<DocumentData> {
 
     private static final String CATEGORY = "Document";
 
-    protected DocumentBusinessEvent(Document value) {
+    protected DocumentBusinessEvent(DocumentData value) {
         super(value);
     }
 

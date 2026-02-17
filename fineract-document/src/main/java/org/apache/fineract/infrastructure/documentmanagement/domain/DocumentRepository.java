@@ -18,9 +18,14 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.domain;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.repository.ListCrudRepository;
+import org.springframework.data.repository.query.QueryByExampleExecutor;
 
-public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSpecificationExecutor<Document> {
-    // no added behaviour
+public interface DocumentRepository extends ListCrudRepository<Document, Long>, QueryByExampleExecutor<Document> {
+
+    List<Document> findAllByParentEntityTypeAndParentEntityId(String parentEntityType, Long parentEntityId);
+
+    Optional<Document> findByIdAndParentEntityTypeAndParentEntityId(Long id, String entityType, Long entityId);
 }

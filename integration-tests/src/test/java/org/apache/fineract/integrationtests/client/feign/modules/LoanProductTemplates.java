@@ -233,6 +233,18 @@ public interface LoanProductTemplates {
                         LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY);
     }
 
+    default PostLoanProductsRequest fourInstallmentsCumulativeWithInterestRecalculation() {
+        return fourInstallmentsCumulativeTemplate()//
+                .loanScheduleType(LoanScheduleType.CUMULATIVE.toString())//
+                .isInterestRecalculationEnabled(true)//
+                .interestRecalculationCompoundingMethod(0)//
+                .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
+                .recalculationRestFrequencyType(1)//
+                .recalculationRestFrequencyInterval(0)//
+                .preClosureInterestCalculationStrategy(1)//
+                .enableAccrualActivityPosting(true);
+    }
+
     default PostLoanProductsRequest customizeProduct(PostLoanProductsRequest template,
             Function<PostLoanProductsRequest, PostLoanProductsRequest> customizer) {
         return customizer.apply(template);

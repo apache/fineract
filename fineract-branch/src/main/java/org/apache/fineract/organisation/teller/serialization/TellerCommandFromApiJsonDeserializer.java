@@ -199,5 +199,7 @@ public final class TellerCommandFromApiJsonDeserializer {
 
         final String currencyCode = this.fromApiJsonHelper.extractStringNamed(CURRENCY_CODE, element);
         baseDataValidator.reset().parameter(CURRENCY_CODE).value(currencyCode).notExceedingLengthOf(3);
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 }

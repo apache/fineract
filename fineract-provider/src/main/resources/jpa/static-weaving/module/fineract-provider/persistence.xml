@@ -34,7 +34,6 @@
         <!-- Core Module Entities -->
         <class>org.apache.fineract.useradministration.domain.Role</class>
         <class>org.apache.fineract.portfolio.fund.domain.Fund</class>
-        <class>org.apache.fineract.infrastructure.documentmanagement.domain.Image</class>
         <class>org.apache.fineract.organisation.workingdays.domain.WorkingDays</class>
         <class>org.apache.fineract.useradministration.domain.Permission</class>
         <class>org.apache.fineract.useradministration.domain.AppUserClientMapping</class>
@@ -227,9 +226,6 @@
         <class>org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTypeListConverter</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.SupportedInterestRefundTypesListConverter</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanStatusConverter</class>
-
-        <!-- Document Module Entities -->
-        <class>org.apache.fineract.infrastructure.documentmanagement.domain.Document</class>
 
         <!-- Tax Module Entities -->
         <class>org.apache.fineract.portfolio.tax.domain.TaxComponent</class>

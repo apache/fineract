@@ -23,6 +23,7 @@ import java.util.function.Function;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdStatus;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -95,6 +96,10 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
 
     protected Long createClient() {
         return clientHelper.createClient();
+    }
+
+    protected Long createClient(String activationDate) {
+        return clientHelper.createClient(activationDate);
     }
 
     protected Long createLoanProduct(PostLoanProductsRequest request) {
@@ -218,5 +223,13 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
 
     protected PostLoansLoanIdTransactionsRequest chargeOff(String date) {
         return LoanRequestBuilders.chargeOff(date);
+    }
+
+    protected void executeInlineCOB(Long loanId) {
+        transactionHelper.executeInlineCOB(loanId);
+    }
+
+    protected GetLoansLoanIdTransactionsTemplateResponse getPrepaymentAmount(Long loanId, String transactionDate, String dateFormat) {
+        return transactionHelper.getPrepaymentAmount(loanId, transactionDate, dateFormat);
     }
 }

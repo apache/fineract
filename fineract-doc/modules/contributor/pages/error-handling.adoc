@@ -1,0 +1,22 @@
+= Error Handling Guidelines
+
+== Exception Handling
+
+* **Log or Rethrow**: When catching exceptions, either rethrow them or log them. Include the root cause.
++
+[source,java]
+----
+catch (SomeException e) {
+    throw new AnotherException("..details..", e);
+    // OR
+    LOG.error("...context...", e);
+}
+----
+
+* **No Empty Catch Blocks**: Completely empty catch blocks are VERY suspicious. Do not "swallow" exceptions unless you are absolutely sure.
+    * Such "normal exceptions" are often indications of using the wrong API (e.g., throwing an exception for an expected condition instead of returning empty/optional).
+
+* **Tests**: In tests, typically propagate exceptions (`throws SomeException`) so the test fails if it occurs.
+    * To test for an exception, use `Assert.assertThrows()`.
+
+* **NullPointer**: Never catch `NullPointerException`. Fix the code instead.

@@ -142,6 +142,13 @@ public class GenericDataServiceImpl implements GenericDataService {
     }
 
     @NonNull
+    @Override
+    public List<ResultsetRowData> fillResultsetRowData(final String sql, List<ResultsetColumnHeaderData> columnHeaders, Object... args) {
+        final SqlRowSet rs = jdbcTemplate.queryForRowSet(sql, args);
+        return fillResultsetRowData(rs, columnHeaders);
+    }
+
+    @NonNull
     private static List<ResultsetRowData> fillResultsetRowData(SqlRowSet rs, List<ResultsetColumnHeaderData> columnHeaders) {
         final SqlRowSetMetaData rsmd = rs.getMetaData();
         final List<ResultsetRowData> resultsetDataRows = new ArrayList<>();

@@ -18,108 +18,50 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepository;
-import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryFactory;
+import org.apache.fineract.infrastructure.contentstore.service.ContentStoreService;
+import org.apache.fineract.infrastructure.documentmanagement.data.DocumentContent;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
-import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
+import org.apache.fineract.infrastructure.documentmanagement.domain.DocumentRepository;
 import org.apache.fineract.infrastructure.documentmanagement.exception.DocumentNotFoundException;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import org.apache.fineract.infrastructure.documentmanagement.mapping.DocumentMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final PlatformSecurityContext context;
-    private final ContentRepositoryFactory contentRepositoryFactory;
+    private final ContentStoreService storeService;
+    private final DocumentRepository documentRepository;
+    private final DocumentMapper documentMapper;
 
     @Override
     public List<DocumentData> retrieveAllDocuments(final String entityType, final Long entityId) {
+        final var docs = documentRepository.findAllByParentEntityTypeAndParentEntityId(entityType, entityId);
 
-        this.context.authenticatedUser();
-
-        // TODO verify if the entities are valid and a user
-        // has data
-        // scope for the particular entities
-        final DocumentMapper mapper = new DocumentMapper(true, true);
-        final String sql = "select " + mapper.schema() + " order by d.id";
-        return this.jdbcTemplate.query(sql, mapper, new Object[] { entityType, entityId }); // NOSONAR
+        return docs.stream().map(documentMapper::map).toList();
     }
 
     @Override
-    public FileData retrieveFileData(final String entityType, final Long entityId, final Long documentId) {
-        try {
-            final DocumentMapper mapper = new DocumentMapper(false, false);
-            final DocumentData documentData = fetchDocumentDetails(entityType, entityId, documentId, mapper);
-            final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(documentData.storageType());
-            return contentRepository.fetchFile(documentData);
-        } catch (final EmptyResultDataAccessException e) {
-            throw new DocumentNotFoundException(entityType, entityId, documentId, e);
-        }
+    public DocumentData retrieveDocument(final Long id) {
+        return documentRepository.findById(id).map(documentMapper::map).orElseThrow(() -> new DocumentNotFoundException(id));
+    }
+
+    @Override
+    public DocumentContent retrieveDocumentContent(final String entityType, final Long entityId, final Long documentId) {
+        final var doc = documentRepository.findByIdAndParentEntityTypeAndParentEntityId(documentId, entityType, entityId)
+                .orElseThrow(() -> new DocumentNotFoundException(entityType, entityId, documentId));
+        final var is = storeService.download(doc.getLocation());
+
+        return documentMapper.map(doc, is);
     }
 
     @Override
     public DocumentData retrieveDocument(final String entityType, final Long entityId, final Long documentId) {
-        try {
-            final DocumentMapper mapper = new DocumentMapper(true, true);
-            return fetchDocumentDetails(entityType, entityId, documentId, mapper);
-        } catch (final EmptyResultDataAccessException e) {
-            throw new DocumentNotFoundException(entityType, entityId, documentId, e);
-        }
-    }
+        final var doc = documentRepository.findByIdAndParentEntityTypeAndParentEntityId(documentId, entityType, entityId)
+                .orElseThrow(() -> new DocumentNotFoundException(entityType, entityId, documentId));
 
-    private DocumentData fetchDocumentDetails(final String entityType, final Long entityId, final Long documentId,
-            final DocumentMapper mapper) {
-        final String sql = "select " + mapper.schema() + " and d.id=? ";
-        return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { entityType, entityId, documentId }); // NOSONAR
-    }
-
-    private static final class DocumentMapper implements RowMapper<DocumentData> {
-
-        private final boolean hideLocation;
-        private final boolean hideStorageType;
-
-        DocumentMapper(final boolean hideLocation, final boolean hideStorageType) {
-            this.hideLocation = hideLocation;
-            this.hideStorageType = hideStorageType;
-        }
-
-        public String schema() {
-            return "d.id as id, d.parent_entity_type as parentEntityType, d.parent_entity_id as parentEntityId, d.name as name, "
-                    + " d.file_name as fileName, d.size as fileSize, d.type as fileType, "
-                    + " d.description as description, d.location as location," + " d.storage_type_enum as storageType"
-                    + " from m_document d where d.parent_entity_type=? and d.parent_entity_id=?";
-        }
-
-        @Override
-        public DocumentData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-            final Long id = JdbcSupport.getLong(rs, "id");
-            final Long parentEntityId = JdbcSupport.getLong(rs, "parentEntityId");
-            final Long fileSize = JdbcSupport.getLong(rs, "fileSize");
-            final String parentEntityType = rs.getString("parentEntityType");
-            final String name = rs.getString("name");
-            final String fileName = rs.getString("fileName");
-            final String fileType = rs.getString("fileType");
-            final String description = rs.getString("description");
-            String location = null;
-            Integer storageType = null;
-            if (!this.hideLocation) {
-                location = rs.getString("location");
-            }
-            if (!this.hideStorageType) {
-                storageType = rs.getInt("storageType");
-            }
-            return new DocumentData(id, parentEntityType, parentEntityId, name, fileName, fileSize, fileType, location, description,
-                    storageType);
-        }
+        return documentMapper.map(doc);
     }
 }

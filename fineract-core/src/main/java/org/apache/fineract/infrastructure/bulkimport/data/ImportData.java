@@ -19,13 +19,21 @@
 package org.apache.fineract.infrastructure.bulkimport.data;
 
 import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 public final class ImportData {
 
     @SuppressWarnings("unused")
     private Long importId;
     @SuppressWarnings("unused")
     private Long documentId;
+    @SuppressWarnings("unused")
+    private Integer entityType;
     @SuppressWarnings("unused")
     private String name;
     @SuppressWarnings("unused")

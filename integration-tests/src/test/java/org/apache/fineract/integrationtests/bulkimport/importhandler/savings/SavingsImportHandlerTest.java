@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.apache.fineract.infrastructure.bulkimport.constants.SavingsConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
+import org.apache.fineract.integrationtests.bulkimport.importhandler.LocalContentStorageUtil;
 import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.OfficeDomain;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
@@ -185,17 +186,17 @@ public class SavingsImportHandlerTest {
         Thread.sleep(1000);
 
         // check status column of output excel
-        String location = savingsAccountHelper.getOutputTemplateLocation(importDocumentId);
+        String location = LocalContentStorageUtil.path(savingsAccountHelper.getOutputTemplateLocation(importDocumentId));
         FileInputStream fileInputStream = new FileInputStream(location);
-        Workbook Outputworkbook = new HSSFWorkbook(fileInputStream);
-        Sheet OutputSavingsSheet = Outputworkbook.getSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);
-        Row row = OutputSavingsSheet.getRow(1);
+        Workbook wb = new HSSFWorkbook(fileInputStream);
+        Sheet sheet = wb.getSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);
+        Row row = sheet.getRow(1);
 
         LOG.info("Output location: {}", location);
         LOG.info("Failure reason column: {}", row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
 
         Assertions.assertEquals("Imported", row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
-        Outputworkbook.close();
+        wb.close();
     }
 
     private void safeNumericValueSetter(Row targetRow, int targetColId, Sheet sourceSheet, int rowId, int colId) {

@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.infrastructure.event.business.domain.document;
 
-import org.apache.fineract.infrastructure.documentmanagement.domain.Document;
+import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
 
 public class DocumentDeletedBusinessEvent extends DocumentBusinessEvent {
 
     private static final String TYPE = "DocumentDeletedBusinessEvent";
 
-    public DocumentDeletedBusinessEvent(Document value) {
+    public DocumentDeletedBusinessEvent(DocumentData value) {
         super(value);
     }
 

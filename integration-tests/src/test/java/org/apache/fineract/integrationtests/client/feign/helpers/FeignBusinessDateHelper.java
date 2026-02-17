@@ -28,10 +28,14 @@ import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 
 public class FeignBusinessDateHelper {
 
+    private static final String ENABLE_BUSINESS_DATE = "enable-business-date";
+
     private final FineractFeignClient fineractClient;
+    private final FeignGlobalConfigurationHelper configHelper;
 
     public FeignBusinessDateHelper(FineractFeignClient fineractClient) {
         this.fineractClient = fineractClient;
+        this.configHelper = new FeignGlobalConfigurationHelper(fineractClient);
     }
 
     public BusinessDateResponse getBusinessDate(String type) {
@@ -49,14 +53,12 @@ public class FeignBusinessDateHelper {
     }
 
     public void runAt(String date, Runnable action) {
-        BusinessDateResponse originalDate = getBusinessDate("BUSINESS_DATE");
         try {
+            configHelper.updateConfigurationByName(ENABLE_BUSINESS_DATE, true);
             updateBusinessDate("BUSINESS_DATE", date);
             action.run();
         } finally {
-            if (originalDate != null && originalDate.getDate() != null) {
-                updateBusinessDate("BUSINESS_DATE", originalDate.getDate().toString());
-            }
+            configHelper.updateConfigurationByName(ENABLE_BUSINESS_DATE, false);
         }
     }
 }

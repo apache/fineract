@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.infrastructure.event.business.domain.document;
 
-import org.apache.fineract.infrastructure.documentmanagement.domain.Document;
+import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
 
 public class DocumentCreatedBusinessEvent extends DocumentBusinessEvent {
 
     private static final String TYPE = "DocumentCreatedBusinessEvent";
 
-    public DocumentCreatedBusinessEvent(Document value) {
+    public DocumentCreatedBusinessEvent(DocumentData value) {
         super(value);
     }
 

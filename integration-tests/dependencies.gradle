@@ -67,4 +67,5 @@ dependencies {
 
     testImplementation 'org.wiremock:wiremock-standalone'
     testImplementation 'com.google.guava:guava'
+    testImplementation 'com.github.romankh3:image-comparison'
 }

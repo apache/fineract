@@ -22,6 +22,7 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.client.domain.search.SearchingClientRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -46,4 +47,11 @@ public interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecif
     @Query("SELECT c.id FROM Client c WHERE c.externalId = :externalId")
     Long findIdByExternalId(@Param("externalId") ExternalId externalId);
 
+    @Modifying
+    @Query("UPDATE Client client SET client.imageId = :imageId WHERE client.id = :clientId")
+    void updateByIdAndImageId(@Param("clientId") Long staffId, @Param("imageId") Long imageId);
+
+    @Modifying
+    @Query("UPDATE Client client SET client.imageId = null WHERE client.id = :clientId")
+    void removeImageId(@Param("clientId") Long clientId);
 }

@@ -903,6 +903,10 @@ cyclonedxBom {
     includeLicenseText = true
 }
 
+tasks.withType(org.cyclonedx.gradle.CyclonedxDirectTask).configureEach {
+    includeMetadataResolution.set(false)
+}
+
 tasks.register('printSourceSetInformation') {
     doLast {
         sourceSets.each { srcSet ->

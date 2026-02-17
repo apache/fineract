@@ -27,7 +27,6 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
@@ -46,7 +45,6 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.documentmanagement.domain.Image;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -72,13 +70,9 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @JoinColumn(name = "transfer_to_office_id")
     private Office transferToOffice;
 
-    @OneToOne(optional = true)
-    @JoinColumn(name = "image_id")
-    private Image image;
+    @Column(name = "image_id")
+    private Long imageId;
 
-    /**
-     * A value from {@link ClientStatus}.
-     */
     @Column(name = "status_enum", nullable = false)
     private Integer status;
 
@@ -494,10 +488,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return this.office.getId();
     }
 
-    public void setImage(final Image image) {
-        this.image = image;
-    }
-
     public String mobileNo() {
         return this.mobileNo;
     }
@@ -508,10 +498,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public void setMobileNo(final String mobileNo) {
         this.mobileNo = mobileNo;
-    }
-
-    public boolean isNotStaff() {
-        return !isStaff();
     }
 
     public boolean isStaff() {

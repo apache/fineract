@@ -487,14 +487,19 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         final AccrualPeriodData period = accrualPeriods.getPeriodByInstallmentNumber(installment.getInstallmentNumber());
         final MonetaryCurrency currency = accrualPeriods.getCurrency();
         Money interest = null;
-        final boolean isPastPeriod = isAfterPeriod(tillDate, installment);
-        final boolean isInPeriod = isInPeriod(tillDate, installment, false);
+        LocalDate effectiveDate = tillDate;
+        if (loan.isClosed() && loan.getClosedOnDate() != null && DateUtils.isBefore(loan.getClosedOnDate(), tillDate)) {
+            effectiveDate = loan.getClosedOnDate();
+        } else if (loanBalanceService.isOverPaid(loan) && loan.getOverpaidOnDate() != null
+                && DateUtils.isBefore(loan.getOverpaidOnDate(), tillDate)) {
+            effectiveDate = loan.getOverpaidOnDate();
+        }
+        final boolean isPastPeriod = isAfterPeriod(effectiveDate, installment);
+        final boolean isInPeriod = isInPeriod(effectiveDate, installment, false);
         if (isPastPeriod || loan.isClosed() || loanBalanceService.isOverPaid(loan)) {
             interest = installment.getInterestCharged(currency).minus(installment.getCreditedInterest());
-        } else {
-            if (isInPeriod) { // first period first day is not accrued
-                interest = scheduleGenerator.getPeriodInterestTillDate(installment, tillDate);
-            }
+        } else if (isInPeriod) {
+            interest = scheduleGenerator.getPeriodInterestTillDate(installment, effectiveDate);
         }
         period.setInterestAmount(interest);
         Money accruable = null;

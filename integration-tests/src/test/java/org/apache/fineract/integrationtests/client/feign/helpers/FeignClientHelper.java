@@ -37,8 +37,11 @@ public class FeignClientHelper {
     }
 
     public Long createClient() {
+        return createClient(Utils.dateFormatter.format(Utils.getLocalDateOfTenant()));
+    }
+
+    public Long createClient(String activationDate) {
         String externalId = Utils.randomStringGenerator("EXT_", 7);
-        String activationDate = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
 
         PostClientsRequest request = new PostClientsRequest()//
                 .officeId(1L)//

@@ -30,7 +30,6 @@ import java.nio.file.Files;
 import org.apache.fineract.client.feign.FeignException;
 import org.apache.fineract.client.feign.FineractMultipartEncoder;
 import org.apache.fineract.client.models.DocumentData;
-import org.apache.fineract.client.models.PostEntityTypeEntityIdDocumentsResponse;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -63,8 +62,7 @@ public class FeignDocumentTest extends FeignIntegrationTest {
         FineractMultipartEncoder.MultipartData multipartData = new FineractMultipartEncoder.MultipartData()
                 .addFile("file", testFile.getName(), fileData, "image/jpeg").addText("name", name).addText("description", description);
 
-        PostEntityTypeEntityIdDocumentsResponse response = ok(
-                () -> fineractClient().documentsFixed().createDocument("clients", clientId, multipartData));
+        var response = ok(() -> fineractClient().documentsFixed().createDocument("clients", clientId, multipartData));
 
         assertThat(response).isNotNull();
         assertThat(response.getResourceId()).isNotNull();
@@ -135,7 +133,7 @@ public class FeignDocumentTest extends FeignIntegrationTest {
 
         FeignException exception = assertThrows(FeignException.class,
                 () -> fineractClient().documentsFixed().getDocument("clients", clientId, documentId));
-        assertEquals(404, exception.status());
+        assertEquals(403, exception.status());
     }
 
     @Test

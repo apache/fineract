@@ -18,27 +18,21 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.service;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.URLConnection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.CommandPipeline;
 import org.apache.fineract.infrastructure.bulkimport.data.BulkImportEvent;
-import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
-import org.apache.fineract.infrastructure.bulkimport.domain.ImportDocument;
 import org.apache.fineract.infrastructure.bulkimport.domain.ImportDocumentRepository;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
+import org.apache.fineract.infrastructure.contentstore.util.ContentPipe;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
-import org.apache.fineract.infrastructure.documentmanagement.domain.Document;
-import org.apache.fineract.infrastructure.documentmanagement.service.DocumentWritePlatformService;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.fineract.infrastructure.documentmanagement.command.DocumentUpdateCommand;
+import org.apache.fineract.infrastructure.documentmanagement.data.DocumentCreateResponse;
+import org.apache.fineract.infrastructure.documentmanagement.data.DocumentUpdateRequest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
@@ -50,14 +44,15 @@ public class BulkImportEventListener implements ApplicationListener<BulkImportEv
 
     private final ApplicationContext applicationContext;
     private final ImportDocumentRepository importRepository;
-    private final DocumentWritePlatformService documentService;
+    private final ContentPipe pipe;
+    private final CommandPipeline commandPipeline;
 
     @Override
     public void onApplicationEvent(final BulkImportEvent event) {
         try {
             ThreadLocalContextUtil.init(event.getContext());
-            final ImportDocument importDocument = this.importRepository.findById(event.getImportId()).orElse(null);
-            final GlobalEntityType entityType = GlobalEntityType.fromInt(importDocument.getEntityType());
+
+            final GlobalEntityType entityType = GlobalEntityType.fromInt(event.getImportDocument().getEntityType());
 
             final ImportHandler importHandler = switch (entityType) {
                 case OFFICES -> this.applicationContext.getBean("officeImportHandler", ImportHandler.class);
@@ -85,38 +80,28 @@ public class BulkImportEventListener implements ApplicationListener<BulkImportEv
                     throw new GeneralPlatformDomainRuleException("error.msg.unable.to.find.resource", "Unable to find requested resource");
             };
 
-            final Workbook workbook = event.getWorkbook();
-            final Count count = importHandler.process(workbook, event.getLocale(), event.getDateFormat());
-            importDocument.update(DateUtils.getLocalDateTimeOfTenant(), count.getSuccessCount(), count.getErrorCount());
-            this.importRepository.saveAndFlush(importDocument);
+            final var count = importHandler.process(event.getWorkbook(), event.getLocale(), event.getDateFormat());
 
-            final Set<String> modifiedParams = new HashSet<>();
-            modifiedParams.add("fileName");
-            modifiedParams.add("size");
-            modifiedParams.add("type");
-            modifiedParams.add("location");
-            Document document = importDocument.getDocument();
+            event.getImportDocument().update(DateUtils.getLocalDateTimeOfTenant(), count.getSuccessCount(), count.getErrorCount());
 
-            DocumentCommand documentCommand = new DocumentCommand(modifiedParams, document.getId(), entityType.name(), null,
-                    document.getName(), document.getFileName(), document.getSize(),
-                    URLConnection.guessContentTypeFromName(document.getFileName()), null, null);
+            final var pipedInputStream = pipe.pipe(output -> {
+                event.getWorkbook().write(output);
+            });
 
-            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            try {
-                try {
-                    workbook.write(bos);
-                } finally {
-                    bos.close();
-                }
-            } catch (IOException io) {
-                log.error("Problem occurred in onApplicationEvent function", io);
-            }
-            byte[] bytes = bos.toByteArray();
-            ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-            this.documentService.updateDocument(documentCommand, bis);
+            final var command = new DocumentUpdateCommand();
+
+            command.setPayload(DocumentUpdateRequest.builder().id(event.getImportDocument().getDocumentId()).entityId(event.getEntityId())
+                    .entityType("IMPORT").stream(pipedInputStream).build());
+
+            final Supplier<DocumentCreateResponse> response = commandPipeline.send(command);
+
+            response.get();
+
+            importRepository.saveAndFlush(event.getImportDocument());
+        } catch (Exception e) {
+            log.error("Bulk import error:", e);
         } finally {
             ThreadLocalContextUtil.reset();
         }
     }
-
 }
