@@ -1652,6 +1652,9 @@ Feature: Loan DownPayment
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 1000.0        | 0        | 0    | 0         | 1000.0 | 0.0  | 0          | 0    | 1000        |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 01 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
     And Customer makes "DOWN_PAYMENT" repayment on "01 January 2022" with 250 EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
@@ -1663,6 +1666,10 @@ Feature: Loan DownPayment
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 0        | 0    | 0         | 1000.0 | 250.0 | 0          | 0    | 750         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 01 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
+      | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
     When Admin sets the business date to "01 February 2022"
     And Customer makes "AUTOPAY" repayment on "01 February 2022" with 250 EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -1675,6 +1682,11 @@ Feature: Loan DownPayment
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 0        | 0    | 0         | 1000.0 | 500.0 | 0          | 0    | 500         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 01 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
+      | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
+      | 01 February 2022 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 500.0        |
     When Admin sets the business date to "15 February 2023"
     And Customer makes "AUTOPAY" repayment on "15 February 2022" with 400 EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -1756,7 +1768,7 @@ Feature: Loan DownPayment
       | LoanProduct          | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
       | LP2_DOWNPAYMENT_AUTO | 01 January 2022   | 2000           | 0                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 January 2022" with "2000" amount and expected disbursement date on "01 January 2022"
-    When Admin successfully disburse the loan on "01 January 2022" with "1000" EUR transaction amount
+    When Admin disburses the loan on "01 January 2022" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2022  |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -1767,8 +1779,13 @@ Feature: Loan DownPayment
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 1000.0        | 0        | 0    | 0         | 1000.0 | 250  | 0          | 0    | 750         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 01 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
+      | 01 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
+    Then LoanDisbursalTransactionBusinessEvent has changedTerms "false"
     When Admin sets the business date to "15 January 2022"
-    When Admin successfully disburse the loan on "15 January 2022" with "1000" EUR transaction amount
+    When Admin disburses the loan on "15 January 2022" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 5 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2022  |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -1781,6 +1798,13 @@ Feature: Loan DownPayment
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 2000.0        | 0        | 0    | 0         | 2000.0 | 500  | 0          | 0    | 1500        |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 01 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
+      | 01 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
+      | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
+      | 15 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
+    Then LoanDisbursalTransactionBusinessEvent has changedTerms "false"
     When Admin successfully undo last disbursal
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |

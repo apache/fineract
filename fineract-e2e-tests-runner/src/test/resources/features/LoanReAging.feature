@@ -1681,7 +1681,6 @@ Feature: LoanReAging
     Then Loan Charges tab has the following data:
       | Name    | isPenalty | Payment due at     | Due as of   | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date | 03 May 2025 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
-
     When Loan Pay-off is made on "03 May 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -1753,7 +1752,6 @@ Feature: LoanReAging
     Then Loan Charges tab has the following data:
       | Name    | isPenalty | Payment due at     | Due as of   | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date | 03 May 2025 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
-
     When Loan Pay-off is made on "03 May 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -1765,7 +1763,7 @@ Feature: LoanReAging
       | LoanProduct                                                        | submitted on date | with Principal  | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 January 2025   | 1000             | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS  | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2025" with "500" amount and expected disbursement date on "01 January 2025"
-    When Admin successfully disburse the loan on "01 January 2025" with "500" EUR transaction amount
+    When Admin disburses the loan on "01 January 2025" with "500" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2025  |                  | 500.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -1781,7 +1779,7 @@ Feature: LoanReAging
       | 01 January 2025  | Disbursement      | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    |
 #    --- backdated disbursement --- #
     When Admin sets the business date to "01 May 2025"
-    When Admin successfully disburse the loan on "16 January 2025" with "100" EUR transaction amount
+    When Admin disburses the loan on "16 January 2025" with "100" EUR transaction amount
 # --- add charge a month later after maturity date --- #
     And Admin adds "LOAN_NSF_FEE" due date charge with "01 May 2025" due date and 20 EUR transaction amount
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
@@ -1804,9 +1802,10 @@ Feature: LoanReAging
     Then Loan Charges tab has the following data:
       | Name    | isPenalty | Payment due at       | Due as of   | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date   | 01 May 2025 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
+    Then LoanDisbursalTransactionBusinessEvent has changedTerms "false"
 # --- add re-aging trn with start date as maturity date --- #
     When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
-      | frequencyNumber | frequencyType | startDate     | numberOfInstallments |
+      | frequencyNumber | frequencyType | startDate      | numberOfInstallments |
       | 1               | WEEKS         | 01 April 2025  | 1                    |
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
@@ -1830,7 +1829,7 @@ Feature: LoanReAging
     Then Loan Charges tab has the following data:
       | Name    | isPenalty | Payment due at       | Due as of   | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date   | 01 May 2025 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
-
+    Then LoanReAgeTransactionBusinessEvent has changedTerms "true"
     When Loan Pay-off is made on "01 May 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -1858,7 +1857,6 @@ Feature: LoanReAging
       | 5  | 0    | 01 April 2024    |                 | 50.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
       | 6  | 365  | 01 April 2025    |                 | 25.0            | 25.0          | 0.0      | 100.0 | 0.0       | 125.0 | 0.0  | 0.0        | 0.0  | 125.0       |
       | 7  | 365  | 01 April 2026    |                 | 0.0             | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
-
     When Loan Pay-off is made on "05 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -1886,7 +1884,6 @@ Feature: LoanReAging
       | 5  | 0    | 01 April 2024    |                 | 50.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
       | 6  | 30   | 01 May 2024      |                 | 25.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
       | 7  | 31   | 01 June 2024     |                 | 0.0             | 25.0          | 0.0      | 100.0 | 0.0       | 125.0 | 0.0  | 0.0        | 0.0  | 125.0       |
-
     When Loan Pay-off is made on "05 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -1914,7 +1911,6 @@ Feature: LoanReAging
       | 5  | 0    | 01 April 2024    |                 | 50.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
       | 6  | 7    | 08 April 2024    |                 | 25.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
       | 7  | 7    | 15 April 2024    |                 | 0.0             | 25.0          | 0.0      | 100.0 | 0.0       | 125.0 | 0.0  | 0.0        | 0.0  | 125.0       |
-
     When Loan Pay-off is made on "05 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -1942,7 +1938,6 @@ Feature: LoanReAging
       | 5  | 0    | 01 April 2024    |                 | 50.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
       | 6  | 1    | 02 April 2024    |                 | 25.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
       | 7  | 1    | 03 April 2024    |                 | 0.0             | 25.0          | 0.0      | 100.0 | 0.0       | 125.0 | 0.0  | 0.0        | 0.0  | 125.0       |
-
     When Loan Pay-off is made on "05 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -1971,7 +1966,6 @@ Feature: LoanReAging
       | 6  | 30   | 01 May 2024      |                 | 25.0            | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
       | 7  | 31   | 01 June 2024     |                 | 0.0             | 25.0          | 0.0      | 0.0   | 0.0       | 25.0  | 0.0  | 0.0        | 0.0  | 25.0        |
       | 8  | 32   | 03 July 2024     |                 | 0.0             | 0.0           | 0.0      | 100.0 | 0.0       | 100.0 | 0.0  | 0.0        | 0.0  | 100.0       |
-
     When Loan Pay-off is made on "05 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -2043,7 +2037,6 @@ Feature: LoanReAging
       | 01 March 2025    | Repayment         | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       |  750.0       | false    |
       | 03 May 2025      | Chargeback        | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       |  875.0       | false    |
       | 01 April 2025    | Re-age            | 750.0  | 750.0     | 0.0      | 0.0  | 0.0       |    0.0       | false    |
-
     When Loan Pay-off is made on "03 May 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -2119,7 +2112,6 @@ Feature: LoanReAging
     Then Loan Charges tab has the following data:
       | Name    | isPenalty | Payment due at       | Due as of   | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date   | 03 May 2025 | Flat             | 10.0 | 0.0  | 0.0    | 10.0        |
-
     When Loan Pay-off is made on "03 May 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -2393,9 +2385,9 @@ Feature: LoanReAging
       | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 09 March 2024    | Re-age            | 1000.0 | 1000.0    | 0.0      | 0.0  | 0.0       | 0.0          | false    |
-
-     When Loan Pay-off is made on "09 March 2024"
-     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    Then LoanReAgeTransactionBusinessEvent has changedTerms "true"
+    When Loan Pay-off is made on "09 March 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4057 @AdvancedPaymentAllocation
   Scenario: Verify that Loan re-aging transaction with repayment and chargeback - before maturity date and merges the corresponding normal installments - UC3
@@ -2619,12 +2611,11 @@ Feature: LoanReAging
       | 01 January 2025  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 01 January 2025  | Down Payment      |  250.0 | 250.0     | 0.0      | 0.0  | 0.0       |  750.0       | false    |
       | 15 February 2025 | Re-age            |  750.0 | 750.0     | 0.0      | 0.0  | 0.0       |    0.0       | false    |
-
     When Loan Pay-off is made on "15 February 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4060 @AdvancedPaymentAllocation
-  Scenario: Verify that Loan re-aging transaction with multiple disbursements: 2nd disb after re-aging - before maturity date and removes additional installments - UC6
+  Scenario: Verify that Loan re-aging transaction with multiple disbursements: 2nd disb before re-aging - before maturity date and removes additional installments - UC6
     When Admin sets the business date to "01 January 2025"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -2667,7 +2658,6 @@ Feature: LoanReAging
       | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2025  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 10 February 2025 | Disbursement      |  500.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       | false    |
-
     When Admin creates a Loan re-aging preview by Loan external ID with the following data:
       | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
       | 1               | MONTHS        | 15 February 2025 | 2                    |
@@ -2682,7 +2672,6 @@ Feature: LoanReAging
     Then Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 1500.0        | 0.0      | 0.0  | 0.0       | 1500.0 | 0.0  | 0.0        | 0.0  | 1500.0      |
-
 # --- re-age loan on 2nd installment ---#
     When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
       | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
@@ -2703,7 +2692,6 @@ Feature: LoanReAging
       | 01 January 2025  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 10 February 2025 | Disbursement      | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       | false    |
       | 10 February 2025 | Re-age            | 1500.0 | 1500.0    | 0.0      | 0.0  | 0.0       | 0.0          | false    |
-
     When Loan Pay-off is made on "10 February 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -2751,7 +2739,6 @@ Feature: LoanReAging
       | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2025  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 10 February 2025 | Disbursement      |  500.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       | false    |
-
 # --- re-age loan on 2nd installment ---#
     When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
       | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
@@ -2772,12 +2759,11 @@ Feature: LoanReAging
       | 01 January 2025  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 10 February 2025 | Disbursement      | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       | false    |
       | 10 February 2025 | Re-age            | 1500.0 | 1500.0    | 0.0      | 0.0  | 0.0       | 0.0          | false    |
-
     When Loan Pay-off is made on "10 February 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4324 @AdvancedPaymentAllocation
-  Scenario: Verify that Loan re-aging transaction with multiple disbursements: 2nd disb before re-aging - before maturity date and removes additional installments - UC6.1
+  Scenario: Verify that Loan re-aging transaction with multiple disbursements: 2nd disb after re-aging - before maturity date and removes additional installments - UC6.1
     When Admin sets the business date to "01 January 2025"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -2800,7 +2786,6 @@ Feature: LoanReAging
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2025  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
-
 # --- re-age loan on 2nd installment ---#
     When Admin sets the business date to "10 February 2025"
     When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
@@ -2838,7 +2823,6 @@ Feature: LoanReAging
       | 01 January 2025  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 10 February 2025 | Re-age            | 1000.0 | 1000.0    | 0.0      | 0.0  | 0.0       | 0.0          | false    |
       | 10 February 2025 | Disbursement      |  500.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       | false    |
-
     When Loan Pay-off is made on "10 February 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -2907,7 +2891,6 @@ Feature: LoanReAging
       | 01 January 2025  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 15 January 2025  | Repayment         |  167.0 | 167.0     | 0.0      | 0.0  | 0.0       | 833.0        | false    |
       | 15 January 2025  | Re-age            |  833.0 | 833.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
-
     When Loan Pay-off is made on "15 January 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -2976,7 +2959,6 @@ Feature: LoanReAging
       | 01 January 2025  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 15 January 2025  | Repayment         |  100.0 | 100.0     | 0.0      | 0.0  | 0.0       | 900.0        | false    |
       | 15 January 2025  | Re-age            |  900.0 | 900.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
-
     When Loan Pay-off is made on "15 January 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -3045,7 +3027,6 @@ Feature: LoanReAging
       | 01 January 2025  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 15 January 2025  | Repayment         |  400.0 | 400.0     | 0.0      | 0.0  | 0.0       | 600.0        | false    |
       | 15 January 2025  | Re-age            |  600.0 | 600.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
-
     When Loan Pay-off is made on "15 January 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -3113,7 +3094,6 @@ Feature: LoanReAging
       | 01 January 2025  | Disbursement           | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 25 January 2025  | Merchant Issued Refund | 300.0  | 300.0     | 0.0      | 0.0  | 0.0       | 700.0        | false    |
       | 16 January 2025  | Re-age                 | 1000.0 | 1000.0    | 0.0      | 0.0  | 0.0       | 0.0          | false    |
-
     When Loan Pay-off is made on "25 January 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -3184,7 +3164,6 @@ Feature: LoanReAging
       | 01 January 2025  | Disbursement      | 1000.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 15 January 2025  | Repayment         |  166.65 | 166.65    | 0.0      | 0.0  | 0.0       | 833.35       | false    |
       | 15 January 2025  | Re-age            |  833.35 | 833.35    | 0.0      | 0.0  | 0.0       | 0.0          | false    |
-
     When Loan Pay-off is made on "15 January 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -3251,7 +3230,6 @@ Feature: LoanReAging
       | 01 January 2025  | Disbursement      | 1000.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 15 January 2025  | Repayment         |  166.65 | 166.65    | 0.0      | 0.0  | 0.0       | 833.35       | false    |
       | 15 January 2025  | Re-age            |  833.35 | 833.35    | 0.0      | 0.0  | 0.0       | 0.0          | false    |
-
     When Loan Pay-off is made on "15 January 2025"
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Loan has 0 outstanding amount
@@ -3355,7 +3333,6 @@ Feature: LoanReAging
       | 01 January 2025  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 01 January 2025  | Down Payment      |  250.0 | 250.0     | 0.0      | 0.0  | 0.0       |  750.0       | false    |
       | 10 January 2025  | Re-age            |  750.0 | 750.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
-
     When Loan Pay-off is made on "10 January 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -3389,7 +3366,6 @@ Feature: LoanReAging
     Then Loan Charges tab has the following data:
       | Name    | isPenalty | Payment due at       | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date   | 01 October 2024 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
-
     When Admin sets the business date to "09 March 2024"
     When Admin creates a Loan re-aging preview by Loan external ID with the following data:
       | frequencyNumber | frequencyType | startDate     | numberOfInstallments |
@@ -3414,7 +3390,6 @@ Feature: LoanReAging
     Then Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 20.0      | 1020.0 | 0.0   | 0.0        | 0.0  | 1020.0      |
-
     When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
       | frequencyNumber | frequencyType | startDate     | numberOfInstallments |
       | 1               | MONTHS        | 15 March 2024 | 10                   |
@@ -3445,7 +3420,6 @@ Feature: LoanReAging
     Then Loan Charges tab has the following data:
       | Name    | isPenalty | Payment due at       | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date   | 01 October 2024 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
-
     When Loan Pay-off is made on "09 March 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -3481,7 +3455,7 @@ Feature: LoanReAging
       | Name    | isPenalty | Payment due at       | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date   | 01 October 2024 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
       | NSF fee | true      | Specified due date   | 01 November 2024| Flat             | 30.0 | 0.0  | 0.0    | 30.0        |
-
+# --- add re-age transaction --- #
     When Admin sets the business date to "09 March 2024"
     When Admin creates a Loan re-aging preview by Loan external ID with the following data:
       | frequencyNumber | frequencyType | startDate     | numberOfInstallments |
@@ -3499,7 +3473,7 @@ Feature: LoanReAging
     Then Loan Re-Aged Repayment schedule preview has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 50.0      | 1050.0 | 0.0   | 0.0        | 0.0  | 1050.0      |
-
+# -- add re-age transaction --- #
     When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
       | frequencyNumber | frequencyType | startDate     | numberOfInstallments |
       | 1               | MONTHS        | 15 March 2024 | 2                    |
@@ -3524,7 +3498,7 @@ Feature: LoanReAging
       | Name    | isPenalty | Payment due at       | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date   | 01 October 2024  | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
       | NSF fee | true      | Specified due date   | 01 November 2024 | Flat             | 30.0 | 0.0  | 0.0    | 30.0        |
-
+    Then LoanReAgeTransactionBusinessEvent has changedTerms "true"
     When Loan Pay-off is made on "09 March 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -5190,7 +5164,6 @@ Feature: LoanReAging
       | 01 January 2024  | Down Payment     | 25.0   | 25.0      | 0.0      | 0.0  | 0.0       | 75.0         | false    | false    |
       | 01 February 2024 | Repayment        | 12.76  | 12.32     | 0.44     | 0.0  | 0.0       | 62.68        | false    | false    |
       | 15 March 2024    | Re-age           | 63.22  | 62.68     | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
-
     When Loan Pay-off is made on "15 March 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -6923,7 +6896,6 @@ Feature: LoanReAging
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
-
     When Admin sets the business date to "01 February 2024"
     And Customer makes "AUTOPAY" repayment on "01 February 2024" with 17.01 EUR transaction amount
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
@@ -6942,7 +6914,7 @@ Feature: LoanReAging
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
-
+# - re-age transaction --- #
     When Admin sets the business date to "15 March 2024"
     When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
       | frequencyNumber | frequencyType | startDate     | numberOfInstallments |
@@ -6967,9 +6939,10 @@ Feature: LoanReAging
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 15 March 2024    | Re-age           | 84.28  | 83.57     | 0.71     | 0.0  | 0.0       | 0.0          | false    | false    |
-
+    Then LoanReAgeTransactionBusinessEvent has changedTerms "true"
+# --- 2nd disbursement transaction --- #
     When Admin sets the business date to "01 April 2024"
-    When Admin successfully disburse the loan on "01 April 2024" with "50" EUR transaction amount
+    When Admin disburses the loan on "01 April 2024" with "50" EUR transaction amount
     Then Loan Repayment schedule has 9 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -6992,7 +6965,7 @@ Feature: LoanReAging
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 15 March 2024    | Re-age           | 84.28  | 83.57     | 0.71     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 April 2024    | Disbursement     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 133.57       | false    | false    |
-
+    Then LoanDisbursalTransactionBusinessEvent has changedTerms "false"
     When Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 17.01 EUR transaction amount
     Then Loan Repayment schedule has 9 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
@@ -7017,7 +6990,6 @@ Feature: LoanReAging
       | 15 March 2024    | Re-age           | 84.28  | 83.57     | 0.71     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 April 2024    | Disbursement     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 133.57       | false    | false    |
       | 01 April 2024    | Chargeback       | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 150.0        | false    | false    |
-
     When Admin successfully undo last disbursal
     Then Loan Repayment schedule has 9 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
@@ -7040,7 +7012,6 @@ Feature: LoanReAging
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 15 March 2024    | Re-age           | 84.28  | 83.57     | 0.71     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 April 2024    | Chargeback       | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 100.0        | false    | false    |
-
     When Loan Pay-off is made on "01 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -7162,7 +7133,7 @@ Feature: LoanReAging
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
-
+# --- add repayment --- #
     When Admin sets the business date to "01 February 2024"
     And Customer makes "AUTOPAY" repayment on "01 February 2024" with 17.01 EUR transaction amount
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
@@ -7181,7 +7152,7 @@ Feature: LoanReAging
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
-
+# --- add re-age transaction ---#
     When Admin sets the business date to "15 March 2024"
     When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
       | frequencyNumber | frequencyType | startDate     | numberOfInstallments |
@@ -7206,9 +7177,10 @@ Feature: LoanReAging
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 15 March 2024    | Re-age           | 84.28  | 83.57     | 0.71     | 0.0  | 0.0       | 0.0          | false    | false    |
-
+    Then LoanReAgeTransactionBusinessEvent has changedTerms "true"
+# --- add backdated 2nd disbursement --- #
     When Admin sets the business date to "01 April 2024"
-    When Admin successfully disburse the loan on "01 March 2024" with "50" EUR transaction amount
+    When Admin disburses the loan on "01 March 2024" with "50" EUR transaction amount
     Then Loan Repayment schedule has 9 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -7231,7 +7203,8 @@ Feature: LoanReAging
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 01 March 2024    | Disbursement     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 133.57       | false    | false    |
       | 15 March 2024    | Re-age           | 134.41 | 133.57    | 0.84     | 0.0  | 0.0       | 0.0          | false    | true     |
-
+    Then LoanDisbursalTransactionBusinessEvent has changedTerms "false"
+# --- add chargeback --- #
     When Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 12 EUR transaction amount
     Then Loan Repayment schedule has 9 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
@@ -7256,8 +7229,7 @@ Feature: LoanReAging
       | 01 March 2024    | Disbursement     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 133.57       | false    | false    |
       | 15 March 2024    | Re-age           | 134.41 | 133.57    | 0.84     | 0.0  | 0.0       | 0.0          | false    | true     |
       | 01 April 2024    | Chargeback       | 12.0   | 11.42     | 0.58     | 0.0  | 0.0       | 144.99       | false    | false    |
-
-    # --- undo last disbursement --- #
+# --- undo last disbursement --- #
     When Admin successfully undo last disbursal
     Then Loan Repayment schedule has 9 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
@@ -7280,7 +7252,6 @@ Feature: LoanReAging
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 15 March 2024    | Re-age           | 84.28  | 83.57     | 0.71     | 0.0  | 0.0       | 0.0          | false    | true     |
       | 01 April 2024    | Chargeback       | 12.0   | 11.42     | 0.58     | 0.0  | 0.0       | 94.99        | false    | false    |
-
     When Loan Pay-off is made on "01 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -7657,7 +7628,6 @@ Feature: LoanReAging
       | 15 March 2024    | Re-age           | 84.28  | 83.57     | 0.71     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 April 2024    | Disbursement     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 133.57       | false    | false    |
       | 01 April 2024    | Chargeback       | 12.0   | 12.0      | 0.0      | 0.0  | 0.0       | 145.57       | false    | false    |
-
     When Loan Pay-off is made on "01 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -11135,3 +11105,70 @@ Feature: LoanReAging
     Then Loan has 0 outstanding amount
     Then Loan's all installments have obligations met
 
+  @TestRailId:C4682 @AdvancedPaymentAllocation
+  Scenario: Verify Re-aging on interest bearing loan with Default Behavior - re-aging that doesn't change number of installments but changes maturity date - UC1
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin set "LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 January 2024   | 100            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "100" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2024 |           | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 2  | 29   | 01 March 2024    |           | 67.05           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 3  | 31   | 01 April 2024    |           | 50.43           | 16.62         | 0.39     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 4  | 30   | 01 May 2024      |           | 33.71           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 5  | 31   | 01 June 2024     |           | 16.9            | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 6  | 30   | 01 July 2024     |           | 0.0             | 16.9          | 0.1      | 0.0  | 0.0       | 17.0  | 0.0  | 0.0        | 0.0  | 17.0        |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 2.05     | 0.0  | 0.0       | 102.05 | 0.0  | 0.0        | 0.0  | 102.05      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+    When Admin sets the business date to "01 February 2024"
+    And Customer makes "AUTOPAY" repayment on "01 February 2024" with 17.01 EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2024 | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    |                  | 67.05           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
+      | 3  | 31   | 01 April 2024    |                  | 50.43           | 16.62         | 0.39     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
+      | 4  | 30   | 01 May 2024      |                  | 33.71           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
+      | 5  | 31   | 01 June 2024     |                  | 16.9            | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
+      | 6  | 30   | 01 July 2024     |                  | 0.0             | 16.9          | 0.1      | 0.0  | 0.0       | 17.0  | 0.0   | 0.0        | 0.0  | 17.0        |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 100.0         | 2.05     | 0.0  | 0.0       | 102.05 | 17.01 | 0.0        | 0.0  | 85.04       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
+    When Admin sets the business date to "15 February 2024"
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
+      | 1               | MONTHS        | 15 February 2024 | 4                    |
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2024 | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
+      | 2  | 14   | 15 February 2024 | 15 February 2024 | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
+      | 3  | 0    | 15 February 2024 |                  | 62.67           | 20.9          | 0.24     | 0.0  | 0.0       | 21.14 | 0.0   | 0.0        | 0.0  | 21.14       |
+      | 4  | 29   | 15 March 2024    |                  | 41.9            | 20.77         | 0.37     | 0.0  | 0.0       | 21.14 | 0.0   | 0.0        | 0.0  | 21.14       |
+      | 5  | 31   | 15 April 2024    |                  | 21.0            | 20.9          | 0.24     | 0.0  | 0.0       | 21.14 | 0.0   | 0.0        | 0.0  | 21.14       |
+      | 6  | 30   | 15 May 2024      |                  | 0.0             | 21.0          | 0.12     | 0.0  | 0.0       | 21.12 | 0.0   | 0.0        | 0.0  | 21.12       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 100.0         | 1.55     | 0.0  | 0.0       | 101.55 | 17.01 | 0.0        | 0.0  | 84.54       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
+      | 15 February 2024 | Re-age           | 83.81  | 83.57     | 0.24     | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then LoanReAgeTransactionBusinessEvent has changedTerms "false"
+    When Loan Pay-off is made on "15 February 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met

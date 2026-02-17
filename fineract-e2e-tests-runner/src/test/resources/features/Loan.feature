@@ -8923,7 +8923,7 @@ Feature: Loan
     When Loan Pay-off is made on "15 January 2025"
     Then Loan's all installments have obligations met
 
-  @TestRailId:4227
+  @TestRailId:C4227
   Scenario: Verify cumulative multidisbursal loan that expects tranches with flat interest type and no interest calculation period - UC7.1
     When Admin sets the business date to "01 January 2025"
     When Admin creates a client with random data
@@ -8942,7 +8942,7 @@ Feature: Loan
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 1500.0        | 25.89    | 0.0  | 0.0       | 1525.89 | 0.0  | 0.0        | 0.0  | 1525.89     |
     Then Loan Transactions tab has none transaction
-    When Admin successfully disburse the loan on "01 January 2025" with "1000" EUR transaction amount
+    When Admin disburses the loan on "01 January 2025" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2025  |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
@@ -8956,6 +8956,7 @@ Feature: Loan
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2025  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+    Then LoanDisbursalTransactionBusinessEvent has changedTerms "false"
     Then Loan Tranche Details tab has the following data:
       | Expected Disbursement On | Disbursed On    | Principal   | Net Disbursal Amount |
       | 01 January 2025          | 01 January 2025 | 1000.0      |                      |
@@ -8982,9 +8983,8 @@ Feature: Loan
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 1500.0        | 17.26    | 0.0  | 0.0       | 1517.26 | 0.0  | 0.0        | 0.0  | 1517.26     |
-
-# -- 2nd disb - on Feb, 1, 2025 --#
-    When Admin successfully disburse the loan on "01 February 2025" with "500" EUR transaction amount
+# -- 2nd disbursement - on Feb, 1, 2025 --#
+    When Admin disburses the loan on "01 February 2025" with "500" EUR transaction amount
     Then Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2025  |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
@@ -9003,7 +9003,7 @@ Feature: Loan
       | Expected Disbursement On | Disbursed On     | Principal   | Net Disbursal Amount |
       | 01 January 2025          | 01 January 2025  | 1000.0      |                      |
       | 15 January 2025          | 01 February 2025 |  500.0      |                      |
-
+    Then LoanDisbursalTransactionBusinessEvent has changedTerms "false"
     When Loan Pay-off is made on "01 February 2025"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Repayment schedule has 3 periods, with the following data for periods:
@@ -9023,6 +9023,7 @@ Feature: Loan
       | 01 February 2025 | Repayment         | 1525.89 | 1500.0    | 25.89    | 0.0  | 0.0       |    0.0       | false    | false    |
       | 01 February 2025 | Accrual           |  25.89  | 0.0       | 25.89    | 0.0  | 0.0       |    0.0       | false    | false    |
 
+  @TestRailId:C4643
   Scenario: Verify that changedTerms is false in LoanDisbursalTransactionBusinessEvent for initial disbursement
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -9031,21 +9032,21 @@ Feature: Loan
       | LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2024" with "1000" amount and expected disbursement date on "01 January 2024"
     When Admin disburses the loan on "01 January 2024" with "1000" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 15   | 16 January 2024  |                  | 667.64          | 332.36        | 2.92     | 0.0  | 0.0       | 335.28 | 0.0   | 0.0        | 0.0  | 335.28      |
+      | 2  | 15   | 31 January 2024  |                  | 334.31          | 333.33        | 1.95     | 0.0  | 0.0       | 335.28 | 0.0   | 0.0        | 0.0  | 335.28      |
+      | 3  | 15   | 15 February 2024 |                  | 0.0             | 334.31        | 0.98     | 0.0  | 0.0       | 335.29 | 0.0   | 0.0        | 0.0  | 335.29      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late | Outstanding |
+      | 1000.0        | 5.85     | 0.0  | 0.0       | 1005.85 | 0.0   | 0.0        | 0.0  | 1005.85     |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
     Then LoanDisbursalTransactionBusinessEvent has changedTerms "false"
 
-  Scenario: Verify that changedTerms is true in LoanDisbursalTransactionBusinessEvent when additional disbursement adds new terms
-    When Admin sets the business date to "01 January 2024"
-    When Admin creates a client with random data
-    When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE_FULL_TERM_TRANCHE | 01 January 2024   | 200            | 9.4822                 | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
-    And Admin successfully approves the loan on "01 January 2024" with "200" amount and expected disbursement date on "01 January 2024"
-    When Admin disburses the loan on "01 January 2024" with "100" EUR transaction amount
-    Then LoanDisbursalTransactionBusinessEvent has changedTerms "false"
-    When Admin sets the business date to "01 February 2024"
-    When Admin disburses the loan on "01 February 2024" with "100" EUR transaction amount
-    Then LoanDisbursalTransactionBusinessEvent has changedTerms "true"
-
+  @TestRailId:C4645
   Scenario: Verify that changedTerms is false in LoanDisbursalTransactionBusinessEvent when additional disbursement does not change terms
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -9055,7 +9056,41 @@ Feature: Loan
       | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_MULTIDISBURSE | 01 January 2024   | 300            | 9.4822                 | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2024" with "300" amount and expected disbursement date on "01 January 2024"
     When Admin disburses the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2024 |                  | 83.66           | 16.34         | 0.79     | 0.0  | 0.0       | 17.13 | 0.0   | 0.0        | 0.0  | 17.13       |
+      | 2  | 29   | 01 March 2024    |                  | 67.19           | 16.47         | 0.66     | 0.0  | 0.0       | 17.13 | 0.0   | 0.0        | 0.0  | 17.13       |
+      | 3  | 31   | 01 April 2024    |                  | 50.59           | 16.6          | 0.53     | 0.0  | 0.0       | 17.13 | 0.0   | 0.0        | 0.0  | 17.13       |
+      | 4  | 30   | 01 May 2024      |                  | 33.86           | 16.73         | 0.4      | 0.0  | 0.0       | 17.13 | 0.0   | 0.0        | 0.0  | 17.13       |
+      | 5  | 31   | 01 June 2024     |                  | 17.0            | 16.86         | 0.27     | 0.0  | 0.0       | 17.13 | 0.0   | 0.0        | 0.0  | 17.13       |
+      | 6  | 30   | 01 July 2024     |                  | 0.0             | 17.0          | 0.13     | 0.0  | 0.0       | 17.13 | 0.0   | 0.0        | 0.0  | 17.13       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 100.0         | 2.78     | 0.0  | 0.0       | 102.78 | 0.0   | 0.0        | 0.0  | 102.78      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
     Then LoanDisbursalTransactionBusinessEvent has changedTerms "false"
     When Admin sets the business date to "08 January 2024"
     When Admin disburses the loan on "08 January 2024" with "200" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      |    |      | 08 January 2024  |                  | 200.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2024 |                  | 250.68          | 49.32         | 2.01     | 0.0  | 0.0       | 51.33 | 0.0   | 0.0        | 0.0  | 51.33       |
+      | 2  | 29   | 01 March 2024    |                  | 201.33          | 49.35         | 1.98     | 0.0  | 0.0       | 51.33 | 0.0   | 0.0        | 0.0  | 51.33       |
+      | 3  | 31   | 01 April 2024    |                  | 151.59          | 49.74         | 1.59     | 0.0  | 0.0       | 51.33 | 0.0   | 0.0        | 0.0  | 51.33       |
+      | 4  | 30   | 01 May 2024      |                  | 101.46          | 50.13         | 1.2      | 0.0  | 0.0       | 51.33 | 0.0   | 0.0        | 0.0  | 51.33       |
+      | 5  | 31   | 01 June 2024     |                  | 50.93           | 50.53         | 0.8      | 0.0  | 0.0       | 51.33 | 0.0   | 0.0        | 0.0  | 51.33       |
+      | 6  | 30   | 01 July 2024     |                  | 0.0             | 50.93         | 0.4      | 0.0  | 0.0       | 51.33 | 0.0   | 0.0        | 0.0  | 51.33       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 300.0         | 7.98     | 0.0  | 0.0       | 307.98 | 0.0   | 0.0        | 0.0  | 307.98      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 08 January 2024  | Disbursement     | 200.0  | 0.0       | 0.0      | 0.0  | 0.0       | 300.0        | false    | false    |
     Then LoanDisbursalTransactionBusinessEvent has changedTerms "false"
+    When Loan Pay-off is made on "08 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
