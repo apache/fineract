@@ -2856,8 +2856,7 @@ Feature: LoanReAmortization
       | 01 April 2024    | Disbursement     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 112.68       | false    | false    |
       | 01 April 2024    | Down Payment     | 12.5   | 12.39     | 0.11     | 0.0  | 0.0       | 100.29       | false    | true     |
 
-    #When Loan Pay-off is made on "01 April 2024"
-    And Customer makes "AUTOPAY" repayment on "01 April 2024" with 100.92 EUR transaction amount
+    When Loan Pay-off is made on "01 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4402 @AdvancedPaymentAllocation
