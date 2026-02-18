@@ -28,6 +28,7 @@ import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.junit.jupiter.api.Test;
 
 class SavingsHelperNPExceptionTest {
+
     private final SavingsHelper savingsHelper = new SavingsHelper(null);
 
     @Test
