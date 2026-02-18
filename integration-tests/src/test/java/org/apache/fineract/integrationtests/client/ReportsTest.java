@@ -48,7 +48,7 @@ public class ReportsTest extends IntegrationTest {
 
     @Test
     void listReports() {
-        assertThat(ok(fineractClient().reports.retrieveReportList())).hasSize(128);
+        assertThat(ok(fineractClient().reports.retrieveReportList())).hasSize(84);
     }
 
     @Test
@@ -83,7 +83,7 @@ public class ReportsTest extends IntegrationTest {
                 () -> ok(fineractClient().reportsRun.runReportGetFile("Expected Payments By Date - Formatted", Map.of("R_endDate",
                         "2013-04-30", "R_loanOfficerId", "-1", "R_officeId", "1", "R_startDate", "2013-04-16", "output-type", "PDF"),
                         false)));
-        assertEquals(503, exception.getResponse().code());
+        assertEquals(404, exception.getResponse().code());
     }
 
     @Test

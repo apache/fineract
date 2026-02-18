@@ -23,6 +23,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <changeSet author="fineract" id="1-postgresql" context="postgresql">
+        <validCheckSum>ANY</validCheckSum>
         <insert tableName="stretchy_parameter">
             <column name="id" valueNumeric="1"/>
             <column name="parameter_name" value="startDateSelect"/>
@@ -474,6 +475,7 @@
         </insert>
     </changeSet>
     <changeSet author="fineract" id="2-postgresql" context="postgresql">
+        <validCheckSum>ANY</validCheckSum>
         <insert tableName="stretchy_report">
             <column name="id" valueNumeric="1"/>
             <column name="report_name" value="Client Listing"/>
@@ -643,42 +645,6 @@
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="48"/>
-            <column name="report_name" value="Balance Sheet"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Accounting"/>
-            <column name="report_sql"/>
-            <column name="description" value="Balance Sheet"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="49"/>
-            <column name="report_name" value="Income Statement"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Accounting"/>
-            <column name="report_sql"/>
-            <column name="description" value="Profit and Loss Statement"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="50"/>
-            <column name="report_name" value="Trial Balance"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Accounting"/>
-            <column name="report_sql"/>
-            <column name="description" value="Trial Balance Report"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
             <column name="id" valueNumeric="51"/>
             <column name="report_name" value="Written-Off Loans"/>
             <column name="report_type" value="Table"/>
@@ -799,30 +765,6 @@
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="91"/>
-            <column name="report_name" value="Loan Account Schedule"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="92"/>
-            <column name="report_name" value="Branch Expected Cash Flow"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
             <column name="id" valueNumeric="93"/>
             <column name="report_name" value="Expected Payments By Date - Basic"/>
             <column name="report_type" value="Table"/>
@@ -830,18 +772,6 @@
             <column name="report_category" value="Loan"/>
             <column name="report_sql" value="SELECT    ounder.name AS &quot;Office&quot;, coalesce(ms.display_name,'-') AS &quot;Loan Officer&quot;, mc.account_no AS &quot;Client Account Number&quot;, mc.display_name AS &quot;Name&quot;, mp.name AS &quot;Product&quot;, ml.account_no AS &quot;Loan Account Number&quot;, mr.duedate AS &quot;Due Date&quot;, mr.installment AS &quot;Installment&quot;, cu.display_symbol AS &quot;Currency&quot;, mr.principal_amount - coalesce(mr.principal_completed_derived,0) AS &quot;Principal Due&quot;, mr.interest_amount - coalesce(coalesce(mr.interest_completed_derived,mr.interest_waived_derived),0) AS &quot;Interest Due&quot;, coalesce(mr.fee_charges_amount,0) - coalesce(coalesce(mr.fee_charges_completed_derived,mr.fee_charges_waived_derived),0) AS &quot;Fees Due&quot;, coalesce(mr.penalty_charges_amount,0) - coalesce(coalesce(mr.penalty_charges_completed_derived,mr.penalty_charges_waived_derived),0) AS &quot;Penalty Due&quot;, (mr.principal_amount- coalesce(mr.principal_completed_derived,0)) + (mr.interest_amount- coalesce(coalesce(mr.interest_completed_derived,mr.interest_waived_derived),0)) + (coalesce(mr.fee_charges_amount,0)- coalesce(coalesce(mr.fee_charges_completed_derived,mr.fee_charges_waived_derived),0)) + (coalesce(mr.penalty_charges_amount,0)- coalesce(coalesce(mr.penalty_charges_completed_derived,mr.penalty_charges_waived_derived),0)) AS &quot;Total Due&quot;, mlaa.total_overdue_derived AS &quot;Total Overdue&quot; FROM      m_office mo JOIN      m_office ounder ON        ounder.hierarchy LIKE concat(mo.hierarchy, '%') AND       ounder.hierarchy LIKE concat('${currentUserHierarchy}', '%') LEFT JOIN m_client mc ON        mc.office_id=ounder.id LEFT JOIN m_loan ml ON        ml.client_id=mc.id AND       ml.loan_status_id=300 LEFT JOIN m_loan_arrears_aging mlaa ON        mlaa.loan_id=ml.id LEFT JOIN m_loan_repayment_schedule mr ON        mr.loan_id=ml.id AND       mr.completed_derived=false LEFT JOIN m_product_loan mp ON        mp.id=ml.product_id LEFT JOIN m_staff ms ON        ms.id=ml.loan_officer_id LEFT JOIN m_currency cu ON        cu.code=ml.currency_code WHERE     mo.id='${officeId}' AND       ( coalesce(ml.loan_officer_id, -10) = ${loanOfficerId} OR        '-1' = ${loanOfficerId}) AND       mr.duedate BETWEEN '${startDate}' AND '${endDate}' ORDER BY  ounder.id, mr.duedate, ml.account_no"/>
             <column name="description" value="Test"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="94"/>
-            <column name="report_name" value="Expected Payments By Date - Formatted"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql"/>
-            <column name="description"/>
             <column name="core_report" valueBoolean="true"/>
             <column name="use_report" valueBoolean="true"/>
             <column name="self_service_user_report" valueBoolean="false"/>
@@ -855,7 +785,7 @@
             <column name="report_sql" value="SELECT    x.* FROM      m_office o,&#10;          m_group g,&#10;          (&#10;                    SELECT    a.activeclients,&#10;                              (b.activeclientloans + c.activegrouploans) AS activeloans,&#10;                              b.activeclientloans,&#10;                              c.activegrouploans,&#10;                              (b.activeclientborrowers + c.activegroupborrowers) AS activeborrowers,&#10;                              b.activeclientborrowers,&#10;                              c.activegroupborrowers,&#10;                              (b.overdueclientloans + c.overduegrouploans) AS overdueloans,&#10;                              b.overdueclientloans,&#10;                              c.overduegrouploans&#10;                    FROM      (&#10;                                     SELECT Count(*) AS activeclients&#10;                                     FROM   m_group topgroup&#10;                                     JOIN   m_group g&#10;                                     ON     g.hierarchy LIKE Concat(topgroup.hierarchy, '%')&#10;                                     JOIN   m_group_client gc&#10;                                     ON     gc.group_id = g.id&#10;                                     JOIN   m_client c&#10;                                     ON     c.id = gc.client_id&#10;                                     WHERE  topgroup.id = ${groupId}&#10;                                     AND    c.status_enum = 300) a,&#10;                              (&#10;                                     SELECT count(*) AS activeclientloans,&#10;                                            count(DISTINCT(l.client_id)) AS activeclientborrowers,&#10;                                            coalesce(sum(&#10;                                            CASE&#10;                                                   WHEN laa.loan_id IS NOT NULL THEN 1&#10;                                                   ELSE 0&#10;                                            end),&#10;                                            0) AS overdueclientloans&#10;                    FROM      m_group topgroup&#10;                    JOIN      m_group g&#10;                    ON        g.hierarchy LIKE concat(topgroup.hierarchy, '%')&#10;                    JOIN      m_loan l&#10;                    ON        l.group_id = g.id&#10;                    AND       l.client_id IS NOT NULL&#10;                    LEFT JOIN m_loan_arrears_aging laa&#10;                    ON        laa.loan_id = l.id&#10;                    WHERE     topgroup.id = ${groupId}&#10;                    AND       l.loan_status_id = 300) b,&#10;          (&#10;                 SELECT count(*)  AS activegrouploans,&#10;                        count(DISTINCT(l.group_id)) AS activegroupborrowers,&#10;                        coalesce(sum(&#10;                        CASE&#10;                               WHEN laa.loan_id IS NOT NULL THEN 1&#10;                               ELSE 0&#10;                        end),&#10;                        0) AS overduegrouploans&#10;FROM      m_group topgroup JOIN      m_group g ON        g.hierarchy LIKE concat(topgroup.hierarchy, '%') JOIN      m_loan l ON        l.group_id = g.id AND       l.client_id IS NULL LEFT JOIN m_loan_arrears_aging laa ON        laa.loan_id = l.id WHERE     topgroup.id = ${groupId} AND       l.loan_status_id = 300) c ) x WHERE g.id = ${groupId} AND o.id = g.office_id AND o.hierarchy LIKE concat('${currentUserHierarchy}', '%')&#10;"/>
             <column name="description" value="Utility query for getting group summary count details for a group_id"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -867,7 +797,7 @@
             <column name="report_sql" value="&#10;SELECT    Coalesce(cur.display_symbol, l.currency_code)  AS currency,&#10;          Coalesce(Sum(l.principal_disbursed_derived),0) AS totaldisbursedamount,&#10;          Coalesce(Sum(l.principal_outstanding_derived),0) AS totalloanoutstandingamount,&#10;          Count(laa.loan_id) AS overdueloans,&#10;          Coalesce(Sum(laa.total_overdue_derived), 0)  AS totalloanoverdueamount&#10;FROM      m_group topgroup JOIN      m_office o ON        o.id = topgroup.office_id AND       o.hierarchy LIKE Concat('${currentUserHierarchy}', '%') JOIN      m_group g ON        g.hierarchy LIKE Concat(topgroup.hierarchy, '%') JOIN      m_loan l ON        l.group_id = g.id LEFT JOIN m_loan_arrears_aging laa ON        laa.loan_id = l.id LEFT JOIN m_currency cur ON        cur.code = l.currency_code WHERE     topgroup.id = ${groupId} AND       l.disbursedon_date IS NOT NULL GROUP BY  l.currency_code,&#10;          cur.display_symbol&#10;"/>
             <column name="description" value="Utility query for getting group summary currency amount details for a group_id"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -879,7 +809,7 @@
             <column name="report_sql" value="select DATE ${startDate} AS &quot;Transaction Date&quot;, 'Opening Balance' AS &quot;Transaction Type&quot;, null AS &quot;Office&quot;, null AS &quot;Loan Officer&quot;, null AS &quot;Loan Account No&quot;, null AS &quot;Loan Product&quot;, null AS &quot;Currency&quot;, null AS &quot;Client Account No&quot;, null AS &quot;Client&quot;, null AS &quot;Principal&quot;, null AS &quot;Interest&quot;, COALESCE(round(sum(CASE WHEN txn.transaction_type_enum  = 1 /* disbursement */ THEN COALESCE(txn.interest_portion_derived, 0.00) ELSE 0 END), 2), 0.00) AS &quot;Outstanding Principal&quot;, COALESCE(round(sum(CASE WHEN txn.transaction_type_enum in (2, 5, 8) /* repayment, repayment at disbursal, recovery repayment */ THEN COALESCE(txn.interest_portion_derived, 0.00) ELSE 0 END), 2), 0.00) AS &quot;Interest Income&quot;, COALESCE(round(sum(CASE WHEN txn.transaction_type_enum = 6 THEN COALESCE(txn.principal_portion_derived, 0.00) ELSE 0 END), 2), 0.00) AS &quot;Principal Write Off&quot; from m_office o join m_office ounder on ounder.hierarchy like concat(o.hierarchy, '%') and ounder.hierarchy like concat('${currentUserHierarchy}', '%') join m_client c on c.office_id = ounder.id join m_loan l on l.client_id = c.id join m_product_loan lp on lp.id = l.product_id join m_loan_transaction txn on txn.loan_id = l.id left join m_currency cur on cur.code = l.currency_code where txn.is_reversed = false and txn.transaction_type_enum not in (10, 11) and o.id = '${officeId}' and txn.transaction_date &lt; DATE ${startDate} union all select txn.transaction_date AS &quot;Transaction Date&quot;, cast(COALESCE(re.enum_message_property, concat('Unknown Transaction Type Value:', ' ', txn.transaction_type_enum)) as char) AS &quot;Transaction Type&quot;, ounder.name AS &quot;Office&quot;, lo.display_name AS &quot;Loan Officer&quot;, l.account_no AS &quot;Loan Account No&quot;, lp.name AS &quot;Loan Product&quot;, COALESCE(cur.display_symbol, l.currency_code) AS &quot;Currency&quot;, c.account_no AS &quot;Client Account No&quot;, c.display_name AS &quot;Client&quot;, COALESCE(txn.principal_portion_derived, 0.00) AS &quot;Principal&quot;, COALESCE(txn.interest_portion_derived, 0.00) AS &quot;Interest&quot;, COALESCE(round(sum(CASE WHEN txn.transaction_type_enum = 1 /* disbursement */ THEN COALESCE(txn.amount, 0.00) ELSE -1 * COALESCE(txn.principal_portion_derived, 0.00) END), 2), 0.00) AS &quot;Outstanding Principal&quot;, COALESCE(round(sum(CASE WHEN txn.transaction_type_enum in (2, 5, 8) /* repayment, repayment at disbursal, recovery repayment */ THEN COALESCE(txn.interest_portion_derived, 0.00) ELSE 0 END), 2), 0.00) AS &quot;Interest Income&quot;, COALESCE(round(sum(CASE WHEN txn.transaction_type_enum = 6 THEN COALESCE(txn.principal_portion_derived, 0.00) ELSE 0 END), 2), 0.00) AS &quot;Principal Write Off&quot; from m_office o join m_office ounder on ounder.hierarchy like concat(o.hierarchy, '%') and ounder.hierarchy like concat('${currentUserHierarchy}', '%') join m_client c on c.office_id = ounder.id join m_loan l on l.client_id = c.id left join m_staff lo on lo.id = l.loan_officer_id join m_product_loan lp on lp.id = l.product_id join m_loan_transaction txn on txn.loan_id = l.id left join m_currency cur on cur.code = l.currency_code left join r_enum_value re on re.enum_name = 'transaction_type_enum' AND re.enum_id = txn.transaction_type_enum where txn.is_reversed = false and txn.transaction_type_enum not in (10, 11) and (COALESCE(l.loan_officer_id, -10) = 9 or '-1' = 9) and o.id = '${officeId}' and txn.transaction_date &gt;= DATE ${startDate} and txn.transaction_date &lt;= DATE ${endDate} group by txn.id, ounder.id, lo.id, l.id, lp.id, cur.id, c.id, re.enum_message_property"/>
             <column name="description" value="Running Balance Txn report for Individual Lending.&#10;Suitable for small MFI's.  Larger could use it using the branch or other parameters.&#10;Basically, suck it and see if its quick enough for you out-of-te box or whether it needs performance work in your situation.&#10;"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -891,7 +821,7 @@
             <column name="report_sql" value="select COALESCE(cur.display_symbol, l.currency_code) as Currency, /*This query will return more than one entry if more than one currency is used */ count(distinct(c.id)) as activeClients, count(*) as activeLoans, sum(l.principal_disbursed_derived) as disbursedAmount, sum(l.principal_outstanding_derived) as loanOutstandingAmount, round((sum(l.principal_outstanding_derived) * 100) / sum(l.principal_disbursed_derived),2) as loanOutstandingPC, sum(COALESCE(lpa.principal_in_advance_derived,0.0)) as LoanPaidInAdvance, sum( CASE WHEN (CURRENT_DATE - 28 * INTERVAL '1 day') &gt; COALESCE(laa.overdue_since_date_derived, CURRENT_DATE) THEN l.principal_outstanding_derived ELSE 0 END) as portfolioAtRisk, round((sum( CASE WHEN (CURRENT_DATE - 28 * INTERVAL '1 day') &gt; COALESCE(laa.overdue_since_date_derived, CURRENT_DATE) THEN l.principal_outstanding_derived ELSE 0 END) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC, count(distinct( CASE WHEN (CURRENT_DATE - 28 * INTERVAL '1 day') &gt; COALESCE(laa.overdue_since_date_derived, CURRENT_DATE) THEN c.id ELSE null END)) as clientsInDefault, round((count(distinct( CASE WHEN (CURRENT_DATE - 28 * INTERVAL '1 day') &gt; COALESCE(laa.overdue_since_date_derived, CURRENT_DATE) THEN c.id ELSE null END))) * 100 / count(distinct(c.id)),2) as clientsInDefaultPC, sum(l.principal_disbursed_derived) / count(*) as averageLoanAmount from m_staff fa join m_office o on o.id = fa.office_id AND o.hierarchy like concat('${currentUserHierarchy}', '%') join m_group pgm on pgm.staff_id = fa.id join m_loan l on l.group_id = pgm.id and l.client_id is not null left join m_currency cur on cur.code = l.currency_code left join m_loan_arrears_aging laa on laa.loan_id = l.id left join m_loan_paid_in_advance lpa on lpa.loan_id = l.id join m_client c on c.id = l.client_id where fa.id = ${staffId} and l.loan_status_id = 300 group by l.currency_code, cur.id"/>
             <column name="description" value="Field Agent Statistics"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -903,7 +833,7 @@
             <column name="report_sql" value="select pgm.id, pgm.display_name as name, sts.enum_message_property as status  from m_group pgm  join m_office o on o.id = pgm.office_id AND o.hierarchy like concat('${currentUserHierarchy}', '%') left join r_enum_value sts on sts.enum_name = 'status_enum' and sts.enum_id = pgm.status_enum  where pgm.staff_id = ${staffId}"/>
             <column name="description" value="List of Field Agent Programs"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -915,7 +845,7 @@
             <column name="report_sql" value="select l.id as loanId, l.account_no as loanAccountNo, c.id as clientId, c.account_no as clientAccountNo, pgm.display_name as programName,  (select count(*) from m_loan cy where cy.group_id = pgm.id and cy.client_id =c.id and cy.disbursedon_date &lt;= l.disbursedon_date) as loanCycleNo,  c.display_name as clientDisplayName, COALESCE(cur.display_symbol, l.currency_code) as Currency, COALESCE(l.principal_repaid_derived,0.0) as loanRepaidAmount, COALESCE(l.principal_outstanding_derived, 0.0) as loanOutstandingAmount, COALESCE(lpa.principal_in_advance_derived,0.0) as LoanPaidInAdvance,  COALESCE(laa.principal_overdue_derived, 0.0) as loanInArrearsAmount, CASE WHEN COALESCE(laa.principal_overdue_derived, 0.00) &gt; 0 THEN 'Yes' ELSE 'No' END as inDefault,  CASE WHEN (CURRENT_DATE - 28 * INTERVAL '1 day') &gt; COALESCE(laa.overdue_since_date_derived, CURRENT_DATE) THEN l.principal_outstanding_derived ELSE 0 END as portfolioAtRisk   from m_group pgm  join m_office o on o.id = pgm.office_id AND o.hierarchy like concat('${currentUserHierarchy}', '%')  join m_loan l on l.group_id = pgm.id and l.client_id is not null  left join m_currency cur on cur.code = l.currency_code  join m_client c on c.id = l.client_id left join m_loan_arrears_aging laa on laa.loan_id = l.id  left join m_loan_paid_in_advance lpa on lpa.loan_id = l.id  where pgm.id = ${programId}  and l.loan_status_id = 300 order by c.display_name, l.account_no"/>
             <column name="description" value="List of Loans in a Program"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -927,7 +857,7 @@
             <column name="report_sql" value="select s.id, s.display_name, s.firstname, s.lastname, s.organisational_role_enum,&#10;s.organisational_role_parent_staff_id,&#10;sp.display_name AS &quot;organisational_role_parent_staff_display_name&quot;&#10;from m_staff s&#10;join m_staff sp on s.organisational_role_parent_staff_id = sp.id&#10;where s.organisational_role_parent_staff_id = ${staffId}"/>
             <column name="description" value="Get Next Level Down Staff"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -939,7 +869,7 @@
             <column name="report_sql" value="select COALESCE(cur.display_symbol, l.currency_code) as Currency, /*This query will return more than one entry if more than one currency is used */ count(distinct(c.id)) as activeClients, count(*) as activeLoans, sum(l.principal_disbursed_derived) as disbursedAmount, sum(l.principal_outstanding_derived) as loanOutstandingAmount, round((sum(l.principal_outstanding_derived) * 100) / sum(l.principal_disbursed_derived),2) as loanOutstandingPC, sum(COALESCE(lpa.principal_in_advance_derived,0.0)) as LoanPaidInAdvance, sum( CASE WHEN (CURRENT_DATE - 28 * INTERVAL '1 day') &gt; COALESCE(laa.overdue_since_date_derived, CURRENT_DATE) THEN l.principal_outstanding_derived ELSE 0 END) as portfolioAtRisk, round((sum( CASE WHEN (CURRENT_DATE - 28 * INTERVAL '1 day') &gt; COALESCE(laa.overdue_since_date_derived, CURRENT_DATE) THEN l.principal_outstanding_derived ELSE 0 END) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC, count(distinct( CASE WHEN (CURRENT_DATE - 28 * INTERVAL '1 day') &gt; COALESCE(laa.overdue_since_date_derived, CURRENT_DATE) THEN c.id ELSE null END)) as clientsInDefault, round((count(distinct( CASE WHEN (CURRENT_DATE - 28 * INTERVAL '1 day') &gt; COALESCE(laa.overdue_since_date_derived, CURRENT_DATE) THEN c.id ELSE null END))) * 100 / count(distinct(c.id)),2) as clientsInDefaultPC, sum(l.principal_disbursed_derived) / count(*) as averageLoanAmount from m_staff coord join m_staff fa on fa.organisational_role_parent_staff_id = coord.id join m_office o on o.id = fa.office_id AND o.hierarchy like concat('${currentUserHierarchy}', '%') join m_group pgm on pgm.staff_id = fa.id join m_loan l on l.group_id = pgm.id and l.client_id is not null left join m_currency cur on cur.code = l.currency_code left join m_loan_arrears_aging laa on laa.loan_id = l.id left join m_loan_paid_in_advance lpa on lpa.loan_id = l.id join m_client c on c.id = l.client_id where coord.id = ${staffId} and l.loan_status_id = 300 group by l.currency_code, cur.id"/>
             <column name="description" value="Coordinator Statistics"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -951,7 +881,7 @@
             <column name="report_sql" value="SELECT    Coalesce(cur.display_symbol, l.currency_code)  AS currency, Count(DISTINCT(c.id))  AS activeclients, Count(*) AS activeloans, Sum(l.principal_disbursed_derived) AS disbursedamount, Sum(l.principal_outstanding_derived) AS loanoutstandingamount, Round((Sum(l.principal_outstanding_derived) * 100) / Sum(l.principal_disbursed_derived),2) AS loanoutstandingpc, Sum(Coalesce(lpa.principal_in_advance_derived,0.0))  AS loanpaidinadvance, sum( CASE WHEN ( CURRENT_DATE - 28 * INTERVAL '1 day') &gt; coalesce(laa.overdue_since_date_derived, CURRENT_DATE) THEN l.principal_outstanding_derived ELSE 0 end) AS portfolioatrisk, round((sum( CASE WHEN ( CURRENT_DATE - 28 * INTERVAL '1 day' ) &gt; coalesce(laa.overdue_since_date_derived, CURRENT_DATE) THEN l.principal_outstanding_derived ELSE 0 end) * 100) / sum(l.principal_outstanding_derived), 2) AS portfolioatriskpc, count(DISTINCT( CASE WHEN ( CURRENT_DATE - 28 * INTERVAL '1 day' ) &gt; coalesce(laa.overdue_since_date_derived, CURRENT_DATE) THEN c.id ELSE NULL end)) AS clientsindefault, round((count(DISTINCT( CASE WHEN ( CURRENT_DATE - 28 * INTERVAL '1 day' ) &gt; coalesce(laa.overdue_since_date_derived, CURRENT_DATE) THEN c.id ELSE NULL end)) * 100) / count(DISTINCT(c.id)), 2)  AS clientsindefaultpc, (sum(l.principal_disbursed_derived) / count(*)) AS averageloanamount FROM      m_staff bm JOIN      m_staff coord ON        coord.organisational_role_parent_staff_id = bm.id JOIN      m_staff fa ON        fa.organisational_role_parent_staff_id = coord.id JOIN      m_office o ON        o.id = fa.office_id AND       o.hierarchy LIKE concat('${currentUserHierarchy}', '%') JOIN      m_group pgm ON        pgm.staff_id = fa.id JOIN      m_loan l ON        l.group_id = pgm.id AND       l.client_id IS NOT NULL LEFT JOIN m_currency cur ON        cur.code = l.currency_code LEFT JOIN m_loan_arrears_aging laa ON        laa.loan_id = l.id LEFT JOIN m_loan_paid_in_advance lpa ON        lpa.loan_id = l.id JOIN      m_client c ON        c.id = l.client_id WHERE     bm.id = ${staffId} AND       l.loan_status_id = 300 GROUP BY  l.currency_code, cur.display_symbol"/>
             <column name="description" value="Branch Manager Statistics"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -963,7 +893,7 @@
             <column name="report_sql" value="SELECT    Coalesce(cur.display_symbol, l.currency_code) AS currency, /*This query will return more than one entry if more than one currency is used */ Count(DISTINCT(c.id))  AS activeclients, Count(*) AS activeloans, Sum(l.principal_disbursed_derived) AS disbursedamount, Sum(l.principal_outstanding_derived) AS loanoutstandingamount, Round((Sum(l.principal_outstanding_derived) * 100) / Sum(l.principal_disbursed_derived),2) AS loanoutstandingpc, Sum(Coalesce(lpa.principal_in_advance_derived,0.0))  AS loanpaidinadvance, sum( CASE WHEN ( CURRENT_DATE - 28 * INTERVAL '1 day') &gt; coalesce(laa.overdue_since_date_derived, CURRENT_DATE) THEN l.principal_outstanding_derived ELSE 0 end) AS portfolioatrisk, round((sum( CASE WHEN ( CURRENT_DATE - 28 * INTERVAL '1 day' ) &gt; coalesce(laa.overdue_since_date_derived, CURRENT_DATE) THEN l.principal_outstanding_derived ELSE 0 end) * 100) / sum(l.principal_outstanding_derived), 2) AS portfolioatriskpc, count(DISTINCT( CASE WHEN ( CURRENT_DATE - 28 * INTERVAL '1 day' ) &gt; coalesce(laa.overdue_since_date_derived, CURRENT_DATE) THEN c.id ELSE NULL end)) AS clientsindefault, round((count(DISTINCT( CASE WHEN ( CURRENT_DATE - 28 * INTERVAL '1 day' ) &gt; coalesce(laa.overdue_since_date_derived, CURRENT_DATE) THEN c.id ELSE NULL end)) * 100) / count(DISTINCT(c.id)), 2)  AS clientsindefaultpc, (sum(l.principal_disbursed_derived) / count(*)) AS averageloanamount FROM      m_staff pd JOIN      m_staff bm ON        bm.organisational_role_parent_staff_id = pd.id JOIN      m_staff coord ON        coord.organisational_role_parent_staff_id = bm.id JOIN      m_staff fa ON        fa.organisational_role_parent_staff_id = coord.id JOIN      m_office o ON        o.id = fa.office_id AND       o.hierarchy LIKE concat('${currentUserHierarchy}', '%') JOIN      m_group pgm ON        pgm.staff_id = fa.id JOIN      m_loan l ON        l.group_id = pgm.id AND       l.client_id IS NOT NULL LEFT JOIN m_currency cur ON        cur.code = l.currency_code LEFT JOIN m_loan_arrears_aging laa ON        laa.loan_id = l.id LEFT JOIN m_loan_paid_in_advance lpa ON        lpa.loan_id = l.id JOIN      m_client c ON        c.id = l.client_id WHERE     pd.id = ${staffId} AND       l.loan_status_id = 300 GROUP BY  l.currency_code, cur.display_symbol"/>
             <column name="description" value="Program DirectorStatistics"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -975,7 +905,7 @@
             <column name="report_sql" value="select COALESCE(cur.display_symbol, l.currency_code) as Currency, /*This query will return more than one entry if more than one currency is used */ count(distinct(c.id)) as activeClients, count(*) as activeLoans, sum(l.principal_disbursed_derived) as disbursedAmount, sum(l.principal_outstanding_derived) as loanOutstandingAmount, round((sum(l.principal_outstanding_derived) * 100) / sum(l.principal_disbursed_derived),2) as loanOutstandingPC, sum(COALESCE(lpa.principal_in_advance_derived,0.0)) as LoanPaidInAdvance, sum( CASE WHEN (CURRENT_DATE - 28 * INTERVAL '1 day') &gt; COALESCE(laa.overdue_since_date_derived, CURRENT_DATE) THEN l.principal_outstanding_derived ELSE 0 END) as portfolioAtRisk, round((sum( CASE WHEN (CURRENT_DATE - 28 * INTERVAL '1 day') &gt; COALESCE(laa.overdue_since_date_derived, CURRENT_DATE) THEN l.principal_outstanding_derived ELSE 0 END) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC, count(distinct( CASE WHEN (CURRENT_DATE - 28 * INTERVAL '1 day') &gt; COALESCE(laa.overdue_since_date_derived, CURRENT_DATE) THEN c.id ELSE null END)) as clientsInDefault, round((count(distinct( CASE WHEN (CURRENT_DATE - 28 * INTERVAL '1 day') &gt; COALESCE(laa.overdue_since_date_derived, CURRENT_DATE) THEN c.id ELSE null END))) * 100 / count(distinct(c.id)),2) as clientsInDefaultPC, sum(l.principal_disbursed_derived) / count(*) as averageLoanAmount from m_group pgm join m_office o on o.id = pgm.office_id AND o.hierarchy like concat('${currentUserHierarchy}', '%') join m_loan l on l.group_id = pgm.id and l.client_id is not null left join m_currency cur on cur.code = l.currency_code left join m_loan_arrears_aging laa on laa.loan_id = l.id left join m_loan_paid_in_advance lpa on lpa.loan_id = l.id join m_client c on c.id = l.client_id where pgm.id = ${programId} and l.loan_status_id = 300 group  by l.currency_code, cur.id"/>
             <column name="description" value="Program Statistics"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -987,7 +917,7 @@
             <column name="report_sql" value="SELECT x.* FROM m_client c, m_office o, (SELECT a.loanCycle, a.activeLoans, b.lastLoanAmount, d.activeSavings, d.totalSavings FROM (SELECT COALESCE(MAX(l.loan_counter),0) AS loanCycle, COUNT(l.id) AS activeLoans FROM m_loan l WHERE l.loan_status_id=300 AND l.client_id=${clientId}) a, (SELECT count(l.id), COALESCE(l.principal_amount,0) AS lastLoanAmount FROM m_loan l WHERE l.client_id=${clientId} AND l.disbursedon_date = (SELECT COALESCE(MAX(disbursedon_date),NOW()) FROM m_loan where client_id=${clientId} and loan_status_id=300) group by l.principal_amount) b, (SELECT COUNT(s.id) AS activeSavings, COALESCE(SUM(s.account_balance_derived),0) AS totalSavings FROM m_savings_account s WHERE s.status_enum=300 AND s.client_id=${clientId}) d) x WHERE c.id=${clientId} AND o.id = c.office_id AND o.hierarchy LIKE CONCAT('${currentUserHierarchy}', '%')"/>
             <column name="description" value="Utility query for getting the client summary details"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -999,7 +929,7 @@
             <column name="report_sql" value="SELECT lp.name AS &quot;productName&quot;, MAX(l.loan_product_counter) AS &quot;loanProductCycle&quot; FROM m_loan l JOIN m_product_loan lp ON l.product_id=lp.id WHERE lp.include_in_borrower_cycle=true AND l.loan_product_counter IS NOT NULL AND l.client_id=${clientId} GROUP BY lp.id"/>
             <column name="description" value="Utility query for getting the client loan cycle details"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -1011,367 +941,7 @@
             <column name="report_sql" value="select COALESCE(cur.display_symbol, sa.currency_code) as currency, count(sa.id) as totalSavingAccounts, COALESCE(sum(sa.account_balance_derived),0) as totalSavings from m_group topgroup join m_office o on o.id = topgroup.office_id and o.hierarchy like concat('${currentUserHierarchy}', '%') join m_group g on g.hierarchy like concat(topgroup.hierarchy, '%') join m_savings_account sa on sa.group_id = g.id left join m_currency cur on cur.code = sa.currency_code where topgroup.id = ${groupId} and sa.activatedon_date is not null group by sa.currency_code, cur.id"/>
             <column name="description" value="Utility query for getting group or center saving summary details for a group_id"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="118"/>
-            <column name="report_name" value="Savings Transactions"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Savings"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="119"/>
-            <column name="report_name" value="Client Savings Summary"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Savings"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="120"/>
-            <column name="report_name" value="Active Loans - Details(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="121"/>
-            <column name="report_name" value="Active Loans - Summary(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="122"/>
-            <column name="report_name" value="Active Loans by Disbursal Period(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="123"/>
-            <column name="report_name" value="Active Loans in last installment Summary(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="124"/>
-            <column name="report_name" value="Active Loans in last installment(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="125"/>
-            <column name="report_name" value="Active Loans Passed Final Maturity Summary(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="126"/>
-            <column name="report_name" value="Active Loans Passed Final Maturity(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="127"/>
-            <column name="report_name" value="Aging Detail(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="128"/>
-            <column name="report_name" value="Aging Summary (Arrears in Months)(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="129"/>
-            <column name="report_name" value="Aging Summary (Arrears in Weeks)(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="130"/>
-            <column name="report_name" value="Client Listing(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Client"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="131"/>
-            <column name="report_name" value="Client Loans Listing(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Client"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="132"/>
-            <column name="report_name" value="Expected Payments By Date - Basic(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="133"/>
-            <column name="report_name" value="Funds Disbursed Between Dates Summary by Office(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Fund"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="134"/>
-            <column name="report_name" value="Funds Disbursed Between Dates Summary(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Fund"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="135"/>
-            <column name="report_name" value="Loans Awaiting Disbursal Summary by Month(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="136"/>
-            <column name="report_name" value="Loans Awaiting Disbursal Summary(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="137"/>
-            <column name="report_name" value="Loans Awaiting Disbursal(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="138"/>
-            <column name="report_name" value="Loans Pending Approval(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="139"/>
-            <column name="report_name" value="Obligation Met Loans Details(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="140"/>
-            <column name="report_name" value="Obligation Met Loans Summary(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="141"/>
-            <column name="report_name" value="Portfolio at Risk by Branch(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="142"/>
-            <column name="report_name" value="Portfolio at Risk(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="143"/>
-            <column name="report_name" value="Rescheduled Loans(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="144"/>
-            <column name="report_name" value="TxnRunningBalances(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Transaction"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="145"/>
-            <column name="report_name" value="Written-Off Loans(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="146"/>
-            <column name="report_name" value="Client Saving Transactions"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Savings"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="147"/>
-            <column name="report_name" value="Client Loan Account Schedule"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -1383,7 +953,7 @@
             <column name="report_sql" value="SELECT gr.id AS id, gr.display_name AS name FROM   m_group gr WHERE  gr.level_id=1 AND    gr.staff_id = ${staffId}"/>
             <column name="description" value=""/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -1395,7 +965,7 @@
             <column name="report_sql" value="SELECT COUNT(cl.id) AS count, cl.activation_date AS days FROM m_office of LEFT JOIN m_client cl on of.id = cl.office_id WHERE of.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = '${officeId}'),'%' ) AND (cl.activation_date BETWEEN (CURRENT_DATE - 12 * INTERVAL '1 day') AND NOW()) GROUP BY days"/>
             <column name="description" value="Retrieves the number of clients joined in last 12 days"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -1407,7 +977,7 @@
             <column name="report_sql" value="SELECT COUNT(cl.id) AS count, EXTRACT(WEEK FROM cl.activation_date) AS Weeks FROM m_office of LEFT JOIN m_client cl on of.id = cl.office_id WHERE of.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = '${officeId}'),'%' ) AND (cl.activation_date BETWEEN (CURRENT_DATE - 12 * INTERVAL '1 WEEK') AND NOW()) GROUP BY Weeks"/>
             <column name="description" value=""/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -1419,7 +989,7 @@
             <column name="report_sql" value="SELECT    Count(cl.id)  AS count, to_char(cl.activation_date, 'Month') AS &quot;Months&quot; FROM      m_office of LEFT JOIN m_client cl ON        of.id = cl.office_id WHERE     of.hierarchy LIKE Concat( ( SELECT ino.hierarchy FROM   m_office ino WHERE  ino.id = '${officeId}'),'%' ) AND       ( cl.activation_date BETWEEN (CURRENT_DATE - 12 * INTERVAL '1 MONTH') AND       DATE_TRUNC('day', now())) GROUP BY  &quot;Months&quot;"/>
             <column name="description" value=""/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -1431,7 +1001,7 @@
             <column name="report_sql" value="SELECT COUNT(ln.id) AS lcount, ln.disbursedon_date AS days FROM m_office of LEFT JOIN m_client cl on of.id = cl.office_id LEFT JOIN m_loan ln on cl.id = ln.client_id WHERE of.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = '${officeId}'),'%' ) AND (ln.disbursedon_date BETWEEN (CURRENT_DATE - 12 * INTERVAL '1 day') AND NOW()) GROUP BY days"/>
             <column name="description" value="Retrieves Number of loans disbursed for last 12 days"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -1443,7 +1013,7 @@
             <column name="report_sql" value="SELECT COUNT(ln.id) AS lcount, EXTRACT(WEEK FROM ln.disbursedon_date) AS Weeks FROM m_office of LEFT JOIN m_client cl on of.id = cl.office_id LEFT JOIN m_loan ln on cl.id = ln.client_id WHERE of.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = '${officeId}'),'%' ) AND (ln.disbursedon_date BETWEEN (CURRENT_DATE - 12 * INTERVAL '1 week') AND NOW()) GROUP BY Weeks"/>
             <column name="description" value=""/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -1455,7 +1025,7 @@
             <column name="report_sql" value="SELECT COUNT(ln.id) AS lcount, EXTRACT(MONTH FROM ln.disbursedon_date) AS &quot;Months&quot; FROM m_office of LEFT JOIN m_client cl on of.id = cl.office_id LEFT JOIN m_loan ln on cl.id = ln.client_id WHERE of.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = '${officeId}'),'%' ) AND (ln.disbursedon_date BETWEEN (CURRENT_DATE - 12 * INTERVAL '1 month') AND NOW()) GROUP BY &quot;Months&quot;"/>
             <column name="description" value=""/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -1467,7 +1037,7 @@
             <column name="report_sql" value="select amount.AmountDue-amount.AmountPaid as AmountDue, amount.AmountPaid as AmountPaid from (SELECT (COALESCE(SUM(ls.principal_amount),0) - COALESCE(SUM(ls.principal_writtenoff_derived),0)  + COALESCE(SUM(ls.interest_amount),0) - COALESCE(SUM(ls.interest_writtenoff_derived),0)   - COALESCE(SUM(ls.interest_waived_derived),0) + COALESCE(SUM(ls.fee_charges_amount),0) - COALESCE(SUM(ls.fee_charges_writtenoff_derived),0) - COALESCE(SUM(ls.fee_charges_waived_derived),0)  + COALESCE(SUM(ls.penalty_charges_amount),0) - COALESCE(SUM(ls.penalty_charges_writtenoff_derived),0)   - COALESCE(SUM(ls.penalty_charges_waived_derived),0) ) AS AmountDue, (COALESCE(SUM(ls.principal_completed_derived),0) - COALESCE(SUM(ls.principal_writtenoff_derived),0) + COALESCE(SUM(ls.interest_completed_derived),0) - COALESCE(SUM(ls.interest_writtenoff_derived),0)   - COALESCE(SUM(ls.interest_waived_derived),0) + COALESCE(SUM(ls.fee_charges_completed_derived),0) - COALESCE(SUM(ls.fee_charges_writtenoff_derived),0) - COALESCE(SUM(ls.fee_charges_waived_derived),0)  + COALESCE(SUM(ls.penalty_charges_completed_derived),0) - COALESCE(SUM(ls.penalty_charges_writtenoff_derived),0)   - COALESCE(SUM(ls.penalty_charges_waived_derived),0) ) AS AmountPaid FROM m_office of LEFT JOIN m_client cl ON of.id = cl.office_id LEFT JOIN m_loan ln ON cl.id = ln.client_id LEFT JOIN m_loan_repayment_schedule ls ON ln.id = ls.loan_id WHERE ls.duedate = DATE_TRUNC('day', NOW()) AND (of.hierarchy LIKE CONCAT(( SELECT ino.hierarchy FROM m_office ino WHERE ino.id = '${officeId}'),'%'))) as amount"/>
             <column name="description" value="Demand Vs Collection"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -1479,103 +1049,7 @@
             <column name="report_sql" value="SELECT awaitinddisbursal.amount-disbursedAmount.amount as amountToBeDisburse, disbursedAmount.amount as disbursedAmount FROM (SELECT COUNT(ln.id) AS noOfLoans, COALESCE(SUM(ln.principal_amount),0) AS amount FROM m_office of LEFT JOIN m_client cl ON cl.office_id = of.id LEFT JOIN m_loan ln ON cl.id = ln.client_id WHERE ln.expected_disbursedon_date = DATE_TRUNC('day', NOW()) AND (ln.loan_status_id=200 OR ln.loan_status_id=300) AND of.hierarchy like concat((SELECT ino.hierarchy FROM m_office ino WHERE ino.id = '${officeId}'),'%' )) awaitinddisbursal, (SELECT COUNT(ltrxn.id) as count, COALESCE(SUM(ltrxn.amount),0) as amount FROM m_office of LEFT JOIN m_client cl ON cl.office_id = of.id LEFT JOIN m_loan ln ON cl.id = ln.client_id LEFT JOIN m_loan_transaction ltrxn ON ln.id = ltrxn.loan_id WHERE ltrxn.transaction_date = DATE_TRUNC('day', NOW()) AND ltrxn.is_reversed = false AND ltrxn.transaction_type_enum=1 AND of.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = '${officeId}'),'%' )) disbursedAmount"/>
             <column name="description" value="Disbursal_Vs_Awaitingdisbursal"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="157"/>
-            <column name="report_name" value="Savings Transaction Receipt"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="158"/>
-            <column name="report_name" value="Loan Transaction Receipt"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="159"/>
-            <column name="report_name" value="Staff Assignment History"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="160"/>
-            <column name="report_name" value="GeneralLedgerReport"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Accounting"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="161"/>
-            <column name="report_name" value="Active Loan Summary per Branch"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="162"/>
-            <column name="report_name" value="Balance Outstanding"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="163"/>
-            <column name="report_name" value="Collection Report"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="164"/>
-            <column name="report_name" value="Disbursal Report"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -1755,7 +1229,7 @@
             <column name="report_sql" value="select ml.id as loanId, mc.id, mc.firstname, COALESCE(mc.middlename, '') as middlename, mc.lastname, mc.display_name as FullName, mobile_no as mobileNo, mc.group_name as GroupName, round(ml.principal_amount, ml.currency_digits) as LoanAmount, round(ml.&quot;total_outstanding_derived&quot;, ml.currency_digits) as LoanOutstanding, ml.&quot;account_no&quot; as LoanAccountId, round(mlt.amountPaid, ml.currency_digits) as repaymentAmount FROM m_office mo JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, '%') AND ounder.hierarchy like CONCAT('.', '%') LEFT JOIN (select ml.id as loanId, COALESCE(mc.id, mc2.id) as id, COALESCE(mc.firstname, mc2.firstname) as firstname, COALESCE(mc.middlename, COALESCE(mc2.middlename, (''))) as middlename, COALESCE(mc.lastname, mc2.lastname) as lastname, COALESCE(mc.display_name, mc2.display_name) as display_name, COALESCE(mc.status_enum, mc2.status_enum) as status_enum, COALESCE(mc.mobile_no, mc2.mobile_no) as mobile_no, COALESCE(mg.office_id, mc2.office_id) as office_id, COALESCE(mg.staff_id, mc2.staff_id) as staff_id, mg.id as group_id, mg.display_name as group_name from m_loan ml left join m_group mg on mg.id = ml.group_id left join m_group_client mgc on mgc.group_id = mg.id left join m_client mc on mc.id = mgc.client_id left join m_client mc2 on mc2.id = ml.client_id order by loanId) mc on mc.office_id = ounder.id right join m_loan as ml on mc.loanId = ml.id right join(select mlt.amount as amountPaid, mlt.id, mlt.loan_id from m_loan_transaction mlt where mlt.is_reversed = false group by mlt.loan_id, mlt.id) as mlt on mlt.loan_id = ml.id right join m_loan_repayment_schedule as mls1 on ml.id = mls1.loan_id and mls1.&quot;completed_derived&quot; = false and mls1.installment = (SELECT MIN(installment) from m_loan_repayment_schedule where loan_id = ml.id and duedate &lt;= CURRENT_DATE and completed_derived = false) where mc.status_enum = 300 and mobile_no is not null and ml.&quot;loan_status_id&quot; = 300 and (mo.id = '${officeId}' or '${officeId}' = -1) and (mc.staff_id = ${loanOfficerId} or ${loanOfficerId} = -1) and (ml.loan_type_enum = ${loanType} or ${loanType} = -1) and ml.id in (select mla.loan_id from m_loan_arrears_aging mla) group by ml.id, mc.id, mc.firstname, mc.middlename, mc.lastname, mc.display_name, mc.mobile_no, mc.group_name, mlt.amountPaid"/>
             <column name="description" value="Loan Repayment"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -1767,7 +1241,7 @@
             <column name="report_sql" value="SELECT mc.id, mc.firstname, mc.middlename as middlename, mc.lastname, mc.display_name as FullName, mc.mobile_no as mobileNo, mc.group_name as GroupName, mo.name as officename, ml.id as loanId, ml.account_no as accountnumber, ml.principal_amount_proposed as loanamount, ml.annual_nominal_interest_rate as annualinterestrate FROM m_office mo JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, '%') AND ounder.hierarchy like CONCAT('.', '%') LEFT JOIN ( select  ml.id as loanId, COALESCE(mc.id,mc2.id) as id, COALESCE(mc.firstname,mc2.firstname) as firstname, COALESCE(mc.middlename,COALESCE(mc2.middlename,(''))) as middlename,  COALESCE(mc.lastname,mc2.lastname) as lastname,  COALESCE(mc.display_name,mc2.display_name) as display_name,  COALESCE(mc.status_enum,mc2.status_enum) as status_enum, COALESCE(mc.mobile_no,mc2.mobile_no) as mobile_no, COALESCE(mg.office_id,mc2.office_id) as office_id, COALESCE(mg.staff_id,mc2.staff_id) as staff_id, mg.id as group_id, mg.display_name as group_name from m_loan ml left join m_group mg on mg.id = ml.group_id left join m_group_client mgc on mgc.group_id = mg.id left join m_client mc on mc.id = mgc.client_id left join m_client mc2 on mc2.id = ml.client_id order by loanId ) mc on mc.office_id = ounder.id  left join m_loan ml on ml.id = mc.loanId WHERE mc.status_enum = 300 and mc.mobile_no is not null and (mo.id = '${officeId}' or '${officeId}' = -1) and (mc.staff_id = ${loanOfficerId} or ${loanOfficerId} = -1)and (ml.id = ${loanId} or ${loanId} = -1)and (mc.id = ${clientId} or ${clientId} = -1)and (mc.group_id = ${groupId} or ${groupId} = -1)and (ml.loan_type_enum = ${loanType} or ${loanType} = -1)"/>
             <column name="description" value="Loan and client data of approved loan"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -1779,7 +1253,7 @@
             <column name="report_sql" value="SELECT mc.id, mc.firstname, mc.middlename as middlename, mc.lastname, mc.display_name as FullName, mc.mobile_no as mobileNo, mc.group_name as GroupName,  mo.name as officename, ml.id as loanId, ml.account_no as accountnumber, ml.principal_amount_proposed as loanamount, ml.annual_nominal_interest_rate as annualinterestrate  FROM m_office mo  JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, '%')  AND ounder.hierarchy like CONCAT('.', '%')  LEFT JOIN (  select   ml.id as loanId, COALESCE(mc.id,mc2.id) as id, COALESCE(mc.firstname,mc2.firstname) as firstname, COALESCE(mc.middlename,COALESCE(mc2.middlename,(''))) as middlename,   COALESCE(mc.lastname,mc2.lastname) as lastname,   COALESCE(mc.display_name,mc2.display_name) as display_name,   COALESCE(mc.status_enum,mc2.status_enum) as status_enum,  COALESCE(mc.mobile_no,mc2.mobile_no) as mobile_no,  COALESCE(mg.office_id,mc2.office_id) as office_id,  COALESCE(mg.staff_id,mc2.staff_id) as staff_id, mg.id as group_id,  mg.display_name as group_name  from m_loan ml  left join m_group mg on mg.id = ml.group_id  left join m_group_client mgc on mgc.group_id = mg.id  left join m_client mc on mc.id = mgc.client_id  left join m_client mc2 on mc2.id = ml.client_id  order by loanId  ) mc on mc.office_id = ounder.id  left join m_loan ml on ml.id = mc.loanId  WHERE mc.status_enum = 300 and mc.mobile_no is not null  and (mo.id = '${officeId}' or '${officeId}' = -1)  and (mc.staff_id = ${loanOfficerId} or ${loanOfficerId} = -1) and (ml.id = ${loanId} or ${loanId} = -1) and (mc.id = ${clientId} or ${clientId} = -1) and (mc.group_id = ${groupId} or ${groupId} = -1)  and (ml.loan_type_enum = ${loanType} or ${loanType} = -1)"/>
             <column name="description" value="Loan and client data of rejected loan"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
