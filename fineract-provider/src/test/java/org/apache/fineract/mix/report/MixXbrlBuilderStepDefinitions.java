@@ -29,18 +29,18 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.util.HashMap;
 import org.apache.commons.io.IOUtils;
+import org.apache.fineract.mix.data.MixReportXBRLNamespaceData;
 import org.apache.fineract.mix.data.MixTaxonomyData;
-import org.apache.fineract.mix.data.NamespaceData;
-import org.apache.fineract.mix.service.NamespaceReadPlatformServiceImpl;
-import org.apache.fineract.mix.service.XBRLBuilder;
+import org.apache.fineract.mix.service.MixReportXBRLBuilder;
+import org.apache.fineract.mix.service.MixReportXBRLNamespaceReadServiceImpl;
 import org.apache.fineract.template.service.TemplateServiceStepDefinitions;
 import org.mockito.ArgumentMatchers;
 
 public class MixXbrlBuilderStepDefinitions implements En {
 
-    private NamespaceReadPlatformServiceImpl readNamespaceService;
+    private MixReportXBRLNamespaceReadServiceImpl readNamespaceService;
 
-    private final XBRLBuilder xbrlBuilder = new XBRLBuilder();
+    private MixReportXBRLBuilder xbrlBuilder;
 
     private Date start;
 
@@ -55,9 +55,11 @@ public class MixXbrlBuilderStepDefinitions implements En {
     public MixXbrlBuilderStepDefinitions() {
         Given("/^The XBRL input parameters start date (.*), end date (.*), currency (.*), taxonomy (.*) and sample (.*)$/",
                 (String start, String end, String currency, String taxonomy, String sample) -> {
-                    readNamespaceService = mock(NamespaceReadPlatformServiceImpl.class);
+                    readNamespaceService = mock(MixReportXBRLNamespaceReadServiceImpl.class);
                     lenient().when(this.readNamespaceService.retrieveNamespaceByPrefix(ArgumentMatchers.anyString()))
-                            .thenReturn(new NamespaceData().setId(1L).setPrefix("mockedprefix").setUrl("mockedurl"));
+                            .thenReturn(new MixReportXBRLNamespaceData().setId(1L).setPrefix("mockedprefix").setUrl("mockedurl"));
+
+                    xbrlBuilder = new MixReportXBRLBuilder(readNamespaceService);
 
                     this.start = Date.valueOf(start);
                     this.end = Date.valueOf(end);

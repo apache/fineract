@@ -42,6 +42,7 @@ buildscript {
                 'fineract-loan',
                 'fineract-savings',
                 'fineract-report',
+                'fineract-mix',
                 'integration-tests',
                 'twofactor-tests',
                 'oauth2-tests',

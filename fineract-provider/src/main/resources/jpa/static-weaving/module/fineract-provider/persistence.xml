@@ -279,9 +279,6 @@
         <!-- AdHocQuery -->
         <class>org.apache.fineract.adhocquery.domain.AdHoc</class>
 
-        <!-- Mix -->
-        <class>org.apache.fineract.mix.domain.MixTaxonomyMapping</class>
-
         <!-- COB (Chunk of Business) -->
         <class>org.apache.fineract.cob.domain.LoanAccountLock</class>
         <class>org.apache.fineract.cob.domain.BatchBusinessStep</class>
