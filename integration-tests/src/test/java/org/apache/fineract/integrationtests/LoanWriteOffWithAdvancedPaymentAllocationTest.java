@@ -148,7 +148,7 @@ public class LoanWriteOffWithAdvancedPaymentAllocationTest {
                         new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("9 September 2022").locale("en")
                                 .dateFormat("dd MMMM yyyy").transactionAmount(0.0)));
 
-        assertEquals(503, exception.getResponse().code());
+        assertEquals(403, exception.getResponse().code());
         assertTrue(exception.getMessage().contains("error.msg.loan.written.off.update.not.allowed"));
     }
 
@@ -221,7 +221,7 @@ public class LoanWriteOffWithAdvancedPaymentAllocationTest {
                         new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("8 September 2022").locale("en")
                                 .dateFormat("dd MMMM yyyy").transactionAmount(0.0)));
 
-        assertEquals(503, exception.getResponse().code());
+        assertEquals(403, exception.getResponse().code());
         assertTrue(exception.getMessage().contains("error.msg.loan.written.off.update.not.allowed"));
     }
 

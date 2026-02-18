@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.reaging.LoanReAgeBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.reaging.LoanUndoReAgeBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionFlagsData;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.reaging.LoanReAgeTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.reaging.LoanUndoReAgeTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
@@ -105,6 +106,8 @@ public class LoanReAgingService {
         reAgingValidator.validateReAge(loan, command);
         BigDecimal userProvidedTxnAmount = command.bigDecimalValueOfParameterNamed(LoanReAgingApiConstants.transactionAmountParamName);
 
+        final long termsBefore = loan.getTermsCount();
+
         final LoanTransaction reAgeTransaction = createReAgeTransaction(loan, command);
         processReAgeTransaction(loan, reAgeTransaction, true);
         validateUserProvidedTransactionAmount(userProvidedTxnAmount, reAgeTransaction);
@@ -116,9 +119,12 @@ public class LoanReAgingService {
         changes.put(LoanReAgingApiConstants.dateFormatParameterName, command.dateFormat());
         persistNote(loan, command, changes);
 
+        final long termsAfter = loan.getTermsCount();
+
         // delinquency recalculation will be triggered by the event in a decoupled way via a listener
         businessEventNotifierService.notifyPostBusinessEvent(new LoanReAgeBusinessEvent(loan));
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanReAgeTransactionBusinessEvent(reAgeTransaction));
+        businessEventNotifierService.notifyPostBusinessEvent(
+                new LoanReAgeTransactionBusinessEvent(reAgeTransaction, new LoanTransactionFlagsData(termsAfter != termsBefore)));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(reAgeTransaction.getId()) //

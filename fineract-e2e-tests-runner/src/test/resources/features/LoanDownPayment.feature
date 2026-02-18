@@ -50,6 +50,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 01 February 2022 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 500.0        |
       | 15 February 2022 | Repayment        | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 100.0        |
+# --- close loan --- #
+    When Loan Pay-off is made on "01 February 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2813
   Scenario: Single disbursement normal flow - auto disabled
@@ -111,6 +114,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 01 February 2022 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 500.0        |
       | 15 February 2022 | Repayment        | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 100.0        |
+# --- close loan --- #
+    When Loan Pay-off is made on "15 February 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2814
   Scenario: Single disbursement charge flow - auto enabled
@@ -162,6 +168,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 01 February 2022 | Repayment        | 300.0  | 250.0     | 0.0      | 0.0  | 50.0      | 500.0        |
       | 15 February 2022 | Repayment        | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 100.0        |
+# --- close loan --- #
+    When Loan Pay-off is made on "15 February 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2815
   Scenario: Single disbursement charge flow - auto disabled
@@ -224,6 +233,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 01 February 2022 | Repayment        | 300.0  | 250.0     | 0.0      | 0.0  | 50.0      | 500.0        |
       | 15 February 2022 | Repayment        | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 100.0        |
+# --- close loan --- #
+    When Loan Pay-off is made on "15 February 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2816
   Scenario: Double disbursement different day - auto enabled
@@ -265,6 +277,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 10 January 2022  | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       |
       | 10 January 2022  | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1050.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "10 January 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2817
   Scenario: Double disbursement different day - auto disabled
@@ -316,6 +331,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 10 January 2022  | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "10 January 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2818
   Scenario: Double disbursement on installment day - auto enabled
@@ -357,6 +375,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 01 February 2022 | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       |
       | 01 February 2022 | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1050.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "01 February 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2819
   Scenario: Double disbursement on installment day - auto disabled
@@ -408,6 +429,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 01 February 2022 | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "01 February 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2820
   Scenario: Downpayment with loan adjustment - auto enabled
@@ -453,6 +477,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 01 April 2022    | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       |
       | 01 April 2022    | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1050.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "01 April 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2821
   Scenario: Downpayment with loan adjustment - auto disabled
@@ -518,6 +545,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 01 April 2022    | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "01 April 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2822
   Scenario: Downpayment creation date - auto enabled
@@ -573,6 +603,9 @@ Feature: Loan DownPayment
       | 10 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 01 April 2022    | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       |
       | 01 April 2022    | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1050.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "01 April 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2823
   Scenario: Downpayment creation date - auto disabled
@@ -638,6 +671,9 @@ Feature: Loan DownPayment
       | 10 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 10 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 01 April 2022    | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "01 April 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2824
   Scenario: Double disbursement normal flow - auto enabled
@@ -693,6 +729,9 @@ Feature: Loan DownPayment
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 15 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
       | 01 February 2022 | Repayment        | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 1000.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "01 February 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2825
   Scenario: Double disbursement normal flow - auto disabled
@@ -758,6 +797,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 01 February 2022 | Repayment        | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 1250.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "01 February 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2826
   Scenario: Double disbursement same day - auto enabled
@@ -798,6 +840,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 15 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "15 January 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2827
   Scenario: Double disbursement same day - auto disabled
@@ -862,6 +907,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 15 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "15 January 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2828
   Scenario: Double disbursement partial overpayment - auto enabled
@@ -902,6 +950,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 15 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "15 January 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2829
   Scenario: Double disbursement partial overpayment - auto disabled
@@ -966,6 +1017,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Repayment        | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 600.0        |
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1600.0       |
       | 15 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1350.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "15 January 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2830
   Scenario: Double disbursement full overpayment - auto enabled
@@ -1018,6 +1072,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 500.0        |
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       |
       | 15 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1250.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "15 January 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2831
   Scenario: Double disbursement full overpayment - auto disabled
@@ -1082,6 +1139,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Repayment        | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 500.0        |
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       |
       | 15 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1250.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "15 January 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2832
   Scenario: Double disbursement after installment overdue - auto enabled
@@ -1122,6 +1182,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 15 February 2022 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 15 February 2022 | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "15 February 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2833
   Scenario: Double disbursement after installment overdue - auto disabled
@@ -1186,6 +1249,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 15 February 2022 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 15 February 2022 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "15 February 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2834
   Scenario: Double disbursement after installment 2 - auto enabled
@@ -1239,6 +1305,9 @@ Feature: Loan DownPayment
       | 01 February 2022 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 500.0        |
       | 15 February 2022 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       |
       | 15 February 2022 | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1250.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "15 February 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2835
   Scenario: Double disbursement after installment 2 - auto disabled
@@ -1316,6 +1385,9 @@ Feature: Loan DownPayment
       | 01 February 2022 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 500.0        |
       | 15 February 2022 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       |
       | 15 February 2022 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1250.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "15 February 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2836
   Scenario: Double disbursement normal overdue - auto enabled
@@ -1370,6 +1442,9 @@ Feature: Loan DownPayment
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 15 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
       | 15 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1250.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "15 January 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2837
   Scenario: Double disbursement normal overdue - auto disabled
@@ -1422,6 +1497,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 2000.0       |
       | 15 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1750.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "15 January 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2838
   Scenario: Double disbursement on Duedate - auto enabled
@@ -1462,6 +1540,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 01 February 2022 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 01 February 2022 | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "01 February 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2839
   Scenario: Double disbursement on Duedate - auto disabled
@@ -1526,6 +1607,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 01 February 2022 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 01 February 2022 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
+# --- close loan --- #
+    When Loan Pay-off is made on "01 February 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2852
   Scenario: Single disbursement with interest - auto disabled
@@ -1546,6 +1630,9 @@ Feature: Loan DownPayment
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 1000.0        | 25       | 0    | 0         | 1025.0 | 0.0  | 0          | 0    | 1025        |
+    # --- close loan --- #
+    When Loan Pay-off is made on "01 January 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2853
   Scenario: Single disbursement delinquency - auto disabled
@@ -1569,6 +1656,9 @@ Feature: Loan DownPayment
     When Admin sets the business date to "5 January 2022"
     When Admin runs COB job
     Then Admin checks that delinquency range is: "RANGE_1" and has delinquentDate "2022-01-04"
+# --- close loan --- #
+    When Loan Pay-off is made on "05 January 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2854
   Scenario: Single disbursement with undo disbursement when auto downpayment is enabled without manual transaction after last downpayment
@@ -1595,6 +1685,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
     When Admin successfully undo disbursal
     Then Loan status has changed to "Approved"
+# --- undo approval --- #
+    Then Admin can successfully undone the loan approval
+    Then Loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
 
   @TestRailId:C2855
   Scenario: Single disbursement with undo disbursement when auto downpayment is disabled without manual transaction after last downpayment
@@ -1632,6 +1725,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
     When Admin successfully undo disbursal
     Then Loan status has changed to "Approved"
+# --- undo approval --- #
+    Then Admin can successfully undone the loan approval
+    Then Loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
 
   @TestRailId:C2856
   Scenario: Single disbursement with undo disbursement when auto downpayment is disabled with manual transaction after last downpayment
@@ -1652,6 +1748,9 @@ Feature: Loan DownPayment
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 1000.0        | 0        | 0    | 0         | 1000.0 | 0.0  | 0          | 0    | 1000        |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 01 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
     And Customer makes "DOWN_PAYMENT" repayment on "01 January 2022" with 250 EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
@@ -1663,6 +1762,10 @@ Feature: Loan DownPayment
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 0        | 0    | 0         | 1000.0 | 250.0 | 0          | 0    | 750         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 01 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
+      | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
     When Admin sets the business date to "01 February 2022"
     And Customer makes "AUTOPAY" repayment on "01 February 2022" with 250 EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -1675,6 +1778,11 @@ Feature: Loan DownPayment
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 0        | 0    | 0         | 1000.0 | 500.0 | 0          | 0    | 500         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 01 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
+      | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
+      | 01 February 2022 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 500.0        |
     When Admin sets the business date to "15 February 2023"
     And Customer makes "AUTOPAY" repayment on "15 February 2022" with 400 EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -1695,6 +1803,9 @@ Feature: Loan DownPayment
       | 15 February 2022 | Repayment        | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 100.0        |
     When Admin successfully undo disbursal
     Then Loan status has changed to "Approved"
+# --- undo approval --- #
+    Then Admin can successfully undone the loan approval
+    Then Loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
 
   @TestRailId:C2857
   Scenario: Single disbursement with undo disbursement when auto downpayment is enabled with manual transaction after last downpayment
@@ -1747,6 +1858,9 @@ Feature: Loan DownPayment
       | 15 February 2022 | Repayment        | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 100.0        |
     When Admin successfully undo disbursal
     Then Loan status has changed to "Approved"
+# --- undo approval --- #
+    Then Admin can successfully undone the loan approval
+    Then Loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
 
   @TestRailId:C2858
   Scenario: Multi disbursement with undo last disbursement when auto downpayment is enabled without manual transaction after last downpayment
@@ -1756,7 +1870,7 @@ Feature: Loan DownPayment
       | LoanProduct          | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
       | LP2_DOWNPAYMENT_AUTO | 01 January 2022   | 2000           | 0                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 January 2022" with "2000" amount and expected disbursement date on "01 January 2022"
-    When Admin successfully disburse the loan on "01 January 2022" with "1000" EUR transaction amount
+    When Admin disburses the loan on "01 January 2022" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2022  |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -1767,8 +1881,13 @@ Feature: Loan DownPayment
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 1000.0        | 0        | 0    | 0         | 1000.0 | 250  | 0          | 0    | 750         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 01 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
+      | 01 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
+    Then LoanDisbursalTransactionBusinessEvent has changedTerms "false"
     When Admin sets the business date to "15 January 2022"
-    When Admin successfully disburse the loan on "15 January 2022" with "1000" EUR transaction amount
+    When Admin disburses the loan on "15 January 2022" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 5 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2022  |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -1781,6 +1900,13 @@ Feature: Loan DownPayment
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 2000.0        | 0        | 0    | 0         | 2000.0 | 500  | 0          | 0    | 1500        |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 01 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
+      | 01 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
+      | 15 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
+      | 15 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
+    Then LoanDisbursalTransactionBusinessEvent has changedTerms "false"
     When Admin successfully undo last disbursal
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
@@ -1796,6 +1922,9 @@ Feature: Loan DownPayment
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 01 January 2022  | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
+# --- close the loan --- #
+    When Loan Pay-off is made on "15 January 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2859
   Scenario: Multi disbursement with undo last disbursement when auto downpayment is disabled without manual transaction after last downpayment
@@ -1857,6 +1986,9 @@ Feature: Loan DownPayment
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
+# --- close the loan --- #
+    When Loan Pay-off is made on "15 January 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2866
   Scenario: Verify backdated disbursement - after down payment, before first installment due date, installment start date calculated by loan disbursement date
@@ -1902,6 +2034,9 @@ Feature: Loan DownPayment
       | 02 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 05 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 2000.0       |
       | 05 January 2023  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1750.0       |
+# --- close the loan --- #
+    When Loan Pay-off is made on "08 January 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2867
   Scenario: Verify backdated disbursement - second disbursement placed on after down payment, after first installment paid on due date, and takes place before first installment due date
@@ -1965,6 +2100,9 @@ Feature: Loan DownPayment
       | 05 January 2023  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 01 February 2023 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 05 February 2023 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
+# --- close the loan --- #
+    When Loan Pay-off is made on "10 February 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2868
   Scenario: Verify backdated disbursement - after down payment, before first installment due date, installment start date calculated by loan submitted on date
@@ -2012,6 +2150,9 @@ Feature: Loan DownPayment
       | 05 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 2000.0       |
       | 05 January 2023  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1750.0       |
     When Admin sets repaymentStartDateType for "LP2_DOWNPAYMENT" loan product to "DISBURSEMENT_DATE"
+# --- close the loan --- #
+    When Loan Pay-off is made on "08 January 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2869
   Scenario: Verify correct Loan Repayment EMI Amount is calculated and is rounded off if loan product installmentAmountInMultiplesOf is set
@@ -2032,6 +2173,9 @@ Feature: Loan DownPayment
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 1250.0        | 0        | 0    | 0         | 1250.0 | 0.0  | 0          | 0    | 1250        |
+# --- close the loan --- #
+    When Loan Pay-off is made on "01 January 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2882
   Scenario: Verify Loan Repayment Due and Overdue events for downpayment
@@ -2047,6 +2191,9 @@ Feature: Loan DownPayment
     When Admin sets the business date to "04 January 2022"
     When Admin runs inline COB job for Loan
     Then Loan Repayment Overdue Business Event is created
+# --- close the loan --- #
+    When Loan Pay-off is made on "04 January 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2883
   Scenario: Verify that with multiple disbursement when last disbursement is reverted, downpayment will be reverted too - autopayment disabled
@@ -2093,6 +2240,9 @@ Feature: Loan DownPayment
       | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 September 2023 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 05 September 2023 | Repayment        | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 500.0        |
+# --- close the loan --- #
+    When Loan Pay-off is made on "11 September 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2884
   Scenario: Verify that with multiple disbursement when last disbursement is reverted, downpayment will be reverted too - autopayment enabled
@@ -2142,6 +2292,9 @@ Feature: Loan DownPayment
       | 01 September 2023 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 01 September 2023 | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 05 September 2023 | Repayment        | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 250.0        |
+# --- close the loan --- #
+    When Loan Pay-off is made on "11 September 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2913
   @AdvancedPaymentAllocation
@@ -2200,6 +2353,9 @@ Feature: Loan DownPayment
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       | 600.0         | 0        | 0.0  | 0         | 600.0 | 150.0 | 0.0        | 0.0  | 450.0       |
+# --- close the loan --- #
+    When Loan Pay-off is made on "04 September 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2938
   Scenario: Multiple disbursements on same day - auto enabled
@@ -2264,6 +2420,9 @@ Feature: Loan DownPayment
       | 01 February 2022 | Down Payment     | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 900.0        |
       | 01 February 2022 | Disbursement     | 200.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1100.0       |
       | 01 February 2022 | Down Payment     | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 1050.0       |
+# --- close the loan --- #
+    When Loan Pay-off is made on "01 February 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C2939
   Scenario: Multiple disbursements on same day - auto disabled
@@ -2336,6 +2495,9 @@ Feature: Loan DownPayment
       | 01 January 2022  | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 750.0        |
       | 01 February 2022 | Disbursement     | 200.0  | 0.0       | 0.0      | 0.0  | 0.0       | 950.0        |
       | 01 February 2022 | Disbursement     | 200.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1150.0       |
+# --- close the loan --- #
+    When Loan Pay-off is made on "01 February 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3017
   Scenario: Verify that repayment schedule is managed properly in case of LP2 product with two disbursement on the same day
@@ -2365,6 +2527,9 @@ Feature: Loan DownPayment
       | 01 October 2023  | Down Payment     | 25.0   | 25.0      | 0.0      | 0.0  | 0.0       | 75.0         |
       | 01 October 2023  | Disbursement     | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 975.0        |
       | 01 October 2023  | Down Payment     | 225.0  | 225.0     | 0.0      | 0.0  | 0.0       | 750.0        |
+# --- close the loan --- #
+    When Loan Pay-off is made on "01 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3031
   Scenario: Verify that in case of auto downpayment Loan details / summary.totalRepaymentTransaction has the downpayment amount
@@ -2376,6 +2541,9 @@ Feature: Loan DownPayment
     And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
     When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
     Then Loan details has the downpayment amount "250" in summary.totalRepaymentTransaction
+# --- close the loan --- #
+    When Loan Pay-off is made on "01 October 2023"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3061 @AdvancedPaymentAllocation
   Scenario: Verify enhanced auto downpayment for overpaid loans - UC1: overpaid amount > second disbursement amount AND overpaid amount > related downpayment amount
@@ -2413,6 +2581,9 @@ Feature: Loan DownPayment
       | 01 February 2024 | Down Payment     | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 375.0        |
       | 16 February 2024 | Repayment        | 1000.0 | 375.0     | 0.0      | 0.0  | 0.0       | 0.0          |
       | 20 February 2024 | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          |
+# --- close the loan --- #
+    When Admin makes Credit Balance Refund transaction on "20 February 2024" with 225 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3062 @AdvancedPaymentAllocation
   Scenario: Verify enhanced auto downpayment for overpaid loans - UC2: overpaid amount = second disbursement amount AND overpaid amount > related downpayment amount
@@ -2486,6 +2657,9 @@ Feature: Loan DownPayment
       | 01 February 2024 | Down Payment     | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 375.0        |
       | 16 February 2024 | Repayment        | 575.0  | 375.0     | 0.0      | 0.0  | 0.0       | 0.0          |
       | 20 February 2024 | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 200.0        |
+# --- close the loan --- #
+    When Loan Pay-off is made on "20 February 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3064 @AdvancedPaymentAllocation
   Scenario: Verify enhanced auto downpayment for overpaid loans - UC4: overpaid amount < second disbursement amount AND overpaid amount < related downpayment amount
@@ -2524,6 +2698,9 @@ Feature: Loan DownPayment
       | 16 February 2024 | Repayment        | 475.0  | 375.0     | 0.0      | 0.0  | 0.0       | 0.0          |
       | 20 February 2024 | Disbursement     | 600.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        |
       | 20 February 2024 | Down Payment     | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 450.0        |
+# --- close the loan --- #
+    When Loan Pay-off is made on "20 February 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3065 @AdvancedPaymentAllocation
   Scenario: Verify enhanced auto downpayment for overpaid loans - UC5: repayment reverted
@@ -2567,6 +2744,9 @@ Feature: Loan DownPayment
       | 16 February 2024 | Repayment        | 375.0  | 275.0     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
       | 20 February 2024 | Disbursement     | 600.0  | 0.0       | 0.0      | 0.0  | 0.0       | 875.0        | false    |
       | 20 February 2024 | Down Payment     | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 825.0        | false    |
+# --- close the loan --- #
+    When Loan Pay-off is made on "20 February 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3105 @AdvancedPaymentAllocation
   Scenario: Verify multi disbursement on same day with Advanced payment allocation works properly
@@ -2635,6 +2815,9 @@ Feature: Loan DownPayment
       | 02 February 2024 | Down Payment     | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 825.0        | false    |
       | 02 February 2024 | Disbursement     | 112.0  | 0.0       | 0.0      | 0.0  | 0.0       | 937.0        | false    |
       | 02 February 2024 | Down Payment     | 28.0   | 28.0      | 0.0      | 0.0  | 0.0       | 909.0        | false    |
+# --- close the loan --- #
+    When Loan Pay-off is made on "02 February 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3162
   Scenario: Verify that downpayment can be enabled during loan creation if the product has downpayment enabled
@@ -2657,6 +2840,9 @@ Feature: Loan DownPayment
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+# --- close the loan --- #
+    When Loan Pay-off is made on "1 January 2022"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3163
   Scenario: Verify that downpayment cannot be enabled during loan creation if the product has downpayment disabled
@@ -2689,6 +2875,9 @@ Feature: Loan DownPayment
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 July 2024     | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
       | 01 July 2024     | Down Payment     | 150.0  | 150.0     | 0.0      | 0.0  | 0.0       | 850.0        | false    |
+# --- close the loan --- #
+    When Loan Pay-off is made on "01 July 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C3181
   Scenario: Verify that auto repayment and downpayment percentage value can be set during loan creation in case of downpayment is enabled on Loan product level - UC2
@@ -2712,3 +2901,185 @@ Feature: Loan DownPayment
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 July 2024     | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+# --- close the loan --- #
+    When Loan Pay-off is made on "01 July 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C4674 @AdvancedPaymentAllocation
+  Scenario: Verify pay-off loan after 2nd disbursement with downpayment on interest bearing loan
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT | 01 January 2024   | 150            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "150" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan Repayment schedule has 7 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                 | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 0    | 01 January 2024  | 01 January 2024 | 75.0            | 25.0          | 0.0      | 0.0  | 0.0       | 25.0  | 25.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 01 February 2024 |                 | 62.68           | 12.32         | 0.44     | 0.0  | 0.0       | 12.76 | 0.0  | 0.0        | 0.0  | 12.76       |
+      | 3  | 29   | 01 March 2024    |                 | 50.29           | 12.39         | 0.37     | 0.0  | 0.0       | 12.76 | 0.0  | 0.0        | 0.0  | 12.76       |
+      | 4  | 31   | 01 April 2024    |                 | 37.82           | 12.47         | 0.29     | 0.0  | 0.0       | 12.76 | 0.0  | 0.0        | 0.0  | 12.76       |
+      | 5  | 30   | 01 May 2024      |                 | 25.28           | 12.54         | 0.22     | 0.0  | 0.0       | 12.76 | 0.0  | 0.0        | 0.0  | 12.76       |
+      | 6  | 31   | 01 June 2024     |                 | 12.67           | 12.61         | 0.15     | 0.0  | 0.0       | 12.76 | 0.0  | 0.0        | 0.0  | 12.76       |
+      | 7  | 30   | 01 July 2024     |                 | 0.0             | 12.67         | 0.07     | 0.0  | 0.0       | 12.74 | 0.0  | 0.0        | 0.0  | 12.74       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.54     | 0.0  | 0.0       | 101.54 | 25.0 | 0.0        | 0.0  | 76.54       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 01 January 2024  | Down Payment     | 25.0   | 25.0      | 0.0      | 0.0  | 0.0       | 75.0         | false    | false    |
+# --- First installment paid --- #
+    When Admin sets the business date to "01 February 2024"
+    And Customer makes "AUTOPAY" repayment on "01 February 2024" with 12.76 EUR transaction amount
+    Then Loan Repayment schedule has 7 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 0    | 01 January 2024  | 01 January 2024  | 75.0            | 25.0          | 0.0      | 0.0  | 0.0       | 25.0  | 25.0  | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 01 February 2024 | 01 February 2024 | 62.68           | 12.32         | 0.44     | 0.0  | 0.0       | 12.76 | 12.76 | 0.0        | 0.0  | 0.0         |
+      | 3  | 29   | 01 March 2024    |                  | 50.29           | 12.39         | 0.37     | 0.0  | 0.0       | 12.76 | 0.0   | 0.0        | 0.0  | 12.76       |
+      | 4  | 31   | 01 April 2024    |                  | 37.82           | 12.47         | 0.29     | 0.0  | 0.0       | 12.76 | 0.0   | 0.0        | 0.0  | 12.76       |
+      | 5  | 30   | 01 May 2024      |                  | 25.28           | 12.54         | 0.22     | 0.0  | 0.0       | 12.76 | 0.0   | 0.0        | 0.0  | 12.76       |
+      | 6  | 31   | 01 June 2024     |                  | 12.67           | 12.61         | 0.15     | 0.0  | 0.0       | 12.76 | 0.0   | 0.0        | 0.0  | 12.76       |
+      | 7  | 30   | 01 July 2024     |                  | 0.0             | 12.67         | 0.07     | 0.0  | 0.0       | 12.74 | 0.0   | 0.0        | 0.0  | 12.74       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 100.0         | 1.54     | 0.0  | 0.0       | 101.54 | 37.76 | 0.0        | 0.0  | 63.78       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 01 January 2024  | Down Payment     | 25.0   | 25.0      | 0.0      | 0.0  | 0.0       | 75.0         | false    | false    |
+      | 01 February 2024 | Repayment        | 12.76  | 12.32     | 0.44     | 0.0  | 0.0       | 62.68        | false    | false    |
+# --- 2nd disbursement --- #
+    When Admin sets the business date to "01 April 2024"
+    When Admin successfully disburse the loan on "01 April 2024" with "50" EUR transaction amount
+    Then Loan Repayment schedule has 8 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 0    | 01 January 2024  | 01 January 2024  | 75.0            | 25.0          | 0.0      | 0.0  | 0.0       | 25.0  | 25.0  | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 01 February 2024 | 01 February 2024 | 62.68           | 12.32         | 0.44     | 0.0  | 0.0       | 12.76 | 12.76 | 0.0        | 0.0  | 0.0         |
+      | 3  | 29   | 01 March 2024    |                  | 50.29           | 12.39         | 0.37     | 0.0  | 0.0       | 12.76 | 12.5  | 0.0        | 12.5 | 0.26        |
+      | 4  | 31   | 01 April 2024    |                  | 37.9            | 12.39         | 0.37     | 0.0  | 0.0       | 12.76 | 0.0   | 0.0        | 0.0  | 12.76       |
+      |    |      | 01 April 2024    |                  | 50.0            |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 5  |  0   | 01 April 2024    |                  | 75.4            | 12.5          | 0.0      | 0.0  | 0.0       | 12.5  | 0.0   | 0.0        | 0.0  | 12.5        |
+      | 6  | 30   | 01 May 2024      |                  | 50.44           | 24.96         | 0.44     | 0.0  | 0.0       | 25.4  | 0.0   | 0.0        | 0.0  | 25.4        |
+      | 7  | 31   | 01 June 2024     |                  | 25.33           | 25.11         | 0.29     | 0.0  | 0.0       | 25.4  | 0.0   | 0.0        | 0.0  | 25.4        |
+      | 8  | 30   | 01 July 2024     |                  | 0.0             | 25.33	      | 0.15     | 0.0  | 0.0       | 25.48 | 0.0   | 0.0        | 0.0  | 25.48       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 150.0         | 2.06     | 0.0  | 0.0       | 152.06 | 50.26 | 0.0        | 12.5 | 101.8       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 01 January 2024  | Down Payment     | 25.0   | 25.0      | 0.0      | 0.0  | 0.0       | 75.0         | false    | false    |
+      | 01 February 2024 | Repayment        | 12.76  | 12.32     | 0.44     | 0.0  | 0.0       | 62.68        | false    | false    |
+      | 01 April 2024    | Disbursement     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 112.68       | false    | false    |
+      | 01 April 2024    | Down Payment     | 12.5   | 12.39     | 0.11     | 0.0  | 0.0       | 100.29       | false    | false    |
+    When Loan Pay-off is made on "01 April 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C4675 @AdvancedPaymentAllocation
+  Scenario: Verify pay-off loan after 3rd disbursement with downpayment on interest bearing loan
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT | 01 January 2024   | 200            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "200" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "100" EUR transaction amount
+    Then Loan Repayment schedule has 7 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                 | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 0    | 01 January 2024  | 01 January 2024 | 75.0            | 25.0          | 0.0      | 0.0  | 0.0       | 25.0  | 25.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 01 February 2024 |                 | 62.68           | 12.32         | 0.44     | 0.0  | 0.0       | 12.76 | 0.0  | 0.0        | 0.0  | 12.76       |
+      | 3  | 29   | 01 March 2024    |                 | 50.29           | 12.39         | 0.37     | 0.0  | 0.0       | 12.76 | 0.0  | 0.0        | 0.0  | 12.76       |
+      | 4  | 31   | 01 April 2024    |                 | 37.82           | 12.47         | 0.29     | 0.0  | 0.0       | 12.76 | 0.0  | 0.0        | 0.0  | 12.76       |
+      | 5  | 30   | 01 May 2024      |                 | 25.28           | 12.54         | 0.22     | 0.0  | 0.0       | 12.76 | 0.0  | 0.0        | 0.0  | 12.76       |
+      | 6  | 31   | 01 June 2024     |                 | 12.67           | 12.61         | 0.15     | 0.0  | 0.0       | 12.76 | 0.0  | 0.0        | 0.0  | 12.76       |
+      | 7  | 30   | 01 July 2024     |                 | 0.0             | 12.67         | 0.07     | 0.0  | 0.0       | 12.74 | 0.0  | 0.0        | 0.0  | 12.74       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.54     | 0.0  | 0.0       | 101.54 | 25.0 | 0.0        | 0.0  | 76.54       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 01 January 2024  | Down Payment     | 25.0   | 25.0      | 0.0      | 0.0  | 0.0       | 75.0         | false    | false    |
+# --- First installment paid --- #
+    When Admin sets the business date to "01 February 2024"
+    And Customer makes "AUTOPAY" repayment on "01 February 2024" with 12.76 EUR transaction amount
+    Then Loan Repayment schedule has 7 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 0    | 01 January 2024  | 01 January 2024  | 75.0            | 25.0          | 0.0      | 0.0  | 0.0       | 25.0  | 25.0  | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 01 February 2024 | 01 February 2024 | 62.68           | 12.32         | 0.44     | 0.0  | 0.0       | 12.76 | 12.76 | 0.0        | 0.0  | 0.0         |
+      | 3  | 29   | 01 March 2024    |                  | 50.29           | 12.39         | 0.37     | 0.0  | 0.0       | 12.76 | 0.0   | 0.0        | 0.0  | 12.76       |
+      | 4  | 31   | 01 April 2024    |                  | 37.82           | 12.47         | 0.29     | 0.0  | 0.0       | 12.76 | 0.0   | 0.0        | 0.0  | 12.76       |
+      | 5  | 30   | 01 May 2024      |                  | 25.28           | 12.54         | 0.22     | 0.0  | 0.0       | 12.76 | 0.0   | 0.0        | 0.0  | 12.76       |
+      | 6  | 31   | 01 June 2024     |                  | 12.67           | 12.61         | 0.15     | 0.0  | 0.0       | 12.76 | 0.0   | 0.0        | 0.0  | 12.76       |
+      | 7  | 30   | 01 July 2024     |                  | 0.0             | 12.67         | 0.07     | 0.0  | 0.0       | 12.74 | 0.0   | 0.0        | 0.0  | 12.74       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 100.0         | 1.54     | 0.0  | 0.0       | 101.54 | 37.76 | 0.0        | 0.0  | 63.78       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 01 January 2024  | Down Payment     | 25.0   | 25.0      | 0.0      | 0.0  | 0.0       | 75.0         | false    | false    |
+      | 01 February 2024 | Repayment        | 12.76  | 12.32     | 0.44     | 0.0  | 0.0       | 62.68        | false    | false    |
+# --- 2nd disbursement --- #
+    When Admin sets the business date to "01 April 2024"
+    When Admin successfully disburse the loan on "01 April 2024" with "50" EUR transaction amount
+    Then Loan Repayment schedule has 8 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 0    | 01 January 2024  | 01 January 2024  | 75.0            | 25.0          | 0.0      | 0.0  | 0.0       | 25.0  | 25.0  | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 01 February 2024 | 01 February 2024 | 62.68           | 12.32         | 0.44     | 0.0  | 0.0       | 12.76 | 12.76 | 0.0        | 0.0  | 0.0         |
+      | 3  | 29   | 01 March 2024    |                  | 50.29           | 12.39         | 0.37     | 0.0  | 0.0       | 12.76 | 12.5  | 0.0        | 12.5 | 0.26        |
+      | 4  | 31   | 01 April 2024    |                  | 37.9            | 12.39         | 0.37     | 0.0  | 0.0       | 12.76 | 0.0   | 0.0        | 0.0  | 12.76       |
+      |    |      | 01 April 2024    |                  | 50.0            |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 5  |  0   | 01 April 2024    |                  | 75.4            | 12.5          | 0.0      | 0.0  | 0.0       | 12.5  | 0.0   | 0.0        | 0.0  | 12.5        |
+      | 6  | 30   | 01 May 2024      |                  | 50.44           | 24.96         | 0.44     | 0.0  | 0.0       | 25.4  | 0.0   | 0.0        | 0.0  | 25.4        |
+      | 7  | 31   | 01 June 2024     |                  | 25.33           | 25.11         | 0.29     | 0.0  | 0.0       | 25.4  | 0.0   | 0.0        | 0.0  | 25.4        |
+      | 8  | 30   | 01 July 2024     |                  | 0.0             | 25.33	      | 0.15     | 0.0  | 0.0       | 25.48 | 0.0   | 0.0        | 0.0  | 25.48       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 150.0         | 2.06     | 0.0  | 0.0       | 152.06 | 50.26 | 0.0        | 12.5 | 101.8       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 01 January 2024  | Down Payment     | 25.0   | 25.0      | 0.0      | 0.0  | 0.0       | 75.0         | false    | false    |
+      | 01 February 2024 | Repayment        | 12.76  | 12.32     | 0.44     | 0.0  | 0.0       | 62.68        | false    | false    |
+      | 01 April 2024    | Disbursement     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 112.68       | false    | false    |
+      | 01 April 2024    | Down Payment     | 12.5   | 12.39     | 0.11     | 0.0  | 0.0       | 100.29       | false    | false    |
+    # --- 3rd disbursement --- #
+    When Admin sets the business date to "01 May 2024"
+    When Admin successfully disburse the loan on "01 May 2024" with "50" EUR transaction amount
+    Then Loan Repayment schedule has 9 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
+      | 1  | 0    | 01 January 2024  | 01 January 2024  | 75.0            | 25.0          | 0.0      | 0.0  | 0.0       | 25.0  | 25.0  | 0.0        | 0.0   | 0.0         |
+      | 2  | 31   | 01 February 2024 | 01 February 2024 | 62.68           | 12.32         | 0.44     | 0.0  | 0.0       | 12.76 | 12.76 | 0.0        | 0.0   | 0.0         |
+      | 3  | 29   | 01 March 2024    | 01 May 2024      | 50.29           | 12.39         | 0.37     | 0.0  | 0.0       | 12.76 | 12.76 | 0.0        | 12.76 | 0.0         |
+      | 4  | 31   | 01 April 2024    |                  | 37.9            | 12.39         | 0.37     | 0.0  | 0.0       | 12.76 | 12.24 | 0.0        | 12.24 | 0.52        |
+      |    |      | 01 April 2024    |                  | 50.0            |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
+      | 5  |  0   | 01 April 2024    |                  | 75.4            | 12.5          | 0.0      | 0.0  | 0.0       | 12.5  | 0.0   | 0.0        | 0.0   | 12.5        |
+      | 6  | 30   | 01 May 2024      |                  | 50.51           | 24.89         | 0.51     | 0.0  | 0.0       | 25.4  | 0.0   | 0.0        | 0.0   | 25.4        |
+      |    |      | 01 May 2024      |                  | 50.0            |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
+      | 7  | 0    | 01 May 2024      |                  | 88.01           | 12.5          | 0.0      | 0.0  | 0.0       | 12.5  | 0.0   | 0.0        | 0.0   | 12.5        |
+      | 8  | 31   | 01 June 2024     |                  | 44.21           | 43.8          | 0.51     | 0.0  | 0.0       | 44.31 | 0.0   | 0.0        | 0.0   | 44.31       |
+      | 9  | 30   | 01 July 2024     |                  | 0.0             | 44.21	      | 0.26     | 0.0  | 0.0       | 44.47 | 0.0   | 0.0        | 0.0   | 44.47       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 200.0         | 2.46     | 0.0  | 0.0       | 202.46 | 62.76 | 0.0        | 25.0 | 139.7       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 01 January 2024  | Down Payment     | 25.0   | 25.0      | 0.0      | 0.0  | 0.0       | 75.0         | false    | false    |
+      | 01 February 2024 | Repayment        | 12.76  | 12.32     | 0.44     | 0.0  | 0.0       | 62.68        | false    | false    |
+      | 01 April 2024    | Disbursement     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 112.68       | false    | false    |
+      | 01 April 2024    | Down Payment     | 12.5   | 12.39     | 0.11     | 0.0  | 0.0       | 100.29       | false    | false    |
+      | 01 May 2024      | Disbursement     | 50.0   | 0.0       | 0.0      | 0.0  | 0.0       | 150.29       | false    | false    |
+      | 01 May 2024      | Down Payment     | 12.5   | 12.24     | 0.26     | 0.0  | 0.0       | 138.05       | false    | false    |
+    When Loan Pay-off is made on "01 May 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met

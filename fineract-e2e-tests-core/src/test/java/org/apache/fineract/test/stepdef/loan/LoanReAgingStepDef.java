@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.avro.loan.v1.LoanTransactionFlagsDataV1;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.LoanScheduleData;
@@ -49,6 +50,7 @@ import org.apache.fineract.test.helper.ErrorMessageHelper;
 import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.messaging.EventAssertion;
 import org.apache.fineract.test.messaging.event.loan.LoanReAgeEvent;
+import org.apache.fineract.test.messaging.event.loan.transaction.LoanReAgeTransactionEvent;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
 import org.junit.jupiter.api.Assertions;
@@ -414,4 +416,20 @@ public class LoanReAgingStepDef extends AbstractStepDef {
         assertThat(exception.getDeveloperMessage()).contains(errorMessage);
     }
 
+    @Then("LoanReAgeTransactionBusinessEvent has changedTerms {string}")
+    public void checkReAgeTransactionEventChangedTerms(final String expectedChangedTerms) {
+        final PostLoansLoanIdTransactionsResponse reAgingResponse = testContext().get(TestContextKey.LOAN_REAGING_RESPONSE);
+        Assertions.assertNotNull(reAgingResponse);
+        final Long transactionId = reAgingResponse.getResourceId();
+        Assertions.assertNotNull(transactionId);
+
+        final Boolean expectedValue = "null".equalsIgnoreCase(expectedChangedTerms) ? null : Boolean.valueOf(expectedChangedTerms);
+
+        eventAssertion.assertEvent(LoanReAgeTransactionEvent.class, transactionId).extractingData(loanTransactionDataV1 -> {
+            final LoanTransactionFlagsDataV1 flags = loanTransactionDataV1.getFlags();
+            final Boolean actualChangedTerms = flags == null ? null : flags.getChangedTerms();
+            assertThat(actualChangedTerms).as("changedTerms in LoanReAgeTransactionBusinessEvent").isEqualTo(expectedValue);
+            return null;
+        });
+    }
 }

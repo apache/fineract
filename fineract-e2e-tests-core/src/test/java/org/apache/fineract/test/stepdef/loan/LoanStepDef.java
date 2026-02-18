@@ -67,6 +67,7 @@ import org.apache.fineract.avro.loan.v1.LoanChargePaidByDataV1;
 import org.apache.fineract.avro.loan.v1.LoanStatusEnumDataV1;
 import org.apache.fineract.avro.loan.v1.LoanTransactionAdjustmentDataV1;
 import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
+import org.apache.fineract.avro.loan.v1.LoanTransactionFlagsDataV1;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AdvancedPaymentData;
@@ -162,6 +163,7 @@ import org.apache.fineract.test.messaging.event.loan.transaction.LoanCapitalized
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanChargeAdjustmentPostBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanChargeOffEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanChargeOffUndoEvent;
+import org.apache.fineract.test.messaging.event.loan.transaction.LoanDisbursalTransactionEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionAccrualActivityPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionContractTerminationPostBusinessEvent;
 import org.apache.fineract.test.messaging.store.EventStore;
@@ -3319,26 +3321,6 @@ public class LoanStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_WRITE_OFF_RESPONSE, writeOffResponse);
     }
 
-    @Then("Admin fails to undo {string}th transaction made on {string}")
-    public void undoTransaction(String nthTransaction, String transactionDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
-        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        long loanId = loanResponse.getLoanId();
-        List<GetLoansLoanIdTransactions> transactions = ok(() -> fineractClient.loans().retrieveLoan(loanId,
-                Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions"))).getTransactions();
-
-        int nthItem = Integer.parseInt(nthTransaction) - 1;
-        GetLoansLoanIdTransactions targetTransaction = transactions.stream()
-                .filter(t -> transactionDate.equals(formatter.format(t.getDate()))).toList().get(nthItem);
-
-        PostLoansLoanIdTransactionsTransactionIdRequest transactionUndoRequest = LoanRequestFactory.defaultTransactionUndoRequest()
-                .transactionDate(transactionDate);
-
-        CallFailedRuntimeException exception = fail(() -> fineractClient.loanTransactions().adjustLoanTransaction(loanId,
-                targetTransaction.getId(), transactionUndoRequest, Map.of()));
-        assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(503);
-    }
-
     @Then("Loan {string} repayment transaction on {string} with {double} EUR transaction amount results in error")
     public void loanTransactionWithErrorCheck(String repaymentType, String transactionDate, double transactionAmount) {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
@@ -5941,5 +5923,36 @@ public class LoanStepDef extends AbstractStepDef {
         advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrder);
 
         return advancedPaymentData;
+    }
+
+    @When("Admin disburses the loan on {string} with {string} EUR transaction amount")
+    public void disburseLoanForEventVerification(String actualDisbursementDate, String transactionAmount) {
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assertNotNull(loanResponse);
+        long loanId = loanResponse.getLoanId();
+
+        PostLoansLoanIdRequest disburseRequest = LoanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount));
+
+        PostLoansLoanIdResponse loanDisburseResponse = ok(
+                () -> fineractClient.loans().stateTransitions(loanId, disburseRequest, Map.of("command", "disburse")));
+        testContext().set(TestContextKey.LOAN_DISBURSE_RESPONSE, loanDisburseResponse);
+    }
+
+    @Then("LoanDisbursalTransactionBusinessEvent has changedTerms {string}")
+    public void checkDisbursalTransactionEventChangedTerms(final String expectedChangedTerms) {
+        final PostLoansLoanIdResponse disburseResponse = testContext().get(TestContextKey.LOAN_DISBURSE_RESPONSE);
+        assertNotNull(disburseResponse);
+        final Long transactionId = disburseResponse.getSubResourceId();
+        assertNotNull(transactionId);
+
+        final Boolean expectedValue = "null".equalsIgnoreCase(expectedChangedTerms) ? null : Boolean.valueOf(expectedChangedTerms);
+
+        eventAssertion.assertEvent(LoanDisbursalTransactionEvent.class, transactionId).extractingData(loanTransactionDataV1 -> {
+            final LoanTransactionFlagsDataV1 flags = loanTransactionDataV1.getFlags();
+            final Boolean actualChangedTerms = flags == null ? null : flags.getChangedTerms();
+            assertThat(actualChangedTerms).as("changedTerms in LoanDisbursalTransactionBusinessEvent").isEqualTo(expectedValue);
+            return null;
+        });
     }
 }

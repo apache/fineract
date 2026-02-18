@@ -283,6 +283,15 @@
                     "items": "org.apache.fineract.avro.loan.v1.OriginatorDetailsV1"
                 }
             ]
+        },
+        {
+            "default": null,
+            "name": "flags",
+            "doc": "Optional flags associated with this transaction event",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.LoanTransactionFlagsDataV1"
+            ]
         }
     ]
 }

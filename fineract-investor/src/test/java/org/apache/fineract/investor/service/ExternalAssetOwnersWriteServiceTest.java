@@ -38,6 +38,7 @@ import com.google.gson.JsonElement;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -79,7 +80,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.jpa.JpaSystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class ExternalAssetOwnersWriteServiceTest {
@@ -346,7 +349,7 @@ public class ExternalAssetOwnersWriteServiceTest {
                 testContext.fromApiJsonHelper.extractLocalDateNamed(ExternalTransferRequestParameters.SETTLEMENT_DATE, jsonCommandElement))
                 .thenReturn(LocalDate.EPOCH);
         lenient().when(testContext.fromApiJsonHelper.extractLocalDateNamed(ExternalTransferRequestParameters.SETTLEMENT_DATE,
-                jsonCommandElement, testContext.DATE_FORMAT, Locale.GERMANY)).thenReturn(LocalDate.EPOCH);
+                jsonCommandElement, TestContext.DATE_FORMAT, Locale.GERMANY)).thenReturn(LocalDate.EPOCH);
 
         // given
         final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
@@ -364,7 +367,7 @@ public class ExternalAssetOwnersWriteServiceTest {
         verify(testContext.externalAssetOwnerRepository, times(0)).saveAndFlush(any(ExternalAssetOwner.class));
         verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(testContext.loanId);
         verify(testContext.delayedSettlementAttributeService).isEnabled(testContext.loanProductId);
-        Assertions.assertEquals(thrownException.getMessage(), "Settlement date cannot be in the past");
+        Assertions.assertEquals("Settlement date cannot be in the past", thrownException.getMessage());
     }
 
     private static Stream<Arguments> effectiveTransferDataProvider() {
@@ -440,14 +443,17 @@ public class ExternalAssetOwnersWriteServiceTest {
         when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
         when(testContext.externalAssetOwnerRepository.findByExternalId(any(ExternalId.class))).thenReturn(Optional.empty());
+        when(testContext.externalAssetOwnerHelper.findOrCreateId(any(ExternalId.class))).thenReturn(42L);
+        when(testContext.externalAssetOwnerRepository.getReferenceById(42L)).thenReturn(testContext.externalAssetOwner);
 
         // when
         CommandProcessingResult result = testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(command);
 
         // then
         verify(testContext.externalAssetOwnerRepository).findByExternalId(any(ExternalId.class));
+        verify(testContext.externalAssetOwnerHelper).findOrCreateId(any(ExternalId.class));
+        verify(testContext.externalAssetOwnerRepository).getReferenceById(42L);
         verify(testContext.externalAssetOwnerTransferRepository).saveAndFlush(externalAssetOwnerTransferArgumentCaptor.capture());
-        verify(testContext.externalAssetOwnerRepository).saveAndFlush(any(ExternalAssetOwner.class));
         verify(testContext.externalAssetOwnerTransferRepository).findEffectiveTransfersOrderByIdDesc(eq(testContext.loanId),
                 any(LocalDate.class));
         verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(testContext.loanId);
@@ -460,6 +466,89 @@ public class ExternalAssetOwnersWriteServiceTest {
         assertEquals(savedTransfer.getExternalId(), result.getResourceExternalId());
         assertEquals(savedTransfer.getLoanId(), result.getSubResourceId());
         assertEquals(savedTransfer.getExternalLoanId(), result.getSubResourceExternalId());
+    }
+
+    @Test
+    public void verifyWhenOwnerCreationHitsConstraintViolationWithJpaSystemExceptionThenRetrySucceeds() {
+        final TestContext testContext = new TestContext();
+        final ArgumentCaptor<ExternalAssetOwnerTransfer> transferCaptor = ArgumentCaptor.forClass(ExternalAssetOwnerTransfer.class);
+
+        // given
+        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+
+        final SQLException sqlException = new SQLException("Duplicate entry", "23505");
+        final JpaSystemException jpaException = new JpaSystemException(new RuntimeException(sqlException));
+
+        when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(false);
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+                .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
+        when(testContext.externalAssetOwnerRepository.findByExternalId(any(ExternalId.class))).thenReturn(Optional.empty());
+        when(testContext.externalAssetOwnerHelper.findOrCreateId(any(ExternalId.class))).thenThrow(jpaException).thenReturn(99L);
+        when(testContext.externalAssetOwnerRepository.getReferenceById(99L)).thenReturn(testContext.externalAssetOwner);
+
+        // when
+        CommandProcessingResult result = testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(command);
+
+        // then
+        verify(testContext.externalAssetOwnerHelper, times(2)).findOrCreateId(any(ExternalId.class));
+        verify(testContext.externalAssetOwnerRepository).getReferenceById(99L);
+        verify(testContext.externalAssetOwnerTransferRepository).saveAndFlush(transferCaptor.capture());
+
+        ExternalAssetOwnerTransfer savedTransfer = transferCaptor.getValue();
+        assertAssertOwnerTransferValues(testContext, savedTransfer, ExternalTransferStatus.PENDING);
+        assertEquals(savedTransfer.getId(), result.getResourceId());
+    }
+
+    @Test
+    public void verifyWhenOwnerCreationHitsConstraintViolationWithDataIntegrityViolationExceptionThenRetrySucceeds() {
+        final TestContext testContext = new TestContext();
+        final ArgumentCaptor<ExternalAssetOwnerTransfer> transferCaptor = ArgumentCaptor.forClass(ExternalAssetOwnerTransfer.class);
+
+        // given
+        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+
+        final SQLException sqlException = new SQLException("Duplicate entry", "23000");
+        final DataIntegrityViolationException diveException = new DataIntegrityViolationException("Duplicate", sqlException);
+
+        when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(false);
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+                .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
+        when(testContext.externalAssetOwnerRepository.findByExternalId(any(ExternalId.class))).thenReturn(Optional.empty());
+        when(testContext.externalAssetOwnerHelper.findOrCreateId(any(ExternalId.class))).thenThrow(diveException).thenReturn(99L);
+        when(testContext.externalAssetOwnerRepository.getReferenceById(99L)).thenReturn(testContext.externalAssetOwner);
+
+        // when
+        CommandProcessingResult result = testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(command);
+
+        // then
+        verify(testContext.externalAssetOwnerHelper, times(2)).findOrCreateId(any(ExternalId.class));
+        verify(testContext.externalAssetOwnerRepository).getReferenceById(99L);
+        verify(testContext.externalAssetOwnerTransferRepository).saveAndFlush(transferCaptor.capture());
+
+        ExternalAssetOwnerTransfer savedTransfer = transferCaptor.getValue();
+        assertAssertOwnerTransferValues(testContext, savedTransfer, ExternalTransferStatus.PENDING);
+        assertEquals(savedTransfer.getId(), result.getResourceId());
+    }
+
+    @Test
+    public void verifyWhenOwnerCreationThrowsNonConstraintJpaSystemExceptionThenExceptionPropagates() {
+        final TestContext testContext = new TestContext();
+
+        // given
+        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+
+        final JpaSystemException jpaException = new JpaSystemException(new RuntimeException("Connection lost"));
+
+        when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(false);
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+                .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
+        when(testContext.externalAssetOwnerRepository.findByExternalId(any(ExternalId.class))).thenReturn(Optional.empty());
+        when(testContext.externalAssetOwnerHelper.findOrCreateId(any(ExternalId.class))).thenThrow(jpaException);
+
+        // when & then
+        assertThrows(JpaSystemException.class, () -> testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(command));
+
+        verify(testContext.externalAssetOwnerHelper, times(1)).findOrCreateId(any(ExternalId.class));
     }
 
     @Test
@@ -574,7 +663,7 @@ public class ExternalAssetOwnersWriteServiceTest {
         ExternalAssetOwnerInitiateTransferException exception = assertThrows(ExternalAssetOwnerInitiateTransferException.class,
                 () -> testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(command));
 
-        assertEquals(exception.getMessage(), "This loan cannot be sold, there is already an in progress transfer");
+        assertEquals("This loan cannot be sold, there is already an in progress transfer", exception.getMessage());
 
         // then
         verify(testContext.fromApiJsonHelper, times(2)).parse(command.json());
@@ -607,7 +696,7 @@ public class ExternalAssetOwnersWriteServiceTest {
         ExternalAssetOwnerInitiateTransferException exception = assertThrows(ExternalAssetOwnerInitiateTransferException.class,
                 () -> testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(command));
 
-        assertEquals(exception.getMessage(), "This loan cannot be sold, no effective transfer found.");
+        assertEquals("This loan cannot be sold, no effective transfer found.", exception.getMessage());
         // then
         verify(testContext.fromApiJsonHelper, times(2)).parse(command.json());
         verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(testContext.loanId);
@@ -699,7 +788,7 @@ public class ExternalAssetOwnersWriteServiceTest {
         ExternalAssetOwnerTransfer savedTransfer = savedTransferCaptor.getValue();
         assertNotNull(savedTransfer);
         assertFalse(transfers.isEmpty());
-        ExternalAssetOwnerTransfer expectedEffectiveTransfer = transfers.get(0);
+        ExternalAssetOwnerTransfer expectedEffectiveTransfer = transfers.getFirst();
         assertEquals(testContext.transferExternalId, savedTransfer.getExternalId().getValue());
         assertEquals(expectedEffectiveTransfer.getOwner(), savedTransfer.getOwner());
         assertEquals(expectedStatus, savedTransfer.getStatus());
@@ -867,6 +956,9 @@ public class ExternalAssetOwnersWriteServiceTest {
         @Mock
         private ExternalAssetOwnersReadService externalAssetOwnersReadService;
 
+        @Mock
+        private ExternalAssetOwnerHelper externalAssetOwnerHelper;
+
         @InjectMocks
         private ExternalAssetOwnersWriteServiceImpl externalAssetOwnersWriteServiceImpl;
 
@@ -938,7 +1030,6 @@ public class ExternalAssetOwnersWriteServiceTest {
             lenient().when(configurationDomainService.getAllowedLoanStatusesOfDelayedSettlementForExternalAssetTransfer())
                     .thenReturn(List.of("ACTIVE", "TRANSFER_IN_PROGRESS", "TRANSFER_ON_HOLD", "OVERPAID", "CLOSED_OBLIGATIONS_MET"));
             lenient().when(externalAssetOwnersReadService.retrieveActiveTransferData(any(Long.class), any(), any())).thenReturn(null);
-
         }
     }
 }

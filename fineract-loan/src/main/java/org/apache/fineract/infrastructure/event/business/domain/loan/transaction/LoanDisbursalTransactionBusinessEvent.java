@@ -28,6 +28,10 @@ public class LoanDisbursalTransactionBusinessEvent extends LoanTransactionBusine
         super(value);
     }
 
+    public LoanDisbursalTransactionBusinessEvent(final LoanTransaction value, final LoanTransactionFlagsData flags) {
+        super(value, flags);
+    }
+
     @Override
     public String getType() {
         return TYPE;

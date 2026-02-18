@@ -23,8 +23,10 @@ import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
+import org.apache.fineract.avro.loan.v1.LoanTransactionFlagsDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionFlagsData;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanTransactionDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventWithCustomDataSerializer;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
@@ -59,6 +61,11 @@ public class LoanTransactionBusinessEventSerializer extends AbstractBusinessEven
 
         final LoanTransactionDataV1 result = loanTransactionMapper.map(transactionData);
         result.setCustomData(collectCustomData(event));
+
+        LoanTransactionFlagsData flags = event.getFlags();
+        if (flags != null) {
+            result.setFlags(LoanTransactionFlagsDataV1.newBuilder().setChangedTerms(flags.changedTerms()).build());
+        }
 
         return result;
     }
