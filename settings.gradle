@@ -76,6 +76,7 @@ include ':fineract-e2e-tests-core'
 include ':fineract-e2e-tests-runner'
 include 'fineract-progressive-loan'
 include 'fineract-progressive-loan-embeddable-schedule-generator'
+include 'fineract-working-capital-loan'
 // NOTE: custom Docker image with all custom modules included
 include ':custom:docker'
 // NOTE: dynamically load custom modules with pattern "custom -> company -> category -> module"

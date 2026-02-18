@@ -90,6 +90,7 @@ dependencies {
     implementation project(':fineract-progressive-loan')
     implementation project(':fineract-savings')
     implementation project(':fineract-provider')
+    implementation project(':fineract-working-capital-loan')
 }
 
 tasks.withType(Tar) {
