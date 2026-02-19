@@ -39,6 +39,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
@@ -159,6 +160,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, LoanReadPlatformServiceCommon {
@@ -540,14 +542,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
     @Override
     public LoanTransactionData retrieveLoanTransactionTemplate(final Long loanId) {
-
         this.context.authenticatedUser();
 
-        RepaymentTransactionTemplateMapper mapper = new RepaymentTransactionTemplateMapper(sqlGenerator);
-        String sql = "select " + mapper.schema();
-        LoanTransactionData loanTransactionData = this.jdbcTemplate.queryForObject(sql, mapper, // NOSONAR
-                LoanTransactionType.REPAYMENT.getValue(), LoanTransactionType.DOWN_PAYMENT.getValue(),
-                LoanTransactionType.REPAYMENT.getValue(), LoanTransactionType.DOWN_PAYMENT.getValue(), loanId, loanId);
+        final RepaymentTransactionTemplateMapper mapper = new RepaymentTransactionTemplateMapper(sqlGenerator);
+        LoanTransactionData loanTransactionData = this.jdbcTemplate.queryForObject("select " + mapper.schema(), mapper, // NOSONAR
+                LoanTransactionType.REPAYMENT.getValue(), LoanTransactionType.DOWN_PAYMENT.getValue(), loanId);
         final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
         return LoanTransactionData.templateOnTop(loanTransactionData, paymentOptions);
     }
@@ -2125,33 +2124,20 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
         public String schema() {
             // TODO: investigate whether it can be refactored to be more efficient
-            StringBuilder sqlBuilder = new StringBuilder();
-            sqlBuilder.append("(CASE ");
-            sqlBuilder.append(
-                    "WHEN (select max(tr.transaction_date) as transaction_date from m_loan_transaction tr where tr.loan_id = l.id AND tr.transaction_type_enum in (?,?) AND tr.is_reversed = false) > ls.dueDate ");
-            sqlBuilder.append(
-                    "THEN (select max(tr.transaction_date) as transaction_date from m_loan_transaction tr where tr.loan_id = l.id AND tr.transaction_type_enum in (?,?) AND tr.is_reversed = false) ");
-            sqlBuilder.append("ELSE ls.dueDate END) as transactionDate, ");
-            sqlBuilder.append(
-                    "ls.principal_amount - coalesce(ls.principal_writtenoff_derived, 0) - coalesce(ls.principal_completed_derived, 0) as principalDue, ");
-            sqlBuilder.append(
-                    "ls.interest_amount - coalesce(ls.interest_completed_derived, 0) - coalesce(ls.interest_waived_derived, 0) - coalesce(ls.interest_writtenoff_derived, 0) as interestDue, ");
-            sqlBuilder.append(
-                    "ls.fee_charges_amount - coalesce(ls.fee_charges_completed_derived, 0) - coalesce(ls.fee_charges_writtenoff_derived, 0) - coalesce(ls.fee_charges_waived_derived, 0) as feeDue, ");
-            sqlBuilder.append(
-                    "ls.penalty_charges_amount - coalesce(ls.penalty_charges_completed_derived, 0) - coalesce(ls.penalty_charges_writtenoff_derived, 0) - coalesce(ls.penalty_charges_waived_derived, 0) as penaltyDue, ");
-            sqlBuilder.append(
-                    "l.currency_code as currencyCode, l.currency_digits as currencyDigits, l.currency_multiplesof as inMultiplesOf, l.net_disbursal_amount as netDisbursalAmount, ");
-            sqlBuilder.append("rc." + sqlGenerator.escape("name")
-                    + " as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode ");
-            sqlBuilder.append("FROM m_loan l ");
-            sqlBuilder.append("JOIN m_currency rc on rc." + sqlGenerator.escape("code") + " = l.currency_code ");
-            sqlBuilder.append("JOIN m_loan_repayment_schedule ls ON ls.loan_id = l.id AND ls.completed_derived = false ");
-            sqlBuilder.append(
-                    "JOIN((SELECT ls.loan_id, ls.duedate as datedue FROM m_loan_repayment_schedule ls WHERE ls.loan_id = ? and ls.completed_derived = false ORDER BY ls.duedate LIMIT 1)) asq on asq.loan_id = ls.loan_id ");
-            sqlBuilder.append("AND asq.datedue = ls.duedate ");
-            sqlBuilder.append("WHERE l.id = ? LIMIT 1");
-            return sqlBuilder.toString();
+            return " GREATEST(loan_transaction.transaction_date, ls.dueDate) as transactionDate,"
+                    + " coalesce(ls.principal_amount, 0) - coalesce(ls.principal_writtenoff_derived, 0) - coalesce(ls.principal_completed_derived, 0) as principalDue,"
+                    + " coalesce(ls.interest_amount, 0) - coalesce(ls.interest_completed_derived, 0) - coalesce(ls.interest_waived_derived, 0) - coalesce(ls.interest_writtenoff_derived, 0) as interestDue,"
+                    + " coalesce(ls.fee_charges_amount, 0) - coalesce(ls.fee_charges_completed_derived, 0) - coalesce(ls.fee_charges_writtenoff_derived, 0) - coalesce(ls.fee_charges_waived_derived, 0) as feeDue,"
+                    + " coalesce(ls.penalty_charges_amount, 0) - coalesce(ls.penalty_charges_completed_derived, 0) - coalesce(ls.penalty_charges_writtenoff_derived, 0) - coalesce(ls.penalty_charges_waived_derived, 0) as penaltyDue,"
+                    + " l.currency_code as currencyCode," + " l.currency_digits as currencyDigits,"
+                    + " l.currency_multiplesof as inMultiplesOf," + " l.net_disbursal_amount as netDisbursalAmount," + " rc."
+                    + sqlGenerator.escape("name") + " as currencyName," + " rc.display_symbol as currencyDisplaySymbol,"
+                    + " rc.internationalized_name_code as currencyNameCode" + " FROM" + " m_loan l" + " JOIN m_currency rc on rc."
+                    + sqlGenerator.escape("code") + " = l.currency_code" + " JOIN m_loan_repayment_schedule ls ON ls.loan_id = l.id"
+                    + " LEFT JOIN (" + " select tr.loan_id, max(tr.transaction_date) as transaction_date" + " from m_loan_transaction tr"
+                    + " where tr.transaction_type_enum in (?,?)" + " AND tr.is_reversed = false" + " group by tr.loan_id"
+                    + " ) loan_transaction ON loan_transaction.loan_id = l.id" + " WHERE l.id = ?" + " ORDER BY ls.installment"
+                    + " LIMIT 1";
         }
 
         @Override
