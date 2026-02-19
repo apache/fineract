@@ -1770,6 +1770,11 @@ public class LoanProductsRequestFactory {
                 .incomeFromBuyDownAccountId(accountTypeResolver.resolve(DefaultAccountType.INCOME_FROM_BUY_DOWN));//
     }
 
+    public PostLoanProductsRequest defaultLoanProductsRequestLP2BuyDownFeesFeeIncome() {
+        return defaultLoanProductsRequestLP2BuyDownFees()//
+                .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE);//
+    }
+
     public PostLoanProductsRequest defaultLoanProductsRequestLP2ChargeOffReasonToExpenseAccountMappingsWithBuyDownFee() {
 
         Long chargeOffReasonId = codeHelper.retrieveCodeByName(CHARGE_OFF_REASONS).getId();

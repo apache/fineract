@@ -233,4 +233,5 @@
     <include file="parts/0212_add_force_password_reset_config.xml" relativeToChangelogFile="true" />
     <include file="parts/0213_transaction_summary_adding_originators.xml" relativeToChangelogFile="true" />
     <include file="parts/0214_trial_balance_summary_adding_originators.xml" relativeToChangelogFile="true" />
+    <include file="parts/0215_transaction_summary_reports_add_buydown_fee_types.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
