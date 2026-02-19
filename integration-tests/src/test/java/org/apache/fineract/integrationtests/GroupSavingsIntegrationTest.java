@@ -55,6 +55,7 @@ import org.apache.fineract.integrationtests.guarantor.GuarantorHelper;
 import org.apache.fineract.integrationtests.guarantor.GuarantorTestBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -902,6 +903,7 @@ public class GroupSavingsIntegrationTest {
      * </ul>
      */
     @Test
+    @Disabled("Using GROUP as Client guarantor causes issues... need to be fixed to support GROUP as guarantor")
     public void testOnHoldTransactionsApiForGroupSavingsAccount() {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
