@@ -40,8 +40,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import org.apache.fineract.client.models.PaymentTypeRequest;
-import org.apache.fineract.client.models.PostPaymentTypesResponse;
+import org.apache.fineract.client.models.PaymentTypeCreateRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
@@ -2664,10 +2663,10 @@ public class ClientSavingsIntegrationTest {
         String name = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
         Boolean isCashPayment = false;
-        Integer position = 1;
+        Long position = 1L;
 
-        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
-                new PaymentTypeRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
+        var paymentTypesResponse = paymentTypeHelper.createPaymentType(
+                new PaymentTypeCreateRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
         Long paymentTypeIdOne = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeIdOne);
 
@@ -2688,8 +2687,8 @@ public class ClientSavingsIntegrationTest {
 
         String paymentTypeNameTwo = PaymentTypeHelper.randomNameGenerator("P_T", 5);
 
-        PostPaymentTypesResponse paymentTypesResponseTwo = paymentTypeHelper.createPaymentType(
-                new PaymentTypeRequest().name(paymentTypeNameTwo).description(description).isCashPayment(isCashPayment).position(position));
+        var paymentTypesResponseTwo = paymentTypeHelper.createPaymentType(new PaymentTypeCreateRequest().name(paymentTypeNameTwo)
+                .description(description).isCashPayment(isCashPayment).position(position));
         Long paymentTypeIdTwo = paymentTypesResponseTwo.getResourceId();
         Assertions.assertNotNull(paymentTypeIdTwo);
 

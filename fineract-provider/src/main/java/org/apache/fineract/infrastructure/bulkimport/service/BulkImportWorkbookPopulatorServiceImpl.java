@@ -91,7 +91,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.products.data.ProductData;
 import org.apache.fineract.portfolio.products.service.ShareProductReadPlatformService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
@@ -124,7 +124,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     private final CenterReadPlatformService centerReadPlatformService;
     private final GroupReadPlatformService groupReadPlatformService;
     private final FundReadPlatformService fundReadPlatformService;
-    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private final PaymentTypeReadService paymentTypeReadPlatformService;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final LoanReadPlatformService loanReadPlatformService;
@@ -142,7 +142,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
             final OfficeReadPlatformService officeReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
             final ClientReadPlatformService clientReadPlatformService, final CenterReadPlatformService centerReadPlatformService,
             final GroupReadPlatformService groupReadPlatformService, final FundReadPlatformService fundReadPlatformService,
-            final PaymentTypeReadPlatformService paymentTypeReadPlatformService,
+            final PaymentTypeReadService paymentTypeReadPlatformService,
             final LoanProductReadPlatformService loanProductReadPlatformService,
             final CurrencyReadPlatformService currencyReadPlatformService, final LoanReadPlatformService loanReadPlatformService,
             final GLAccountReadPlatformService glAccountReadPlatformService,

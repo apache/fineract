@@ -29,7 +29,7 @@ import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.DepositAccountData;
@@ -51,7 +51,7 @@ public class DepositAccountPreMatureCalculationPlatformServiceImpl implements De
     private final DepositAccountAssembler depositAccountAssembler;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
-    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private final PaymentTypeReadService paymentTypeReadPlatformService;
 
     @Transactional
     @Override

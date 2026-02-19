@@ -43,5 +43,5 @@ jobs:
           chmod +x scripts/verify-signed-commits.sh
           ./scripts/verify-signed-commits.sh \
             --base-ref origin/${{ github.base_ref }} \
-            --head-ref ${{ github.sha }} \
+            --head-ref ${{ github.event.pull_request.head.sha }} \
             --strict

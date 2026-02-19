@@ -18,13 +18,11 @@
  */
 package org.apache.fineract.portfolio.paymenttype.starter;
 
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeDataValidator;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepository;
-import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
+import org.apache.fineract.portfolio.paymenttype.mapper.PaymentTypeCreateRequestMapper;
 import org.apache.fineract.portfolio.paymenttype.mapper.PaymentTypeMapper;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
+import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadServiceImpl;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeWriteService;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeWriteServiceImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -35,16 +33,14 @@ import org.springframework.context.annotation.Configuration;
 public class PaymentTypeConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(PaymentTypeReadPlatformService.class)
-    PaymentTypeReadPlatformService paymentTypeReadPlatformService(PlatformSecurityContext context, PaymentTypeMapper paymentTypeMapper,
-            PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper) {
-        return new PaymentTypeReadPlatformServiceImpl(context, paymentTypeMapper, paymentTypeRepositoryWrapper);
+    @ConditionalOnMissingBean(PaymentTypeReadService.class)
+    PaymentTypeReadService paymentTypeReadPlatformService(PaymentTypeRepository repository, PaymentTypeMapper mapper) {
+        return new PaymentTypeReadServiceImpl(repository, mapper);
     }
 
     @Bean
     @ConditionalOnMissingBean(PaymentTypeWriteService.class)
-    PaymentTypeWriteService paymentTypeWriteService(PaymentTypeRepository repository, PaymentTypeRepositoryWrapper repositoryWrapper,
-            PaymentTypeDataValidator fromApiJsonDeserializer) {
-        return new PaymentTypeWriteServiceImpl(repository, repositoryWrapper, fromApiJsonDeserializer);
+    PaymentTypeWriteService paymentTypeWriteService(PaymentTypeRepository repository, PaymentTypeCreateRequestMapper createRequestMapper) {
+        return new PaymentTypeWriteServiceImpl(repository, createRequestMapper);
     }
 }

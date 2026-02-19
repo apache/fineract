@@ -45,6 +45,7 @@ import org.apache.fineract.infrastructure.security.data.PlatformRequestLog;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.service.AuthTenantDetailsService;
+import org.apache.fineract.infrastructure.security.service.PlatformUserDetailsChecker;
 import org.apache.fineract.infrastructure.security.service.TenantAwareJpaPlatformUserDetailsService;
 import org.apache.fineract.infrastructure.security.service.TwoFactorService;
 import org.apache.fineract.notification.service.UserNotificationService;
@@ -115,7 +116,9 @@ public class SecurityConfig {
     @Autowired
     private IdempotencyStoreHelper idempotencyStoreHelper;
     @Autowired
-    ProgressiveLoanModelCheckerFilter progressiveLoanModelCheckerFilter;
+    private ProgressiveLoanModelCheckerFilter progressiveLoanModelCheckerFilter;
+    @Autowired
+    private PlatformUserDetailsChecker platformUserDetailsChecker;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -290,6 +293,41 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_IMPORT")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/import/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_IMPORT")
+                    // payment type
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/paymenttypes/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_PAYMENTTYPE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/paymenttypes"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_PAYMENTTYPE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/paymenttypes"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_PAYMENTTYPE")
+                    // mix: taxonomy
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/mixtaxonomy/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_MIX_TAXONOMY")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/mixtaxonomy/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_MIX_TAXONOMY")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/mixtaxonomy/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_MIX_TAXONOMY")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/mixtaxonomy/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_MIX_TAXONOMY")
+                    // mix: mapping
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/mixmapping/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_MIX_MAPPING")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/mixmapping/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_MIX_MAPPING")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/mixmapping/*"))
+                    // TODO: "UPDATE_XBRLMAPPING" is the legacy permission name; we should rename for consistency
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_MIX_MAPPING", "UPDATE_XBRLMAPPING")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/mixmapping/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_MIX_MAPPING")
+                    // mix: report
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/mixreport/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_MIX_REPORT")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/mixreport/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_MIX_REPORT")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/mixreport/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_MIX_REPORT")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/mixreport/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_MIX_REPORT")
 
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/*/twofactor")).fullyAuthenticated()
@@ -383,6 +421,7 @@ public class SecurityConfig {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
+        authProvider.setPostAuthenticationChecks(platformUserDetailsChecker);
         return authProvider;
     }
 

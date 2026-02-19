@@ -68,7 +68,7 @@ import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartDat
 import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartReadPlatformService;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
@@ -127,7 +127,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     private final RecurringAccountDepositTransactionTemplateMapper rdTransactionTemplateMapper = new RecurringAccountDepositTransactionTemplateMapper();
     private final DropdownReadPlatformService dropdownReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
-    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private final PaymentTypeReadService paymentTypeReadPlatformService;
 
     @Override
     public Collection<DepositAccountData> retrieveAll(final DepositAccountType depositAccountType,
@@ -1160,7 +1160,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                 final Long paymentTypeId = JdbcSupport.getLong(rs, PAYMENT_TYPE);
                 if (paymentTypeId != null) {
                     final String typeName = rs.getString(PAYMENT_TYPE_NAME);
-                    final PaymentTypeData paymentType = PaymentTypeData.instance(paymentTypeId, typeName);
+                    final PaymentTypeData paymentType = PaymentTypeData.builder().id(paymentTypeId).name(typeName).build();
                     final String accountNumber = rs.getString(ACCOUNT_NUMBER);
                     final String checkNumber = rs.getString(CHECK_NUMBER);
                     final String routingCode = rs.getString(ROUTING_CODE);

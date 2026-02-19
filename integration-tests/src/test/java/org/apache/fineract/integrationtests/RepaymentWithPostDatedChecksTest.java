@@ -34,9 +34,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import org.apache.fineract.client.models.PaymentTypeCreateRequest;
 import org.apache.fineract.client.models.PaymentTypeData;
-import org.apache.fineract.client.models.PaymentTypeRequest;
-import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
@@ -138,10 +137,10 @@ public class RepaymentWithPostDatedChecksTest {
         String name = "PDC";
         String description = PaymentTypeHelper.randomNameGenerator("PDC", 15);
         Boolean isCashPayment = false;
-        Integer position = 1;
+        Long position = 1L;
 
-        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
-                new PaymentTypeRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
+        var paymentTypesResponse = paymentTypeHelper.createPaymentType(
+                new PaymentTypeCreateRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
         Long paymentTypeId = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeId);
         paymentTypeHelper.verifyPaymentTypeCreatedOnServer(paymentTypeId);

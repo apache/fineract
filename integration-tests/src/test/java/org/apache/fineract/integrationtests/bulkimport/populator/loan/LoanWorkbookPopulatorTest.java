@@ -26,8 +26,7 @@ import io.restassured.specification.ResponseSpecification;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
-import org.apache.fineract.client.models.PaymentTypeRequest;
-import org.apache.fineract.client.models.PostPaymentTypesResponse;
+import org.apache.fineract.client.models.PaymentTypeCreateRequest;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
@@ -93,9 +92,9 @@ public class LoanWorkbookPopulatorTest {
         String name = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
         Boolean isCashPayment = true;
-        Integer position = 1;
-        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
-                new PaymentTypeRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
+        Long position = 1L;
+        var paymentTypesResponse = paymentTypeHelper.createPaymentType(
+                new PaymentTypeCreateRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
         Long outcome_payment_creation = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(outcome_payment_creation, "Could not create payment type");
 

@@ -41,8 +41,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.fineract.client.models.PaymentTypeRequest;
-import org.apache.fineract.client.models.PostPaymentTypesResponse;
+import org.apache.fineract.client.models.PaymentTypeCreateRequest;
 import org.apache.fineract.infrastructure.bulkimport.constants.LoanConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.integrationtests.bulkimport.importhandler.LocalContentStorageUtil;
@@ -168,8 +167,8 @@ public class LoanImportHandlerTest {
         String paymentTypeName = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String paymentTypeDescription = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
 
-        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
-                new PaymentTypeRequest().name(paymentTypeName).description(paymentTypeDescription).isCashPayment(true).position(1));
+        var paymentTypesResponse = paymentTypeHelper.createPaymentType(
+                new PaymentTypeCreateRequest().name(paymentTypeName).description(paymentTypeDescription).isCashPayment(true).position(1L));
         Long outcome_payment_creation = paymentTypesResponse.getResourceId();
 
         Assertions.assertNotNull(outcome_payment_creation, "Could not create payment type");

@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           fetch-depth: 0
       - name: Generate build number
@@ -31,6 +31,6 @@ jobs:
           java-version: '21'
           distribution: 'zulu'
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
+        uses: gradle/actions/setup-gradle@f29f5a9d7b09a7c6b29859002d29d24e1674c884 # v5.0.1
       - name: Build the image
         run: ./gradlew publish -Pfineract.config.username=$ARTIFACTORY_USERNAME -Pfineract.config.password=$ARTIFACTORY_PASSWORD -Pfineract.release.version=${BUILD_NUMBER}

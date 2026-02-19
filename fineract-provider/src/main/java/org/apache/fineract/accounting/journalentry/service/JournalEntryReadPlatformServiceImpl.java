@@ -187,7 +187,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentTypeId");
                 if (paymentTypeId != null) {
                     final String typeName = rs.getString("paymentTypeName");
-                    final PaymentTypeData paymentType = PaymentTypeData.instance(paymentTypeId, typeName);
+                    final PaymentTypeData paymentType = PaymentTypeData.builder().id(paymentTypeId).name(typeName).build();
                     final String accountNumber = rs.getString("accountNumber");
                     final String checkNumber = rs.getString("checkNumber");
                     final String routingCode = rs.getString("routingCode");

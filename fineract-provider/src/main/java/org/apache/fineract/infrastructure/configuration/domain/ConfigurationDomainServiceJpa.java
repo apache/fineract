@@ -559,4 +559,9 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         Long value = property.getValue();
         return value != null && value > 0 ? value.intValue() : 0;
     }
+
+    @Override
+    public boolean isForcePasswordResetOnFirstLoginEnabled() {
+        return getGlobalConfigurationPropertyData(GlobalConfigurationConstants.FORCE_PASSWORD_RESET_ON_FIRST_LOGIN).isEnabled();
+    }
 }

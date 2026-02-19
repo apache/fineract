@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.portfolio.note.data.NoteData;
-import org.apache.fineract.portfolio.paymenttype.api.PaymentTypeApiResourceSwagger.GetPaymentTypesResponse;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 
 /**
  * Created by sanyam on 25/7/17.
@@ -110,7 +110,7 @@ final class JournalEntriesApiResourceSwagger {
 
             @Schema(example = "62")
             public Long id;
-            public GetPaymentTypesResponse paymentType;
+            public PaymentTypeData paymentType;
             @Schema(example = "acc123")
             public String accountNumber;
             @Schema(example = "che123")

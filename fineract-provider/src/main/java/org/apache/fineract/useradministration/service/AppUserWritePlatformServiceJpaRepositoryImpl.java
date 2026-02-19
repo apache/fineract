@@ -127,6 +127,9 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             }
 
             AppUser appUser = AppUser.fromJson(userOffice, linkedStaff, allRoles, clients, command);
+            if (this.configurationDomainService.isForcePasswordResetOnFirstLoginEnabled()) {
+                appUser.updatePasswordResetRequired(true);
+            }
 
             final Boolean sendPasswordToEmail = command.booleanObjectValueOfParameterNamed("sendPasswordToEmail");
             this.userDomainService.create(appUser, sendPasswordToEmail);
@@ -160,12 +163,14 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
     public CommandProcessingResult changeUserPassword(final Long userId, final JsonCommand command) {
         try {
-            this.context.authenticatedUser(new CommandWrapperBuilder().updateUser(null).build());
-            this.fromApiJsonDeserializer.validateForChangePassword(command.json(), this.context.authenticatedUser());
+            this.context.authenticatedUser(new CommandWrapperBuilder().changeUserPassword(userId).build());
+            this.fromApiJsonDeserializer.validateForChangePassword(command.json(),
+                    this.context.authenticatedUser(new CommandWrapperBuilder().changeUserPassword(userId).build()));
             final AppUser userToUpdate = this.appUserRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
             final AppUserPreviousPassword currentPasswordToSaveAsPreview = getCurrentPasswordToSaveAsPreview(userToUpdate, command);
             final Map<String, Object> changes = userToUpdate.changePassword(command, this.platformPasswordEncoder);
             if (!changes.isEmpty()) {
+                userToUpdate.updatePasswordResetRequired(false);
                 this.appUserRepository.saveAndFlush(userToUpdate);
                 if (currentPasswordToSaveAsPreview != null) {
                     this.appUserPreviewPasswordRepository.save(currentPasswordToSaveAsPreview);
@@ -190,9 +195,9 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
     public CommandProcessingResult updateUser(final Long userId, final JsonCommand command) {
         try {
-            this.context.authenticatedUser(new CommandWrapperBuilder().updateUser(null).build());
+            final AppUser currentUser = this.context.authenticatedUser(new CommandWrapperBuilder().updateUser(null).build());
 
-            this.fromApiJsonDeserializer.validateForUpdate(command.json(), this.context.authenticatedUser());
+            this.fromApiJsonDeserializer.validateForUpdate(command.json(), currentUser);
 
             final AppUser userToUpdate = this.appUserRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 
@@ -238,6 +243,10 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             }
 
             if (!changes.isEmpty()) {
+                if ((changes.containsKey("password") || changes.containsKey("passwordEncoded")) && !currentUser.getId().equals(userId)
+                        && this.configurationDomainService.isForcePasswordResetOnFirstLoginEnabled()) {
+                    userToUpdate.updatePasswordResetRequired(true);
+                }
                 this.appUserRepository.saveAndFlush(userToUpdate);
 
                 if (currentPasswordToSaveAsPreview != null) {

@@ -230,4 +230,5 @@
     <include file="parts/0209_transaction_summary_with_asset_owner_and_from_asset_owner_id_for_asset_sales.xml" relativeToChangelogFile="true" />
     <include file="parts/0210_add_configuration_password_reuse_check_history_count.xml" relativeToChangelogFile="true" />
     <include file="parts/0211_trial_balance_summary_fix_external_owners_and_aggregation.xml" relativeToChangelogFile="true" />
+    <include file="parts/0212_add_force_password_reset_config.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

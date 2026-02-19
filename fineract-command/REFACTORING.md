@@ -298,12 +298,12 @@ public class CreatePaymentTypeCommandHandler implements NewCommandSourceHandler 
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class CreatePaymentTypeCommandHandler implements CommandHandler<CreatePaymentTypeRequest, CreatePaymentTypeResponse> {
+public class PaymentTypeCreateCommandHandler implements CommandHandler<PaymentTypeCreateRequest, PaymentTypeCreateResponse> {
 
     private final PaymentTypeWriteService paymentTypeWriteService;
 
     @Override
-    public CreatePaymentTypeResponse handle(Command<CreatePaymentTypeRequest> command) {
+    public PaymentTypeCreateResponse handle(Command<PaymentTypeCreateRequest> command) {
         // TODO: refactor business logic service to accept properly typed request objects as input
         return paymentTypeWriteService.createPaymentType(command.getPayload());
     }

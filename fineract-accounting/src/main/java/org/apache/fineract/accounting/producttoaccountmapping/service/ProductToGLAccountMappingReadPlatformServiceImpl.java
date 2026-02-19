@@ -223,8 +223,8 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
 
         List<PaymentTypeToGLAccountMapper> paymentTypeToGLAccountMappers = mappings.isEmpty() ? null : new ArrayList<>();
         for (final ProductToGLAccountMapping mapping : mappings) {
-            final PaymentTypeData paymentTypeData = PaymentTypeData.instance(mapping.getPaymentType().getId(),
-                    mapping.getPaymentType().getName());
+            final PaymentTypeData paymentTypeData = PaymentTypeData.builder().id(mapping.getPaymentType().getId())
+                    .name(mapping.getPaymentType().getName()).build();
             final GLAccountData gLAccountData = new GLAccountData().setId(mapping.getGlAccount().getId())
                     .setName(mapping.getGlAccount().getName()).setGlCode(mapping.getGlAccount().getGlCode());
 

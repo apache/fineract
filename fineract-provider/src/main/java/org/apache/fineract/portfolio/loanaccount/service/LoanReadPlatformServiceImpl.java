@@ -149,7 +149,7 @@ import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -177,7 +177,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
     private final PaginationHelper paginationHelper;
-    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private final PaymentTypeReadService paymentTypeReadPlatformService;
     private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
     private final LoanUtilService loanUtilService;
     private final ConfigurationDomainService configurationDomainService;
@@ -1395,7 +1395,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentType");
             if (paymentTypeId != null) {
                 final String typeName = rs.getString("paymentTypeName");
-                final PaymentTypeData paymentType = PaymentTypeData.instance(paymentTypeId, typeName);
+                final PaymentTypeData paymentType = PaymentTypeData.builder().id(paymentTypeId).name(typeName).build();
                 final String accountNumber = rs.getString("accountNumber");
                 final String checkNumber = rs.getString("checkNumber");
                 final String routingCode = rs.getString("routingCode");

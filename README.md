@@ -1,9 +1,11 @@
 # Apache Fineract
+
 <!-- TODO Reactivate when there is a working CI-CD instance: [![Swagger Validation](https://validator.swagger.io/validator?url=https://sandbox.mifos.community/fineract-provider/swagger-ui/fineract.yaml)](https://validator.swagger.io/validator/debug?url=https://sandbox.mifos.community/fineract-provider/swagger-ui/fineract.yaml) -->
 [![Build](https://github.com/apache/fineract/actions/workflows/build-mariadb.yml/badge.svg?branch=develop)](https://github.com/apache/fineract/actions/workflows/build-mariadb.yml)
 [![Docker Hub](https://img.shields.io/docker/pulls/apache/fineract.svg?logo=Docker)](https://hub.docker.com/r/apache/fineract)
 [![Docker Build](https://github.com/apache/fineract/actions/workflows/publish-dockerhub.yml/badge.svg)](https://github.com/apache/fineract/actions/workflows/publish-dockerhub.yml)
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=apache_fineract&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=apache_fineract)
+[![Verified DPG](https://img.shields.io/badge/Verified-DPG-3333AB)](https://www.digitalpublicgoods.net/r/apache-fineract "Apache Fineract is a verified Digital Public Good under the Digital Public Goods Alliance.")
 
 Apache Fineract is an open-source core banking platform providing a
 flexible, extensible foundation for a wide range of financial services. By
