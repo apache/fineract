@@ -94,6 +94,8 @@ public class GuarantorImportHandler implements ImportHandler {
                 guarantorTypeId = 1;
             } else if (guarantorType.equalsIgnoreCase(TemplatePopulateImportConstants.GUARANTOR_EXTERNAL)) {
                 guarantorTypeId = 3;
+            } else if (guarantorType.equalsIgnoreCase(TemplatePopulateImportConstants.GUARANTOR_GROUP)) {
+                guarantorTypeId = 4;
             }
         }
         String clientName = ImportHandlerUtils.readAsString(GuarantorConstants.ENTITY_ID_COL, row);

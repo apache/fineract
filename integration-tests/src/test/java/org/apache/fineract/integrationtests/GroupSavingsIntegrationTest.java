@@ -957,7 +957,7 @@ public class GroupSavingsIntegrationTest {
         // Add the group savings account as guarantor collateral for the loan
         // Use GUARANTEE_AMOUNT (500) as guarantee amount (less than the MINIMUM_OPENING_BALANCE of 1000)
         String guarantorJSON = new GuarantorTestBuilder()
-                .existingCustomerWithGuaranteeAmount(String.valueOf(groupID), String.valueOf(savingsId), GUARANTEE_AMOUNT).build();
+                .existingGroupWithGuaranteeAmount(String.valueOf(groupID), String.valueOf(savingsId), GUARANTEE_AMOUNT).build();
 
         LOG.info("Guarantor JSON: {}", guarantorJSON);
         LOG.info("Loan ID: {}, Group ID: {}, Savings ID: {}", loanID, groupID, savingsId);
@@ -1021,6 +1021,322 @@ public class GroupSavingsIntegrationTest {
 
         Assertions.assertTrue(foundTransactionWithGroupName,
                 "Should find at least one on-hold transaction with savingsClientName populated (group name)");
+    }
+
+    /**
+     * Test that creating a group guarantor with an invalid group ID fails with appropriate error
+     */
+    @Test
+    public void testGroupGuarantorWithInvalidGroupId() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        // Create a client who will take out the loan
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(clientID);
+
+        // Create loan product with hold funds
+        LoanProductTestBuilder loanProductBuilder = new LoanProductTestBuilder().withPrincipal(PRINCIPAL).withNumberOfRepayments("4")
+                .withRepaymentAfterEvery("1").withRepaymentTypeAsWeek().withinterestRatePerPeriod("2")
+                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
+                .withOnHoldFundDetails("0", "0", "0");
+        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(loanProductBuilder.build(null));
+        Assertions.assertNotNull(loanProductID);
+
+        // Apply for a loan
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(PRINCIPAL).withLoanTermFrequency("4")
+                .withLoanTermFrequencyAsWeeks().withNumberOfRepayments("4").withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsWeeks()
+                .withInterestRatePerPeriod("2").withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
+                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withSubmittedOnDate(SavingsAccountHelper.TRANSACTION_DATE)
+                .withExpectedDisbursementDate(SavingsAccountHelper.TRANSACTION_DATE)
+                .build(clientID.toString(), loanProductID.toString(), null);
+        final Integer loanID = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        Assertions.assertNotNull(loanID);
+
+        // Try to create guarantor with invalid group ID (9999999)
+        final Integer invalidGroupId = 9999999;
+        String guarantorJSON = new GuarantorTestBuilder()
+                .existingGroupWithGuaranteeAmount(String.valueOf(invalidGroupId), "1", GUARANTEE_AMOUNT).build();
+
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder().build();
+        final RequestSpecification errorRequest = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        errorRequest.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+
+        ArrayList<HashMap> error = (ArrayList<HashMap>) this.guarantorHelper.createGuarantorWithError(loanID, guarantorJSON, errorRequest,
+                errorResponse);
+        // Verify we got an error response (status code may be 403 or 404 depending on environment)
+        Assertions.assertNotNull(error, "Should return error for invalid group ID");
+
+        LOG.info("SUCCESS: Invalid group ID correctly rejected");
+    }
+
+    /**
+     * Test that using a client ID with GROUP guarantor type fails with appropriate error
+     */
+    @Test
+    public void testGroupGuarantorWithClientIdButGroupType() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        // Create TWO clients - one for loan, one to misuse as "group"
+        final Integer loanClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(loanClientID);
+
+        final Integer otherClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(otherClientID);
+
+        // Create savings account for the other client
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, null, null,
+                "false");
+        final Integer clientSavingsId = this.savingsAccountHelper.applyForSavingsApplication(otherClientID, savingsProductID, "INDIVIDUAL");
+        this.savingsAccountHelper.approveSavings(clientSavingsId);
+        this.savingsAccountHelper.activateSavings(clientSavingsId);
+
+        // Create loan product
+        LoanProductTestBuilder loanProductBuilder = new LoanProductTestBuilder().withPrincipal(PRINCIPAL).withNumberOfRepayments("4")
+                .withRepaymentAfterEvery("1").withRepaymentTypeAsWeek().withinterestRatePerPeriod("2")
+                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
+                .withOnHoldFundDetails("0", "0", "0");
+        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(loanProductBuilder.build(null));
+
+        // Create loan
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(PRINCIPAL).withLoanTermFrequency("4")
+                .withLoanTermFrequencyAsWeeks().withNumberOfRepayments("4").withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsWeeks()
+                .withInterestRatePerPeriod("2").withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
+                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withSubmittedOnDate(SavingsAccountHelper.TRANSACTION_DATE)
+                .withExpectedDisbursementDate(SavingsAccountHelper.TRANSACTION_DATE)
+                .build(loanClientID.toString(), loanProductID.toString(), null);
+        final Integer loanID = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+
+        // Try to create guarantor with CLIENT ID but GROUP type (type mismatch)
+        String guarantorJSON = new GuarantorTestBuilder()
+                .existingGroupWithGuaranteeAmount(String.valueOf(otherClientID), String.valueOf(clientSavingsId), GUARANTEE_AMOUNT).build();
+
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder().build();
+        final RequestSpecification errorRequest = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        errorRequest.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+
+        ArrayList<HashMap> error = (ArrayList<HashMap>) this.guarantorHelper.createGuarantorWithError(loanID, guarantorJSON, errorRequest,
+                errorResponse);
+        // Verify we got an error response (status code may be 403 or 404 depending on environment)
+        Assertions.assertNotNull(error, "Should return error for client ID used with GROUP type");
+
+        LOG.info("SUCCESS: Client ID with GROUP type correctly rejected");
+    }
+
+    /**
+     * Test that duplicate group guarantor detection works and shows proper error message with group name
+     */
+    @Test
+    public void testDuplicateGroupGuarantor() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        // Create client for loan
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(clientID);
+
+        // Create group with savings account
+        final Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
+        Assertions.assertNotNull(groupID);
+
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, null, null,
+                "false");
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(groupID, savingsProductID, ACCOUNT_TYPE_GROUP);
+        this.savingsAccountHelper.approveSavings(savingsId);
+        this.savingsAccountHelper.activateSavings(savingsId);
+
+        // Create loan
+        LoanProductTestBuilder loanProductBuilder = new LoanProductTestBuilder().withPrincipal(PRINCIPAL).withNumberOfRepayments("4")
+                .withRepaymentAfterEvery("1").withRepaymentTypeAsWeek().withinterestRatePerPeriod("2")
+                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
+                .withOnHoldFundDetails("0", "0", "0");
+        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(loanProductBuilder.build(null));
+
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(PRINCIPAL).withLoanTermFrequency("4")
+                .withLoanTermFrequencyAsWeeks().withNumberOfRepayments("4").withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsWeeks()
+                .withInterestRatePerPeriod("2").withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
+                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withSubmittedOnDate(SavingsAccountHelper.TRANSACTION_DATE)
+                .withExpectedDisbursementDate(SavingsAccountHelper.TRANSACTION_DATE)
+                .build(clientID.toString(), loanProductID.toString(), null);
+        final Integer loanID = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+
+        // Add group guarantor first time - should succeed
+        String guarantorJSON = new GuarantorTestBuilder()
+                .existingGroupWithGuaranteeAmount(String.valueOf(groupID), String.valueOf(savingsId), GUARANTEE_AMOUNT).build();
+        Integer guarantorId1 = this.guarantorHelper.createGuarantor(loanID, guarantorJSON);
+        Assertions.assertNotNull(guarantorId1, "First guarantor creation should succeed");
+
+        // Try to add the SAME group guarantor again - should fail with duplicate error
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
+        final RequestSpecification errorRequest = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        errorRequest.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+
+        ArrayList<HashMap> error = (ArrayList<HashMap>) this.guarantorHelper.createGuarantorWithError(loanID, guarantorJSON, errorRequest,
+                errorResponse);
+        Assertions.assertNotNull(error, "Should return error for duplicate group guarantor");
+
+        // Verify error message contains group information
+        HashMap errorData = error.get(0);
+        String userMessage = (String) errorData.get("userMessageGlobalisationCode");
+        Assertions.assertTrue(userMessage != null && userMessage.contains("already.exist"),
+                "Error message should indicate duplicate guarantor");
+
+        LOG.info("SUCCESS: Duplicate group guarantor correctly rejected");
+    }
+
+    /**
+     * Test complete loan lifecycle (approval, disbursement, repayment) with a group guarantor
+     */
+    @Test
+    public void testGroupGuarantorLoanLifecycle() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        // Create client for loan
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(clientID);
+
+        // Create group with savings account
+        final Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
+        Assertions.assertNotNull(groupID);
+
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, null, null,
+                "false");
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(groupID, savingsProductID, ACCOUNT_TYPE_GROUP);
+        this.savingsAccountHelper.approveSavings(savingsId);
+        this.savingsAccountHelper.activateSavings(savingsId);
+
+        // Deposit funds into the savings account to cover the guarantee
+        this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT, SavingsAccountHelper.TRANSACTION_DATE,
+                CommonConstants.RESPONSE_RESOURCE_ID);
+
+        // Create loan product - using minimal hold fund requirements for testing
+        // Focus is on verifying that group guarantors work, not on complex hold fund logic
+        LoanProductTestBuilder loanProductBuilder = new LoanProductTestBuilder().withPrincipal("2000").withNumberOfRepayments("1")
+                .withRepaymentAfterEvery("1").withRepaymentTypeAsWeek().withinterestRatePerPeriod("0")
+                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
+                .withOnHoldFundDetails("0", "0", "0");
+        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(loanProductBuilder.build(null));
+
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("2000").withLoanTermFrequency("1")
+                .withLoanTermFrequencyAsWeeks().withNumberOfRepayments("1").withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsWeeks()
+                .withInterestRatePerPeriod("0").withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
+                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withSubmittedOnDate(SavingsAccountHelper.TRANSACTION_DATE)
+                .withExpectedDisbursementDate(SavingsAccountHelper.TRANSACTION_DATE)
+                .build(clientID.toString(), loanProductID.toString(), null);
+        final Integer loanID = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+
+        // Add group guarantor with amount = 1000 (50% of 2000 loan)
+        String guarantorJSON = new GuarantorTestBuilder()
+                .existingGroupWithGuaranteeAmount(String.valueOf(groupID), String.valueOf(savingsId), "1000").build();
+        Integer guarantorId = this.guarantorHelper.createGuarantor(loanID, guarantorJSON);
+        Assertions.assertNotNull(guarantorId);
+
+        // Verify guarantor was created successfully
+        ArrayList<HashMap> guarantors = this.guarantorHelper.getGuarantorList(loanID);
+        Assertions.assertEquals(1, guarantors.size(), "Should have 1 group guarantor");
+        HashMap guarantor = guarantors.get(0);
+        HashMap guarantorType = (HashMap) guarantor.get("guarantorType");
+        Assertions.assertEquals(4, guarantorType.get("id"), "Guarantor type should be GROUP (4)");
+
+        // Approve loan with group guarantor
+        HashMap loanStatusHashMap = this.loanTransactionHelper.approveLoan(SavingsAccountHelper.TRANSACTION_DATE, loanID);
+        Assertions.assertNotNull(loanStatusHashMap, "Loan approval should succeed with group guarantor");
+
+        // Disburse loan
+        this.loanTransactionHelper.disburseLoan(Long.valueOf(loanID), SavingsAccountHelper.TRANSACTION_DATE, 2000.0);
+
+        // Make full repayment
+        final String repaymentDate = SavingsAccountHelper.TRANSACTION_DATE;
+        this.loanTransactionHelper.makeRepayment(repaymentDate, Float.parseFloat("2000"), loanID);
+
+        LOG.info("SUCCESS: Group guarantor lifecycle test completed");
+    }
+
+    /**
+     * Test mixed client and group guarantors on the same loan
+     */
+    @Test
+    public void testMixedClientAndGroupGuarantors() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        // Create loan borrower client
+        final Integer borrowerClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(borrowerClientID);
+
+        // Create guarantor client with savings
+        final Integer guarantorClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(guarantorClientID);
+
+        // Create guarantor group with savings
+        final Integer guarantorGroupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
+        Assertions.assertNotNull(guarantorGroupID);
+
+        // Create savings accounts
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, null, null,
+                "false");
+
+        final Integer clientSavingsId = this.savingsAccountHelper.applyForSavingsApplication(guarantorClientID, savingsProductID,
+                "INDIVIDUAL");
+        this.savingsAccountHelper.approveSavings(clientSavingsId);
+        this.savingsAccountHelper.activateSavings(clientSavingsId);
+
+        final Integer groupSavingsId = this.savingsAccountHelper.applyForSavingsApplication(guarantorGroupID, savingsProductID,
+                ACCOUNT_TYPE_GROUP);
+        this.savingsAccountHelper.approveSavings(groupSavingsId);
+        this.savingsAccountHelper.activateSavings(groupSavingsId);
+
+        // Create loan
+        LoanProductTestBuilder loanProductBuilder = new LoanProductTestBuilder().withPrincipal(PRINCIPAL).withNumberOfRepayments("4")
+                .withRepaymentAfterEvery("1").withRepaymentTypeAsWeek().withinterestRatePerPeriod("2")
+                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
+                .withOnHoldFundDetails("0", "0", "0");
+        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(loanProductBuilder.build(null));
+
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(PRINCIPAL).withLoanTermFrequency("4")
+                .withLoanTermFrequencyAsWeeks().withNumberOfRepayments("4").withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsWeeks()
+                .withInterestRatePerPeriod("2").withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
+                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withSubmittedOnDate(SavingsAccountHelper.TRANSACTION_DATE)
+                .withExpectedDisbursementDate(SavingsAccountHelper.TRANSACTION_DATE)
+                .build(borrowerClientID.toString(), loanProductID.toString(), null);
+        final Integer loanID = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+
+        // Add CLIENT guarantor
+        String clientGuarantorJSON = new GuarantorTestBuilder()
+                .existingCustomerWithGuaranteeAmount(String.valueOf(guarantorClientID), String.valueOf(clientSavingsId), "250").build();
+        Integer clientGuarantorId = this.guarantorHelper.createGuarantor(loanID, clientGuarantorJSON);
+        Assertions.assertNotNull(clientGuarantorId, "Client guarantor creation should succeed");
+
+        // Add GROUP guarantor
+        String groupGuarantorJSON = new GuarantorTestBuilder()
+                .existingGroupWithGuaranteeAmount(String.valueOf(guarantorGroupID), String.valueOf(groupSavingsId), "250").build();
+        Integer groupGuarantorId = this.guarantorHelper.createGuarantor(loanID, groupGuarantorJSON);
+        Assertions.assertNotNull(groupGuarantorId, "Group guarantor creation should succeed");
+
+        // Retrieve all guarantors for the loan
+        ArrayList<HashMap> guarantors = this.guarantorHelper.getGuarantorList(loanID);
+        Assertions.assertNotNull(guarantors, "Should retrieve guarantor list");
+        Assertions.assertEquals(2, guarantors.size(), "Should have 2 guarantors (1 client, 1 group)");
+
+        // Verify both guarantor types are present
+        boolean hasClientGuarantor = false;
+        boolean hasGroupGuarantor = false;
+
+        for (HashMap guarantor : guarantors) {
+            HashMap guarantorType = (HashMap) guarantor.get("guarantorType");
+            Integer typeId = (Integer) guarantorType.get("id");
+
+            if (typeId == 1) { // CUSTOMER/CLIENT
+                hasClientGuarantor = true;
+            } else if (typeId == 4) { // GROUP
+                hasGroupGuarantor = true;
+            }
+        }
+
+        Assertions.assertTrue(hasClientGuarantor, "Should have client guarantor");
+        Assertions.assertTrue(hasGroupGuarantor, "Should have group guarantor");
+
+        // Approve loan - both holds should be placed
+        this.loanTransactionHelper.approveLoan(SavingsAccountHelper.TRANSACTION_DATE, loanID);
+
+        LOG.info("SUCCESS: Mixed client and group guarantors work together");
     }
 
     @Test

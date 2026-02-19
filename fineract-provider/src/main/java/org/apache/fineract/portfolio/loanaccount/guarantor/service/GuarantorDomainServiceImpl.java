@@ -390,7 +390,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                         if (guarantor.isSelfGuarantee()) {
                             selfGuarantorList.add(guarantorFundingDetails);
                             selfGuarantee = selfGuarantee.add(guarantorFundingDetails.getAmountRemaining());
-                        } else if (guarantor.isExistingCustomer()) {
+                        } else if (guarantor.isExistingCustomer() || guarantor.isExistingGroup()) {
                             externalGuarantorList.add(guarantorFundingDetails);
                             guarantorGuarantee = guarantorGuarantee.add(guarantorFundingDetails.getAmountRemaining());
                         }

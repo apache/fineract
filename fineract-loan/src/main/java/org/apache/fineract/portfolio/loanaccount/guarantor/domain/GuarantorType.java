@@ -25,7 +25,8 @@ public enum GuarantorType {
 
     CUSTOMER(1, "guarantor.existing.customer"), //
     STAFF(2, "guarantor.staff"), //
-    EXTERNAL(3, "guarantor.external"); //
+    EXTERNAL(3, "guarantor.external"), //
+    GROUP(4, "guarantor.existing.group"); //
 
     private final Integer value;
     private final String code;
@@ -88,6 +89,10 @@ public enum GuarantorType {
 
     public boolean isStaff() {
         return this.value.equals(GuarantorType.STAFF.getValue());
+    }
+
+    public boolean isGroup() {
+        return this.value.equals(GuarantorType.GROUP.getValue());
     }
 
 }

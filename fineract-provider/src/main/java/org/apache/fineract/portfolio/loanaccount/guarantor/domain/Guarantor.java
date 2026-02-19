@@ -188,6 +188,10 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
         return GuarantorType.STAFF.getValue().equals(this.gurantorType);
     }
 
+    public boolean isExistingGroup() {
+        return GuarantorType.GROUP.getValue().equals(this.gurantorType);
+    }
+
     public boolean isExternalGuarantor() {
         return GuarantorType.EXTERNAL.getValue().equals(this.gurantorType);
     }
