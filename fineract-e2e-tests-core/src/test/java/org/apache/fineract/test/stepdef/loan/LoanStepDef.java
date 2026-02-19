@@ -61,6 +61,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
 import org.apache.fineract.avro.loan.v1.LoanChargePaidByDataV1;
@@ -117,6 +118,7 @@ import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoansApprovedAmountRequest;
 import org.apache.fineract.client.models.PutLoansAvailableDisbursementAmountRequest;
+import org.apache.fineract.client.models.PutLoansLoanIdChargeData;
 import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.test.data.AmortizationType;
@@ -171,9 +173,9 @@ import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Assertions;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
+@RequiredArgsConstructor
 public class LoanStepDef extends AbstractStepDef {
 
     public static final String DATE_FORMAT = "dd MMMM yyyy";
@@ -188,46 +190,23 @@ public class LoanStepDef extends AbstractStepDef {
     private static final DateTimeFormatter FORMATTER_EVENTS = DateTimeFormatter.ofPattern(DATE_FORMAT_EVENTS);
     private static final String TRANSACTION_DATE_FORMAT = "dd MMMM yyyy";
 
-    @Autowired
-    private BusinessDateHelper businessDateHelper;
-
-    @Autowired
-    private FineractFeignClient fineractClient;
-
-    @Autowired
-    private EventAssertion eventAssertion;
-
-    @Autowired
-    private PaymentTypeResolver paymentTypeResolver;
-
-    @Autowired
-    private LoanProductResolver loanProductResolver;
-
-    @Autowired
-    private LoanRequestFactory loanRequestFactory;
-
-    @Autowired
-    private EventCheckHelper eventCheckHelper;
+    private final BusinessDateHelper businessDateHelper;
+    private final FineractFeignClient fineractClient;
+    private final EventAssertion eventAssertion;
+    private final PaymentTypeResolver paymentTypeResolver;
+    private final LoanProductResolver loanProductResolver;
+    private final LoanRequestFactory loanRequestFactory;
+    private final EventCheckHelper eventCheckHelper;
+    private final EventStore eventStore;
+    private final CodeValueResolver codeValueResolver;
+    private final CodeHelper codeHelper;
+    private final EventProperties eventProperties;
+    private final JobPollingProperties jobPollingProperties;
 
     private void storePaymentTransactionResponse(ApiResponse<PostLoansLoanIdTransactionsResponse> apiResponse) {
         testContext().set(TestContextKey.LOAN_PAYMENT_TRANSACTION_RESPONSE, apiResponse.getData());
         testContext().set(TestContextKey.LOAN_PAYMENT_TRANSACTION_HEADERS, apiResponse.getHeaders());
     }
-
-    @Autowired
-    private EventStore eventStore;
-
-    @Autowired
-    private CodeValueResolver codeValueResolver;
-
-    @Autowired
-    private CodeHelper codeHelper;
-
-    @Autowired
-    private EventProperties eventProperties;
-
-    @Autowired
-    private JobPollingProperties jobPollingProperties;
 
     @When("Admin creates a new Loan")
     public void createLoan() {
@@ -1482,6 +1461,47 @@ public class LoanStepDef extends AbstractStepDef {
 
         PutLoansLoanIdResponse responseMod = ok(
                 () -> fineractClient.loans().modifyLoanApplication(loanId2, putLoansLoanIdRequest, Map.of()));
+        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, responseMod);
+    }
+
+    @Then("Admin modifies the loan and changes the ANNUAL interest rate to {string}")
+    public void modifyLoanInterestRate(final String newInterestRate) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final Long loanId = loanResponse.getResourceId();
+
+        final GetLoansLoanIdResponse loanDetails = ok(
+                () -> fineractClient.loans().retrieveLoan(loanId, Map.of("staffInSelectedOfficeOnly", "false", "associations", "charges")));
+
+        final PutLoansLoanIdRequest putLoansLoanIdRequest = new PutLoansLoanIdRequest()//
+                .productId(loanDetails.getLoanProductId())//
+                .principal(loanDetails.getPrincipal().longValue())//
+                .loanTermFrequency(loanDetails.getTermFrequency())//
+                .loanTermFrequencyType(loanDetails.getTermPeriodFrequencyType().getId())//
+                .numberOfRepayments(loanDetails.getNumberOfRepayments())//
+                .repaymentEvery(loanDetails.getRepaymentEvery())//
+                .repaymentFrequencyType(loanDetails.getRepaymentFrequencyType().getId())//
+                .interestRatePerPeriod(new BigDecimal(newInterestRate))//
+                .interestType(loanDetails.getInterestType().getId())//
+                .interestCalculationPeriodType(loanDetails.getInterestCalculationPeriodType().getId())//
+                .amortizationType(loanDetails.getAmortizationType().getId())//
+                .transactionProcessingStrategyCode(loanDetails.getTransactionProcessingStrategyCode())//
+                .expectedDisbursementDate(FORMATTER.format(loanDetails.getTimeline().getExpectedDisbursementDate()))//
+                .submittedOnDate(FORMATTER.format(loanDetails.getTimeline().getSubmittedOnDate()))//
+                .clientId(loanDetails.getClientId())//
+                .dateFormat(DATE_FORMAT)//
+                .locale("en")//
+                .loanType("individual");//
+
+        final List<GetLoansLoanIdLoanChargeData> existingCharges = loanDetails.getCharges();
+        if (existingCharges != null && !existingCharges.isEmpty()) {
+            existingCharges.stream()
+                    .map(charge -> new PutLoansLoanIdChargeData().id(charge.getId()).chargeId(charge.getChargeId())
+                            .dueDate(charge.getDueDate().format(FORMATTER)).amount(charge.getAmountOrPercentage()))
+                    .forEach(putLoansLoanIdRequest::addChargesItem);
+        }
+
+        final PutLoansLoanIdResponse responseMod = ok(
+                () -> fineractClient.loans().modifyLoanApplication(loanId, putLoansLoanIdRequest, Map.of()));
         testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, responseMod);
     }
 

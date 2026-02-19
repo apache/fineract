@@ -1610,7 +1610,7 @@ final class LoansApiResourceSwagger {
         public Long clientId;
         @Schema(example = "individual")
         public String loanType;
-        public List<PutLoansLoanIdChanges> charges;
+        public List<PutLoansLoanIdChargeData> charges;
         public List<PutLoansLoanIdCollateral> collateral;
         public List<PutLoansLoanIdDisbursementData> disbursementData;
         @Schema(example = "false", description = "Allow full term length for each tranche disbursement")
@@ -1628,9 +1628,9 @@ final class LoansApiResourceSwagger {
         @Schema(example = "false")
         public Boolean interestRecognitionOnDisbursementDate;
 
-        static final class PutLoansLoanIdChanges {
+        static final class PutLoansLoanIdChargeData {
 
-            private PutLoansLoanIdChanges() {}
+            private PutLoansLoanIdChargeData() {}
 
             @Schema(example = "dd MMMM yyyy")
             public String dateFormat;

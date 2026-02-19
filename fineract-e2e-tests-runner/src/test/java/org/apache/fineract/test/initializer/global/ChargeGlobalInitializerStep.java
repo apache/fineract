@@ -64,6 +64,7 @@ public class ChargeGlobalInitializerStep implements FineractGlobalInitializerSte
     public static final String CHARGE_LOAN_INSTALLMENT_FEE_PERCENT_AMOUNT = "Installment percentage amount fee";
     public static final String CHARGE_LOAN_INSTALLMENT_FEE_PERCENT_INTEREST = "Installment percentage interest fee";
     public static final String CHARGE_LOAN_INSTALLMENT_FEE_PERCENT_AMOUNT_PLUS_INTEREST = "Installment percentage amount + interest fee";
+    public static final String CHARGE_LOAN_DISBURSEMENT_PERCENT_AMOUNT_PLUS_INTEREST_FEE = "Disbursement percentage amount + interest fee";
     public static final String CHARGE_CLIENT_FIXED_FEE = "Fixed fee for Client";
     public static final String CHARGE_DISBURSEMENT_CHARGE = "Disbursement Charge";
     public static final String CHARGE_LOAN_TRANCHE_DISBURSEMENT_CHARGE_AMOUNT = "Tranche Disbursement Charge Amount";
@@ -185,6 +186,12 @@ public class ChargeGlobalInitializerStep implements FineractGlobalInitializerSte
                 CHARGE_AMOUNT_PERCENTAGE, true, false);
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_INSTALLMENT_FEE_PERCENTAGE_INTEREST_CREATE_RESPONSE,
                 responseLoanInstallmentPercentInterest);
+
+        PostChargesResponse responseLoanDisbursementPercentAmountPlusInterest = createChargeIfNotExists(charges, CHARGE_APPLIES_TO_LOAN,
+                CHARGE_LOAN_DISBURSEMENT_PERCENT_AMOUNT_PLUS_INTEREST_FEE, CHARGE_TIME_TYPE_DISBURSEMENT,
+                CHARGE_CALCULATION_TYPE_PERCENTAGE_LOAN_AMOUNT_PLUS_INTEREST, CHARGE_AMOUNT_PERCENTAGE, true, false);
+        TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_DISBURSEMENT_PERCENTAGE_AMOUNT_PLUS_INTEREST_CREATE_RESPONSE,
+                responseLoanDisbursementPercentAmountPlusInterest);
     }
 
     private PostChargesResponse createChargeIfNotExists(List<ChargeData> existingCharges, Enum<ChargeProductAppliesTo> appliesTo,
