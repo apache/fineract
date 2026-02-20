@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.cob.loan;
 
+import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
+import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -38,7 +40,7 @@ public class LoanLockingConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public LoanLockingService retrieveLoanLockingService() {
+    public LockingService<LoanAccountLock> retrieveLoanLockingService() {
         return new LoanLockingServiceImpl(jdbcTemplate, fineractProperties, loanAccountLockRepository);
     }
 }

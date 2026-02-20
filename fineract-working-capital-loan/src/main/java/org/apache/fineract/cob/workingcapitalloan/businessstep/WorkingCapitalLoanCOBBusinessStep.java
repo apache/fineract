@@ -16,23 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.cob.workingcapitalloan.businessstep;
 
-import java.util.List;
-import org.apache.fineract.cob.domain.LoanAccountLock;
-import org.apache.fineract.cob.domain.LockOwner;
+import org.apache.fineract.cob.COBBusinessStep;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoan;
 
-public interface LoanLockingService {
-
-    void upgradeLock(List<Long> accountsToLock, LockOwner lockOwner);
-
-    void deleteByLoanIdInAndLockOwner(List<Long> loanIds, LockOwner lockOwner);
-
-    List<LoanAccountLock> findAllByLoanIdIn(List<Long> loanIds);
-
-    LoanAccountLock findByLoanIdAndLockOwner(Long loanId, LockOwner lockOwner);
-
-    List<LoanAccountLock> findAllByLoanIdInAndLockOwner(List<Long> loanIds, LockOwner lockOwner);
-
-    void applyLock(List<Long> loanIds, LockOwner lockOwner);
-}
+public abstract class WorkingCapitalLoanCOBBusinessStep implements COBBusinessStep<WorkingCapitalLoan> {}

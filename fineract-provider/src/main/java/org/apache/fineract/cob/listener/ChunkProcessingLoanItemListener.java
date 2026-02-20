@@ -18,18 +18,23 @@
  */
 package org.apache.fineract.cob.listener;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LockOwner;
-import org.apache.fineract.cob.loan.LoanLockingService;
+import org.apache.fineract.cob.domain.LockingService;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.springframework.transaction.support.TransactionTemplate;
 
-public class ChunkProcessingLoanItemListener extends AbstractLoanItemListener {
+@Slf4j
+public class ChunkProcessingLoanItemListener extends AbstractLoanItemListener<LoanAccountLock, Loan> {
 
-    public ChunkProcessingLoanItemListener(LoanLockingService loanLockingService, TransactionTemplate transactionTemplate) {
-        super(loanLockingService, transactionTemplate);
+    public ChunkProcessingLoanItemListener(LockingService<LoanAccountLock> lockingService, TransactionTemplate transactionTemplate) {
+        super(lockingService, transactionTemplate);
     }
 
     @Override
     protected LockOwner getLockOwner() {
         return LockOwner.LOAN_COB_CHUNK_PROCESSING;
     }
+
 }

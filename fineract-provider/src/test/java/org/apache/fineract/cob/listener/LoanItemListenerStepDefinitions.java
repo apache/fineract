@@ -32,8 +32,8 @@ import java.time.ZoneId;
 import java.util.List;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LockOwner;
-import org.apache.fineract.cob.exceptions.LoanReadException;
-import org.apache.fineract.cob.loan.LoanLockingService;
+import org.apache.fineract.cob.domain.LockingService;
+import org.apache.fineract.cob.exceptions.LockedReadException;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -45,7 +45,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 public class LoanItemListenerStepDefinitions implements En {
 
-    private LoanLockingService loanLockingService = mock(LoanLockingService.class);
+    private LockingService loanLockingService = mock(LockingService.class);
     private TransactionTemplate transactionTemplate = spy(TransactionTemplate.class);
 
     private ChunkProcessingLoanItemListener loanItemListener = new ChunkProcessingLoanItemListener(loanLockingService, transactionTemplate);
@@ -58,7 +58,7 @@ public class LoanItemListenerStepDefinitions implements En {
     public LoanItemListenerStepDefinitions() {
         Given("/^The LoanItemListener.onReadError method (.*)$/", (String action) -> {
             ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
-            exception = new LoanReadException(1L, new RuntimeException("fail"));
+            exception = new LockedReadException(1L, new RuntimeException("fail"));
             loanAccountLock = new LoanAccountLock(1L, LockOwner.LOAN_COB_CHUNK_PROCESSING, LocalDate.now(ZoneId.systemDefault()));
             when(loanLockingService.findByLoanIdAndLockOwner(1L, LockOwner.LOAN_COB_CHUNK_PROCESSING)).thenReturn(loanAccountLock);
             transactionTemplate.setTransactionManager(mock(PlatformTransactionManager.class));
@@ -83,7 +83,7 @@ public class LoanItemListenerStepDefinitions implements En {
 
         Given("/^The LoanItemListener.onProcessError method (.*)$/", (String action) -> {
             ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
-            exception = new LoanReadException(1L, new RuntimeException("fail"));
+            exception = new LockedReadException(1L, new RuntimeException("fail"));
             loanAccountLock = new LoanAccountLock(2L, LockOwner.LOAN_COB_CHUNK_PROCESSING, LocalDate.now(ZoneId.systemDefault()));
             when(loanLockingService.findByLoanIdAndLockOwner(2L, LockOwner.LOAN_COB_CHUNK_PROCESSING)).thenReturn(loanAccountLock);
             when(loan.getId()).thenReturn(2L);
@@ -108,7 +108,7 @@ public class LoanItemListenerStepDefinitions implements En {
 
         Given("/^The LoanItemListener.onWriteError method (.*)$/", (String action) -> {
             ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
-            exception = new LoanReadException(3L, new RuntimeException("fail"));
+            exception = new LockedReadException(3L, new RuntimeException("fail"));
             loanAccountLock = new LoanAccountLock(3L, LockOwner.LOAN_COB_CHUNK_PROCESSING, LocalDate.now(ZoneId.systemDefault()));
             when(loanLockingService.findByLoanIdAndLockOwner(3L, LockOwner.LOAN_COB_CHUNK_PROCESSING)).thenReturn(loanAccountLock);
             when(loan.getId()).thenReturn(3L);

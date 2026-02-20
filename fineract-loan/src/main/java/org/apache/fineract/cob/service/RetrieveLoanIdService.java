@@ -16,18 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.exceptions;
+package org.apache.fineract.cob.service;
 
-public class LoanReadException extends Exception {
+public interface RetrieveLoanIdService extends RetrieveIdService {
 
-    private final Long id;
-
-    public LoanReadException(Long id, Throwable t) {
-        super(String.format("Loan is in already locked state! loanId: %d", id), t);
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
-    }
 }

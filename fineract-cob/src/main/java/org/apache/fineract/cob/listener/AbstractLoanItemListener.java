@@ -23,13 +23,12 @@ import static org.springframework.transaction.TransactionDefinition.PROPAGATION_
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.cob.domain.LoanAccountLock;
+import org.apache.fineract.cob.domain.AccountLock;
 import org.apache.fineract.cob.domain.LockOwner;
-import org.apache.fineract.cob.exceptions.LoanReadException;
-import org.apache.fineract.cob.loan.LoanLockingService;
+import org.apache.fineract.cob.domain.LockingService;
+import org.apache.fineract.cob.exceptions.LockedReadException;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.serialization.ThrowableSerialization;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.springframework.batch.core.annotation.OnProcessError;
 import org.springframework.batch.core.annotation.OnReadError;
 import org.springframework.batch.core.annotation.OnSkipInProcess;
@@ -44,9 +43,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @Slf4j
 @RequiredArgsConstructor
-public abstract class AbstractLoanItemListener {
+public abstract class AbstractLoanItemListener<T extends AccountLock, S extends AbstractPersistableCustom<Long>> {
 
-    private final LoanLockingService loanLockingService;
+    private final LockingService<T> loanLockingService;
 
     private final TransactionTemplate transactionTemplate;
 
@@ -57,7 +56,7 @@ public abstract class AbstractLoanItemListener {
             @Override
             protected void doInTransactionWithoutResult(@NonNull TransactionStatus status) {
                 for (Long loanId : loanIds) {
-                    LoanAccountLock loanAccountLock = loanLockingService.findByLoanIdAndLockOwner(loanId, getLockOwner());
+                    T loanAccountLock = loanLockingService.findByLoanIdAndLockOwner(loanId, getLockOwner());
                     if (loanAccountLock != null) {
                         loanAccountLock.setError(String.format(msg, loanId), ThrowableSerialization.serialize(e));
                     }
@@ -68,7 +67,7 @@ public abstract class AbstractLoanItemListener {
 
     @OnReadError
     public void onReadError(Exception e) {
-        if (e instanceof LoanReadException ee) {
+        if (e instanceof LockedReadException ee) {
             log.warn("Error was triggered during reading of Loan (id={}) due to: {}", ee.getId(), ThrowableSerialization.serialize(e));
             updateAccountLockWithError(List.of(ee.getId()), "Loan (id: %d) reading is failed", e);
         } else {
@@ -77,13 +76,13 @@ public abstract class AbstractLoanItemListener {
     }
 
     @OnProcessError
-    public void onProcessError(@NonNull Loan item, Exception e) {
+    public void onProcessError(@NonNull S item, Exception e) {
         log.warn("Error was triggered during processing of Loan (id={}) due to: {}", item.getId(), ThrowableSerialization.serialize(e));
         updateAccountLockWithError(List.of(item.getId()), "Loan (id: %d) processing is failed", e);
     }
 
     @OnWriteError
-    public void onWriteError(Exception e, @NonNull Chunk<? extends Loan> items) {
+    public void onWriteError(Exception e, @NonNull Chunk<? extends S> items) {
         List<Long> loanIds = items.getItems().stream().map(AbstractPersistableCustom::getId).toList();
         log.warn("Error was triggered during writing of Loans (ids={}) due to: {}", loanIds, ThrowableSerialization.serialize(e));
 
@@ -96,12 +95,12 @@ public abstract class AbstractLoanItemListener {
     }
 
     @OnSkipInProcess
-    public void onSkipInProcess(@NonNull Loan item, @NonNull Throwable e) {
+    public void onSkipInProcess(@NonNull S item, @NonNull Throwable e) {
         log.warn("Skipping was triggered during processing of Loan (id={})", item.getId());
     }
 
     @OnSkipInWrite
-    public void onSkipInWrite(@NonNull Loan item, @NonNull Throwable e) {
+    public void onSkipInWrite(@NonNull S item, @NonNull Throwable e) {
         log.warn("Skipping was triggered during writing of Loan (id={})", item.getId());
     }
 

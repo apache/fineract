@@ -29,6 +29,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 @EqualsAndHashCode
+@Deprecated
 public class LoanCOBParameter {
 
     private Long minLoanId;

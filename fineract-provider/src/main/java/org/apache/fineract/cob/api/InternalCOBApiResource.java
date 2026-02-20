@@ -38,7 +38,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.data.COBPartition;
 import org.apache.fineract.cob.loan.LoanCOBConstant;
-import org.apache.fineract.cob.loan.RetrieveLoanIdService;
+import org.apache.fineract.cob.service.RetrieveLoanIdService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
@@ -63,7 +63,7 @@ public class InternalCOBApiResource implements InitializingBean {
 
     private static final String DATETIME_PATTERN = "dd MMMM yyyy";
 
-    private final RetrieveLoanIdService retrieveLoanIdService;
+    private final RetrieveLoanIdService retrieveIdService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final ToApiJsonSerializer<List> toApiJsonSerializerForList;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
@@ -90,7 +90,7 @@ public class InternalCOBApiResource implements InitializingBean {
     public String getCobPartitions(@Context final UriInfo uriInfo, @PathParam("partitionSize") int partitionSize) {
         LocalDate businessDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.BUSINESS_DATE);
         log.info("RetrieveLoanCOBPartitions is called with partitionSize {} for {}", partitionSize, businessDate);
-        List<COBPartition> loanCOBPartitions = retrieveLoanIdService.retrieveLoanCOBPartitions(LoanCOBConstant.NUMBER_OF_DAYS_BEHIND,
+        List<COBPartition> loanCOBPartitions = retrieveIdService.retrieveLoanCOBPartitions(LoanCOBConstant.NUMBER_OF_DAYS_BEHIND,
                 businessDate, false, partitionSize);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return toApiJsonSerializerForList.serialize(settings, loanCOBPartitions);

@@ -43,7 +43,6 @@ import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.exceptions.AccountLockCannotBeOverruledException;
 import org.apache.fineract.cob.loan.LoanCOBConstant;
-import org.apache.fineract.cob.loan.RetrieveLoanIdService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -94,7 +93,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
     private final TransactionTemplate transactionTemplate;
     private final CustomJobParameterRepository customJobParameterRepository;
     private final PlatformSecurityContext context;
-    private final RetrieveLoanIdService retrieveLoanIdService;
+    private final RetrieveLoanIdService retrieveIdService;
     private final FineractProperties fineractProperties;
 
     private final Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
@@ -171,7 +170,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
         List<COBIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDates = new ArrayList<>();
         List<List<Long>> partitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());
         partitions.forEach(partition -> loanIdAndLastClosedBusinessDates
-                .addAll(retrieveLoanIdService.retrieveLoanIdsBehindDateOrNull(cobBusinessDate, partition)));
+                .addAll(retrieveIdService.retrieveLoanIdsBehindDateOrNull(cobBusinessDate, partition)));
         return loanIdAndLastClosedBusinessDates;
     }
 

@@ -18,6 +18,36 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloanproduct.domain;
 
-public class WorkingCapitalLoan {
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
+import java.time.LocalDate;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatusConverter;
+
+@Entity
+@Table(name = "m_wc_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "wc_loan_account_no_UNIQUE"),
+        @UniqueConstraint(columnNames = { "external_id" }, name = "wc_loan_externalid_UNIQUE") })
+@Getter
+public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
+
+    @Version
+    int version;
+
+    @Setter
+    @Column(name = "last_closed_business_date")
+    private LocalDate lastClosedBusinessDate;
+
+    @Setter(AccessLevel.PACKAGE)
+    @Column(name = "loan_status_id", nullable = false)
+    @Convert(converter = LoanStatusConverter.class)
+    private LoanStatus loanStatus;
 
 }

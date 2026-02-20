@@ -22,7 +22,11 @@ import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.common.InitialisationTasklet;
 import org.apache.fineract.cob.common.ResetContextTasklet;
 import org.apache.fineract.cob.conditions.BatchWorkerCondition;
+import org.apache.fineract.cob.domain.LoanAccountLock;
+import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.listener.ChunkProcessingLoanItemListener;
+import org.apache.fineract.cob.service.BeforeStepLockingItemReaderHelper;
+import org.apache.fineract.cob.service.RetrieveLoanIdService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
@@ -74,12 +78,12 @@ public class LoanCOBWorkerConfiguration {
     @Autowired
     private TransactionTemplate transactionTemplate;
     @Autowired
-    private RetrieveLoanIdService retrieveLoanIdService;
+    private RetrieveLoanIdService retrieveIdService;
 
     @Autowired
     private FineractProperties fineractProperties;
     @Autowired
-    private LoanLockingService loanLockingService;
+    private LockingService<LoanAccountLock> loanLockingService;
 
     @Autowired
     private ProgressiveLoanModelProcessingService progressiveLoanModelProcessingService;
@@ -165,7 +169,7 @@ public class LoanCOBWorkerConfiguration {
 
     @Bean
     public ApplyLoanLockTasklet applyLock() {
-        return new ApplyLoanLockTasklet(fineractProperties, loanLockingService, retrieveLoanIdService, transactionTemplate);
+        return new ApplyLoanLockTasklet(fineractProperties, loanLockingService, retrieveIdService, transactionTemplate);
     }
 
     @Bean
@@ -176,7 +180,7 @@ public class LoanCOBWorkerConfiguration {
     @Bean
     @StepScope
     public LoanItemReader cobWorkerItemReader() {
-        return new LoanItemReader(loanRepository, retrieveLoanIdService, loanLockingService);
+        return new LoanItemReader(loanRepository, new BeforeStepLockingItemReaderHelper<>(retrieveIdService, loanLockingService));
     }
 
     @Bean

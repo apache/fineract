@@ -19,6 +19,10 @@
 package org.apache.fineract.cob.data;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,4 +35,10 @@ public class BusinessStepNameAndOrder {
 
     private String stepName;
     private Long stepOrder;
+
+    public static TreeMap<Long, String> getBusinessStepMap(Set<BusinessStepNameAndOrder> businessSteps) {
+        Map<Long, String> businessStepMap = businessSteps.stream()
+                .collect(Collectors.toMap(BusinessStepNameAndOrder::getStepOrder, BusinessStepNameAndOrder::getStepName));
+        return new TreeMap<>(businessStepMap);
+    }
 }

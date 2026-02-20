@@ -22,6 +22,8 @@ import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.common.ResetContextTasklet;
 import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
+import org.apache.fineract.cob.domain.LoanAccountLock;
+import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.listener.InlineCOBLoanItemListener;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
@@ -67,7 +69,7 @@ public class LoanInlineCOBConfig {
     @Autowired
     private CustomJobParameterResolver customJobParameterResolver;
     @Autowired
-    private LoanLockingService loanLockingService;
+    private LockingService<LoanAccountLock> loanLockingService;
     @Autowired
     private ProgressiveLoanModelProcessingService progressiveLoanModelProcessingService;
 
@@ -136,7 +138,7 @@ public class LoanInlineCOBConfig {
     @Bean
     public ExecutionContextPromotionListener inlineCobPromotionListener() {
         ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-        listener.setKeys(new String[] { LoanCOBConstant.LOAN_COB_PARAMETER, LoanCOBConstant.BUSINESS_STEPS,
+        listener.setKeys(new String[] { LoanCOBConstant.COB_PARAMETER, LoanCOBConstant.BUSINESS_STEPS,
                 LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME });
         return listener;
     }

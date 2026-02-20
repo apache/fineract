@@ -26,7 +26,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class CustomLoanAccountLockRepositoryImpl implements CustomLoanAccountLockRepository {
+public class CustomWorkingCapitalLoanAccountLockRepositoryImpl implements CustomLoanAccountLockRepository<WorkingCapitalLoanAccountLock> {
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -35,16 +35,16 @@ public class CustomLoanAccountLockRepositoryImpl implements CustomLoanAccountLoc
 
     @Override
     public void updateLoanFromAccountLocks() {
-        String sql = "UPDATE m_loan SET last_closed_business_date = (select "
+        String sql = "UPDATE m_wc_loan SET last_closed_business_date = (select "
                 + databaseSpecificSQLGenerator.subDate("lck.lock_placed_on_cob_business_date", "1", "DAY")
                 + """
-                                                             from m_loan_account_locks lck
+                                                             from m_wc_loan_account_locks lck
                                                              where lck.loan_id = id
                                                                and lck.lock_placed_on_cob_business_date is not null
                                                                and lck.error is not null
                                                                and lck.lock_owner in ('LOAN_COB_CHUNK_PROCESSING','LOAN_INLINE_COB_PROCESSING'))
                         where last_closed_business_date is null and exists  (select lck.loan_id
-                                      from m_loan_account_locks lck  where lck.loan_id = id
+                                      from m_wc_loan_account_locks lck  where lck.loan_id = id
                                         and lck.lock_placed_on_cob_business_date is not null and lck.error is not null
                                         and lck.lock_owner in ('LOAN_COB_CHUNK_PROCESSING','LOAN_INLINE_COB_PROCESSING'))
                             """;
@@ -52,4 +52,5 @@ public class CustomLoanAccountLockRepositoryImpl implements CustomLoanAccountLoc
         entityManager.createNativeQuery(sql).executeUpdate();
         entityManager.flush();
     }
+
 }

@@ -20,26 +20,26 @@ package org.apache.fineract.cob.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.cob.domain.LoanAccountLock;
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
+import org.apache.fineract.cob.domain.AccountLock;
+import org.apache.fineract.cob.domain.AccountLockRepository;
+import org.apache.fineract.cob.domain.CustomLoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
 @RequiredArgsConstructor
-public class LoanAccountLockServiceImpl implements LoanAccountLockService {
+public abstract class AbstractAccountLockService<T extends AccountLock> implements AccountLockService<T> {
 
-    private final LoanAccountLockRepository loanAccountLockRepository;
+    private final AccountLockRepository<T> loanAccountLockRepository;
+    private final CustomLoanAccountLockRepository<T> customLoanAccountLockRepository;
 
     @Override
-    public List<LoanAccountLock> getLockedLoanAccountByPage(int page, int limit) {
+    public List<T> getLockedLoanAccountByPage(int page, int limit) {
         Pageable loanAccountLockPage = PageRequest.of(page, limit);
-        Page<LoanAccountLock> loanAccountLocks = loanAccountLockRepository.findAll(loanAccountLockPage);
+        Page<T> loanAccountLocks = loanAccountLockRepository.findAll(loanAccountLockPage);
         return loanAccountLocks.getContent();
     }
 
@@ -58,8 +58,9 @@ public class LoanAccountLockServiceImpl implements LoanAccountLockService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateCobAndRemoveLocks() {
-        loanAccountLockRepository.updateLoanFromAccountLocks();
-        loanAccountLockRepository.removeLockByOwner();
+        customLoanAccountLockRepository.updateLoanFromAccountLocks();
+        loanAccountLockRepository.removeByLockOwnerInAndErrorIsNotNullAndLockPlacedOnCobBusinessDateIsNotNull(
+                List.of(LockOwner.LOAN_COB_CHUNK_PROCESSING, LockOwner.LOAN_INLINE_COB_PROCESSING));
     }
 
 }

@@ -23,33 +23,33 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.cob.exceptions.LoanReadException;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.cob.exceptions.LockedReadException;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.AfterStep;
 import org.springframework.batch.item.ItemReader;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.lang.NonNull;
 
 @Slf4j
 @RequiredArgsConstructor
-public abstract class AbstractLoanItemReader implements ItemReader<Loan> {
+public abstract class AbstractLoanItemReader<T extends AbstractPersistableCustom<Long>> implements ItemReader<T> {
 
-    protected final LoanRepository loanRepository;
+    protected final CrudRepository<T, Long> loanRepository;
 
     @Setter(AccessLevel.PROTECTED)
     private LinkedBlockingQueue<Long> remainingData;
 
     @Override
-    public Loan read() throws Exception {
+    public T read() throws Exception {
         final Long loanId = remainingData.poll();
         if (loanId != null) {
             try {
                 return loanRepository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId));
             } catch (Exception e) {
-                throw new LoanReadException(loanId, e);
+                throw new LockedReadException(loanId, e);
             }
         }
         return null;

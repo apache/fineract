@@ -16,11 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.exceptions;
+package org.apache.fineract.cob.converter;
 
-public class LoanLockCannotBeAppliedException extends Exception {
+import org.apache.fineract.cob.data.COBParameter;
+import org.apache.fineract.cob.data.LoanCOBParameter;
 
-    public LoanLockCannotBeAppliedException(String message, Throwable cause) {
-        super(message, cause);
+public final class COBParameterConverter {
+
+    private COBParameterConverter() {}
+
+    public static COBParameter convert(Object obj) {
+        if (obj instanceof COBParameter) {
+            return (COBParameter) obj;
+        } else if (obj instanceof LoanCOBParameter loanCOBParameter) {
+            // for backward compatibility
+            return loanCOBParameter.toCOBParameter();
+        }
+        return null;
     }
 }

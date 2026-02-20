@@ -41,9 +41,9 @@ import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
 import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.loan.LoanCOBConstant;
-import org.apache.fineract.cob.loan.RetrieveLoanIdService;
 import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
+import org.apache.fineract.cob.service.RetrieveLoanIdService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -72,7 +72,7 @@ public class LoanCOBFilterHelper implements InitializingBean {
     private final InlineLoanCOBExecutorServiceImpl inlineLoanCOBExecutorService;
     private final LoanRepository loanRepository;
     private final FineractProperties fineractProperties;
-    private final RetrieveLoanIdService retrieveLoanIdService;
+    private final RetrieveLoanIdService retrieveIdService;
 
     private final LoanRescheduleRequestRepository loanRescheduleRequestRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -197,9 +197,9 @@ public class LoanCOBFilterHelper implements InitializingBean {
         List<COBIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDates = new ArrayList<>();
         List<List<Long>> partitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());
         partitions.forEach(partition -> {
-            loanIdAndLastClosedBusinessDates.addAll(retrieveLoanIdService
+            loanIdAndLastClosedBusinessDates.addAll(retrieveIdService
                     .retrieveLoanIdsBehindDate(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE), partition));
-            loanIdAndLastClosedBusinessDates.addAll(retrieveLoanIdService.retrieveLoanBehindOnDisbursementDate(
+            loanIdAndLastClosedBusinessDates.addAll(retrieveIdService.retrieveLoanBehindOnDisbursementDate(
                     ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE), partition));
         });
         return CollectionUtils.isNotEmpty(loanIdAndLastClosedBusinessDates);

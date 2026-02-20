@@ -280,6 +280,7 @@
         <class>org.apache.fineract.portfolio.account.domain.AccountTransferTransaction</class>
 
         <!-- Provider Module Entities -->
+
         <!-- Notification -->
         <class>org.apache.fineract.notification.domain.NotificationMapper</class>
         <class>org.apache.fineract.notification.domain.Notification</class>
@@ -288,7 +289,6 @@
         <class>org.apache.fineract.adhocquery.domain.AdHoc</class>
 
         <!-- COB (Chunk of Business) -->
-        <class>org.apache.fineract.cob.domain.LoanAccountLock</class>
         <class>org.apache.fineract.cob.domain.BatchBusinessStep</class>
 
         <!-- Template -->

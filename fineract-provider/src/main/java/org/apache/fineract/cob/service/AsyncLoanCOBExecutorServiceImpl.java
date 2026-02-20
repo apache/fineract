@@ -29,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
 import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.loan.LoanCOBConstant;
-import org.apache.fineract.cob.loan.RetrieveLoanIdService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
@@ -62,7 +61,7 @@ public class AsyncLoanCOBExecutorServiceImpl implements AsyncLoanCOBExecutorServ
     private final JobLocator jobLocator;
     private final ScheduledJobDetailRepository scheduledJobDetailRepository;
     private final JobStarter jobStarter;
-    private final RetrieveLoanIdService retrieveLoanIdService;
+    private final RetrieveLoanIdService retrieveIdService;
 
     @Override
     @Async(TaskExecutorConstant.LOAN_COB_CATCH_UP_TASK_EXECUTOR_BEAN_NAME)
@@ -70,7 +69,7 @@ public class AsyncLoanCOBExecutorServiceImpl implements AsyncLoanCOBExecutorServ
         try {
             ThreadLocalContextUtil.init(context);
             LocalDate cobBusinessDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
-            List<COBIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDate = retrieveLoanIdService
+            List<COBIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDate = retrieveIdService
                     .retrieveLoanIdsOldestCobProcessed(cobBusinessDate);
 
             LocalDate oldestCOBProcessedDate = !loanIdAndLastClosedBusinessDate.isEmpty()

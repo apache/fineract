@@ -26,7 +26,6 @@ import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.data.IsCatchUpRunningDTO;
 import org.apache.fineract.cob.data.OldestCOBProcessedLoanDTO;
 import org.apache.fineract.cob.loan.LoanCOBConstant;
-import org.apache.fineract.cob.loan.RetrieveLoanIdService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -41,7 +40,7 @@ public class LoanCOBCatchUpServiceImpl implements LoanCOBCatchUpService {
 
     private final AsyncLoanCOBExecutorService asyncLoanCOBExecutorService;
     private final JobExecutionRepository jobExecutionRepository;
-    private final RetrieveLoanIdService retrieveLoanIdService;
+    private final RetrieveLoanIdService retrieveIdService;
     private final LoanAccountLockService accountLockService;
 
     @Override
@@ -51,7 +50,7 @@ public class LoanCOBCatchUpServiceImpl implements LoanCOBCatchUpService {
 
     @Override
     public OldestCOBProcessedLoanDTO getOldestCOBProcessedLoan() {
-        List<COBIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDate = retrieveLoanIdService
+        List<COBIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDate = retrieveIdService
                 .retrieveLoanIdsOldestCobProcessed(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE));
         OldestCOBProcessedLoanDTO oldestCOBProcessedLoanDTO = new OldestCOBProcessedLoanDTO();
         oldestCOBProcessedLoanDTO.setLoanIds(loanIdAndLastClosedBusinessDate.stream().map(COBIdAndLastClosedBusinessDate::getId).toList());

@@ -18,22 +18,20 @@
  */
 package org.apache.fineract.cob.resolver;
 
-import java.time.LocalDate;
-import org.apache.fineract.cob.loan.LoanCOBConstant;
+import org.apache.fineract.cob.COBConstant;
 import org.springframework.batch.core.StepExecution;
 
-public final class BusinessDateResolver {
+public final class CatchUpFlagResolver {
 
-    private BusinessDateResolver() {}
+    private CatchUpFlagResolver() {}
 
-    public static LocalDate resolve(StepExecution stepExecution) {
-        Object bd = stepExecution.getJobExecution().getExecutionContext().get(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME);
-        return switch (bd) {
-            case null -> throw new IllegalStateException(
-                    "Missing BusinessDate in JobExecutionContext for jobExecutionId=" + stepExecution.getJobExecution().getId());
-            case String bdStr -> LocalDate.parse(bdStr);
-            case LocalDate bdLocalDate -> bdLocalDate;
-            default -> throw new IllegalStateException("BusinessDate value is unrecognizable: " + bd);
+    public static boolean resolve(StepExecution stepExecution) {
+        Object isCatchUp = stepExecution.getJobExecution().getExecutionContext().get(COBConstant.IS_CATCH_UP_PARAMETER_NAME);
+        return switch (isCatchUp) {
+            case null -> false;
+            case String isCatchUpStr -> Boolean.parseBoolean(isCatchUpStr);
+            case Boolean b -> b;
+            default -> throw new IllegalStateException("isCatchUp value is unrecognizable: " + isCatchUp);
         };
     }
 }

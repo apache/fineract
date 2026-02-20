@@ -18,16 +18,16 @@
  */
 package org.apache.fineract.cob.service;
 
-import java.util.List;
+import org.apache.fineract.cob.domain.AccountLockRepository;
+import org.apache.fineract.cob.domain.CustomLoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LoanAccountLock;
+import org.springframework.stereotype.Service;
 
-public interface LoanAccountLockService {
+@Service
+public class LoanAccountLockService extends AbstractAccountLockService<LoanAccountLock> {
 
-    List<LoanAccountLock> getLockedLoanAccountByPage(int page, int limit);
-
-    boolean isLoanHardLocked(Long loanId);
-
-    boolean isLockOverrulable(Long loanId);
-
-    void updateCobAndRemoveLocks();
+    public LoanAccountLockService(AccountLockRepository<LoanAccountLock> loanAccountLockRepository,
+            CustomLoanAccountLockRepository<LoanAccountLock> customLoanAccountLockRepository) {
+        super(loanAccountLockRepository, customLoanAccountLockRepository);
+    }
 }

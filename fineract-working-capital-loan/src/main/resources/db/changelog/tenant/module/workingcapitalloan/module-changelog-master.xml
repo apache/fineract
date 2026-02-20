@@ -23,4 +23,6 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
   <include relativeToChangelogFile="true" file="parts/0001_loan_product.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0002_wc_loan_schema.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0003_working_capital_loan_cob.xml"/>
 </databaseChangeLog>

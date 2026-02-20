@@ -16,21 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.converter;
+package org.apache.fineract.cob.exceptions;
 
-import org.apache.fineract.cob.data.COBParameter;
-import org.apache.fineract.cob.data.LoanCOBParameter;
+public class LockedReadException extends Exception {
 
-public final class COBParameterConverter {
+    private final Long id;
 
-    private COBParameterConverter() {}
+    public LockedReadException(Long id, Throwable t) {
+        super(String.format("Loan is in already locked state! loanId: %d", id), t);
+        this.id = id;
+    }
 
-    public static COBParameter convert(Object obj) {
-        if (obj instanceof COBParameter) {
-            return (COBParameter) obj;
-        } else if (obj instanceof LoanCOBParameter loanCOBParameter) {
-            return loanCOBParameter.toCOBParameter();
-        }
-        return null;
+    public Long getId() {
+        return id;
     }
 }

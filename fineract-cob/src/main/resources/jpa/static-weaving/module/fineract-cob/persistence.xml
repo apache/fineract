@@ -65,7 +65,7 @@
         <class>org.apache.fineract.infrastructure.businessdate.domain.BusinessDate</class>
         <class>org.apache.fineract.infrastructure.codes.domain.CodeValue</class>
 
-        <!-- Validation Module Entities -->
+        <!-- COB Module Entities -->
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>

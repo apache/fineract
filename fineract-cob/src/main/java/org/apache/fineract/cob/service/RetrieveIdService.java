@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.cob.service;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.cob.data.COBIdAndExternalIdAndAccountNo;
@@ -26,7 +28,7 @@ import org.apache.fineract.cob.data.COBParameter;
 import org.apache.fineract.cob.data.COBPartition;
 import org.springframework.data.repository.query.Param;
 
-public interface RetrieveLoanIdService {
+public interface RetrieveIdService {
 
     List<COBPartition> retrieveLoanCOBPartitions(Long numberOfDays, LocalDate businessDate, boolean isCatchUp, int partitionSize);
 
@@ -41,4 +43,8 @@ public interface RetrieveLoanIdService {
     List<COBIdAndExternalIdAndAccountNo> findAllStayedLockedByCobBusinessDate(@Param("cobBusinessDate") LocalDate cobBusinessDate);
 
     List<COBIdAndLastClosedBusinessDate> retrieveLoanBehindOnDisbursementDate(LocalDate businessDateByType, List<Long> loanIds);
+
+    static COBPartition mapRow(ResultSet rs, int rowNum) throws SQLException {
+        return new COBPartition(rs.getLong("min"), rs.getLong("max"), rs.getLong("page"), rs.getLong("count"));
+    }
 }

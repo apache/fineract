@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.exceptions.AccountLockCannotBeOverruledException;
-import org.apache.fineract.cob.loan.RetrieveLoanIdService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -64,7 +63,7 @@ class InlineLoanCOBExecutorServiceImplTest {
     @Mock
     private InlineLoanCOBExecutionDataParser dataParser;
     @Mock
-    private RetrieveLoanIdService retrieveLoanIdService;
+    private RetrieveLoanIdService retrieveIdService;
     @Mock
     private FineractProperties fineractProperties;
     @Mock
@@ -97,7 +96,7 @@ class InlineLoanCOBExecutorServiceImplTest {
         when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(65000);
         when(fineractApiProperties.getBodyItemSizeLimit()).thenReturn(fineractBodyItemSizeLimitProperties);
         when(fineractBodyItemSizeLimitProperties.getInlineLoanCob()).thenReturn(1000);
-        when(retrieveLoanIdService.retrieveLoanIdsBehindDateOrNull(any(), anyList())).thenReturn(List.of(loan));
+        when(retrieveIdService.retrieveLoanIdsBehindDateOrNull(any(), anyList())).thenReturn(List.of(loan));
         assertThrows(AccountLockCannotBeOverruledException.class, () -> testObj.executeInlineJob(command, "INLINE_LOAN_COB"));
     }
 
@@ -121,9 +120,9 @@ class InlineLoanCOBExecutorServiceImplTest {
         when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(2);
         when(fineractApiProperties.getBodyItemSizeLimit()).thenReturn(fineractBodyItemSizeLimitProperties);
         when(fineractBodyItemSizeLimitProperties.getInlineLoanCob()).thenReturn(1000);
-        when(retrieveLoanIdService.retrieveLoanIdsBehindDateOrNull(any(), anyList())).thenReturn(List.of(loan1, loan2, loan3));
+        when(retrieveIdService.retrieveLoanIdsBehindDateOrNull(any(), anyList())).thenReturn(List.of(loan1, loan2, loan3));
         assertThrows(AccountLockCannotBeOverruledException.class, () -> testObj.executeInlineJob(command, "INLINE_LOAN_COB"));
-        verify(retrieveLoanIdService, times(2)).retrieveLoanIdsBehindDateOrNull(any(), anyList());
+        verify(retrieveIdService, times(2)).retrieveLoanIdsBehindDateOrNull(any(), anyList());
     }
 
     @Test

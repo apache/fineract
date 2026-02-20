@@ -16,22 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.resolver;
+package org.apache.fineract.cob.service;
 
-import org.apache.fineract.cob.loan.LoanCOBConstant;
-import org.springframework.batch.core.StepExecution;
+import java.util.List;
+import org.apache.fineract.cob.domain.AccountLock;
 
-public final class CatchUpFlagResolver {
+public interface AccountLockService<T extends AccountLock> {
 
-    private CatchUpFlagResolver() {}
+    List<T> getLockedLoanAccountByPage(int page, int limit);
 
-    public static boolean resolve(StepExecution stepExecution) {
-        Object isCatchUp = stepExecution.getJobExecution().getExecutionContext().get(LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME);
-        return switch (isCatchUp) {
-            case null -> false;
-            case String isCatchUpStr -> Boolean.parseBoolean(isCatchUpStr);
-            case Boolean b -> b;
-            default -> throw new IllegalStateException("isCatchUp value is unrecognizable: " + isCatchUp);
-        };
-    }
+    boolean isLoanHardLocked(Long loanId);
+
+    boolean isLockOverrulable(Long loanId);
+
+    void updateCobAndRemoveLocks();
 }
