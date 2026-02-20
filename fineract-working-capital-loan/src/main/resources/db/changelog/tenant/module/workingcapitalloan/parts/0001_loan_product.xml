@@ -199,4 +199,35 @@
             <column name="wc_loan_product_id"/>
         </createIndex>
     </changeSet>
+
+    <changeSet id="wclp-0001-7" author="fineract">
+        <insert tableName="m_permission">
+            <column name="grouping" value="organisation"/>
+            <column name="code" value="READ_WORKINGCAPITALLOANPRODUCT"/>
+            <column name="entity_name" value="WORKINGCAPITALLOANPRODUCT"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="organisation"/>
+            <column name="code" value="CREATE_WORKINGCAPITALLOANPRODUCT"/>
+            <column name="entity_name" value="WORKINGCAPITALLOANPRODUCT"/>
+            <column name="action_name" value="CREATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="organisation"/>
+            <column name="code" value="UPDATE_WORKINGCAPITALLOANPRODUCT"/>
+            <column name="entity_name" value="WORKINGCAPITALLOANPRODUCT"/>
+            <column name="action_name" value="UPDATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="organisation"/>
+            <column name="code" value="DELETE_WORKINGCAPITALLOANPRODUCT"/>
+            <column name="entity_name" value="WORKINGCAPITALLOANPRODUCT"/>
+            <column name="action_name" value="DELETE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>
