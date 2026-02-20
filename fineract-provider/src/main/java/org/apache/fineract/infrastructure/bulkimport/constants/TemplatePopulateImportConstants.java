@@ -141,6 +141,7 @@ public final class TemplatePopulateImportConstants {
     // Guarantor Types
     public static final String GUARANTOR_INTERNAL = "Internal";
     public static final String GUARANTOR_EXTERNAL = "External";
+    public static final String GUARANTOR_GROUP = "Group";
 
     // Loan Account/Loan repayment Client External Id
     public static final Boolean CONTAINS_CLIENT_EXTERNAL_ID = true;

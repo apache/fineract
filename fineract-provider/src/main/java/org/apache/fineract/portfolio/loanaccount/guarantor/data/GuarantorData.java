@@ -207,4 +207,8 @@ public class GuarantorData implements IGuarantor {
     public boolean isStaffMember() {
         return GuarantorType.STAFF.getValue().equals(this.guarantorType.getId().intValue());
     }
+
+    public boolean isExistingGroup() {
+        return GuarantorType.GROUP.getValue().equals(this.guarantorType.getId().intValue());
+    }
 }
