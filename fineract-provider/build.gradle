@@ -27,6 +27,26 @@ apply plugin: 'io.swagger.core.v3.swagger-gradle-plugin'
 apply plugin: 'com.google.cloud.tools.jib'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'se.thinkcode.cucumber-runner'
+apply plugin: 'com.docktape.swagger-brake'
+
+swaggerBrake {
+    newApi = "${project.buildDir}/resources/main/static/fineract.json"
+    oldApi = findProperty('apiBaseline') ?: "${projectDir}/config/swagger/fineract-baseline.json"
+    outputFormats = ['JSON']
+    outputFilePath = "${project.buildDir}/swagger-brake"
+    deprecatedApiDeletionAllowed = true
+    strictValidation = false
+}
+
+checkBreakingChanges.dependsOn resolve
+checkBreakingChanges.onlyIf {
+    def baseline = findProperty('apiBaseline') ?: "${projectDir}/config/swagger/fineract-baseline.json"
+    def exists = file(baseline).exists()
+    if (!exists) {
+        logger.lifecycle("Skipping checkBreakingChanges: baseline file not found at ${baseline}")
+    }
+    exists
+}
 
 check.dependsOn('cucumber')
 

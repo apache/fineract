@@ -125,6 +125,7 @@ plugins {
     id 'com.gradleup.shadow' version '8.3.5' apply false
     id 'me.champeau.jmh' version '0.7.1' apply false
     id 'org.cyclonedx.bom' version '3.1.0' apply false
+    id 'com.docktape.swagger-brake' version '2.7.0' apply false
 }
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"
