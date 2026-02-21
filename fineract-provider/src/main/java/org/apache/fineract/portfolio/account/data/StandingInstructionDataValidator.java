@@ -115,10 +115,6 @@ public class StandingInstructionDataValidator {
         baseDataValidator.reset().parameter(StandingInstructionApiConstants.validTillParamName).value(validTill)
                 .validateDateAfter(validFrom);
 
-        final BigDecimal transferAmount = this.fromApiJsonHelper
-                .extractBigDecimalWithLocaleNamed(StandingInstructionApiConstants.amountParamName, element);
-        baseDataValidator.reset().parameter(StandingInstructionApiConstants.amountParamName).value(transferAmount).positiveAmount();
-
         final Integer transferType = this.fromApiJsonHelper.extractIntegerNamed(transferTypeParamName, element, Locale.getDefault());
         baseDataValidator.reset().parameter(transferTypeParamName).value(transferType).notNull().inMinMaxRange(1, 3);
 
@@ -129,13 +125,32 @@ public class StandingInstructionDataValidator {
 
         final Integer standingInstructionType = this.fromApiJsonHelper
                 .extractIntegerNamed(StandingInstructionApiConstants.instructionTypeParamName, element, Locale.getDefault());
+
         baseDataValidator.reset().parameter(StandingInstructionApiConstants.instructionTypeParamName).value(standingInstructionType)
                 .notNull().inMinMaxRange(1, 2);
 
+        boolean isDues = false;
+
+        if (standingInstructionType != null) {
+            StandingInstructionType type = StandingInstructionType.fromInt(standingInstructionType);
+            isDues = type.isDuesAmoutTransfer();
+        }
+
+        final BigDecimal transferAmount = this.fromApiJsonHelper
+                .extractBigDecimalWithLocaleNamed(StandingInstructionApiConstants.amountParamName, element);
+
+        if (!isDues) {
+            baseDataValidator.reset().parameter(StandingInstructionApiConstants.amountParamName).value(transferAmount).notNull()
+                    .positiveAmount();
+        }
+
         final Integer recurrenceType = this.fromApiJsonHelper.extractIntegerNamed(StandingInstructionApiConstants.recurrenceTypeParamName,
                 element, Locale.getDefault());
-        baseDataValidator.reset().parameter(StandingInstructionApiConstants.recurrenceTypeParamName).value(recurrenceType).notNull()
-                .inMinMaxRange(1, 2);
+        if (!isDues) {
+            baseDataValidator.reset().parameter(StandingInstructionApiConstants.recurrenceTypeParamName).value(recurrenceType).notNull()
+                    .inMinMaxRange(1, 2);
+        }
+
         boolean isPeriodic = false;
         if (recurrenceType != null) {
             isPeriodic = AccountTransferRecurrenceType.fromInt(recurrenceType).isPeriodicRecurrence();
@@ -143,29 +158,37 @@ public class StandingInstructionDataValidator {
 
         final Integer recurrenceFrequency = this.fromApiJsonHelper
                 .extractIntegerNamed(StandingInstructionApiConstants.recurrenceFrequencyParamName, element, Locale.getDefault());
-        baseDataValidator.reset().parameter(StandingInstructionApiConstants.recurrenceFrequencyParamName).value(recurrenceFrequency)
-                .inMinMaxRange(0, 3);
+        if (!isDues) {
+            baseDataValidator.reset().parameter(StandingInstructionApiConstants.recurrenceFrequencyParamName).value(recurrenceFrequency)
+                    .inMinMaxRange(0, 3);
+        }
 
         if (recurrenceFrequency != null) {
             PeriodFrequencyType frequencyType = PeriodFrequencyType.fromInt(recurrenceFrequency);
             if (frequencyType.isMonthly() || frequencyType.isYearly()) {
                 final MonthDay monthDay = this.fromApiJsonHelper
                         .extractMonthDayNamed(StandingInstructionApiConstants.recurrenceOnMonthDayParamName, element);
-                baseDataValidator.reset().parameter(StandingInstructionApiConstants.recurrenceOnMonthDayParamName).value(monthDay)
-                        .notNull();
+
+                if (!isDues) {
+                    baseDataValidator.reset().parameter(StandingInstructionApiConstants.recurrenceOnMonthDayParamName).value(monthDay)
+                            .notNull();
+                }
             }
         }
 
         final Integer recurrenceInterval = this.fromApiJsonHelper
                 .extractIntegerNamed(StandingInstructionApiConstants.recurrenceIntervalParamName, element, Locale.getDefault());
-        if (isPeriodic) {
+        if (!isDues && isPeriodic) {
             baseDataValidator.reset().parameter(StandingInstructionApiConstants.recurrenceIntervalParamName).value(recurrenceInterval)
                     .notNull();
             baseDataValidator.reset().parameter(StandingInstructionApiConstants.recurrenceFrequencyParamName).value(recurrenceFrequency)
                     .notNull();
         }
-        baseDataValidator.reset().parameter(StandingInstructionApiConstants.recurrenceIntervalParamName).value(recurrenceInterval)
-                .integerGreaterThanZero();
+
+        if (!isDues) {
+            baseDataValidator.reset().parameter(StandingInstructionApiConstants.recurrenceIntervalParamName).value(recurrenceInterval)
+                    .integerGreaterThanZero();
+        }
 
         final String name = this.fromApiJsonHelper.extractStringNamed(StandingInstructionApiConstants.nameParamName, element);
         baseDataValidator.reset().parameter(StandingInstructionApiConstants.nameParamName).value(name).notNull();
@@ -177,9 +200,6 @@ public class StandingInstructionDataValidator {
             baseDataValidator.reset().parameter(StandingInstructionApiConstants.recurrenceTypeParamName).value(recurrenceType).notNull()
                     .inMinMaxRange(1, 1);
 
-        }
-        if (standingInstructionType != null && StandingInstructionType.fromInt(standingInstructionType).isFixedAmoutTransfer()) {
-            baseDataValidator.reset().parameter(StandingInstructionApiConstants.amountParamName).value(transferAmount).notNull();
         }
 
         String errorCode = null;
@@ -211,6 +231,7 @@ public class StandingInstructionDataValidator {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, UPDATE_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
