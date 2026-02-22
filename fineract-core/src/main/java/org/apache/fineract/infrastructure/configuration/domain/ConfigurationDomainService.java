@@ -152,6 +152,10 @@ public interface ConfigurationDomainService {
 
     String getAssetOwnerTransferOustandingInterestStrategy();
 
+    boolean isForceWithdrawalOnSavingsAccountEnabled();
+
+    Long retrieveForceWithdrawalOnSavingsAccountLimit();
+
     Integer getPasswordReuseRestrictionCount();
 
     boolean isForcePasswordResetOnFirstLoginEnabled();

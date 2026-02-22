@@ -1070,6 +1070,7 @@ public class GroupSavingsIntegrationTest {
     }
 
     /**
+     *
      * Test that duplicate group guarantor detection works and shows proper error message with group name
      */
     @Test

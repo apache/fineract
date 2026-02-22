@@ -366,7 +366,7 @@ public class LoanReAgingStepDef extends AbstractStepDef {
     PostLoansLoanIdTransactionsRequest setReAgeingRequestProperties(PostLoansLoanIdTransactionsRequest request, List<String> headers,
             List<String> values) {
         for (int i = 0; i < headers.size(); i++) {
-            String header = headers.get(i).toLowerCase().trim().replaceAll(" ", "");
+            String header = headers.get(i).toLowerCase(java.util.Locale.ROOT).trim().replaceAll(" ", "");
             switch (header) {
                 case "frequencynumber" -> request.setFrequencyNumber(Integer.parseInt(values.get(i)));
                 case "frequencytype" -> request.setFrequencyType(values.get(i));

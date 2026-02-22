@@ -84,6 +84,7 @@ public class SavingsAccountHelper {
 
     private static final String DEPOSIT_SAVINGS_COMMAND = "deposit";
     private static final String WITHDRAW_SAVINGS_COMMAND = "withdrawal";
+    private static final String FORCE_WITHDRAW_SAVINGS_COMMAND = "force-withdrawal";
     private static final String GSIM_SAVINGS = "/gsim";
     private static final String GSIM_SAVINGS_COMMAND = "/gsimcommands";
     private static final String GSIM_DEPOSIT_SAVINGS_COMMAND = "gsimDeposit";
@@ -432,6 +433,12 @@ public class SavingsAccountHelper {
     public Response<PostSavingsAccountTransactionsResponse> withdrawalFromSavingsAccount(final Long savingsId,
             PostSavingsAccountTransactionsRequest request) {
         return Calls.executeU(FineractClientHelper.getFineractClient().savingsTransactions.transaction2(savingsId, request, "withdrawal"));
+    }
+
+    public Response<PostSavingsAccountTransactionsResponse> forceWithdrawalFromSavingsAccount(final Long savingsId,
+            PostSavingsAccountTransactionsRequest request) {
+        return Calls.executeU(
+                FineractClientHelper.getFineractClient().savingsTransactions.transaction2(savingsId, request, "force-withdrawal"));
     }
 
     public Response<PostSavingsAccountTransactionsResponse> depositIntoSavingsAccount(final Long savingsId,
@@ -1522,6 +1529,13 @@ public class SavingsAccountHelper {
             }
         }
         return total.setScale(2, java.math.RoundingMode.HALF_UP);
+    }
+
+    public Object forceWithdrawalFromSavingsAccount(final Integer savingsId, final String amount, String date,
+            String jsonAttributeToGetback) {
+        LOG.info("\n--------------------------------- SAVINGS TRANSACTION FORCE WITHDRAWAL --------------------------------");
+        return performSavingActions(createSavingsTransactionURL("force-withdrawal", savingsId), getSavingsTransactionJSON(amount, date),
+                jsonAttributeToGetback);
     }
 
 }

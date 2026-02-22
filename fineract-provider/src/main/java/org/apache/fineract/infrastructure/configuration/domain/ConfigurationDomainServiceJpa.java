@@ -550,6 +550,16 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
+    public boolean isForceWithdrawalOnSavingsAccountEnabled() {
+        return getGlobalConfigurationPropertyData(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT).isEnabled();
+    }
+
+    @Override
+    public Long retrieveForceWithdrawalOnSavingsAccountLimit() {
+        return getGlobalConfigurationPropertyData(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT_LIMIT).getValue();
+    }
+
+    @Override
     public Integer getPasswordReuseRestrictionCount() {
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(
                 GlobalConfigurationConstants.PASSWORD_REUSE_CHECK_HISTORY_COUNT);

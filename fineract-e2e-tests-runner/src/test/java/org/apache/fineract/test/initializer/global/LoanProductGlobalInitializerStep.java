@@ -1312,7 +1312,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .recalculationRestFrequencyType(1)//
                 .recalculationRestFrequencyInterval(1)//
                 .repaymentEvery(1)//
-                .interestRatePerPeriod((double) 7.0)//
+                .interestRatePerPeriod(7.0)//
                 .interestRateFrequencyType(INTEREST_RATE_FREQUENCY_TYPE_MONTH)//
                 .enableDownPayment(false)//
                 .interestRecalculationCompoundingMethod(0)//

@@ -179,9 +179,10 @@ public class SavingsAccountTransactionsApiResource {
             case "deposit" -> builder.savingsAccountDeposit(savingsId).build();
             case "gsimDeposit" -> builder.gsimSavingsAccountDeposit(savingsId).build();
             case "withdrawal" -> builder.savingsAccountWithdrawal(savingsId).build();
+            case "force-withdrawal" -> builder.savingsAccountForceWithdrawal(savingsId).build();
             case "postInterestAsOn" -> builder.savingsAccountInterestPosting(savingsId).build();
             case SavingsApiConstants.COMMAND_HOLD_AMOUNT -> builder.holdAmount(savingsId).build();
-            default -> throw new UnrecognizedQueryParamException("command", commandParam, "deposit", "withdrawal",
+            default -> throw new UnrecognizedQueryParamException("command", commandParam, "deposit", "withdrawal", "force-withdrawal",
                     SavingsApiConstants.COMMAND_HOLD_AMOUNT);
         };
 

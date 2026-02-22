@@ -58,7 +58,8 @@ public class GlobalConfigurationHelper {
         return Calls.ok(FineractClientHelper.getFineractClient().globalConfigurations.retrieveOne3(configId));
     }
 
-    // TODO: This is quite a bad pattern and adds a lot of time to individual test executions
+    // TODO: This is quite a bad pattern and adds a lot of time to individual test
+    // executions
     public void resetAllDefaultGlobalConfigurations() {
 
         GetGlobalConfigurationsResponse actualGlobalConfigurations = getAllGlobalConfigurations();
@@ -606,6 +607,20 @@ public class GlobalConfigurationHelper {
         enableOriginatorCreationDuringLoanApplication.put("enabled", false);
         enableOriginatorCreationDuringLoanApplication.put("trapDoor", false);
         defaults.add(enableOriginatorCreationDuringLoanApplication);
+
+        HashMap<String, Object> forceWithdrawalOnSavingsAccount = new HashMap<>();
+        forceWithdrawalOnSavingsAccount.put("name", GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT);
+        forceWithdrawalOnSavingsAccount.put("value", 0L);
+        forceWithdrawalOnSavingsAccount.put("enabled", false);
+        forceWithdrawalOnSavingsAccount.put("trapDoor", false);
+        defaults.add(forceWithdrawalOnSavingsAccount);
+
+        HashMap<String, Object> forceWithdrawalOnSavingsAccountLimit = new HashMap<>();
+        forceWithdrawalOnSavingsAccountLimit.put("name", GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT_LIMIT);
+        forceWithdrawalOnSavingsAccountLimit.put("value", 0L);
+        forceWithdrawalOnSavingsAccountLimit.put("enabled", false);
+        forceWithdrawalOnSavingsAccountLimit.put("trapDoor", false);
+        defaults.add(forceWithdrawalOnSavingsAccountLimit);
 
         return defaults;
     }

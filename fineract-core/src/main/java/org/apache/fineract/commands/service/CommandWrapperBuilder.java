@@ -3901,4 +3901,13 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId + "/originators/" + originatorId;
         return this;
     }
+
+    public CommandWrapperBuilder savingsAccountForceWithdrawal(final Long accountId) {
+        this.actionName = "FORCE_WITHDRAWAL";
+        this.entityName = "SAVINGSACCOUNT";
+        this.entityId = accountId;
+        this.savingsId = accountId;
+        this.href = "/savingsaccounts/" + accountId;
+        return this;
+    }
 }

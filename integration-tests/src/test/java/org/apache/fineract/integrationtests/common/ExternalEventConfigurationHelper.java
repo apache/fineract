@@ -36,7 +36,8 @@ public class ExternalEventConfigurationHelper {
             + Utils.TENANT_IDENTIFIER;
 
     // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // Example:
+    // org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static ArrayList<Map<String, Object>> getAllExternalEventConfigurations(RequestSpecification requestSpec,
@@ -47,7 +48,8 @@ public class ExternalEventConfigurationHelper {
     }
 
     // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // Example:
+    // org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static ArrayList<Map<String, Object>> getDefaultExternalEventConfigurations() {
@@ -667,11 +669,17 @@ public class ExternalEventConfigurationHelper {
         savingsAccountsStayedLockedBusinessEvent.put("enabled", false);
         defaults.add(savingsAccountsStayedLockedBusinessEvent);
 
+        Map<String, Object> savingsAccountForceWithdrawalBusinessEvent = new HashMap<>();
+        savingsAccountForceWithdrawalBusinessEvent.put("type", "SavingsAccountForceWithdrawalBusinessEvent");
+        savingsAccountForceWithdrawalBusinessEvent.put("enabled", false);
+        defaults.add(savingsAccountForceWithdrawalBusinessEvent);
+
         return defaults;
     }
 
     // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // Example:
+    // org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String getExternalEventConfigurationsForUpdateJSON() {
@@ -690,7 +698,8 @@ public class ExternalEventConfigurationHelper {
     }
 
     // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // Example:
+    // org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Map<String, Boolean> updateExternalEventConfigurations(RequestSpecification requestSpec,
@@ -701,7 +710,8 @@ public class ExternalEventConfigurationHelper {
     }
 
     // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // Example:
+    // org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void resetDefaultConfigurations(RequestSpecification requestSpec, ResponseSpecification responseSpec) {
