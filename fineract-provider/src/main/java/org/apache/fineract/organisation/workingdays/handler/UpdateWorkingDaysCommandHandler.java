@@ -18,29 +18,38 @@
  */
 package org.apache.fineract.organisation.workingdays.handler;
 
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import java.util.Collections;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.organisation.workingdays.data.WorkingDaysUpdateRequest;
+import org.apache.fineract.organisation.workingdays.data.WorkingDaysUpdateResponse;
 import org.apache.fineract.organisation.workingdays.service.WorkingDaysWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "WORKINGDAYS", action = "UPDATE")
-public class UpdateWorkingDaysCommandHandler implements NewCommandSourceHandler {
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class UpdateWorkingDaysCommandHandler implements CommandHandler<WorkingDaysUpdateRequest, WorkingDaysUpdateResponse> {
 
     private final WorkingDaysWritePlatformService workingDaysWritePlatformService;
 
-    @Autowired
-    public UpdateWorkingDaysCommandHandler(final WorkingDaysWritePlatformService workingDaysWritePlatformService) {
-        this.workingDaysWritePlatformService = workingDaysWritePlatformService;
-    }
-
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.workingDaysWritePlatformService.updateWorkingDays(command);
+    public WorkingDaysUpdateResponse handle(Command<WorkingDaysUpdateRequest> command) {
+        WorkingDaysUpdateRequest request = command.getPayload();
+        Map<String, Object> changes = this.workingDaysWritePlatformService.updateWorkingDays(request);
+        if (changes == null) {
+            changes = Collections.emptyMap();
+        }
+
+        return WorkingDaysUpdateResponse.builder().resourceId((Long) changes.get("resourceId")).changes(changes)
+                .recurrence(request.getRecurrence()).repaymentRescheduleType(request.getRepaymentRescheduleType())
+                .extendTermForDailyRepayments(request.getExtendTermForDailyRepayments())
+                .extendTermForRepaymentsOnHolidays(request.getExtendTermForRepaymentsOnHolidays()).build();
     }
+
 }

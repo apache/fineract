@@ -20,35 +20,24 @@ package org.apache.fineract.organisation.workingdays.data;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Collection;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.FieldNameConstants;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldNameConstants
-public class WorkingDaysData implements Serializable {
+public class WorkingDaysUpdateResponse implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
-
-    private Long id;
-
+    private Long resourceId;
     private String recurrence;
-
-    private EnumOptionData repaymentRescheduleType;
-
+    private Integer repaymentRescheduleType;
     private Boolean extendTermForDailyRepayments;
-
     private Boolean extendTermForRepaymentsOnHolidays;
-
-    @SuppressWarnings("unused")
-    private Collection<EnumOptionData> repaymentRescheduleOptions;
-
+    private Map<String, Object> changes;
 }

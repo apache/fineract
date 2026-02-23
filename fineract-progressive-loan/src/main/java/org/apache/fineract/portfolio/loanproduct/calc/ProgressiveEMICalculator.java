@@ -896,7 +896,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             }
             rp.setEmi(rp.getTotalPaidAmount());
             rp.moveOutstandingDueToReAging();
-            rp.setNoUnrecognisedInterest(true);
+            rp.setInterestMovedDownward(true);
         });
     }
 
@@ -1098,7 +1098,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         findLastUnpaidRepaymentPeriod.ifPresent(repaymentPeriod -> {
             repaymentPeriod.setFutureUnrecognizedInterest(scheduleModel.zero());
             scheduleModel.repaymentPeriods().forEach(rp -> {
-                rp.setInterestMoved(false);
+                rp.setInterestMovedUpward(false);
             });
 
             MathContext mc = scheduleModel.mc();
@@ -1161,7 +1161,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             repaymentPeriod.setFutureUnrecognizedInterest(period.getUnrecognizedInterest());
             scheduleModel.repaymentPeriods().stream().filter(rp -> rp.getDueDate().isAfter(repaymentPeriod.getDueDate())) //
                     .forEach(rp -> {
-                        rp.setInterestMoved(true);
+                        rp.setInterestMovedUpward(true);
                     });
         });
     }
@@ -1530,7 +1530,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         final CurrencyData currency = scheduleModel.loanProductRelatedDetail().getCurrencyData();
         RepaymentPeriod firstRepaymentPeriod = repaymentPeriods.getFirst();
         RepaymentPeriod lastRepaymentPeriod = repaymentPeriods.getLast();
-        Money sumOfInterest = Money.zero(currency);
+        Money sumOfInterest = Money.of(currency, calculateEMIValueForFixedInterest(repaymentPeriods, mc), mc);
         for (RepaymentPeriod rp : repaymentPeriods) {
             Money interest = rp.calculateCalculatedDueInterest();
             sumOfInterest = sumOfInterest.add(interest);
@@ -1604,8 +1604,9 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
         final Money outstandingBalance = startPeriod.getInitialBalanceForEmiRecalculation();
 
-        final Money equalMonthlyInstallment = Money.of(outstandingBalance.getCurrencyData(),
-                calculateEMIValue(rateFactorN, outstandingBalance.getAmount(), fnResult, mc), mc);
+        final Money equalMonthlyInstallment = Money
+                .of(outstandingBalance.getCurrencyData(), calculateEMIValue(rateFactorN, outstandingBalance.getAmount(), fnResult, mc), mc)
+                .add(calculateEMIValueForFixedInterest(repaymentPeriods, mc));
         final Money finalEqualMonthlyInstallment = applyInstallmentAmountInMultiplesOf(scheduleModel, equalMonthlyInstallment);
 
         repaymentPeriods.forEach(period -> {
@@ -1714,6 +1715,14 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     private BigDecimal calculateEMIValue(final BigDecimal rateFactorPlus1N, final BigDecimal outstandingBalanceForRest,
             final BigDecimal fnResult, MathContext mc) {
         return rateFactorPlus1N.multiply(outstandingBalanceForRest, mc).divide(fnResult, mc);
+    }
+
+    /**
+     * Calculate the EMI (Equal Monthly Installment) value for fixed interest portion
+     */
+    private BigDecimal calculateEMIValueForFixedInterest(final List<RepaymentPeriod> repaymentPeriods, MathContext mc) {
+        return repaymentPeriods.stream().map(RepaymentPeriod::getFixedInterest).map(Money::getAmount).reduce(ZERO, BigDecimal::add)
+                .divide(BigDecimal.valueOf(repaymentPeriods.isEmpty() ? 1 : repaymentPeriods.size()), mc);
     }
 
     /**
@@ -1994,11 +2003,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                     .addCreditedInterestAmount(MathUtil.min(rp.getOutstandingInterest(), rp.getCreditedInterest(), false).negated());
             rp.setEmi(rp.getTotalPaidAmount());
             rp.moveOutstandingDueToReAging();
-            rp.setNoUnrecognisedInterest(true);
+            rp.setInterestMovedDownward(true);
         });
-
-        // stop calculate unrecognised interest at this point because all
-        interestSchedule.getLastRepaymentPeriod().setNoUnrecognisedInterest(true);
 
         if (!originalMaturityDate.isBefore(transactionDate)) {
             createRepaymentPeriodForEarlyRepaidAmountsDuringReAgeing(interestSchedule,

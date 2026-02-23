@@ -328,6 +328,13 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_MIX_REPORT")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/mixreport/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_MIX_REPORT")
+                    // working days
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/workingdays"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_WORKING_DAYS")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/workingdays/template"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_WORKING_DAYS")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/workingdays"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_WORKING_DAYS")
 
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/*/twofactor")).fullyAuthenticated()

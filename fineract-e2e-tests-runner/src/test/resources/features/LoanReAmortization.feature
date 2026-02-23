@@ -87,7 +87,7 @@ Feature: LoanReAmortization
       | 01 January 2024  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        |
       | 01 January 2024  | Down Payment     | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 375.0        |
       | 25 January 2024  | Re-amortize      | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 0.0          |
-    # --- close the loan --- #
+# --- close the loan --- #
     When Loan Pay-off is made on "25 January 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -136,7 +136,7 @@ Feature: LoanReAmortization
       | 01 January 2024  | Down Payment     | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 375.0        | false    |
       | 25 January 2024  | Re-amortize      | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
     Then Admin checks that delinquency range is: "RANGE_3" and has delinquentDate "2024-01-19"
-    # --- close the loan --- #
+# --- close the loan --- #
     When Loan Pay-off is made on "26 January 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -156,7 +156,7 @@ Feature: LoanReAmortization
     When Admin sets the business date to "25 January 2024"
     When Admin creates a Loan re-amortization transaction on current business date
     Then Admin checks that delinquency range is: "NO_DELINQUENCY" and has delinquentDate ""
-    # --- close the loan --- #
+# --- close the loan --- #
     When Loan Pay-off is made on "25 January 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -189,7 +189,7 @@ Feature: LoanReAmortization
       | 01 January 2024  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        |
       | 01 January 2024  | Down Payment     | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 375.0        |
       | 25 January 2024  | Re-amortize      | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 0.0          |
-    # --- close the loan --- #
+# --- close the loan --- #
     When Loan Pay-off is made on "25 January 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -220,7 +220,7 @@ Feature: LoanReAmortization
       | 01 January 2024  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        |
       | 01 January 2024  | Down Payment     | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 375.0        |
       | 01 February 2024 | Re-amortize      | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 0.0          |
-    # --- close the loan --- #
+# --- close the loan --- #
     When Loan Pay-off is made on "01 February 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -269,7 +269,7 @@ Feature: LoanReAmortization
       | 01 January 2024  | Down Payment     | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 375.0        |
       | 15 January 2024  | Repayment        | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 250.0        |
       | 01 February 2024 | Re-amortize      | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 0.0          |
-    # --- close the loan --- #
+# --- close the loan --- #
     When Loan Pay-off is made on "02 February 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -302,7 +302,7 @@ Feature: LoanReAmortization
       | 01 January 2024  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        |
       | 01 January 2024  | Down Payment     | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 375.0        |
       | 01 February 2024 | Re-amortize      | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 0.0          |
-    # --- close the loan --- #
+# --- close the loan --- #
     When Loan Pay-off is made on "01 February 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -335,7 +335,7 @@ Feature: LoanReAmortization
       | 01 January 2024  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        |
       | 01 January 2024  | Down Payment     | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 375.0        |
       | 31 January 2024  | Re-amortize      | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 0.0          |
-    # --- close the loan --- #
+# --- close the loan --- #
     When Loan Pay-off is made on "31 January 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -384,7 +384,7 @@ Feature: LoanReAmortization
       | 01 January 2024  | Down Payment     | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 375.0        |
       | 17 January 2024  | Repayment        | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 325.0        |
       | 30 January 2024  | Re-amortize      | 75.0   | 75.0      | 0.0      | 0.0  | 0.0       | 0.0          |
-    # --- close the loan --- #
+# --- close the loan --- #
     When Loan Pay-off is made on "30 January 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -405,7 +405,7 @@ Feature: LoanReAmortization
     When Admin creates a Loan re-amortization transaction on current business date
     Then LoanDelinquencyRangeChangeBusinessEvent is created
     Then LoanReAmortizeBusinessEvent is created
-    # --- close the loan --- #
+# --- close the loan --- #
     When Loan Pay-off is made on "01 February 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -463,7 +463,7 @@ Feature: LoanReAmortization
       | 01 January 2024  | Down Payment     | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 600.0        | false    | false    |
       | 16 January 2024  | Repayment        | 120.0  | 120.0     | 0.0      | 0.0  | 0.0       | 480.0        | true     | false    |
       | 20 February 2024 | Re-amortize      | 360.0  | 360.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
-    # --- close the loan --- #
+# --- close the loan --- #
     When Loan Pay-off is made on "25 February 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -518,7 +518,7 @@ Feature: LoanReAmortization
       | 01 January 2024  | Down Payment     | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 600.0        | false    | false    |
       | 16 January 2024  | Repayment        | 120.0  | 120.0     | 0.0      | 0.0  | 0.0       | 480.0        | false    | false    |
       | 20 February 2024 | Re-amortize      | 240.0  | 240.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
-    # --- close the loan --- #
+# --- close the loan --- #
     When Loan Pay-off is made on "25 February 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -576,7 +576,7 @@ Feature: LoanReAmortization
       | 16 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 700.0        | false    | false    |
       | 16 January 2024  | Down Payment     | 25.0   | 25.0      | 0.0      | 0.0  | 0.0       | 675.0        | false    | false    |
       | 20 February 2024 | Re-amortize      | 398.0  | 398.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
-    # --- close the loan --- #
+# --- close the loan --- #
     When Loan Pay-off is made on "25 February 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -634,7 +634,7 @@ Feature: LoanReAmortization
       | 01 January 2024  | Down Payment     | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 600.0        | false    | false    |
       | 16 January 2024  | Repayment        | 140.0  | 120.0     | 0.0      | 0.0  | 20.0      | 480.0        | false    | true     |
       | 20 February 2024 | Re-amortize      | 240.0  | 240.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
-    # --- close the loan --- #
+# --- close the loan --- #
     When Loan Pay-off is made on "25 February 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -740,7 +740,7 @@ Feature: LoanReAmortization
       | 20 February 2024 | Re-amortize      | 360.0  | 360.0     | 0.0      | 0.0  | 0.0       | 0.0          | true     | false    |
       | 21 February 2024 | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 700.0        | false    | false    |
       | 21 February 2024 | Down Payment     | 25.0   | 25.0      | 0.0      | 0.0  | 0.0       | 675.0        | true     | false    |
-    # --- close the loan --- #
+# --- close the loan --- #
     When Loan Pay-off is made on "23 February 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -1215,7 +1215,7 @@ Feature: LoanReAmortization
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 15 March 2024    | Re-amortize      | 17.01  | 16.52     | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
-    # --- close the loan --- #
+# --- close the loan --- #
     When Loan Pay-off is made on "15 March 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
@@ -1285,8 +1285,8 @@ Feature: LoanReAmortization
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 15 March 2024    | Re-amortize      | 17.01  | 16.52     | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
     #TODO - Active status after pay-off
-    #When Loan Pay-off is made on "15 March 2024"
-    #Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+  #  When Loan Pay-off is made on "15 March 2024"
+  #  Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4221 @AdvancedPaymentAllocation
   Scenario: Verify Re-amortization transaction on interest bearing loan - Interest handling: EQUAL_AMORTIZATION_INTEREST_SPLIT - UC3: Principal interest and fee re-amortization, N+1 installment
@@ -1686,7 +1686,6 @@ Feature: LoanReAmortization
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 15 March 2024    | Re-amortize      | 17.01  | 16.52     | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
-
     When Admin sets the business date to "01 April 2024"
     And Customer makes "AUTOPAY" repayment on "01 March 2024" with 17.01 EUR transaction amount
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
@@ -4383,7 +4382,7 @@ Feature: LoanReAmortization
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4503
-  Scenario: Verify Re-amortization with backdated interest pause to re-aging, starts after re-aging with last instalment strategy - interest bearing loan with equal amortization + interest split - UC3.3
+  Scenario: Verify Re-amortization with backdated interest pause to re-aging, starts after re-amortization with last instalment strategy - interest bearing loan with equal amortization + interest split - UC3.3
     When Admin sets the business date to "01 January 2024"
     And Admin creates a client with random data
     And Admin creates a fully customized loan with the following data:
@@ -4425,7 +4424,7 @@ Feature: LoanReAmortization
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
-#  --- Check before re-age --- #
+#  --- Check before re-amortization --- #
     When Admin sets the business date to "15 March 2024"
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
@@ -4818,13 +4817,13 @@ Feature: LoanReAmortization
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024  | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           |  0.0          | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024     |                  | 69.84           | 13.73         | 0.57     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 4  | 30   | 01 May 2024       |                  | 56.03           | 13.81         | 0.49     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 5  | 31   | 01 June 2024      |                  | 42.14           | 13.89         | 0.41     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 6  | 30   | 01 July 2024      |                  | 28.17           | 13.97         | 0.33     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 7  | 31   | 01 August 2024    |                  | 14.11           | 14.06         | 0.24     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 8  | 31   | 01 September 2024 |                  | 0.0             | 14.11         | 0.16     | 0.0  | 0.0       | 14.27 | 0.0   | 0.0        | 0.0  | 14.27       |
+      | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024     |                  | 69.85           | 13.72         | 0.57     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
+      | 4  | 30   | 01 May 2024       |                  | 56.05           | 13.8          | 0.49     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
+      | 5  | 31   | 01 June 2024      |                  | 42.17           | 13.88         | 0.41     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
+      | 6  | 30   | 01 July 2024      |                  | 28.21           | 13.96         | 0.33     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
+      | 7  | 31   | 01 August 2024    |                  | 14.16           | 14.05         | 0.24     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
+      | 8  | 31   | 01 September 2024 |                  | 0.0             | 14.16         | 0.16     | 0.0  | 0.0       | 14.32 | 0.0   | 0.0        | 0.0  | 14.32       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 100.0         | 2.78     | 0.0  | 0.0       | 102.78 | 17.01 | 0.0        | 0.0  | 85.77       |
@@ -4842,15 +4841,15 @@ Feature: LoanReAmortization
       | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024  | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           |  0.0          | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024     |                  | 69.84           | 13.73         | 0.57     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 4  | 30   | 01 May 2024       |                  | 56.03           | 13.81         | 0.49     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 5  | 31   | 01 June 2024      |                  | 42.14           | 13.89         | 0.41     | 0.0  | 0.0       | 14.3  | 0.0   | 0.0        | 0.0  | 14.3        |
-      | 6  | 30   | 01 July 2024      |                  | 33.84           | 8.3           | 0.33     | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
-      | 7  | 31   | 01 August 2024    |                  | 25.49           | 8.35          | 0.28     | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
-      | 8  | 31   | 01 September 2024 |                  | 17.09           | 8.4           | 0.23     | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
-      | 9  | 30   | 01 October 2024   |                  | 8.56            | 8.53          | 0.1      | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
-      | 10 | 31   | 01 November 2024  |                  | 0.0             | 8.56          | 0.05     | 0.0  | 0.0       | 8.61  | 0.0   | 0.0        | 0.0  | 8.61        |
+      | 2  | 29   | 01 March 2024     | 15 March 2024    | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024     |                  | 69.85           | 13.72         | 0.57     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
+      | 4  | 30   | 01 May 2024       |                  | 56.05           | 13.8          | 0.49     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
+      | 5  | 31   | 01 June 2024      |                  | 42.17           | 13.88         | 0.41     | 0.0  | 0.0       | 14.29 | 0.0   | 0.0        | 0.0  | 14.29       |
+      | 6  | 30   | 01 July 2024      |                  | 33.87           | 8.3           | 0.33     | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
+      | 7  | 31   | 01 August 2024    |                  | 25.52           | 8.35          | 0.28     | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
+      | 8  | 31   | 01 September 2024 |                  | 17.12           | 8.4           | 0.23     | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
+      | 9  | 30   | 01 October 2024   |                  | 8.59            | 8.53          | 0.1      | 0.0  | 0.0       | 8.63  | 0.0   | 0.0        | 0.0  | 8.63        |
+      | 10 | 31   | 01 November 2024  |                  | 0.0             | 8.59          | 0.05     | 0.0  | 0.0       | 8.64  | 0.0   | 0.0        | 0.0  | 8.64        |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 100.0         | 3.04     | 0.0  | 0.0       | 103.04 | 17.01 | 0.0        | 0.0  | 86.03       |

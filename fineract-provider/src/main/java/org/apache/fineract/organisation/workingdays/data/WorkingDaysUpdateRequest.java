@@ -18,37 +18,30 @@
  */
 package org.apache.fineract.organisation.workingdays.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Collection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.FieldNameConstants;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldNameConstants
-public class WorkingDaysData implements Serializable {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class WorkingDaysUpdateRequest implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 1L;
-
-    private Long id;
+    public static final long serialVersionUID = 1L;
 
     private String recurrence;
 
-    private EnumOptionData repaymentRescheduleType;
+    private Integer repaymentRescheduleType;
 
     private Boolean extendTermForDailyRepayments;
 
     private Boolean extendTermForRepaymentsOnHolidays;
-
-    @SuppressWarnings("unused")
-    private Collection<EnumOptionData> repaymentRescheduleOptions;
 
 }
