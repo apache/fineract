@@ -149,11 +149,14 @@ mysql -u root -pmysql fineract_default -e \
 Method 2 - Via API (After Fineract is Running):
 [source,bash]
 ----
-curl -X PUT https://localhost:8443/fineract-provider/api/v1/configurations/name/enable-business-date \
+curl -k -X PUT https://localhost:8443/fineract-provider/api/v1/configurations/name/enable-business-date \
   -H "Authorization: Basic bWlmb3M6cGFzc3dvcmQ=" \
+  -H "Fineract-Platform-TenantId: default" \
   -H "Content-Type: application/json" \
   -d '{"enabled": true}'
 ----
+
+NOTE: The `Fineract-Platform-TenantId` header is required. Without it, the request can fail with HTTP 400 because tenant context is missing.
 
 *Verification*:
 [source,bash]
@@ -170,9 +173,11 @@ mysql -u root -pmysql fineract_default -e \
 
 [source,bash]
 ----
-# Start Fineract in background
-./gradlew bootRun
+# Start Fineract with test profile enabled for E2E
+./gradlew bootRun -Dspring.profiles.active=test
 ----
+
+IMPORTANT: When running E2E tests that hit endpoints/APIs backed by beans annotated with `@Profile(FineractProfiles.TEST)`, the provider startup must include `-Dspring.profiles.active=test`. Without this, test-profile-only components are not loaded.
 
 Wait for Fineract to be fully started. You can verify by checking:
 [source,bash]
