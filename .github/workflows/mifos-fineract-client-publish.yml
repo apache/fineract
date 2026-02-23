@@ -22,7 +22,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Generate build number
-        uses: onyxmueller/build-tag-number@v1
+        uses: onyxmueller/build-tag-number@4a0c81c9af350d967032d49204c83c38e6b0c8e4 # v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up JDK 21
