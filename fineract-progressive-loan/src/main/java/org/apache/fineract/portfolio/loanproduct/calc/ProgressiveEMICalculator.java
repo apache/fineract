@@ -54,6 +54,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeInteres
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelRepaymentPeriod;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.ScheduledDateGenerator;
 import org.apache.fineract.portfolio.loanproduct.calc.data.EmiAdjustment;
 import org.apache.fineract.portfolio.loanproduct.calc.data.EmiChangeOperation;
@@ -524,10 +525,15 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                         false)); //
             }
         }
-
+        Money duePrincipal = repaymentPeriod.getDuePrincipal();
+        Money dueInterest = repaymentPeriod.getDueInterest();
+        if (scheduleModel.loanProductRelatedDetail().getLoanScheduleProcessingType() == LoanScheduleProcessingType.VERTICAL
+                && notFullyRepaidRepaymentPeriodCount > 1) {
+            duePrincipal = repaymentPeriod.getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest();
+        }
         return new PeriodDueDetails(repaymentPeriod.getEmi(), //
-                repaymentPeriod.getDuePrincipal(), //
-                repaymentPeriod.getDueInterest()); //
+                duePrincipal, //
+                dueInterest); //
     }
 
     @Override

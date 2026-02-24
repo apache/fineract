@@ -1715,7 +1715,7 @@ public final class LoanApplicationTerms {
                 repaymentEvery, numberOfRepayments,
                 isInterestChargedFromDateSameAsDisbursalDateEnabled != null && isInterestChargedFromDateSameAsDisbursalDateEnabled,
                 daysInYearCustomStrategy, allowPartialPeriodInterestCalculation, interestRecalculationEnabled, recalculationFrequencyType,
-                preClosureInterestCalculationStrategy, allowFullTermForTranche);
+                preClosureInterestCalculationStrategy, allowFullTermForTranche, loanScheduleProcessingType);
     }
 
     public Integer getLoanTermFrequency() {

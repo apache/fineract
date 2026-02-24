@@ -57,7 +57,7 @@ public final class LoanConfigurationDetailsMapper {
                 loanProductRelatedDetail.getNumberOfRepayments(), loanProductRelatedDetail.isInterestRecognitionOnDisbursementDate(),
                 loanProductRelatedDetail.getDaysInYearCustomStrategy(), loanProductRelatedDetail.isAllowPartialPeriodInterestCalculation(),
                 loan.isInterestRecalculationEnabled(), getRestFrequencyType(loan), getPreCloseInterestCalculationStrategy(loan),
-                loan.isAllowFullTermForTranche());
+                loan.isAllowFullTermForTranche(), loan.getLoanProductRelatedDetail().getLoanScheduleProcessingType());
     }
 
     private static RecalculationFrequencyType getRestFrequencyType(Loan loan) {
