@@ -1494,10 +1494,12 @@ public class LoanStepDef extends AbstractStepDef {
 
         final List<GetLoansLoanIdLoanChargeData> existingCharges = loanDetails.getCharges();
         if (existingCharges != null && !existingCharges.isEmpty()) {
-            existingCharges.stream()
-                    .map(charge -> new PutLoansLoanIdChargeData().id(charge.getId()).chargeId(charge.getChargeId())
-                            .dueDate(charge.getDueDate().format(FORMATTER)).amount(charge.getAmountOrPercentage()))
-                    .forEach(putLoansLoanIdRequest::addChargesItem);
+            for (final GetLoansLoanIdLoanChargeData charge : existingCharges) {
+                putLoansLoanIdRequest.addChargesItem(new PutLoansLoanIdChargeData()//
+                        .id(charge.getId())//
+                        .chargeId(charge.getChargeId())//
+                        .dueDate(charge.getDueDate().format(FORMATTER)).amount(charge.getAmountOrPercentage()));
+            }
         }
 
         final PutLoansLoanIdResponse responseMod = ok(
