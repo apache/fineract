@@ -28,7 +28,6 @@ import org.apache.fineract.infrastructure.contentstore.service.ContentStoreServi
 import org.apache.fineract.infrastructure.documentmanagement.adapter.EntityImageIdAdapter;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentContent;
 import org.apache.fineract.infrastructure.documentmanagement.domain.ImageRepository;
-import org.apache.fineract.infrastructure.documentmanagement.exception.DocumentInvalidRequestException;
 import org.apache.fineract.infrastructure.documentmanagement.exception.DocumentNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -45,25 +44,15 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
 
     @Override
     public DocumentContent retrieveImage(final String entityType, final Long entityId) {
-        try {
-            return imageIdAdapters.stream().filter(imageIdAdapter -> imageIdAdapter.accept(entityType)).findFirst()
-                    .flatMap(imageIdAdapter -> imageIdAdapter.get(entityId))
-                    .flatMap(
-                            imageIdResult -> imageRepository.findById(imageIdResult.getId())
-                                    .map(image -> DocumentContent
-                                            .builder().fileName(
-                                                    FilenameUtils.getName(image.getLocation()))
-                                            .format(FilenameUtils.getExtension(image.getLocation()))
-                                            .displayName(imageIdResult.getDisplayName())
-                                            .contentType(
-                                                    contentDetectorManager
-                                                            .detect(ContentDetectorContext.builder()
-                                                                    .fileName(FilenameUtils.getName(image.getLocation())).build())
-                                                            .getMimeType())
-                                            .stream(storeService.download(image.getLocation())).build()))
-                    .orElseThrow(() -> new DocumentNotFoundException(entityType, entityId, -1L));
-        } catch (final Exception e) {
-            throw new DocumentInvalidRequestException(e);
-        }
+        return imageIdAdapters.stream().filter(imageIdAdapter -> imageIdAdapter.accept(entityType)).findFirst()
+                .flatMap(imageIdAdapter -> imageIdAdapter.get(entityId))
+                .flatMap(imageIdResult -> imageRepository.findById(imageIdResult.getId()).map(image -> DocumentContent.builder()
+                        .fileName(FilenameUtils.getName(image.getLocation())).format(FilenameUtils.getExtension(image.getLocation()))
+                        .displayName(imageIdResult.getDisplayName())
+                        .contentType(contentDetectorManager
+                                .detect(ContentDetectorContext.builder().fileName(FilenameUtils.getName(image.getLocation())).build())
+                                .getMimeType())
+                        .stream(storeService.download(image.getLocation())).build()))
+                .orElseThrow(() -> new DocumentNotFoundException(entityType, entityId, -1L));
     }
 }

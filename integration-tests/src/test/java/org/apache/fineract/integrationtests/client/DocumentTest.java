@@ -117,7 +117,7 @@ class DocumentTest extends IntegrationTest {
         ok(fineractClient().documents.deleteDocument("clients", clientId, documentId));
         CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                 () -> ok(fineractClient().documents.getDocument("clients", clientId, documentId)));
-        assertEquals(403, exception.getResponse().code());
+        assertEquals(404, exception.getResponse().code());
     }
 
     @Order(9999)

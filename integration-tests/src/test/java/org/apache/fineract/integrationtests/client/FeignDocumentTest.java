@@ -133,7 +133,7 @@ public class FeignDocumentTest extends FeignIntegrationTest {
 
         FeignException exception = assertThrows(FeignException.class,
                 () -> fineractClient().documentsFixed().getDocument("clients", clientId, documentId));
-        assertEquals(403, exception.status());
+        assertEquals(404, exception.status());
     }
 
     @Test
