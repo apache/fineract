@@ -42,6 +42,8 @@ import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
 import org.apache.fineract.test.data.LoanRescheduleErrorMessage;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
+import org.apache.fineract.test.messaging.event.EventCheckHelper;
+import org.apache.fineract.test.messaging.store.EventStore;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,9 +58,14 @@ public class LoanRescheduleStepDef extends AbstractStepDef {
 
     @Autowired
     private FineractFeignClient fineractClient;
+    @Autowired
+    private EventStore eventStore;
+    @Autowired
+    private EventCheckHelper eventCheckHelper;
 
     @When("Admin creates and approves Loan reschedule with the following data:")
     public void createAndApproveLoanReschedule(DataTable table) throws IOException {
+        eventStore.reset();
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
 
@@ -100,6 +107,10 @@ public class LoanRescheduleStepDef extends AbstractStepDef {
 
         ok(() -> fineractClient.rescheduleLoans().updateLoanRescheduleRequest(scheduleId, approveRequest,
                 Map.<String, Object>of("command", "approve")));
+
+        if (newInterestRate != null) {
+            eventCheckHelper.loanBalanceChangedEventCheck(loanId);
+        }
     }
 
     @Then("Loan reschedule with the following data results a {int} error and {string} error message")

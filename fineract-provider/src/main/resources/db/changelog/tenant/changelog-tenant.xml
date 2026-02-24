@@ -234,4 +234,5 @@
     <include file="parts/0213_transaction_summary_adding_originators.xml" relativeToChangelogFile="true" />
     <include file="parts/0214_trial_balance_summary_adding_originators.xml" relativeToChangelogFile="true" />
     <include file="parts/0215_transaction_summary_reports_add_buydown_fee_types.xml" relativeToChangelogFile="true" />
+    <include file="parts/0216_add_unique_constraint_sms_campaign_name.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

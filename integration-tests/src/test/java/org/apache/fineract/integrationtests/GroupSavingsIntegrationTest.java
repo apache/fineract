@@ -1071,7 +1071,7 @@ public class GroupSavingsIntegrationTest {
     }
 
     /**
-     * Test that using a client ID with GROUP guarantor type fails with appropriate error
+     * Test that using a non-existent entity ID with GROUP guarantor type fails with appropriate error
      */
     @Test
     public void testGroupGuarantorWithClientIdButGroupType() {
@@ -1110,9 +1110,11 @@ public class GroupSavingsIntegrationTest {
                     .build(loanClientID.toString(), loanProductID.toString(), null);
             final Integer loanID = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
 
-            // Try to create guarantor with CLIENT ID but GROUP type (type mismatch)
+            // Try to create guarantor with a non-existent GROUP entity ID (type mismatch)
+            // Use a random large ID that cannot collide with any auto-generated group ID from other tests
+            final Integer nonExistentGroupId = Utils.randomNumberGenerator(7);
             String guarantorJSON = new GuarantorTestBuilder()
-                    .existingGroupWithGuaranteeAmount(String.valueOf(otherClientID), String.valueOf(clientSavingsId), GUARANTEE_AMOUNT)
+                    .existingGroupWithGuaranteeAmount(String.valueOf(nonExistentGroupId), String.valueOf(clientSavingsId), GUARANTEE_AMOUNT)
                     .build();
 
             final ResponseSpecification errorResponse = new ResponseSpecBuilder().build();
@@ -1121,10 +1123,9 @@ public class GroupSavingsIntegrationTest {
 
             ArrayList<HashMap> error = (ArrayList<HashMap>) this.guarantorHelper.createGuarantorWithError(loanID, guarantorJSON,
                     errorRequest, errorResponse);
-            // Verify we got an error response (status code may be 403 or 404 depending on environment)
-            Assertions.assertNotNull(error, "Should return error for client ID used with GROUP type");
+            Assertions.assertNotNull(error, "Should return error for non-existent group entity ID");
 
-            LOG.info("SUCCESS: Client ID with GROUP type correctly rejected");
+            LOG.info("SUCCESS: Non-existent group entity ID correctly rejected");
         });
     }
 
