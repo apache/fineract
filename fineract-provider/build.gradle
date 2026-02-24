@@ -116,10 +116,10 @@ configurations {
 
 dependencies {
     implementation project(':fineract-core')
-    implementation 'org.springframework.boot:spring-boot-starter-test'
-    implementation 'org.mockito:mockito-core'
-    implementation 'org.mockito:mockito-junit-jupiter'
-    implementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.liquibase:liquibase-core'
 }

@@ -35,6 +35,8 @@ configurations {
 }
 dependencies {
     driver 'com.mysql:mysql-connector-j'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
 }
 
 cargo {
