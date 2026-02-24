@@ -167,10 +167,18 @@ public class ProgressiveLoanInterestScheduleModel {
         if (repaymentPeriodDueDate == null) {
             return Optional.empty();
         }
-        return repaymentPeriods.stream()//
-                .filter(repaymentPeriodItem -> DateUtils.isEqual(repaymentPeriodItem.getFromDate(), repaymentPeriodFromDate)
-                        && DateUtils.isEqual(repaymentPeriodItem.getDueDate(), repaymentPeriodDueDate))//
+        // Exact match first
+        Optional<RepaymentPeriod> result = repaymentPeriods.stream()
+                .filter(rp -> DateUtils.isEqual(rp.getFromDate(), repaymentPeriodFromDate)
+                        && DateUtils.isEqual(rp.getDueDate(), repaymentPeriodDueDate))
                 .findFirst();
+        if (result.isEmpty()) {
+            // Fallback: find a period that encompasses the requested date range
+            // This handles collapsed stub periods where multiple periods were merged into one
+            result = repaymentPeriods.stream().filter(rp -> !DateUtils.isAfter(rp.getFromDate(), repaymentPeriodFromDate)
+                    && !DateUtils.isBefore(rp.getDueDate(), repaymentPeriodDueDate)).findFirst();
+        }
+        return result;
     }
 
     public List<RepaymentPeriod> getRelatedRepaymentPeriods(final LocalDate calculateFromRepaymentPeriodDueDate) {

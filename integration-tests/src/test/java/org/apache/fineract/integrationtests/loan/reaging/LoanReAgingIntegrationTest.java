@@ -24,12 +24,15 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.restassured.path.json.JsonPath;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
@@ -1021,6 +1024,250 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
                     LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST.name(), 937.5);
 
             checkMaturityDates(loanId, LocalDate.of(2023, 7, 12), LocalDate.of(2023, 7, 12));
+        });
+    }
+
+    @Test
+    public void test_LoanReAge_RepeatedReAgeDoesNotCreateDuplicatePeriods() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("28 January 2026", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 6;
+            int repaymentEvery = 1;
+
+            // Create interest-bearing progressive loan product
+            PostLoanProductsRequest product = create4IProgressive() //
+                    .numberOfRepayments(numberOfRepayments) //
+                    .repaymentEvery(repaymentEvery) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS_L); //
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            // Apply and Approve Loan
+            double amount = 1000.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "28 January 2026", amount, numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(repaymentEvery)//
+                    .loanTermFrequency(numberOfRepayments)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .interestRatePerPeriod(BigDecimal.valueOf(10.0))//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "28 January 2026"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+
+            // Disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(amount), "28 January 2026");
+
+            createdLoanId.set(loanId);
+
+            // First re-age
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        // Second re-age on next day
+        runAt("29 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        // Third re-age on next day
+        runAt("30 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        // Fourth re-age on next day
+        runAt("31 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+
+            // Verify: should have 8 periods total (1 disbursement + 1 stub + 6 re-aged installments)
+            // NOT 12+ periods with spurious stubs from each intermediate reAge
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
+
+            assertEquals(8, periods.size(), "Expected 8 periods (1 disbursement + 1 stub + 6 re-aged) but got " + periods.size());
+
+            // Verify due dates are correct
+            assertEquals(LocalDate.of(2026, 1, 28), periods.get(0).getDueDate()); // disbursement
+            assertEquals(LocalDate.of(2026, 1, 31), periods.get(1).getDueDate()); // stub
+            assertEquals(LocalDate.of(2026, 2, 28), periods.get(2).getDueDate()); // 1st re-aged
+            assertEquals(LocalDate.of(2026, 3, 28), periods.get(3).getDueDate()); // 2nd re-aged
+            assertEquals(LocalDate.of(2026, 4, 28), periods.get(4).getDueDate()); // 3rd re-aged
+            assertEquals(LocalDate.of(2026, 5, 28), periods.get(5).getDueDate()); // 4th re-aged
+            assertEquals(LocalDate.of(2026, 6, 28), periods.get(6).getDueDate()); // 5th re-aged
+            assertEquals(LocalDate.of(2026, 7, 28), periods.get(7).getDueDate()); // 6th re-aged
+
+            checkMaturityDates(loanId, LocalDate.of(2026, 7, 28), LocalDate.of(2026, 7, 28));
+        });
+    }
+
+    @Test
+    public void test_LoanReAge_RepeatedReAge_COBAccrualDoesNotFail() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("28 January 2026", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 6;
+            int repaymentEvery = 1;
+
+            PostLoanProductsRequest product = create4IProgressive() //
+                    .numberOfRepayments(numberOfRepayments) //
+                    .repaymentEvery(repaymentEvery) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS_L); //
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            double amount = 1000.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "28 January 2026", amount, numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(repaymentEvery)//
+                    .loanTermFrequency(numberOfRepayments)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .interestRatePerPeriod(BigDecimal.valueOf(10.0))//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "28 January 2026"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+
+            disburseLoan(loanId, BigDecimal.valueOf(amount), "28 January 2026");
+
+            createdLoanId.set(loanId);
+
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        runAt("29 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        runAt("30 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        runAt("31 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        runAt("01 February 2026", () -> {
+            long loanId = createdLoanId.get();
+
+            // Execute inline COB - this should not fail with NoSuchElementException
+            executeInlineCOB(loanId);
+
+            // Verify loan schedule still has 8 periods (1 disbursement + 1 stub + 6 re-aged)
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
+
+            assertEquals(8, periods.size(), "Expected 8 periods (1 disbursement + 1 stub + 6 re-aged) but got " + periods.size());
+
+            // Verify loan is still active (COB did not crash)
+            assertEquals(LoanStatus.ACTIVE.getValue(), loanDetails.getStatus().getId().intValue());
+        });
+    }
+
+    @Test
+    public void test_LoanReAge_RepeatedReAge_PreviewShowsCorrectPeriods() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("28 January 2026", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 6;
+            int repaymentEvery = 1;
+
+            PostLoanProductsRequest product = create4IProgressive() //
+                    .numberOfRepayments(numberOfRepayments) //
+                    .repaymentEvery(repaymentEvery) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS_L); //
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            double amount = 1000.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "28 January 2026", amount, numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(repaymentEvery)//
+                    .loanTermFrequency(numberOfRepayments)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .interestRatePerPeriod(BigDecimal.valueOf(10.0))//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "28 January 2026"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+
+            disburseLoan(loanId, BigDecimal.valueOf(amount), "28 January 2026");
+
+            createdLoanId.set(loanId);
+
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        runAt("29 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        runAt("30 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        runAt("31 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+
+            // Verify actual schedule has 8 periods
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
+
+            assertEquals(8, periods.size(), "Expected 8 periods (1 disbursement + 1 stub + 6 re-aged) but got " + periods.size());
+        });
+
+        runAt("01 February 2026", () -> {
+            long loanId = createdLoanId.get();
+
+            // Call preview API via REST
+            String previewUrl = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/reage-preview" //
+                    + "?frequencyType=MONTHS&frequencyNumber=1&startDate=28+February+2026&numberOfInstallments=6" //
+                    + "&dateFormat=dd+MMMM+yyyy&locale=en&" + Utils.TENANT_IDENTIFIER;
+
+            String jsonResponse = Utils.performServerGet(requestSpec, responseSpec, previewUrl);
+
+            // Parse the periods array from the JSON response
+            List<HashMap<String, Object>> previewPeriods = JsonPath.from(jsonResponse).getList("periods");
+
+            assertNotNull(previewPeriods, "Preview response should contain periods");
+            assertEquals(8, previewPeriods.size(),
+                    "Preview should have 8 periods (1 disbursement + 1 stub + 6 re-aged) but got " + previewPeriods.size());
         });
     }
 

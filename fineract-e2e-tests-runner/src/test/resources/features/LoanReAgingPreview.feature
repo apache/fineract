@@ -2870,4 +2870,60 @@ Feature: LoanReAgingPreview
     When Loan Pay-off is made on "24 February 2026"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
+  @TestRailId:C6000 @AdvancedPaymentAllocation
+  Scenario: Re-aging preview should not accumulate 1-day periods after repeated re-aging across month-end (PS-3004)
+    When Admin sets the business date to "28 January 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_CONTRACT_TERMINATION | 28 January 2026   | 100            | 7                       | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "28 January 2026" with "100" amount and expected disbursement date on "28 January 2026"
+    When Admin successfully disburse the loan on "28 January 2026" with "100" EUR transaction amount
+#   --- Re-age 4 times across late-January dates ---
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
+      | 1               | MONTHS        | 28 February 2026 | 6                    |
+    When Admin sets the business date to "29 January 2026"
+    And Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
+      | 1               | MONTHS        | 28 February 2026 | 6                    |
+    When Admin sets the business date to "30 January 2026"
+    And Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
+      | 1               | MONTHS        | 28 February 2026 | 6                    |
+    When Admin sets the business date to "31 January 2026"
+    And Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
+      | 1               | MONTHS        | 28 February 2026 | 6                    |
+#   --- Verify actual schedule: should be 8 periods (1 disbursement + 1 stub + 6 re-aged), NOT 12+ ---
+    Then Loan Repayment schedule has 7 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 28 January 2026   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 3    | 31 January 2026   | 28 January 2026  | 100.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 2  | 28   | 28 February 2026  |                  | 83.62           | 16.38         | 0.64     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 3  | 28   | 28 March 2026     |                  | 67.09           | 16.53         | 0.49     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 4  | 31   | 28 April 2026     |                  | 50.46           | 16.63         | 0.39     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 5  | 30   | 28 May 2026       |                  | 33.73           | 16.73         | 0.29     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 6  | 31   | 28 June 2026      |                  | 16.91           | 16.82         | 0.2      | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 7  | 30   | 28 July 2026      |                  | 0.0             | 16.91         | 0.1      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+#   --- Now move to February and call re-aging preview ---
+    When Admin sets the business date to "01 February 2026"
+    And Admin creates a Loan re-aging preview by Loan external ID with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
+      | 1               | MONTHS        | 28 February 2026 | 6                    |
+#   --- Preview should also show correct number of periods, NOT duplicated ---
+    Then Loan Re-Aged Repayment schedule preview has 7 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 28 January 2026   |                 | 100.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  |            |      |             |
+      | 1  | 4    | 01 February 2026  | 28 January 2026 | 100.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 2  | 27   | 28 February 2026  |                 | 83.62           | 16.38         | 0.64     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 3  | 28   | 28 March 2026     |                 | 67.09           | 16.53         | 0.49     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 4  | 31   | 28 April 2026     |                 | 50.46           | 16.63         | 0.39     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 5  | 30   | 28 May 2026       |                 | 33.73           | 16.73         | 0.29     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 6  | 31   | 28 June 2026      |                 | 16.91           | 16.82         | 0.2      | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 7  | 30   | 28 July 2026      |                 | 0.0             | 16.91         | 0.1      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+
+    When Loan Pay-off is made on "01 February 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
 
