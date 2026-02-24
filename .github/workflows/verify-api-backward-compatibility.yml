@@ -212,7 +212,7 @@ jobs:
 
       - name: Archive breaking change report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: api-compatibility-report
           path: current/fineract-provider/build/swagger-brake/
