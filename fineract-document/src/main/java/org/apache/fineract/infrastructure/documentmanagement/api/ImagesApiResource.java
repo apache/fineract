@@ -197,7 +197,8 @@ public class ImagesApiResource {
 
     @PUT
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @RequestBody(description = "Update image", content = { @Content(mediaType = MediaType.MULTIPART_FORM_DATA) })
+    @RequestBody(description = "Update image", content = {
+            @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @io.swagger.v3.oas.annotations.media.Schema(type = "object")) })
     public ImageCreateResponse updateImage(@PathParam(DOCUMENT_API_PARAM_ENTITY_TYPE) final String entityName,
             @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId, @HeaderParam(CONTENT_LENGTH) final Long fileSize,
             @FormDataParam(DOCUMENT_API_PARAM_FILE) final InputStream inputStream,

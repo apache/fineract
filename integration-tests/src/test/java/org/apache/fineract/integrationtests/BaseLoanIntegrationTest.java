@@ -84,7 +84,6 @@ import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PostRolesRequest;
 import org.apache.fineract.client.models.PostUsersRequest;
-import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoansApprovedAmountRequest;
 import org.apache.fineract.client.models.PutLoansApprovedAmountResponse;
@@ -96,13 +95,10 @@ import org.apache.fineract.client.models.RetrieveLoansPointInTimeRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.FineractClient;
-import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.BatchHelper;
-import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -137,9 +133,6 @@ import retrofit2.Response;
 @Slf4j
 @ExtendWith({ LoanTestLifecycleExtension.class, ExternalEventsExtension.class })
 public abstract class BaseLoanIntegrationTest extends IntegrationTest {
-
-    protected static final String DATETIME_PATTERN = "dd MMMM yyyy";
-    protected static final String LOCALE = "en";
 
     static {
         Utils.initializeRESTAssured();
@@ -184,9 +177,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     protected final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
     protected final LoanAccountLockHelper loanAccountLockHelper = new LoanAccountLockHelper(requestSpec,
             createResponseSpecification(Matchers.is(202)));
-    protected BusinessDateHelper businessDateHelper = new BusinessDateHelper();
     protected DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
-    protected GlobalConfigurationHelper globalConfigurationHelper = new GlobalConfigurationHelper();
     protected final CodeHelper codeHelper = new CodeHelper();
     protected final ChargesHelper chargesHelper = new ChargesHelper();
     protected final ExternalEventHelper externalEventHelper = new ExternalEventHelper();
@@ -1328,19 +1319,6 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         while (currentDate.isBefore(endDate) || currentDate.isEqual(endDate)) {
             runAt(format.format(currentDate), runnable);
             currentDate = currentDate.plusDays(1);
-        }
-    }
-
-    protected void runAt(String date, Runnable runnable) {
-        try {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(true));
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                    .date(date).dateFormat(DATETIME_PATTERN).locale("en"));
-            runnable.run();
-        } finally {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 

@@ -303,8 +303,8 @@ dependencyManagement {
         // Force lz4-java version: CVE-2025-12183
         dependency 'at.yawk.lz4:lz4-java:1.10.1'
         // Force tomcat-embed-core version: CVE-2025-24813
-        dependency 'org.apache.tomcat.embed:tomcat-embed-core:10.1.47'
-        dependency 'org.apache.tomcat.embed:tomcat-embed-el:10.1.47'
-        dependency 'org.apache.tomcat.embed:tomcat-embed-websocket:10.1.47'
+        dependency 'org.apache.tomcat.embed:tomcat-embed-core:10.1.49'
+        dependency 'org.apache.tomcat.embed:tomcat-embed-el:10.1.49'
+        dependency 'org.apache.tomcat.embed:tomcat-embed-websocket:10.1.49'
     }
 }

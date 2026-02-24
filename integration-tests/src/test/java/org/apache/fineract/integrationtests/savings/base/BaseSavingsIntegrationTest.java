@@ -92,6 +92,7 @@ public class BaseSavingsIntegrationTest extends IntegrationTest {
         }
     }
 
+    @Override
     protected void runAt(String date, Runnable runnable) {
         runAt(date, (d) -> runnable.run());
     }
