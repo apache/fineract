@@ -1,0 +1,494 @@
+= Loan Origination Details
+
+== Overview
+
+Tracks the originator of a loan (merchant, broker, affiliate, platform, or channel) for revenue sharing and reporting. Originator details are propagated through business events and reporting.
+
+== Configuration
+
+=== Enabling the Module
+
+[source,properties]
+----
+fineract.module.loan-origination.enabled=${FINERACT_MODULE_LOAN_ORIGINATION_ENABLED:true}
+----
+
+**Enabled by default.** When disabled, API endpoints become unavailable, event enrichment is skipped, and the loan creation flow continues to work without originator processing.
+
+=== Global Configuration
+
+[cols="1,1,1", options="header"]
+|===
+| Configuration Key | Default | Description
+
+| `enable-originator-creation-during-loan-application`
+| `false`
+| Allows automatic creation of new originator records when an unknown `externalId` is provided during loan creation
+|===
+
+== Data Model
+
+=== Originator Registry (`m_loan_originator`)
+
+[cols="1,1,1,1", options="header"]
+|===
+| Column | Type | Required | Description
+
+| `id`
+| BIGINT (PK)
+| Yes
+| Auto-generated primary key
+
+| `external_id`
+| VARCHAR(100)
+| Yes
+| Unique, immutable external identifier (a.k.a. Revenue Share ID)
+
+| `name`
+| VARCHAR(255)
+| No
+| Originator display name
+
+| `status`
+| VARCHAR(20)
+| Yes
+| `ACTIVE`, `PENDING`, or `INACTIVE`
+
+| `originator_type_cv_id`
+| INT (FK)
+| No
+| Code value reference to `LoanOriginatorType`
+
+| `channel_type_cv_id`
+| INT (FK)
+| No
+| Code value reference to `LoanOriginationChannelType`
+
+| `created_on_utc`
+| DATETIME
+| Yes
+| Record creation timestamp (UTC)
+
+| `created_by`
+| BIGINT (FK)
+| Yes
+| Foreign key to `m_appuser` -- user who created the record
+
+| `last_modified_on_utc`
+| DATETIME
+| Yes
+| Last modification timestamp (UTC)
+
+| `last_modified_by`
+| BIGINT (FK)
+| Yes
+| Foreign key to `m_appuser` -- user who last modified the record
+|===
+
+=== Loan-Originator Mapping (`m_loan_originator_mapping`)
+
+Associates loans with originators. Supports multiple originators per loan, though typical usage is one.
+
+[cols="1,1,1,1", options="header"]
+|===
+| Column | Type | Required | Description
+
+| `id`
+| BIGINT (PK)
+| Yes
+| Auto-generated primary key
+
+| `loan_id`
+| BIGINT (FK)
+| Yes
+| Foreign key to `m_loan`
+
+| `originator_id`
+| BIGINT (FK)
+| Yes
+| Foreign key to `m_loan_originator`
+
+| `created_on_utc`
+| DATETIME
+| Yes
+| Record creation timestamp (UTC)
+
+| `created_by`
+| BIGINT (FK)
+| Yes
+| Foreign key to `m_appuser` -- user who created the record
+
+| `last_modified_on_utc`
+| DATETIME
+| Yes
+| Last modification timestamp (UTC)
+
+| `last_modified_by`
+| BIGINT (FK)
+| Yes
+| Foreign key to `m_appuser` -- user who last modified the record
+|===
+
+A unique constraint on `(loan_id, originator_id)` prevents duplicate assignments.
+
+=== Code Values
+
+**`LoanOriginatorType`** (default values): `MERCHANT`, `BROKER`, `AFFILIATE`, `PLATFORM`
+
+**`LoanOriginationChannelType`** (default values): `ONLINE`, `IN_STORE`, `API`, `AGGREGATOR`
+
+Both code value sets are extensible -- additional values can be added via the standard Code Values API.
+
+== API Endpoints
+
+=== Originator Registry APIs
+
+==== Create a Loan Originator
+
+`POST /v1/loan-originators`
+
+**Permission**: `CREATE_LOAN_ORIGINATOR`
+
+[source,json]
+----
+{
+  "name": "Best Merchant in US",
+  "externalId": "best-merchant-us-east",
+  "status": "ACTIVE",
+  "originatorTypeId": 12,
+  "channelTypeId": 44
+}
+----
+
+* `externalId` -- **required**, unique, max 100 characters
+* `name` -- optional, max 255 characters
+* `status` -- optional, defaults to `ACTIVE`. Allowed values: `ACTIVE`, `PENDING`, `INACTIVE`
+* `originatorTypeId` -- optional, must reference a valid `LoanOriginatorType` code value
+* `channelTypeId` -- optional, must reference a valid `LoanOriginationChannelType` code value
+
+**Response:**
+
+[source,json]
+----
+{
+  "resourceId": 13,
+  "resourceExternalId": "best-merchant-us-east"
+}
+----
+
+|===
+| HTTP Code | Description
+
+| 200 | Created successfully
+| 400 | Required parameter missing or incorrect format
+| 403 | Duplicate external ID or insufficient permissions
+| 404 | Originator type or channel type does not exist
+|===
+
+==== List All Loan Originators
+
+`GET /v1/loan-originators`
+
+**Permission**: `READ_LOAN_ORIGINATOR`
+
+[source,json]
+----
+[
+  {
+    "id": 13,
+    "externalId": "best-merchant-us-east",
+    "name": "Best Merchant in US",
+    "status": "ACTIVE",
+    "originatorType": {
+      "id": 12,
+      "name": "MERCHANT",
+      "active": true,
+      "mandatory": false
+    },
+    "channelType": {
+      "id": 44,
+      "name": "ONLINE",
+      "active": true,
+      "mandatory": false
+    }
+  }
+]
+----
+
+==== Retrieve a Loan Originator
+
+`GET /v1/loan-originators/{originatorId}` +
+`GET /v1/loan-originators/external-id/{externalId}`
+
+**Permission**: `READ_LOAN_ORIGINATOR`
+
+==== Get Template Data
+
+`GET /v1/loan-originators/template`
+
+**Permission**: `READ_LOAN_ORIGINATOR`
+
+Returns a pre-generated `externalId`, available status values, and code value options for originator type and channel type.
+
+==== Update a Loan Originator
+
+`PUT /v1/loan-originators/{originatorId}` +
+`PUT /v1/loan-originators/external-id/{externalId}`
+
+**Permission**: `UPDATE_LOAN_ORIGINATOR`
+
+[source,json]
+----
+{
+  "status": "PENDING"
+}
+----
+
+Updatable fields: `name`, `status`, `originatorTypeId`, `channelTypeId`. Only changed fields need to be included.
+
+**Response:**
+
+[source,json]
+----
+{
+  "resourceId": 13,
+  "resourceExternalId": "best-merchant-us-east",
+  "changes": {
+    "status": "PENDING"
+  }
+}
+----
+
+|===
+| HTTP Code | Description
+
+| 200 | Updated successfully
+| 400 | Unsupported parameter (e.g. `externalId`) or incorrect format
+| 404 | Originator not found
+|===
+
+[IMPORTANT]
+====
+The `externalId` field **cannot be updated** after creation.
+====
+
+==== Delete a Loan Originator
+
+`DELETE /v1/loan-originators/{originatorId}` +
+`DELETE /v1/loan-originators/external-id/{externalId}`
+
+**Permission**: `DELETE_LOAN_ORIGINATOR`
+
+|===
+| HTTP Code | Description
+
+| 200 | Deleted successfully
+| 403 | Originator is currently mapped to one or more loans
+| 404 | Originator not found
+|===
+
+[IMPORTANT]
+====
+An originator cannot be deleted if it is currently mapped to any loans.
+====
+
+=== Loan-Originator Mapping APIs
+
+==== Attach Originator to Loan
+
+`POST /v1/loans/{loanId}/originators/{originatorId}` +
+`POST /v1/loans/{loanId}/originators/external-id/{originatorExternalId}` +
+`POST /v1/loans/external-id/{loanExternalId}/originators/{originatorId}` +
+`POST /v1/loans/external-id/{loanExternalId}/originators/external-id/{originatorExternalId}`
+
+**Permission**: `ATTACH_LOAN_ORIGINATOR`
+
+No request body.
+
+**Response:**
+
+[source,json]
+----
+{
+  "loanId": 45,
+  "loanExternalId": "11793428-12cb-42fe-ab9f-72b4ddf2453a",
+  "originatorId": 13,
+  "originatorExternalId": "best-merchant-us-east"
+}
+----
+
+|===
+| HTTP Code | Description
+
+| 200 | Attached successfully
+| 403 | Loan is not in Submitted and Pending Approval status, originator is not ACTIVE, or mapping already exists
+| 404 | Loan or originator not found
+|===
+
+==== Detach Originator from Loan
+
+`DELETE /v1/loans/{loanId}/originators/{originatorId}` +
+`DELETE /v1/loans/{loanId}/originators/external-id/{originatorExternalId}` +
+`DELETE /v1/loans/external-id/{loanExternalId}/originators/{originatorId}` +
+`DELETE /v1/loans/external-id/{loanExternalId}/originators/external-id/{originatorExternalId}`
+
+**Permission**: `DETACH_LOAN_ORIGINATOR`
+
+No request body. Response format is the same as Attach.
+
+|===
+| HTTP Code | Description
+
+| 200 | Detached successfully
+| 403 | Loan is not in Submitted and Pending Approval status
+| 404 | Loan, originator, or mapping not found
+|===
+
+==== Retrieve Originators for a Loan
+
+`GET /v1/loans/{loanId}/originators` +
+`GET /v1/loans/external-id/{loanExternalId}/originators`
+
+**Permission**: `READ_LOAN`
+
+[source,json]
+----
+{
+  "originators": [
+    {
+      "id": 13,
+      "externalId": "best-merchant-us-east",
+      "name": "Best Merchant in US",
+      "status": "ACTIVE",
+      "originatorType": {
+        "id": 12,
+        "name": "MERCHANT",
+        "active": true,
+        "mandatory": false
+      },
+      "channelType": {
+        "id": 44,
+        "name": "ONLINE",
+        "active": true,
+        "mandatory": false
+      }
+    }
+  ]
+}
+----
+
+==== Originators via Retrieve Loan API
+
+Originator details can also be fetched as part of the standard Retrieve Loan API using the `associations` query parameter:
+
+`GET /v1/loans/{loanId}?associations=originators` +
+`GET /v1/loans/external-id/{loanExternalId}?associations=originators`
+
+**Permission**: `READ_LOAN`
+
+The `originators` association is also included when `associations=all` is used. Since the `associations` parameter defaults to `all`, originator data is included in the Retrieve Loan response by default (even without an explicit `associations` parameter). The response adds an `originators` field to the loan object with the same structure as the dedicated endpoint above.
+
+==== Attach/Detach Validation Rules
+
+[IMPORTANT]
+====
+* Attach and detach are **only allowed while the loan is in Submitted and Pending Approval status**
+* The same originator **cannot be attached twice** to the same loan
+* The same originator **cannot be detached twice** (returns 404 if mapping does not exist)
+* Only originators with `ACTIVE` status can be **attached** (no status restriction for detach)
+====
+
+=== Inline Originator Creation During Loan Application
+
+Originators can be provided as part of the loan creation request (`POST /v1/loans`):
+
+[source,json]
+----
+{
+  "...": "...",
+  "originators": [
+    {
+      "id": 1,
+      "externalId": "XYZ",
+      "name": "PP Merchant",
+      "originatorTypeId": 1,
+      "channelTypeId": 2
+    }
+  ]
+}
+----
+
+* `id` or `externalId` is mandatory for each entry
+* If `id` is provided: attaches the existing originator (lookup by `id` takes priority over `externalId`)
+* If only `externalId` is provided:
+** Attaches the existing originator if found
+** Creates a new originator and attaches it (only when `enable-originator-creation-during-loan-application` is `true`)
+** Returns **403** if originator is not found and creation is not enabled
+* `name`, `originatorTypeId`, `channelTypeId` are optional, used only when creating a new entry
+* Newly created originators are automatically assigned `ACTIVE` status
+* Duplicate originators within the same request are silently skipped
+
+== Business Events Integration
+
+Originator details are automatically included in all loan and loan transaction external business events.
+
+An `OriginatorDetailsV1` Avro record is added as an optional `originators` field (list) to:
+
+* `LoanAccountDataV1.avsc` -- all loan-centric events
+* `LoanTransactionDataV1.avsc` -- all loan transaction-centric events
+
+[source,json]
+----
+{
+  "name": "OriginatorDetailsV1",
+  "fields": [
+    {"name": "id", "type": ["null", "long"]},
+    {"name": "externalId", "type": ["null", "string"]},
+    {"name": "name", "type": ["null", "string"]},
+    {"name": "status", "type": ["null", "string"]},
+    {"name": "originatorType", "type": ["null", "CodeValueDataV1"]},
+    {"name": "channelType", "type": ["null", "CodeValueDataV1"]}
+  ]
+}
+----
+
+The field is **optional with default `null`**, preserving backward compatibility for existing event consumers.
+
+On any loan or loan transaction event publication, the enricher fetches originator mappings for the loan, builds the `originators` list from the registry, and attaches it to the event payload.
+
+== Security and Permissions
+
+[cols="1,1", options="header"]
+|===
+| Permission | Description
+
+| `CREATE_LOAN_ORIGINATOR`
+| Create originator records
+
+| `READ_LOAN_ORIGINATOR`
+| View originator registry records and template data
+
+| `READ_LOAN`
+| View loan-originator associations (`GET /v1/loans/.../originators`)
+
+| `UPDATE_LOAN_ORIGINATOR`
+| Modify originator records
+
+| `DELETE_LOAN_ORIGINATOR`
+| Delete originator records (only if not mapped to loans)
+
+| `ATTACH_LOAN_ORIGINATOR`
+| Attach an originator to a loan
+
+| `DETACH_LOAN_ORIGINATOR`
+| Detach an originator from a loan
+|===
+
+== Reporting
+
+Originator external IDs are included in the following stretchy reports:
+
+* **Transaction Summary Report**
+* **Trial Balance Report**
+
+Report queries join `m_loan_originator_mapping` and `m_loan_originator` via a CTE. Multiple originators per loan are aggregated into a comma-separated string (`STRING_AGG` on PostgreSQL, `GROUP_CONCAT` on MySQL). The resulting column is `originator_external_ids`. Loans without originators have `NULL` in this column.
