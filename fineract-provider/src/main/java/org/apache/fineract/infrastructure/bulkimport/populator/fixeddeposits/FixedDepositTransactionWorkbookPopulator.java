@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TransactionConstants;
 import org.apache.fineract.infrastructure.bulkimport.populator.AbstractWorkbookPopulator;
@@ -54,7 +55,7 @@ public class FixedDepositTransactionWorkbookPopulator extends AbstractWorkbookPo
     private final List<SavingsAccountData> savingsAccounts;
 
     public FixedDepositTransactionWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, ClientSheetPopulator clientSheetPopulator,
-            ExtrasSheetPopulator extrasSheetPopulator, List<SavingsAccountData> savingsAccounts) {
+                                                    ExtrasSheetPopulator extrasSheetPopulator, List<SavingsAccountData> savingsAccounts) {
         this.officeSheetPopulator = officeSheetPopulator;
         this.clientSheetPopulator = clientSheetPopulator;
         this.extrasSheetPopulator = extrasSheetPopulator;
@@ -75,7 +76,7 @@ public class FixedDepositTransactionWorkbookPopulator extends AbstractWorkbookPo
     }
 
     private void setDefaults(Sheet worksheet) {
-        for (Integer rowNo = 1; rowNo < 3000; rowNo++) {
+        for (int rowNo = 1; rowNo < 3000; rowNo++) {
             Row row = worksheet.getRow(rowNo);
             if (row == null) {
                 row = worksheet.createRow(rowNo);
@@ -103,9 +104,10 @@ public class FixedDepositTransactionWorkbookPopulator extends AbstractWorkbookPo
             for (int col : textCols) {
                 Cell cell = row.getCell(col);
                 if (cell == null) {
-                    cell = row.createCell(col);
+                    cell = row.createCell(col, CellType.STRING);
+                } else if (cell.getCellType() != CellType.STRING) {
+                    cell = row.createCell(col, CellType.STRING);
                 }
-                cell.setCellType(CellType.STRING);
                 cell.setCellStyle(textCellStyle);
             }
         }
@@ -135,7 +137,7 @@ public class FixedDepositTransactionWorkbookPopulator extends AbstractWorkbookPo
         DataValidationConstraint accountNumberConstraint = validationHelper.createFormulaListConstraint(
                 "INDIRECT(CONCATENATE(\"Account_\",SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($B1,\" \",\"_\"),\"(\",\"_\"),\")\",\"_\")))");
         DataValidationConstraint transactionTypeConstraint = validationHelper
-                .createExplicitListConstraint(new String[] { "Withdrawal", "Deposit" });
+                .createExplicitListConstraint(new String[]{"Withdrawal", "Deposit"});
         DataValidationConstraint paymentTypeConstraint = validationHelper.createFormulaListConstraint("PaymentTypes");
         DataValidationConstraint transactionDateConstraint = validationHelper.createDateConstraint(
                 DataValidationConstraint.OperatorType.BETWEEN,
@@ -166,7 +168,7 @@ public class FixedDepositTransactionWorkbookPopulator extends AbstractWorkbookPo
         officeGroup.setRefersToFormula(TemplatePopulateImportConstants.OFFICE_SHEET_NAME + "!$B$2:$B$" + (officeNames.size() + 1));
 
         // Clients Named after Offices
-        for (Integer i = 0; i < officeNames.size(); i++) {
+        for (int i = 0; i < officeNames.size(); i++) {
             Integer[] officeNameToBeginEndIndexesOfClients = clientSheetPopulator.getOfficeNameToBeginEndIndexesOfClients().get(i);
             Name name = savingsTransactionWorkbook.createName();
             if (officeNameToBeginEndIndexesOfClients != null) {
@@ -188,7 +190,7 @@ public class FixedDepositTransactionWorkbookPopulator extends AbstractWorkbookPo
         for (int i = 0; i < savingsAccounts.size(); i++) {
             if (!clientName.equals(savingsAccounts.get(i).getClientName())) {
                 endIndex = i + 1;
-                clientNameToBeginEndIndexes.put(clientName, new Integer[] { startIndex, endIndex });
+                clientNameToBeginEndIndexes.put(clientName, new Integer[]{startIndex, endIndex});
                 startIndex = i + 2;
                 clientName = savingsAccounts.get(i).getClientName();
                 clientId = savingsAccounts.get(i).getClientId();
@@ -197,7 +199,7 @@ public class FixedDepositTransactionWorkbookPopulator extends AbstractWorkbookPo
             }
             if (i == savingsAccounts.size() - 1) {
                 endIndex = i + 2;
-                clientNameToBeginEndIndexes.put(clientName, new Integer[] { startIndex, endIndex });
+                clientNameToBeginEndIndexes.put(clientName, new Integer[]{startIndex, endIndex});
             }
         }
 

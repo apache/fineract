@@ -98,7 +98,7 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
                             String key = validateStretchyReportParamMapEntry.getKey();
                             String value = validateStretchyReportParamMapEntry.getValue();
 
-                            if (StringUtils.containsIgnoreCase(key, "date")) {
+                            if (key != null && key.toLowerCase().contains("date")) {
                                 ReportMailingJobStretchyReportParamDateOption reportMailingJobStretchyReportParamDateOption = ReportMailingJobStretchyReportParamDateOption
                                         .newInstance(value);
 

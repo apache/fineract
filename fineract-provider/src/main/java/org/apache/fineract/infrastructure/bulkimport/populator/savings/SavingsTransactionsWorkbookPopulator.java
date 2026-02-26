@@ -75,7 +75,7 @@ public class SavingsTransactionsWorkbookPopulator extends AbstractWorkbookPopula
     }
 
     private void setDefaults(Sheet worksheet) {
-        for (Integer rowNo = 1; rowNo < 3000; rowNo++) {
+        for (int rowNo = 1; rowNo < 3000; rowNo++) {
             Row row = worksheet.getRow(rowNo);
             if (row == null) {
                 row = worksheet.createRow(rowNo);
@@ -103,9 +103,10 @@ public class SavingsTransactionsWorkbookPopulator extends AbstractWorkbookPopula
             for (int col : textCols) {
                 Cell cell = row.getCell(col);
                 if (cell == null) {
-                    cell = row.createCell(col);
+                    cell = row.createCell(col, CellType.STRING);
+                } else if (cell.getCellType() != CellType.STRING) {
+                    cell = row.createCell(col, CellType.STRING);
                 }
-                cell.setCellType(CellType.STRING);
                 cell.setCellStyle(textCellStyle);
             }
         }
@@ -166,7 +167,7 @@ public class SavingsTransactionsWorkbookPopulator extends AbstractWorkbookPopula
         officeGroup.setRefersToFormula(TemplatePopulateImportConstants.OFFICE_SHEET_NAME + "!$B$2:$B$" + (officeNames.size() + 1));
 
         // Clients Named after Offices
-        for (Integer i = 0; i < officeNames.size(); i++) {
+        for (int i = 0; i < officeNames.size(); i++) {
             Integer[] officeNameToBeginEndIndexesOfClients = clientSheetPopulator.getOfficeNameToBeginEndIndexesOfClients().get(i);
             Name name = savingsTransactionWorkbook.createName();
             if (officeNameToBeginEndIndexesOfClients != null) {
