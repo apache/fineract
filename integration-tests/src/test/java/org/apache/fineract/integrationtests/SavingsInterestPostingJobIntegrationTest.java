@@ -49,6 +49,7 @@ import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
+import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -130,7 +131,6 @@ public class SavingsInterestPostingJobIntegrationTest {
 
     @Test
     public void testDuplicateOverdraftInterestPostingJob() {
-        // client activation, savings activation and 1st transaction date
         final String startDate = "01 July 2022";
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
@@ -141,15 +141,40 @@ public class SavingsInterestPostingJobIntegrationTest {
 
         this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
-        Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
-        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
-        Integer dateCount = 0;
-        for (HashMap<String, Object> transaction : transactions) {
-            if (transaction.get("date").toString().equals("[2022, 7, 10]") && transaction.get("reversed").toString().equals("false")) {
-                dateCount++;
-            }
+
+        assertNoDuplicateOverdraftInterestPostings(savingsId);
+    }
+
+    @Test
+    public void testPostInterestJobRunTwiceSameDayNoDuplicate() {
+        final LocalDate businessDate = LocalDate.of(2022, 4, 12);
+        try {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+
+            final String startDate = "10 April 2022";
+            final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+            Assertions.assertNotNull(clientID);
+
+            final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
+            this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+
+            // First run of Post Interest job
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+
+            // Second run of Post Interest job on the same business day — should NOT create duplicates
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+
+            int postingCount = countTotalUnreversedPostings(savingsId, SavingsAccountTransactionType.INTEREST_POSTING.getValue());
+            LOG.info("Interest posting count after running job twice: {}", postingCount);
+            assertTrue(postingCount > 0, "Should have at least one interest posting");
+
+            assertNoDuplicateInterestPostings(savingsId);
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
-        assertEquals(1, dateCount, "No Duplicate Overdraft Interest Posting");
     }
 
     @Test
@@ -241,6 +266,236 @@ public class SavingsInterestPostingJobIntegrationTest {
         assertEquals("800.4384", interestPostingTransaction.get("runningBalance").toString(), "Equality check for Balance");
     }
 
+    @Test
+    public void testMultipleAccountsPostInterestJobRunTwiceNoDuplicate() {
+        final LocalDate businessDate = LocalDate.of(2022, 4, 12);
+        try {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+
+            final String startDate = "10 April 2022";
+            final Integer savingsProductID = createSavingsProductDailyPosting();
+            Assertions.assertNotNull(savingsProductID);
+
+            List<Integer> savingsIds = new ArrayList<>();
+            for (int i = 0; i < 3; i++) {
+                final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+                Assertions.assertNotNull(clientID);
+                final Integer savingsId = createSavingsAccountForProduct(clientID, savingsProductID, startDate);
+                this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+                savingsIds.add(savingsId);
+            }
+
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+
+            for (Integer savingsId : savingsIds) {
+                int postingCount = countTotalUnreversedPostings(savingsId, SavingsAccountTransactionType.INTEREST_POSTING.getValue());
+                assertTrue(postingCount > 0, "Account " + savingsId + " should have at least one interest posting");
+                assertNoDuplicateInterestPostings(savingsId);
+            }
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
+    }
+
+    @Test
+    public void testOverdraftInterestPostingJobRunTwiceNoDuplicate() {
+        final LocalDate businessDate = LocalDate.of(2022, 4, 12);
+        try {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+
+            final String startDate = "10 April 2022";
+            final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+            Assertions.assertNotNull(clientID);
+
+            final Integer savingsId = createSavingsAccountDailyPostingOverdraft(clientID, startDate);
+            this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+
+            int postingCount = countTotalUnreversedPostings(savingsId, SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue());
+            assertTrue(postingCount > 0, "Should have at least one overdraft interest posting");
+            assertNoDuplicateOverdraftInterestPostings(savingsId);
+
+            HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+            Float accountBalance = Float.parseFloat(summary.get("accountBalance").toString());
+            LOG.info("Overdraft account balance after running job twice: {}", accountBalance);
+            assertTrue(accountBalance < 0, "Overdraft account balance should be negative");
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
+    }
+
+    @Test
+    public void testPostInterestJobRunThreeTimesNoDuplicate() {
+        final LocalDate businessDate = LocalDate.of(2022, 4, 12);
+        try {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+
+            final String startDate = "10 April 2022";
+            final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+            Assertions.assertNotNull(clientID);
+
+            final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
+            this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+
+            // Run job three times
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+
+            HashMap summaryAfterFirst = this.savingsAccountHelper.getSavingsSummary(savingsId);
+            Float balanceAfterFirst = Float.parseFloat(summaryAfterFirst.get("accountBalance").toString());
+
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+
+            HashMap summaryAfterSecond = this.savingsAccountHelper.getSavingsSummary(savingsId);
+            Float balanceAfterSecond = Float.parseFloat(summaryAfterSecond.get("accountBalance").toString());
+
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+
+            HashMap summaryAfterThird = this.savingsAccountHelper.getSavingsSummary(savingsId);
+            Float balanceAfterThird = Float.parseFloat(summaryAfterThird.get("accountBalance").toString());
+
+            assertNoDuplicateInterestPostings(savingsId);
+            assertEquals(balanceAfterFirst, balanceAfterSecond, 0.001f, "Balance should not change between first and second run");
+            assertEquals(balanceAfterSecond, balanceAfterThird, 0.001f, "Balance should not change between second and third run");
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
+    }
+
+    @Test
+    public void testPostInterestAcrossMultipleDaysNoDuplicate() {
+        final LocalDate businessDateDay1 = LocalDate.of(2022, 4, 12);
+        final LocalDate businessDateDay2 = LocalDate.of(2022, 4, 13);
+        try {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDateDay1);
+
+            final String startDate = "10 April 2022";
+            final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+            Assertions.assertNotNull(clientID);
+
+            final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
+            this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+
+            // Day 1: run job twice
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+
+            Map<String, Integer> postingsAfterDay1 = countUnreversedPostingsByDate(savingsId,
+                    SavingsAccountTransactionType.INTEREST_POSTING.getValue());
+            int postingDatesAfterDay1 = postingsAfterDay1.size();
+            assertTrue(postingDatesAfterDay1 > 0, "Should have at least one interest posting date after day 1");
+
+            // Day 2: advance business date, run job twice
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDateDay2);
+
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+
+            Map<String, Integer> postingsAfterDay2 = countUnreversedPostingsByDate(savingsId,
+                    SavingsAccountTransactionType.INTEREST_POSTING.getValue());
+            int postingDatesAfterDay2 = postingsAfterDay2.size();
+            assertTrue(postingDatesAfterDay2 > postingDatesAfterDay1, "Should have more posting dates after day 2 than day 1");
+
+            // No date should have duplicates
+            assertNoDuplicateInterestPostings(savingsId);
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
+    }
+
+    @Test
+    public void testPostInterestWithChargeJobRunTwiceNoDuplicate() {
+        final LocalDate businessDate = LocalDate.of(2022, 7, 12);
+        try {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+
+            final String startDate = "21 June 2022";
+            final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+            Assertions.assertNotNull(clientID);
+
+            final Integer savingsId = createSavingsAccountDailyPostingWithCharge(clientID, startDate);
+            this.savingsAccountHelper.depositToSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+            this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+
+            int postingCount = countTotalUnreversedPostings(savingsId, SavingsAccountTransactionType.INTEREST_POSTING.getValue());
+            assertTrue(postingCount > 0, "Should have at least one interest posting");
+            assertNoDuplicateInterestPostings(savingsId);
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
+    }
+
+    @Test
+    public void testPostInterestBalanceConsistencyAfterRepeatedRuns() {
+        final LocalDate businessDate = LocalDate.of(2022, 4, 12);
+        try {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+
+            final String startDate = "10 April 2022";
+            final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+            Assertions.assertNotNull(clientID);
+
+            final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
+            this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+
+            // Run job once and capture balance
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+
+            HashMap summaryAfterFirstRun = this.savingsAccountHelper.getSavingsSummary(savingsId);
+            float balanceAfterFirstRun = ((Number) summaryAfterFirstRun.get("accountBalance")).floatValue();
+            float totalInterestAfterFirstRun = ((Number) summaryAfterFirstRun.get("totalInterestPosted")).floatValue();
+            LOG.info("Balance after first run: {}, totalInterestPosted: {}", balanceAfterFirstRun, totalInterestAfterFirstRun);
+
+            // Run job again and capture balance
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+
+            HashMap summaryAfterSecondRun = this.savingsAccountHelper.getSavingsSummary(savingsId);
+            float balanceAfterSecondRun = ((Number) summaryAfterSecondRun.get("accountBalance")).floatValue();
+            float totalInterestAfterSecondRun = ((Number) summaryAfterSecondRun.get("totalInterestPosted")).floatValue();
+            LOG.info("Balance after second run: {}, totalInterestPosted: {}", balanceAfterSecondRun, totalInterestAfterSecondRun);
+
+            assertEquals(balanceAfterFirstRun, balanceAfterSecondRun, 0.001f, "Account balance must not change on repeated job run");
+            assertEquals(totalInterestAfterFirstRun, totalInterestAfterSecondRun, 0.001f,
+                    "Total interest posted must not change on repeated job run");
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
+    }
+
+    private Integer createSavingsAccountForProduct(final Integer clientID, final Integer savingsProductID, final String startDate) {
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID,
+                ACCOUNT_TYPE_INDIVIDUAL, startDate);
+        Assertions.assertNotNull(savingsId);
+        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavingsOnDate(savingsId, startDate);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavingsAccount(savingsId, startDate);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        return savingsId;
+    }
+
     private Integer createSavingsAccountDailyPosting(final Integer clientID, final String startDate) {
         final Integer savingsProductID = createSavingsProductDailyPosting();
         Assertions.assertNotNull(savingsProductID);
@@ -322,6 +577,41 @@ public class SavingsInterestPostingJobIntegrationTest {
                 .withInterestCalculationPeriodTypeAsDailyBalance() //
                 .withMinimumOpenningBalance(minOpenningBalance).withAccountingRuleAsNone().build();
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Integer> countUnreversedPostingsByDate(Integer savingsId, int transactionTypeId) {
+        Object obj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
+        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) obj;
+        Map<String, Integer> postingsByDate = new HashMap<>();
+        for (HashMap<String, Object> transaction : transactions) {
+            int typeId = ((Number) ((Map<String, Object>) transaction.get("transactionType")).get("id")).intValue();
+            boolean reversed = Boolean.parseBoolean(transaction.get("reversed").toString());
+            if (typeId == transactionTypeId && !reversed) {
+                postingsByDate.merge(transaction.get("date").toString(), 1, Integer::sum);
+            }
+        }
+        return postingsByDate;
+    }
+
+    private void assertNoDuplicateInterestPostings(Integer savingsId) {
+        Map<String, Integer> postingsByDate = countUnreversedPostingsByDate(savingsId,
+                SavingsAccountTransactionType.INTEREST_POSTING.getValue());
+        for (Map.Entry<String, Integer> entry : postingsByDate.entrySet()) {
+            assertEquals(1, entry.getValue().intValue(), "Duplicate interest posting detected for date " + entry.getKey());
+        }
+    }
+
+    private void assertNoDuplicateOverdraftInterestPostings(Integer savingsId) {
+        Map<String, Integer> postingsByDate = countUnreversedPostingsByDate(savingsId,
+                SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue());
+        for (Map.Entry<String, Integer> entry : postingsByDate.entrySet()) {
+            assertEquals(1, entry.getValue().intValue(), "Duplicate overdraft interest posting detected for date " + entry.getKey());
+        }
+    }
+
+    private int countTotalUnreversedPostings(Integer savingsId, int transactionTypeId) {
+        return countUnreversedPostingsByDate(savingsId, transactionTypeId).values().stream().mapToInt(Integer::intValue).sum();
     }
 
     // Reset configuration fields

@@ -29,7 +29,9 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -167,6 +169,8 @@ public class SavingsSchedularInterestPoster {
         List<Object[]> paramsForSavingsSummary = new ArrayList<>();
         List<Object[]> paramsForTransactionUpdate = new ArrayList<>();
         List<String> transRefNo = new ArrayList<>();
+        List<Long> transInsertAccountIds = new ArrayList<>();
+        List<Long> transUpdateAccountIds = new ArrayList<>();
         LocalDate currentDate = DateUtils.getBusinessLocalDate();
         Long userId = platformSecurityContext.authenticatedUser().getId();
         for (SavingsAccountData savingsAccountData : savingsAccountDataList) {
@@ -181,13 +185,14 @@ public class SavingsSchedularInterestPoster {
                     savingsAccountSummaryData.getLastInterestCalculationDate(),
                     savingsAccountSummaryData.getInterestPostedTillDate() != null ? savingsAccountSummaryData.getInterestPostedTillDate()
                             : savingsAccountSummaryData.getLastInterestCalculationDate(),
-                    auditTime, userId, savingsAccountData.getId() });
+                    auditTime, userId, savingsAccountData.getId(), savingsAccountData.getVersion() });
             List<SavingsAccountTransactionData> savingsAccountTransactionDataList = savingsAccountData.getSavingsAccountTransactionData();
             for (SavingsAccountTransactionData savingsAccountTransactionData : savingsAccountTransactionDataList) {
                 if (savingsAccountTransactionData.getId() == null && !MathUtil.isZero(savingsAccountTransactionData.getAmount())) {
                     UUID uuid = UUID.randomUUID();
                     savingsAccountTransactionData.setRefNo(uuid.toString());
                     transRefNo.add(uuid.toString());
+                    transInsertAccountIds.add(savingsAccountData.getId());
                     paramsForTransactionInsertion.add(new Object[] { savingsAccountData.getId(), savingsAccountData.getOfficeId(),
                             savingsAccountTransactionData.isReversed(), savingsAccountTransactionData.getTransactionType().getId(),
                             savingsAccountTransactionData.getTransactionDate(), savingsAccountTransactionData.getAmount(),
@@ -197,6 +202,7 @@ public class SavingsSchedularInterestPoster {
                             savingsAccountTransactionData.getRefNo(), savingsAccountTransactionData.isReversalTransaction(),
                             savingsAccountTransactionData.getOverdraftAmount(), currentDate });
                 } else {
+                    transUpdateAccountIds.add(savingsAccountData.getId());
                     paramsForTransactionUpdate.add(new Object[] { savingsAccountTransactionData.isReversed(),
                             savingsAccountTransactionData.getAmount(), savingsAccountTransactionData.getOverdraftAmount(),
                             savingsAccountTransactionData.getBalanceEndDate(), savingsAccountTransactionData.getBalanceNumberOfDays(),
@@ -208,24 +214,65 @@ public class SavingsSchedularInterestPoster {
             savingsAccountData.setUpdatedTransactions(savingsAccountTransactionDataList);
         }
 
-        if (transRefNo.size() > 0) {
-            this.jdbcTemplate.batchUpdate(queryForSavingsUpdate, paramsForSavingsSummary);
-            this.jdbcTemplate.batchUpdate(queryForTransactionInsertion, paramsForTransactionInsertion);
-            this.jdbcTemplate.batchUpdate(queryForTransactionUpdate, paramsForTransactionUpdate);
-            log.debug("`Total No Of Interest Posting:` {}", transRefNo.size());
-            List<SavingsAccountTransactionData> savingsAccountTransactionDataList = fetchTransactionsFromIds(transRefNo);
-            if (savingsAccountDataList != null) {
-                log.debug("Fetched Transactions from DB: {}", savingsAccountTransactionDataList.size());
+        if (!transRefNo.isEmpty()) {
+            int[] updateCounts = this.jdbcTemplate.batchUpdate(queryForSavingsUpdate, paramsForSavingsSummary);
+
+            Set<Long> skippedAccountIds = new HashSet<>();
+            for (int i = 0; i < updateCounts.length; i++) {
+                if (updateCounts[i] == 0) {
+                    Long accountId = savingsAccountDataList.get(i).getId();
+                    skippedAccountIds.add(accountId);
+                    log.warn("Skipping interest posting for account {} - concurrent modification detected (optimistic lock)", accountId);
+                }
             }
 
-            HashMap<String, SavingsAccountTransactionData> savingsAccountTransactionMap = new HashMap<>();
-            for (SavingsAccountTransactionData savingsAccountTransactionData : savingsAccountTransactionDataList) {
-                final String key = savingsAccountTransactionData.getRefNo();
-                savingsAccountTransactionMap.put(key, savingsAccountTransactionData);
+            if (!skippedAccountIds.isEmpty()) {
+                paramsForTransactionInsertion = filterByAccountId(paramsForTransactionInsertion, transInsertAccountIds, skippedAccountIds);
+                transRefNo = filterRefNos(transRefNo, transInsertAccountIds, skippedAccountIds);
+                paramsForTransactionUpdate = filterByAccountId(paramsForTransactionUpdate, transUpdateAccountIds, skippedAccountIds);
             }
-            batchUpdateJournalEntries(savingsAccountDataList, savingsAccountTransactionMap);
+
+            if (!transRefNo.isEmpty()) {
+                this.jdbcTemplate.batchUpdate(queryForTransactionInsertion, paramsForTransactionInsertion);
+                this.jdbcTemplate.batchUpdate(queryForTransactionUpdate, paramsForTransactionUpdate);
+                log.debug("`Total No Of Interest Posting:` {}", transRefNo.size());
+                List<SavingsAccountTransactionData> savingsAccountTransactionDataList = fetchTransactionsFromIds(transRefNo);
+                if (savingsAccountDataList != null) {
+                    log.debug("Fetched Transactions from DB: {}", savingsAccountTransactionDataList.size());
+                }
+
+                HashMap<String, SavingsAccountTransactionData> savingsAccountTransactionMap = new HashMap<>();
+                for (SavingsAccountTransactionData savingsAccountTransactionData : savingsAccountTransactionDataList) {
+                    final String key = savingsAccountTransactionData.getRefNo();
+                    savingsAccountTransactionMap.put(key, savingsAccountTransactionData);
+                }
+
+                List<SavingsAccountData> filteredAccountDataList = skippedAccountIds.isEmpty() ? savingsAccountDataList
+                        : savingsAccountDataList.stream().filter(sa -> !skippedAccountIds.contains(sa.getId())).toList();
+                batchUpdateJournalEntries(filteredAccountDataList, savingsAccountTransactionMap);
+            }
         }
 
+    }
+
+    List<Object[]> filterByAccountId(List<Object[]> params, List<Long> accountIds, Set<Long> skippedIds) {
+        List<Object[]> filtered = new ArrayList<>();
+        for (int i = 0; i < params.size(); i++) {
+            if (!skippedIds.contains(accountIds.get(i))) {
+                filtered.add(params.get(i));
+            }
+        }
+        return filtered;
+    }
+
+    List<String> filterRefNos(List<String> refNos, List<Long> accountIds, Set<Long> skippedIds) {
+        List<String> filtered = new ArrayList<>();
+        for (int i = 0; i < refNos.size(); i++) {
+            if (!skippedIds.contains(accountIds.get(i))) {
+                filtered.add(refNos.get(i));
+            }
+        }
+        return filtered;
     }
 
     private String batchQueryForTransactionInsertion() {
@@ -240,7 +287,7 @@ public class SavingsSchedularInterestPoster {
         return "update m_savings_account set total_deposits_derived=?, total_withdrawals_derived=?, total_interest_earned_derived=?, total_interest_posted_derived=?, total_withdrawal_fees_derived=?, "
                 + "total_fees_charge_derived=?, total_penalty_charge_derived=?, total_annual_fees_derived=?, account_balance_derived=?, total_overdraft_interest_derived=?, total_withhold_tax_derived=?, "
                 + "last_interest_calculation_date=?, interest_posted_till_date=?, " + LAST_MODIFIED_DATE_DB_FIELD + " = ?, "
-                + LAST_MODIFIED_BY_DB_FIELD + " = ? WHERE id=? ";
+                + LAST_MODIFIED_BY_DB_FIELD + " = ?, version = version + 1 WHERE id=? AND version=?";
     }
 
     private String batchQueryForTransactionsUpdate() {
