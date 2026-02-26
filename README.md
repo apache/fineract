@@ -230,7 +230,7 @@ minikube service fineract-server --url --https
 
 Fineract is now running at the printed URL, which you can check e.g. using:
 ```bash
-http --verify=no --timeout 240 --check-status get $(minikube service fineract-server --url --https)/fineract-provider/actuator/health
+curl --insecure --max-time 240 --fail $(minikube service fineract-server --url --https)/fineract-provider/actuator/health
 ```
 
 To check the status of your containers on your local minikube Kubernetes cluster, run:
