@@ -62,6 +62,7 @@ buildscript {
                 'fineract-client',
                 'fineract-client-feign',
                 'fineract-core',
+                'fineract-mix',
                 'fineract-security',
                 'fineract-cob',
                 'fineract-validation',
