@@ -76,6 +76,7 @@ buildscript {
                 'fineract-loan',
                 'fineract-savings',
                 'fineract-report',
+                'fineract-mix',
                 'fineract-branch',
                 'fineract-document',
                 'fineract-progressive-loan',
