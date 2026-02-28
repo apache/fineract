@@ -67,6 +67,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ClientReadPlatformServiceImpl implements ClientReadPlatformService {
 
+    private static final String READ_HIGH_PROFILE_CLIENT = "READ_HIGH_PROFILE_CLIENT";
+
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
@@ -213,6 +215,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String hierarchySearchString = hierarchy + "%";
 
             final Client client = clientRepositoryWrapper.getClientByClientIdAndHierarchy(clientId, hierarchySearchString);
+            if (client.getSocialStatus() != null) {
+                context.authenticatedUser().validateHasPermissionTo(READ_HIGH_PROFILE_CLIENT);
+            }
             final ClientData clientData = clientMapper.map(client);
 
             // Get client collaterals

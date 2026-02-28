@@ -189,6 +189,10 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @JoinColumn(name = "client_classification_cv_id")
     private CodeValue clientClassification;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "social_status_cv_id")
+    private CodeValue socialStatus;
+
     @Column(name = "legal_form_enum")
     private Integer legalForm;
 
