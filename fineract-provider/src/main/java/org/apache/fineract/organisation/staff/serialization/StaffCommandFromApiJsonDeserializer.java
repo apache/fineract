@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.organisation.staff.domain.StaffRequest;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -223,5 +224,28 @@ public final class StaffCommandFromApiJsonDeserializer {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                     dataValidationErrors);
         }
+    }
+
+    public StaffRequest commandFromApiJson(final String json) {
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final Long officeId = this.fromApiJsonHelper.extractLongNamed(OFFICE_ID, element);
+        final String firstname = this.fromApiJsonHelper.extractStringNamed(FIRSTNAME, element);
+        final String lastname = this.fromApiJsonHelper.extractStringNamed(LASTNAME, element);
+        final String externalId = this.fromApiJsonHelper.extractStringNamed(EXTERNAL_ID, element);
+        final String mobileNo = this.fromApiJsonHelper.extractStringNamed(MOBILE_NO, element);
+        final Boolean isLoanOfficer = this.fromApiJsonHelper.extractBooleanNamed(IS_LOAN_OFFICER, element);
+        final Boolean isActive = this.fromApiJsonHelper.extractBooleanNamed(IS_ACTIVE, element);
+        final LocalDate joiningDate = this.fromApiJsonHelper.extractLocalDateNamed(JOINING_DATE, element);
+        final String locale = this.fromApiJsonHelper.extractStringNamed(LOCALE, element);
+        final String dateFormat = this.fromApiJsonHelper.extractStringNamed(DATE_FORMAT, element);
+        final Boolean forceStatus = this.fromApiJsonHelper.extractBooleanNamed(FORCE_STATUS, element);
+
+        return new StaffRequest(officeId, firstname, lastname, externalId, mobileNo, isLoanOfficer, isActive, joiningDate, locale,
+                dateFormat, forceStatus);
     }
 }

@@ -24,6 +24,7 @@ import static org.apache.fineract.useradministration.service.AppUserConstants.RE
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNumberFormatConstants;
@@ -3113,7 +3114,7 @@ public class CommandWrapperBuilder {
 
     public CommandWrapperBuilder createProductCommand(String productType, String command, final Long productId) {
         this.entityName = productType.toUpperCase() + "PRODUCT";
-        this.actionName = "CREATE" + "_" + command.toUpperCase();
+        this.actionName = "CREATE" + "_" + command.toUpperCase(Locale.ROOT);
         this.entityId = productId;
         this.href = "/products/" + productType + "/" + productId + "?command=" + command;
         return this;

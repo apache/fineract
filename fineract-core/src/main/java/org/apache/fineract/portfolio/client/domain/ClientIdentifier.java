@@ -25,6 +25,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -74,7 +75,7 @@ public class ClientIdentifier extends AbstractAuditableWithUTCDateTimeCustom<Lon
         this.documentType = documentType;
         this.documentKey = StringUtils.defaultIfEmpty(documentKey, null);
         this.description = StringUtils.defaultIfEmpty(description, null);
-        ClientIdentifierStatus statusEnum = ClientIdentifierStatus.valueOf(statusName.toUpperCase());
+        ClientIdentifierStatus statusEnum = ClientIdentifierStatus.valueOf(statusName.toUpperCase(Locale.ROOT));
         this.active = null;
         if (statusEnum.isActive()) {
             this.active = statusEnum.getValue();

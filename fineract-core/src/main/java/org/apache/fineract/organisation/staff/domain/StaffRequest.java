@@ -16,43 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.staff.data;
+package org.apache.fineract.organisation.staff.domain;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDate;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @FieldNameConstants
 public class StaffRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Schema(example = "1")
     private Long officeId;
-    @Schema(example = "John")
     private String firstname;
-    @Schema(example = "Doe")
     private String lastname;
-    @Schema(example = "true")
-    private Boolean isLoanOfficer;
-    @Schema(example = "17H")
     private String externalId;
-    @Schema(example = "+353851239876")
     private String mobileNo;
-    @Schema(example = "true")
+    private Boolean isLoanOfficer;
     private Boolean isActive;
-    @Schema(example = "01 January 2009")
-    private String joiningDate;
-    @Schema(example = "en")
+    @JsonFormat(pattern = "dd MMMM yyyy", locale = "en")
+    private LocalDate joiningDate;
     private String locale;
-    @Schema(example = "dd MMMM yyyy")
     private String dateFormat;
-    @Schema(example = "true")
     private Boolean forceStatus;
 }

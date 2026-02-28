@@ -56,7 +56,7 @@ public class FeignImageTest extends FeignIntegrationTest {
         request.setOfficeId(1L);
         request.setFirstname("Feign");
         request.setLastname("ImageTest" + System.currentTimeMillis());
-        request.setJoiningDate(LocalDate.now(ZoneId.of("UTC")).toString());
+        request.setJoiningDate(LocalDate.now(ZoneId.of("UTC")));
         request.setDateFormat("yyyy-MM-dd");
         request.setLocale("en_US");
 

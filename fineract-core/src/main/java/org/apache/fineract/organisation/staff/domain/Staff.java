@@ -112,6 +112,67 @@ public class Staff extends AbstractPersistableCustom<Long> {
         return new Staff(staffOffice, firstname, lastname, externalId, mobileNo, isLoanOfficer, isActive, joiningDate);
     }
 
+    public static Staff fromRequest(final Office staffOffice, final StaffRequest request) {
+        final String firstname = request.getFirstname();
+        final String lastname = request.getLastname();
+        final String externalId = request.getExternalId();
+        final String mobileNo = request.getMobileNo();
+        final boolean isLoanOfficer = request.getIsLoanOfficer() != null ? request.getIsLoanOfficer() : false;
+        final Boolean isActive = request.getIsActive();
+
+        LocalDate joiningDate = null;
+        return new Staff(staffOffice, firstname, lastname, externalId, mobileNo, isLoanOfficer, isActive, joiningDate);
+    }
+
+    public Map<String, Object> update(final StaffRequest request) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
+
+        if (request.getOfficeId() != null && !request.getOfficeId().equals(this.office.getId())) {
+            actualChanges.put("officeId", request.getOfficeId());
+        }
+
+        boolean firstnameChanged = false;
+        if (request.getFirstname() != null && !request.getFirstname().equals(this.firstname)) {
+            actualChanges.put("firstname", request.getFirstname());
+            this.firstname = request.getFirstname();
+            firstnameChanged = true;
+        }
+
+        boolean lastnameChanged = false;
+        if (request.getLastname() != null && !request.getLastname().equals(this.lastname)) {
+            actualChanges.put("lastname", request.getLastname());
+            this.lastname = request.getLastname();
+            lastnameChanged = true;
+        }
+
+        // Fixed: Combined the flags you created above
+        if (firstnameChanged || lastnameChanged) {
+            deriveDisplayName(this.firstname);
+        }
+
+        if (request.getExternalId() != null && !request.getExternalId().equals(this.externalId)) {
+            actualChanges.put("externalId", request.getExternalId());
+            this.externalId = request.getExternalId();
+        }
+
+        if (request.getMobileNo() != null && !request.getMobileNo().equals(this.mobileNo)) {
+            actualChanges.put("mobileNo", request.getMobileNo());
+            this.mobileNo = StringUtils.defaultIfEmpty(request.getMobileNo(), null);
+        }
+
+        if (request.getIsLoanOfficer() != null && request.getIsLoanOfficer() != this.loanOfficer) {
+            actualChanges.put("isLoanOfficer", request.getIsLoanOfficer());
+            this.loanOfficer = request.getIsLoanOfficer();
+        }
+
+        if (request.getIsActive() != null && request.getIsActive() != this.active) {
+            actualChanges.put("isActive", request.getIsActive());
+            this.active = request.getIsActive();
+        }
+
+        return actualChanges;
+    }
+
     protected Staff() {
         //
     }

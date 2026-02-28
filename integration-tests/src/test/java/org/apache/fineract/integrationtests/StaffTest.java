@@ -25,6 +25,8 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -173,11 +175,13 @@ public class StaffTest {
         final String lastname = Utils.uniqueRandomStringGenerator("Doe_", 10);
         final String externalId = UUID.randomUUID().toString();
         final String mobileNo = Utils.uniqueRandomStringGenerator("num_", 10);
+        final LocalDate joiningDate = LocalDate.now(ZoneId.of("UTC"));
 
         map.put("firstname", firstname);
         map.put("lastname", lastname);
         map.put("externalId", externalId);
         map.put("mobileNo", mobileNo);
+        map.put("joiningDate", joiningDate);
 
         Map<String, Object> response = StaffHelper.updateStaff(requestSpec, responseSpec, 1, map);
         @SuppressWarnings("unchecked")
