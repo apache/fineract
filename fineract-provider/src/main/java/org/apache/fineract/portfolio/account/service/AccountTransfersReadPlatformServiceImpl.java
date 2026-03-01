@@ -255,7 +255,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     @Override
     public boolean isAccountTransfer(final Long transactionId, final PortfolioAccountType accountType) {
         final StringBuilder sql = new StringBuilder("select count(*) from m_account_transfer_transaction at where ");
-        if (accountType.isLoanAccount()) {
+        if (PortfolioAccountType.LOAN.equals(accountType)) {
             sql.append("at.from_loan_transaction_id=").append(transactionId).append(" or at.to_loan_transaction_id=").append(transactionId);
         } else {
             sql.append("at.from_savings_transaction_id=").append(transactionId).append(" or at.to_savings_transaction_id=")

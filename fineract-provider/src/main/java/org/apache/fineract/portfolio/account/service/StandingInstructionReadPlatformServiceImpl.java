@@ -295,10 +295,10 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             if (addAndCaluse) {
                 sqlBuilder.append(" and ");
             }
-            if (accountType.isSavingsAccount()) {
+            if (PortfolioAccountType.SAVINGS.equals(accountType)) {
                 sqlBuilder.append(" fromsavacc.id=? ");
                 paramObj.add(standingInstructionDTO.fromAccount());
-            } else if (accountType.isLoanAccount()) {
+            } else if (PortfolioAccountType.LOAN.equals(accountType)) {
                 sqlBuilder.append(" fromloanacc.id=? ");
                 paramObj.add(standingInstructionDTO.fromAccount());
             }
