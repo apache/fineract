@@ -20,11 +20,15 @@ package org.apache.fineract.portfolio.interestratechart.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -70,5 +74,23 @@ public class InterestRateChartValidationTest {
         assertEquals("validation.msg.savings.interestRateChart.slabs.gap", actualError.getUserMessageGlobalisationCode());
         // Check that arguments are present
         assertFalse(actualError.getArgs().isEmpty());
+    }
+
+    @Test
+    public void testSinglePeriodChartSlabWithExplicitEndDoesNotFailValidation() {
+        InterestRateChartFields chartFields = InterestRateChartFields.createNew("chart", "chart", LocalDate.of(2022, 1, 1),
+                LocalDate.of(2022, 12, 31), false);
+        InterestRateChart chart = InterestRateChart.createNew(chartFields, List.of());
+
+        InterestRateChartSlabFields slabFields = InterestRateChartSlabFields.createNew("Level 1", SavingsPeriodFrequencyType.MONTHS, 0, 3,
+                null, null, new BigDecimal("12"), "USD");
+        InterestRateChartSlab.createNew(slabFields, chart);
+
+        DataValidatorBuilder validator = new DataValidatorBuilder(dataValidationErrors).resource("savings.interestRateChart")
+                .parameter("slabs");
+        chart.validateChartSlabs(validator);
+
+        assertTrue(dataValidationErrors.isEmpty(),
+                "Expected no validation error for a single well-formed period slab with explicit toPeriod");
     }
 }

@@ -247,11 +247,6 @@ public class InterestRateChartSlabFields {
                 && !(interestRateChartSlabFields.fromPeriod.equals(1) || interestRateChartSlabFields.fromPeriod.equals(0));
     }
 
-    public boolean isNotProperPriodEnd() {
-        return !(this.toPeriod == null && this.amountRangeTo == null);
-
-    }
-
     public boolean isRateChartOverlapping(final InterestRateChartSlabFields that, final boolean isPrimaryGroupingByAmount) {
         boolean isPeriodOverLapping = isPeriodOverlapping(that);
         boolean isAmountOverLapping = isAmountOverlapping(that);

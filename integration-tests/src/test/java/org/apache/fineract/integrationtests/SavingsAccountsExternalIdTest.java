@@ -19,8 +19,6 @@
 package org.apache.fineract.integrationtests;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import org.apache.fineract.client.models.DeleteSavingsAccountsAccountIdResponse;
@@ -33,6 +31,7 @@ import org.apache.fineract.client.models.PutSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.SavingsAccountData;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -48,7 +47,7 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
     public static final String EXTERNAL_ID = UUID.randomUUID().toString();
     private final String dateFormat = "dd MMMM yyyy";
     private final String locale = "en";
-    private final String formattedDate = LocalDate.now(ZoneId.of("UTC")).format(DateTimeFormatter.ofPattern(dateFormat));
+    private final String formattedDate = Utils.getLocalDateOfTenant().format(DateTimeFormatter.ofPattern(dateFormat));
 
     @Test
     @Order(1)
