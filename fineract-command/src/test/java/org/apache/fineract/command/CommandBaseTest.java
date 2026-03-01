@@ -33,6 +33,7 @@ import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.utility.DockerImageName;
 
@@ -49,8 +50,9 @@ abstract class CommandBaseTest {
             .withNetwork(network).withUsername("root").withPassword("mifos").withDatabaseName("fineract-test");
 
     @Container
-    private static final MariaDBContainer<?> MARIADB_CONTAINER = new MariaDBContainer<>(DockerImageName.parse("mariadb:11.4"))
-            .withNetwork(network).withUsername("root").withPassword("mifos").withDatabaseName("fineract-test");
+    private static final MariaDBContainer<?> MARIADB_CONTAINER = new MariaDBContainer<>(DockerImageName.parse("mariadb:12.2"))
+            .withNetwork(network).withUsername("root").withPassword("mifos").withDatabaseName("fineract-test")
+            .withCommand("--innodb-snapshot-isolation=OFF").waitingFor(Wait.forListeningPort());
 
     @Container
     private static final MySQLContainer<?> MYSQL_CONTAINER = new MySQLContainer<>(DockerImageName.parse("mysql:8")).withNetwork(network)

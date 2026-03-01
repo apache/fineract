@@ -30,7 +30,7 @@ In the moment you get started writing code, please consult our [CONTRIBUTING](CO
 REQUIREMENTS
 ============
 * min. 16GB RAM and 8 core CPU
-* `MariaDB >= 11.5.2` or `PostgreSQL >= 18.0`
+* `MariaDB >= 12.2` or `PostgreSQL >= 18.0`
 * `Java >= 21` (Azul Zulu JVM is tested by our CI on GitHub Actions)
 
 Tomcat (min. v10) is only required, if you wish to deploy the Fineract WAR to a separate external servlet container.  You do not need to install Tomcat to run Fineract. We recommend the use of the self-contained JAR, which transparently embeds a servlet container using Spring Boot.
@@ -293,11 +293,11 @@ DATABASE AND TABLES
 
 You can run the required version of the database server in a container, instead of having to install it, like this:
 
-    docker run --name mariadb-11.5 -p 3306:3306 -e MARIADB_ROOT_PASSWORD=mysql -d mariadb:11.5.2
+    docker run --name mariadb-12.2 -p 3306:3306 -e MARIADB_ROOT_PASSWORD=mysql -d mariadb:12.2.2 --innodb-snapshot-isolation=OFF
 
 and stop and destroy it like this:
 
-    docker rm -f mariadb-11.5
+    docker rm -f mariadb-12.2
 
 Beware that this container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mariadb) regarding how to make it persistent instead of ephemeral.
 

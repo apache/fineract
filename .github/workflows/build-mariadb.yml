@@ -17,7 +17,7 @@ jobs:
 
     services:
       mariadb:
-        image: mariadb:11.5.2
+        image: mariadb:12.2
         ports:
           - 3306:3306
         env:
@@ -70,9 +70,14 @@ jobs:
 
       - name: Verify MariaDB connection
         run: |
-          while ! mysqladmin ping -h"127.0.0.1" -P3306 ; do
+          while ! mysqladmin ping -h"127.0.0.1" -P3306 -uroot -pmysql --silent; do
             sleep 1
           done
+
+      - name: Configure MariaDB compatibility defaults
+        run: |
+          mysql -h127.0.0.1 -P3306 -uroot -pmysql -e "SET GLOBAL innodb_snapshot_isolation=OFF;"
+          mysql -h127.0.0.1 -P3306 -uroot -pmysql -e "SHOW VARIABLES LIKE 'innodb_snapshot_isolation';"
 
       - name: Initialise databases
         run: |

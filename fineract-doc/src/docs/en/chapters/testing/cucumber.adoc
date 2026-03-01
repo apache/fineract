@@ -24,7 +24,7 @@ Apache Fineract's E2E test suite provides comprehensive coverage of business fun
 === Required Software
 
 * *Java 21*: Apache Fineract requires Java 21 (Azul Zulu JDK recommended)
-* *Database*: MariaDB 11.5.2, PostgreSQL 17.4, or MySQL 9.1
+* *Database*: MariaDB 12.2, PostgreSQL 17.4, or MySQL 9.1
 * *Git*: For source code management
 * *Gradle 8.14.3*: Included via wrapper
 

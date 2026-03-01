@@ -86,8 +86,10 @@ spec:
         tier: fineractmysql
     spec:
       containers:
-        - image: mariadb:11.4
+        - image: mariadb:12.2
           name: mysql
+          args:
+            - --innodb-snapshot-isolation=OFF
           resources:
             requests:
               memory: "1Gi"
