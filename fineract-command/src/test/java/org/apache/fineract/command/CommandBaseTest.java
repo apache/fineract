@@ -45,7 +45,7 @@ abstract class CommandBaseTest {
     protected static Network network = Network.newNetwork();
 
     @Container
-    private static final PostgreSQLContainer<?> POSTGRES_CONTAINER = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16"))
+    private static final PostgreSQLContainer<?> POSTGRES_CONTAINER = new PostgreSQLContainer<>(DockerImageName.parse("postgres:18.3"))
             .withNetwork(network).withUsername("root").withPassword("mifos").withDatabaseName("fineract-test");
 
     @Container

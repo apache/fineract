@@ -591,7 +591,7 @@ public final class Utils {
     }
 
     private static int getYear() {
-        return 1000 + random.nextInt(1001);
+        return 2000 + random.nextInt(31);
     }
 
     private static int getMonth() {

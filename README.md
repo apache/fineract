@@ -30,7 +30,7 @@ In the moment you get started writing code, please consult our [CONTRIBUTING](CO
 REQUIREMENTS
 ============
 * min. 16GB RAM and 8 core CPU
-* `MariaDB >= 11.5.2` or `PostgreSQL >= 17.0`
+* `MariaDB >= 11.5.2` or `PostgreSQL >= 18.0`
 * `Java >= 21` (Azul Zulu JVM is tested by our CI on GitHub Actions)
 
 Tomcat (min. v10) is only required, if you wish to deploy the Fineract WAR to a separate external servlet container.  You do not need to install Tomcat to run Fineract. We recommend the use of the self-contained JAR, which transparently embeds a servlet container using Spring Boot.

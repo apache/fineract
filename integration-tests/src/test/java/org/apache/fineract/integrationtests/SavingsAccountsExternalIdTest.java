@@ -59,7 +59,7 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
         request.setProductId(1L);
         request.setLocale(locale);
         request.setDateFormat(dateFormat);
-        request.submittedOnDate(formattedDate);
+        request.setSubmittedOnDate(formattedDate);
         request.setExternalId(EXTERNAL_ID);
 
         Response<PostSavingsAccountsResponse> response = okR(fineractClient().savingsAccounts.submitApplication2(request));
