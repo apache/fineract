@@ -30,7 +30,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.BusinessStep;
 import org.apache.fineract.client.models.BusinessStepRequest;
+import org.apache.fineract.client.models.ConfiguredJobNamesDTO;
 import org.apache.fineract.client.models.JobBusinessStepConfigData;
+import org.apache.fineract.client.models.JobBusinessStepDetail;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
@@ -60,6 +62,46 @@ public class WorkFlowJobHelper {
         executeVoid(() -> fineractClient.businessStepConfiguration().updateJobBusinessStepConfig(WORKFLOW_NAME_LOAN_CLOSE_OF_BUSINESS,
                 request, Map.of()));
         logChanges();
+    }
+
+    /**
+     * Returns all job names that have business step configuration registered.
+     */
+    public ConfiguredJobNamesDTO getConfiguredBusinessJobs() {
+        return ok(() -> fineractClient.businessStepConfiguration().retrieveAllConfiguredBusinessJobs(Map.of()));
+    }
+
+    /**
+     * Returns the currently configured business steps for the given job.
+     *
+     * @param jobName
+     *            the job name, e.g. {@code LOAN_CLOSE_OF_BUSINESS}
+     */
+    public JobBusinessStepConfigData getConfiguredWorkflowSteps(String jobName) {
+        return ok(() -> fineractClient.businessStepConfiguration().retrieveAllConfiguredBusinessStep(jobName, Map.of()));
+    }
+
+    /**
+     * Returns all available (registered) business steps for the given job.
+     *
+     * @param jobName
+     *            the job name, e.g. {@code LOAN_CLOSE_OF_BUSINESS}
+     */
+    public JobBusinessStepDetail getAvailableWorkflowSteps(String jobName) {
+        return ok(() -> fineractClient.businessStepConfiguration().retrieveAllAvailableBusinessStep(jobName, Map.of()));
+    }
+
+    /**
+     * Replaces the configured business steps for the given job.
+     *
+     * @param jobName
+     *            the job name, e.g. {@code LOAN_CLOSE_OF_BUSINESS}
+     * @param steps
+     *            the ordered list of business steps to configure
+     */
+    public void updateWorkflowSteps(String jobName, List<BusinessStep> steps) {
+        BusinessStepRequest request = new BusinessStepRequest().businessSteps(steps);
+        executeVoid(() -> fineractClient.businessStepConfiguration().updateJobBusinessStepConfig(jobName, request, Map.of()));
     }
 
     private void logChanges() {

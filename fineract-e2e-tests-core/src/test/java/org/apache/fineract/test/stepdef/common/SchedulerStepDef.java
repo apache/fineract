@@ -18,9 +18,16 @@
  */
 package org.apache.fineract.test.stepdef.common;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.cucumber.java.en.And;
+import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.GetJobsResponse;
 import org.apache.fineract.test.data.job.DefaultJob;
 import org.apache.fineract.test.service.JobService;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
@@ -31,6 +38,9 @@ public class SchedulerStepDef extends AbstractStepDef {
 
     @Autowired
     private JobService jobService;
+
+    @Autowired
+    private FineractFeignClient fineractClient;
 
     @And("Admin runs the Add Accrual Transactions job")
     public void runAccrualTransaction() {
@@ -70,5 +80,30 @@ public class SchedulerStepDef extends AbstractStepDef {
     @When("Admin runs the Accrual Activity Posting job")
     public void runAccrualActivityPosting() {
         jobService.executeAndWait(DefaultJob.ACCRUAL_ACTIVITY_POSTING);
+    }
+
+    @When("Admin runs WC COB job")
+    public void runWorkingCapitalLoanCOB() {
+        jobService.executeAndWait(DefaultJob.WORKING_CAPITAL_LOAN_COB);
+    }
+
+    @Then("Admin verifies scheduler job {string} has display name {string}")
+    public void verifyJobDisplayName(String shortName, String expectedDisplayName) {
+        GetJobsResponse response = ok(() -> fineractClient.schedulerJob().retrieveByShortName(shortName, Map.of()));
+        assertThat(response.getDisplayName())//
+                .as("Job '%s' display name — expected '%s' but got '%s'", shortName, expectedDisplayName, response.getDisplayName())//
+                .isEqualTo(expectedDisplayName);
+    }
+
+    @Then("Admin verifies scheduler job {string} has active status {string}")
+    public void verifyJobActiveStatus(String shortName, String expectedActive) {
+        assertThat(expectedActive)//
+                .as("Parameter must be 'true' or 'false' but got '%s'", expectedActive)//
+                .isIn("true", "false");
+        GetJobsResponse response = ok(() -> fineractClient.schedulerJob().retrieveByShortName(shortName, Map.of()));
+        boolean expected = Boolean.parseBoolean(expectedActive);
+        assertThat(response.getActive())//
+                .as("Job '%s' active status — expected %s but got %s", shortName, expected, response.getActive())//
+                .isEqualTo(expected);
     }
 }
