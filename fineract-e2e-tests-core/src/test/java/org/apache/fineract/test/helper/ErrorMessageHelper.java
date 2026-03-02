@@ -77,6 +77,19 @@ public final class ErrorMessageHelper {
         return "The parameter 'currencies' is mandatory.";
     }
 
+    public static String currencyNotFound(String currencyCode) {
+        return String.format("Currency with code '%s' not found in currency options", currencyCode);
+    }
+
+    public static String wrongCurrencyField(String currencyCode, String fieldName, Object actual, Object expected) {
+        return String.format("Wrong %s for currency '%s'. Actual value is: %s - But expected value is: %s", fieldName, currencyCode, actual,
+                expected);
+    }
+
+    public static String wrongSelectedCurrencies(List<String> actual, List<String> expected) {
+        return String.format("Wrong selected currencies. Actual value is: %s - But expected value is: %s", actual, expected);
+    }
+
     public static String disburseDateFailure(Integer loanId) {
         String loanIdStr = parseLoanIdToString(loanId);
         return String.format("The date on which a loan with identifier : %s is disbursed cannot be in the future.", loanIdStr);

@@ -221,6 +221,7 @@ public abstract class TestContextKey {
     public static final String LOAN_CHARGEBACK_RESPONSE = "loanChargebackResponse";
     public static final String LOAN_CHARGE_ADJUSTMENT_RESPONSE = "loanChargeAdjustmentResponse";
     public static final String PUT_CURRENCIES_RESPONSE = "putCurrenciesResponse";
+    public static final String GET_CURRENCIES_RESPONSE = "getCurrenciesResponse";
     public static final String BATCH_API_CALL_RESPONSE = "batchApiCallResponse";
     public static final String BATCH_API_CALL_IDEMPOTENCY_KEY = "batchApiIdempotencyKey";
     public static final String BATCH_API_CALL_IDEMPOTENCY_KEY_2 = "batchApiIdempotencyKey2";
