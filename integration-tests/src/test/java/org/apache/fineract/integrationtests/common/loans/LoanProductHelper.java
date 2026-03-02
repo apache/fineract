@@ -18,8 +18,10 @@
  */
 package org.apache.fineract.integrationtests.common.loans;
 
+import java.util.Collection;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoanProductsTemplateResponse;
+import org.apache.fineract.client.models.LoanProductBasicDetailsData;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
@@ -53,5 +55,9 @@ public class LoanProductHelper {
 
     public GetLoanProductsTemplateResponse getLoanProductTemplate(boolean isProductMixTemplate) {
         return Calls.ok(FineractClientHelper.getFineractClient().loanProducts.retrieveTemplate11(isProductMixTemplate));
+    }
+
+    public static Collection<LoanProductBasicDetailsData> fetchProductBasicDetailsList() {
+        return Calls.ok(FineractClientHelper.getFineractClient().loanProductsDetails.fetchProducts());
     }
 }

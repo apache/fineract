@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloanproduct.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -63,6 +64,9 @@ public interface WorkingCapitalLoanProductRepository
             WHERE wclp.externalId = :externalId
             """)
     Optional<WorkingCapitalLoanProduct> findByExternalIdWithDetails(@Param("externalId") ExternalId externalId);
+
+    @Query("select wclp FROM WorkingCapitalLoanProduct wclp where wclp.closeDate is null or wclp.closeDate >= :businessDate")
+    List<WorkingCapitalLoanProduct> fetchActiveWorkingCapitalLoanProducts(LocalDate businessDate);
 
     // TODO: Check if product is used in any loans (for deletion validation)
     // This will be implemented when Working Capital Loan entity is created

@@ -57,4 +57,5 @@ public interface LoanProductReadPlatformService {
     Collection<CreditAllocationData> retrieveCreditAllocationData(Long loanProductId);
 
     LoanProductData retrieveLoanProductFloatingDetails(Long loanProductId);
+
 }
