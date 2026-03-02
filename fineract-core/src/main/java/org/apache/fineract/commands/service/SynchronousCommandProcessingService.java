@@ -361,7 +361,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
                     reqmap.put("officeId", resultCopy.getOfficeId());
                     reqmap.put("clientId", resultCopy.getClientId());
+                    reqmap.put("resourceId", resultCopy.getResourceId());
                     resultCopy.setOfficeId(null);
+                    resultCopy.setResourceId(null);
                     reqmap.put("response", resultCopy);
                 } else if (result instanceof ErrorInfo ex) {
                     reqmap.put("status", "Exception");

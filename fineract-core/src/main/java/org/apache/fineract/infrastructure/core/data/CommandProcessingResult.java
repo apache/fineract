@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core.data;
 import java.io.Serializable;
 import java.util.Map;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 
@@ -32,12 +33,14 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 public class CommandProcessingResult implements Serializable {
 
     private final Long commandId;
+    @Setter
     private Long officeId;
     private final Long groupId;
     private final Long clientId;
     private final Long loanId;
     private final Long savingsId;
-    private final Long resourceId;
+    @Setter
+    private Long resourceId;
     private final Long subResourceId;
     private final String transactionId;
     private final Map<String, Object> changes;
@@ -46,6 +49,7 @@ public class CommandProcessingResult implements Serializable {
     private final Long productId;
     private final Long gsimId;
     private final Long glimId;
+    @Setter
     private Boolean rollbackTransaction;
     private final ExternalId resourceExternalId;
     private final ExternalId subResourceExternalId;
@@ -137,10 +141,6 @@ public class CommandProcessingResult implements Serializable {
         return new CommandProcessingResult(null, null, null, null);
     }
 
-    public void setOfficeId(final Long officeId) {
-        this.officeId = officeId;
-    }
-
     public Map<String, Object> getChanges() {
         Map<String, Object> checkIfEmpty = null;
         if (this.changes != null && !this.changes.isEmpty()) {
@@ -156,10 +156,6 @@ public class CommandProcessingResult implements Serializable {
 
     public boolean isRollbackTransaction() {
         return this.rollbackTransaction != null && this.rollbackTransaction;
-    }
-
-    public void setRollbackTransaction(Boolean rollbackTransaction) {
-        this.rollbackTransaction = rollbackTransaction;
     }
 
     private ExternalId setExternalIdOrNull(ExternalId externalId) {

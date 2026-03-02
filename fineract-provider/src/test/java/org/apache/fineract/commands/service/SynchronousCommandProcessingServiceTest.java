@@ -20,6 +20,7 @@ package org.apache.fineract.commands.service;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -38,6 +39,8 @@ import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.batch.exception.ErrorInfo;
@@ -48,28 +51,38 @@ import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.exception.CommandResultPersistenceException;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.commands.provider.CommandHandlerProvider;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.domain.ActionContext;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.NonNull;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
 public class SynchronousCommandProcessingServiceTest {
 
@@ -102,7 +115,7 @@ public class SynchronousCommandProcessingServiceTest {
     @Spy
     private FineractRequestContextHolder fineractRequestContextHolder;
 
-    @InjectMocks
+    // Created explicitly to avoid ambiguous injection of two ToApiJsonSerializer<> mocks
     private SynchronousCommandProcessingService underTest;
 
     @Mock
@@ -110,9 +123,12 @@ public class SynchronousCommandProcessingServiceTest {
 
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.openMocks(this);
         RequestContextHolder.resetRequestAttributes();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+        underTest = new SynchronousCommandProcessingService(context, applicationContext, toApiJsonSerializer, toApiResultJsonSerializer,
+                configurationDomainService, commandHandlerProvider, idempotencyKeyResolver, commandSourceService,
+                retryConfigurationAssembler, fineractRequestContextHolder);
 
         ErrorInfo errorInfo = mock(ErrorInfo.class);
         when(errorInfo.getMessage()).thenReturn("Failed");
@@ -150,6 +166,7 @@ public class SynchronousCommandProcessingServiceTest {
         reset(idempotencyKeyResolver);
         reset(commandSourceService);
         reset(retryConfigurationAssembler);
+        ThreadLocalContextUtil.reset();
     }
 
     @Test
@@ -477,6 +494,98 @@ public class SynchronousCommandProcessingServiceTest {
         assertDoesNotThrow(() -> {
             underTest.publishHookEvent(entityName, actionName, command, Object.class);
         });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void publishHookEvent_shouldExtractOfficeIdToTopLevel_andNullItInResponse() {
+        Long officeId = 5L;
+        Long clientId = 123L;
+        Long resourceId = 456L;
+
+        CommandProcessingResult result = new CommandProcessingResultBuilder().withEntityId(resourceId).withClientId(clientId)
+                .withOfficeId(officeId).build();
+
+        setupAuthenticatedUserMock();
+
+        underTest.publishHookEvent("datatables", "CREATE", buildJsonCommand("{\"field\":\"value\"}"), result);
+
+        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass((Class) Map.class);
+        verify(toApiJsonSerializer).serialize(captor.capture());
+        Map<String, Object> payload = captor.getValue();
+
+        assertEquals(officeId, payload.get("officeId"));
+        CommandProcessingResult response = (CommandProcessingResult) payload.get("response");
+        assertNull(response.getOfficeId());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void publishHookEvent_shouldExtractResourceIdToTopLevel_andNullItInResponse() {
+        Long officeId = 5L;
+        Long clientId = 123L;
+        Long resourceId = 456L;
+
+        CommandProcessingResult result = new CommandProcessingResultBuilder().withEntityId(resourceId).withClientId(clientId)
+                .withOfficeId(officeId).build();
+
+        setupAuthenticatedUserMock();
+
+        underTest.publishHookEvent("datatables", "CREATE", buildJsonCommand("{\"field\":\"value\"}"), result);
+
+        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass((Class) Map.class);
+        verify(toApiJsonSerializer).serialize(captor.capture());
+        Map<String, Object> payload = captor.getValue();
+
+        assertEquals(resourceId, payload.get("resourceId"));
+        assertEquals(clientId, payload.get("clientId"));
+
+        CommandProcessingResult response = (CommandProcessingResult) payload.get("response");
+        assertNull(response.getResourceId());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void publishHookEvent_clientDatatableSingleRow_responseResourceIdShouldBeNull() {
+        Long clientId = 123L;
+        Long resourceId = 123L;
+        Long officeId = 5L;
+
+        CommandProcessingResult result = new CommandProcessingResultBuilder().withEntityId(resourceId).withClientId(clientId)
+                .withOfficeId(officeId).build();
+
+        setupAuthenticatedUserMock();
+
+        underTest.publishHookEvent("datatables", "CREATE", buildJsonCommand("{\"field\":\"value\"}"), result);
+
+        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass((Class) Map.class);
+        verify(toApiJsonSerializer).serialize(captor.capture());
+        Map<String, Object> payload = captor.getValue();
+
+        assertEquals(resourceId, payload.get("resourceId"));
+        assertEquals(clientId, payload.get("clientId"));
+
+        CommandProcessingResult response = (CommandProcessingResult) payload.get("response");
+        assertNull(response.getResourceId());
+    }
+
+    private static JsonCommand buildJsonCommand(String json) {
+        return new JsonCommand(null, json, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+    }
+
+    private AppUser setupAuthenticatedUserMock() {
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+        ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(
+                Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2026, 1, 1), BusinessDateType.COB_DATE, LocalDate.of(2025, 12, 31))));
+
+        AppUser appUser = Mockito.mock(AppUser.class);
+        when(appUser.getId()).thenReturn(1L);
+        when(appUser.getUsername()).thenReturn("admin");
+        when(appUser.getDisplayName()).thenReturn("Admin User");
+        when(context.authenticatedUser()).thenReturn(appUser);
+        when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
+        return appUser;
     }
 
     private static final class RetryException extends RuntimeException {}
