@@ -236,4 +236,5 @@
     <include file="parts/0215_transaction_summary_reports_add_buydown_fee_types.xml" relativeToChangelogFile="true" />
     <include file="parts/0216_add_unique_constraint_sms_campaign_name.xml" relativeToChangelogFile="true" />
     <include file="parts/0217_force_withdrawal_configs.xml" relativeToChangelogFile="true" />
+    <include file="parts/0218_standardize_character_set_and_collation.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
