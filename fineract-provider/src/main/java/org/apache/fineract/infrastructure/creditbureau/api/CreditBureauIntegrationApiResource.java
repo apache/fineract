@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -64,6 +65,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Path("/v1/creditBureauIntegration")
 @Component
+@Tag(name = "Credit Bureau Integration", description = "")
 @RequiredArgsConstructor
 public class CreditBureauIntegrationApiResource {
 

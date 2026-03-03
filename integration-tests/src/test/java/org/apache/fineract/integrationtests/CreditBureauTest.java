@@ -28,11 +28,6 @@ import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatterBuilder;
@@ -53,8 +48,6 @@ import org.slf4j.LoggerFactory;
 public class CreditBureauTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(CreditBureauTest.class);
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -64,9 +57,6 @@ public class CreditBureauTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         configureCreditBureauService();
     }
 
@@ -128,11 +118,11 @@ public class CreditBureauTest {
                         + "\"Gender\":\"male\"," + "\"Address\":\"Test Address\"" + "}," + "\"CreditScore\": {\"Score\":  \"500\"},"
                         + "\"ActiveLoans\": [\"Loan1\", \"Loan2\"]," + "\"WriteOffLoans\": [\"Loan3\", \"Loan4\"]" + "}}", 200)));
 
-        Object serviceResult = CreditBureauIntegrationHelper.getCreditReport(this.requestSpec, this.responseSpec, "1", "NRC213");
+        String serviceResult = CreditBureauIntegrationHelper.getCreditReport("1", "NRC213");
         Assertions.assertNotNull(serviceResult);
         Gson gson = new Gson();
         CreditBureauReportData responseData = gson.fromJson(
-                gson.toJson(JsonParser.parseString(String.valueOf(serviceResult)).getAsJsonObject().get("creditBureauReportData")),
+                gson.toJson(JsonParser.parseString(serviceResult).getAsJsonObject().get("creditBureauReportData")),
                 CreditBureauReportData.class);
         Assertions.assertEquals("\"Test Name\"", responseData.getName());
         Assertions.assertEquals("{\"Score\":\"500\"}", responseData.getCreditScore());
@@ -166,11 +156,11 @@ public class CreditBureauTest {
                         + "\"Name\":\"Test Name\"," + "\"Gender\":\"male\"," + "\"Address\":\"Test Address\"" + "},"
                         + "\"CreditScore\": {\"Score\":  \"500\"}," + "\"ActiveLoans\": []," + "\"WriteOffLoans\": []" + "}}", 200)));
 
-        Object serviceResult = CreditBureauIntegrationHelper.getCreditReport(this.requestSpec, this.responseSpec, "1", "NRC213");
+        String serviceResult = CreditBureauIntegrationHelper.getCreditReport("1", "NRC213");
         Assertions.assertNotNull(serviceResult);
         Gson gson = new Gson();
         CreditBureauReportData responseData = gson.fromJson(
-                gson.toJson(JsonParser.parseString(String.valueOf(serviceResult)).getAsJsonObject().get("creditBureauReportData")),
+                gson.toJson(JsonParser.parseString(serviceResult).getAsJsonObject().get("creditBureauReportData")),
                 CreditBureauReportData.class);
         Assertions.assertEquals("\"Test Name\"", responseData.getName());
         Assertions.assertEquals("{\"Score\":\"500\"}", responseData.getCreditScore());

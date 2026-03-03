@@ -59,6 +59,7 @@ import org.apache.fineract.client.services.ClientsAddressApi;
 import org.apache.fineract.client.services.CodeValuesApi;
 import org.apache.fineract.client.services.CodesApi;
 import org.apache.fineract.client.services.CreditBureauConfigurationApi;
+import org.apache.fineract.client.services.CreditBureauIntegrationApi;
 import org.apache.fineract.client.services.CurrencyApi;
 import org.apache.fineract.client.services.DataTablesApi;
 import org.apache.fineract.client.services.DefaultApi;
@@ -201,6 +202,7 @@ public final class FineractClient {
     public final ChargesApi charges;
     public final ClientApi clients;
     public final CreditBureauConfigurationApi creditBureauConfiguration;
+    public final CreditBureauIntegrationApi creditBureauIntegration;
 
     public final ClientSearchV2Api clientSearchV2;
     public final ClientChargesApi clientCharges;
@@ -336,6 +338,7 @@ public final class FineractClient {
         charges = retrofit.create(ChargesApi.class);
         clients = retrofit.create(ClientApi.class);
         creditBureauConfiguration = retrofit.create(CreditBureauConfigurationApi.class);
+        creditBureauIntegration = retrofit.create(CreditBureauIntegrationApi.class);
         clientSearchV2 = retrofit.create(ClientSearchV2Api.class);
         clientCharges = retrofit.create(ClientChargesApi.class);
         clientIdentifiers = retrofit.create(ClientIdentifierApi.class);
