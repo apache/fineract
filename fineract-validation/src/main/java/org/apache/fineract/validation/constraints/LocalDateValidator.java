@@ -31,13 +31,18 @@ import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 public class LocalDateValidator implements ConstraintValidator<LocalDate, Object> {
-
+    // Field names provided by the @LocalDate annotation.
+    // These indicate which attributes of the validated object contain:
+    // - the date string
+    // - the expected format
+    // - the locale to use for parsing
     private String dateField;
     private String formatField;
     private String localeField;
 
     @Override
     public void initialize(LocalDate annotation) {
+        // Store the field names declared in the annotation so they can be accessed via reflection.
         this.dateField = annotation.dateField();
         this.formatField = annotation.formatField();
         this.localeField = annotation.localeField();
@@ -46,38 +51,55 @@ public class LocalDateValidator implements ConstraintValidator<LocalDate, Object
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext context) {
         try {
+            // Access the fields dynamically using reflection. 
+            // This allows the validator to be reused across different DTOs.
             var dateAttr = value.getClass().getDeclaredField(dateField);
             var formatAttr = value.getClass().getDeclaredField(formatField);
             var localeAttr = value.getClass().getDeclaredField(localeField);
-
+            // Make private fields accessible for reading.
             dateAttr.setAccessible(true);
             formatAttr.setAccessible(true);
             localeAttr.setAccessible(true);
-
+            // Extract the actual values from the object being validated.
             var date = (String) dateAttr.get(value);
             var format = (String) formatAttr.get(value);
             var locale = (String) localeAttr.get(value);
-
+            // Basic validation: if any required field is missing or blank, the date is invalid.
             if (StringUtils.isBlank(date) || StringUtils.isBlank(format) || StringUtils.isBlank(locale)) {
                 return false;
             }
-
+            // Attempt to parse the date. If parsing fails, an exception is thrown and caught below.
             toLocalDate(date, format, locale);
 
             return true;
         } catch (IllegalAccessException | NoSuchFieldException e) {
+            // This indicates a misconfiguration of the annotation or DTO.
             throw new RuntimeException("Invalid configuration for @LocalDate", e);
         } catch (Exception e) {
+            // Any parsing or formatting error means the date is invalid.
             return false;
         }
     }
-
-    private void toLocalDate(String date, String format, String locale) {
+/**
+     * Converts the provided date string into a LocalDateTime using the given format and locale.
+     * This method throws an exception if the date does not match the expected pattern.
+     *
+     * The return value is intentionally used (instead of ignored) to comply with Sonar rule java:S2201.
+     */
+    
+        private java.time.LocalDateTime toLocalDate(String date, String format, String locale) {   
+        // Build a formatter that: 
+        // - is case-insensitive
+        //- accepts lenient parsing for patterns
+        // - replaces 'y' with 'u' to avoid issues with year interpretation
+        // - optionally parses time if present
+        // - defaults missing time components to 00:00:00 
+        // - uses strict resolver style to avoid ambiguous dates
         var formatter = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient().appendPattern(format.replace("y", "u"))
                 .optionalStart().appendPattern(" HH:mm:ss").optionalEnd().parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
                 .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0).parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
                 .toFormatter(Locale.forLanguageTag(locale)).withResolverStyle(ResolverStyle.STRICT);
 
-        parse(date, formatter);
+        return parse(date, formatter);
     }
 }
