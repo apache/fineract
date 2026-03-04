@@ -22,7 +22,7 @@ import org.apache.fineract.cob.conditions.BatchWorkerCondition;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.domain.WorkingCapitalLoanAccountLock;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;

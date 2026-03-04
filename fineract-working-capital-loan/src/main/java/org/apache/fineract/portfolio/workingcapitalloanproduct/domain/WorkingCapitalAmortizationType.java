@@ -56,8 +56,8 @@ public enum WorkingCapitalAmortizationType implements ApiFacingEnum<WorkingCapit
         return null;
     }
 
-    public boolean isFLAT() {
-        return this.equals(WorkingCapitalAmortizationType.FLAT);
+    public boolean isEIR() {
+        return this.equals(WorkingCapitalAmortizationType.EIR);
     }
 
 }

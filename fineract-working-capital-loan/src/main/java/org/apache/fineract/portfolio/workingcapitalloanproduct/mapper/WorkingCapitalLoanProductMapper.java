@@ -29,11 +29,11 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyBucketMapper;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.data.WorkingCapitalLoanProductConfigurableAttributesData;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.data.WorkingCapitalLoanProductData;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.data.WorkingCapitalPaymentAllocationData;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductConfigurableAttributes;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductPaymentAllocationRule;
@@ -51,7 +51,6 @@ public interface WorkingCapitalLoanProductMapper {
     @Mapping(target = "status", source = "closeDate", qualifiedByName = "productStatus")
     @Mapping(target = "currency", source = "currency", qualifiedByName = "monetaryCurrencyToCurrencyData")
     @Mapping(target = "amortizationType", source = "relatedDetail.amortizationType", qualifiedByName = "amortizationToStringEnumOptionData")
-    @Mapping(target = "flatPercentageAmount", source = "relatedDetail.flatPercentageAmount")
     @Mapping(target = "npvDayCount", source = "relatedDetail.npvDayCount")
     @Mapping(target = "paymentAllocation", source = "paymentAllocationRules", qualifiedByName = "paymentAllocationRulesToData")
     @Mapping(target = "minPrincipal", source = "minMaxConstraints.minPrincipal")
@@ -130,7 +129,6 @@ public interface WorkingCapitalLoanProductMapper {
             return null;
         }
         return WorkingCapitalLoanProductConfigurableAttributesData.builder() //
-                .flatPercentageAmount(configurableAttributes.getFlatPercentageAmount()) //
                 .delinquencyBucketClassification(configurableAttributes.getDelinquencyBucketClassification()) //
                 .discountDefault(configurableAttributes.getDiscountDefault()) //
                 .periodPaymentFrequency(configurableAttributes.getPeriodPaymentFrequency()) //

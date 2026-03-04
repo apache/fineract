@@ -52,6 +52,10 @@ public final class AccountNumberFormatEnumerations {
     public static final Set<AccountNumberPrefixType> accountNumberPrefixesForGroups = Collections
             .unmodifiableSet(new HashSet<>(Collections.singletonList(AccountNumberPrefixType.OFFICE_NAME)));
 
+    public static final Set<AccountNumberPrefixType> accountNumberPrefixesForWorkingCapitalLoanAccounts = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList(AccountNumberPrefixType.OFFICE_NAME,
+                    AccountNumberPrefixType.LOAN_PRODUCT_SHORT_NAME, AccountNumberPrefixType.PREFIX_SHORT_NAME)));
+
     public enum AccountNumberPrefixType {
 
         OFFICE_NAME(1, "accountNumberPrefixType.officeName"), //

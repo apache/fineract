@@ -34,8 +34,8 @@ import org.apache.fineract.cob.workingcapitalloan.businessstep.WorkingCapitalLoa
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoan;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.repository.WorkingCapitalLoanRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;

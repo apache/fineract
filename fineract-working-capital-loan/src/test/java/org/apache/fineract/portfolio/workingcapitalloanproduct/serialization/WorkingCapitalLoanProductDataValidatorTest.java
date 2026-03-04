@@ -49,12 +49,15 @@ class WorkingCapitalLoanProductDataValidatorTest {
     private WorkingCapitalLoanProductRepository repository;
     @Mock
     private WorkingCapitalAdvancedPaymentAllocationsJsonParser advancedPaymentAllocationsJsonParser;
+    @Mock
+    private WorkingCapitalPaymentAllocationDataValidator paymentAllocationDataValidator;
     private WorkingCapitalLoanProductDataValidator validator;
 
     @BeforeEach
     void setUp() {
         final FromJsonHelper fromApiJsonHelper = new FromJsonHelper();
-        validator = new WorkingCapitalLoanProductDataValidator(fromApiJsonHelper, repository, advancedPaymentAllocationsJsonParser);
+        validator = new WorkingCapitalLoanProductDataValidator(fromApiJsonHelper, repository, advancedPaymentAllocationsJsonParser,
+                paymentAllocationDataValidator);
     }
 
     @Test
@@ -115,15 +118,6 @@ class WorkingCapitalLoanProductDataValidatorTest {
     void testValidateForCreate_WithInvalidAmortization_ShouldThrowException() {
         // Given
         final String json = createJsonWithField(WorkingCapitalLoanProductConstants.amortizationTypeParamName, "INVALID");
-
-        // When & Then
-        assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForCreate(json));
-    }
-
-    @Test
-    void testValidateForCreate_WithFlatAmortizationAndMissingFlatPercentageAmount_ShouldThrowException() {
-        // Given
-        final String json = createJsonWithField(WorkingCapitalLoanProductConstants.amortizationTypeParamName, "FLAT");
 
         // When & Then
         assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForCreate(json));

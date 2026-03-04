@@ -26,4 +26,7 @@
   <include relativeToChangelogFile="true" file="parts/0002_wc_loan_schema.xml"/>
   <include relativeToChangelogFile="true" file="parts/0003_working_capital_loan_cob.xml"/>
   <include relativeToChangelogFile="true" file="parts/0004_extend_working_capital_loan_entity.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0005_alter_wc_loan_add_columns.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0006_wc_loan_disbursement_details.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0007_drop_flat_percentage_amount.xml"/>
 </databaseChangeLog>

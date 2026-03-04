@@ -26,6 +26,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatEnumerations.AccountNumberPrefixType;
+import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
+import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNumberGeneratorService;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
@@ -38,6 +40,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,7 +50,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @AllArgsConstructor
-public class AccountNumberGenerator {
+public class AccountNumberGenerator implements AccountNumberGeneratorService {
 
     private static final int maxLength = 9;
 
@@ -62,6 +66,7 @@ public class AccountNumberGenerator {
     private final ClientRepository clientRepository;
     private final LoanRepository loanRepository;
     private final SavingsAccountRepository savingsAccountRepository;
+    private final WorkingCapitalLoanRepository workingCapitalLoanRepository;
 
     public String generate(Client client, AccountNumberFormat accountNumberFormat) {
         Map<String, String> propertyMap = new HashMap<>();
@@ -99,6 +104,29 @@ public class AccountNumberGenerator {
         propertyMap.put(SHARE_PRODUCT_SHORT_NAME, shareaccount.getShareProduct().getShortName());
         propertyMap.put(ENTITY_TYPE, "shareAccount");
         return generateAccountNumber(propertyMap, accountNumberFormat);
+    }
+
+    public String generate(WorkingCapitalLoan wcl, AccountNumberFormat accountNumberFormat) {
+        Map<String, String> propertyMap = new HashMap<>();
+        propertyMap.put(ID, wcl.getId().toString());
+        propertyMap.put(OFFICE_NAME,
+                wcl.getClient() != null && wcl.getClient().getOffice() != null ? wcl.getClient().getOffice().getName() : "");
+        propertyMap.put(LOAN_PRODUCT_SHORT_NAME, wcl.getLoanProduct() != null ? wcl.getLoanProduct().getShortName() : "");
+        propertyMap.put(ENTITY_TYPE, "workingCapitalLoan");
+        return generateAccountNumber(propertyMap, accountNumberFormat);
+    }
+
+    @Override
+    public String generate(EntityAccountType type, Object entity, AccountNumberFormat format) {
+        return switch (type) {
+            case CLIENT -> generate((Client) entity, format);
+            case LOAN -> generate((Loan) entity, format);
+            case SAVINGS -> generate((SavingsAccount) entity, format);
+            case SHARES -> generate((ShareAccount) entity, format);
+            case WORKING_CAPITAL_LOAN -> generate((WorkingCapitalLoan) entity, format);
+            case CENTER, GROUP ->
+                throw new UnsupportedOperationException("Use generateCenterAccountNumber / generateGroupAccountNumber for " + type);
+        };
     }
 
     private String generateAccountNumber(Map<String, String> propertyMap, AccountNumberFormat accountNumberFormat) {
@@ -221,6 +249,12 @@ public class AccountNumberGenerator {
             case "savingsAccount":
                 SavingsAccount savingsAccount = this.savingsAccountRepository.findSavingsAccountByAccountNumber(accountNumber);
                 if (savingsAccount != null) {
+                    randomNumberConflict = true;
+                }
+            break;
+
+            case "workingCapitalLoan":
+                if (this.workingCapitalLoanRepository.existsByAccountNumber(accountNumber)) {
                     randomNumberConflict = true;
                 }
             break;

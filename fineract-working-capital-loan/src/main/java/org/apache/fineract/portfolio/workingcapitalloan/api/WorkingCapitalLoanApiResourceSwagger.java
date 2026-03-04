@@ -1,0 +1,400 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.fineract.portfolio.workingcapitalloan.api;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.portfolio.fund.data.FundData;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.api.WorkingCapitalLoanProductApiResourceSwagger;
+
+/**
+ * Swagger documentation classes for Working Capital Loans API.
+ */
+public final class WorkingCapitalLoanApiResourceSwagger {
+
+    private WorkingCapitalLoanApiResourceSwagger() {}
+
+    @Schema(description = "Template: loan details (prefilled when productId/clientId provided) plus dropdown options.")
+    public static final class GetWorkingCapitalLoansTemplateResponse {
+
+        private GetWorkingCapitalLoansTemplateResponse() {}
+
+        @Schema(description = "Loan details (product, fundId, currency, client, etc.).")
+        public GetWorkingCapitalLoansLoanIdResponse loanData;
+        public List<WorkingCapitalLoanProductApiResourceSwagger.GetWorkingCapitalLoanProductsResponse> productOptions;
+        public Collection<FundData> fundOptions;
+        public Collection<WorkingCapitalLoanProductApiResourceSwagger.GetWorkingCapitalLoanProductsResponse.GetDelinquencyBucket> delinquencyBucketOptions;
+        public List<StringEnumOptionData> periodFrequencyTypeOptions;
+    }
+
+    @Schema(description = "GetWorkingCapitalLoansClient")
+    public static final class GetWorkingCapitalLoansClient {
+
+        private GetWorkingCapitalLoansClient() {}
+
+        @Schema(example = "1")
+        public Long id;
+        @Schema(example = "Client One")
+        public String displayName;
+    }
+
+    @Schema(description = "GetWorkingCapitalLoansPagedResponse (content, totalElements, totalPages, number, size, first, last)")
+    public static final class GetWorkingCapitalLoansPagedResponse {
+
+        private GetWorkingCapitalLoansPagedResponse() {}
+
+        public List<GetWorkingCapitalLoansLoanIdResponse> content;
+        @Schema(example = "100")
+        public Long totalElements;
+        @Schema(example = "2")
+        public Integer totalPages;
+        @Schema(example = "0")
+        public Integer number;
+        @Schema(example = "50")
+        public Integer size;
+        public Boolean first;
+        public Boolean last;
+    }
+
+    @Schema(description = "GetWorkingCapitalLoansLoanIdStatus")
+    static final class GetWorkingCapitalLoansLoanIdStatus {
+
+        private GetWorkingCapitalLoansLoanIdStatus() {}
+
+        @Schema(example = "100")
+        public Long id;
+        @Schema(example = "loanStatusType.submitted.and.pending.approval")
+        public String code;
+        @Schema(example = "Submitted and pending approval")
+        public String value;
+        @Schema(example = "true")
+        public Boolean pendingApproval;
+        @Schema(example = "false")
+        public Boolean waitingForDisbursal;
+        @Schema(example = "false")
+        public Boolean active;
+        @Schema(example = "false")
+        public Boolean closedObligationsMet;
+        @Schema(example = "false")
+        public Boolean closedWrittenOff;
+        @Schema(example = "false")
+        public Boolean closedRescheduled;
+        @Schema(example = "false")
+        public Boolean closed;
+        @Schema(example = "false")
+        public Boolean overpaid;
+    }
+
+    @Schema(description = "GetWorkingCapitalLoansLoanIdTimeline")
+    static final class GetWorkingCapitalLoansLoanIdTimeline {
+
+        private GetWorkingCapitalLoansLoanIdTimeline() {}
+
+        @Schema(example = "[2024, 1, 15]")
+        public LocalDate submittedOnDate;
+        @Schema(example = "admin")
+        public String submittedByUsername;
+        @Schema(example = "App")
+        public String submittedByFirstname;
+        @Schema(example = "Administrator")
+        public String submittedByLastname;
+        @Schema(example = "[2024, 1, 15]")
+        public LocalDate approvedOnDate;
+        @Schema(example = "admin")
+        public String approvedByUsername;
+        @Schema(example = "App")
+        public String approvedByFirstname;
+        @Schema(example = "Administrator")
+        public String approvedByLastname;
+        @Schema(example = "[2024, 2, 1]")
+        public LocalDate expectedDisbursementDate;
+        @Schema(example = "[2024, 2, 1]")
+        public LocalDate actualDisbursementDate;
+        @Schema(example = "admin")
+        public String disbursedByUsername;
+        @Schema(example = "App")
+        public String disbursedByFirstname;
+        @Schema(example = "Administrator")
+        public String disbursedByLastname;
+        @Schema(example = "[2024, 2, 1]")
+        public LocalDate closedOnDate;
+        @Schema(example = "admin")
+        public String closedByUsername;
+        @Schema(example = "App")
+        public String closedByFirstname;
+        @Schema(example = "Administrator")
+        public String closedByLastname;
+        @Schema(example = "[2024, 2, 1]", description = "Expected maturity date")
+        public LocalDate expectedMaturityDate;
+        @Schema(example = "[2024, 12, 31]", description = "Actual maturity date (when loan is fully paid)")
+        public LocalDate actualMaturityDate;
+        /** Full list of disbursement details (for multi-disbursement support). */
+        public List<GetDisbursementDetail> disbursementDetails;
+    }
+
+    @Schema(description = "GetWorkingCapitalLoansLoanIdResponse")
+    public static final class GetWorkingCapitalLoansLoanIdResponse {
+
+        private GetWorkingCapitalLoansLoanIdResponse() {}
+
+        @Schema(example = "1")
+        public Long id;
+        @Schema(example = "WCL-1")
+        public String accountNo;
+        @Schema(example = "ext-id-001")
+        public String externalId;
+        public GetWorkingCapitalLoansClient client;
+        @Schema(example = "1")
+        public Long officeId;
+        @Schema(example = "1")
+        public Long fundId;
+        @Schema(example = "Fund 1")
+        public String fundName;
+        public WorkingCapitalLoanProductApiResourceSwagger.GetWorkingCapitalLoanProductsResponse product;
+        public GetWorkingCapitalLoansLoanIdStatus status;
+        public GetWorkingCapitalLoansLoanIdTimeline timeline;
+        @Schema(example = "[2024, 1, 15]")
+        public LocalDate submittedOnDate;
+        public LocalDate approvedOnDate;
+        public LocalDate rejectedOnDate;
+        public BigDecimal proposedPrincipal;
+        public BigDecimal approvedPrincipal;
+
+        public CurrencyData currency;
+        @Schema(example = "1.0")
+        public BigDecimal periodPaymentRate;
+        @Schema(example = "30")
+        public Integer repaymentEvery;
+        public StringEnumOptionData repaymentFrequencyType;
+        @Schema(example = "0.0")
+        public BigDecimal discount;
+        public WorkingCapitalLoanProductApiResourceSwagger.GetWorkingCapitalLoanProductsResponse.GetDelinquencyBucket delinquencyBucket;
+        @Schema(example = "[2024, 1, 14]", description = "Last closed business date (COB)")
+        public LocalDate lastClosedBusinessDate;
+        public List<GetPaymentAllocation> paymentAllocation;
+        /** Full list of disbursement details (timeline uses the first). */
+        public List<GetDisbursementDetail> disbursementDetails;
+        /** Running balances (principal outstanding, total payment, etc.). */
+        public GetBalance balance;
+    }
+
+    @Schema(description = "Working capital loan running balances")
+    public static final class GetBalance {
+
+        private GetBalance() {}
+
+        @Schema(example = "1")
+        public Long id;
+        @Schema(example = "10000.00")
+        public java.math.BigDecimal principalOutstanding;
+        @Schema(example = "0.00")
+        public java.math.BigDecimal totalPaidPrincipal;
+        @Schema(example = "10500.00")
+        public java.math.BigDecimal totalPayment;
+        @Schema(example = "0.00")
+        public java.math.BigDecimal realizedIncome;
+        @Schema(example = "0.00")
+        public java.math.BigDecimal unrealizedIncome;
+    }
+
+    @Schema(description = "Single disbursement detail (expected and actual)")
+    public static final class GetDisbursementDetail {
+
+        private GetDisbursementDetail() {}
+
+        public Long id;
+        public LocalDate expectedDisbursementDate;
+        public BigDecimal expectedAmount;
+        public LocalDate expectedMaturityDate;
+        public LocalDate actualDisbursementDate;
+        public BigDecimal actualAmount;
+        public String disbursedByUsername;
+        public String disbursedByFirstname;
+        public String disbursedByLastname;
+    }
+
+    @Schema(description = "GetPaymentAllocation")
+    public static final class GetPaymentAllocation {
+
+        private GetPaymentAllocation() {}
+
+        @Schema(example = "DEFAULT")
+        public String transactionType;
+        public List<GetPaymentAllocationOrder> paymentAllocationOrder;
+    }
+
+    @Schema(description = "GetPaymentAllocationOrder")
+    public static final class GetPaymentAllocationOrder {
+
+        private GetPaymentAllocationOrder() {}
+
+        @Schema(example = "PENALTY")
+        public String paymentAllocationRule;
+        @Schema(example = "1")
+        public Integer order;
+    }
+
+    @Schema(description = "PostWorkingCapitalLoansRequest")
+    public static final class PostWorkingCapitalLoansRequest {
+
+        private PostWorkingCapitalLoansRequest() {}
+
+        @Schema(example = "1", required = true)
+        public Long clientId;
+        @Schema(example = "1", required = true)
+        public Long productId;
+        @Schema(example = "1")
+        public Long fundId;
+        @Schema(example = "WCL-1")
+        public String accountNo;
+        @Schema(example = "ext-id-001")
+        public String externalId;
+        @Schema(example = "10000.00", required = true, description = "Principal (disbursement) amount")
+        public BigDecimal principalAmount;
+        @Schema(example = "10500.00")
+        public BigDecimal totalPayment;
+        @Schema(example = "15 January 2024")
+        public String submittedOnDate;
+        @Schema(example = "1 February 2024")
+        public String expectedDisbursementDate;
+        @Schema(example = "Note when submitting")
+        public String submittedOnNote;
+
+        @Schema(example = "1.0")
+        public BigDecimal periodPaymentRate;
+        @Schema(example = "30")
+        public Integer repaymentEvery;
+        @Schema(example = "DAYS", allowableValues = { "DAYS", "MONTHS", "YEARS" })
+        public String repaymentFrequencyType;
+        @Schema(example = "0.0")
+        public BigDecimal discount;
+        @Schema(example = "1")
+        public Long delinquencyBucketId;
+        public List<PostPaymentAllocationRule> paymentAllocationRules;
+
+        @Schema(example = "en_GB")
+        public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+
+        @Schema(description = "PostPaymentAllocationRule")
+        public static final class PostPaymentAllocationRule {
+
+            private PostPaymentAllocationRule() {}
+
+            @Schema(example = "DEFAULT")
+            public String transactionType;
+            public List<PostPaymentAllocationOrder> paymentAllocationOrder;
+        }
+
+        @Schema(description = "PostPaymentAllocationOrder")
+        public static final class PostPaymentAllocationOrder {
+
+            private PostPaymentAllocationOrder() {}
+
+            @Schema(example = "PENALTY")
+            public String paymentAllocationRule;
+            @Schema(example = "1")
+            public Integer order;
+        }
+    }
+
+    @Schema(description = "PostWorkingCapitalLoansResponse")
+    public static final class PostWorkingCapitalLoansResponse {
+
+        private PostWorkingCapitalLoansResponse() {}
+
+        @Schema(example = "1")
+        public Long resourceId;
+        @Schema(example = "1")
+        public Long officeId;
+        @Schema(example = "1")
+        public Long clientId;
+        @Schema(example = "1")
+        public Long loanId;
+    }
+
+    @Schema(description = "PutWorkingCapitalLoansLoanIdRequest")
+    public static final class PutWorkingCapitalLoansLoanIdRequest {
+
+        private PutWorkingCapitalLoansLoanIdRequest() {}
+
+        @Schema(example = "1")
+        public Long clientId;
+        @Schema(example = "1")
+        public Long productId;
+        @Schema(example = "1")
+        public Long fundId;
+        @Schema(example = "WCL-1")
+        public String accountNo;
+        @Schema(example = "ext-id-001")
+        public String externalId;
+        @Schema(example = "10000.00", description = "Principal (disbursement) amount")
+        public BigDecimal principalAmount;
+        @Schema(example = "10500.00")
+        public BigDecimal totalPayment;
+        @Schema(example = "15 January 2024")
+        public String submittedOnDate;
+        @Schema(example = "1 February 2024")
+        public String expectedDisbursementDate;
+        @Schema(example = "Note when modifying", description = "Max length 500 characters")
+        public String submittedOnNote;
+
+        @Schema(example = "1.0")
+        public BigDecimal periodPaymentRate;
+        @Schema(example = "30")
+        public Integer repaymentEvery;
+        @Schema(example = "DAYS", allowableValues = { "DAYS", "MONTHS", "YEARS" })
+        public String repaymentFrequencyType;
+        @Schema(example = "0.0")
+        public BigDecimal discount;
+        @Schema(example = "1")
+        public Long delinquencyBucketId;
+        public List<PostWorkingCapitalLoansRequest.PostPaymentAllocationRule> paymentAllocationRules;
+
+        @Schema(example = "en_GB")
+        public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+    }
+
+    @Schema(description = "PutWorkingCapitalLoansLoanIdResponse")
+    public static final class PutWorkingCapitalLoansLoanIdResponse {
+
+        private PutWorkingCapitalLoansLoanIdResponse() {}
+
+        @Schema(example = "1")
+        public Long resourceId;
+        public Object changes;
+    }
+
+    @Schema(description = "DeleteWorkingCapitalLoansLoanIdResponse")
+    public static final class DeleteWorkingCapitalLoansLoanIdResponse {
+
+        private DeleteWorkingCapitalLoansLoanIdResponse() {}
+
+        @Schema(example = "1")
+        public Long resourceId;
+    }
+}

@@ -28,7 +28,8 @@ public enum EntityAccountType {
     SAVINGS(3, "accountType.savings"), //
     CENTER(4, "accountType.center"), //
     GROUP(5, "accountType.group"), //
-    SHARES(6, "accountType.shares"); //
+    SHARES(6, "accountType.shares"), //
+    WORKING_CAPITAL_LOAN(7, "accountType.workingCapitalLoan"); //
 
     private final Integer value;
     private final String code;

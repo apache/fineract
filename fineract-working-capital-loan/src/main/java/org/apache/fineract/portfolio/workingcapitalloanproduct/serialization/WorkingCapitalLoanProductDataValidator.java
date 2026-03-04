@@ -43,10 +43,10 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoanProductConstants;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAdvancedPaymentAllocationsJsonParser;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.exception.WorkingCapitalLoanProductDuplicateExternalIdException;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.exception.WorkingCapitalLoanProductDuplicateNameException;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.exception.WorkingCapitalLoanProductDuplicateShortNameException;
@@ -63,6 +63,7 @@ public class WorkingCapitalLoanProductDataValidator {
     private final FromJsonHelper fromApiJsonHelper;
     private final WorkingCapitalLoanProductRepository repository;
     private final WorkingCapitalAdvancedPaymentAllocationsJsonParser advancedPaymentAllocationsJsonParser;
+    private final WorkingCapitalPaymentAllocationDataValidator paymentAllocationDataValidator;
 
     /**
      * The parameters supported for this command.
@@ -73,19 +74,14 @@ public class WorkingCapitalLoanProductDataValidator {
             WorkingCapitalLoanProductConstants.startDateParamName, WorkingCapitalLoanProductConstants.closeDateParamName,
             WorkingCapitalLoanProductConstants.externalIdParamName, WorkingCapitalLoanProductConstants.currencyCodeParamName,
             WorkingCapitalLoanProductConstants.digitsAfterDecimalParamName, WorkingCapitalLoanProductConstants.inMultiplesOfParamName,
-            WorkingCapitalLoanProductConstants.amortizationTypeParamName, WorkingCapitalLoanProductConstants.flatPercentageAmountParamName,
-            WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, WorkingCapitalLoanProductConstants.npvDayCountParamName,
-            WorkingCapitalLoanProductConstants.paymentAllocationParamName, WorkingCapitalLoanProductConstants.minPrincipalParamName,
-            WorkingCapitalLoanProductConstants.principalParamName, WorkingCapitalLoanProductConstants.maxPrincipalParamName,
-            WorkingCapitalLoanProductConstants.minPeriodPaymentRateParamName, WorkingCapitalLoanProductConstants.periodPaymentRateParamName,
-            WorkingCapitalLoanProductConstants.maxPeriodPaymentRateParamName, WorkingCapitalLoanProductConstants.discountParamName,
-            WorkingCapitalLoanProductConstants.repaymentEveryParamName, WorkingCapitalLoanProductConstants.repaymentFrequencyTypeParamName,
+            WorkingCapitalLoanProductConstants.amortizationTypeParamName, WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName,
+            WorkingCapitalLoanProductConstants.npvDayCountParamName, WorkingCapitalLoanProductConstants.paymentAllocationParamName,
+            WorkingCapitalLoanProductConstants.minPrincipalParamName, WorkingCapitalLoanProductConstants.principalParamName,
+            WorkingCapitalLoanProductConstants.maxPrincipalParamName, WorkingCapitalLoanProductConstants.minPeriodPaymentRateParamName,
+            WorkingCapitalLoanProductConstants.periodPaymentRateParamName, WorkingCapitalLoanProductConstants.maxPeriodPaymentRateParamName,
+            WorkingCapitalLoanProductConstants.discountParamName, WorkingCapitalLoanProductConstants.repaymentEveryParamName,
+            WorkingCapitalLoanProductConstants.repaymentFrequencyTypeParamName,
             WorkingCapitalLoanProductConstants.allowAttributeOverridesParamName));
-
-    private static final Set<String> SUPPORTED_PAYMENT_ALLOCATION_RULE_PARAMS = new HashSet<>(
-            Arrays.asList("transactionType", "paymentAllocationOrder"));
-    private static final Set<String> SUPPORTED_PAYMENT_ALLOCATION_ORDER_PARAMS = new HashSet<>(
-            Arrays.asList("paymentAllocationRule", "order"));
 
     public void validateForCreate(final String json) {
         if (StringUtils.isBlank(json)) {
@@ -97,7 +93,7 @@ public class WorkingCapitalLoanProductDataValidator {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(WorkingCapitalLoanProductConstants.RESOURCE_NAME);
+                .resource(WorkingCapitalLoanProductConstants.WCLP_RESOURCE_NAME);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
@@ -118,7 +114,7 @@ public class WorkingCapitalLoanProductDataValidator {
         if (!this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.paymentAllocationParamName, element)) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.paymentAllocationParamName).value(null).notNull();
         } else {
-            validatePaymentAllocationParameters(element, baseDataValidator);
+            this.paymentAllocationDataValidator.validate(element, baseDataValidator);
             final JsonCommand command = JsonCommand.fromJsonElement(null, element, this.fromApiJsonHelper);
             this.advancedPaymentAllocationsJsonParser.assembleWCPaymentAllocationRules(command);
         }
@@ -166,7 +162,7 @@ public class WorkingCapitalLoanProductDataValidator {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(WorkingCapitalLoanProductConstants.RESOURCE_NAME);
+                .resource(WorkingCapitalLoanProductConstants.WCLP_RESOURCE_NAME);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
@@ -182,7 +178,7 @@ public class WorkingCapitalLoanProductDataValidator {
 
         // Validate payment allocation if present
         if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.paymentAllocationParamName, element)) {
-            validatePaymentAllocationParameters(element, baseDataValidator);
+            this.paymentAllocationDataValidator.validate(element, baseDataValidator);
             final JsonCommand command = JsonCommand.fromJsonElement(null, element, this.fromApiJsonHelper);
             this.advancedPaymentAllocationsJsonParser.assembleWCPaymentAllocationRules(command);
         }
@@ -224,54 +220,8 @@ public class WorkingCapitalLoanProductDataValidator {
         }
     }
 
-    private void validatePaymentAllocationParameters(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
-        if (!element.isJsonObject()) {
-            return;
-        }
-        final JsonElement paymentAllocationElement = element.getAsJsonObject()
-                .get(WorkingCapitalLoanProductConstants.paymentAllocationParamName);
-        if (paymentAllocationElement == null || !paymentAllocationElement.isJsonArray()) {
-            return;
-        }
-        final String orderParamPath = WorkingCapitalLoanProductConstants.paymentAllocationParamName + ".paymentAllocationOrder";
-        for (final JsonElement ruleEl : paymentAllocationElement.getAsJsonArray()) {
-            if (ruleEl == null || !ruleEl.isJsonObject()) {
-                continue;
-            }
-            final JsonObject rule = ruleEl.getAsJsonObject();
-            this.fromApiJsonHelper.checkForUnsupportedNestedParameters(WorkingCapitalLoanProductConstants.paymentAllocationParamName, rule,
-                    SUPPORTED_PAYMENT_ALLOCATION_RULE_PARAMS);
-            // Mandatory: transactionType
-            final String transactionType = this.fromApiJsonHelper.extractStringNamed("transactionType", rule);
-            baseDataValidator.reset().parameter("paymentAllocation.transactionType").value(transactionType).notBlank();
-            // Mandatory: paymentAllocationOrder (must be present and array)
-            final JsonElement orderEl = rule.get("paymentAllocationOrder");
-            if (orderEl == null) {
-                baseDataValidator.reset().parameter("paymentAllocation.paymentAllocationOrder").value(null).notNull();
-            } else if (!orderEl.isJsonArray()) {
-                baseDataValidator.reset().parameter("paymentAllocation.paymentAllocationOrder").failWithCode("must.be.array",
-                        "paymentAllocationOrder must be an array");
-            } else {
-                for (final JsonElement orderItemEl : orderEl.getAsJsonArray()) {
-                    if (orderItemEl == null || !orderItemEl.isJsonObject()) {
-                        continue;
-                    }
-                    final JsonObject orderItem = orderItemEl.getAsJsonObject();
-                    this.fromApiJsonHelper.checkForUnsupportedNestedParameters(orderParamPath, orderItem,
-                            SUPPORTED_PAYMENT_ALLOCATION_ORDER_PARAMS);
-                    // Mandatory: paymentAllocationRule, order
-                    final String paymentAllocationRule = this.fromApiJsonHelper.extractStringNamed("paymentAllocationRule", orderItem);
-                    baseDataValidator.reset().parameter(orderParamPath + ".paymentAllocationRule").value(paymentAllocationRule).notBlank();
-                    final Integer order = this.fromApiJsonHelper.extractIntegerNamed("order", orderItem, Locale.getDefault());
-                    baseDataValidator.reset().parameter(orderParamPath + ".order").value(order).notNull();
-                }
-            }
-        }
-    }
-
     private Set<String> getSupportedConfigurableAttributes() {
         final Set<String> supportedAttributes = new HashSet<>();
-        supportedAttributes.add(WorkingCapitalLoanProductConstants.flatPercentageAmountOverridableParamName);
         supportedAttributes.add(WorkingCapitalLoanProductConstants.delinquencyBucketClassificationOverridableParamName);
         supportedAttributes.add(WorkingCapitalLoanProductConstants.discountDefaultOverridableParamName);
         supportedAttributes.add(WorkingCapitalLoanProductConstants.periodPaymentFrequencyOverridableParamName);
@@ -348,12 +298,9 @@ public class WorkingCapitalLoanProductDataValidator {
                     baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.amortizationTypeParamName)
                             .failWithCode("invalid.amortization.type");
                 } else {
-                    // If FLAT is selected, flatPercentageAmount is mandatory
-                    if (amortizationType.isFLAT()) {
-                        final BigDecimal flatPercentageAmount = this.fromApiJsonHelper.extractBigDecimalNamed(
-                                WorkingCapitalLoanProductConstants.flatPercentageAmountParamName, element, new HashSet<>());
-                        baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.flatPercentageAmountParamName)
-                                .value(flatPercentageAmount).notNull().zeroOrPositiveAmount();
+                    if (!amortizationType.isEIR()) {
+                        baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.amortizationTypeParamName)
+                                .failWithCode("invalid.amortization.type.only.eir.type.is.supported.for.now");
                     }
                 }
             }

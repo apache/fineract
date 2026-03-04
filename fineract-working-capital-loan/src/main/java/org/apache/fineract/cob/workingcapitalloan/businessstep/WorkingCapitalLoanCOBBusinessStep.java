@@ -19,6 +19,6 @@
 package org.apache.fineract.cob.workingcapitalloan.businessstep;
 
 import org.apache.fineract.cob.COBBusinessStep;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 
 public abstract class WorkingCapitalLoanCOBBusinessStep implements COBBusinessStep<WorkingCapitalLoan> {}

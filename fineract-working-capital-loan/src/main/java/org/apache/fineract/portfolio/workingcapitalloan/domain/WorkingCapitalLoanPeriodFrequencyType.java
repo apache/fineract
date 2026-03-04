@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.workingcapitalloanproduct.domain;
+package org.apache.fineract.portfolio.workingcapitalloan.domain;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.springframework.util.StringUtils;
 
 /**
@@ -60,4 +61,7 @@ public enum WorkingCapitalLoanPeriodFrequencyType implements ApiFacingEnum<Worki
         return null;
     }
 
+    public StringEnumOptionData toStringEnumOptionData() {
+        return new StringEnumOptionData(name(), getCode(), name());
+    }
 }

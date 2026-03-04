@@ -200,22 +200,6 @@ public class WorkingCapitalLoanProductValidationTest {
     }
 
     @Test
-    public void testCreateWorkingCapitalLoanProductWithFlatAmortizationAndMissingFlatPercentageAmount() {
-        // Given
-        final PostWorkingCapitalLoanProductsRequest request = new WorkingCapitalLoanProductTestBuilder().withAmortizationType("FLAT")
-                .build();
-        request.setFlatPercentageAmount(null); // Explicitly set to null
-
-        // When & Then - Should throw CallFailedRuntimeException with status 400
-        final CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                () -> wclProductHelper.createWorkingCapitalLoanProduct(request));
-        assertEquals(400, exception.getStatus());
-        assertNotNull(exception.getDeveloperMessage());
-        assertEquals("Validation errors: [flatPercentageAmount] The parameter `flatPercentageAmount` is mandatory.",
-                exception.getDeveloperMessage());
-    }
-
-    @Test
     public void testCreateWorkingCapitalLoanProductWithMissingNpvDayCount() {
         // Given
         final PostWorkingCapitalLoanProductsRequest request = new WorkingCapitalLoanProductTestBuilder().withNpvDayCount(null).build();

@@ -194,6 +194,12 @@ public class ClientHelper {
         return GSON.fromJson(response, GetClientsClientIdAccountsResponse.class);
     }
 
+    public static String getClientAccountsRaw(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final long clientId) {
+        final String url = CLIENT_URL + "/" + clientId + "/accounts?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, url);
+    }
+
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)

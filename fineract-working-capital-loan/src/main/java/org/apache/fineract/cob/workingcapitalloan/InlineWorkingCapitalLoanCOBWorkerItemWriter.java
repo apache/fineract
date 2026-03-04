@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.domain.WorkingCapitalLoanAccountLock;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.springframework.data.repository.CrudRepository;
 
 @Slf4j

@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import org.springframework.util.StringUtils;
+
 /**
  * Enum representation of loan status states.
  */
@@ -131,5 +133,47 @@ public enum LoanStatus {
 
     public boolean isOverpaid() {
         return this.value.equals(LoanStatus.OVERPAID.getValue());
+    }
+
+    public static LoanStatus fromString(final String statusValue) {
+        if (!StringUtils.hasText(statusValue)) {
+            return LoanStatus.INVALID;
+        }
+
+        if (statusValue.trim().equalsIgnoreCase(SUBMITTED_AND_PENDING_APPROVAL.name())) {
+            return SUBMITTED_AND_PENDING_APPROVAL;
+        }
+        if (statusValue.trim().equalsIgnoreCase(APPROVED.name())) {
+            return APPROVED;
+        }
+        if (statusValue.trim().equalsIgnoreCase(ACTIVE.name())) {
+            return ACTIVE;
+        }
+        if (statusValue.trim().equalsIgnoreCase(TRANSFER_IN_PROGRESS.name())) {
+            return TRANSFER_IN_PROGRESS;
+        }
+        if (statusValue.trim().equalsIgnoreCase(TRANSFER_ON_HOLD.name())) {
+            return TRANSFER_ON_HOLD;
+        }
+        if (statusValue.trim().equalsIgnoreCase(WITHDRAWN_BY_CLIENT.name())) {
+            return WITHDRAWN_BY_CLIENT;
+        }
+        if (statusValue.trim().equalsIgnoreCase(REJECTED.name())) {
+            return REJECTED;
+        }
+        if (statusValue.trim().equalsIgnoreCase(CLOSED_OBLIGATIONS_MET.name())) {
+            return CLOSED_OBLIGATIONS_MET;
+        }
+        if (statusValue.trim().equalsIgnoreCase(CLOSED_WRITTEN_OFF.name())) {
+            return CLOSED_WRITTEN_OFF;
+        }
+        if (statusValue.trim().equalsIgnoreCase(CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT.name())) {
+            return CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT;
+        }
+        if (statusValue.trim().equalsIgnoreCase(OVERPAID.name())) {
+            return OVERPAID;
+        }
+
+        return null;
     }
 }

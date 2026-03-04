@@ -40,7 +40,6 @@ public final class WorkingCapitalLoanProductConstants {
 
     // Settings
     public static final String amortizationTypeParamName = "amortizationType";
-    public static final String flatPercentageAmountParamName = "flatPercentageAmount";
     public static final String delinquencyBucketIdParamName = "delinquencyBucketId";
     public static final String npvDayCountParamName = "npvDayCount";
     public static final String paymentAllocationParamName = "paymentAllocation";
@@ -58,12 +57,11 @@ public final class WorkingCapitalLoanProductConstants {
 
     // Configurable attributes (same as LoanProduct)
     public static final String allowAttributeOverridesParamName = "allowAttributeOverrides";
-    public static final String flatPercentageAmountOverridableParamName = "flatPercentageAmount";
     public static final String delinquencyBucketClassificationOverridableParamName = "delinquencyBucketClassification";
     public static final String discountDefaultOverridableParamName = "discountDefault";
     public static final String periodPaymentFrequencyOverridableParamName = "periodPaymentFrequency";
     public static final String periodPaymentFrequencyTypeOverridableParamName = "periodPaymentFrequencyType";
 
     // Resource name for permissions
-    public static final String RESOURCE_NAME = "WORKINGCAPITALLOANPRODUCT";
+    public static final String WCLP_RESOURCE_NAME = "WORKINGCAPITALLOANPRODUCT";
 }

@@ -19,7 +19,7 @@
 package org.apache.fineract.cob.workingcapitalloan;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.repository.WorkingCapitalLoanRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

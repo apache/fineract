@@ -20,7 +20,7 @@ package org.apache.fineract.cob.workingcapitalloan;
 
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.processor.AbstractItemProcessor;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 
 public abstract class AbstractWorkingCapitalLoanCOBWorkerItemProcessor extends AbstractItemProcessor<WorkingCapitalLoan> {
 

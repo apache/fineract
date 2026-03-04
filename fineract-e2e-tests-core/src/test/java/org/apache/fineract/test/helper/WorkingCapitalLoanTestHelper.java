@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.test.helper;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -39,6 +40,7 @@ public class WorkingCapitalLoanTestHelper {
     private static final String TABLE_WC_LOAN_ACCOUNT_LOCKS = "m_wc_loan_account_locks";
     private static final int INITIAL_VERSION = 0;
     private static final long ADMIN_USER_ID = 1L;
+    private static final BigDecimal DEFAULT_PRINCIPAL = new BigDecimal("1000.00");
 
     private final JdbcTemplate testJdbcTemplate;
     private final SimpleJdbcInsert wcLoanInsert;
@@ -50,8 +52,8 @@ public class WorkingCapitalLoanTestHelper {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public Long insertActiveLoan() {
-        return insertLoan(LoanStatus.ACTIVE.getValue(), null);
+    public Long insertActiveLoan(final Long clientId, final Long productId) {
+        return insertLoan(LoanStatus.ACTIVE, null, clientId, productId);
     }
 
     public String generateUniqueExternalId() {
@@ -62,18 +64,25 @@ public class WorkingCapitalLoanTestHelper {
         return String.valueOf(System.currentTimeMillis());
     }
 
-    public Long insertLoan(int loanStatusId, LocalDate lastClosedBusinessDate) {
-        Timestamp now = Timestamp.from(OffsetDateTime.now(ZoneOffset.UTC).toInstant());
-        MapSqlParameterSource params = new MapSqlParameterSource()//
-                .addValue("account_no", generateAccountNumber()).addValue("external_id", generateUniqueExternalId())
+    public Long insertLoan(final LoanStatus status, final LocalDate lastClosedBusinessDate, final Long clientId, final Long productId) {
+        final Timestamp now = Timestamp.from(OffsetDateTime.now(ZoneOffset.UTC).toInstant());
+        final MapSqlParameterSource params = new MapSqlParameterSource()//
+                .addValue("account_no", generateAccountNumber())//
+                .addValue("external_id", generateUniqueExternalId())//
                 .addValue("version", INITIAL_VERSION)//
                 .addValue("created_by", ADMIN_USER_ID)//
                 .addValue("last_modified_by", ADMIN_USER_ID)//
                 .addValue("created_on_utc", now)//
                 .addValue("last_modified_on_utc", now)//
-                .addValue("loan_status_id", loanStatusId)//
-                .addValue("last_closed_business_date", lastClosedBusinessDate);
-        Number key = wcLoanInsert.executeAndReturnKey(params);
+                .addValue("loan_status_id", status.getValue())//
+                .addValue("last_closed_business_date", lastClosedBusinessDate)//
+                .addValue("client_id", clientId)//
+                .addValue("product_id", productId)//
+                .addValue("principal", DEFAULT_PRINCIPAL)//
+                .addValue("principal_amount_proposed", DEFAULT_PRINCIPAL)//
+                .addValue("approved_principal", DEFAULT_PRINCIPAL)//
+                .addValue("total_payment", DEFAULT_PRINCIPAL);
+        final Number key = wcLoanInsert.executeAndReturnKey(params);
         return Objects.requireNonNull(key, "Generated key must not be null").longValue();
     }
 

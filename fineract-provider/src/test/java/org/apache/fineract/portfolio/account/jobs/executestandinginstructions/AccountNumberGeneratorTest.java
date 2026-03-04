@@ -41,6 +41,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProduct;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -59,8 +60,9 @@ public class AccountNumberGeneratorTest {
         clientRepo = mock(ClientRepository.class);
         loanRepo = mock(LoanRepository.class);
         savingsRepo = mock(SavingsAccountRepository.class);
+        final WorkingCapitalLoanRepository workingCapitalLoanRepo = mock(WorkingCapitalLoanRepository.class);
 
-        generator = new AccountNumberGenerator(configService, clientRepo, loanRepo, savingsRepo);
+        generator = new AccountNumberGenerator(configService, clientRepo, loanRepo, savingsRepo, workingCapitalLoanRepo);
 
         GlobalConfigurationPropertyData accountLengthConfig = mock(GlobalConfigurationPropertyData.class);
         when(accountLengthConfig.getValue()).thenReturn(Long.valueOf("9"));

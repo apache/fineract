@@ -142,6 +142,9 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
             case SHARES:
             // SHARES has no prefix
             break;
+            case WORKING_CAPITAL_LOAN:
+                accountNumberPrefixTypesSet = AccountNumberFormatEnumerations.accountNumberPrefixesForWorkingCapitalLoanAccounts;
+            break;
         }
 
         Object[] array = accountNumberPrefixTypesSet.toArray();

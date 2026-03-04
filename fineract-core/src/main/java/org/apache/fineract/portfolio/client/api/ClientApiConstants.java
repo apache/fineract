@@ -185,7 +185,7 @@ public class ClientApiConstants {
     public static final String clientEntityName = "clients";
 
     public static final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList("loanAccounts", "savingsAccounts", "shareAccounts"));
+            Arrays.asList("loanAccounts", "savingsAccounts", "shareAccounts", "workingCapitalLoanAccounts"));
 
     /**
      * These parameters will match the class level parameters of ClientData. Where possible, we try to get response

@@ -44,9 +44,6 @@ public class WorkingCapitalLoanProductConfigurableAttributes extends AbstractPer
     @JoinColumn(name = "wc_loan_product_id", nullable = false)
     private WorkingCapitalLoanProduct wcProduct;
 
-    @Column(name = "flat_percentage_amount_overridable")
-    private Boolean flatPercentageAmount;
-
     @Column(name = "delinquency_bucket_classification_overridable")
     private Boolean delinquencyBucketClassification;
 

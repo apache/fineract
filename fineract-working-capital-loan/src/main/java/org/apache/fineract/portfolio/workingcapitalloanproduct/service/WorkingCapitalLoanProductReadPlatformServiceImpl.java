@@ -32,9 +32,9 @@ import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatform
 import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.fund.service.FundReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.data.WorkingCapitalLoanProductData;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAllocationType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.exception.WorkingCapitalLoanProductNotFoundException;
@@ -56,7 +56,7 @@ public class WorkingCapitalLoanProductReadPlatformServiceImpl implements Working
 
     @Override
     public List<WorkingCapitalLoanProductData> retrieveAllWorkingCapitalLoanProducts() {
-        final List<WorkingCapitalLoanProduct> products = this.repository.findAllWithFund();
+        final List<WorkingCapitalLoanProduct> products = this.repository.findAllWithDetails();
         return this.mapper.toDataList(products);
     }
 
