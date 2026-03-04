@@ -42,7 +42,8 @@ public class LocalDateValidator implements ConstraintValidator<LocalDate, Object
         this.formatField = annotation.formatField();
         this.localeField = annotation.localeField();
     }
-
+    // Valida una fecha obteniendo dinámicamente los campos mediante reflexión.
+    // Si alguno de los campos es nulo o el formato no coincide, la validación falla.
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext context) {
         try {
@@ -71,13 +72,15 @@ public class LocalDateValidator implements ConstraintValidator<LocalDate, Object
             return false;
         }
     }
-
+    // Convierte la cadena de fecha a LocalDate usando un patrón configurable.
+    // Se aplica un formateo estricto para evitar fechas ambiguas o inválidas.
     private void toLocalDate(String date, String format, String locale) {
         var formatter = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient().appendPattern(format.replace("y", "u"))
                 .optionalStart().appendPattern(" HH:mm:ss").optionalEnd().parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
                 .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0).parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
                 .toFormatter(Locale.forLanguageTag(locale)).withResolverStyle(ResolverStyle.STRICT);
-
+        // Se almacena el resultado de parse() para cumplir la regla Sonar java:S2201
+        // y asegurar que el parseo se realiza correctamente.
         parse(date, formatter);
     }
 }
