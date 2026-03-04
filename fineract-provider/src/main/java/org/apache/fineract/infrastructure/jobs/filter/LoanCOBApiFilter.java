@@ -18,81 +18,14 @@
  */
 package org.apache.fineract.infrastructure.jobs.filter;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
-import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
-import org.apache.fineract.infrastructure.core.http.BodyCachingHttpServletRequestWrapper;
-import org.apache.fineract.infrastructure.jobs.exception.LoanIdsHardLockedException;
-import org.apache.fineract.useradministration.exception.UnAuthenticatedUserException;
-import org.apache.http.HttpStatus;
 import org.springframework.context.annotation.Conditional;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.web.filter.OncePerRequestFilter;
 
-@RequiredArgsConstructor
 @Conditional(LoanCOBEnabledCondition.class)
-public class LoanCOBApiFilter extends OncePerRequestFilter {
+public class LoanCOBApiFilter extends COBApiFilter {
 
-    private final LoanCOBFilterHelper helper;
-
-    private static class Reject {
-
-        private final String message;
-        private final Integer statusCode;
-
-        Reject(String message, Integer statusCode) {
-            this.message = message;
-            this.statusCode = statusCode;
-        }
-
-        public static Reject reject(Long loanId, int status) {
-            return new Reject(ApiGlobalErrorResponse.loanIsLocked(loanId).toJson(), status);
-        }
-
-        public void toServletResponse(HttpServletResponse response) throws IOException {
-            response.setStatus(statusCode);
-            response.getWriter().write(message);
-        }
-    }
-
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-        request = new BodyCachingHttpServletRequestWrapper(request);
-
-        if (!helper.isOnApiList((BodyCachingHttpServletRequestWrapper) request)) {
-            proceed(filterChain, request, response);
-        } else {
-            try {
-                boolean bypassUser = helper.isBypassUser();
-                if (bypassUser) {
-                    proceed(filterChain, request, response);
-                } else {
-                    try {
-                        List<Long> loanIds = helper.calculateRelevantLoanIds((BodyCachingHttpServletRequestWrapper) request);
-                        if (!loanIds.isEmpty() && helper.isLoanBehind(loanIds)) {
-                            helper.executeInlineCob(loanIds);
-                        }
-                        proceed(filterChain, request, response);
-                    } catch (LoanIdsHardLockedException e) {
-                        Reject.reject(e.getLoanIdFromRequest(), HttpStatus.SC_CONFLICT).toServletResponse(response);
-                    }
-                }
-            } catch (UnAuthenticatedUserException e) {
-                throw new AuthenticationCredentialsNotFoundException("Not Authenticated", e);
-            }
-        }
-    }
-
-    private void proceed(FilterChain filterChain, HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-        filterChain.doFilter(request, response);
+    public LoanCOBApiFilter(LoanCOBFilterHelper helper) {
+        super(helper);
     }
 
 }

@@ -18,23 +18,14 @@
  */
 package org.apache.fineract.cob.workingcapitalloan;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBBusinessStepService;
-import org.apache.fineract.cob.processor.AbstractItemProcessor;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoan;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
 
-@Slf4j
-public class WorkingCapitalLoanCOBWorkerItemProcessor extends AbstractItemProcessor<WorkingCapitalLoan> {
+public class WorkingCapitalLoanCOBWorkerItemProcessor extends AbstractWorkingCapitalLoanCOBWorkerItemProcessor {
 
     public WorkingCapitalLoanCOBWorkerItemProcessor(COBBusinessStepService cobBusinessStepService) {
         super(cobBusinessStepService);
-    }
-
-    @Override
-    public void setLastRun(WorkingCapitalLoan processedLoan) {
-        processedLoan.setLastClosedBusinessDate(getBusinessDate());
     }
 
     @BeforeStep

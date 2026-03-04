@@ -16,7 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.cob.service;
 
-public interface LoanCOBCatchUpService extends COBCatchUpService {}
+import org.apache.fineract.cob.data.IsCatchUpRunningDTO;
+import org.apache.fineract.cob.data.OldestCOBProcessedLoanDTO;
+
+public interface COBCatchUpService {
+
+    void unlockHardLockedLoans();
+
+    OldestCOBProcessedLoanDTO getOldestCOBProcessedLoan();
+
+    void executeLoanCOBCatchUp();
+
+    IsCatchUpRunningDTO isCatchUpRunning();
+}

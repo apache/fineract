@@ -16,7 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.cob.workingcapitalloan;
 
-package org.apache.fineract.cob.service;
+import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.processor.AbstractItemProcessor;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoan;
 
-public interface LoanCOBCatchUpService extends COBCatchUpService {}
+public abstract class AbstractWorkingCapitalLoanCOBWorkerItemProcessor extends AbstractItemProcessor<WorkingCapitalLoan> {
+
+    public AbstractWorkingCapitalLoanCOBWorkerItemProcessor(COBBusinessStepService cobBusinessStepService) {
+        super(cobBusinessStepService);
+    }
+
+    @Override
+    public void setLastRun(WorkingCapitalLoan processedLoan) {
+        processedLoan.setLastClosedBusinessDate(getBusinessDate());
+    }
+
+}

@@ -16,7 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.cob.service;
 
-public interface LoanCOBCatchUpService extends COBCatchUpService {}
+import org.apache.fineract.infrastructure.core.domain.FineractContext;
+
+public interface AsyncCOBExecutorService {
+
+    void executeLoanCOBCatchUpAsync(FineractContext context);
+}

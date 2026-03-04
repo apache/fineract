@@ -17,6 +17,6 @@
  * under the License.
  */
 
-package org.apache.fineract.cob.service;
+package org.apache.fineract.infrastructure.jobs.filter;
 
-public interface LoanCOBCatchUpService extends COBCatchUpService {}
+public interface WorkingCapitalLoanCOBFilterHelper extends COBFilterHelper {}

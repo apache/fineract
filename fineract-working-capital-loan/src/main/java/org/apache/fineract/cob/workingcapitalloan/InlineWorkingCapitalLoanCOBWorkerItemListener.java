@@ -18,27 +18,23 @@
  */
 package org.apache.fineract.cob.workingcapitalloan;
 
-import lombok.RequiredArgsConstructor;
+import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
-import org.apache.fineract.cob.domain.WorkingCapitalAccountLockRepository;
 import org.apache.fineract.cob.domain.WorkingCapitalLoanAccountLock;
-import org.apache.fineract.infrastructure.core.config.FineractProperties;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.apache.fineract.cob.listener.AbstractLoanItemListener;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.springframework.transaction.support.TransactionTemplate;
 
-@Configuration
-@RequiredArgsConstructor
-public class WorkingCapitalLoanLockingConfiguration {
+public class InlineWorkingCapitalLoanCOBWorkerItemListener extends AbstractLoanItemListener<WorkingCapitalLoanAccountLock, Loan> {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final FineractProperties fineractProperties;
-    private final WorkingCapitalAccountLockRepository workingCapitalAccountLockRepository;
-
-    @Bean
-    @ConditionalOnMissingBean
-    public LockingService<WorkingCapitalLoanAccountLock> workingCapitalLoanLockingService() {
-        return new WorkingCapitalLoanLockingServiceImpl(jdbcTemplate, fineractProperties, workingCapitalAccountLockRepository);
+    public InlineWorkingCapitalLoanCOBWorkerItemListener(LockingService<WorkingCapitalLoanAccountLock> lockingService,
+            TransactionTemplate transactionTemplate) {
+        super(lockingService, transactionTemplate);
     }
+
+    @Override
+    protected LockOwner getLockOwner() {
+        return LockOwner.LOAN_INLINE_COB_PROCESSING;
+    }
+
 }

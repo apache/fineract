@@ -19,4 +19,4 @@
 
 package org.apache.fineract.cob.service;
 
-public interface LoanCOBCatchUpService extends COBCatchUpService {}
+public interface WorkingCapitalLoanCOBCatchUpService extends COBCatchUpService {}

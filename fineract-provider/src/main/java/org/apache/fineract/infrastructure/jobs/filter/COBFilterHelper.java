@@ -16,7 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.infrastructure.jobs.filter;
 
-package org.apache.fineract.cob.service;
+import java.io.IOException;
+import java.util.List;
+import org.apache.fineract.infrastructure.core.http.BodyCachingHttpServletRequestWrapper;
 
-public interface LoanCOBCatchUpService extends COBCatchUpService {}
+public interface COBFilterHelper {
+
+    boolean isOnApiList(BodyCachingHttpServletRequestWrapper request) throws IOException;
+
+    boolean isBypassUser();
+
+    List<Long> calculateRelevantLoanIds(BodyCachingHttpServletRequestWrapper request) throws IOException;
+
+    boolean isLoanBehind(List<Long> loanIds);
+
+    void executeInlineCob(List<Long> loanIds);
+}

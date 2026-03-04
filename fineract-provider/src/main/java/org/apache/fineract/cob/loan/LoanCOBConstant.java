@@ -28,7 +28,6 @@ public final class LoanCOBConstant extends COBConstant {
     public static final String LOAN_COB_WORKER_STEP = "loanCOBWorkerStep";
 
     public static final String INLINE_LOAN_COB_JOB_NAME = "INLINE_LOAN_COB";
-    public static final String LOAN_IDS_PARAMETER_NAME = "LoanIds";
 
     public static final String LOAN_COB_PARTITIONER_STEP = "Loan COB partition - Step";
 

@@ -17,6 +17,15 @@
  * under the License.
  */
 
-package org.apache.fineract.cob.service;
+package org.apache.fineract.infrastructure.jobs.filter;
 
-public interface LoanCOBCatchUpService extends COBCatchUpService {}
+import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
+import org.springframework.context.annotation.Conditional;
+
+@Conditional(LoanCOBEnabledCondition.class)
+public class WorkingCapitalLoanCOBApiFilter extends COBApiFilter {
+
+    public WorkingCapitalLoanCOBApiFilter(WorkingCapitalLoanCOBFilterHelper helper) {
+        super(helper);
+    }
+}

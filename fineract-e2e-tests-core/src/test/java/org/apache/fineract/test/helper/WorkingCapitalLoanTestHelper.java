@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Objects;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.test.data.LoanStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -53,9 +54,18 @@ public class WorkingCapitalLoanTestHelper {
         return insertLoan(LoanStatus.ACTIVE.getValue(), null);
     }
 
+    public String generateUniqueExternalId() {
+        return "EXT-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    public String generateAccountNumber() {
+        return String.valueOf(System.currentTimeMillis());
+    }
+
     public Long insertLoan(int loanStatusId, LocalDate lastClosedBusinessDate) {
         Timestamp now = Timestamp.from(OffsetDateTime.now(ZoneOffset.UTC).toInstant());
         MapSqlParameterSource params = new MapSqlParameterSource()//
+                .addValue("account_no", generateAccountNumber()).addValue("external_id", generateUniqueExternalId())
                 .addValue("version", INITIAL_VERSION)//
                 .addValue("created_by", ADMIN_USER_ID)//
                 .addValue("last_modified_by", ADMIN_USER_ID)//

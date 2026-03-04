@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.fineract.cob.COBConstant;
 import org.apache.fineract.cob.data.COBIdAndExternalIdAndAccountNo;
 import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
@@ -72,17 +71,17 @@ public class WorkingCapitalLoanRetrieveIdServiceImpl implements WorkingCapitalLo
 
     @Override
     public List<COBIdAndLastClosedBusinessDate> retrieveLoanIdsBehindDate(LocalDate businessDate, List<Long> loanIds) {
-        throw new NotImplementedException();
+        return loanRepository.findAllLoansBehindByLoanIdsAndStatuses(businessDate, loanIds, NON_CLOSED_LOAN_STATUSES);
     }
 
     @Override
     public List<COBIdAndLastClosedBusinessDate> retrieveLoanIdsBehindDateOrNull(LocalDate businessDate, List<Long> loanIds) {
-        throw new NotImplementedException();
+        return loanRepository.findAllLoansBehindOrNullByLoanIdsAndStatuses(businessDate, loanIds, NON_CLOSED_LOAN_STATUSES);
     }
 
     @Override
     public List<COBIdAndLastClosedBusinessDate> retrieveLoanIdsOldestCobProcessed(LocalDate businessDate) {
-        throw new NotImplementedException();
+        return loanRepository.findOldestCOBProcessedLoan(businessDate, NON_CLOSED_LOAN_STATUSES);
     }
 
     @Override
@@ -103,11 +102,11 @@ public class WorkingCapitalLoanRetrieveIdServiceImpl implements WorkingCapitalLo
 
     @Override
     public List<COBIdAndExternalIdAndAccountNo> findAllStayedLockedByCobBusinessDate(LocalDate cobBusinessDate) {
-        throw new NotImplementedException();
+        return loanRepository.findAllStayedLockedByCobBusinessDate(cobBusinessDate);
     }
 
     @Override
-    public List<COBIdAndLastClosedBusinessDate> retrieveLoanBehindOnDisbursementDate(LocalDate businessDateByType, List<Long> loanIds) {
-        throw new NotImplementedException();
+    public List<COBIdAndLastClosedBusinessDate> retrieveLoanBehindOnDisbursementDate(LocalDate businessDate, List<Long> loanIds) {
+        return loanRepository.findAllLoansBehindOnDisbursementDate(businessDate, loanIds, NON_CLOSED_LOAN_STATUSES);
     }
 }

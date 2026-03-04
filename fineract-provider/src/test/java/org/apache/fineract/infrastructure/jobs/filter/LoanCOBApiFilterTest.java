@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.infrastructure.jobs.filter;
 
-import static org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelper.LOAN_GLIMACCOUNT_PATH_PATTERN;
-import static org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelper.LOAN_PATH_PATTERN;
+import static org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelperImpl.LOAN_GLIMACCOUNT_PATH_PATTERN;
+import static org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelperImpl.LOAN_PATH_PATTERN;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -86,7 +86,7 @@ class LoanCOBApiFilterTest {
 
     private LoanCOBApiFilter testObj;
     @InjectMocks
-    private LoanCOBFilterHelper helper;
+    private LoanCOBFilterHelperImpl helper;
     @Mock
     private LoanAccountLockService loanAccountLockService;
     @Mock

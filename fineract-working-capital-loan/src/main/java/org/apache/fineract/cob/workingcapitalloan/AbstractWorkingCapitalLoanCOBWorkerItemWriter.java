@@ -18,24 +18,38 @@
  */
 package org.apache.fineract.cob.workingcapitalloan;
 
+import java.util.List;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.domain.WorkingCapitalLoanAccountLock;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoan;
+import org.springframework.batch.item.Chunk;
+import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.data.repository.CrudRepository;
 
 @Slf4j
-public class WorkingCapitalLoanCOBWorkerItemWriter extends AbstractWorkingCapitalLoanCOBWorkerItemWriter {
+public abstract class AbstractWorkingCapitalLoanCOBWorkerItemWriter extends RepositoryItemWriter<WorkingCapitalLoan> {
 
-    public WorkingCapitalLoanCOBWorkerItemWriter(LockingService<WorkingCapitalLoanAccountLock> loanLockingService,
+    private final LockingService<WorkingCapitalLoanAccountLock> loanLockingService;
+
+    public AbstractWorkingCapitalLoanCOBWorkerItemWriter(LockingService<WorkingCapitalLoanAccountLock> loanLockingService,
             CrudRepository<WorkingCapitalLoan, Long> repository) {
-        super(loanLockingService, repository);
+        this.loanLockingService = loanLockingService;
+        setRepository(repository);
     }
 
     @Override
-    protected LockOwner getLockOwner() {
-        return LockOwner.LOAN_COB_CHUNK_PROCESSING;
+    public void write(@NonNull Chunk<? extends WorkingCapitalLoan> items) throws Exception {
+        if (!items.isEmpty()) {
+            super.write(items);
+            List<Long> loanIds = items.getItems().stream().map(AbstractPersistableCustom::getId).toList();
+            loanLockingService.deleteByLoanIdInAndLockOwner(loanIds, getLockOwner());
+        }
     }
+
+    protected abstract LockOwner getLockOwner();
 
 }

@@ -140,3 +140,41 @@ Feature: Working Capital COB Job
     When Admin runs WC COB job
     Then Admin verifies inserted WC loan 1 has lastClosedBusinessDate "31 December 2023"
     Then Admin verifies inserted WC loan 2 has null lastClosedBusinessDate
+
+
+  @TestRailId:CXXXX
+  Scenario: inline WC COB advances lastClosedBusinessDate over consecutive business dates
+    When Admin sets the business date to "01 January 2024"
+    Given Admin inserts an active WC loan into the database
+    When Admin runs inline COB job for Working Capital Loan
+    Then Admin verifies all inserted WC loans have lastClosedBusinessDate "31 December 2023"
+    When Admin sets the business date to "02 January 2024"
+    When Admin runs inline COB job for Working Capital Loan
+    Then Admin verifies all inserted WC loans have lastClosedBusinessDate "01 January 2024"
+    Then Admin verifies all inserted WC loans have version 2
+
+  @TestRailId:CXXXX
+  Scenario: inline WC COB advances lastClosedBusinessDate over skipped business dates
+    When Admin sets the business date to "01 January 2024"
+    Given Admin inserts an active WC loan into the database
+    When Admin runs inline COB job for Working Capital Loan
+    Then Admin verifies all inserted WC loans have lastClosedBusinessDate "31 December 2023"
+    When Admin sets the business date to "05 January 2024"
+    When Admin runs inline COB job for Working Capital Loan
+    Then Admin verifies all inserted WC loans have lastClosedBusinessDate "04 January 2024"
+    ## version 1 is the created and 3 days of inline catchup happened then the actual which indicates version 5
+    Then Admin verifies all inserted WC loans have version 5
+
+  @TestRailId:CXXXX
+  Scenario: Working Capital COB catch up advances lastClosedBusinessDate over skipped business dates
+    When Admin sets the business date to "01 January 2024"
+    Given Admin inserts an active WC loan into the database
+    When Admin runs WC COB job
+    Then Admin verifies all inserted WC loans have lastClosedBusinessDate "31 December 2023"
+    When Admin sets the business date to "05 January 2024"
+    When Admin runs Working Capital COB catch up
+    When Admin runs COB catch up
+    Then Admin checks that WC Loan COB is running until the current business date
+    Then Admin verifies all inserted WC loans have lastClosedBusinessDate "04 January 2024"
+    ## version 1 is the created and 3 days of inline catchup happened then the actual which indicates version 5
+    Then Admin verifies all inserted WC loans have version 5

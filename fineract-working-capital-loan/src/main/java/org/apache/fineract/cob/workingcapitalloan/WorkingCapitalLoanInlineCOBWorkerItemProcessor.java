@@ -16,7 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.cob.workingcapitalloan;
 
-package org.apache.fineract.cob.service;
+import org.apache.fineract.cob.COBBusinessStepService;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.annotation.BeforeStep;
 
-public interface LoanCOBCatchUpService extends COBCatchUpService {}
+public class WorkingCapitalLoanInlineCOBWorkerItemProcessor extends AbstractWorkingCapitalLoanCOBWorkerItemProcessor {
+
+    public WorkingCapitalLoanInlineCOBWorkerItemProcessor(COBBusinessStepService cobBusinessStepService) {
+        super(cobBusinessStepService);
+    }
+
+    @BeforeStep
+    public void beforeStep(StepExecution stepExecution) {
+        setExecutionContext(stepExecution.getJobExecution().getExecutionContext());
+        setBusinessDate(stepExecution);
+    }
+}

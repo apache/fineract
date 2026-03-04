@@ -20,10 +20,12 @@ package org.apache.fineract.cob.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
-import org.apache.fineract.cob.loan.LoanCOBConstant;
+import org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanCOBConstant;
+import org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanRetrieveIdService;
 import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetailRepository;
+import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.jobs.service.JobStarter;
 import org.springframework.batch.core.configuration.JobLocator;
 import org.springframework.context.annotation.Conditional;
@@ -33,26 +35,27 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @Conditional(LoanCOBEnabledCondition.class)
-public class AsyncLoanCOBExecutorServiceImpl extends AsyncCommonCOBExecutorService implements AsyncLoanCOBExecutorService {
+public class AsyncWorkingCapitalLoanCOBExecutorServiceImpl extends AsyncCommonCOBExecutorService
+        implements AsyncWorkingCapitalLoanCOBExecutorService {
 
-    public AsyncLoanCOBExecutorServiceImpl(JobLocator jobLocator, ScheduledJobDetailRepository scheduledJobDetailRepository,
-            JobStarter jobStarter, RetrieveLoanIdService retrieveIdService) {
+    public AsyncWorkingCapitalLoanCOBExecutorServiceImpl(JobLocator jobLocator, ScheduledJobDetailRepository scheduledJobDetailRepository,
+            JobStarter jobStarter, WorkingCapitalLoanRetrieveIdService retrieveIdService) {
         super(jobLocator, scheduledJobDetailRepository, jobStarter, retrieveIdService);
     }
 
     @Override
-    @Async(TaskExecutorConstant.LOAN_COB_CATCH_UP_TASK_EXECUTOR_BEAN_NAME)
+    @Async(TaskExecutorConstant.WORKING_CAPITAL_LOAN_COB_CATCH_UP_TASK_EXECUTOR_BEAN_NAME)
     public void executeLoanCOBCatchUpAsync(FineractContext context) {
         super.executeLoanCOBCatchUpAsync(context);
     }
 
     @Override
     public String getJobName() {
-        return LoanCOBConstant.JOB_NAME;
+        return JobName.WORKING_CAPITAL_LOAN_COB_JOB.name();
     }
 
     @Override
     public String getJobHumanReadableName() {
-        return LoanCOBConstant.JOB_HUMAN_READABLE_NAME;
+        return WorkingCapitalLoanCOBConstant.WORKING_CAPITAL_JOB_HUMAN_READABLE_NAME;
     }
 }

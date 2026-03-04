@@ -172,6 +172,7 @@ import org.apache.fineract.client.feign.services.TellerCashManagementApi;
 import org.apache.fineract.client.feign.services.TwoFactorApi;
 import org.apache.fineract.client.feign.services.UserGeneratedDocumentsApi;
 import org.apache.fineract.client.feign.services.UsersApi;
+import org.apache.fineract.client.feign.services.WorkingCapitalLoanCobCatchUpApi;
 import org.apache.fineract.client.feign.services.WorkingCapitalLoanProductsApi;
 import org.apache.fineract.client.feign.services.WorkingDaysApi;
 
@@ -840,6 +841,10 @@ public final class FineractFeignClient {
 
     public WorkingCapitalLoanProductsApi workingCapitalLoanProducts() {
         return create(WorkingCapitalLoanProductsApi.class);
+    }
+
+    public WorkingCapitalLoanCobCatchUpApi workingCapitalLoanCobCatchUpApi() {
+        return create(WorkingCapitalLoanCobCatchUpApi.class);
     }
 
     public WorkingDaysApi workingDays() {

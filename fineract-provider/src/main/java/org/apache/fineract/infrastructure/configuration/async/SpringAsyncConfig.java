@@ -37,6 +37,13 @@ public class SpringAsyncConfig implements AsyncConfigurer {
         return threadPoolTaskExecutor;
     }
 
+    @Bean(name = TaskExecutorConstant.WORKING_CAPITAL_LOAN_COB_CATCH_UP_TASK_EXECUTOR_BEAN_NAME)
+    public ThreadPoolTaskExecutor workingCapitalLoanCOBCatchUpThreadPoolTaskExecutor() {
+        ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
+        threadPoolTaskExecutor.setMaxPoolSize(1);
+        return threadPoolTaskExecutor;
+    }
+
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return new CustomAsyncExceptionHandler();
