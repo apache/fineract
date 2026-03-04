@@ -78,6 +78,6 @@ public class LocalDateValidator implements ConstraintValidator<LocalDate, Object
                 .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0).parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
                 .toFormatter(Locale.forLanguageTag(locale)).withResolverStyle(ResolverStyle.STRICT);
 
-        parse(date, formatter);
+        var parsedDate = (date, formatter);
     }
 }
