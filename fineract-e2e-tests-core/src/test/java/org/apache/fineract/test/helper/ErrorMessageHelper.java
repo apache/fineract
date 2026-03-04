@@ -1011,4 +1011,33 @@ public final class ErrorMessageHelper {
     public static String reAmortizeSameDateFailure() {
         return "Validation errors: [id] Loan reamortization can only be done once a day. There has already been a reamortization done for today";
     }
+
+    public static String incorrectExpectedValueInResponse() {
+        return "The parameter is not matching to expected.";
+    }
+
+    public static String fieldValueNullOrEmptyMandatoryFailure(String fieldName) {
+        return String.format("The parameter `%s` is mandatory.", fieldName);
+    }
+
+    public static String fieldValueMoreMaxLengthAllowedFailure(String fieldName, int maxAllowedLength) {
+        return String.format("The parameter `%s` exceeds max length of %d.", fieldName, maxAllowedLength);
+    }
+
+    public static String fieldValueZeroValueFailure(String fieldName) {
+        return String.format("The parameter `%s` must be greater than 0.", fieldName);
+    }
+
+    public static String paymentAllocationRulesInvalidNumberFailure(int actualNumberOfPaymentAllocationRules) {
+        return String.format("Each provided payment allocation must contain exactly 3 allocation rules, but %d were provided",
+                actualNumberOfPaymentAllocationRules);
+    }
+
+    public static String paymentAllocationRulesInvalidValueFailure() {
+        return "One or more payment allocation types are invalid or not recognized";
+    }
+
+    public static String workingCapitalLoanProductIdentifiedDoesNotExistFailure(String identifierId) {
+        return String.format("Working Capital Loan Product with identifier %s does not exist", identifierId);
+    }
 }

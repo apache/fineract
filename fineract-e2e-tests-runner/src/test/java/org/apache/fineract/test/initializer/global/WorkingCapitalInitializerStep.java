@@ -20,19 +20,16 @@ package org.apache.fineract.test.initializer.global;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanProductsResponse;
-import org.apache.fineract.client.models.PaymentAllocationOrder;
-import org.apache.fineract.client.models.PostPaymentAllocation;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsResponse;
 import org.apache.fineract.test.data.workingcapitalproduct.DefaultWorkingCapitalLoanProduct;
-import org.apache.fineract.test.factory.WorkingCapitalLoanProductRequestFactory;
+import org.apache.fineract.test.factory.WorkingCapitalRequestFactory;
 import org.apache.fineract.test.support.TestContext;
 import org.apache.fineract.test.support.TestContextKey;
 import org.springframework.stereotype.Component;
@@ -40,39 +37,30 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class WorkingCapitalLoanProductInitializerStep implements FineractGlobalInitializerStep {
+public class WorkingCapitalInitializerStep implements FineractGlobalInitializerStep {
 
     private final FineractFeignClient fineractClient;
-    private final WorkingCapitalLoanProductRequestFactory workingCapitalLoanProductRequestFactory;
+    private final WorkingCapitalRequestFactory workingCapitalRequestFactory;
 
     @Override
     public void initialize() throws Exception {
 
         final String workingCapitalProductDefaultName = DefaultWorkingCapitalLoanProduct.WCLP.getName();
-        final PostWorkingCapitalLoanProductsRequest defaultWCPLRequest = workingCapitalLoanProductRequestFactory
+        final PostWorkingCapitalLoanProductsRequest defaultWCPLRequest = workingCapitalRequestFactory
                 .defaultWorkingCapitalLoanProductRequest() //
-                .name(workingCapitalProductDefaultName) //
-                .paymentAllocation(List.of(//
-                        createPaymentAllocation("DEFAULT", List.of("PENALTY", "FEE", "PRINCIPAL"))));//
+                .name(workingCapitalProductDefaultName); //
         final PostWorkingCapitalLoanProductsResponse responseDefaultWCPL = createWorkingCapitalLoanProductIdempotent(defaultWCPLRequest);
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP, responseDefaultWCPL);
-    }
 
-    private static PostPaymentAllocation createPaymentAllocation(String transactionType, List<String> paymentAllocationRules) {
-        PostPaymentAllocation.TransactionTypeEnum transactionTypeName = PostPaymentAllocation.TransactionTypeEnum.valueOf(transactionType);
-        PostPaymentAllocation paymentAllocationData = new PostPaymentAllocation();
-        paymentAllocationData.setTransactionType(transactionTypeName);
-
-        List<PaymentAllocationOrder> paymentAllocationOrders = new ArrayList<>();
-        for (int i = 0; i < paymentAllocationRules.size(); i++) {
-            PaymentAllocationOrder e = new PaymentAllocationOrder();
-            e.setOrder(i + 1);
-            e.setPaymentAllocationRule(paymentAllocationRules.get(i));
-            paymentAllocationOrders.add(e);
-        }
-
-        paymentAllocationData.setPaymentAllocationOrder(paymentAllocationOrders);
-        return paymentAllocationData;
+        final String workingCapitalProductForUpdateName = DefaultWorkingCapitalLoanProduct.WCLP_FOR_UPDATE.getName();
+        final PostWorkingCapitalLoanProductsRequest defaultForUpdateWCPLRequest = workingCapitalRequestFactory
+                .defaultWorkingCapitalLoanProductRequest() //
+                .name(workingCapitalProductForUpdateName); //
+        final PostWorkingCapitalLoanProductsResponse responseForUpdateWCPL = createWorkingCapitalLoanProductIdempotent(
+                defaultForUpdateWCPLRequest);
+        TestContext.GLOBAL.set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST_FOR_UPDATE_WCLP,
+                defaultForUpdateWCPLRequest);
+        TestContext.GLOBAL.set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_FOR_UPDATE_WCLP, responseForUpdateWCPL);
     }
 
     private PostWorkingCapitalLoanProductsResponse createWorkingCapitalLoanProductIdempotent(

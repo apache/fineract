@@ -367,6 +367,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public String shortName;
         @Schema(example = "Updated Working Capital Loan Product for merchants")
         public String description;
+        @Schema(example = "2075e308-d4a8-44d9-8203-f5a947b8c2f4")
+        public String externalId;
         @Schema(example = "3")
         public Long fundId;
         @Schema(example = "10 July 2022")

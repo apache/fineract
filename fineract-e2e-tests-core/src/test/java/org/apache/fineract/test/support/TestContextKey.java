@@ -318,4 +318,10 @@ public abstract class TestContextKey {
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL_INTEREST_RECALC = "loanProductCreateResponseLP2DownPaymentAdvancedPaymentAllocationProgressiveLoanScheduleVerticalInterestRecalc";
     public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP = "workingCapitalLoanProductCreateResponseWCLP";
     public static final String WC_LOAN_IDS = "wcLoanIds";
+    public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST_FOR_UPDATE_WCLP = "workingCapitalLoanProductCreateRequestForUpdateWCLP";
+    public static final String DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_FOR_UPDATE_WCLP = "workingCapitalLoanProductCreateResponseForUpdateWCLP";
+    public static final String WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST = "workingCapitalLoanProductCreateRequest";
+    public static final String WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE = "workingCapitalLoanProductCreateResponse";
+    public static final String WORKING_CAPITAL_LOAN_PRODUCT_UPDATE_REQUEST = "workingCapitalLoanProductUpdateRequest";
+    public static final String WORKING_CAPITAL_LOAN_PRODUCT_UPDATE_RESPONSE = "workingCapitalLoanProductUpdateResponse";
 }

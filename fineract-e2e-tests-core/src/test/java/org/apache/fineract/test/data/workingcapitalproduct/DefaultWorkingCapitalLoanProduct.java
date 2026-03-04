@@ -20,7 +20,8 @@ package org.apache.fineract.test.data.workingcapitalproduct;
 
 public enum DefaultWorkingCapitalLoanProduct implements WorkingCapitalLoanProduct {
 
-    WCLP; //
+    WCLP, //
+    WCLP_FOR_UPDATE; //
 
     @Override
     public String getName() {
