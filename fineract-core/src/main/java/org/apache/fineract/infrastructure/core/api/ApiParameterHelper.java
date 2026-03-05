@@ -45,6 +45,20 @@ public final class ApiParameterHelper {
         return id;
     }
 
+/**
+ * Extracts the "fields" query parameter from the API request.
+ *
+ * Example:
+ * GET /clients?fields=id,name,status
+ *
+ * Result:
+ * ["id", "name", "status"]
+ *
+ * This is used to limit response payload size and improve performance.
+ *
+ * @param queryParams HTTP query parameters
+ * @return Set of requested response fields, or empty set if none provided
+ */
     public static Set<String> extractFieldsForResponseIfProvided(final MultivaluedMap<String, String> queryParams) {
         Set<String> fields = new HashSet<>();
         String commaSeparatedParameters = "";
