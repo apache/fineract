@@ -397,4 +397,45 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         @Schema(example = "1")
         public Long resourceId;
     }
+
+    @Schema(description = "PostWorkingCapitalLoansLoanIdResponse")
+    public static final class PostWorkingCapitalLoansLoanIdResponse {
+
+        private PostWorkingCapitalLoansLoanIdResponse() {}
+
+        @Schema(example = "2")
+        public Long officeId;
+        @Schema(example = "6")
+        public Long clientId;
+        @Schema(example = "3")
+        public Long loanId;
+        @Schema(example = "3")
+        public Long resourceId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String resourceExternalId;
+        public Object changes;
+    }
+
+    @Schema(description = "PostWorkingCapitalLoansLoanIdRequest")
+    public static final class PostWorkingCapitalLoansLoanIdRequest {
+
+        private PostWorkingCapitalLoansLoanIdRequest() {}
+
+        @Schema(example = "15 January 2024", description = "Date of approval")
+        public String approvedOnDate;
+        @Schema(example = "10000.00", description = "Approved principal amount (optional, defaults to proposed principal)")
+        public BigDecimal approvedLoanAmount;
+        @Schema(example = "1 February 2024", description = "Expected disbursement date")
+        public String expectedDisbursementDate;
+        @Schema(example = "0.0", description = "Discount amount (cannot exceed creation-time discount)")
+        public BigDecimal discountAmount;
+        @Schema(example = "15 January 2024", description = "Date of rejection")
+        public String rejectedOnDate;
+        @Schema(example = "Approval/Rejection note")
+        public String note;
+        @Schema(example = "en_GB")
+        public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+    }
 }

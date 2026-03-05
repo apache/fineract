@@ -129,7 +129,7 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
             loan.getDisbursementDetails().add(detail);
         }
         loan.setProposedPrincipal(principal);
-        loan.setApprovedPrincipal(principal);
+        loan.setApprovedPrincipal(BigDecimal.ZERO);
         final WorkingCapitalLoanBalance balance = WorkingCapitalLoanBalance.createFor(loan);
         balance.setPrincipalOutstanding(principal != null ? principal : BigDecimal.ZERO);
         balance.setTotalPayment(totalPayment != null ? totalPayment : BigDecimal.ZERO);
@@ -249,7 +249,7 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
             final BigDecimal principal = fromApiJsonHelper
                     .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.principalAmountParamName, element);
             loan.setProposedPrincipal(principal);
-            loan.setApprovedPrincipal(principal);
+            loan.setApprovedPrincipal(BigDecimal.ZERO);
             ensureBalance(loan).setPrincipalOutstanding(principal != null ? principal : BigDecimal.ZERO);
             changes.put(WorkingCapitalLoanConstants.principalAmountParamName, principal);
         }

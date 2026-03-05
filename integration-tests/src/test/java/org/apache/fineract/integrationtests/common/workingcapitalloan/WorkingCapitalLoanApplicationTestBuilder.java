@@ -242,6 +242,48 @@ public class WorkingCapitalLoanApplicationTestBuilder {
         return json;
     }
 
+    public static String buildApproveJson(final LocalDate approvedOnDate, final BigDecimal approvedLoanAmount,
+            final BigDecimal discountAmount) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("locale", DEFAULT_LOCALE);
+        json.addProperty("dateFormat", DEFAULT_DATE_FORMAT);
+        if (approvedOnDate != null) {
+            json.addProperty("approvedOnDate", approvedOnDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        }
+        // expectedDisbursementDate is mandatory — default to 7 days after approval
+        final LocalDate disbursementDate = approvedOnDate != null ? approvedOnDate.plusDays(7)
+                : LocalDate.now(ZoneId.systemDefault()).plusDays(7);
+        json.addProperty("expectedDisbursementDate", disbursementDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        if (approvedLoanAmount != null) {
+            json.addProperty("approvedLoanAmount", approvedLoanAmount);
+        }
+        if (discountAmount != null) {
+            json.addProperty("discountAmount", discountAmount);
+        }
+        return json.toString();
+    }
+
+    public static String buildApproveJson(final LocalDate approvedOnDate) {
+        return buildApproveJson(approvedOnDate, null, null);
+    }
+
+    public static String buildRejectJson(final LocalDate rejectedOnDate) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("locale", DEFAULT_LOCALE);
+        json.addProperty("dateFormat", DEFAULT_DATE_FORMAT);
+        if (rejectedOnDate != null) {
+            json.addProperty("rejectedOnDate", rejectedOnDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        }
+        return json.toString();
+    }
+
+    public static String buildUndoApproveJson() {
+        final JsonObject json = new JsonObject();
+        json.addProperty("locale", DEFAULT_LOCALE);
+        json.addProperty("dateFormat", DEFAULT_DATE_FORMAT);
+        return json.toString();
+    }
+
     private JsonArray buildPaymentAllocationJson() {
         final JsonArray paymentAllocation = new JsonArray();
         final JsonObject rule = new JsonObject();

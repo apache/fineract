@@ -594,6 +594,30 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder approveWorkingCapitalLoanApplication(final Long loanId) {
+        this.actionName = "APPROVE";
+        this.entityName = "WORKINGCAPITALLOAN";
+        this.entityId = loanId;
+        this.href = "/workingcapitalloans/" + loanId;
+        return this;
+    }
+
+    public CommandWrapperBuilder rejectWorkingCapitalLoanApplication(final Long loanId) {
+        this.actionName = "REJECT";
+        this.entityName = "WORKINGCAPITALLOAN";
+        this.entityId = loanId;
+        this.href = "/workingcapitalloans/" + loanId;
+        return this;
+    }
+
+    public CommandWrapperBuilder undoWorkingCapitalLoanApplicationApproval(final Long loanId) {
+        this.actionName = "APPROVALUNDO";
+        this.entityName = "WORKINGCAPITALLOAN";
+        this.entityId = loanId;
+        this.href = "/workingcapitalloans/" + loanId;
+        return this;
+    }
+
     public CommandWrapperBuilder createClientIdentifier(final Long clientId) {
         this.actionName = "CREATE";
         this.entityName = "CLIENTIDENTIFIER";

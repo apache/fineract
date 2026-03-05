@@ -31,4 +31,5 @@
   <include relativeToChangelogFile="true" file="parts/0007_drop_flat_percentage_amount.xml"/>
   <include relativeToChangelogFile="true" file="parts/0008_delinquency_for_working_capital_loans.xml"/>
   <include relativeToChangelogFile="true" file="parts/0009_wc_loan_amortization_model.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0010_loan_account_permissions.xml"/>
 </databaseChangeLog>

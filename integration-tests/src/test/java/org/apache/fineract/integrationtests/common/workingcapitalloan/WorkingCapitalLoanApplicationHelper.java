@@ -26,6 +26,7 @@ import org.apache.fineract.client.feign.services.WorkingCapitalLoansApi;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRequest;
@@ -88,6 +89,52 @@ public class WorkingCapitalLoanApplicationHelper {
         Map<String, Object> params = queryParams != null ? queryParams : Map.of();
         Object response = FeignCalls.ok(() -> api().retrieveWorkingCapitalLoanTemplate(params));
         return toJson(response);
+    }
+
+    public Long approveById(final Long loanId, final String jsonBody) {
+        PostWorkingCapitalLoansLoanIdRequest request = fromJson(jsonBody, PostWorkingCapitalLoansLoanIdRequest.class);
+        return FeignCalls.ok(() -> api().stateTransitionWorkingCapitalLoanById(loanId, "approve", request)).getResourceId();
+    }
+
+    public Long rejectById(final Long loanId, final String jsonBody) {
+        PostWorkingCapitalLoansLoanIdRequest request = fromJson(jsonBody, PostWorkingCapitalLoansLoanIdRequest.class);
+        return FeignCalls.ok(() -> api().stateTransitionWorkingCapitalLoanById(loanId, "reject", request)).getResourceId();
+    }
+
+    public Long undoApprovalById(final Long loanId, final String jsonBody) {
+        PostWorkingCapitalLoansLoanIdRequest request = fromJson(jsonBody, PostWorkingCapitalLoansLoanIdRequest.class);
+        return FeignCalls.ok(() -> api().stateTransitionWorkingCapitalLoanById(loanId, "undoapproval", request)).getResourceId();
+    }
+
+    public Long approveByExternalId(final String externalId, final String jsonBody) {
+        PostWorkingCapitalLoansLoanIdRequest request = fromJson(jsonBody, PostWorkingCapitalLoansLoanIdRequest.class);
+        return FeignCalls.ok(() -> api().stateTransitionWorkingCapitalLoanByExternalId(externalId, "approve", request)).getResourceId();
+    }
+
+    public Long rejectByExternalId(final String externalId, final String jsonBody) {
+        PostWorkingCapitalLoansLoanIdRequest request = fromJson(jsonBody, PostWorkingCapitalLoansLoanIdRequest.class);
+        return FeignCalls.ok(() -> api().stateTransitionWorkingCapitalLoanByExternalId(externalId, "reject", request)).getResourceId();
+    }
+
+    public Long undoApprovalByExternalId(final String externalId, final String jsonBody) {
+        PostWorkingCapitalLoansLoanIdRequest request = fromJson(jsonBody, PostWorkingCapitalLoansLoanIdRequest.class);
+        return FeignCalls.ok(() -> api().stateTransitionWorkingCapitalLoanByExternalId(externalId, "undoapproval", request))
+                .getResourceId();
+    }
+
+    public CallFailedRuntimeException runApproveExpectingFailure(final Long loanId, final String jsonBody) {
+        PostWorkingCapitalLoansLoanIdRequest request = fromJson(jsonBody, PostWorkingCapitalLoansLoanIdRequest.class);
+        return FeignCalls.fail(() -> api().stateTransitionWorkingCapitalLoanById(loanId, "approve", request));
+    }
+
+    public CallFailedRuntimeException runRejectExpectingFailure(final Long loanId, final String jsonBody) {
+        PostWorkingCapitalLoansLoanIdRequest request = fromJson(jsonBody, PostWorkingCapitalLoansLoanIdRequest.class);
+        return FeignCalls.fail(() -> api().stateTransitionWorkingCapitalLoanById(loanId, "reject", request));
+    }
+
+    public CallFailedRuntimeException runUndoApprovalExpectingFailure(final Long loanId, final String jsonBody) {
+        PostWorkingCapitalLoansLoanIdRequest request = fromJson(jsonBody, PostWorkingCapitalLoansLoanIdRequest.class);
+        return FeignCalls.fail(() -> api().stateTransitionWorkingCapitalLoanById(loanId, "undoapproval", request));
     }
 
     /**

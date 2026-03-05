@@ -43,6 +43,8 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.core.api.jersey.Pagination;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
+import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
@@ -190,6 +192,36 @@ public class WorkingCapitalLoanApiResource {
         return deleteLoanApplication(null, loanExternalId);
     }
 
+    @POST
+    @Path("{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "stateTransitionWorkingCapitalLoanById", summary = "Approve/Reject/Undo-approve a Working Capital Loan", description = "Mandatory command query parameter: approve, reject, or undoapproval.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanApiResourceSwagger.PostWorkingCapitalLoansLoanIdRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanApiResourceSwagger.PostWorkingCapitalLoansLoanIdResponse.class))) })
+    public CommandProcessingResult stateTransitionById(
+            @PathParam("loanId") @Parameter(description = "loanId", required = true) final Long loanId,
+            @QueryParam("command") @Parameter(description = "command", required = true) final String commandParam,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+        return handleStateTransition(loanId, null, commandParam, apiRequestBodyAsJson);
+    }
+
+    @POST
+    @Path("external-id/{loanExternalId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "stateTransitionWorkingCapitalLoanByExternalId", summary = "Approve/Reject/Undo-approve a Working Capital Loan by external id", description = "Mandatory command query parameter: approve, reject, or undoapproval.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanApiResourceSwagger.PostWorkingCapitalLoansLoanIdRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanApiResourceSwagger.PostWorkingCapitalLoansLoanIdResponse.class))) })
+    public CommandProcessingResult stateTransitionByExternalId(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId", required = true) final String loanExternalId,
+            @QueryParam("command") @Parameter(description = "command", required = true) final String commandParam,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+        return handleStateTransition(null, loanExternalId, commandParam, apiRequestBodyAsJson);
+    }
+
     private CommandProcessingResult modifyLoanApplication(final Long loanId, final String loanExternalIdStr,
             final String apiRequestBodyAsJson) {
         final Long resolvedLoanId = loanId != null ? loanId
@@ -210,6 +242,31 @@ public class WorkingCapitalLoanApiResource {
         }
         final CommandWrapper commandRequest = new CommandWrapperBuilder().withLoanId(resolvedLoanId).deleteWorkingCapitalLoanApplication()
                 .build();
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    }
+
+    private CommandProcessingResult handleStateTransition(final Long loanId, final String loanExternalIdStr, final String commandParam,
+            final String apiRequestBodyAsJson) {
+        final Long resolvedLoanId = loanId != null ? loanId
+                : readPlatformService.getResolvedLoanId(ExternalIdFactory.produce(loanExternalIdStr));
+        if (resolvedLoanId == null) {
+            throw new WorkingCapitalLoanNotFoundException(ExternalIdFactory.produce(loanExternalIdStr));
+        }
+
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+        CommandWrapper commandRequest = null;
+        if (CommandParameterUtil.is(commandParam, "approve")) {
+            commandRequest = builder.approveWorkingCapitalLoanApplication(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "reject")) {
+            commandRequest = builder.rejectWorkingCapitalLoanApplication(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "undoapproval")) {
+            commandRequest = builder.undoWorkingCapitalLoanApplicationApproval(resolvedLoanId).build();
+        }
+
+        if (commandRequest == null) {
+            throw new UnrecognizedQueryParamException("command", commandParam);
+        }
+
         return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 }
