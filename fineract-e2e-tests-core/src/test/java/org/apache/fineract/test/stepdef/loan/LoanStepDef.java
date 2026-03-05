@@ -2402,6 +2402,8 @@ public class LoanStepDef extends AbstractStepDef {
     public void checkLoanTransactionTab(List<List<String>> data, List<GetLoansLoanIdTransactions> transactions, List<String> header,
             String resourceId) {
         checkLoanTransactionTabRows(data, transactions, header, resourceId);
+        log.info("Transactions for resource {}: {}", resourceId,
+                transactions.stream().map(tran -> tran.getType().getValue() + " " + tran.getDate() + " " + tran.getAmount()).toList());
         assertThat(transactions.size())
                 .as(ErrorMessageHelper.nrOfLinesWrongInTransactionsTab(resourceId, transactions.size(), data.size() - 1))
                 .isEqualTo(data.size() - 1);
