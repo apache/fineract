@@ -2402,6 +2402,7 @@ public class LoanStepDef extends AbstractStepDef {
     public void checkLoanTransactionTab(List<List<String>> data, List<GetLoansLoanIdTransactions> transactions, List<String> header,
             String resourceId) {
         checkLoanTransactionTabRows(data, transactions, header, resourceId);
+        // experiment -- do not merge
         log.info("Transactions for resource {}: {}", resourceId,
                 transactions.stream().map(tran -> tran.getType().getValue() + " " + tran.getDate() + " " + tran.getAmount()).toList());
         assertThat(transactions.size())
