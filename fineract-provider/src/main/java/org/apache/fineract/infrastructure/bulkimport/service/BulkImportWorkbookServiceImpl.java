@@ -227,13 +227,14 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
 
     private static final class ImportMapper implements RowMapper<ImportData> {
 
+        private static final String IMPORT_SCHEMA = """
+                i.id as id, i.document_id as documentId, d.name as name, i.import_time as importTime, i.end_time as endTime,
+                i.completed as completed, i.total_records as totalRecords, i.success_count as successCount,
+                i.failure_count as failureCount, i.createdby_id as createdBy
+                from m_import_document i inner join m_document d on i.document_id=d.id where i.entity_type= ?\s""";
+
         public String schema() {
-            final StringBuilder sql = new StringBuilder();
-            sql.append("i.id as id, i.document_id as documentId, d.name as name, i.import_time as importTime, i.end_time as endTime, ")
-                    .append("i.completed as completed, i.total_records as totalRecords, i.success_count as successCount, ")
-                    .append("i.failure_count as failureCount, i.createdby_id as createdBy ")
-                    .append("from m_import_document i inner join m_document d on i.document_id=d.id ").append("where i.entity_type= ? ");
-            return sql.toString();
+            return IMPORT_SCHEMA;
         }
 
         @Override

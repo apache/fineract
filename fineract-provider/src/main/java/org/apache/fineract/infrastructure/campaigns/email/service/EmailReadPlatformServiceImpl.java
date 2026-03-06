@@ -52,28 +52,24 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
 
     private static final class EmailMapper implements RowMapper<EmailData> {
 
-        final String schema;
+        private static final String EMAIL_SCHEMA = """
+                 emo.id as id,
+                emo.group_id as groupId,
+                emo.client_id as clientId,
+                emo.staff_id as staffId,
+                emo.campaign_name as campaignName,
+                emo.status_enum as statusId,
+                emo.email_address as emailAddress,
+                emo.submittedon_date as sentDate,
+                emo.email_subject as emailSubject,
+                emo.message as message,
+                emo.error_message as errorMessage
+                from scheduled_email_messages_outbound emo\s""";
 
-        EmailMapper() {
-            final StringBuilder sql = new StringBuilder(300);
-            sql.append(" emo.id as id, ");
-            sql.append("emo.group_id as groupId, ");
-            sql.append("emo.client_id as clientId, ");
-            sql.append("emo.staff_id as staffId, ");
-            sql.append("emo.campaign_name as campaignName, ");
-            sql.append("emo.status_enum as statusId, ");
-            sql.append("emo.email_address as emailAddress, ");
-            sql.append("emo.submittedon_date as sentDate, ");
-            sql.append("emo.email_subject as emailSubject, ");
-            sql.append("emo.message as message, ");
-            sql.append("emo.error_message as errorMessage ");
-            sql.append("from " + tableName() + " emo");
-
-            this.schema = sql.toString();
-        }
+        EmailMapper() {}
 
         public String schema() {
-            return this.schema;
+            return EMAIL_SCHEMA;
         }
 
         public String tableName() {

@@ -63,45 +63,41 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
 
     private static final class EmailCampaignMapper implements RowMapper<EmailCampaignData> {
 
-        final String schema;
+        private static final String EMAIL_CAMPAIGN_SCHEMA = """
+                ec.id as id,
+                ec.campaign_name as campaignName,
+                ec.campaign_type as campaignType,
+                ec.business_rule_id as businessRuleId,
+                ec.email_subject as emailSubject,
+                ec.email_message as emailMessage,
+                ec.email_attachment_file_format as emailAttachmentFileFormat,
+                sr.id as stretchyReportId,
+                sr.report_name as reportName, sr.report_type as reportType, sr.report_subtype as reportSubType,
+                sr.report_category as reportCategory, sr.report_sql as reportSql, sr.description as reportDescription,
+                sr.core_report as coreReport, sr.use_report as useReport,
+                ec.stretchy_report_param_map as stretchyReportParamMap,
+                ec.param_value as paramValue,
+                ec.status_enum as statusEnum,
+                ec.recurrence as recurrence,
+                ec.recurrence_start_date as recurrenceStartDate,
+                ec.next_trigger_date as nextTriggerDate,
+                ec.last_trigger_date as lastTriggerDate,
+                ec.submittedon_date as submittedOnDate,
+                sbu.username as submittedByUsername,
+                ec.closedon_date as closedOnDate,
+                clu.username as closedByUsername,
+                acu.username as activatedByUsername,
+                ec.approvedon_date as activatedOnDate
+                from scheduled_email_campaign ec
+                left join m_appuser sbu on sbu.id = ec.submittedon_userid
+                left join m_appuser acu on acu.id = ec.approvedon_userid
+                left join m_appuser clu on clu.id = ec.closedon_userid
+                left join stretchy_report sr on ec.stretchy_report_id = sr.id\s""";
 
-        private EmailCampaignMapper() {
-            final StringBuilder sql = new StringBuilder(400);
-            sql.append("ec.id as id, ");
-            sql.append("ec.campaign_name as campaignName, ");
-            sql.append("ec.campaign_type as campaignType, ");
-            sql.append("ec.business_rule_id as businessRuleId, ");
-            sql.append("ec.email_subject as emailSubject, ");
-            sql.append("ec.email_message as emailMessage, ");
-            sql.append("ec.email_attachment_file_format as emailAttachmentFileFormat, ");
-            sql.append("sr.id as stretchyReportId, ");
-            sql.append("sr.report_name as reportName, sr.report_type as reportType, sr.report_subtype as reportSubType, ");
-            sql.append("sr.report_category as reportCategory, sr.report_sql as reportSql, sr.description as reportDescription, ");
-            sql.append("sr.core_report as coreReport, sr.use_report as useReport, ");
-            sql.append("ec.stretchy_report_param_map as stretchyReportParamMap, ");
-            sql.append("ec.param_value as paramValue, ");
-            sql.append("ec.status_enum as statusEnum, ");
-            sql.append("ec.recurrence as recurrence, ");
-            sql.append("ec.recurrence_start_date as recurrenceStartDate, ");
-            sql.append("ec.next_trigger_date as nextTriggerDate, ");
-            sql.append("ec.last_trigger_date as lastTriggerDate, ");
-            sql.append("ec.submittedon_date as submittedOnDate, ");
-            sql.append("sbu.username as submittedByUsername, ");
-            sql.append("ec.closedon_date as closedOnDate, ");
-            sql.append("clu.username as closedByUsername, ");
-            sql.append("acu.username as activatedByUsername, ");
-            sql.append("ec.approvedon_date as activatedOnDate ");
-            sql.append("from scheduled_email_campaign ec ");
-            sql.append("left join m_appuser sbu on sbu.id = ec.submittedon_userid ");
-            sql.append("left join m_appuser acu on acu.id = ec.approvedon_userid ");
-            sql.append("left join m_appuser clu on clu.id = ec.closedon_userid ");
-            sql.append("left join stretchy_report sr on ec.stretchy_report_id = sr.id");
-
-            this.schema = sql.toString();
-        }
+        private EmailCampaignMapper() {}
 
         public String schema() {
-            return this.schema;
+            return EMAIL_CAMPAIGN_SCHEMA;
         }
 
         @Override
@@ -144,28 +140,24 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
 
     private static final class BusinessRuleMapper implements ResultSetExtractor<List<EmailBusinessRulesData>> {
 
-        final String schema;
+        private static final String BUSINESS_RULE_SCHEMA = """
+                sr.id as id,
+                sr.report_name as reportName,
+                sr.report_type as reportType,
+                sr.report_subtype as reportSubType,
+                sr.description as description,
+                sp.parameter_variable as params,
+                sp.parameter_FormatType as paramType,
+                sp.parameter_label as paramLabel,
+                sp.parameter_name as paramName
+                from stretchy_report sr
+                left join stretchy_report_parameter as srp on srp.report_id = sr.id
+                left join stretchy_parameter as sp on sp.id = srp.parameter_id\s""";
 
-        private BusinessRuleMapper() {
-            final StringBuilder sql = new StringBuilder(300);
-            sql.append("sr.id as id, ");
-            sql.append("sr.report_name as reportName, ");
-            sql.append("sr.report_type as reportType, ");
-            sql.append("sr.report_subtype as reportSubType, ");
-            sql.append("sr.description as description, ");
-            sql.append("sp.parameter_variable as params, ");
-            sql.append("sp.parameter_FormatType as paramType, ");
-            sql.append("sp.parameter_label as paramLabel, ");
-            sql.append("sp.parameter_name as paramName ");
-            sql.append("from stretchy_report sr ");
-            sql.append("left join stretchy_report_parameter as srp on srp.report_id = sr.id ");
-            sql.append("left join stretchy_parameter as sp on sp.id = srp.parameter_id ");
-
-            this.schema = sql.toString();
-        }
+        private BusinessRuleMapper() {}
 
         public String schema() {
-            return this.schema;
+            return BUSINESS_RULE_SCHEMA;
         }
 
         @Override
@@ -238,7 +230,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
     public EmailCampaignData retrieveOne(Long resourceId) {
         final boolean isVisible = true;
         try {
-            final String sql = "select " + this.emailCampaignMapper.schema + " where ec.id = ? and ec.is_visible = ?";
+            final String sql = "select " + this.emailCampaignMapper.schema() + " where ec.id = ? and ec.is_visible = ?";
             return this.jdbcTemplate.queryForObject(sql, this.emailCampaignMapper, new Object[] { resourceId, isVisible }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new EmailCampaignNotFound(resourceId, e);

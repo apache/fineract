@@ -2049,16 +2049,17 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     @Override
     public Collection<Long> retrieveLoanIdsWithPendingIncomePostingTransactions() {
         LocalDate currentdate = DateUtils.getBusinessLocalDate();
-        StringBuilder sqlBuilder = new StringBuilder().append(" select distinct loan.id from m_loan as loan ").append(
-                " inner join m_loan_recalculation_details as recdet on (recdet.loan_id = loan.id and recdet.is_compounding_to_be_posted_as_transaction is not null and recdet.is_compounding_to_be_posted_as_transaction = true) ")
-                .append(" inner join m_loan_repayment_schedule as repsch on repsch.loan_id = loan.id ")
-                .append(" inner join m_loan_interest_recalculation_additional_details as adddet on adddet.loan_repayment_schedule_id = repsch.id ")
-                .append(" left join m_loan_transaction as trans on (trans.is_reversed <> true and trans.transaction_type_enum = 19 and trans.loan_id = loan.id and trans.transaction_date = adddet.effective_date) ")
-                .append(" where loan.loan_status_id = 300 ").append(" and loan.is_npa = false and loan.is_charged_off = false ")
-                .append(" and adddet.effective_date is not null ").append(" and trans.transaction_date is null ")
-                .append(" and adddet.effective_date < ? ");
+        final String sql = """
+                select distinct loan.id from m_loan as loan
+                inner join m_loan_recalculation_details as recdet on (recdet.loan_id = loan.id and recdet.is_compounding_to_be_posted_as_transaction is not null and recdet.is_compounding_to_be_posted_as_transaction = true)
+                inner join m_loan_repayment_schedule as repsch on repsch.loan_id = loan.id
+                inner join m_loan_interest_recalculation_additional_details as adddet on adddet.loan_repayment_schedule_id = repsch.id
+                left join m_loan_transaction as trans on (trans.is_reversed <> true and trans.transaction_type_enum = 19 and trans.loan_id = loan.id and trans.transaction_date = adddet.effective_date)
+                where loan.loan_status_id = 300  and loan.is_npa = false and loan.is_charged_off = false
+                and adddet.effective_date is not null  and trans.transaction_date is null
+                and adddet.effective_date < ?\s""";
         try {
-            return this.jdbcTemplate.queryForList(sqlBuilder.toString(), Long.class, new Object[] { currentdate });
+            return this.jdbcTemplate.queryForList(sql, Long.class, new Object[] { currentdate });
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }

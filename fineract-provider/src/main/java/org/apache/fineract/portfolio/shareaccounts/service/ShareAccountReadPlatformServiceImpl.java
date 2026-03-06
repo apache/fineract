@@ -235,42 +235,41 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         private final Collection<ShareAccountChargeData> charges;
         private final Collection<ShareAccountTransactionData> purchasedShares;
 
-        private final String schema;
+        private static final String SHARE_ACCOUNT_SCHEMA = """
+                sa.id as id, sa.external_id as externalId, sa.status_enum as statusEnum,
+                sa.savings_account_id, msa.account_no as savingsAccNo,
+                c.id as clientId, c.display_name as clientName,
+                sa.account_no as accountNo, sa.total_approved_shares as approvedShares, sa.total_pending_shares as pendingShares,
+                sa.savings_account_id as savingsAccountNo, sa.minimum_active_period_frequency as minimumactivePeriod,
+                sa.minimum_active_period_frequency_enum as minimumactivePeriodEnum,
+                sa.lockin_period_frequency as lockinPeriod, sa.lockin_period_frequency_enum as lockinPeriodEnum,
+                sa.allow_dividends_inactive_clients as allowdividendsforinactiveclients,
+                sa.submitted_date as submittedDate, sbu.username as submittedByUsername,
+                sbu.firstname as submittedByFirstname, sbu.lastname as submittedByLastname,
+                sa.rejected_date as rejectedDate, rbu.username as rejectedByUsername,
+                rbu.firstname as rejectedByFirstname, rbu.lastname as rejectedByLastname,
+                sa.approved_date as approvedDate, abu.username as approvedByUsername,
+                abu.firstname as approvedByFirstname, abu.lastname as approvedByLastname,
+                sa.activated_date as activatedDate, avbu.username as activatedByUsername,
+                avbu.firstname as activatedByFirstname, avbu.lastname as activatedByLastname,
+                sa.closed_date as closedDate, cbu.username as closedByUsername,
+                cbu.firstname as closedByFirstname, cbu.lastname as closedByLastname,
+                sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf,
+                curr.name as currencyName, curr.internationalized_name_code as currencyNameCode,
+                curr.display_symbol as currencyDisplaySymbol, sa.product_id as productId, p.name as productName, p.short_name as shortProductName
+                from m_share_account sa join m_share_product as p on p.id = sa.product_id
+                join m_currency curr on curr.code = sa.currency_code left join m_client c ON c.id = sa.client_id
+                left join m_appuser sbu on sbu.id = sa.submitted_userid
+                left join m_appuser rbu on rbu.id = sa.rejected_userid
+                left join m_appuser abu on abu.id = sa.approved_userid
+                left join m_appuser avbu on rbu.id = sa.activated_userid
+                left join m_appuser cbu on cbu.id = sa.closed_userid
+                left join m_savings_account msa on sa.savings_account_id = msa.id\s""";
 
         ShareAccountMapper(final Collection<ShareAccountChargeData> charges,
                 final Collection<ShareAccountTransactionData> purchasedShares) {
             this.charges = charges;
             this.purchasedShares = purchasedShares;
-            StringBuilder buff = new StringBuilder().append("sa.id as id, sa.external_id as externalId, sa.status_enum as statusEnum, ")
-                    .append("sa.savings_account_id, msa.account_no as savingsAccNo, ")
-                    .append("c.id as clientId, c.display_name as clientName, ")
-                    .append("sa.account_no as accountNo, sa.total_approved_shares as approvedShares, sa.total_pending_shares as pendingShares, ")
-                    .append("sa.savings_account_id as savingsAccountNo, sa.minimum_active_period_frequency as minimumactivePeriod, ")
-                    .append("sa.minimum_active_period_frequency_enum as minimumactivePeriodEnum, ")
-                    .append("sa.lockin_period_frequency as lockinPeriod, sa.lockin_period_frequency_enum as lockinPeriodEnum, ")
-                    .append("sa.allow_dividends_inactive_clients as allowdividendsforinactiveclients, ")
-                    .append("sa.submitted_date as submittedDate, sbu.username as submittedByUsername, ")
-                    .append("sbu.firstname as submittedByFirstname, sbu.lastname as submittedByLastname, ")
-                    .append("sa.rejected_date as rejectedDate, rbu.username as rejectedByUsername, ")
-                    .append("rbu.firstname as rejectedByFirstname, rbu.lastname as rejectedByLastname, ")
-                    .append("sa.approved_date as approvedDate, abu.username as approvedByUsername, ")
-                    .append("abu.firstname as approvedByFirstname, abu.lastname as approvedByLastname, ")
-                    .append("sa.activated_date as activatedDate, avbu.username as activatedByUsername, ")
-                    .append("avbu.firstname as activatedByFirstname, avbu.lastname as activatedByLastname, ")
-                    .append("sa.closed_date as closedDate, cbu.username as closedByUsername, ")
-                    .append("cbu.firstname as closedByFirstname, cbu.lastname as closedByLastname, ")
-                    .append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf, ")
-                    .append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ")
-                    .append("curr.display_symbol as currencyDisplaySymbol, sa.product_id as productId, p.name as productName, p.short_name as shortProductName ")
-                    .append("from m_share_account sa ").append("join m_share_product as p on p.id = sa.product_id ")
-                    .append("join m_currency curr on curr.code = sa.currency_code ").append("left join m_client c ON c.id = sa.client_id ")
-                    .append("left join m_appuser sbu on sbu.id = sa.submitted_userid ")
-                    .append("left join m_appuser rbu on rbu.id = sa.rejected_userid ")
-                    .append("left join m_appuser abu on abu.id = sa.approved_userid ")
-                    .append("left join m_appuser avbu on rbu.id = sa.activated_userid ")
-                    .append("left join m_appuser cbu on cbu.id = sa.closed_userid ")
-                    .append("left join m_savings_account msa on sa.savings_account_id = msa.id ");
-            this.schema = buff.toString();
         }
 
         @Override
@@ -356,7 +355,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         }
 
         public String schema() {
-            return this.schema;
+            return SHARE_ACCOUNT_SCHEMA;
         }
     }
 
@@ -366,17 +365,15 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         final PurchasedSharesDataRowMapper purchasedSharesDataRowMapper = new PurchasedSharesDataRowMapper();
 
         ShareAccountMapperForDividents() {
-            StringBuilder sb = new StringBuilder();
-
-            sb.append("sa.id as id, sa.status_enum as statusEnum, ");
-            sb.append("c.id as clientId, c.display_name as clientName, ");
-            sb.append("sa.account_no as accountNo, ");
-            sb.append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf, ");
-            sb.append(purchasedSharesDataRowMapper.schema());
-            sb.append(" from m_share_account sa ");
-            sb.append(" join m_client c ON c.id = sa.client_id ");
-            sb.append(" join m_share_account_transactions saps ON saps.account_id = sa.id ");
-            schema = sb.toString();
+            schema = """
+                    sa.id as id, sa.status_enum as statusEnum,
+                    c.id as clientId, c.display_name as clientName,
+                    sa.account_no as accountNo,
+                    sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf,\s"""
+                    + purchasedSharesDataRowMapper.schema() + """
+                            from m_share_account sa
+                            join m_client c ON c.id = sa.client_id
+                            join m_share_account_transactions saps ON saps.account_id = sa.id\s""";
         }
 
         @Override
@@ -427,16 +424,12 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
 
     private static final class PurchasedSharesDataRowMapper implements RowMapper<ShareAccountTransactionData> {
 
-        private final String schema;
+        private static final String PURCHASED_SHARES_SCHEMA = """
+                saps.id as purchasedId, saps.account_id as accountId, saps.transaction_date as transactionDate, saps.total_shares as purchasedShares, saps.unit_price as unitPrice,
+                saps.status_enum as purchaseStatus, saps.type_enum as purchaseType, saps.amount as amount, saps.charge_amount as chargeamount,
+                saps.amount_paid as amountPaid\s""";
 
-        PurchasedSharesDataRowMapper() {
-            StringBuilder buff = new StringBuilder().append(
-                    "saps.id as purchasedId, saps.account_id as accountId, saps.transaction_date as transactionDate, saps.total_shares as purchasedShares, saps.unit_price as unitPrice, ")
-                    .append("saps.status_enum as purchaseStatus, saps.type_enum as purchaseType, saps.amount as amount, saps.charge_amount as chargeamount, ")
-                    .append("saps.amount_paid as amountPaid ");
-
-            schema = buff.toString();
-        }
+        PurchasedSharesDataRowMapper() {}
 
         @Override
         public ShareAccountTransactionData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
@@ -457,21 +450,18 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         }
 
         public String schema() {
-            return this.schema;
+            return PURCHASED_SHARES_SCHEMA;
         }
     }
 
     private static final class ShareAccountDividendRowMapper implements RowMapper<ShareAccountDividendData> {
 
-        private final String schema;
+        private static final String SHARE_ACCOUNT_DIVIDEND_SCHEMA = """
+                spdp.created_date, sadd.id, sadd.amount, sadd.savings_transaction_id, sadd.status
+                 from m_share_account_dividend_details sadd
+                JOIN m_share_product_dividend_pay_out spdp ON spdp.id = sadd.dividend_pay_out_id\s""";
 
-        ShareAccountDividendRowMapper() {
-            StringBuilder buff = new StringBuilder()
-                    .append("spdp.created_date, sadd.id, sadd.amount, sadd.savings_transaction_id, sadd.status ")
-                    .append(" from m_share_account_dividend_details sadd ")
-                    .append("JOIN m_share_product_dividend_pay_out spdp ON spdp.id = sadd.dividend_pay_out_id ");
-            schema = buff.toString();
-        }
+        ShareAccountDividendRowMapper() {}
 
         @SuppressWarnings("unused")
         @Override
@@ -487,7 +477,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         }
 
         public String schema() {
-            return this.schema;
+            return SHARE_ACCOUNT_DIVIDEND_SCHEMA;
         }
     }
 

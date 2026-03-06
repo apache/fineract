@@ -121,13 +121,13 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
 
     private static final class ProvisioningCriteriaDefinitionRowMapper implements RowMapper<ProvisioningCriteriaDefinitionData> {
 
-        private final StringBuilder sqlQuery = new StringBuilder()
-                .append("pc.id, pc.criteria_id, pc.category_id, mpc.category_name, pc.min_age, pc.max_age, ")
-                .append("pc.provision_percentage, pc.liability_account, pc.expense_account, lia.gl_code as liabilitycode, expe.gl_code as expensecode, ")
-                .append("lia.name as liabilityname, expe.name as expensename ").append("from m_provisioning_criteria_definition as pc ")
-                .append("LEFT JOIN acc_gl_account lia ON lia.id = pc.liability_account ")
-                .append("LEFT JOIN acc_gl_account expe ON expe.id = pc.expense_account ")
-                .append("LEFT JOIN m_provision_category mpc ON mpc.id = pc.category_id");
+        private static final String PROVISIONING_CRITERIA_DEFINITION_SCHEMA = """
+                pc.id, pc.criteria_id, pc.category_id, mpc.category_name, pc.min_age, pc.max_age,
+                pc.provision_percentage, pc.liability_account, pc.expense_account, lia.gl_code as liabilitycode, expe.gl_code as expensecode,
+                lia.name as liabilityname, expe.name as expensename from m_provisioning_criteria_definition as pc
+                LEFT JOIN acc_gl_account lia ON lia.id = pc.liability_account
+                LEFT JOIN acc_gl_account expe ON expe.id = pc.expense_account
+                LEFT JOIN m_provision_category mpc ON mpc.id = pc.category_id\s""";
 
         @Override
         public ProvisioningCriteriaDefinitionData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
@@ -153,7 +153,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
         }
 
         public String schema() {
-            return sqlQuery.toString();
+            return PROVISIONING_CRITERIA_DEFINITION_SCHEMA;
         }
     }
 

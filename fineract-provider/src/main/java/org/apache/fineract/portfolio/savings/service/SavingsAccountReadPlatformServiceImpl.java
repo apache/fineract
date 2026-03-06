@@ -1391,8 +1391,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
     @Override
     public List<Long> getAccountsIdsByStatusPaged(Integer status, int pageSize, Long maxSavingsIdInList) {
-        String sql = new StringBuilder().append(" SELECT sa.id FROM m_savings_account sa ")
-                .append(" where sa.id > ? and sa.status_enum  = ? ").append(" order by sa.id limit ?").toString();
+        final String sql = """
+                SELECT sa.id FROM m_savings_account sa
+                where sa.id > ? and sa.status_enum  = ?  order by sa.id limit ?\s""";
 
         try {
             return this.jdbcTemplate.queryForList(sql, Long.class, new Object[] { maxSavingsIdInList, status, pageSize });

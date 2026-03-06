@@ -39,16 +39,16 @@ public class ScorecardReadPlatformServiceImpl implements ScorecardReadPlatformSe
 
     private static final class ScorecardMapper implements RowMapper<ScorecardData> {
 
-        public String schema() {
-            StringBuilder sb = new StringBuilder(50);
-            sb.append(" sc.id as id, sc.survey_id as surveyId, s.a_name as surveyName, ");
-            sb.append(" sc.client_id as clientId,");
-            sb.append(" sc.user_id as userId, user.username as username ");
-            sb.append(" from m_survey_scorecards sc ");
-            sb.append(" left join m_surveys s ON s.id = sc.survey_id ");
-            sb.append(" left join m_appuser user ON user.id = sc.user_id ");
+        private static final String SCORECARD_SCHEMA = """
+                sc.id as id, sc.survey_id as surveyId, s.a_name as surveyName,
+                sc.client_id as clientId,
+                sc.user_id as userId, user.username as username
+                from m_survey_scorecards sc
+                left join m_surveys s ON s.id = sc.survey_id
+                left join m_appuser user ON user.id = sc.user_id\s""";
 
-            return sb.toString();
+        public String schema() {
+            return SCORECARD_SCHEMA;
         }
 
         @Override
@@ -67,14 +67,14 @@ public class ScorecardReadPlatformServiceImpl implements ScorecardReadPlatformSe
 
     private static final class ScorecardValueMapper implements RowMapper<ScorecardValue> {
 
-        public String schema() {
-            StringBuilder sb = new StringBuilder(50);
-            sb.append(" sc.question_id as questionId, sc.response_id as responseId, ");
-            sb.append(" sc.created_on as createdOn, sc.a_value as value ");
-            sb.append(" from m_survey_scorecards sc  ");
-            sb.append(" where sc.survey_id = ? and sc.client_id = ?  ");
+        private static final String SCORECARD_VALUE_SCHEMA = """
+                sc.question_id as questionId, sc.response_id as responseId,
+                sc.created_on as createdOn, sc.a_value as value
+                from m_survey_scorecards sc
+                where sc.survey_id = ? and sc.client_id = ?\s""";
 
-            return sb.toString();
+        public String schema() {
+            return SCORECARD_VALUE_SCHEMA;
         }
 
         @Override
