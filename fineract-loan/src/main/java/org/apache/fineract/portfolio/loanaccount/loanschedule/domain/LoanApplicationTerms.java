@@ -1876,6 +1876,9 @@ public final class LoanApplicationTerms {
 
     public void updateAnnualNominalInterestRate(BigDecimal annualNominalInterestRate) {
         if (annualNominalInterestRate != null) {
+            if (this.annualNominalInterestRate == null || annualNominalInterestRate.compareTo(this.annualNominalInterestRate) != 0) {
+                this.fixedEmiAmount = null;
+            }
             this.annualNominalInterestRate = annualNominalInterestRate;
         }
     }
