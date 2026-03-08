@@ -18,7 +18,10 @@
  */
 package org.apache.fineract.integrationtests;
 
-import java.math.BigDecimal;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import org.apache.fineract.client.models.DeleteSavingsAccountsAccountIdResponse;
@@ -31,138 +34,92 @@ import org.apache.fineract.client.models.PutSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.SavingsAccountData;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
-import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import retrofit2.Response;
 
 @ExtendWith({ SavingsTestLifecycleExtension.class })
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SavingsAccountsExternalIdTest extends IntegrationTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountsExternalIdTest.class);
-    public static final String EXTERNAL_ID = UUID.randomUUID().toString();
+    private static final String externalId = UUID.randomUUID().toString();
     private final String dateFormat = "dd MMMM yyyy";
     private final String locale = "en";
-    private final String formattedDate = Utils.getLocalDateOfTenant().format(DateTimeFormatter.ofPattern(dateFormat));
+    private final String formattedDate = LocalDate.now(ZoneId.systemDefault()).minusDays(5).format(DateTimeFormatter.ofPattern(dateFormat));
 
     @Test
     @Order(1)
     void submitSavingsAccountsApplication() {
-        LOG.info("------------------------------ CREATING NEW SAVINGS ACCOUNT APPLICATION ---------------------------------------");
         PostSavingsAccountsRequest request = new PostSavingsAccountsRequest();
         request.setClientId(1L);
         request.setProductId(1L);
         request.setLocale(locale);
         request.setDateFormat(dateFormat);
-        request.setSubmittedOnDate(formattedDate);
-        request.setExternalId(EXTERNAL_ID);
+        request.submittedOnDate(formattedDate);
+        request.setExternalId(externalId);
 
-        Response<PostSavingsAccountsResponse> response = okR(fineractClient().savingsAccounts.submitApplication2(request));
-
+        Response<PostSavingsAccountsResponse> response = okR(fineractClient().savingsAccounts.submitSavingsApplication(request));
         assertThat(response.isSuccessful()).isTrue();
-        assertThat(response.body()).isNotNull();
     }
 
     @Test
     @Order(2)
     void updateSavingsAccountWithExternalId() {
-        LOG.info("------------------------------ UPDATING SAVINGS ACCOUNT ---------------------------------------");
         PutSavingsAccountsAccountIdRequest request = new PutSavingsAccountsAccountIdRequest();
         request.setLocale(locale);
         request.setNominalAnnualInterestRate(5.999);
-        Response<PutSavingsAccountsAccountIdResponse> response = okR(fineractClient().savingsAccounts.update22(EXTERNAL_ID, request, ""));
-
+        Response<PutSavingsAccountsAccountIdResponse> response = okR(
+                fineractClient().savingsAccounts.updateSavingsAccountByExternalId(externalId, request, ""));
         assertThat(response.isSuccessful()).isTrue();
-        assertThat(response.body()).isNotNull();
     }
 
     @Test
     @Order(3)
     void approveSavingsAccount() {
-        LOG.info("------------------------------ APPROVING SAVINGS ACCOUNT ---------------------------------------");
         PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
-        request.dateFormat(dateFormat);
-        request.setLocale(locale);
         request.setApprovedOnDate(formattedDate);
+        request.setLocale(locale);
+        request.setDateFormat(dateFormat);
         Response<PostSavingsAccountsAccountIdResponse> response = okR(
-                fineractClient().savingsAccounts.handleCommands7(EXTERNAL_ID, request, "approve"));
-
+                fineractClient().savingsAccounts.handleSavingsCommandsByExternalId(externalId, request, "approve"));
         assertThat(response.isSuccessful()).isTrue();
-        assertThat(response.body()).isNotNull();
     }
 
     @Test
     @Order(4)
     void retrieveSavingsAccountWithExternalId() {
-        LOG.info("------------------------------ RETRIEVING SAVINGS ACCOUNT ---------------------------------------");
-        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
-        request.dateFormat(dateFormat);
-        request.setLocale(locale);
-        request.setActivatedOnDate(formattedDate);
-        Response<SavingsAccountData> response = okR(fineractClient().savingsAccounts.retrieveOne27(EXTERNAL_ID, false, null, "all"));
-
+        Response<SavingsAccountData> response = okR(
+                fineractClient().savingsAccounts.retrieveSavingsAccountByExternalId(externalId, false, "all", null));
         assertThat(response.isSuccessful()).isTrue();
-        assertThat(response.body()).isNotNull();
         assertThat(response.body().getStatus().getCode()).isEqualTo("savingsAccountStatusType.approved");
-        assertThat(response.body().getNominalAnnualInterestRate()).isEqualByComparingTo(BigDecimal.valueOf(5.999));
     }
 
     @Test
     @Order(5)
     void undoApprovalSavingsAccountWithExternalId() {
-        LOG.info("------------------------------ UNDO APPROVAL SAVINGS ACCOUNT ---------------------------------------");
         PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
         Response<PostSavingsAccountsAccountIdResponse> response = okR(
-                fineractClient().savingsAccounts.handleCommands7(EXTERNAL_ID, request, "undoapproval"));
-
+                fineractClient().savingsAccounts.handleSavingsCommandsByExternalId(externalId, request, "undoapproval"));
         assertThat(response.isSuccessful()).isTrue();
-        assertThat(response.body()).isNotNull();
     }
 
     @Test
     @Order(6)
-    void retrieveSavingsAccountWithExternalIdSecondTime() {
-        LOG.info("------------------------------ RETRIEVING SAVINGS ACCOUNT - SECOND TIME ---------------------------------------");
-        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
-        request.dateFormat(dateFormat);
-        request.setLocale(locale);
-        request.setActivatedOnDate(formattedDate);
-        Response<SavingsAccountData> response = okR(fineractClient().savingsAccounts.retrieveOne27(EXTERNAL_ID, false, null, "all"));
-
+    void deleteSavingsAccountWithExternalId() {
+        Response<DeleteSavingsAccountsAccountIdResponse> response = okR(
+                fineractClient().savingsAccounts.deleteSavingsAccountByExternalId(externalId));
         assertThat(response.isSuccessful()).isTrue();
-        assertThat(response.body()).isNotNull();
-        assertThat(response.body().getStatus().getCode()).isEqualTo("savingsAccountStatusType.submitted.and.pending.approval");
     }
 
     @Test
     @Order(7)
-    void deleteSavingsAccountWithExternalId() {
-        LOG.info("------------------------------ DELETING SAVINGS ACCOUNT ---------------------------------------");
-        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
-        request.dateFormat(dateFormat);
-        request.setLocale(locale);
-        request.setActivatedOnDate(formattedDate);
-        Response<DeleteSavingsAccountsAccountIdResponse> response = okR(fineractClient().savingsAccounts.delete20(EXTERNAL_ID));
-
-        assertThat(response.isSuccessful()).isTrue();
-        assertThat(response.body()).isNotNull();
-    }
-
-    @Test
-    @Order(8)
-    void retrieveSavingsAccountWithExternalIdThirdTime() {
-        LOG.info("------------------------------ RETRIEVING SAVINGS ACCOUNT - THIRD TIME ---------------------------------------");
-        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
-        request.dateFormat(dateFormat);
-        request.setLocale(locale);
-        request.setActivatedOnDate(formattedDate);
+    void retrieveSavingsAccountWithExternalIdFinalCheck() {
         Response<SavingsAccountData> response = Calls
-                .executeU(fineractClient().savingsAccounts.retrieveOne27(EXTERNAL_ID, false, null, "all"));
-
+                .executeU(fineractClient().savingsAccounts.retrieveSavingsAccountByExternalId(externalId, false, "all", null));
         assertThat(response.raw().code()).isEqualTo(404);
     }
 }

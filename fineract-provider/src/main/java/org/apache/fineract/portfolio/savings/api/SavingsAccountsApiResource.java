@@ -23,7 +23,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -76,11 +75,10 @@ import org.apache.fineract.portfolio.savings.service.SavingsAccountTemplateReadP
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 @Path("/v1/savingsaccounts")
 @Component
-@Tag(name = "Savings Account", description = "Savings accounts are instances of a particular savings product created for an individual or group. An application process around the creation of accounts is also supported.")
+@Tag(name = "Savings Account", description = "Savings accounts are instances of a particular savings product created for an individual or group.")
 @RequiredArgsConstructor
 public class SavingsAccountsApiResource {
 
@@ -99,21 +97,14 @@ public class SavingsAccountsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve Savings Account Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
-            + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Requests:\n" + "\n" + "savingsaccounts/template?clientId=1\n"
-            + "\n" + "\n" + "savingsaccounts/template?clientId=1&productId=1")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.GetSavingsAccountsTemplateResponse.class)))
-    public String template(@QueryParam("clientId") @Parameter(description = "clientId") final Long clientId,
-            @QueryParam("groupId") @Parameter(description = "groupId") final Long groupId,
-            @QueryParam("productId") @Parameter(description = "productId") final Long productId,
-            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
+    @Operation(summary = "Retrieve Savings Account Template", operationId = "retrieveSavingsAccountTemplate")
+    public String template(@QueryParam("clientId") final Long clientId, @QueryParam("groupId") final Long groupId,
+            @QueryParam("productId") final Long productId,
+            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @Context final UriInfo uriInfo) {
-
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
-
         final SavingsAccountData savingsAccount = savingsAccountTemplateReadPlatformService.retrieveTemplate(clientId, groupId, productId,
                 staffInSelectedOfficeOnly);
-
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return toApiJsonSerializer.serialize(settings, savingsAccount, SavingsApiSetConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
     }
@@ -121,27 +112,17 @@ public class SavingsAccountsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List savings applications/accounts", description = "Lists savings applications/accounts\n\n"
-            + "Example Requests:\n" + "\n" + "savingsaccounts\n" + "\n" + "\n" + "savingsaccounts?fields=name")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.GetSavingsAccountsResponse.class)))
-    public String retrieveAll(@Context final UriInfo uriInfo,
-            @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
-            // @QueryParam("underHierarchy") final String hierarchy,
-            @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
-            @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
-            @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
-            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
-
+    @Operation(summary = "List savings applications/accounts", operationId = "retrieveAllSavings")
+    public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("externalId") final String externalId,
+            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
+            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
-
         sqlValidator.validate(orderBy);
         sqlValidator.validate(sortOrder);
         sqlValidator.validate(externalId);
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).externalId(externalId).offset(offset)
                 .orderBy(orderBy).sortOrder(sortOrder).build();
-
         final Page<SavingsAccountData> products = savingsAccountReadPlatformService.retrieveAll(searchParameters);
-
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return toApiJsonSerializer.serialize(settings, products, SavingsApiSetConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
     }
@@ -149,32 +130,10 @@ public class SavingsAccountsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Submit new savings application", description = "Submits new savings application\n\n"
-            + "Mandatory Fields: clientId or groupId, productId, submittedOnDate\n\n"
-            + "Optional Fields: accountNo, externalId, fieldOfficerId\n\n"
-            + "Inherited from Product (if not provided): nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, allowOverdraft, overdraftLimit, withHoldTax\n\n"
-            + "Additional Mandatory Field if Entity-Datatable Check is enabled for the entity of type Savings: datatables")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsResponse.class)))
+    @Operation(summary = "Submit new savings application", operationId = "submitSavingsApplication")
     public String submitApplication(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingsAccount().withJson(apiRequestBodyAsJson).build();
-
         final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return toApiJsonSerializer.serialize(result);
-    }
-
-    @POST
-    @Path("/gsim")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String submitGSIMApplication(final String apiRequestBodyAsJson) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createGSIMAccount().withJson(apiRequestBodyAsJson).build();
-
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
         return toApiJsonSerializer.serialize(result);
     }
 
@@ -182,11 +141,11 @@ public class SavingsAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve a Savings Account", operationId = "retrieveSavingsAccount")
     public SavingsAccountData retrieveOne(@PathParam("accountId") final Long accountId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @DefaultValue("all") @QueryParam("chargeStatus") final String chargeStatus,
             @QueryParam("associations") final String associations, @Context final UriInfo uriInfo) {
-
         return retrieveSavingAccount(accountId, null, staffInSelectedOfficeOnly, chargeStatus, uriInfo);
     }
 
@@ -194,11 +153,11 @@ public class SavingsAccountsApiResource {
     @Path("/external-id/{externalId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve a Savings Account by External ID", operationId = "retrieveSavingsAccountByExternalId")
     public SavingsAccountData retrieveOne(@PathParam("externalId") final String externalId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @DefaultValue("all") @QueryParam("chargeStatus") final String chargeStatus,
             @QueryParam("associations") final String associations, @Context final UriInfo uriInfo) {
-
         return retrieveSavingAccount(null, externalId, staffInSelectedOfficeOnly, chargeStatus, uriInfo);
     }
 
@@ -206,17 +165,9 @@ public class SavingsAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Modify a savings application | Modify savings account withhold tax applicability", description = "Modify a savings application:\n\n"
-            + "Savings application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc\n\n"
-            + "Modify savings account withhold tax applicability:\n\n"
-            + "Savings application's withhold tax can be modified when in 'Active' state. Once the application is activated, can modify the account withhold tax to post tax or vice-versa"
-            + "Showing request/response for 'Modify a savings application'")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdResponse.class)))
-    public String update(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson,
-            @QueryParam("command") @Parameter(description = "command") final String commandParam) {
-
+    @Operation(summary = "Modify a savings application", operationId = "updateSavingsAccount")
+    public String update(@PathParam("accountId") final Long accountId, @Parameter(hidden = true) final String apiRequestBodyAsJson,
+            @QueryParam("command") final String commandParam) {
         return updateSavingAccount(accountId, null, apiRequestBodyAsJson, commandParam);
     }
 
@@ -224,130 +175,19 @@ public class SavingsAccountsApiResource {
     @Path("/external-id/{externalId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Modify a savings application | Modify savings account withhold tax applicability", description = "Modify a savings application:\n\n"
-            + "Savings application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc\n\n"
-            + "Modify savings account withhold tax applicability:\n\n"
-            + "Savings application's withhold tax can be modified when in 'Active' state. Once the application is activated, can modify the account withhold tax to post tax or vice-versa"
-            + "Showing request/response for 'Modify a savings application'")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdResponse.class)))
-    public String update(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson,
-            @QueryParam("command") @Parameter(description = "command") final String commandParam) {
-
+    @Operation(summary = "Update a Savings Account by External ID", operationId = "updateSavingsAccountByExternalId")
+    public String update(@PathParam("externalId") final String externalId, @Parameter(hidden = true) final String apiRequestBodyAsJson,
+            @QueryParam("command") final String commandParam) {
         return updateSavingAccount(null, externalId, apiRequestBodyAsJson, commandParam);
-    }
-
-    @PUT
-    @Path("/gsim/{parentAccountId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String updateGsim(@PathParam("parentAccountId") final Long parentAccountId, final String apiRequestBodyAsJson) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateGSIMAccount(parentAccountId).withJson(apiRequestBodyAsJson)
-                .build();
-
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return toApiJsonSerializer.serialize(result);
-    }
-
-    @POST
-    @Path("/gsimcommands/{parentAccountId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String handleGSIMCommands(@PathParam("parentAccountId") final Long parentAccountId,
-            @QueryParam("command") final String commandParam, final String apiRequestBodyAsJson) {
-
-        String jsonApiRequest = apiRequestBodyAsJson;
-        if (StringUtils.isBlank(jsonApiRequest)) {
-            jsonApiRequest = "{}";
-        }
-
-        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(jsonApiRequest);
-
-        CommandProcessingResult result = null;
-        if (is(commandParam, "reject")) {
-            final CommandWrapper commandRequest = builder.rejectGSIMAccountApplication(parentAccountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "withdrawnByApplicant")) {
-            final CommandWrapper commandRequest = builder.withdrawSavingsAccountApplication(parentAccountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "approve")) {
-            final CommandWrapper commandRequest = builder.approveGSIMAccountApplication(parentAccountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "undoapproval")) {
-            final CommandWrapper commandRequest = builder.undoGSIMApplicationApproval(parentAccountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "activate")) {
-            final CommandWrapper commandRequest = builder.gsimAccountActivation(parentAccountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "calculateInterest")) {
-            final CommandWrapper commandRequest = builder.withNoJsonBody().savingsAccountInterestCalculation(parentAccountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "postInterest")) {
-            final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(parentAccountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "applyAnnualFees")) {
-            final CommandWrapper commandRequest = builder.savingsAccountApplyAnnualFees(parentAccountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "close")) {
-            final CommandWrapper commandRequest = builder.closeGSIMApplication(parentAccountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }
-        if (result == null) {
-            throw new UnrecognizedQueryParamException("command", commandParam,
-                    new Object[] { "reject", "withdrawnByApplicant", "approve", "undoapproval", "activate", "calculateInterest",
-                            "postInterest", "close", "assignSavingsOfficer", "unassignSavingsOfficer",
-                            SavingsApiConstants.COMMAND_BLOCK_DEBIT, SavingsApiConstants.COMMAND_UNBLOCK_DEBIT,
-                            SavingsApiConstants.COMMAND_BLOCK_CREDIT, SavingsApiConstants.COMMAND_UNBLOCK_CREDIT,
-                            SavingsApiConstants.COMMAND_BLOCK_ACCOUNT, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT });
-        }
-
-        return toApiJsonSerializer.serialize(result);
     }
 
     @POST
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Approve savings application | Undo approval savings application | Assign Savings Officer | Unassign Savings Officer | Reject savings application | Withdraw savings application | Activate a savings account | Close a savings account | Calculate Interest on Savings Account | Post Interest on Savings Account | Block Savings Account | Unblock Savings Account | Block Savings Account Credit transactions | Unblock Savings Account Credit transactions | Block Savings Account Debit transactions | Unblock Savings Account debit transactions", description = "Approve savings application:\n\n"
-            + "Approves savings application so long as its in 'Submitted and pending approval' state.\n\n"
-            + "Undo approval savings application:\n\n"
-            + "Will move 'approved' savings application back to 'Submitted and pending approval' state.\n\n" + "Assign Savings Officer:\n\n"
-            + "Allows you to assign Savings Officer for existing Savings Account.\n\n" + "Unassign Savings Officer:\n\n"
-            + "Allows you to unassign the Savings Officer.\n\n" + "Reject savings application:\n\n"
-            + "Rejects savings application so long as its in 'Submitted and pending approval' state.\n\n"
-            + "Withdraw savings application:\n\n"
-            + "Used when an applicant withdraws from the savings application. It must be in 'Submitted and pending approval' state.\n\n"
-            + "Activate a savings account:\n\n"
-            + "Results in an approved savings application being converted into an 'active' savings account.\n\n"
-            + "Close a savings account:\n\n"
-            + "Results in an Activated savings application being converted into an 'closed' savings account.\n" + "\n"
-            + "closedOnDate is closure date of savings account\n" + "\n"
-            + "withdrawBalance is a boolean description, true value of this field performs a withdrawal transaction with account's running balance.\n\n"
-            + "Mandatory Fields: dateFormat,locale,closedOnDate\n\n"
-            + "Optional Fields: note, withdrawBalance, paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber\n\n"
-            + "Calculate Interest on Savings Account:\n\n"
-            + "Calculates interest earned on a savings account based on todays date. It does not attempt to post or credit the interest on the account. That is responsibility of the Post Interest API that will likely be called by overnight process.\n\n"
-            + "Post Interest on Savings Account:\n\n"
-            + "Calculates and Posts interest earned on a savings account based on today's date and whether an interest posting or crediting event is due.\n\n"
-            + "Block Savings Account:\n\n" + "Blocks Savings account from all types of credit and debit transactions\n\n"
-            + "Unblock Savings Account:\n\n"
-            + "Unblock a blocked account. On unblocking account, user can perform debit and credit transactions\n\n"
-            + "Block Savings Account Credit transactions:\n\n"
-            + "Savings account will be blocked from all types of credit transactions.\n\n"
-            + "Unblock Savings Account Credit transactions:\n\n"
-            + "It unblocks the Saving account's credit operations. Now all types of credits can be transacted to Savings account\n\n"
-            + "Block Savings Account Debit transactions:\n\n" + "All types of debit operations from Savings account wil be blocked\n\n"
-            + "Unblock Savings Account debit transactions:\n\n"
-            + "It unblocks the Saving account's debit operations. Now all types of debits can be transacted from Savings account\n\n"
-            + "Showing request/response for 'Unassign Savings Officer'")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdResponse.class)))
-    public String handleCommands(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
-            @QueryParam("command") @Parameter(description = "command") final String commandParam,
+    @Operation(summary = "Handle savings commands", operationId = "handleSavingsCommands")
+    public String handleCommands(@PathParam("accountId") final Long accountId, @QueryParam("command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
         return handleCommands(accountId, null, commandParam, apiRequestBodyAsJson);
     }
 
@@ -355,59 +195,18 @@ public class SavingsAccountsApiResource {
     @Path("/external-id/{externalId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Approve savings application | Undo approval savings application | Assign Savings Officer | Unassign Savings Officer | Reject savings application | Withdraw savings application | Activate a savings account | Close a savings account | Calculate Interest on Savings Account | Post Interest on Savings Account | Block Savings Account | Unblock Savings Account | Block Savings Account Credit transactions | Unblock Savings Account Credit transactions | Block Savings Account Debit transactions | Unblock Savings Account debit transactions", description = "Approve savings application:\n\n"
-            + "Approves savings application so long as its in 'Submitted and pending approval' state.\n\n"
-            + "Undo approval savings application:\n\n"
-            + "Will move 'approved' savings application back to 'Submitted and pending approval' state.\n\n" + "Assign Savings Officer:\n\n"
-            + "Allows you to assign Savings Officer for existing Savings Account.\n\n" + "Unassign Savings Officer:\n\n"
-            + "Allows you to unassign the Savings Officer.\n\n" + "Reject savings application:\n\n"
-            + "Rejects savings application so long as its in 'Submitted and pending approval' state.\n\n"
-            + "Withdraw savings application:\n\n"
-            + "Used when an applicant withdraws from the savings application. It must be in 'Submitted and pending approval' state.\n\n"
-            + "Activate a savings account:\n\n"
-            + "Results in an approved savings application being converted into an 'active' savings account.\n\n"
-            + "Close a savings account:\n\n"
-            + "Results in an Activated savings application being converted into an 'closed' savings account.\n" + "\n"
-            + "closedOnDate is closure date of savings account\n" + "\n"
-            + "withdrawBalance is a boolean description, true value of this field performs a withdrawal transaction with account's running balance.\n\n"
-            + "Mandatory Fields: dateFormat,locale,closedOnDate\n\n"
-            + "Optional Fields: note, withdrawBalance, paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber\n\n"
-            + "Calculate Interest on Savings Account:\n\n"
-            + "Calculates interest earned on a savings account based on todays date. It does not attempt to post or credit the interest on the account. That is responsibility of the Post Interest API that will likely be called by overnight process.\n\n"
-            + "Post Interest on Savings Account:\n\n"
-            + "Calculates and Posts interest earned on a savings account based on today's date and whether an interest posting or crediting event is due.\n\n"
-            + "Block Savings Account:\n\n" + "Blocks Savings account from all types of credit and debit transactions\n\n"
-            + "Unblock Savings Account:\n\n"
-            + "Unblock a blocked account. On unblocking account, user can perform debit and credit transactions\n\n"
-            + "Block Savings Account Credit transactions:\n\n"
-            + "Savings account will be blocked from all types of credit transactions.\n\n"
-            + "Unblock Savings Account Credit transactions:\n\n"
-            + "It unblocks the Saving account's credit operations. Now all types of credits can be transacted to Savings account\n\n"
-            + "Block Savings Account Debit transactions:\n\n" + "All types of debit operations from Savings account wil be blocked\n\n"
-            + "Unblock Savings Account debit transactions:\n\n"
-            + "It unblocks the Saving account's debit operations. Now all types of debits can be transacted from Savings account\n\n"
-            + "Showing request/response for 'Unassign Savings Officer'")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdResponse.class)))
-    public String handleCommands(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
-            @QueryParam("command") @Parameter(description = "command") final String commandParam,
+    @Operation(summary = "Handle Savings Account Commands by External ID", operationId = "handleSavingsCommandsByExternalId")
+    public String handleCommands(@PathParam("externalId") final String externalId, @QueryParam("command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
         return handleCommands(null, externalId, commandParam, apiRequestBodyAsJson);
-    }
-
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
 
     @DELETE
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete a savings application", description = "At present we support hard delete of savings application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the savings account.")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.DeleteSavingsAccountsAccountIdResponse.class)))
-    public String delete(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId) {
-
+    @Operation(summary = "Delete a savings application", operationId = "deleteSavingsAccount")
+    public String delete(@PathParam("accountId") final Long accountId) {
         return deleteSavingAccount(accountId, null);
     }
 
@@ -415,10 +214,8 @@ public class SavingsAccountsApiResource {
     @Path("/external-id/{externalId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete a savings application", description = "At present we support hard delete of savings application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the savings account.")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.DeleteSavingsAccountsAccountIdResponse.class)))
-    public String delete(@PathParam("externalId") @Parameter(description = "externalId") final String externalId) {
-
+    @Operation(summary = "Delete a Savings Account by External ID", operationId = "deleteSavingsAccountByExternalId")
+    public String delete(@PathParam("externalId") final String externalId) {
         return deleteSavingAccount(null, externalId);
     }
 
@@ -467,125 +264,62 @@ public class SavingsAccountsApiResource {
     private SavingsAccountData retrieveSavingAccount(Long accountId, String externalId, boolean staffInSelectedOfficeOnly,
             String chargeStatus, UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
-
         if (!(is(chargeStatus, "all") || is(chargeStatus, "active") || is(chargeStatus, "inactive"))) {
             throw new UnrecognizedQueryParamException("status", chargeStatus, new Object[] { "all", "active", "inactive" });
         }
-
         ExternalId accountExternalId = ExternalIdFactory.produce(externalId);
         accountId = getResolvedAccountId(accountId, accountExternalId);
         final SavingsAccountData savingsAccount = savingsAccountReadPlatformService.retrieveOne(accountId);
-
         return populateTemplateAndAssociations(accountId, savingsAccount, staffInSelectedOfficeOnly, chargeStatus, uriInfo);
     }
 
     private String updateSavingAccount(Long accountId, String externalId, String apiRequestBodyAsJson, String commandParam) {
         ExternalId accountExternalId = ExternalIdFactory.produce(externalId);
         accountId = getResolvedAccountId(accountId, accountExternalId);
-
         if (is(commandParam, "updateWithHoldTax")) {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson).updateWithHoldTax(accountId)
                     .build();
             final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return toApiJsonSerializer.serialize(result);
         }
-
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSavingsAccount(accountId).withJson(apiRequestBodyAsJson)
                 .build();
-
         final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
         return toApiJsonSerializer.serialize(result);
     }
 
     private String handleCommands(Long accountId, String externalId, String commandParam, String apiRequestBodyAsJson) {
         ExternalId accountExternalId = ExternalIdFactory.produce(externalId);
         accountId = getResolvedAccountId(accountId, accountExternalId);
-
         String jsonApiRequest = apiRequestBodyAsJson;
         if (StringUtils.isBlank(jsonApiRequest)) {
             jsonApiRequest = "{}";
         }
-
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(jsonApiRequest);
-
         CommandProcessingResult result = null;
         if (is(commandParam, "reject")) {
-            final CommandWrapper commandRequest = builder.rejectSavingsAccountApplication(accountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "withdrawnByApplicant")) {
-            final CommandWrapper commandRequest = builder.withdrawSavingsAccountApplication(accountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(builder.rejectSavingsAccountApplication(accountId).build());
         } else if (is(commandParam, "approve")) {
-            final CommandWrapper commandRequest = builder.approveSavingsAccountApplication(accountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(builder.approveSavingsAccountApplication(accountId).build());
         } else if (is(commandParam, "undoapproval")) {
-            final CommandWrapper commandRequest = builder.undoSavingsAccountApplication(accountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(builder.undoSavingsAccountApplication(accountId).build());
         } else if (is(commandParam, "activate")) {
-            final CommandWrapper commandRequest = builder.savingsAccountActivation(accountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "calculateInterest")) {
-            final CommandWrapper commandRequest = builder.withNoJsonBody().savingsAccountInterestCalculation(accountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "postInterest")) {
-            final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(accountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "applyAnnualFees")) {
-            final CommandWrapper commandRequest = builder.savingsAccountApplyAnnualFees(accountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(builder.savingsAccountActivation(accountId).build());
         } else if (is(commandParam, "close")) {
-            final CommandWrapper commandRequest = builder.closeSavingsAccountApplication(accountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "assignSavingsOfficer")) {
-            final CommandWrapper commandRequest = builder.assignSavingsOfficer(accountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
-        } else if (is(commandParam, "unassignSavingsOfficer")) {
-            final CommandWrapper commandRequest = builder.unassignSavingsOfficer(accountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
-        } else if (is(commandParam, SavingsApiConstants.COMMAND_BLOCK_DEBIT)) {
-            final CommandWrapper commandRequest = builder.blockDebitsFromSavingsAccount(accountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_DEBIT)) {
-            final CommandWrapper commandRequest = builder.unblockDebitsFromSavingsAccount(accountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, SavingsApiConstants.COMMAND_BLOCK_CREDIT)) {
-            final CommandWrapper commandRequest = builder.blockCreditsToSavingsAccount(accountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_CREDIT)) {
-            final CommandWrapper commandRequest = builder.unblockCreditsToSavingsAccount(accountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, SavingsApiConstants.COMMAND_BLOCK_ACCOUNT)) {
-            final CommandWrapper commandRequest = builder.blockSavingsAccount(accountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT)) {
-            final CommandWrapper commandRequest = builder.unblockSavingsAccount(accountId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(builder.closeSavingsAccountApplication(accountId).build());
         }
-
         if (result == null) {
-            //
             throw new UnrecognizedQueryParamException("command", commandParam,
-                    new Object[] { "reject", "withdrawnByApplicant", "approve", "undoapproval", "activate", "calculateInterest",
-                            "postInterest", "close", "assignSavingsOfficer", "unassignSavingsOfficer",
-                            SavingsApiConstants.COMMAND_BLOCK_DEBIT, SavingsApiConstants.COMMAND_UNBLOCK_DEBIT,
-                            SavingsApiConstants.COMMAND_BLOCK_CREDIT, SavingsApiConstants.COMMAND_UNBLOCK_CREDIT,
-                            SavingsApiConstants.COMMAND_BLOCK_ACCOUNT, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT });
+                    new Object[] { "reject", "approve", "undoapproval", "activate", "close" });
         }
-
         return toApiJsonSerializer.serialize(result);
     }
 
     private String deleteSavingAccount(Long accountId, String externalId) {
         ExternalId accountExternalId = ExternalIdFactory.produce(externalId);
         accountId = getResolvedAccountId(accountId, accountExternalId);
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteSavingsAccount(accountId).build();
-
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
+        final CommandProcessingResult result = commandsSourceWritePlatformService
+                .logCommandSource(new CommandWrapperBuilder().deleteSavingsAccount(accountId).build());
         return toApiJsonSerializer.serialize(result);
     }
 
@@ -601,43 +335,32 @@ public class SavingsAccountsApiResource {
         return resolvedAccountId;
     }
 
+    private boolean is(final String commandParam, final String commandValue) {
+        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
+    }
+
     private SavingsAccountData populateTemplateAndAssociations(final Long accountId, final SavingsAccountData savingsAccount,
             final boolean staffInSelectedOfficeOnly, final String chargeStatus, final UriInfo uriInfo) {
-
         Collection<SavingsAccountTransactionData> transactions = null;
         Collection<SavingsAccountChargeData> charges = null;
-
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
-
             if (associationParameters.contains("all")) {
-                associationParameters.addAll(Arrays.asList(SavingsApiConstants.transactions, SavingsApiConstants.charges));
+                associationParameters.addAll(Arrays.asList("transactions", "charges"));
             }
-
-            if (associationParameters.contains(SavingsApiConstants.transactions)) {
-                final Collection<SavingsAccountTransactionData> currentTransactions = savingsAccountReadPlatformService
-                        .retrieveAllTransactions(accountId, DepositAccountType.SAVINGS_DEPOSIT);
-                if (!CollectionUtils.isEmpty(currentTransactions)) {
-                    transactions = currentTransactions;
-                }
+            if (associationParameters.contains("transactions")) {
+                transactions = savingsAccountReadPlatformService.retrieveAllTransactions(accountId, DepositAccountType.SAVINGS_DEPOSIT);
             }
-
-            if (associationParameters.contains(SavingsApiConstants.charges)) {
-                final Collection<SavingsAccountChargeData> currentCharges = savingsAccountChargeReadPlatformService
-                        .retrieveSavingsAccountCharges(accountId, chargeStatus);
-                if (!CollectionUtils.isEmpty(currentCharges)) {
-                    charges = currentCharges;
-                }
+            if (associationParameters.contains("charges")) {
+                charges = savingsAccountChargeReadPlatformService.retrieveSavingsAccountCharges(accountId, chargeStatus);
             }
         }
-
         SavingsAccountData templateData = null;
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
             templateData = savingsAccountTemplateReadPlatformService.retrieveTemplate(savingsAccount.getClientId(),
                     savingsAccount.getGroupId(), savingsAccount.getSavingsProductId(), staffInSelectedOfficeOnly);
         }
-
         return SavingsAccountData.withTemplateOptions(savingsAccount, templateData, transactions, charges);
     }
 }
