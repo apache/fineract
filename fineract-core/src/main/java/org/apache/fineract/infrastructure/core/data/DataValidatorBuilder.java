@@ -23,6 +23,7 @@ import com.google.gson.JsonArray;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -1087,6 +1088,36 @@ public class DataValidatorBuilder {
                     value, scale);
             this.dataValidationErrors.add(error);
             return this;
+        }
+        return this;
+    }
+
+    /**
+     * Validates that the value is a valid {@link DateTimeFormatter} pattern.
+     *
+     * <p>
+     * If the value is a non-blank string, this method attempts to create a {@link DateTimeFormatter} using
+     * {@link DateTimeFormatter#ofPattern(String)}. If the pattern is invalid, a validation error is added.
+     * </p>
+     *
+     * @return this {@code DataValidatorBuilder} for method chaining
+     */
+    public DataValidatorBuilder validDateTimeFormatPattern() {
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
+
+        if (this.value != null && this.value instanceof String pattern && !StringUtils.isBlank(pattern)) {
+            try {
+                DateTimeFormatter.ofPattern(pattern);
+            } catch (final IllegalArgumentException e) {
+                String validationErrorCode = "validation.msg." + this.resource + "." + this.parameter + ".invalid.dateFormat.pattern";
+                String defaultEnglishMessage = "The parameter `" + this.parameter + "` has an invalid date/time pattern: `" + pattern
+                        + "`.";
+                final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode, defaultEnglishMessage, this.parameter,
+                        pattern);
+                this.dataValidationErrors.add(error);
+            }
         }
         return this;
     }

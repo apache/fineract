@@ -212,6 +212,12 @@ public final class ClientDataValidator {
                     .integerGreaterThanZero();
         }
 
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.dateFormatParamName, element)) {
+            final String dateFormat = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.dateFormatParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.dateFormatParamName).value(dateFormat).notBlank()
+                    .validDateTimeFormatPattern();
+        }
+
         final Integer legalFormId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.legalFormIdParamName, element);
         baseDataValidator.reset().parameter(ClientApiConstants.legalFormIdParamName).value(legalFormId).notNull().inMinMaxRange(1, 2);
 
@@ -499,6 +505,12 @@ public final class ClientDataValidator {
             final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.dateOfBirthParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.dateOfBirthParamName).value(dateOfBirth).notNull()
                     .validateDateBefore(DateUtils.getBusinessLocalDate()).validateDateBefore(submittedDate);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.dateFormatParamName, element)) {
+            final String dateFormat = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.dateFormatParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.dateFormatParamName).value(dateFormat).notBlank()
+                    .validDateTimeFormatPattern();
         }
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.legalFormIdParamName, element)) {
