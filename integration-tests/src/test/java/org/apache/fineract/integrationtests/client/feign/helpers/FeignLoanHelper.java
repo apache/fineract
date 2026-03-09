@@ -182,6 +182,13 @@ public class FeignLoanHelper {
         return response.getLoanId();
     }
 
+    public Long createSubmittedLoanWithOriginators(Long clientId, Long productId, List<PostLoansOriginatorData> originators) {
+        PostLoansRequest request = buildSubmittedLoanRequest(clientId, productId);
+        request.setOriginators(originators);
+        PostLoansResponse response = ok(() -> fineractClient.loans().calculateLoanScheduleOrSubmitLoanApplication(request, (String) null));
+        return response.getLoanId();
+    }
+
     public CallFailedRuntimeException createSubmittedLoanWithOriginatorsExpectingError(Long clientId,
             List<PostLoansOriginatorData> originators) {
         PostLoansRequest request = buildSubmittedLoanRequest(clientId);
@@ -190,7 +197,10 @@ public class FeignLoanHelper {
     }
 
     private PostLoansRequest buildSubmittedLoanRequest(Long clientId) {
-        Long productId = createSimpleLoanProduct();
+        return buildSubmittedLoanRequest(clientId, createSimpleLoanProduct());
+    }
+
+    private PostLoansRequest buildSubmittedLoanRequest(Long clientId, Long productId) {
         String todayDate = org.apache.fineract.integrationtests.common.Utils.dateFormatter
                 .format(org.apache.fineract.integrationtests.common.Utils.getLocalDateOfTenant());
         return new PostLoansRequest()//

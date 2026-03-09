@@ -18,7 +18,17 @@
  */
 package org.apache.fineract.integrationtests.client.feign.tests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.PostLoansOriginatorData;
@@ -214,5 +224,71 @@ public class FeignLoanOriginatorDuringApplicationTest extends FeignIntegrationTe
 
         originatorHelper.detachOriginatorFromLoan(loanId, originatorId);
         originatorHelper.deleteOriginator(originatorId);
+    }
+
+    @Test
+    public void testCreateLoanWithSameOriginatorExternalIdInParallelShouldNotFail() throws InterruptedException {
+        configHelper.enableOriginatorCreationDuringLoanApplication();
+
+        try {
+            final int threadCount = 10;
+            final String sharedOriginatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
+            final Long productId = loanHelper.createSimpleLoanProduct();
+
+            final List<Long> clientIds = new ArrayList<>();
+            for (int i = 0; i < threadCount; i++) {
+                clientIds.add(clientHelper.createClient());
+            }
+
+            final ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+            final CountDownLatch startLatch = new CountDownLatch(1);
+            final CountDownLatch doneLatch = new CountDownLatch(threadCount);
+            final List<Long> results = Collections.synchronizedList(new ArrayList<>());
+            final List<Exception> exceptions = Collections.synchronizedList(new ArrayList<>());
+
+            for (int i = 0; i < threadCount; i++) {
+                final Long clientId = clientIds.get(i);
+                executorService.execute(() -> {
+                    try {
+                        startLatch.await();
+                        final List<PostLoansOriginatorData> originators = List.of(
+                                new PostLoansOriginatorData().externalId(sharedOriginatorExternalId).name("Parallel Created Originator"));
+                        final Long loanId = loanHelper.createSubmittedLoanWithOriginators(clientId, productId, originators);
+                        results.add(loanId);
+                    } catch (final Exception e) {
+                        exceptions.add(e);
+                    } finally {
+                        doneLatch.countDown();
+                    }
+                });
+            }
+
+            startLatch.countDown();
+            assertTrue(doneLatch.await(30, TimeUnit.SECONDS), "All threads should complete within timeout");
+            executorService.shutdown();
+            assertTrue(executorService.awaitTermination(10, TimeUnit.SECONDS), "ExecutorService should terminate");
+
+            assertTrue(exceptions.isEmpty(),
+                    "Expected no exceptions but got " + exceptions.size() + ": " + exceptions.stream().map(Throwable::getMessage).toList());
+            assertEquals(threadCount, results.size(), "All loan applications should succeed");
+
+            // Verify all loans have the same originator attached
+            for (final Long loanId : results) {
+                final var loanDetails = loanHelper.getLoanDetailsWithAssociations(loanId, "originators");
+                assertNotNull(loanDetails.getOriginators());
+                assertEquals(1, loanDetails.getOriginators().size());
+                assertEquals(sharedOriginatorExternalId, loanDetails.getOriginators().get(0).getExternalId(),
+                        "All loans should reference the same originator");
+            }
+
+            // Cleanup
+            final var createdOriginator = originatorHelper.getOriginatorByExternalId(sharedOriginatorExternalId);
+            for (final Long loanId : results) {
+                originatorHelper.detachOriginatorFromLoan(loanId, createdOriginator.getId());
+            }
+            originatorHelper.deleteOriginator(createdOriginator.getId());
+        } finally {
+            configHelper.disableOriginatorCreationDuringLoanApplication();
+        }
     }
 }
