@@ -63,6 +63,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -3261,7 +3262,14 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 }
             }
         } else {
-            handleReAgeWithCommonStrategy(loanTransaction, new CommonReAgeSettings(), ctx);
+            CommonReAgeSettings settings = switch (loanReAgeParameter.getInterestHandlingType()) {
+                case LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST -> new CommonReAgeSettings(false, true, true, true);
+                case LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_PAYABLE_INTEREST -> new CommonReAgeSettings(true, true, true, true);
+                case LoanReAgeInterestHandlingType.DEFAULT -> new CommonReAgeSettings();
+                case null -> new CommonReAgeSettings();
+                default -> throw new NotImplementedException();
+            };
+            handleReAgeWithCommonStrategy(loanTransaction, settings, ctx);
         }
         if (loanTransaction.getAmount().compareTo(ZERO) == 0) {
             loanTransaction.reverse();
