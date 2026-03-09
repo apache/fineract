@@ -276,6 +276,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newRepaymentTransaction);
         loan = loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
+
+        loanLifecycleStateMachine.determineAndTransition(loan, transactionDate);
+
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, newRepaymentTransaction, noteText);
             this.noteRepository.save(note);
