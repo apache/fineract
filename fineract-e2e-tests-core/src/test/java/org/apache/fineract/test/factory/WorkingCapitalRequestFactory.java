@@ -87,7 +87,7 @@ public class WorkingCapitalRequestFactory {
         String shortName = loanProductsRequestFactory.generateShortNameSafely();
 
         PostAllowAttributeOverrides allowAttributeOverrides = new PostAllowAttributeOverrides().delinquencyBucketClassification(true)
-                .discountDefault(false).flatPercentageAmount(true).periodPaymentFrequencyType(false).periodPaymentFrequency(true);
+                .discountDefault(false).periodPaymentFrequencyType(false).periodPaymentFrequency(true);
 
         return new PutWorkingCapitalLoanProductsProductIdRequest()//
                 .name(name)//

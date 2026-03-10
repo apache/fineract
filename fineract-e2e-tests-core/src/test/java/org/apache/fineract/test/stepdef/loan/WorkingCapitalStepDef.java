@@ -459,8 +459,6 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
             assert allowAttributeOverridesGetResponse != null;
             assertions.assertThat(allowAttributeOverridesCreateResponse.getDiscountDefault())
                     .isEqualTo(allowAttributeOverridesGetResponse.getDiscountDefault());
-            assertions.assertThat(allowAttributeOverridesCreateResponse.getFlatPercentageAmount())
-                    .isEqualTo(allowAttributeOverridesGetResponse.getFlatPercentageAmount());
             assertions.assertThat(allowAttributeOverridesCreateResponse.getDelinquencyBucketClassification())
                     .isEqualTo(allowAttributeOverridesGetResponse.getDelinquencyBucketClassification());
             assertions.assertThat(allowAttributeOverridesCreateResponse.getPeriodPaymentFrequency())
@@ -572,8 +570,6 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
             assert allowAttributeOverridesGetResponse != null;
             assertions.assertThat(allowAttributeOverridesCreateResponse.getDiscountDefault())
                     .isEqualTo(allowAttributeOverridesGetResponse.getDiscountDefault());
-            assertions.assertThat(allowAttributeOverridesCreateResponse.getFlatPercentageAmount())
-                    .isEqualTo(allowAttributeOverridesGetResponse.getFlatPercentageAmount());
             assertions.assertThat(allowAttributeOverridesCreateResponse.getDelinquencyBucketClassification())
                     .isEqualTo(allowAttributeOverridesGetResponse.getDelinquencyBucketClassification());
             assertions.assertThat(allowAttributeOverridesCreateResponse.getPeriodPaymentFrequency())
