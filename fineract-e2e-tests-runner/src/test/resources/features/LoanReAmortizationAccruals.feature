@@ -2958,9 +2958,8 @@ Feature: LoanReAmortizationAccruals
       | 12 March 2024    | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 13 March 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 March 2024    | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
-    #TODO - Active status after pay-off
-   # Then Loan Pay-off is made on "15 March 2024"
-   # Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    When Loan Pay-off is made on "15 March 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
   @TestRailId:C4631 @AdvancedPaymentAllocation
   Scenario: Verify Re-amortization trn with N+1 installment - interest bearing loan with equal amortization + interest split: Accrual and Accrual Activity S4
