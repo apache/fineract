@@ -136,6 +136,11 @@ public class RunreportsApiResource {
         MultivaluedMap<String, String> queryParams = new MultivaluedStringMap();
         queryParams.putAll(uriInfo.getQueryParameters());
 
+        final boolean template = ApiParameterHelper.template(queryParams);
+        if (template && queryParams.getFirst(ReportParameters.getParameterType()) == null) {
+            queryParams.putSingle(ReportParameters.getParameterType(), Boolean.TRUE.toString());
+        }
+
         final boolean parameterTypeValue = ApiParameterHelper.parameterType(queryParams);
 
         checkUserPermissionForReport(reportName, parameterTypeValue);
