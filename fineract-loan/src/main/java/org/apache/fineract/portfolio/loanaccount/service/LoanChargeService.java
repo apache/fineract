@@ -64,6 +64,7 @@ public class LoanChargeService {
     private final LoanTransactionProcessingService loanTransactionProcessingService;
     private final LoanLifecycleStateMachine loanLifecycleStateMachine;
     private final LoanBalanceService loanBalanceService;
+    private final LoanScheduleGeneratorService loanScheduleGeneratorService;
 
     public void recalculateAllCharges(final Loan loan) {
         Set<LoanCharge> charges = loan.getActiveCharges();
@@ -249,7 +250,9 @@ public class LoanChargeService {
         return switch (loanCharge.getChargeCalculation()) {
             case PERCENT_OF_AMOUNT -> getDerivedAmountForCharge(loan, loanCharge);
             case PERCENT_OF_AMOUNT_AND_INTEREST -> {
-                final BigDecimal totalInterestCharged = loan.getTotalInterest();
+                final BigDecimal totalInterestCharged = loan.isMultiDisburmentLoan()
+                        ? loanScheduleGeneratorService.calculateInteresOnlyWithFirtDisbursement(loan)
+                        : loan.getTotalInterest();
                 if (loan.isMultiDisburmentLoan() && loanCharge.isDisbursementCharge()) {
                     yield sumMultiDisbursementAmounts(loan, false).getAmount().add(totalInterestCharged);
                 } else if (loan.isMultiDisburmentLoan() && loanCharge.isTrancheDisbursementCharge()) {
@@ -258,7 +261,13 @@ public class LoanChargeService {
                     yield loan.getPrincipal().getAmount().add(totalInterestCharged);
                 }
             }
-            case PERCENT_OF_INTEREST -> loan.getTotalInterest();
+            case PERCENT_OF_INTEREST -> {
+                if (loan.isMultiDisburmentLoan() && loanCharge.isDisbursementCharge()) {
+                    yield loanScheduleGeneratorService.calculateInteresOnlyWithFirtDisbursement(loan);
+                } else {
+                    yield loan.getTotalInterest();
+                }
+            }
             case PERCENT_OF_DISBURSEMENT_AMOUNT -> {
                 if (loanCharge.getTrancheDisbursementCharge() != null) {
                     yield loanCharge.getTrancheDisbursementCharge().getloanDisbursementDetails().getPrincipal();
