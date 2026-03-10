@@ -88,7 +88,15 @@ public class WorkingCapitalLoanCobStepDef extends AbstractStepDef {
     @When("Admin runs inline COB job for Working Capital Loan")
     public void runWorkingCapitalInlineCOB() throws IOException {
         InlineJobRequest inlineJobRequest = new InlineJobRequest().addLoanIdsItem(getTrackedLoanIds().getLast());
+        ok(() -> fineractClient.inlineJob().executeInlineJob("WC_LOAN_COB", inlineJobRequest));
+    }
 
+    @When("Admin runs inline COB job for all Working Capital Loans")
+    public void runWorkingCapitalInlineCOBForAll() throws IOException {
+        InlineJobRequest inlineJobRequest = new InlineJobRequest();
+        for (Long loanId : getTrackedLoanIds()) {
+            inlineJobRequest.addLoanIdsItem(loanId);
+        }
         ok(() -> fineractClient.inlineJob().executeInlineJob("WC_LOAN_COB", inlineJobRequest));
     }
 
@@ -224,25 +232,20 @@ public class WorkingCapitalLoanCobStepDef extends AbstractStepDef {
                 .until(() -> {
                     IsCatchUpRunningDTO isCatchUpRunningResponse = ok(
                             () -> fineractClient.workingCapitalLoanCobCatchUpApi().isCatchUpRunning1());
-                    IsCatchUpRunningDTO isCatchUpRunning = isCatchUpRunningResponse;
-                    return isCatchUpRunning.getCatchUpRunning();
+                    return isCatchUpRunningResponse.getCatchUpRunning();
                 });
         // Then wait for catch-up to complete
         await().atMost(Duration.ofMinutes(4)).pollInterval(Duration.ofSeconds(5)).pollDelay(Duration.ofSeconds(5)).until(() -> {
-            // Check if catch-up is still running
             IsCatchUpRunningDTO statusResponse = ok(() -> fineractClient.workingCapitalLoanCobCatchUpApi().isCatchUpRunning1());
-            // Only proceed with date check if catch-up is not running
             if (!statusResponse.getCatchUpRunning()) {
-                // Get the current business date
                 BusinessDateResponse businessDateResponse = ok(
                         () -> fineractClient.businessDateManagement().getBusinessDate(BusinessDateHelper.COB, Map.of()));
                 LocalDate currentBusinessDate = businessDateResponse.getDate();
 
-                // Get the last closed business date
-                OldestCOBProcessedLoanDTO catchUpResponse = ok(() -> fineractClient.loanCobCatchUp().getOldestCOBProcessedLoan());
+                OldestCOBProcessedLoanDTO catchUpResponse = ok(
+                        () -> fineractClient.workingCapitalLoanCobCatchUpApi().getOldestCOBProcessedLoan1());
                 LocalDate lastClosedDate = catchUpResponse.getCobBusinessDate();
 
-                // Verify that the last closed date is not before the current business date
                 return !lastClosedDate.isBefore(currentBusinessDate);
             }
             return false;
