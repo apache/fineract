@@ -48,6 +48,7 @@
         <class>org.apache.fineract.portfolio.calendar.domain.Calendar</class>
         <class>org.apache.fineract.portfolio.calendar.domain.CalendarHistory</class>
         <class>org.apache.fineract.portfolio.client.domain.ClientIdentifier</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentPeriodAndRule</class>
         <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket</class>
         <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange</class>
         <class>org.apache.fineract.portfolio.group.domain.StaffAssignmentHistory</class>

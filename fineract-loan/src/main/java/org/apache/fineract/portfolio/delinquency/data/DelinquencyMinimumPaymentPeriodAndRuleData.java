@@ -16,40 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.delinquency.api;
 
-import java.io.Serial;
-import java.io.Serializable;
+package org.apache.fineract.portfolio.delinquency.data;
+
 import java.math.BigDecimal;
-import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-@Setter
+@ToString
+@AllArgsConstructor
 @Getter
-@NoArgsConstructor
-public class DelinquencyBucketRequest implements Serializable {
+@Setter
+public class DelinquencyMinimumPaymentPeriodAndRuleData {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    private String name;
-    private List<Long> ranges;
-    private String bucketType;
-    private MinimumPaymentPeriodAndRule minimumPaymentPeriodAndRule;
-
-    @Setter
-    @Getter
-    @NoArgsConstructor
-    public static class MinimumPaymentPeriodAndRule implements Serializable {
-
-        @Serial
-        private static final long serialVersionUID = 1L;
-
-        private Long frequency;
-        private Integer frequencyType;
-        private BigDecimal minimumPayment;
-        private Long minimumPaymentType;
-    }
+    private Long frequency;
+    private EnumOptionData frequencyType;
+    private BigDecimal minimumPayment;
+    private EnumOptionData minimumPaymentType;
 }

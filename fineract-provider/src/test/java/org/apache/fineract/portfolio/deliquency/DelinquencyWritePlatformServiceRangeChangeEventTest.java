@@ -57,6 +57,7 @@ import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketMappingsRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentPeriodAndRuleRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRangeRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
@@ -130,6 +131,8 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
     private LoanDelinquencyActionRepository loanDelinquencyActionRepository;
     @Mock
     private DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
+    @Mock
+    private DelinquencyMinimumPaymentPeriodAndRuleRepository delinquencyMinimumPaymentPeriodAndRuleRepository;
 
     private DelinquencyWritePlatformServiceHelper delinquencyWritePlatformServiceHelper;
 
@@ -153,7 +156,7 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
                 repositoryBucketMappings, loanDelinquencyTagRepository, loanRepository, loanProductRepository, loanDelinquencyDomainService,
                 loanInstallmentDelinquencyTagRepository, delinquencyReadPlatformService, loanDelinquencyActionRepository,
                 delinquencyActionParseAndValidator, delinquencyEffectivePauseHelper, businessEventNotifierService,
-                delinquencyWritePlatformServiceHelper);
+                delinquencyWritePlatformServiceHelper, delinquencyMinimumPaymentPeriodAndRuleRepository);
     }
 
     @AfterAll

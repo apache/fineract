@@ -45,6 +45,7 @@ import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketType;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeCalculationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeIncomeType;
@@ -548,8 +549,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             // Delinquency Buckets
             final Long delinquencyBucketId = JdbcSupport.getLong(rs, "delinquencyBucketId");
             final String delinquencyBucketName = rs.getString("delinquencyBucketName");
-            final DelinquencyBucketData delinquencyBucket = new DelinquencyBucketData(delinquencyBucketId, delinquencyBucketName,
-                    new ArrayList<>());
+            final DelinquencyBucketData delinquencyBucket = DelinquencyBucketData.getDataInstance(delinquencyBucketId,
+                    delinquencyBucketName, new ArrayList<>(), DelinquencyBucketType.REGULAR.getValue(), null);
 
             final String loanScheduleTypeStr = rs.getString("loanScheduleType");
             final LoanScheduleType loanScheduleType = LoanScheduleType.valueOf(loanScheduleTypeStr);

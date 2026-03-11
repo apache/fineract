@@ -22,6 +22,7 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketMappingsRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentPeriodAndRuleRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRangeRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistoryRepository;
@@ -83,12 +84,13 @@ public class DelinquencyConfiguration {
             DelinquencyReadPlatformService delinquencyReadPlatformService, LoanDelinquencyActionRepository loanDelinquencyActionRepository,
             DelinquencyActionParseAndValidator delinquencyActionParseAndValidator,
             DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper,
-            DelinquencyWritePlatformServiceHelper delinquencyWritePlatformServiceHelper) {
+            DelinquencyWritePlatformServiceHelper delinquencyWritePlatformServiceHelper,
+            DelinquencyMinimumPaymentPeriodAndRuleRepository delinquencyMinimumPaymentPeriodAndRuleRepository) {
         return new DelinquencyWritePlatformServiceImpl(dataValidatorBucket, dataValidatorRange, repositoryRange, repositoryBucket,
                 repositoryBucketMappings, loanDelinquencyTagRepository, loanRepository, loanProductRepository, loanDelinquencyDomainService,
                 loanInstallmentDelinquencyTagRepository, delinquencyReadPlatformService, loanDelinquencyActionRepository,
                 delinquencyActionParseAndValidator, delinquencyEffectivePauseHelper, businessEventNotifierService,
-                delinquencyWritePlatformServiceHelper);
+                delinquencyWritePlatformServiceHelper, delinquencyMinimumPaymentPeriodAndRuleRepository);
     }
 
     @Bean

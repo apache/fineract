@@ -19,11 +19,13 @@
 package org.apache.fineract.portfolio.delinquency.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 
 @ToString
 @AllArgsConstructor
@@ -34,5 +36,17 @@ public class DelinquencyBucketData implements Serializable {
     private Long id;
     private String name;
     private List<DelinquencyRangeData> ranges;
+    private Long bucketType;
+    private DelinquencyMinimumPaymentPeriodAndRuleData minimumPaymentPeriodAndRule;
+
+    public static DelinquencyBucketData getDataInstance(Long id, String name, List<DelinquencyRangeData> ranges, Long bucketType,
+            DelinquencyMinimumPaymentPeriodAndRuleData minimumPaymentPeriodAndRule) {
+        return new DelinquencyBucketData(id, name, ranges, bucketType, minimumPaymentPeriodAndRule, null, null, null, null);
+    }
+
+    private List<DelinquencyRangeData> rangesOptions = new ArrayList<>();
+    private List<CodeValueData> bucketTypeOptions = new ArrayList<>();
+    private List<CodeValueData> frequencyTypeOptions = new ArrayList<>();
+    private List<CodeValueData> minimumPaymentOptions = new ArrayList<>();
 
 }

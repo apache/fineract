@@ -16,21 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.portfolio.delinquency.domain;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
-import jakarta.persistence.Version;
-import java.util.List;
+import java.io.Serial;
+import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -40,29 +37,25 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "m_delinquency_bucket", uniqueConstraints = {
-        @UniqueConstraint(name = "uq_delinquency_bucket_name", columnNames = { "name" }) })
-public class DelinquencyBucket extends AbstractAuditableWithUTCDateTimeCustom<Long> {
+@Table(name = "m_delinquency_payment_rule")
+public class DelinquencyMinimumPaymentPeriodAndRule extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @Serial
+    private static final long serialVersionUID = -9204385885041120403L;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "m_delinquency_bucket_mappings", joinColumns = @JoinColumn(name = "delinquency_bucket_id"), inverseJoinColumns = @JoinColumn(name = "delinquency_range_id"))
-    private List<DelinquencyRange> ranges;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "bucket_id", nullable = false, unique = true)
+    private DelinquencyBucket bucket;
 
-    @OneToOne(mappedBy = "bucket", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private DelinquencyMinimumPaymentPeriodAndRule minimumPaymentPeriodAndRule;
+    @Column(name = "frequency", nullable = false)
+    private Long frequency;
 
-    @Enumerated
-    @Column(name = "bucket_type")
-    private DelinquencyBucketType bucketType;
+    @Column(name = "frequency_type", nullable = false)
+    private DelinquencyFrequencyType frequencyType;
 
-    @Version
-    private Long version;
+    @Column(name = "minimum_payment", nullable = false)
+    private BigDecimal minimumPayment;
 
-    public DelinquencyBucket(String name) {
-        this.name = name;
-    }
-
+    @Column(name = "minimum_payment_type", nullable = false)
+    private DelinquencyMinimumPayment minimumPaymentType;
 }

@@ -33,17 +33,26 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriInfo;
+import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketType;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyFrequencyType;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPayment;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -58,6 +67,7 @@ public class DelinquencyApiResource {
     private final DefaultToApiJsonSerializer<DelinquencyRangeData> jsonSerializerRange;
     private final DelinquencyReadPlatformService readPlatformService;
     private final PortfolioCommandSourceWritePlatformService commandWritePlatformService;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
     public static final String DELINQUENCY_BUCKET = "DELINQUENCY_BUCKET";
 
     @GET
@@ -128,6 +138,16 @@ public class DelinquencyApiResource {
     }
 
     @GET
+    @Path("buckets/template")
+    @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Template for Delinquency Buckets", description = "")
+    public DelinquencyBucketData getTemplate() {
+        securityContext.authenticatedUser().validateHasReadPermission(DELINQUENCY_BUCKET);
+        return handleTemplate(null);
+    }
+
+    @GET
     @Path("buckets")
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
@@ -143,9 +163,27 @@ public class DelinquencyApiResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Retrieve a specific Delinquency Bucket based on the Id", description = "")
     public DelinquencyBucketData getDelinquencyBucket(
-            @PathParam("delinquencyBucketId") @Parameter(description = "delinquencyBucketId") final Long delinquencyBucketId) {
+            @PathParam("delinquencyBucketId") @Parameter(description = "delinquencyBucketId") final Long delinquencyBucketId,
+            @Context final UriInfo uriInfo) {
         securityContext.authenticatedUser().validateHasReadPermission(DELINQUENCY_BUCKET);
-        return this.readPlatformService.retrieveDelinquencyBucket(delinquencyBucketId);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        DelinquencyBucketData delinquencyBucketData = this.readPlatformService.retrieveDelinquencyBucket(delinquencyBucketId);
+        return settings.isTemplate() ? handleTemplate(delinquencyBucketData) : delinquencyBucketData;
+    }
+
+    private DelinquencyBucketData handleTemplate(DelinquencyBucketData delinquencyBucketData) {
+        if (delinquencyBucketData == null) {
+            delinquencyBucketData = DelinquencyBucketData.getDataInstance(null, null, List.of(), DelinquencyBucketType.REGULAR.getValue(),
+                    null);
+        }
+        delinquencyBucketData.setRangesOptions(this.readPlatformService.retrieveAllDelinquencyRanges());
+        delinquencyBucketData.setBucketTypeOptions(
+                Arrays.stream(DelinquencyBucketType.values()).map(e -> CodeValueData.instance(e.getValue(), e.getCode())).toList());
+        delinquencyBucketData.setFrequencyTypeOptions(Arrays.stream(DelinquencyFrequencyType.values())
+                .map(e -> CodeValueData.instance(e.getValue().longValue(), e.getCode())).toList());
+        delinquencyBucketData.setMinimumPaymentOptions(
+                Arrays.stream(DelinquencyMinimumPayment.values()).map(e -> CodeValueData.instance(e.getValue(), e.getCode())).toList());
+        return delinquencyBucketData;
     }
 
     @POST

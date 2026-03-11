@@ -25,6 +25,12 @@ public final class DelinquencyApiConstants {
     }
 
     public static final String NAME_PARAM_NAME = "name";
+    public static final String BUCKET_TYPE_PARAM_NAME = "bucketType";
+    public static final String MINIMUM_PAYMENT_PERIOD_AND_RULE_PARAM_NAME = "minimumPaymentPeriodAndRule";
+    public static final String FREQUENCY_PARAM_NAME = "frequency";
+    public static final String FREQUENCY_TYPE_PARAM_NAME = "frequencyType";
+    public static final String MINIMUM_PAYMENT_PARAM_NAME = "minimumPayment";
+    public static final String MINIMUM_PAYMENT_TYPE_PARAM_NAME = "minimumPaymentType";
     public static final String CLASSIFICATION_PARAM_NAME = "classification";
     public static final String RANGES_PARAM_NAME = "ranges";
     public static final String MINIMUMAGEDAYS_PARAM_NAME = "minimumAgeDays";
