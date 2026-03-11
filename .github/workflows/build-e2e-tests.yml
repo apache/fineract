@@ -15,8 +15,8 @@ jobs:
       fail-fast: false
       matrix:
         # Define the number of shards (1-based indexing)
-        shard_index: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        total_shards: [10]
+        shard_index: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        total_shards: [15]
 
     env:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
