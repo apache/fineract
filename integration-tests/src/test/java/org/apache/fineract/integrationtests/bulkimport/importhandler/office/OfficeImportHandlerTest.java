@@ -22,10 +22,14 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -35,7 +39,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.bulkimport.constants.OfficeConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.integrationtests.bulkimport.importhandler.LocalContentStorageUtil;
-import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
@@ -47,6 +50,8 @@ import org.junit.jupiter.api.Test;
 
 @Slf4j
 public class OfficeImportHandlerTest {
+
+    private static final String OFFICE_URL = "/fineract-provider/api/v1/offices";
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -61,8 +66,7 @@ public class OfficeImportHandlerTest {
 
     @Test
     public void testOfficeImport() throws IOException, InterruptedException, NoSuchFieldException, ParseException {
-        OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
-        Workbook workbook = officeHelper.getOfficeWorkBook("dd MMMM yyyy");
+        Workbook workbook = getOfficeWorkBook("dd MMMM yyyy");
 
         // insert dummy data into excel
         Sheet sheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
@@ -87,7 +91,7 @@ public class OfficeImportHandlerTest {
         workbook.write(outputStream);
         outputStream.close();
 
-        String importDocumentId = officeHelper.importOfficeTemplate(file);
+        String importDocumentId = importOfficeTemplate(file);
         file.delete();
         Assertions.assertNotNull(importDocumentId);
 
@@ -95,7 +99,7 @@ public class OfficeImportHandlerTest {
         Thread.sleep(10000);
 
         // check status column of output excel
-        String location = LocalContentStorageUtil.path(officeHelper.getOutputTemplateLocation(importDocumentId));
+        String location = LocalContentStorageUtil.path(getOutputTemplateLocation(importDocumentId));
         FileInputStream fileInputStream = new FileInputStream(location);
         Workbook outputWorkbook = new HSSFWorkbook(fileInputStream);
         Sheet officeSheet = outputWorkbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
@@ -106,5 +110,25 @@ public class OfficeImportHandlerTest {
 
         Assertions.assertEquals("Imported", row.getCell(OfficeConstants.STATUS_COL).getStringCellValue());
         outputWorkbook.close();
+    }
+
+    private Workbook getOfficeWorkBook(final String dateFormat) throws IOException {
+        requestSpec.header(HttpHeaders.CONTENT_TYPE, "application/vnd.ms-excel");
+        byte[] byteArray = Utils.performGetBinaryResponse(requestSpec, responseSpec,
+                OFFICE_URL + "/downloadtemplate" + "?" + Utils.TENANT_IDENTIFIER + "&dateFormat=" + dateFormat);
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        return new HSSFWorkbook(inputStream);
+    }
+
+    private String importOfficeTemplate(File file) {
+        requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
+        return Utils.performServerTemplatePost(requestSpec, responseSpec, OFFICE_URL + "/uploadtemplate" + "?" + Utils.TENANT_IDENTIFIER,
+                null, file, "en", "dd MMMM yyyy");
+    }
+
+    private String getOutputTemplateLocation(final String importDocumentId) {
+        requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
+        return Utils.performServerOutputTemplateLocationGet(requestSpec, responseSpec,
+                "/fineract-provider/api/v1/imports/getOutputTemplateLocation" + "?" + Utils.TENANT_IDENTIFIER, importDocumentId);
     }
 }

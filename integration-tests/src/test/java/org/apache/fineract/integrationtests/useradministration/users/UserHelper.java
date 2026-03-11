@@ -217,7 +217,7 @@ public final class UserHelper {
             final ResponseSpecification responseSpec) {
         String password = SIMPLE_USER_PASSWORD;
         if (!SIMPLE_USER_CREATED) {
-            GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
+            GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
             String simpleRoleId = createSimpleRole(requestSpec, responseSpec);
             PostUsersRequest createUserRequest = new PostUsersRequest().username(SIMPLE_USER_NAME)
                     .firstname(Utils.randomFirstNameGenerator()).lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org")
@@ -241,7 +241,7 @@ public final class UserHelper {
     public static PostUsersRequest buildUserRequest(ResponseSpecification responseSpec, RequestSpecification requestSpec, String password) {
         Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
         String uniqueUsername = Utils.uniqueRandomStringGenerator("TestUser", 4);
-        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
+        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
 
         return new PostUsersRequest().username(uniqueUsername).firstname(Utils.randomFirstNameGenerator())
                 .lastname(Utils.randomLastNameGenerator()).email("testuser@example.com").password(password).repeatPassword(password)

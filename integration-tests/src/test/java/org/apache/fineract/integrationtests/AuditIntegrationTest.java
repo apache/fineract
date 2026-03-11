@@ -120,8 +120,8 @@ public class AuditIntegrationTest {
         }
 
         // When Office is created
-        OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
-        int officeId = officeHelper.createOffice("22 June 2020");
+        OfficeHelper officeHelper = new OfficeHelper();
+        int officeId = officeHelper.createOffice(java.time.LocalDate.of(2020, 6, 22)).getResourceId().intValue();
         auditsRecieved = auditHelper.getAuditDetails(officeId, "CREATE", "OFFICE");
         auditHelper.verifyOneAuditOnly(auditsRecieved, officeId, "CREATE", "OFFICE");
     }

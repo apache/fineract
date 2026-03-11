@@ -18,13 +18,16 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -66,7 +69,7 @@ public class InstanceModeIntegrationTest {
     public void testGetHeadOfficeWorks_WhenInstanceModeIsReadOnly() {
         // given
         // when
-        GetOfficesResponse result = OfficeHelper.getHeadOffice(requestSpec, responseSpec200);
+        GetOfficesResponse result = OfficeHelper.getHeadOffice();
         // then
         assertNotNull(result);
     }
@@ -76,7 +79,7 @@ public class InstanceModeIntegrationTest {
     public void testGetHeadOfficeWorks_WhenInstanceModeIsWriteOnly() {
         // given
         // when
-        GetOfficesResponse result = OfficeHelper.getHeadOffice(requestSpec, responseSpec200);
+        GetOfficesResponse result = OfficeHelper.getHeadOffice();
         // then
         assertNotNull(result);
     }
@@ -86,8 +89,9 @@ public class InstanceModeIntegrationTest {
     public void testGetHeadOfficeDoesntWork_WhenInstanceModeIsBatchOnly() {
         // given
         // when
-        OfficeHelper.getHeadOffice(requestSpec, responseSpec405);
-        // then no exception is thrown
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class, () -> OfficeHelper.getHeadOffice());
+        // then
+        assertEquals(405, exception.getStatus());
     }
 
     @ConfigureInstanceMode(readEnabled = true, writeEnabled = false, batchWorkerEnabled = false, batchManagerEnabled = false)

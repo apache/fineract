@@ -27,6 +27,7 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -59,7 +60,7 @@ public class CenterIntegrationTest {
 
     @Test
     public void testBasicCenterCreation() {
-        int officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
+        int officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId().intValue();
 
         String name = "TestBasicCreation" + new Timestamp(new java.util.Date().getTime());
         int resourceId = CenterHelper.createCenter(name, officeId, requestSpec, responseSpec);
@@ -85,7 +86,7 @@ public class CenterIntegrationTest {
     @Test
     public void testFullCenterCreation() {
 
-        int officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
+        int officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId().intValue();
         String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
         String externalId = UUID.randomUUID().toString();
         int staffId = StaffHelper.createStaff(requestSpec, responseSpec);
@@ -125,7 +126,7 @@ public class CenterIntegrationTest {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testCenterUpdate() {
-        int officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
+        int officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId().intValue();
         String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
         String externalId = UUID.randomUUID().toString();
         int staffId = StaffHelper.createStaff(requestSpec, responseSpec);
@@ -171,7 +172,7 @@ public class CenterIntegrationTest {
 
     @Test
     public void testCenterDeletion() {
-        int officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
+        int officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId().intValue();
         String name = "TestBasicCreation" + new Timestamp(new java.util.Date().getTime());
         int resourceId = CenterHelper.createCenter(name, officeId, requestSpec, responseSpec);
 
@@ -264,7 +265,7 @@ public class CenterIntegrationTest {
     @Test
     public void testCentersOrphanGroups() {
 
-        int officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
+        int officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId().intValue();
 
         String name = "TestBasicCreation" + new Timestamp(new java.util.Date().getTime());
         int resourceId = CenterHelper.createCenter(name, officeId, requestSpec, responseSpec);

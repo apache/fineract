@@ -63,7 +63,7 @@ public class AccountingRuleIntegrationTest {
         // given
         final Account accountToCredit = accountHelper.createIncomeAccount();
         final Account accountToDebit = accountHelper.createExpenseAccount();
-        final GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
+        final GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
 
         // when
         final PostAccountingRulesResponse accountingRule = accountRuleHelper.createAccountRule(headOffice.getId(), accountToCredit,

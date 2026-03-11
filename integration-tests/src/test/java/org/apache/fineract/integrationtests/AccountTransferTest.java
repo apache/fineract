@@ -27,6 +27,7 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -158,8 +159,8 @@ public class AccountTransferTest {
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
         final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
 
-        OfficeHelper officeHelper = new OfficeHelper(this.requestSpec, this.responseSpec);
-        Integer toOfficeId = officeHelper.createOffice("01 January 2011");
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(toOfficeId);
 
         // Creating Savings Account to which fund to be Transferred
@@ -186,7 +187,7 @@ public class AccountTransferTest {
 
         final HashMap toSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(toSavingsID);
 
-        Integer fromOfficeId = officeHelper.createOffice("01 January 2011");
+        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(fromOfficeId);
 
         // Creating Savings Account from which the Fund has to be Transferred
@@ -257,8 +258,8 @@ public class AccountTransferTest {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
 
-        OfficeHelper officeHelper = new OfficeHelper(this.requestSpec, this.responseSpec);
-        Integer toOfficeId = officeHelper.createOffice("01 January 2011");
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(toOfficeId);
 
         // Creating Loan Account to which fund to be Transferred
@@ -286,7 +287,7 @@ public class AccountTransferTest {
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(toLoanStatusHashMap);
 
-        Integer fromOfficeId = officeHelper.createOffice("01 January 2011");
+        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(fromOfficeId);
 
         // Creating Savings Account from which the Fund has to be Transferred
@@ -355,8 +356,8 @@ public class AccountTransferTest {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
 
-        OfficeHelper officeHelper = new OfficeHelper(this.requestSpec, this.responseSpec);
-        Integer toOfficeId = officeHelper.createOffice("01 January 2011");
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(toOfficeId);
 
         // Creating Loan Account to which fund to be Transferred
@@ -381,7 +382,7 @@ public class AccountTransferTest {
         toSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(toSavingsID);
         SavingsStatusChecker.verifySavingsIsActive(toSavingsStatusHashMap);
 
-        Integer fromOfficeId = officeHelper.createOffice("01 January 2011");
+        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(fromOfficeId);
 
         // Creating Savings Account from which the Fund has to be Transferred
@@ -479,8 +480,8 @@ public class AccountTransferTest {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
 
-        OfficeHelper officeHelper = new OfficeHelper(this.requestSpec, this.responseSpec);
-        Integer toOfficeId = officeHelper.createOffice("01 January 2011");
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(toOfficeId);
 
         // Creating Loan Account to which fund to be Transferred
@@ -505,7 +506,7 @@ public class AccountTransferTest {
         toSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(toSavingsID);
         SavingsStatusChecker.verifySavingsIsActive(toSavingsStatusHashMap);
 
-        Integer fromOfficeId = officeHelper.createOffice("01 January 2011");
+        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(fromOfficeId);
 
         // Creating Savings Account from which the Fund has to be Transferred
@@ -571,8 +572,8 @@ public class AccountTransferTest {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
 
-        OfficeHelper officeHelper = new OfficeHelper(this.requestSpec, this.responseSpec);
-        Integer toOfficeId = officeHelper.createOffice("01 January 2011");
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(toOfficeId);
 
         // Creating Loan Account to which fund to be Transferred
@@ -597,7 +598,7 @@ public class AccountTransferTest {
         toSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(toSavingsID);
         SavingsStatusChecker.verifySavingsIsActive(toSavingsStatusHashMap);
 
-        Integer fromOfficeId = officeHelper.createOffice("01 January 2011");
+        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(fromOfficeId);
 
         // Creating Savings Account from which the Fund has to be Transferred
@@ -664,8 +665,8 @@ public class AccountTransferTest {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
 
-        OfficeHelper officeHelper = new OfficeHelper(this.requestSpec, this.responseSpec);
-        Integer toOfficeId = officeHelper.createOffice("01 January 2011");
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(toOfficeId);
 
         // Creating Loan Account to which fund to be Transferred
@@ -690,7 +691,7 @@ public class AccountTransferTest {
         toSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(toSavingsID);
         SavingsStatusChecker.verifySavingsIsActive(toSavingsStatusHashMap);
 
-        Integer fromOfficeId = officeHelper.createOffice("01 January 2011");
+        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(fromOfficeId);
 
         // Creating Savings Account from which the Fund has to be Transferred
@@ -757,8 +758,8 @@ public class AccountTransferTest {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
 
-        OfficeHelper officeHelper = new OfficeHelper(this.requestSpec, this.responseSpec);
-        Integer toOfficeId = officeHelper.createOffice("01 January 2011");
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(toOfficeId);
 
         // Creating Loan Account to which fund to be Transferred
@@ -783,7 +784,7 @@ public class AccountTransferTest {
         toSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(toSavingsID);
         SavingsStatusChecker.verifySavingsIsActive(toSavingsStatusHashMap);
 
-        Integer fromOfficeId = officeHelper.createOffice("01 January 2011");
+        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(fromOfficeId);
 
         // Creating Savings Account from which the Fund has to be Transferred
@@ -843,8 +844,8 @@ public class AccountTransferTest {
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
         final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
 
-        OfficeHelper officeHelper = new OfficeHelper(this.requestSpec, this.responseSpec);
-        Integer toOfficeId = officeHelper.createOffice("01 January 2011");
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(toOfficeId);
 
         // Creating Savings Account to which fund to be Transferred
@@ -871,7 +872,7 @@ public class AccountTransferTest {
 
         final HashMap toSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(toSavingsID);
 
-        Integer fromOfficeId = officeHelper.createOffice("01 January 2011");
+        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(fromOfficeId);
 
         // Creating Savings Account from which the Fund has to be Transferred

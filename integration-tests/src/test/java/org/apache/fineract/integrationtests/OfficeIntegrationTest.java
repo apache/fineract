@@ -18,86 +18,66 @@
  */
 package org.apache.fineract.integrationtests;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetOfficesResponse;
+import org.apache.fineract.client.models.PostOfficesResponse;
 import org.apache.fineract.client.models.PutOfficesOfficeIdResponse;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.integrationtests.common.OfficeDomain;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import retrofit2.Response;
 
 public class OfficeIntegrationTest {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-    }
+    private final OfficeHelper officeHelper = new OfficeHelper();
 
     @Test
     public void testOfficeModification() {
-        OfficeHelper oh = new OfficeHelper(requestSpec, responseSpec);
-        int officeId = oh.createOffice("01 July 2007");
+        PostOfficesResponse createResponse = officeHelper.createOffice(LocalDate.of(2007, 7, 1));
+        Long officeId = createResponse.getResourceId();
+
         String name = Utils.uniqueRandomStringGenerator("New_Office_", 4);
         String date = "02 July 2007";
-        String[] dateArr = { "2007", "7", "2" };
 
-        oh.updateOffice(officeId, name, date);
-        OfficeDomain newOffice = oh.retrieveOfficeByID(officeId);
+        officeHelper.updateOffice(officeId, name, date);
+        GetOfficesResponse updatedOffice = officeHelper.retrieveOffice(officeId);
 
-        Assertions.assertTrue(name.equals(newOffice.getName()));
-        Assertions.assertArrayEquals(dateArr, newOffice.getOpeningDate());
+        Assertions.assertEquals(name, updatedOffice.getName());
+        Assertions.assertTrue(DateUtils.isEqual(updatedOffice.getOpeningDate(), LocalDate.of(2007, 7, 2)));
     }
 
     @Test
-    public void testOfficeModificationWithExternalId() throws IOException {
-        OfficeHelper oh = new OfficeHelper(requestSpec, responseSpec);
+    public void testOfficeModificationWithExternalId() {
         String externalId = UUID.randomUUID().toString();
-        int officeId = oh.createOfficeWithExternalId(externalId, "01 July 2007");
-        String date = "02 July 2007";
+        PostOfficesResponse createResponse = officeHelper.createOffice(externalId, LocalDate.of(2007, 7, 1));
+        Long officeId = createResponse.getResourceId();
+
         String name = Utils.uniqueRandomStringGenerator("New_Office_", 4);
-        String[] dateArr = { "2007", "7", "2" };
+        String date = "02 July 2007";
 
-        Response<PutOfficesOfficeIdResponse> updateResult = oh.updateOfficeUsingExternalId(externalId, name, date);
-        Assertions.assertTrue(updateResult.isSuccessful());
-        Assertions.assertEquals(officeId, updateResult.body().getOfficeId());
-        OfficeDomain newOffice = oh.retrieveOfficeByID(officeId);
+        PutOfficesOfficeIdResponse updateResult = officeHelper.updateOfficeByExternalId(externalId, name, date);
+        Assertions.assertEquals(officeId, updateResult.getOfficeId());
 
-        Assertions.assertTrue(name.equals(newOffice.getName()));
-        Assertions.assertArrayEquals(dateArr, newOffice.getOpeningDate());
+        GetOfficesResponse updatedOffice = officeHelper.retrieveOffice(officeId);
+
+        Assertions.assertEquals(name, updatedOffice.getName());
+        Assertions.assertTrue(DateUtils.isEqual(updatedOffice.getOpeningDate(), LocalDate.of(2007, 7, 2)));
     }
 
     @Test
-    public void testOfficeModificationAndFetchWithExternalId() throws IOException {
-        OfficeHelper oh = new OfficeHelper(requestSpec, responseSpec);
+    public void testOfficeModificationAndFetchWithExternalId() {
         String externalId = UUID.randomUUID().toString();
-        int officeId = oh.createOfficeWithExternalId(externalId, "01 July 2007");
+        officeHelper.createOffice(externalId, LocalDate.of(2007, 7, 1));
+
         String name = Utils.uniqueRandomStringGenerator("New_Office_", 4);
         String date = "02 July 2007";
-        String[] dateArr = { "2007", "7", "2" };
 
-        oh.updateOfficeUsingExternalId(externalId, name, date);
-        Response<GetOfficesResponse> officeResult = oh.retrieveOfficeByExternalId(externalId);
+        officeHelper.updateOfficeByExternalId(externalId, name, date);
+        GetOfficesResponse updatedOffice = officeHelper.retrieveOfficeByExternalId(externalId);
 
-        GetOfficesResponse newOffice = officeResult.body();
-
-        Assertions.assertTrue(name.equals(newOffice.getName()));
-        Assertions.assertTrue(DateUtils.isEqual(newOffice.getOpeningDate(), LocalDate.of(2007, 7, 2)));
+        Assertions.assertEquals(name, updatedOffice.getName());
+        Assertions.assertTrue(DateUtils.isEqual(updatedOffice.getOpeningDate(), LocalDate.of(2007, 7, 2)));
     }
 }

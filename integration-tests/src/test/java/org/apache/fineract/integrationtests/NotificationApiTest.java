@@ -59,7 +59,7 @@ public class NotificationApiTest {
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
 
-        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
+        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
         String username = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
         String password = Utils.randomStringGenerator("A1b2c3d4e5f$", 1); // prefix is to conform with the password
                                                                           // rules

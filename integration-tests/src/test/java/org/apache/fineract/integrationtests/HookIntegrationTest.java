@@ -55,7 +55,7 @@ public class HookIntegrationTest {
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.hookHelper = new HookHelper(this.requestSpec, this.responseSpec);
-        this.officeHelper = new OfficeHelper(this.requestSpec, this.responseSpec);
+        this.officeHelper = new OfficeHelper();
     }
 
     @Test
@@ -66,7 +66,7 @@ public class HookIntegrationTest {
         final String payloadURL = "http://echo-webhook.herokuapp.com:80/" + uniqueId + "/";
         final Integer hookId = this.hookHelper.createHook(payloadURL);
         Assertions.assertNotNull(hookId);
-        final Integer createdOfficeID = this.officeHelper.createOffice("01 January 2012");
+        final Integer createdOfficeID = this.officeHelper.createOffice(java.time.LocalDate.of(2012, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(createdOfficeID);
         try {
             // sleep for a three seconds after each failure to increase the likelihood of the previous request for
