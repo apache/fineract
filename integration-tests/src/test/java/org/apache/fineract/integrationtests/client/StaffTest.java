@@ -21,7 +21,6 @@ package org.apache.fineract.integrationtests.client;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Optional;
-import org.apache.fineract.client.models.StaffCreateRequest;
 import org.apache.fineract.client.models.StaffData;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Order;
@@ -53,7 +52,7 @@ class StaffTest extends IntegrationTest {
     }
 
     Long create() {
-        return ok(fineractClient().staff.createStaff(new StaffCreateRequest().officeId(1L).firstname(Utils.randomFirstNameGenerator())
+        return ok(fineractClient().staff.createStaff(new StaffRequest().officeId(1L).firstname(Utils.randomFirstNameGenerator())
                 .lastname(Utils.randomLastNameGenerator()).externalId(Utils.randomStringGenerator("", 12))
                 .joiningDate(LocalDate.now(ZoneId.of("UTC")).toString()).dateFormat("yyyy-MM-dd").locale("en_US"))).getResourceId();
     }

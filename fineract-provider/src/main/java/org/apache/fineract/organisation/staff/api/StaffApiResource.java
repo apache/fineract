@@ -77,19 +77,14 @@ public class StaffApiResource {
     private final CommandPipeline commandPipeline;
 
     @GET
-    @Operation(summary = "Retrieve Staff", operationId = "retrieveAllStaff", description = """
-            Returns the list of staff members.
-
-            Example Requests:
-
-            - /staff
-            - /staff?status=ACTIVE
-            - /staff?status=INACTIVE
-            - /staff?status=ALL
-
-            By default it Returns all the ACTIVE Staff. Otherwise a status can be provided like e.g. status=INACTIVE,
-            then it returns all INACTIVE staff or status=ALL returns both ACTIVE and INACTIVE staff.
-            """)
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve Staff", operationId = "retrieveAllStaff", description = "Returns the list of staff members.\n" + "\n"
+            + "Example Requests:\n" + "\n" + "staff\n\n\n\n" + "\n" + "Retrieve a Staff by status\n" + "\n"
+            + "Returns the details of a Staff based on status.\n" + "\n" + "By default it Returns all the ACTIVE Staff.\n" + "\n"
+            + "If status=INACTIVE, then it returns all INACTIVE Staff.\n" + "\n"
+            + "and for status=ALL, it Returns both ACTIVE and INACTIVE Staff.\n" + "\n" + "Example Requests:\n" + "\n"
+            + "staff?status=active")
     public List<StaffData> retrieveAll(@QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @DefaultValue("false") @QueryParam("staffInOfficeHierarchy") @Parameter(description = "staffInOfficeHierarchy") final boolean staffInOfficeHierarchy,
             @DefaultValue("false") @QueryParam("loanOfficersOnly") @Parameter(description = "loanOfficersOnly") final boolean loanOfficersOnly,
@@ -100,13 +95,10 @@ public class StaffApiResource {
 
     @GET
     @Path("{staffId}")
-    @Operation(summary = "Retrieve a Staff Member", operationId = "retrieveOneStaff", description = """
-            Returns the details of a Staff Member.
-
-            Example Requests:
-
-            - /staff/1
-            """)
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve a Staff Member", operationId = "retrieveOneStaff", description = "Returns the details of a Staff Member.\n"
+            + "\n" + "Example Requests:\n" + "\n" + "staff/1")
     public StaffData retrieveOne(@PathParam("staffId") @Parameter(description = "staffId") final Long staffId,
             @DefaultValue("false") @QueryParam("template") @Parameter(description = "template", hidden = true) boolean template) {
         StaffData staff = readPlatformService.retrieveStaff(staffId);
@@ -159,7 +151,7 @@ public class StaffApiResource {
 
     @PUT
     @Path("{staffId}")
-    @Operation(summary = "Update a Staff Member", description = "Updates the details of a staff member.")
+    @Operation(summary = "Update a Staff Member", operationId = "updateStaff", description = "Updates the details of a staff member.")
     public StaffUpdateResponse updateStaff(@PathParam("staffId") @Parameter(description = "staffId") final Long staffId,
             @RequestBody(required = true) @Valid StaffUpdateRequest request) {
         request.setId(staffId);
