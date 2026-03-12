@@ -24,8 +24,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
@@ -33,7 +35,9 @@ import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.BaseLoanIntegrationTest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
+import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.reamortization.LoanReAmortizationInterestHandlingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -998,6 +1002,86 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
         });
     }
 
+    @Test
+    public void reAmortizationEqualInterestSplitWithFeeChargePayoffTest() {
+        runAt("01 January 2024", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 6;
+            int repaymentEvery = 1;
+
+            // Create Interest-Bearing Loan Product with 7% interest (progressive schedule)
+            Long loanProductId = createInterestBearingProgressiveLoanProduct(numberOfRepayments, repaymentEvery);
+
+            // Apply for loan with 200 amount (will approve with 100)
+            double applyAmount = 200.0;
+            double approveAmount = 100.0;
+            double disburseAmount = 100.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2024", applyAmount,
+                    numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(repaymentEvery)//
+                    .loanTermFrequency(numberOfRepayments)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .interestRatePerPeriod(BigDecimal.valueOf(7.0))//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            loanId.set(postLoansResponse.getLoanId());
+
+            // Approve with 100 (partial approval)
+            loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(), approveLoanRequest(approveAmount, "01 January 2024"));
+
+            // Disburse 100 on Jan 1, 2024
+            disburseLoan(loanId.get(), BigDecimal.valueOf(disburseAmount), "01 January 2024");
+
+            // Verify disbursement transaction
+            verifyTransactions(loanId.get(), //
+                    transaction(100.0, "Disbursement", "01 January 2024") //
+            );
+        });
+
+        // Make repayment on Feb 1, 2024 and add fee charge due Feb 15, 2024
+        runAt("01 February 2024", () -> {
+            loanTransactionHelper.makeLoanRepayment("01 February 2024", 17.01f, (int) loanId.get());
+
+            addChargeWithCurrency(loanId.get(), false, 10.0, "15 February 2024", "EUR");
+
+            verifyTransactions(loanId.get(), //
+                    transaction(100.0, "Disbursement", "01 January 2024"), //
+                    transaction(17.01, "Repayment", "01 February 2024") //
+            );
+        });
+
+        // Re-amortize with EQUAL_AMORTIZATION_INTEREST_SPLIT on Mar 15, 2024
+        runAt("15 March 2024", () -> {
+            reAmortizeLoan(loanId.get(), LoanReAmortizationInterestHandlingType.EQUAL_AMORTIZATION_INTEREST_SPLIT.name());
+
+            verifyTransactions(loanId.get(), //
+                    transaction(100.0, "Disbursement", "01 January 2024"), //
+                    transaction(17.01, "Repayment", "01 February 2024"), //
+                    transaction(17.01, "Re-amortize", "15 March 2024") //
+            );
+
+            // Pay-off the loan on Mar 15, 2024
+            HashMap prepayAmount = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, (int) loanId.get());
+            assertNotNull(prepayAmount);
+            Float amount = (Float) prepayAmount.get("amount");
+
+            loanTransactionHelper.makeLoanRepayment("15 March 2024", amount, (int) loanId.get());
+
+            // Verify loan is closed with all obligations met (status 600)
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.get());
+            assertNotNull(loanDetails.getStatus());
+            assertEquals(600, loanDetails.getStatus().getId().intValue(),
+                    "Loan should be CLOSED_OBLIGATIONS_MET (600) after pay-off but was " + loanDetails.getStatus().getId());
+            assertTrue(loanDetails.getStatus().getClosedObligationsMet(), "Loan status should be closedObligationsMet after pay-off");
+        });
+    }
+
     private Long createInterestBearingProgressiveLoanProduct(int numberOfRepayments, int repaymentEvery) {
         PostLoanProductsRequest product = create4IProgressive()//
                 .numberOfRepayments(numberOfRepayments)//
@@ -1041,5 +1125,15 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
                 .retrieveLoanProductById(loanProductResponse.getResourceId());
         assertNotNull(getLoanProductsProductIdResponse);
         return loanProductResponse.getResourceId();
+    }
+
+    private Long addChargeWithCurrency(Long loanId, boolean isPenalty, double amount, String dueDate, String currencyCode) {
+        Integer chargeId = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(amount), isPenalty, currencyCode));
+        assertNotNull(chargeId);
+        Integer loanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId.intValue(),
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(chargeId), dueDate, String.valueOf(amount)));
+        assertNotNull(loanChargeId);
+        return loanChargeId.longValue();
     }
 }

@@ -51,7 +51,7 @@ public class FeignSchedulerHelper {
     public void executeAndAwaitJob(String jobDisplayName) {
         stopScheduler();
 
-        List<GetJobsResponse> allJobs = ok(() -> fineractClient.schedulerJob().retrieveAll8());
+        List<GetJobsResponse> allJobs = ok(() -> fineractClient.schedulerJob().retrieveAllSchedulerJobs());
         GetJobsResponse targetJob = allJobs.stream().filter(j -> jobDisplayName.equals(j.getDisplayName())).findFirst()
                 .orElseThrow(() -> new RuntimeException("Job not found: " + jobDisplayName));
 
@@ -59,7 +59,7 @@ public class FeignSchedulerHelper {
         FeignCalls.executeVoid(() -> fineractClient.schedulerJob().executeJob(targetJob.getJobId(), "executeJob", new ExecuteJobRequest()));
 
         Awaitility.await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(1)).pollDelay(Duration.ofSeconds(1)).until(() -> {
-            GetJobsResponse job = ok(() -> fineractClient.schedulerJob().retrieveOne5(targetJob.getJobId()));
+            GetJobsResponse job = ok(() -> fineractClient.schedulerJob().retrieveOneSchedulerJob(targetJob.getJobId()));
             JobDetailHistoryData history = job.getLastRunHistory();
             if (history == null || history.getJobRunStartTime() == null) {
                 return false;

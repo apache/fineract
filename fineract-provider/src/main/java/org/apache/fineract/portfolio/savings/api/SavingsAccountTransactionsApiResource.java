@@ -85,6 +85,7 @@ public class SavingsAccountTransactionsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve a savings account transaction template", operationId = "retrieveTemplateSavingsAccountTransaction")
     public String retrieveTemplate(@PathParam("savingsId") final Long savingsId,
             // @QueryParam("command") final String commandParam,
             @Context final UriInfo uriInfo) {
@@ -107,6 +108,7 @@ public class SavingsAccountTransactionsApiResource {
     @Path("{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve a savings account transaction", operationId = "retrieveOneSavingsAccountTransaction")
     public String retrieveOne(@PathParam("savingsId") final Long savingsId, @PathParam("transactionId") final Long transactionId,
             @Context final UriInfo uriInfo) {
 
@@ -158,7 +160,7 @@ public class SavingsAccountTransactionsApiResource {
     @Path("query")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Advanced search Savings Account Transactions")
+    @Operation(summary = "Advanced search Savings Account Transactions", operationId = "advancedQuerySavingsAccountTransactions")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = List.class)))
     public String advancedQuery(@PathParam("savingsId") @Parameter(description = "savingsId") final Long savingsId,
             PagedLocalRequest<AdvancedQueryRequest> queryRequest, @Context final UriInfo uriInfo) {
@@ -169,6 +171,7 @@ public class SavingsAccountTransactionsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Create a savings account transaction", operationId = "createSavingsAccountTransaction")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.PostSavingsAccountTransactionsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.PostSavingsAccountTransactionsResponse.class)))
     public String transaction(@PathParam("savingsId") final Long savingsId, @QueryParam("command") final String commandParam,
@@ -194,7 +197,7 @@ public class SavingsAccountTransactionsApiResource {
     @Path("{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Undo/Reverse/Modify/Release Amount transaction API", description = "Undo/Reverse/Modify/Release Amount transaction API\n\n"
+    @Operation(summary = "Undo/Reverse/Modify/Release Amount transaction API", operationId = "adjustSavingsAccountTransaction", description = "Undo/Reverse/Modify/Release Amount transaction API\n\n"
             + "Example Requests:\n" + "\n" + "\n" + "savingsaccounts/{savingsId}/transactions/{transactionId}?command=reverse\n" + "\n"
             + "Accepted command = undo, reverse, modify, releaseAmount")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.PostSavingsAccountBulkReversalTransactionsRequest.class)))

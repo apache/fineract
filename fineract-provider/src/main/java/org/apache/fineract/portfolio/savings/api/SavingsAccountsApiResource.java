@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
@@ -97,10 +98,14 @@ public class SavingsAccountsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve Savings Account Template", operationId = "retrieveSavingsAccountTemplate")
-    public String template(@QueryParam("clientId") final Long clientId, @QueryParam("groupId") final Long groupId,
-            @QueryParam("productId") final Long productId,
-            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
+    @Operation(summary = "Retrieve Savings Account Template", operationId = "retrieveSavingsAccountTemplate", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
+            + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Requests:\n" + "\n" + "savingsaccounts/template?clientId=1\n"
+            + "\n" + "\n" + "savingsaccounts/template?clientId=1&productId=1")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.GetSavingsAccountsTemplateResponse.class)))
+    public String template(@QueryParam("clientId") @Parameter(description = "clientId") final Long clientId,
+            @QueryParam("groupId") @Parameter(description = "groupId") final Long groupId,
+            @QueryParam("productId") @Parameter(description = "productId") final Long productId,
+            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
         final SavingsAccountData savingsAccount = savingsAccountTemplateReadPlatformService.retrieveTemplate(clientId, groupId, productId,
@@ -112,10 +117,17 @@ public class SavingsAccountsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List savings applications/accounts", operationId = "retrieveAllSavings")
-    public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("externalId") final String externalId,
-            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
+    @Operation(summary = "List savings applications/accounts", operationId = "retrieveAllSavingsAccounts", description = "Lists savings applications/accounts\n\n"
+            + "Example Requests:\n" + "\n" + "savingsaccounts\n" + "\n" + "\n" + "savingsaccounts?fields=name")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.GetSavingsAccountsResponse.class)))
+    public String retrieveAll(@Context final UriInfo uriInfo,
+            @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
+            // @QueryParam("underHierarchy") final String hierarchy,
+            @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+            @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
+            @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
+            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
+
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
         sqlValidator.validate(orderBy);
         sqlValidator.validate(sortOrder);
@@ -130,7 +142,13 @@ public class SavingsAccountsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Submit new savings application", operationId = "submitSavingsApplication")
+    @Operation(summary = "Submit new savings application", operationId = "submitSavingsApplication", description = "Submits new savings application\n\n"
+            + "Mandatory Fields: clientId or groupId, productId, submittedOnDate\n\n"
+            + "Optional Fields: accountNo, externalId, fieldOfficerId\n\n"
+            + "Inherited from Product (if not provided): nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, allowOverdraft, overdraftLimit, withHoldTax\n\n"
+            + "Additional Mandatory Field if Entity-Datatable Check is enabled for the entity of type Savings: datatables")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsResponse.class)))
     public String submitApplication(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingsAccount().withJson(apiRequestBodyAsJson).build();
         final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -141,7 +159,7 @@ public class SavingsAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Savings Account", operationId = "retrieveSavingsAccount")
+    @Operation(summary = "Retrieve a savings account", operationId = "retrieveSavingsAccount")
     public SavingsAccountData retrieveOne(@PathParam("accountId") final Long accountId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @DefaultValue("all") @QueryParam("chargeStatus") final String chargeStatus,
@@ -153,7 +171,7 @@ public class SavingsAccountsApiResource {
     @Path("/external-id/{externalId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Savings Account by External ID", operationId = "retrieveSavingsAccountByExternalId")
+    @Operation(summary = "Retrieve a savings account by external ID", operationId = "retrieveSavingsAccountByExternalId")
     public SavingsAccountData retrieveOne(@PathParam("externalId") final String externalId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @DefaultValue("all") @QueryParam("chargeStatus") final String chargeStatus,
@@ -165,9 +183,17 @@ public class SavingsAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Modify a savings application", operationId = "updateSavingsAccount")
-    public String update(@PathParam("accountId") final Long accountId, @Parameter(hidden = true) final String apiRequestBodyAsJson,
-            @QueryParam("command") final String commandParam) {
+    @Operation(summary = "Modify a savings application | Modify savings account withhold tax applicability", operationId = "updateSavingsAccount", description = "Modify a savings application:\n\n"
+            + "Savings application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc\n\n"
+            + "Modify savings account withhold tax applicability:\n\n"
+            + "Savings application's withhold tax can be modified when in 'Active' state. Once the application is activated, can modify the account withhold tax to post tax or vice-versa"
+            + "Showing request/response for 'Modify a savings application'")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdResponse.class)))
+    public String update(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam) {
+
         return updateSavingAccount(accountId, null, apiRequestBodyAsJson, commandParam);
     }
 
@@ -175,9 +201,17 @@ public class SavingsAccountsApiResource {
     @Path("/external-id/{externalId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update a Savings Account by External ID", operationId = "updateSavingsAccountByExternalId")
-    public String update(@PathParam("externalId") final String externalId, @Parameter(hidden = true) final String apiRequestBodyAsJson,
-            @QueryParam("command") final String commandParam) {
+    @Operation(summary = "Modify a savings application | Modify savings account withhold tax applicability by externalId", operationId = "updateSavingsAccountByExternalId", description = "Modify a savings application by externalId:\n\n"
+            + "Savings application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc\n\n"
+            + "Modify savings account withhold tax applicability:\n\n"
+            + "Savings application's withhold tax can be modified when in 'Active' state. Once the application is activated, can modify the account withhold tax to post tax or vice-versa"
+            + "Showing request/response for 'Modify a savings application'")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdResponse.class)))
+    public String update(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam) {
+
         return updateSavingAccount(null, externalId, apiRequestBodyAsJson, commandParam);
     }
 
@@ -185,8 +219,42 @@ public class SavingsAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Handle savings commands", operationId = "handleSavingsCommands")
-    public String handleCommands(@PathParam("accountId") final Long accountId, @QueryParam("command") final String commandParam,
+    @Operation(summary = "Approve savings application | Undo approval savings application | Assign Savings Officer | Unassign Savings Officer | Reject savings application | Withdraw savings application | Activate a savings account | Close a savings account | Calculate Interest on Savings Account | Post Interest on Savings Account | Block Savings Account | Unblock Savings Account | Block Savings Account Credit transactions | Unblock Savings Account Credit transactions | Block Savings Account Debit transactions | Unblock Savings Account debit transactions", description = "Approve savings application:\n\n"
+            + "Approves savings application so long as its in 'Submitted and pending approval' state.\n\n"
+            + "Undo approval savings application:\n\n"
+            + "Will move 'approved' savings application back to 'Submitted and pending approval' state.\n\n" + "Assign Savings Officer:\n\n"
+            + "Allows you to assign Savings Officer for existing Savings Account.\n\n" + "Unassign Savings Officer:\n\n"
+            + "Allows you to unassign the Savings Officer.\n\n" + "Reject savings application:\n\n"
+            + "Rejects savings application so long as its in 'Submitted and pending approval' state.\n\n"
+            + "Withdraw savings application:\n\n"
+            + "Used when an applicant withdraws from the savings application. It must be in 'Submitted and pending approval' state.\n\n"
+            + "Activate a savings account:\n\n"
+            + "Results in an approved savings application being converted into an 'active' savings account.\n\n"
+            + "Close a savings account:\n\n"
+            + "Results in an Activated savings application being converted into an 'closed' savings account.\n" + "\n"
+            + "closedOnDate is closure date of savings account\n" + "\n"
+            + "withdrawBalance is a boolean description, true value of this field performs a withdrawal transaction with account's running balance.\n\n"
+            + "Mandatory Fields: dateFormat,locale,closedOnDate\n\n"
+            + "Optional Fields: note, withdrawBalance, paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber\n\n"
+            + "Calculate Interest on Savings Account:\n\n"
+            + "Calculates interest earned on a savings account based on todays date. It does not attempt to post or credit the interest on the account. That is responsibility of the Post Interest API that will likely be called by overnight process.\n\n"
+            + "Post Interest on Savings Account:\n\n"
+            + "Calculates and Posts interest earned on a savings account based on today's date and whether an interest posting or crediting event is due.\n\n"
+            + "Block Savings Account:\n\n" + "Blocks Savings account from all types of credit and debit transactions\n\n"
+            + "Unblock Savings Account:\n\n"
+            + "Unblock a blocked account. On unblocking account, user can perform debit and credit transactions\n\n"
+            + "Block Savings Account Credit transactions:\n\n"
+            + "Savings account will be blocked from all types of credit transactions.\n\n"
+            + "Unblock Savings Account Credit transactions:\n\n"
+            + "It unblocks the Saving account's credit operations. Now all types of credits can be transacted to Savings account\n\n"
+            + "Block Savings Account Debit transactions:\n\n" + "All types of debit operations from Savings account wil be blocked\n\n"
+            + "Unblock Savings Account debit transactions:\n\n"
+            + "It unblocks the Saving account's debit operations. Now all types of debits can be transacted from Savings account\n\n"
+            + "Showing request/response for 'Unassign Savings Officer'", operationId = "handleCommandsSavingsAccount")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdResponse.class)))
+    public String handleCommands(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         return handleCommands(accountId, null, commandParam, apiRequestBodyAsJson);
     }
@@ -195,8 +263,42 @@ public class SavingsAccountsApiResource {
     @Path("/external-id/{externalId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Handle Savings Account Commands by External ID", operationId = "handleSavingsCommandsByExternalId")
-    public String handleCommands(@PathParam("externalId") final String externalId, @QueryParam("command") final String commandParam,
+    @Operation(summary = "Approve savings application | Undo approval savings application | Assign Savings Officer | Unassign Savings Officer | Reject savings application | Withdraw savings application | Activate a savings account | Close a savings account | Calculate Interest on Savings Account | Post Interest on Savings Account | Block Savings Account | Unblock Savings Account | Block Savings Account Credit transactions | Unblock Savings Account Credit transactions | Block Savings Account Debit transactions | Unblock Savings Account debit transactions", description = "Approve savings application:\n\n"
+            + "Approves savings application so long as its in 'Submitted and pending approval' state.\n\n"
+            + "Undo approval savings application:\n\n"
+            + "Will move 'approved' savings application back to 'Submitted and pending approval' state.\n\n" + "Assign Savings Officer:\n\n"
+            + "Allows you to assign Savings Officer for existing Savings Account.\n\n" + "Unassign Savings Officer:\n\n"
+            + "Allows you to unassign the Savings Officer.\n\n" + "Reject savings application:\n\n"
+            + "Rejects savings application so long as its in 'Submitted and pending approval' state.\n\n"
+            + "Withdraw savings application:\n\n"
+            + "Used when an applicant withdraws from the savings application. It must be in 'Submitted and pending approval' state.\n\n"
+            + "Activate a savings account:\n\n"
+            + "Results in an approved savings application being converted into an 'active' savings account.\n\n"
+            + "Close a savings account:\n\n"
+            + "Results in an Activated savings application being converted into an 'closed' savings account.\n" + "\n"
+            + "closedOnDate is closure date of savings account\n" + "\n"
+            + "withdrawBalance is a boolean description, true value of this field performs a withdrawal transaction with account's running balance.\n\n"
+            + "Mandatory Fields: dateFormat,locale,closedOnDate\n\n"
+            + "Optional Fields: note, withdrawBalance, paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber\n\n"
+            + "Calculate Interest on Savings Account:\n\n"
+            + "Calculates interest earned on a savings account based on todays date. It does not attempt to post or credit the interest on the account. That is responsibility of the Post Interest API that will likely be called by overnight process.\n\n"
+            + "Post Interest on Savings Account:\n\n"
+            + "Calculates and Posts interest earned on a savings account based on today's date and whether an interest posting or crediting event is due.\n\n"
+            + "Block Savings Account:\n\n" + "Blocks Savings account from all types of credit and debit transactions\n\n"
+            + "Unblock Savings Account:\n\n"
+            + "Unblock a blocked account. On unblocking account, user can perform debit and credit transactions\n\n"
+            + "Block Savings Account Credit transactions:\n\n"
+            + "Savings account will be blocked from all types of credit transactions.\n\n"
+            + "Unblock Savings Account Credit transactions:\n\n"
+            + "It unblocks the Saving account's credit operations. Now all types of credits can be transacted to Savings account\n\n"
+            + "Block Savings Account Debit transactions:\n\n" + "All types of debit operations from Savings account wil be blocked\n\n"
+            + "Unblock Savings Account debit transactions:\n\n"
+            + "It unblocks the Saving account's debit operations. Now all types of debits can be transacted from Savings account\n\n"
+            + "Showing request/response for 'Unassign Savings Officer'", operationId = "handleCommandsSavingsAccountByExternalId")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdResponse.class)))
+    public String handleCommands(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         return handleCommands(null, externalId, commandParam, apiRequestBodyAsJson);
     }
@@ -205,8 +307,10 @@ public class SavingsAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete a savings application", operationId = "deleteSavingsAccount")
-    public String delete(@PathParam("accountId") final Long accountId) {
+    @Operation(summary = "Delete a savings application", operationId = "deleteSavingsAccount", description = "At present we support hard delete of savings application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the savings account.")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.DeleteSavingsAccountsAccountIdResponse.class)))
+    public String delete(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId) {
+
         return deleteSavingAccount(accountId, null);
     }
 
@@ -214,8 +318,10 @@ public class SavingsAccountsApiResource {
     @Path("/external-id/{externalId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete a Savings Account by External ID", operationId = "deleteSavingsAccountByExternalId")
-    public String delete(@PathParam("externalId") final String externalId) {
+    @Operation(summary = "Delete a savings application by externalId", operationId = "deleteSavingsAccountByExternalId", description = "At present we support hard delete of savings application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the savings account.")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.DeleteSavingsAccountsAccountIdResponse.class)))
+    public String delete(@PathParam("externalId") @Parameter(description = "externalId") final String externalId) {
+
         return deleteSavingAccount(null, externalId);
     }
 

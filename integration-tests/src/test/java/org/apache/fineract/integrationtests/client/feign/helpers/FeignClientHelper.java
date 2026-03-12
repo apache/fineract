@@ -58,11 +58,11 @@ public class FeignClientHelper {
     }
 
     public Long createClient(PostClientsRequest request) {
-        PostClientsResponse response = ok(() -> fineractClient.clients().create6(request));
+        PostClientsResponse response = ok(() -> fineractClient.clients().createClient(request));
         return response.getClientId();
     }
 
     public GetClientsClientIdResponse getClient(Long clientId) {
-        return ok(() -> fineractClient.clients().retrieveOne11(clientId, Collections.emptyMap()));
+        return ok(() -> fineractClient.clients().retrieveOneClient(clientId, Collections.emptyMap()));
     }
 }

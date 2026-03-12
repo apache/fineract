@@ -25,4 +25,5 @@
   <include relativeToChangelogFile="true" file="parts/0001_loan_product.xml"/>
   <include relativeToChangelogFile="true" file="parts/0002_wc_loan_schema.xml"/>
   <include relativeToChangelogFile="true" file="parts/0003_working_capital_loan_cob.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0004_extend_working_capital_loan_entity.xml"/>
 </databaseChangeLog>

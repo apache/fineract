@@ -19,6 +19,7 @@
 
 package org.apache.fineract.portfolio.self.products.api;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -50,6 +51,7 @@ public class SelfSavingsProductsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "List Self Savings Products", operationId = "retrieveAllSelfSavingsProducts")
     public String retrieveAll(@QueryParam(SavingsApiConstants.clientIdParamName) final Long clientId, @Context final UriInfo uriInfo) {
 
         this.appUserClientMapperReadService.validateAppuserClientsMapping(clientId);
@@ -61,6 +63,7 @@ public class SelfSavingsProductsApiResource {
     @Path("{productId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve Self Savings Product", operationId = "retrieveOneSelfSavingsProduct")
     public String retrieveOne(@PathParam(SavingsApiConstants.productIdParamName) final Long productId,
             @QueryParam(SavingsApiConstants.clientIdParamName) final Long clientId, @Context final UriInfo uriInfo) {
 

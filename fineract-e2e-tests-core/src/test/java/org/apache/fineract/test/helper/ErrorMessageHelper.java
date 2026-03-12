@@ -128,6 +128,10 @@ public final class ErrorMessageHelper {
         return "Loan Disbursal is not allowed. Loan Account is not in approved and not disbursed state.";
     }
 
+    public static String disburseIsNotAllowedExceedApprovedAmountFailure() {
+        return "Loan can't be disbursed, disburse amount is exceeding approved principal.";
+    }
+
     public static String loanSubmitDateInFutureFailureMsg() {
         return "The date on which a loan is submitted cannot be in the future.";
     }

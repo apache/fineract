@@ -90,8 +90,8 @@ public class SchedulerJobApiResource {
     private final SqlValidator sqlValidator;
 
     @GET
-    @Operation(summary = "Retrieve Scheduler Jobs", description = "Returns the list of jobs.\n" + "\n" + "Example Requests:\n" + "\n"
-            + "jobs")
+    @Operation(summary = "Retrieve Scheduler Jobs", operationId = "retrieveAllSchedulerJobs", description = "Returns the list of jobs.\n"
+            + "\n" + "Example Requests:\n" + "\n" + "jobs")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.GetJobsResponse.class))))
     public String retrieveAll(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(SCHEDULER_RESOURCE_NAME);
@@ -102,7 +102,8 @@ public class SchedulerJobApiResource {
 
     @GET
     @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
-    @Operation(summary = "Retrieve a Job", description = "Returns the details of a Job.\n" + "\n" + "Example Requests:\n" + "\n" + "jobs/5")
+    @Operation(summary = "Retrieve a Job", operationId = "retrieveOneSchedulerJob", description = "Returns the details of a Job.\n" + "\n"
+            + "Example Requests:\n" + "\n" + "jobs/5")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.GetJobsResponse.class)))
     public String retrieveOne(@PathParam(SchedulerJobApiConstants.JOB_ID) @Parameter(description = "jobId") final Long jobId,
             @Context final UriInfo uriInfo) {

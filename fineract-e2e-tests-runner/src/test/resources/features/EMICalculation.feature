@@ -7950,7 +7950,7 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 30 January 2025  | Accrual           | 0.11   | 0.0       | 0.11     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 31 January 2025  | Accrual           | 0.11   | 0.0       | 0.11     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 February 2025 | Disbursement      | 300.0  | 0.0       | 0.0      | 0.0  | 0.0       | 882.78       | false    | false    |
-    Then Admin fails to disburse the loan on "01 February 2025" with "100" amount
+    Then Admin fails to disburse the loan on "01 February 2025" with "100" amount due to exceed approved amount
 #    --- undo last disbursement --- #
     When Admin successfully undo last disbursal
     Then Loan Tranche Details tab has the following data:
@@ -8141,7 +8141,7 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 31 January 2025  | Repayment         | 117.86 | 116.16    | 1.7      | 0.0  | 0.0       | 468.02       | false    | false    |
       | 31 January 2025  | Accrual           | 0.11   | 0.0       | 0.11     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 February 2025 | Disbursement      | 300.0  | 0.0       | 0.0      | 0.0  | 0.0       | 768.02       | false    | false    |
-    Then Admin fails to disburse the loan on "01 February 2025" with "100" amount
+    Then Admin fails to disburse the loan on "01 February 2025" with "100" amount due to exceed approved amount
 #    --- undo disbursement --- #
     When Admin sets the business date to "02 February 2025"
     When Admin runs inline COB job for Loan

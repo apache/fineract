@@ -245,8 +245,8 @@ public class LoanChargeStepDef extends AbstractStepDef {
 
         PostLoansLoanIdChargesChargeIdRequest waiveRequest = new PostLoansLoanIdChargesChargeIdRequest();
 
-        PostLoansLoanIdChargesChargeIdResponse waiveResponse = ok(() -> fineractClient.loanCharges().executeLoanCharge2(loanId, chargeId,
-                waiveRequest, Map.<String, Object>of("command", "waive")));
+        PostLoansLoanIdChargesChargeIdResponse waiveResponse = ok(() -> fineractClient.loanCharges()
+                .executeLoanChargeOnExistingCharge(loanId, chargeId, waiveRequest, Map.<String, Object>of("command", "waive")));
         testContext().set(TestContextKey.WAIVE_CHARGE_RESPONSE, waiveResponse);
     }
 
@@ -260,8 +260,8 @@ public class LoanChargeStepDef extends AbstractStepDef {
 
         PostLoansLoanIdChargesChargeIdRequest waiveRequest = new PostLoansLoanIdChargesChargeIdRequest();
 
-        PostLoansLoanIdChargesChargeIdResponse waiveResponse = ok(() -> fineractClient.loanCharges().executeLoanCharge2(loanId, chargeId,
-                waiveRequest, Map.<String, Object>of("command", "waive")));
+        PostLoansLoanIdChargesChargeIdResponse waiveResponse = ok(() -> fineractClient.loanCharges()
+                .executeLoanChargeOnExistingCharge(loanId, chargeId, waiveRequest, Map.<String, Object>of("command", "waive")));
         testContext().set(TestContextKey.WAIVE_CHARGE_RESPONSE, waiveResponse);
     }
 

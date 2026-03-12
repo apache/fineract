@@ -29,6 +29,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatusConverter;
 
@@ -41,6 +42,10 @@ public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<L
     @Version
     int version;
 
+    @Setter()
+    @Column(name = "account_no", length = 20, unique = true, nullable = false)
+    private String accountNumber;
+
     @Setter
     @Column(name = "last_closed_business_date")
     private LocalDate lastClosedBusinessDate;
@@ -49,5 +54,13 @@ public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<L
     @Column(name = "loan_status_id", nullable = false)
     @Convert(converter = LoanStatusConverter.class)
     private LoanStatus loanStatus;
+
+    @Setter()
+    @Column(name = "external_id")
+    private ExternalId externalId;
+
+    @Setter()
+    @Column(name = "disbursedon_date")
+    private LocalDate actualDisbursementDate;
 
 }

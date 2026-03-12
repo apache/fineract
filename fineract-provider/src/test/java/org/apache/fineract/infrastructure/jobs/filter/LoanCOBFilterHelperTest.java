@@ -62,7 +62,7 @@ public class LoanCOBFilterHelperTest {
     private LoanRescheduleRequestRepository loanRescheduleRequestRepository;
 
     @InjectMocks
-    private LoanCOBFilterHelper helper;
+    private LoanCOBFilterHelperImpl helper;
 
     @BeforeEach
     public void initLoanCOBFilterHelper() throws Exception {

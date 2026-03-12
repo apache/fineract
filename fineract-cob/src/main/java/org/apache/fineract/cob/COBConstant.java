@@ -27,6 +27,7 @@ public class COBConstant {
 
     public static final String COB_CUSTOM_JOB_PARAMETER_KEY = "CUSTOM_JOB_PARAMETER_ID";
 
+    public static final String INLINE_IDS_PARAMETER_NAME = "LoanIds";
     public static final String COB_PARAMETER = "loanCobParameter";
     public static final Long NUMBER_OF_DAYS_BEHIND = 1L;
     public static final String PARTITION_KEY = "partition";

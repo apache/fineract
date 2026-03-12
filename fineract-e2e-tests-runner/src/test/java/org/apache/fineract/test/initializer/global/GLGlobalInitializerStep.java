@@ -141,6 +141,6 @@ public class GLGlobalInitializerStep implements FineractGlobalInitializerStep {
         }
 
         PostGLAccountsRequest request = GLAccountRequestFactory.defaultGLAccountRequest(name, glCode, type, GLA_USAGE_DETAIL, true);
-        executeVoid(() -> fineractClient.generalLedgerAccount().createGLAccount1(request, Map.of()));
+        executeVoid(() -> fineractClient.generalLedgerAccount().createGLAccount(request, Map.of()));
     }
 }

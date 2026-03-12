@@ -32,7 +32,8 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.data.IsCatchUpRunningDTO;
 import org.apache.fineract.cob.data.OldestCOBProcessedLoanDTO;
-import org.apache.fineract.cob.service.LoanCOBCatchUpService;
+import org.apache.fineract.cob.service.COBCatchUpService;
+import org.apache.fineract.cob.service.LoanCOBCatchUpServiceImpl;
 import org.apache.fineract.infrastructure.core.exception.JobIsNotFoundOrNotEnabledException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.springframework.stereotype.Component;
@@ -43,7 +44,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class LoanCOBCatchUpApiResource {
 
-    private final Optional<LoanCOBCatchUpService> loanCOBCatchUpServiceOp;
+    private final Optional<LoanCOBCatchUpServiceImpl> loanCOBCatchUpServiceOp;
 
     @GET
     @Path("oldest-cob-closed")
@@ -51,7 +52,7 @@ public class LoanCOBCatchUpApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieves the oldest COB processed loan", description = "Retrieves the COB business date and the oldest COB processed loan")
     public OldestCOBProcessedLoanDTO getOldestCOBProcessedLoan() {
-        return loanCOBCatchUpServiceOp.map(LoanCOBCatchUpService::getOldestCOBProcessedLoan)
+        return loanCOBCatchUpServiceOp.map(COBCatchUpService::getOldestCOBProcessedLoan)
                 .orElseThrow(() -> new JobIsNotFoundOrNotEnabledException(JobName.LOAN_COB.name()));
     }
 
@@ -64,19 +65,8 @@ public class LoanCOBCatchUpApiResource {
     @ApiResponse(responseCode = "202", description = "Catch Up has been started")
     @ApiResponse(responseCode = "400", description = "Catch Up is already running")
     public Response executeLoanCOBCatchUp() {
-        return loanCOBCatchUpServiceOp.map(loanCOBCatchUpService -> {
-            if (loanCOBCatchUpService.isCatchUpRunning().isCatchUpRunning()) {
-                return Response.status(Response.Status.BAD_REQUEST).build();
-            }
-            loanCOBCatchUpService.unlockHardLockedLoans();
-            OldestCOBProcessedLoanDTO oldestCOBProcessedLoan = loanCOBCatchUpService.getOldestCOBProcessedLoan();
-
-            if (oldestCOBProcessedLoan.getCobProcessedDate().equals(oldestCOBProcessedLoan.getCobBusinessDate())) {
-                return Response.status(Response.Status.OK).build();
-            }
-            loanCOBCatchUpService.executeLoanCOBCatchUp();
-            return Response.status(Response.Status.ACCEPTED).build();
-        }).orElseThrow(() -> new JobIsNotFoundOrNotEnabledException(JobName.LOAN_COB.name()));
+        return loanCOBCatchUpServiceOp.map(COBCatchUpExecutorHelper::executeLoanCOBCatchUp)
+                .orElseThrow(() -> new JobIsNotFoundOrNotEnabledException(JobName.LOAN_COB.name()));
     }
 
     @GET
@@ -85,6 +75,6 @@ public class LoanCOBCatchUpApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieves whether Loan COB catch up is running", description = "Retrieves whether Loan COB catch up is running, and the current execution date if it is running.")
     public IsCatchUpRunningDTO isCatchUpRunning() {
-        return loanCOBCatchUpServiceOp.map(LoanCOBCatchUpService::isCatchUpRunning).orElseGet(() -> new IsCatchUpRunningDTO(false, null));
+        return loanCOBCatchUpServiceOp.map(COBCatchUpService::isCatchUpRunning).orElseGet(() -> new IsCatchUpRunningDTO(false, null));
     }
 }

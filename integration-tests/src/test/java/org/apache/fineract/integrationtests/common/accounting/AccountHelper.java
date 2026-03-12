@@ -150,15 +150,15 @@ public class AccountHelper {
     }
 
     public static PostGLAccountsResponse createGLAccount(final PostGLAccountsRequest request) {
-        return Calls.ok(FineractClientHelper.getFineractClient().glAccounts.createGLAccount1(request));
+        return Calls.ok(FineractClientHelper.getFineractClient().glAccounts.createGLAccount(request));
     }
 
     public static DeleteGLAccountsResponse deleteGLAccount(final Long requestId) {
-        return Calls.ok(FineractClientHelper.getFineractClient().glAccounts.deleteGLAccount1(requestId));
+        return Calls.ok(FineractClientHelper.getFineractClient().glAccounts.deleteGLAccount(requestId));
     }
 
     public static PutGLAccountsResponse updateGLAccount(final Long requestId, final PutGLAccountsRequest request) {
-        return Calls.ok(FineractClientHelper.getFineractClient().glAccounts.updateGLAccount1(requestId, request));
+        return Calls.ok(FineractClientHelper.getFineractClient().glAccounts.updateGLAccount(requestId, request));
     }
 
     public static GetGLAccountsResponse getGLAccount(final Long glAccountId) {

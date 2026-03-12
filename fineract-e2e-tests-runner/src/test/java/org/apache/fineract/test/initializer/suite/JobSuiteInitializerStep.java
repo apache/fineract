@@ -122,7 +122,7 @@ public class JobSuiteInitializerStep implements FineractSuiteInitializerStep {
     }
 
     private Long updateExternalEventJobFrequency(String cronExpression) {
-        GetJobsResponse externalEventJobResponse = ok(() -> fineractClient.schedulerJob().retrieveAll8()).stream()
+        GetJobsResponse externalEventJobResponse = ok(() -> fineractClient.schedulerJob().retrieveAllSchedulerJobs()).stream()
                 .filter(r -> r.getDisplayName().equals(SEND_ASYNCHRONOUS_EVENTS_JOB_NAME)).findAny()
                 .orElseThrow(() -> new IllegalStateException(SEND_ASYNCHRONOUS_EVENTS_JOB_NAME + " is not found"));
         Long jobId = externalEventJobResponse.getJobId();

@@ -138,7 +138,7 @@ class InlineLoanCOBExecutorServiceImplTest {
     }
 
     private Method getOldestCOBBusinessDate() throws NoSuchMethodException {
-        Method method = InlineLoanCOBExecutorServiceImpl.class.getDeclaredMethod("getOldestCOBBusinessDate", List.class);
+        Method method = InlineCommonLockableCOBExecutorService.class.getDeclaredMethod("getOldestCOBBusinessDate", List.class);
         method.setAccessible(true);
         return method;
     }

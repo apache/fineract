@@ -19,19 +19,16 @@
 package org.apache.fineract.cob.workingcapitalloan;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.cob.conditions.BatchWorkerCondition;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.domain.WorkingCapitalAccountLockRepository;
 import org.apache.fineract.cob.domain.WorkingCapitalLoanAccountLock;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
-@Conditional(BatchWorkerCondition.class)
 @RequiredArgsConstructor
 public class WorkingCapitalLoanLockingConfiguration {
 

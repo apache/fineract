@@ -111,7 +111,7 @@ public class FixedDepositAccountsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve Fixed Deposit Account Template", description = """
+    @Operation(summary = "Retrieve Fixed Deposit Account Template", operationId = "retrieveTemplateFixedDepositAccount", description = """
             This is a convenience resource. It can be useful when building maintenance user interface screens for fixed deposit applications. The template data returned consists of any or all of:
 
 
@@ -142,7 +142,7 @@ public class FixedDepositAccountsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List Fixed deposit applications/accounts", description = """
+    @Operation(summary = "List Fixed deposit applications/accounts", operationId = "retrieveAllFixedDepositAccounts", description = """
             Lists Fixed Deposit Accounts
 
             Example Requests:
@@ -205,7 +205,7 @@ public class FixedDepositAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a fixed deposit application/account", description = """
+    @Operation(summary = "Retrieve a fixed deposit application/account", operationId = "retrieveOneFixedDepositAccount", description = """
             Retrieves a fixed deposit application/account
 
             Example Requests :
@@ -341,7 +341,7 @@ public class FixedDepositAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Modify a fixed deposit application", description = "Fixed deposit application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc")
+    @Operation(summary = "Modify a fixed deposit application", operationId = "updateFixedDepositAccount", description = "Fixed deposit application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.PutFixedDepositAccountsAccountIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.PutFixedDepositAccountsAccountIdResponse.class)))
     public String update(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
@@ -377,7 +377,7 @@ public class FixedDepositAccountsApiResource {
             + "Calculates interest earned on a fixed deposit account based on todays date. It does not attempt to post or credit the interest on the account. That is responsibility of the Post Interest API that will likely be called by overnight process.\n\n"
             + "Post Interest on Fixed Deposit Account:\n\n"
             + "Calculates and Posts interest earned on a fixed deposit account based on today's date and whether an interest posting or crediting event is due.\n\n"
-            + "Showing request/response for Calculate Interest on Fixed Deposit Account")
+            + "Showing request/response for Calculate Interest on Fixed Deposit Account", operationId = "handleCommandsFixedDepositAccount")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.PostFixedDepositAccountsAccountIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.PostFixedDepositAccountsAccountIdResponse.class)))
     public String handleCommands(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
@@ -446,7 +446,7 @@ public class FixedDepositAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete a fixed deposit application", description = "At present we support hard delete of fixed deposit application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the fixed deposit account.")
+    @Operation(summary = "Delete a fixed deposit application", operationId = "deleteFixedDepositAccount", description = "At present we support hard delete of fixed deposit application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the fixed deposit account.")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountsApiResourceSwagger.DeleteFixedDepositAccountsAccountIdResponse.class)))
     public String delete(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId) {
 

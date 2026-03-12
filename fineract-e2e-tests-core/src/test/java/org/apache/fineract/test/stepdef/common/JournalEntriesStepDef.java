@@ -172,7 +172,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
                 Map<String, Object> journalQueryParams = new HashMap<>();
                 journalQueryParams.put("transactionId", transactionId);
                 journalQueryParams.put("runningBalance", true);
-                journalEntryDataResponse = journalEntriesApi().retrieveAll1(journalQueryParams);
+                journalEntryDataResponse = journalEntriesApi().retrieveAllJournalEntries(journalQueryParams);
             } catch (Exception e) {
                 log.error("Exception", e);
             }
@@ -222,7 +222,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
             journalQueryParams.put("transactionId", transactionId);
             journalQueryParams.put("loanId", loanId);
             journalQueryParams.put("runningBalance", true);
-            journalEntryDataResponse = journalEntriesApi().retrieveAll1(journalQueryParams);
+            journalEntryDataResponse = journalEntriesApi().retrieveAllJournalEntries(journalQueryParams);
         } catch (Exception e) {
             log.error("Exception", e);
         }
@@ -297,7 +297,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
                 Map<String, Object> journalQueryParams = new HashMap<>();
                 journalQueryParams.put("transactionId", t);
                 journalQueryParams.put("runningBalance", true);
-                journalEntryDataResponse = journalEntriesApi().retrieveAll1(journalQueryParams);
+                journalEntryDataResponse = journalEntriesApi().retrieveAllJournalEntries(journalQueryParams);
             } catch (Exception e) {
                 log.error("Exception", e);
             }
@@ -364,7 +364,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
                 Map<String, Object> journalQueryParams = new HashMap<>();
                 journalQueryParams.put("transactionId", transactionId);
                 journalQueryParams.put("runningBalance", true);
-                journalEntryDataResponse = journalEntriesApi().retrieveAll1(journalQueryParams);
+                journalEntryDataResponse = journalEntriesApi().retrieveAllJournalEntries(journalQueryParams);
             } catch (Exception e) {
                 log.error("Exception", e);
             }
@@ -436,7 +436,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
             Map<String, Object> journalQueryParams = new HashMap<>();
             journalQueryParams.put("transactionId", transactionId);
             journalQueryParams.put("runningBalance", true);
-            journalEntryDataResponse = journalEntriesApi().retrieveAll1(journalQueryParams);
+            journalEntryDataResponse = journalEntriesApi().retrieveAllJournalEntries(journalQueryParams);
         } catch (Exception e) {
             log.error("Exception", e);
         }

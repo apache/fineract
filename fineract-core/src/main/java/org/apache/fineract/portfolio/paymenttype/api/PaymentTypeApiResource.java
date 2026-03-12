@@ -112,7 +112,7 @@ public class PaymentTypeApiResource {
     @Path("{paymentTypeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete a Payment Type", description = "Deletes payment type")
+    @Operation(summary = "Delete a Payment Type", operationId = "deleteCodePaymentType", description = "Deletes payment type")
     public PaymentTypeDeleteResponse deleteCode(@PathParam("paymentTypeId") final Long paymentTypeId) {
 
         final var command = new PaymentTypeDeleteCommand();

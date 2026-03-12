@@ -46,7 +46,7 @@ import retrofit2.Response;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SavingsAccountsExternalIdTest extends IntegrationTest {
 
-    private static final String externalId = UUID.randomUUID().toString();
+    private static final String EXTERNAL_ID = UUID.randomUUID().toString();
     private final String dateFormat = "dd MMMM yyyy";
     private final String locale = "en";
     private final String formattedDate = LocalDate.now(ZoneId.systemDefault()).minusDays(5).format(DateTimeFormatter.ofPattern(dateFormat));
@@ -59,8 +59,8 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
         request.setProductId(1L);
         request.setLocale(locale);
         request.setDateFormat(dateFormat);
-        request.submittedOnDate(formattedDate);
-        request.setExternalId(externalId);
+        request.setSubmittedOnDate(formattedDate);
+        request.setExternalId(EXTERNAL_ID);
 
         Response<PostSavingsAccountsResponse> response = okR(fineractClient().savingsAccounts.submitSavingsApplication(request));
         assertThat(response.isSuccessful()).isTrue();
@@ -73,7 +73,8 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
         request.setLocale(locale);
         request.setNominalAnnualInterestRate(5.999);
         Response<PutSavingsAccountsAccountIdResponse> response = okR(
-                fineractClient().savingsAccounts.updateSavingsAccountByExternalId(externalId, request, ""));
+                fineractClient().savingsAccounts.updateSavingsAccountByExternalId(EXTERNAL_ID, request, ""));
+
         assertThat(response.isSuccessful()).isTrue();
     }
 
@@ -85,15 +86,22 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
         request.setLocale(locale);
         request.setDateFormat(dateFormat);
         Response<PostSavingsAccountsAccountIdResponse> response = okR(
-                fineractClient().savingsAccounts.handleSavingsCommandsByExternalId(externalId, request, "approve"));
+                fineractClient().savingsAccounts.handleCommandsSavingsAccountByExternalId(EXTERNAL_ID, request, "approve"));
+
         assertThat(response.isSuccessful()).isTrue();
     }
 
     @Test
     @Order(4)
     void retrieveSavingsAccountWithExternalId() {
+        LOG.info("------------------------------ RETRIEVING SAVINGS ACCOUNT ---------------------------------------");
+        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
+        request.dateFormat(dateFormat);
+        request.setLocale(locale);
+        request.setActivatedOnDate(formattedDate);
         Response<SavingsAccountData> response = okR(
-                fineractClient().savingsAccounts.retrieveSavingsAccountByExternalId(externalId, false, "all", null));
+                fineractClient().savingsAccounts.retrieveSavingsAccountByExternalId(EXTERNAL_ID, false, null, "all"));
+
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.body().getStatus().getCode()).isEqualTo("savingsAccountStatusType.approved");
     }
@@ -103,23 +111,51 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
     void undoApprovalSavingsAccountWithExternalId() {
         PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
         Response<PostSavingsAccountsAccountIdResponse> response = okR(
-                fineractClient().savingsAccounts.handleSavingsCommandsByExternalId(externalId, request, "undoapproval"));
+                fineractClient().savingsAccounts.handleCommandsSavingsAccountByExternalId(EXTERNAL_ID, request, "undoapproval"));
+
         assertThat(response.isSuccessful()).isTrue();
     }
 
     @Test
     @Order(6)
-    void deleteSavingsAccountWithExternalId() {
-        Response<DeleteSavingsAccountsAccountIdResponse> response = okR(
-                fineractClient().savingsAccounts.deleteSavingsAccountByExternalId(externalId));
+    void retrieveSavingsAccountWithExternalIdSecondTime() {
+        LOG.info("------------------------------ RETRIEVING SAVINGS ACCOUNT - SECOND TIME ---------------------------------------");
+        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
+        request.dateFormat(dateFormat);
+        request.setLocale(locale);
+        request.setActivatedOnDate(formattedDate);
+        Response<SavingsAccountData> response = okR(
+                fineractClient().savingsAccounts.retrieveSavingsAccountByExternalId(EXTERNAL_ID, false, null, "all"));
+
         assertThat(response.isSuccessful()).isTrue();
     }
 
     @Test
     @Order(7)
-    void retrieveSavingsAccountWithExternalIdFinalCheck() {
+    void deleteSavingsAccountWithExternalId() {
+        LOG.info("------------------------------ DELETING SAVINGS ACCOUNT ---------------------------------------");
+        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
+        request.dateFormat(dateFormat);
+        request.setLocale(locale);
+        request.setActivatedOnDate(formattedDate);
+        Response<DeleteSavingsAccountsAccountIdResponse> response = okR(
+                fineractClient().savingsAccounts.deleteSavingsAccountByExternalId(EXTERNAL_ID));
+
+        assertThat(response.isSuccessful()).isTrue();
+        assertThat(response.body()).isNotNull();
+    }
+
+    @Test
+    @Order(8)
+    void retrieveSavingsAccountWithExternalIdThirdTime() {
+        LOG.info("------------------------------ RETRIEVING SAVINGS ACCOUNT - THIRD TIME ---------------------------------------");
+        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
+        request.dateFormat(dateFormat);
+        request.setLocale(locale);
+        request.setActivatedOnDate(formattedDate);
         Response<SavingsAccountData> response = Calls
-                .executeU(fineractClient().savingsAccounts.retrieveSavingsAccountByExternalId(externalId, false, "all", null));
+                .executeU(fineractClient().savingsAccounts.retrieveSavingsAccountByExternalId(EXTERNAL_ID, false, null, "all"));
+
         assertThat(response.raw().code()).isEqualTo(404);
     }
 }

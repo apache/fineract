@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -78,6 +79,7 @@ public class FixedDepositAccountTransactionsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve Fixed Deposit Account Transaction Template", operationId = "retrieveTemplateFixedDepositAccountTransaction")
     public String retrieveTemplate(@PathParam("fixedDepositAccountId") final Long fixedDepositAccountId,
             // @QueryParam("command") final String commandParam,
             @Context final UriInfo uriInfo) {
@@ -99,6 +101,7 @@ public class FixedDepositAccountTransactionsApiResource {
     @Path("{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve a fixed deposit account transaction", operationId = "retrieveOneFixedDepositAccountTransaction")
     public String retrieveOne(@PathParam("fixedDepositAccountId") final Long fixedDepositAccountId,
             @PathParam("transactionId") final Long transactionId, @Context final UriInfo uriInfo) {
 

@@ -42,4 +42,8 @@ public interface AccountLockRepository<T extends AccountLock> {
     void removeByLockOwnerInAndErrorIsNotNullAndLockPlacedOnCobBusinessDateIsNotNull(List<LockOwner> lockOwners);
 
     Page<T> findAll(Pageable loanAccountLockPage);
+
+    T saveAndFlush(T entity);
+
+    Optional<T> findById(Long id);
 }

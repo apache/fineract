@@ -74,9 +74,9 @@ public class LoanInlineCOBConfig {
     private ProgressiveLoanModelProcessingService progressiveLoanModelProcessingService;
 
     @Bean
-    public InlineLoanCOBBuildExecutionContextTasklet inlineLoanCOBBuildExecutionContextTasklet() {
-        return new InlineLoanCOBBuildExecutionContextTasklet(cobBusinessStepService, customJobParameterRepository,
-                customJobParameterResolver);
+    public InlineLoanCOBBuildExecutionContextTasklet<Loan, LoanCOBBusinessStep> inlineLoanCOBBuildExecutionContextTasklet() {
+        return new InlineLoanCOBBuildExecutionContextTasklet<>(cobBusinessStepService, customJobParameterRepository,
+                customJobParameterResolver, LoanCOBBusinessStep.class, LoanCOBConstant.LOAN_COB_JOB_NAME);
     }
 
     @Bean

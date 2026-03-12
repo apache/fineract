@@ -162,8 +162,9 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
             validateLoanClientIsActive(loan);
             validateLoanGroupIsActive(loan);
 
-            final BigDecimal disbursedAmount = loan.getSummary().getTotalPrincipalDisbursed();
-            loanDisbursementValidator.compareDisbursedToApprovedOrProposedPrincipal(loan, principal, disbursedAmount);
+            final BigDecimal totalDisbursedAmount = principal != null ? loan.getDisbursedAmount().add(principal)
+                    : loan.getDisbursedAmount();
+            loanDisbursementValidator.compareDisbursedToApprovedOrProposedPrincipal(loan, totalDisbursedAmount);
 
             if (loan.isChargedOff()) {
                 throw new GeneralPlatformDomainRuleException("error.msg.loan.disbursal.not.allowed.on.charged.off",
@@ -186,9 +187,9 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
             if ((loanCollateralManagements != null && !loanCollateralManagements.isEmpty()) && loan.getLoanType().isIndividualAccount()) {
                 BigDecimal totalCollateral = collectTotalCollateral(loanCollateralManagements);
 
-                // Validate the loan collateral value against the disbursedAmount
-                if (disbursedAmount.compareTo(totalCollateral) > 0) {
-                    throw new LoanCollateralAmountNotSufficientException(disbursedAmount);
+                // Validate the loan collateral value against the total disbursed amount after this transaction
+                if (totalDisbursedAmount.compareTo(totalCollateral) > 0) {
+                    throw new LoanCollateralAmountNotSufficientException(totalDisbursedAmount);
                 }
             }
 

@@ -49,24 +49,24 @@ public class FeignLoanOriginatorHelper {
     }
 
     public Long createOriginator(PostLoanOriginatorsRequest request) {
-        PostLoanOriginatorsResponse response = ok(() -> fineractClient.loanOriginators().create11(request));
+        PostLoanOriginatorsResponse response = ok(() -> fineractClient.loanOriginators().createLoanOriginator(request));
         return response.getResourceId();
     }
 
     public CallFailedRuntimeException createOriginatorExpectingError(PostLoanOriginatorsRequest request) {
-        return fail(() -> fineractClient.loanOriginators().create11(request));
+        return fail(() -> fineractClient.loanOriginators().createLoanOriginator(request));
     }
 
     public List<GetLoanOriginatorsResponse> getAllOriginators() {
-        return ok(() -> fineractClient.loanOriginators().retrieveAll28());
+        return ok(() -> fineractClient.loanOriginators().retrieveAllLoanOriginators());
     }
 
     public GetLoanOriginatorsResponse getOriginatorById(Long originatorId) {
-        return ok(() -> fineractClient.loanOriginators().retrieveOne18(originatorId));
+        return ok(() -> fineractClient.loanOriginators().retrieveOneLoanOriginator(originatorId));
     }
 
     public CallFailedRuntimeException getOriginatorByIdExpectingError(Long originatorId) {
-        return fail(() -> fineractClient.loanOriginators().retrieveOne18(originatorId));
+        return fail(() -> fineractClient.loanOriginators().retrieveOneLoanOriginator(originatorId));
     }
 
     public GetLoanOriginatorsResponse getOriginatorByExternalId(String externalId) {
@@ -78,7 +78,7 @@ public class FeignLoanOriginatorHelper {
     }
 
     public PutLoanOriginatorsResponse updateOriginator(Long originatorId, PutLoanOriginatorsRequest request) {
-        return ok(() -> fineractClient.loanOriginators().update16(originatorId, request));
+        return ok(() -> fineractClient.loanOriginators().updateLoanOriginator(originatorId, request));
     }
 
     public PutLoanOriginatorsResponse updateOriginatorByExternalId(String externalId, PutLoanOriginatorsRequest request) {
@@ -86,11 +86,11 @@ public class FeignLoanOriginatorHelper {
     }
 
     public CallFailedRuntimeException updateOriginatorExpectingError(Long originatorId, PutLoanOriginatorsRequest request) {
-        return fail(() -> fineractClient.loanOriginators().update16(originatorId, request));
+        return fail(() -> fineractClient.loanOriginators().updateLoanOriginator(originatorId, request));
     }
 
     public Long deleteOriginator(Long originatorId) {
-        var response = ok(() -> fineractClient.loanOriginators().delete14(originatorId));
+        var response = ok(() -> fineractClient.loanOriginators().deleteLoanOriginator(originatorId));
         return response.getResourceId();
     }
 
@@ -100,7 +100,7 @@ public class FeignLoanOriginatorHelper {
     }
 
     public CallFailedRuntimeException deleteOriginatorExpectingError(Long originatorId) {
-        return fail(() -> fineractClient.loanOriginators().delete14(originatorId));
+        return fail(() -> fineractClient.loanOriginators().deleteLoanOriginator(originatorId));
     }
 
     public static String generateUniqueExternalId() {

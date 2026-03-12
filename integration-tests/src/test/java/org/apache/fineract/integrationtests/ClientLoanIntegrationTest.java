@@ -6413,7 +6413,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
                                 .locale("en").dateFormat(DATETIME_PATTERN));
             });
             assertEquals(403, exception.getResponse().code());
-            assertTrue(exception.getMessage().contains("error.msg.loan.disbursal.not.allowed.on.charged.off"));
+            assertTrue(exception.getMessage().contains("amount.can't.be.greater.than.maximum.applied.loan.amount.calculation"));
 
             exception = assertThrows(CallFailedRuntimeException.class, () -> {
                 errorLoanTransactionHelper.disburseLoan((long) loanID,
@@ -6421,7 +6421,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
                                 .locale("en").dateFormat(DATETIME_PATTERN));
             });
             assertEquals(403, exception.getResponse().code());
-            assertTrue(exception.getMessage().contains("error.msg.loan.disbursal.not.allowed.on.charged.off"));
+            assertTrue(exception.getMessage().contains("amount.can't.be.greater.than.maximum.applied.loan.amount.calculation"));
 
             LOAN_TRANSACTION_HELPER.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
                     .transactionDate("07 September 2022").locale("en").transactionAmount(5000.0));

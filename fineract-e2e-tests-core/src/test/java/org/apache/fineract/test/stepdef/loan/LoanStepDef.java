@@ -1863,6 +1863,19 @@ public class LoanStepDef extends AbstractStepDef {
         assertThat(exception.getDeveloperMessage()).contains(ErrorMessageHelper.disburseIsNotAllowedFailure());
     }
 
+    @Then("Admin fails to disburse the loan on {string} with {string} amount due to exceed approved amount")
+    public void disburseIsNotAllowedExceedApprovedAmountFailure(String disbursementDate, String disbursementAmount) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.getLoanId();
+        final PostLoansLoanIdRequest disburseRequest = LoanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(disbursementDate).transactionAmount(new BigDecimal(disbursementAmount));
+
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.loans().stateTransitions(loanId, disburseRequest, Map.of("command", "disburse")));
+        assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(403);
+        assertThat(exception.getDeveloperMessage()).contains(ErrorMessageHelper.disburseIsNotAllowedExceedApprovedAmountFailure());
+    }
+
     @Then("Admin fails to disburse the loan on {string} with {string} EUR transaction amount because of charge-off that was performed for the loan")
     public void disburseChargedOffLoanFailure(String actualDisbursementDate, String transactionAmount) {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
@@ -3264,7 +3277,7 @@ public class LoanStepDef extends AbstractStepDef {
         PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         Long loanId = loanCreateResponse.getLoanId();
         String loanExternalId = loanCreateResponse.getResourceExternalId();
-        DeleteLoansLoanIdResponse deleteLoanResponse = ok(() -> fineractClient.loans().deleteLoanApplication1(loanExternalId));
+        DeleteLoansLoanIdResponse deleteLoanResponse = ok(() -> fineractClient.loans().deleteLoanApplicationByExternalId(loanExternalId));
         assertThat(deleteLoanResponse.getLoanId()).isEqualTo(loanId);
         assertThat(deleteLoanResponse.getResourceExternalId()).isEqualTo(loanExternalId);
     }
@@ -3273,7 +3286,8 @@ public class LoanStepDef extends AbstractStepDef {
     public void failedDeleteLoanWithExternalId() {
         PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         String loanExternalId = loanCreateResponse.getResourceExternalId();
-        CallFailedRuntimeException exception = fail(() -> fineractClient.loans().deleteLoanApplication1(loanExternalId.substring(5)));
+        CallFailedRuntimeException exception = fail(
+                () -> fineractClient.loans().deleteLoanApplicationByExternalId(loanExternalId.substring(5)));
         assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(404);
     }
 
@@ -3505,7 +3519,7 @@ public class LoanStepDef extends AbstractStepDef {
     @Then("Loan Product Charge-Off reasons options from loan product template have {int} options, with the following data:")
     public void loanProductTemplateChargeOffReasonOptionsCheck(final int linesExpected, final DataTable table) {
         final GetLoanProductsTemplateResponse loanProductDetails = ok(
-                () -> fineractClient.loanProducts().retrieveTemplate11(Map.of("staffInSelectedOfficeOnly", "false")));
+                () -> fineractClient.loanProducts().retrieveTemplateLoanProduct(Map.of("staffInSelectedOfficeOnly", "false")));
         assertNotNull(loanProductDetails);
         final List<GetLoanProductsChargeOffReasonOptions> chargeOffReasonOptions = loanProductDetails.getChargeOffReasonOptions();
         assertNotNull(chargeOffReasonOptions);
@@ -5612,7 +5626,8 @@ public class LoanStepDef extends AbstractStepDef {
         final PutLoansAvailableDisbursementAmountRequest modifyLoanAvailableDisbursementAmountRequest = new PutLoansAvailableDisbursementAmountRequest()
                 .locale(LOCALE_EN).amount(new BigDecimal(amount));
 
-        ok(() -> fineractClient.loans().modifyLoanAvailableDisbursementAmount1(externalId, modifyLoanAvailableDisbursementAmountRequest));
+        ok(() -> fineractClient.loans().modifyLoanAvailableDisbursementAmountByExternalId(externalId,
+                modifyLoanAvailableDisbursementAmountRequest));
     }
 
     @Then("Update loan available disbursement amount is forbidden with amount {string} due to exceed applied amount")
@@ -5622,8 +5637,8 @@ public class LoanStepDef extends AbstractStepDef {
         final PutLoansAvailableDisbursementAmountRequest modifyLoanAvailableDisbursementAmountRequest = new PutLoansAvailableDisbursementAmountRequest()
                 .locale(LOCALE_EN).amount(new BigDecimal(amount));
 
-        final CallFailedRuntimeException exception = fail(() -> fineractClient.loans().modifyLoanAvailableDisbursementAmount1(externalId,
-                modifyLoanAvailableDisbursementAmountRequest));
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.loans()
+                .modifyLoanAvailableDisbursementAmountByExternalId(externalId, modifyLoanAvailableDisbursementAmountRequest));
 
         assertThat(exception.getStatus()).isEqualTo(403);
         // API returns generic validation error - ideally should contain specific message about exceeding amount
@@ -5792,7 +5807,7 @@ public class LoanStepDef extends AbstractStepDef {
 
     private Long getClassificationCodeValueId(String codeName, String codeValueName) {
         // Check if code value already exists
-        List<GetCodeValuesDataResponse> existingCodeValues = fineractClient.codeValues().retrieveAllCodeValues1(codeName);
+        List<GetCodeValuesDataResponse> existingCodeValues = fineractClient.codeValues().retrieveAllCodeValuesByCodeName(codeName);
         // Try to find existing code value with the same name
         for (GetCodeValuesDataResponse codeValue : existingCodeValues) {
             if (codeValueName.equals(codeValue.getName())) {

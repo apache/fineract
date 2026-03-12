@@ -804,7 +804,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         String transferExternalId = testContext()
                 .get(TestContextKey.ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_USER_GENERATED + "_" + type);
 
-        externalAssetOwnersApi().transferRequestWithId1(transferExternalId, Map.of("command", command));
+        externalAssetOwnersApi().transferRequestWithIdByExternalId(transferExternalId, Map.of("command", command));
     }
 
     @When("Admin send {string} command to the transaction type {string} will throw error")
@@ -813,7 +813,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
                 .get(TestContextKey.ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_USER_GENERATED + "_" + type);
 
         CallFailedRuntimeException exception = fail(
-                () -> externalAssetOwnersApi().transferRequestWithId1(transferExternalId, Map.of("command", command)));
+                () -> externalAssetOwnersApi().transferRequestWithIdByExternalId(transferExternalId, Map.of("command", command)));
 
         assertThat(exception.getStatus()).as("Expected status code: 403").isEqualTo(403);
     }
@@ -875,7 +875,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         }
 
         CallFailedRuntimeException exception = fail(
-                () -> externalAssetOwnersApi().transferRequestWithId1(transferExternalId, Map.of("command", command)));
+                () -> externalAssetOwnersApi().transferRequestWithIdByExternalId(transferExternalId, Map.of("command", command)));
 
         assertThat(exception.getStatus()).as("Expected status code: 403").isEqualTo(403);
     }
@@ -889,7 +889,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
             transferExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_SALES_TRANSFER_EXTERNAL_ID_FROM_RESPONSE);
         }
 
-        externalAssetOwnersApi().transferRequestWithId1(transferExternalId, Map.of("command", command));
+        externalAssetOwnersApi().transferRequestWithIdByExternalId(transferExternalId, Map.of("command", command));
     }
 
     @When("Admin set external asset owner loan product attribute {string} value {string} for loan product {string}")
