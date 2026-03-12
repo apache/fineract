@@ -327,10 +327,10 @@ public class ClientSearchTest extends IntegrationTest {
         secondEntityClientRequest.setLegalFormId(2L);
         PostClientsResponse secondEntityClientResponse = clientHelper.createClient(secondEntityClientRequest);
         // when
-        GetClientsResponse individualClients = ok(fineractClient().clients.retrieveAll21(newOffice.getOfficeId(), null, null, null, null,
-                null, null, null, null, null, null, null, 1));
-        GetClientsResponse entityClients = ok(fineractClient().clients.retrieveAll21(newOffice.getOfficeId(), null, null, null, null, null,
-                null, null, null, "id", null, null, 2));
+        GetClientsResponse individualClients = ok(fineractClient().clients.retrieveAllClients(newOffice.getOfficeId(), null, null, null,
+                null, null, null, null, null, null, null, null, 1));
+        GetClientsResponse entityClients = ok(fineractClient().clients.retrieveAllClients(newOffice.getOfficeId(), null, null, null, null,
+                null, null, null, null, "id", null, null, 2));
         // then
         assertThat(individualClients.getTotalFilteredRecords()).isEqualTo(1);
         assertThat(individualClients.getPageItems().get(0).getId()).isEqualTo(individualClientResponse.getClientId());

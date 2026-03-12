@@ -145,7 +145,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
 
         PostUsersResponse createUserResponse = testContext().get(TestContextKey.CREATED_SIMPLE_USER_RESPONSE);
         Long createdUserId = createUserResponse.getResourceId();
-        GetUsersUserIdResponse user = ok(() -> fineractClient.users().retrieveOne30(createdUserId));
+        GetUsersUserIdResponse user = ok(() -> fineractClient.users().retrieveOneUser(createdUserId));
 
         String apiBaseUrl = apiProperties.getBaseUrl() + "/fineract-provider/api/";
         FineractFeignClient userClient = FineractFeignClient.builder().baseUrl(apiBaseUrl)
@@ -174,8 +174,9 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         String idempotencyKey = UUID.randomUUID().toString();
         testContext().set(TestContextKey.TRANSACTION_IDEMPOTENCY_KEY, idempotencyKey);
 
-        PostLoansLoanIdTransactionsResponse repaymentResponse = ok(() -> fineractClient.loanTransactions()
-                .executeLoanTransaction1(resourceExternalId, repaymentRequest, Map.<String, Object>of("command", "repayment")));
+        PostLoansLoanIdTransactionsResponse repaymentResponse = ok(
+                () -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(resourceExternalId, repaymentRequest,
+                        Map.<String, Object>of("command", "repayment")));
 
         testContext().set(TestContextKey.LOAN_REPAYMENT_RESPONSE, repaymentResponse);
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
@@ -200,15 +201,16 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
 
         PostUsersResponse createUserResponse = testContext().get(TestContextKey.CREATED_SIMPLE_USER_RESPONSE);
         Long createdUserId = createUserResponse.getResourceId();
-        GetUsersUserIdResponse user = ok(() -> fineractClient.users().retrieveOne30(createdUserId));
+        GetUsersUserIdResponse user = ok(() -> fineractClient.users().retrieveOneUser(createdUserId));
 
         String apiBaseUrl = apiProperties.getBaseUrl() + "/fineract-provider/api/";
         FineractFeignClient userClient = FineractFeignClient.builder().baseUrl(apiBaseUrl)
                 .credentials(user.getUsername(), PWD_USER_WITH_ROLE).tenantId(apiProperties.getTenantId()).disableSslVerification(true)
                 .readTimeout((int) apiProperties.getReadTimeout(), java.util.concurrent.TimeUnit.SECONDS).build();
 
-        PostLoansLoanIdTransactionsResponse repaymentResponse = ok(() -> userClient.loanTransactions()
-                .executeLoanTransaction1(resourceExternalId, repaymentRequest, Map.<String, Object>of("command", "repayment")));
+        PostLoansLoanIdTransactionsResponse repaymentResponse = ok(
+                () -> userClient.loanTransactions().executeLoanTransactionByLoanExternalId(resourceExternalId, repaymentRequest,
+                        Map.<String, Object>of("command", "repayment")));
         testContext().set(TestContextKey.LOAN_REPAYMENT_RESPONSE, repaymentResponse);
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
     }

@@ -38,7 +38,7 @@ public class FeignJournalEntryHelper {
     }
 
     public GetJournalEntriesTransactionIdResponse getJournalEntriesForLoan(Long loanId) {
-        return ok(() -> fineractClient.journalEntries().retrieveAll1(Map.of("loanId", loanId)));
+        return ok(() -> fineractClient.journalEntries().retrieveAllJournalEntries(Map.of("loanId", loanId)));
     }
 
     public void verifyJournalEntries(Long loanId, LoanTestData.Journal... expectedEntries) {

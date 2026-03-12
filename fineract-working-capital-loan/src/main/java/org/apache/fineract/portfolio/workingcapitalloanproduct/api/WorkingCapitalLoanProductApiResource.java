@@ -102,7 +102,7 @@ public class WorkingCapitalLoanProductApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "retrieveWorkingCapitalLoanProductTemplate", summary = "Retrieve Working Capital Loan Product Details Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
+    @Operation(summary = "Retrieve Working Capital Loan Product Details Template", operationId = "retrieveTemplateWorkingCapitalLoanProduct", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "Example Request:\n" + "\n"
             + "workingcapitalloanproducts/template")
     @ApiResponses({
@@ -116,7 +116,7 @@ public class WorkingCapitalLoanProductApiResource {
     @Path("{productId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "retrieveWorkingCapitalLoanProductDetails", summary = "Retrieve a Working Capital Loan Product", description = "Retrieves a Working Capital Loan Product\n\n"
+    @Operation(summary = "Retrieve a Working Capital Loan Product", operationId = "retrieveOneWorkingCapitalLoanProduct", description = "Retrieves a Working Capital Loan Product\n\n"
             + "Example Requests:\n" + "\n" + "workingcapitalloanproducts/1\n" + "\n" + "\n" + "workingcapitalloanproducts/1?template=true\n"
             + "\n" + "\n" + "workingcapitalloanproducts/1?fields=name,description,principal")
     @ApiResponses({
@@ -132,7 +132,7 @@ public class WorkingCapitalLoanProductApiResource {
     @Path("{productId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "updateWorkingCapitalLoanProduct", summary = "Update a Working Capital Loan Product", description = "Updates a Working Capital Loan Product")
+    @Operation(summary = "Update a Working Capital Loan Product", operationId = "updateWorkingCapitalLoanProduct", description = "Updates a Working Capital Loan Product")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanProductApiResourceSwagger.PutWorkingCapitalLoanProductsProductIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanProductApiResourceSwagger.PutWorkingCapitalLoanProductsProductIdResponse.class))) })
@@ -147,7 +147,7 @@ public class WorkingCapitalLoanProductApiResource {
     @Path("{productId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "deleteWorkingCapitalLoanProduct", summary = "Delete a Working Capital Loan Product", description = "Deletes a Working Capital Loan Product if it is not in use")
+    @Operation(summary = "Delete a Working Capital Loan Product", operationId = "deleteWorkingCapitalLoanProduct", description = "Deletes a Working Capital Loan Product if it is not in use")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanProductApiResourceSwagger.DeleteWorkingCapitalLoanProductsProductIdResponse.class))) })
     public CommandProcessingResult deleteWorkingCapitalLoanProduct(
@@ -160,7 +160,7 @@ public class WorkingCapitalLoanProductApiResource {
     @Path("external-id/{externalProductId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "deleteWorkingCapitalLoanProductByExternalId", summary = "Delete a Working Capital Loan Product", description = "Deletes a Working Capital Loan Product by external ID if it is not in use")
+    @Operation(summary = "Delete a Working Capital Loan Product", operationId = "deleteWorkingCapitalLoanProductByExternalId", description = "Deletes a Working Capital Loan Product by external ID if it is not in use")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanProductApiResourceSwagger.DeleteWorkingCapitalLoanProductsProductIdResponse.class))) })
     public CommandProcessingResult deleteWorkingCapitalLoanProduct(
@@ -181,7 +181,7 @@ public class WorkingCapitalLoanProductApiResource {
     @Path("external-id/{externalProductId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "retrieveWorkingCapitalLoanProductDetailsByExternalId", summary = "Retrieve a Working Capital Loan Product", description = "Retrieves a Working Capital Loan Product by external ID\n\n"
+    @Operation(summary = "Retrieve a Working Capital Loan Product", operationId = "retrieveOneWorkingCapitalLoanProductByExternalId", description = "Retrieves a Working Capital Loan Product by external ID\n\n"
             + "Example Requests:\n" + "\n" + "workingcapitalloanproducts/external-id/2075e308-d4a8-44d9-8203-f5a947b8c2f4")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanProductApiResourceSwagger.GetWorkingCapitalLoanProductsProductIdResponse.class))) })
@@ -205,7 +205,7 @@ public class WorkingCapitalLoanProductApiResource {
     @Path("external-id/{externalProductId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "updateWorkingCapitalLoanProductByExternalId", summary = "Update a Working Capital Loan Product", description = "Updates a Working Capital Loan Product by external ID")
+    @Operation(summary = "Update a Working Capital Loan Product", operationId = "updateWorkingCapitalLoanProductByExternalId", description = "Updates a Working Capital Loan Product by external ID")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanProductApiResourceSwagger.PutWorkingCapitalLoanProductsProductIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanProductApiResourceSwagger.PutWorkingCapitalLoanProductsProductIdResponse.class))) })

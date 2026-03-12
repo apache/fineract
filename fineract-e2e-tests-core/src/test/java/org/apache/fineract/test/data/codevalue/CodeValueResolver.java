@@ -53,7 +53,7 @@ public class CodeValueResolver {
     public long resolve(String codeName, String codeValue) {
         log.debug("Resolving code value by code id and name [{}]", codeValue);
         List<GetCodeValuesDataResponse> codeValuesResponses = ok(
-                () -> fineractClient.codeValues().retrieveAllCodeValues1(codeName, Map.of()));
+                () -> fineractClient.codeValues().retrieveAllCodeValuesByCodeName(codeName, Map.of()));
         GetCodeValuesDataResponse foundPtr = codeValuesResponses.stream().filter(ptr -> codeValue.equals(ptr.getName())).findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Code Value [%s] not found for Code [%s]".formatted(codeValue, codeName)));
 

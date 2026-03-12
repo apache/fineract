@@ -286,7 +286,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
     @Then("Admin failed to retrieve a Working Capital Loan Product with id {int} that doesn't exist")
     public void retrieveWorkingCapitalLoanProductFailure(Integer productId) {
         CallFailedRuntimeException exception = fail(
-                () -> workingCapitalApi().retrieveWorkingCapitalLoanProductDetails(Long.valueOf(productId), Map.of()));
+                () -> workingCapitalApi().retrieveOneWorkingCapitalLoanProduct(Long.valueOf(productId), Map.of()));
         assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(404);
         assertThat(exception.getDeveloperMessage())
                 .contains(ErrorMessageHelper.workingCapitalLoanProductIdentifiedDoesNotExistFailure(String.valueOf(productId)));
@@ -338,7 +338,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         String externalId = workingCapitalLoanProductsUpdateRequest.getExternalId();
 
         CallFailedRuntimeException exception = fail(
-                () -> workingCapitalApi().retrieveWorkingCapitalLoanProductDetailsByExternalId(externalId, Map.of()));
+                () -> workingCapitalApi().retrieveOneWorkingCapitalLoanProductByExternalId(externalId, Map.of()));
         assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(404);
         assertThat(exception.getDeveloperMessage())
                 .contains(ErrorMessageHelper.workingCapitalLoanProductIdentifiedDoesNotExistFailure(String.valueOf(externalId)));
@@ -367,7 +367,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
                 .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
         Long resourceId = workingCapitalLoanProductResponse.getResourceId();
         GetWorkingCapitalLoanProductsProductIdResponse getWorkingCapitalProductResponse = workingCapitalApi()
-                .retrieveWorkingCapitalLoanProductDetails(resourceId, Map.of());
+                .retrieveOneWorkingCapitalLoanProduct(resourceId, Map.of());
         checkWorkingCapitalLoanProductCreate(workingCapitalLoanProductCreateRequest, getWorkingCapitalProductResponse);
     }
 
@@ -377,7 +377,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         String externalId = workingCapitalLoanProductCreateRequest.getExternalId();
 
         GetWorkingCapitalLoanProductsProductIdResponse getWorkingCapitalProductResponse = workingCapitalApi()
-                .retrieveWorkingCapitalLoanProductDetailsByExternalId(externalId, Map.of());
+                .retrieveOneWorkingCapitalLoanProductByExternalId(externalId, Map.of());
         checkWorkingCapitalLoanProductCreate(workingCapitalLoanProductCreateRequest, getWorkingCapitalProductResponse);
     }
 
@@ -478,7 +478,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         Long resourceId = workingCapitalLoanProductResponse.getResourceId();
 
         GetWorkingCapitalLoanProductsProductIdResponse getWorkingCapitalProductResponse = workingCapitalApi()
-                .retrieveWorkingCapitalLoanProductDetails(resourceId, Map.of());
+                .retrieveOneWorkingCapitalLoanProduct(resourceId, Map.of());
         checkWorkingCapitalLoanProductUpdate(workingCapitalLoanProductsUpdateRequest, getWorkingCapitalProductResponse);
     }
 
@@ -488,7 +488,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         String externalId = workingCapitalLoanProductsUpdateRequest.getExternalId();
 
         GetWorkingCapitalLoanProductsProductIdResponse getWorkingCapitalProductResponse = workingCapitalApi()
-                .retrieveWorkingCapitalLoanProductDetailsByExternalId(externalId, Map.of());
+                .retrieveOneWorkingCapitalLoanProductByExternalId(externalId, Map.of());
         checkWorkingCapitalLoanProductUpdate(workingCapitalLoanProductsUpdateRequest, getWorkingCapitalProductResponse);
     }
 
@@ -795,8 +795,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
     }
 
     public void checkWorkingCapitalLoanProductDeleteFailure(Long productId) {
-        CallFailedRuntimeException exception = fail(
-                () -> workingCapitalApi().retrieveWorkingCapitalLoanProductDetails(productId, Map.of()));
+        CallFailedRuntimeException exception = fail(() -> workingCapitalApi().retrieveOneWorkingCapitalLoanProduct(productId, Map.of()));
         assertThat(exception.getStatus()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(404);
         assertThat(exception.getDeveloperMessage())
                 .contains(ErrorMessageHelper.workingCapitalLoanProductIdentifiedDoesNotExistFailure(String.valueOf(productId)));

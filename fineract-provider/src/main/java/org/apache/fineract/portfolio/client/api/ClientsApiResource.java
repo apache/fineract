@@ -131,7 +131,7 @@ public class ClientsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List Clients", description = "The list capability of clients can support pagination and sorting.\n\n"
+    @Operation(summary = "List Clients", operationId = "retrieveAllClients", description = "The list capability of clients can support pagination and sorting.\n\n"
             + "Example Requests:\n" + "\n" + "clients\n" + "\n" + "clients?fields=displayName,officeName,timeline\n" + "\n"
             + "clients?offset=10&limit=50\n" + "\n" + "clients?orderBy=displayName&sortOrder=DESC")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsResponse.class)))
@@ -158,8 +158,8 @@ public class ClientsApiResource {
     @Path("{clientId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Client", description = "Example Requests:\n" + "\n" + "clients/1\n" + "\n" + "\n"
-            + "clients/1?template=true\n" + "\n" + "\n" + "clients/1?fields=id,displayName,officeName")
+    @Operation(summary = "Retrieve a Client", operationId = "retrieveOneClient", description = "Example Requests:\n" + "\n" + "clients/1\n"
+            + "\n" + "\n" + "clients/1?template=true\n" + "\n" + "\n" + "clients/1?fields=id,displayName,officeName")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsClientIdResponse.class)))
     public String retrieveOne(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @Context final UriInfo uriInfo,
@@ -170,7 +170,7 @@ public class ClientsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Create a Client", description = "Note:\n\n"
+    @Operation(summary = "Create a Client", operationId = "createClient", description = "Note:\n\n"
             + "1. You can enter either:firstname/middlename/lastname - for a person (middlename is optional) OR fullname - for a business or organisation (or person known by one name).\n"
             + "\n" + "2.If address is enable(enable-address=true), then additional field called address has to be passed.\n\n"
             + "Mandatory Fields: firstname and lastname OR fullname, officeId, active=true and activationDate OR active=false, if(address enabled) address\n\n"
@@ -314,8 +314,9 @@ public class ClientsApiResource {
     @GET
     @Path("/external-id/{externalId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Client by External Id", description = "Example Requests:\n" + "\n" + "clients/123-456\n" + "\n" + "\n"
-            + "clients/123-456?template=true\n" + "\n" + "\n" + "clients/123-456?fields=id,displayName,officeName")
+    @Operation(summary = "Retrieve a Client by External Id", operationId = "retrieveOneClientByExternalId", description = "Example Requests:\n"
+            + "\n" + "clients/123-456\n" + "\n" + "\n" + "clients/123-456?template=true\n" + "\n" + "\n"
+            + "clients/123-456?fields=id,displayName,officeName")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsClientIdResponse.class)))
     public String retrieveOne(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
             @Context final UriInfo uriInfo,

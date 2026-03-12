@@ -260,7 +260,7 @@ public class CodeGlobalInitializerStep implements FineractGlobalInitializerStep 
             postCodeValuesDataRequest.position(position);
 
             try {
-                executeVoid(() -> fineractClient.codeValues().createCodeValue1(codeName, postCodeValuesDataRequest, Map.of()));
+                executeVoid(() -> fineractClient.codeValues().createCodeValueByCodeName(codeName, postCodeValuesDataRequest, Map.of()));
                 log.debug("Code value '{}' created successfully", name);
             } catch (CallFailedRuntimeException e) {
                 if (e.getStatus() == 403 && e.getDeveloperMessage() != null && e.getDeveloperMessage().contains("already exists")) {
@@ -280,7 +280,8 @@ public class CodeGlobalInitializerStep implements FineractGlobalInitializerStep 
             putCodeValuesDataRequest.name(name);
             putCodeValuesDataRequest.position(position);
 
-            executeVoid(() -> fineractClient.codeValues().updateCodeValue1(codeName, (long) position, putCodeValuesDataRequest, Map.of()));
+            executeVoid(() -> fineractClient.codeValues().updateCodeValueByCodeName(codeName, (long) position, putCodeValuesDataRequest,
+                    Map.of()));
         });
     }
 

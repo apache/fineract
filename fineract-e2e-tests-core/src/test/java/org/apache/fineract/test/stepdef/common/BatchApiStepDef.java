@@ -552,7 +552,7 @@ public class BatchApiStepDef extends AbstractStepDef {
         // Create new user which cannot bypass loan COB execution
         PostUsersResponse createUserResponse = testContext().get(TestContextKey.CREATED_SIMPLE_USER_RESPONSE);
         Long createdUserId = createUserResponse.getResourceId();
-        GetUsersUserIdResponse user = fineractFeignClient.users().retrieveOne30(createdUserId);
+        GetUsersUserIdResponse user = fineractFeignClient.users().retrieveOneUser(createdUserId);
         String authorizationString = user.getUsername() + ":" + PWD_USER_WITH_ROLE;
         Base64 base64 = new Base64();
         headerMap.put("Authorization",
@@ -849,7 +849,7 @@ public class BatchApiStepDef extends AbstractStepDef {
 
         Map<String, Object> clientQueryParams = new HashMap<>();
         clientQueryParams.put("staffInSelectedOfficeOnly", false);
-        GetClientsClientIdResponse response = clientApi().retrieveOne12(clientExternalId, clientQueryParams);
+        GetClientsClientIdResponse response = clientApi().retrieveOneClientByExternalId(clientExternalId, clientQueryParams);
         assertThat(response.getId()).as(ErrorMessageHelper.idNull()).isNotNull();
     }
 
@@ -866,7 +866,7 @@ public class BatchApiStepDef extends AbstractStepDef {
 
         Map<String, Object> loanQueryParams = new HashMap<>();
         loanQueryParams.put("staffInSelectedOfficeOnly", false);
-        GetLoansLoanIdResponse response = loansApi().retrieveLoan1(loanExternalId, loanQueryParams);
+        GetLoansLoanIdResponse response = loansApi().retrieveLoanByExternalId(loanExternalId, loanQueryParams);
         assertThat(response.getId()).as(ErrorMessageHelper.idNull()).isNotNull();
     }
 
@@ -883,7 +883,7 @@ public class BatchApiStepDef extends AbstractStepDef {
 
         Map<String, Object> loanQueryParams = new HashMap<>();
         loanQueryParams.put("staffInSelectedOfficeOnly", false);
-        GetLoansLoanIdResponse response = loansApi().retrieveLoan1(loanExternalId, loanQueryParams);
+        GetLoansLoanIdResponse response = loansApi().retrieveLoanByExternalId(loanExternalId, loanQueryParams);
         GetLoansLoanIdStatus status = response.getStatus();
         Long statusIdActual = status.getId();
         Long statusIdExpected = LoanStatus.APPROVED.value.longValue();
@@ -910,7 +910,7 @@ public class BatchApiStepDef extends AbstractStepDef {
         try {
             Map<String, Object> clientQueryParams = new HashMap<>();
             clientQueryParams.put("staffInSelectedOfficeOnly", false);
-            clientApi().retrieveOne12(clientExternalId, clientQueryParams);
+            clientApi().retrieveOneClientByExternalId(clientExternalId, clientQueryParams);
             throw new IllegalStateException("Expected Feign exception but call succeeded");
         } catch (org.apache.fineract.client.feign.FeignException e) {
             errorResponse = fromJson(e.responseBodyAsString(), ErrorResponse.class);
@@ -949,7 +949,7 @@ public class BatchApiStepDef extends AbstractStepDef {
         // Feign throws exceptions on errors instead of returning error in response body
         ErrorResponse errorResponse = null;
         try {
-            loansApi().retrieveLoan1(loanExternalId, loanQueryParams);
+            loansApi().retrieveLoanByExternalId(loanExternalId, loanQueryParams);
             throw new IllegalStateException("Expected Feign exception but call succeeded");
         } catch (org.apache.fineract.client.feign.FeignException e) {
             errorResponse = fromJson(e.responseBodyAsString(), ErrorResponse.class);

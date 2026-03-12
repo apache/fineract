@@ -60,7 +60,7 @@ public class FeignImageTest extends FeignIntegrationTest {
         request.setDateFormat("yyyy-MM-dd");
         request.setLocale("en_US");
 
-        CreateStaffResponse response = ok(() -> fineractClient().staff().create3(request));
+        CreateStaffResponse response = ok(() -> fineractClient().staff().createStaff(request));
         assertThat(response).isNotNull();
         assertThat(response.getResourceId()).isNotNull();
         staffId = response.getResourceId();

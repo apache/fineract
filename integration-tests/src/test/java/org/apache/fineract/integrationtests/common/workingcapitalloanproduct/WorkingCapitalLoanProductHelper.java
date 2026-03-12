@@ -41,12 +41,12 @@ public class WorkingCapitalLoanProductHelper {
 
     public GetWorkingCapitalLoanProductsProductIdResponse retrieveWorkingCapitalLoanProductByExternalId(final String externalId) {
         return FeignCalls.ok(() -> FineractFeignClientHelper.getFineractFeignClient().workingCapitalLoanProducts()
-                .retrieveWorkingCapitalLoanProductDetailsByExternalId(externalId));
+                .retrieveOneWorkingCapitalLoanProductByExternalId(externalId));
     }
 
     public GetWorkingCapitalLoanProductsProductIdResponse retrieveWorkingCapitalLoanProductById(final Long productId) {
         return FeignCalls.ok(() -> FineractFeignClientHelper.getFineractFeignClient().workingCapitalLoanProducts()
-                .retrieveWorkingCapitalLoanProductDetails(productId));
+                .retrieveOneWorkingCapitalLoanProduct(productId));
     }
 
     public List<GetWorkingCapitalLoanProductsResponse> retrieveAllWorkingCapitalLoanProducts() {
@@ -56,7 +56,7 @@ public class WorkingCapitalLoanProductHelper {
 
     public GetWorkingCapitalLoanProductsTemplateResponse retrieveTemplate() {
         return FeignCalls.ok(() -> FineractFeignClientHelper.getFineractFeignClient().workingCapitalLoanProducts()
-                .retrieveWorkingCapitalLoanProductTemplate());
+                .retrieveTemplateWorkingCapitalLoanProduct());
     }
 
     public PutWorkingCapitalLoanProductsProductIdResponse updateWorkingCapitalLoanProductByExternalId(final String externalId,

@@ -277,7 +277,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
                 .locale(DEFAULT_LOCALE);//
 
         PostLoansDelinquencyActionResponse response = ok(
-                () -> fineractClient.loans().createLoanDelinquencyAction1(loanExternalId, request));
+                () -> fineractClient.loans().createLoanDelinquencyActionByExternalId(loanExternalId, request));
         testContext().set(TestContextKey.LOAN_DELINQUENCY_ACTION_RESPONSE, response);
         eventCheckHelper.loanAccountDelinquencyPauseChangedBusinessEventCheck(loanId);
     }
@@ -295,7 +295,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
                 .locale(DEFAULT_LOCALE);//
 
         PostLoansDelinquencyActionResponse response = ok(
-                () -> fineractClient.loans().createLoanDelinquencyAction1(loanExternalId, request));
+                () -> fineractClient.loans().createLoanDelinquencyActionByExternalId(loanExternalId, request));
         testContext().set(TestContextKey.LOAN_DELINQUENCY_ACTION_RESPONSE, response);
         eventCheckHelper.loanAccountDelinquencyPauseChangedBusinessEventCheck(loanId);
     }

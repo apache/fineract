@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.configuration.api;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -65,6 +66,7 @@ public class InternalConfigurationsApiResource implements InitializingBean {
     @Path("name/{configName}/value/{configValue}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Update internal global configuration", operationId = "updateInternalGlobalConfiguration")
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public Response updateGlobalConfiguration(@PathParam("configName") String configName, @PathParam("configValue") Long configValue) {
         log.warn("------------------------------------------------------------");

@@ -60,7 +60,7 @@ public class GlobalConfigurationStepDef {
     @When("Global config {string} value set to {string} through DefaultApi")
     public void setGlobalConfigValueStringDefaultApi(String configKey, String configValue) {
         Long configValueLong = Long.valueOf(configValue);
-        fineractClient.defaultApi().updateGlobalConfiguration(configKey, configValueLong);
+        fineractClient.defaultApi().updateInternalGlobalConfiguration(configKey, configValueLong);
     }
 
     @When("Update currency with incorrect empty value outcomes with an error")
