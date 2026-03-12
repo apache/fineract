@@ -74,11 +74,11 @@ public class SurveyHelper {
     }
 
     public List<SurveyData> retrieveAllSurveys() {
-        return executeApiCall(() -> surveysApi.fetchAllSurveys1(null), "Failed to retrieve all surveys");
+        return executeApiCall(() -> surveysApi.fetchAllSurveys(null), "Failed to retrieve all surveys");
     }
 
     public List<SurveyData> retrieveActiveSurveys() {
-        return executeApiCall(() -> surveysApi.fetchAllSurveys1(true), "Failed to retrieve active surveys");
+        return executeApiCall(() -> surveysApi.fetchAllSurveys(true), "Failed to retrieve active surveys");
     }
 
     public String updateSurvey(Long surveyId, SurveyData surveyData) {

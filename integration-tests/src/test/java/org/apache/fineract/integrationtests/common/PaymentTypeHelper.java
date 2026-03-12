@@ -89,7 +89,7 @@ public final class PaymentTypeHelper {
 
     public PaymentTypeDeleteResponse deletePaymentType(final Long paymentTypeId) {
         log.info("-------------------------------DELETING PAYMENT TYPE-------------------------------------------");
-        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.deleteCode1(paymentTypeId));
+        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.deleteCodePaymentType(paymentTypeId));
     }
 
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {

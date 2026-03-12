@@ -49,12 +49,14 @@ public class ExternalAssetOwnerHelper {
     }
 
     public void cancelTransferByTransferExternalId(String transferExternalId) {
-        Calls.ok(FineractClientHelper.getFineractClient().externalAssetOwners.transferRequestWithId1(transferExternalId, "cancel"));
+        Calls.ok(FineractClientHelper.getFineractClient().externalAssetOwners.transferRequestWithIdByExternalId(transferExternalId,
+                "cancel"));
     }
 
     public void cancelTransferByTransferExternalIdError(String transferExternalId) {
-        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class, () -> Calls
-                .okR(FineractClientHelper.getFineractClient().externalAssetOwners.transferRequestWithId1(transferExternalId, "cancel")));
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> Calls.okR(FineractClientHelper.getFineractClient().externalAssetOwners
+                        .transferRequestWithIdByExternalId(transferExternalId, "cancel")));
         assertEquals(403, exception.getResponse().code());
     }
 

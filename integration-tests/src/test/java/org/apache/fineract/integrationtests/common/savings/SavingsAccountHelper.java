@@ -379,7 +379,7 @@ public class SavingsAccountHelper {
     }
 
     public PostSavingsAccountsAccountIdResponse closeSavingsAccount(final Long savingsId, PostSavingsAccountsAccountIdRequest request) {
-        return Calls.ok(FineractClientHelper.getFineractClient().savingsAccounts.handleCommands6(savingsId, request, "close"));
+        return Calls.ok(FineractClientHelper.getFineractClient().savingsAccounts.handleCommandsSavingsAccount(savingsId, request, "close"));
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -432,18 +432,20 @@ public class SavingsAccountHelper {
 
     public Response<PostSavingsAccountTransactionsResponse> withdrawalFromSavingsAccount(final Long savingsId,
             PostSavingsAccountTransactionsRequest request) {
-        return Calls.executeU(FineractClientHelper.getFineractClient().savingsTransactions.transaction2(savingsId, request, "withdrawal"));
+        return Calls.executeU(FineractClientHelper.getFineractClient().savingsTransactions.createSavingsAccountTransaction(savingsId,
+                request, "withdrawal"));
     }
 
     public Response<PostSavingsAccountTransactionsResponse> forceWithdrawalFromSavingsAccount(final Long savingsId,
             PostSavingsAccountTransactionsRequest request) {
-        return Calls.executeU(
-                FineractClientHelper.getFineractClient().savingsTransactions.transaction2(savingsId, request, "force-withdrawal"));
+        return Calls.executeU(FineractClientHelper.getFineractClient().savingsTransactions.createSavingsAccountTransaction(savingsId,
+                request, "force-withdrawal"));
     }
 
     public Response<PostSavingsAccountTransactionsResponse> depositIntoSavingsAccount(final Long savingsId,
             PostSavingsAccountTransactionsRequest request) {
-        return Calls.executeU(FineractClientHelper.getFineractClient().savingsTransactions.transaction2(savingsId, request, "deposit"));
+        return Calls.executeU(FineractClientHelper.getFineractClient().savingsTransactions.createSavingsAccountTransaction(savingsId,
+                request, "deposit"));
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -1075,8 +1077,8 @@ public class SavingsAccountHelper {
     }
 
     public Map<String, Object> querySavingsTransactions(Integer savingsId, PagedLocalRequestAdvancedQueryRequest request) {
-        String response = Calls
-                .ok(FineractClientHelper.getFineractClient().savingsTransactions.advancedQuery1(savingsId.longValue(), request));
+        String response = Calls.ok(FineractClientHelper.getFineractClient().savingsTransactions
+                .advancedQuerySavingsAccountTransactions(savingsId.longValue(), request));
         return JsonPath.from(response).get("");
     }
 

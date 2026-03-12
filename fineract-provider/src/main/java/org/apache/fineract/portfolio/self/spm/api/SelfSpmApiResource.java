@@ -19,6 +19,7 @@
 
 package org.apache.fineract.portfolio.self.spm.api;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -48,6 +49,7 @@ public class SelfSpmApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "List all self surveys", operationId = "fetchAllSelfSurveys")
     @Transactional
     public List<SurveyData> fetchAllSurveys() {
         securityContext.authenticatedUser();

@@ -44,7 +44,8 @@ public class FinancialActivityMappingGlobalInitializerStep implements FineractGl
                 .financialActivityId(FINANCIAL_ACTIVITY_ID_ASSET_TRANSFER).glAccountId(GL_ACCOUNT_ID_ASSET_TRANSFER);
 
         try {
-            executeVoid(() -> fineractClient.mappingFinancialActivitiesToAccounts().createGLAccount(request, Map.of()));
+            executeVoid(() -> fineractClient.mappingFinancialActivitiesToAccounts().createGLAccountMappingFinancialActivityAccount(request,
+                    Map.of()));
             log.debug("Financial activity mapping created successfully");
         } catch (CallFailedRuntimeException e) {
             if (e.getStatus() == 403 && e.getDeveloperMessage() != null && e.getDeveloperMessage().contains("already exists")) {

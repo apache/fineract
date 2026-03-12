@@ -50,7 +50,7 @@ public class GlobalConfigurationHelper {
 
         PutGlobalConfigurationsRequest updateRequest = new PutGlobalConfigurationsRequest().enabled(enabled).value(value);
 
-        ok(() -> fineractClient.globalConfiguration().updateConfiguration1(configId, updateRequest, Map.of()));
+        ok(() -> fineractClient.globalConfiguration().updateGlobalConfiguration(configId, updateRequest, Map.of()));
         GlobalConfigurationPropertyData updatedConfiguration = ok(
                 () -> fineractClient.globalConfiguration().retrieveOneByName(configKey, Map.of()));
         boolean isEnabled = BooleanUtils.toBoolean(updatedConfiguration.getEnabled());
@@ -64,7 +64,7 @@ public class GlobalConfigurationHelper {
 
         PutGlobalConfigurationsRequest updateRequest = new PutGlobalConfigurationsRequest().enabled(true).stringValue(value);
 
-        ok(() -> fineractClient.globalConfiguration().updateConfiguration1(configId, updateRequest, Map.of()));
+        ok(() -> fineractClient.globalConfiguration().updateGlobalConfiguration(configId, updateRequest, Map.of()));
         GlobalConfigurationPropertyData updatedConfiguration = ok(
                 () -> fineractClient.globalConfiguration().retrieveOneByName(configKey, Map.of()));
         boolean isEnabled = BooleanUtils.toBoolean(updatedConfiguration.getEnabled());

@@ -99,7 +99,7 @@ public class JournalEntriesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List Journal Entries", description = "The list capability of journal entries can support pagination and sorting.\n\n"
+    @Operation(summary = "List Journal Entries", operationId = "retrieveAllJournalEntries", description = "The list capability of journal entries can support pagination and sorting.\n\n"
             + "Example Requests:\n" + "\n" + "journalentries\n" + "\n" + "journalentries?transactionId=PB37X8Y21EQUY4S\n" + "\n"
             + "journalentries?officeId=1&manualEntriesOnly=true&fromDate=1 July 2013&toDate=15 July 2013&dateFormat=dd MMMM yyyy&locale=en\n"
             + "\n" + "journalentries?fields=officeName,glAccountName,transactionDate\n" + "\n" + "journalentries?offset=10&limit=50\n"

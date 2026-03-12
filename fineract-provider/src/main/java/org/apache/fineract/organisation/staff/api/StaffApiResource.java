@@ -83,9 +83,10 @@ public class StaffApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve Staff", description = "Returns the list of staff members.\n" + "\n" + "Example Requests:\n" + "\n"
-            + "staff\n\n\n\n" + "\n" + "Retrieve a Staff by status\n" + "\n" + "Returns the details of a Staff based on status.\n" + "\n"
-            + "By default it Returns all the ACTIVE Staff.\n" + "\n" + "If status=INACTIVE, then it returns all INACTIVE Staff.\n" + "\n"
+    @Operation(summary = "Retrieve Staff", operationId = "retrieveAllStaff", description = "Returns the list of staff members.\n" + "\n"
+            + "Example Requests:\n" + "\n" + "staff\n\n\n\n" + "\n" + "Retrieve a Staff by status\n" + "\n"
+            + "Returns the details of a Staff based on status.\n" + "\n" + "By default it Returns all the ACTIVE Staff.\n" + "\n"
+            + "If status=INACTIVE, then it returns all INACTIVE Staff.\n" + "\n"
             + "and for status=ALL, it Returns both ACTIVE and INACTIVE Staff.\n" + "\n" + "Example Requests:\n" + "\n"
             + "staff?status=active")
     public List<StaffData> retrieveAll(@QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
@@ -100,8 +101,8 @@ public class StaffApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Create a staff member", description = "Creates a staff member.\n" + "\n" + "Mandatory Fields: \n"
-            + "officeId, firstname, lastname\n" + "\n" + "Optional Fields: \n" + "isLoanOfficer, isActive")
+    @Operation(summary = "Create a staff member", operationId = "createStaff", description = "Creates a staff member.\n" + "\n"
+            + "Mandatory Fields: \n" + "officeId, firstname, lastname\n" + "\n" + "Optional Fields: \n" + "isLoanOfficer, isActive")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = StaffRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.CreateStaffResponse.class)))
     public CommandProcessingResult create(@Parameter(hidden = true) StaffRequest staffRequest) {
@@ -114,8 +115,8 @@ public class StaffApiResource {
     @Path("{staffId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Staff Member", description = "Returns the details of a Staff Member.\n" + "\n" + "Example Requests:\n"
-            + "\n" + "staff/1")
+    @Operation(summary = "Retrieve a Staff Member", operationId = "retrieveOneStaff", description = "Returns the details of a Staff Member.\n"
+            + "\n" + "Example Requests:\n" + "\n" + "staff/1")
     public StaffData retrieveOne(@PathParam("staffId") @Parameter(description = "staffId") final Long staffId,
             @Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);

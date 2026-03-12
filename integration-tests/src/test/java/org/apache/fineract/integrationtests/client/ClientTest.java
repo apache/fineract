@@ -56,14 +56,14 @@ public class ClientTest extends IntegrationTest {
         // TODO activationDate() why String? https://issues.apache.org/jira/browse/FINERACT-1232
         // TODO why dateFormat and locale required even when no activationDate?!
         // https://issues.apache.org/jira/browse/FINERACT-1233
-        return ok(fineractClient().clients.create6(
+        return ok(fineractClient().clients.createClient(
                 new PostClientsRequest().legalFormId(1L).officeId(1L).fullname("TestClient").dateFormat(Utils.DATE_FORMAT).locale("en_US")))
                 .getClientId();
     }
 
     Optional<Long> retrieveFirst() {
         GetClientsResponse clients = ok(
-                fineractClient().clients.retrieveAll21(null, null, null, null, null, null, null, 0, 1, null, null, false, null));
+                fineractClient().clients.retrieveAllClients(null, null, null, null, null, null, null, 0, 1, null, null, false, null));
         if (clients.getTotalFilteredRecords() != null && clients.getTotalFilteredRecords() > 0) {
             return clients.getPageItems().stream().findFirst().map(item -> item.getId());
         }
