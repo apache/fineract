@@ -47,8 +47,8 @@ dependencies {
     }
     testImplementation 'com.google.code.gson:gson:2.11.0'
 
-    testImplementation 'org.junit.platform:junit-platform-suite:1.11.4'
-    testImplementation 'org.junit.platform:junit-platform-console:1.11.4'
+    testImplementation 'org.junit.platform:junit-platform-suite:6.0.3'
+    testImplementation 'org.junit.platform:junit-platform-console:6.0.3'
     testImplementation 'io.cucumber:cucumber-java:7.20.1'
     testImplementation 'io.cucumber:cucumber-junit:7.20.1'
     testImplementation 'io.cucumber:cucumber-spring:7.20.1'

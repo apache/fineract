@@ -84,8 +84,8 @@ dependencies {
     testImplementation 'io.qameta.allure:allure-cucumber7-jvm:2.29.1'
 
     testImplementation 'org.assertj:assertj-core:3.26.3'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.3'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:6.0.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter:6.0.3'
 
     testCompileOnly 'org.projectlombok:lombok:1.18.36'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'

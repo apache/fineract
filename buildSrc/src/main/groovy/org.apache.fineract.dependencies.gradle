@@ -29,7 +29,7 @@ dependencyManagement {
         mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:3.2.1'
         mavenBom 'io.opentelemetry:opentelemetry-bom:1.44.1'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:2.0.21'
-        mavenBom 'org.junit:junit-bom:5.11.3'
+        mavenBom 'org.junit:junit-bom:6.0.3'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.19.2'
         mavenBom 'io.cucumber:cucumber-bom:7.20.1'
         mavenBom 'org.mockito:mockito-bom:5.14.2'
