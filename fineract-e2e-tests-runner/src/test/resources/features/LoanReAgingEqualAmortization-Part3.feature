@@ -1165,19 +1165,18 @@ Feature: LoanReAgingEqualAmortization - Part3
     When Admin creates a Loan re-aging transaction with the following data:
       | frequencyNumber | frequencyType | startDate     | numberOfInstallments | reAgeInterestHandling            |
       | 1               | MONTHS        | 10 April 2026 | 6                    | EQUAL_AMORTIZATION_FULL_INTEREST |
-    Then Loan Repayment schedule has 10 periods, with the following data for periods:
+    Then Loan Repayment schedule has 9 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
       |    |      | 01 January 2026   |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |       |             |
       | 1  | 0    | 01 January 2026   | 01 January 2026 | 750.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0  | 250.0 | 0.0        | 0.0   | 0.0         |
       | 2  | 31   | 01 February 2026  | 10 March 2026   | 650.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 0.0        | 100.0 | 0.0         |
       | 3  | 28   | 01 March 2026     | 10 March 2026   | 650.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0   | 0.0        | 0.0   | 0.0         |
-      | 4  | 9    | 10 March 2026     | 10 March 2026   | 650.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0   | 0.0        | 0.0   | 0.0         |
-      | 5  | 31   | 10 April 2026     |                 | 541.67          | 108.33        | 0.0      | 0.0  | 2.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
-      | 6  | 30   | 10 May 2026       |                 | 433.34          | 108.33        | 0.0      | 0.0  | 2.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
-      | 7  | 31   | 10 June 2026      |                 | 325.01          | 108.33        | 0.0      | 0.0  | 2.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
-      | 8  | 30   | 10 July 2026      |                 | 216.68          | 108.33        | 0.0      | 0.0  | 2.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
-      | 9  | 31   | 10 August 2026    |                 | 108.35          | 108.33        | 0.0      | 0.0  | 2.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
-      | 10 | 31   | 10 September 2026 |                 | 0.0             | 108.35        | 0.0      | 0.0  | 2.0       | 110.35 | 0.0   | 0.0        | 0.0   | 110.35      |
+      | 4  | 40   | 10 April 2026     |                 | 541.67          | 108.33        | 0.0      | 0.0  | 2.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
+      | 5  | 30   | 10 May 2026       |                 | 433.34          | 108.33        | 0.0      | 0.0  | 2.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
+      | 6  | 31   | 10 June 2026      |                 | 325.01          | 108.33        | 0.0      | 0.0  | 2.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
+      | 7  | 30   | 10 July 2026      |                 | 216.68          | 108.33        | 0.0      | 0.0  | 2.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
+      | 8  | 31   | 10 August 2026    |                 | 108.35          | 108.33        | 0.0      | 0.0  | 2.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
+      | 9  | 31   | 10 September 2026 |                 | 0.0             | 108.35        | 0.0      | 0.0  | 2.0       | 110.35 | 0.0   | 0.0        | 0.0   | 110.35      |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 12.0      | 1012.0 | 350.0 | 0.0        | 100.0 | 662.0       |
@@ -1252,19 +1251,18 @@ Feature: LoanReAgingEqualAmortization - Part3
     When Admin creates a Loan re-aging transaction with the following data:
       | frequencyNumber | frequencyType | startDate     | numberOfInstallments | reAgeInterestHandling               |
       | 1               | MONTHS        | 10 April 2026 | 6                    | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
-    Then Loan Repayment schedule has 10 periods, with the following data for periods:
+    Then Loan Repayment schedule has 9 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
       |    |      | 01 January 2026   |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |       |             |
       | 1  | 0    | 01 January 2026   | 01 January 2026 | 750.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0  | 250.0 | 0.0        | 0.0   | 0.0         |
       | 2  | 31   | 01 February 2026  | 10 March 2026   | 650.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 0.0        | 100.0 | 0.0         |
       | 3  | 28   | 01 March 2026     | 10 March 2026   | 650.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0   | 0.0        | 0.0   | 0.0         |
-      | 4  | 9    | 10 March 2026     | 10 March 2026   | 650.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0   | 0.0        | 0.0   | 0.0         |
-      | 5  | 31   | 10 April 2026     |                 | 541.67          | 108.33        | 0.0      | 2.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
-      | 6  | 30   | 10 May 2026       |                 | 433.34          | 108.33        | 0.0      | 2.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
-      | 7  | 31   | 10 June 2026      |                 | 325.01          | 108.33        | 0.0      | 2.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
-      | 8  | 30   | 10 July 2026      |                 | 216.68          | 108.33        | 0.0      | 2.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
-      | 9  | 31   | 10 August 2026    |                 | 108.35          | 108.33        | 0.0      | 2.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
-      | 10 | 31   | 10 September 2026 |                 | 0.0             | 108.35        | 0.0      | 2.0  | 0.0       | 110.35 | 0.0   | 0.0        | 0.0   | 110.35      |
+      | 4  | 40   | 10 April 2026     |                 | 541.67          | 108.33        | 0.0      | 2.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
+      | 5  | 30   | 10 May 2026       |                 | 433.34          | 108.33        | 0.0      | 2.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
+      | 6  | 31   | 10 June 2026      |                 | 325.01          | 108.33        | 0.0      | 2.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
+      | 7  | 30   | 10 July 2026      |                 | 216.68          | 108.33        | 0.0      | 2.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
+      | 8  | 31   | 10 August 2026    |                 | 108.35          | 108.33        | 0.0      | 2.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
+      | 9  | 31   | 10 September 2026 |                 | 0.0             | 108.35        | 0.0      | 2.0  | 0.0       | 110.35 | 0.0   | 0.0        | 0.0   | 110.35      |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
       | 1000.0        | 0.0      | 12.0 | 0.0       | 1012.0 | 350.0 | 0.0        | 100.0 | 662.0       |
@@ -1338,19 +1336,18 @@ Feature: LoanReAgingEqualAmortization - Part3
     When Admin creates a Loan re-aging transaction with the following data:
       | frequencyNumber | frequencyType | startDate     | numberOfInstallments | reAgeInterestHandling               |
       | 1               | MONTHS        | 10 April 2026 | 6                    | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
-    Then Loan Repayment schedule has 10 periods, with the following data for periods:
+    Then Loan Repayment schedule has 9 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
       |    |      | 01 January 2026   |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |       |             |
       | 1  | 0    | 01 January 2026   | 01 January 2026 | 750.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0  | 250.0 | 0.0        | 0.0   | 0.0         |
       | 2  | 31   | 01 February 2026  | 10 March 2026   | 650.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 0.0        | 100.0 | 0.0         |
       | 3  | 28   | 01 March 2026     | 10 March 2026   | 650.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0   | 0.0        | 0.0   | 0.0         |
-      | 4  | 9    | 10 March 2026     | 10 March 2026   | 662.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0   | 0.0        | 0.0   | 0.0         |
-      | 5  | 31   | 10 April 2026     |                 | 551.67          | 110.33        | 0.0      | 0.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
-      | 6  | 30   | 10 May 2026       |                 | 441.34          | 110.33        | 0.0      | 0.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
-      | 7  | 31   | 10 June 2026      |                 | 331.01          | 110.33        | 0.0      | 0.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
-      | 8  | 30   | 10 July 2026      |                 | 220.68          | 110.33        | 0.0      | 0.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
-      | 9  | 31   | 10 August 2026    |                 | 110.35          | 110.33        | 0.0      | 0.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
-      | 10 | 31   | 10 September 2026 |                 | 0.0             | 110.35        | 0.0      | 0.0  | 0.0       | 110.35 | 0.0   | 0.0        | 0.0   | 110.35      |
+      | 4  | 40   | 10 April 2026     |                 | 551.67          | 110.33        | 0.0      | 0.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
+      | 5  | 30   | 10 May 2026       |                 | 441.34          | 110.33        | 0.0      | 0.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
+      | 6  | 31   | 10 June 2026      |                 | 331.01          | 110.33        | 0.0      | 0.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
+      | 7  | 30   | 10 July 2026      |                 | 220.68          | 110.33        | 0.0      | 0.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
+      | 8  | 31   | 10 August 2026    |                 | 110.35          | 110.33        | 0.0      | 0.0  | 0.0       | 110.33 | 0.0   | 0.0        | 0.0   | 110.33      |
+      | 9  | 31   | 10 September 2026 |                 | 0.0             | 110.35        | 0.0      | 0.0  | 0.0       | 110.35 | 0.0   | 0.0        | 0.0   | 110.35      |
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
       | 1012.0        | 0.0      | 0.0  | 0.0       | 1012.0 | 350.0 | 0.0        | 100.0 | 662.0       |

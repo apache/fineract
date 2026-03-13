@@ -3860,8 +3860,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         loanCharge.getAmountOutstanding(currency), numberOfReAgeInstallments, null, currency)))
                 .toList();
 
-        FirstReAgeInstallmentProps firstReAgeInstallmentProps = calculateFirstReAgeInstallmentProps(installments,
-                loanReAgeParameter.getStartDate());
+        LocalDate relativeStartDate = loanReAgeParameter.getStartDate().isBefore(transactionDate) ? loanReAgeParameter.getStartDate()
+                : transactionDate;
+
+        FirstReAgeInstallmentProps firstReAgeInstallmentProps = calculateFirstReAgeInstallmentProps(installments, relativeStartDate);
 
         BalancesWithPaidInAdvance balances = installments.stream()
                 .filter(i -> !i.isDownPayment() && !i.isAdditional() && !i.getDueDate().isBefore(transactionDate)).map(installment -> {
