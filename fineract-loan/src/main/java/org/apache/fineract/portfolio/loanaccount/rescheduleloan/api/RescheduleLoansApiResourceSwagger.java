@@ -200,6 +200,10 @@ final class RescheduleLoansApiResourceSwagger {
         public Long rescheduleReasonId;
         @Schema(example = "20 September 2011")
         public String submittedOnDate;
+        @Schema(example = "20 September 2011")
+        public String endDate;
+        @Schema(example = "100.00")
+        public BigDecimal emi;
     }
 
     @Schema(description = "PostUpdateRescheduleLoansRequest")

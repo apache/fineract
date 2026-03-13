@@ -249,17 +249,19 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final boolean isSpecificToInstallment, BigDecimal decimalValue, LocalDate dueDate, LocalDate endDate, BigDecimal emi) {
 
         if (rescheduleFromDate != null && endDate != null && emi != null) {
-            LoanTermVariations parent = null;
             final Integer termType = LoanTermVariationType.EMI_AMOUNT.getValue();
-            List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
-            for (LoanRepaymentScheduleInstallment installment : installments) {
-                if (!DateUtils.isBefore(installment.getDueDate(), rescheduleFromDate)
-                        && !DateUtils.isAfter(installment.getDueDate(), endDate)) {
-                    createLoanTermVariations(loanRescheduleRequest, termType, loan, installment.getDueDate(), installment.getDueDate(),
-                            loanRescheduleRequestToTermVariationMappings, isActive, true, emi, parent);
-                }
-                if (DateUtils.isAfter(installment.getDueDate(), endDate)) {
-                    break;
+
+            LoanTermVariations parent = createLoanTermVariations(loanRescheduleRequest, termType, loan, rescheduleFromDate,
+                    rescheduleFromDate, loanRescheduleRequestToTermVariationMappings, isActive, false, emi, null);
+
+            LoanRepaymentScheduleInstallment revertInstallment = loan.getRepaymentScheduleInstallments().stream()
+                    .filter(i -> DateUtils.isAfter(i.getDueDate(), endDate)).findFirst().orElse(null);
+            if (revertInstallment != null) {
+                BigDecimal originalEmi = loan.retriveLastEmiAmount();
+                if (originalEmi != null) {
+                    createLoanTermVariations(loanRescheduleRequest, termType, loan, revertInstallment.getDueDate(),
+                            revertInstallment.getDueDate(), loanRescheduleRequestToTermVariationMappings, isActive, false, originalEmi,
+                            parent);
                 }
             }
         }

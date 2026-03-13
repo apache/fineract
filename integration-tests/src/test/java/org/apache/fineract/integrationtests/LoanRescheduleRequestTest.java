@@ -410,6 +410,33 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
         });
     }
 
+    @Test
+    public void testCreateLoanRescheduleChangeEMIWithExtraTerms() {
+        PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        Long commonLoanProductId = createLoanProductPeriodicWithInterest();
+
+        AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        runAt("01 March 2024", () -> {
+            Long loanId = applyForLoanApplicationWithInterest(client.getClientId(), commonLoanProductId, BigDecimal.valueOf(4000),
+                    "1 March 2023", "1 March 2024");
+            loanIdRef.set(loanId);
+            loanTransactionHelper.approveLoan("1 March 2024", loanId.intValue());
+
+            loanTransactionHelper.disburseLoan("1 March 2024", loanId.intValue(), "4000", null);
+
+            PostCreateRescheduleLoansResponse rescheduleLoansResponse = loanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanIdRef.get()).dateFormat(DATETIME_PATTERN)
+                            .locale("en").submittedOnDate("1 March 2024").rescheduleReasonId(1L).rescheduleFromDate("1 April 2024")
+                            .emi(BigDecimal.valueOf(500)).endDate("1 May 2024").extraTerms(2));
+
+            GetLoanRescheduleRequestResponse getLoanRescheduleRequestResponse = Assertions.assertDoesNotThrow(
+                    () -> loanRescheduleRequestHelper.readLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(), null));
+            Assertions.assertNotNull(getLoanRescheduleRequestResponse);
+
+            approveLoanReschedule(rescheduleLoansResponse.getResourceId(), "1 March 2024");
+        });
+    }
+
     private Integer createProgressiveLoanProduct() {
         AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
         final String loanProductJSON = new LoanProductTestBuilder().withNumberOfRepayments(numberOfRepayments)

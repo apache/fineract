@@ -102,6 +102,8 @@ public class LoanRescheduleRequestDataValidatorImpl implements LoanRescheduleReq
             DataValidatorBuilder dataValidatorBuilder) {
         final LocalDate endDate = fromJsonHelper.extractLocalDateNamed(RescheduleLoansApiConstants.endDateParamName, jsonElement);
         final BigDecimal emi = fromJsonHelper.extractBigDecimalWithLocaleNamed(RescheduleLoansApiConstants.emiParamName, jsonElement);
+        final Integer extraTerms = fromJsonHelper.extractIntegerWithLocaleNamed(RescheduleLoansApiConstants.extraTermsParamName,
+                jsonElement);
         if (emi != null || endDate != null) {
             dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.endDateParamName).value(endDate).notNull();
             dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.emiParamName).value(emi).notNull().positiveAmount();
@@ -109,9 +111,15 @@ public class LoanRescheduleRequestDataValidatorImpl implements LoanRescheduleReq
             if (endDate != null) {
                 LoanRepaymentScheduleInstallment endInstallment = loan.fetchLoanRepaymentScheduleInstallmentByDueDate(endDate);
 
-                if (endInstallment == null) {
+                if (endInstallment == null && (extraTerms == null || extraTerms == 0)) {
                     dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.endDateParamName)
                             .failWithCode("repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not exist");
+                } else if (endInstallment == null && extraTerms != null && extraTerms > 0) {
+                    LocalDate lastDueDate = loan.getLastLoanRepaymentScheduleInstallment().getDueDate();
+                    if (!DateUtils.isAfter(endDate, lastDueDate)) {
+                        dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.endDateParamName).failWithCode(
+                                "repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not exist");
+                    }
                 }
             }
         }
