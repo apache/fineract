@@ -195,7 +195,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
                  entry.id, journal_entry_created, createdby_id, created_date, created.username as createduser,
                 lastmodifiedby_id, modified.username as modifieduser, lastmodified_date, SUM(reserved.reseve_amount) as totalreserved
                 from m_provisioning_history entry
-                JOIN m_loanproduct_provisioning_entry reserved on entry.id = reserved.history_id
+                LEFT JOIN m_loanproduct_provisioning_entry reserved on entry.id = reserved.history_id
                 left JOIN m_appuser created ON created.id = entry.createdby_id
                 left JOIN m_appuser modified ON modified.id = entry.lastmodifiedby_id\s""";
 

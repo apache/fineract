@@ -26,12 +26,20 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import org.apache.fineract.client.models.ProvisionEntryRequest;
+import org.apache.fineract.client.models.ProvisioningEntryData;
+import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -149,6 +157,45 @@ public class ProvisioningIntegrationTest {
         Assertions.assertTrue((Boolean) entry.get("journalEntry"));
         Map provisioningEntry = transactionHelper.retrieveProvisioningEntries(provisioningEntryId);
         Assertions.assertTrue(((ArrayList) provisioningEntry.get("pageItems")).size() > 0);
+    }
+
+    @Test
+    public void testGetProvisioningEntryWithNoActiveLoansShouldReturn200() {
+        // FINERACT-2530: GET /provisioningentries/{id} threw EmptyResultDataAccessException (HTTP 500)
+        // when no rows existed in m_loanproduct_provisioning_entry for the given history ID.
+        ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper(requestSpec, responseSpec);
+
+        // Create a loan product but do NOT disburse any loans so m_loanproduct_provisioning_entry stays empty
+        final Integer loanProductID = createLoanProduct(false, NONE);
+        Assertions.assertNotNull(loanProductID);
+        ArrayList<Integer> loanProducts = new ArrayList<>();
+        loanProducts.add(loanProductID);
+
+        ArrayList categories = transactionHelper.retrieveAllProvisioningCategories();
+        Assertions.assertTrue(categories.size() > 0);
+        Account liability = accountHelper.createLiabilityAccount();
+        Account expense = accountHelper.createExpenseAccount();
+        Map requestCriteria = ProvisioningHelper.createProvisioingCriteriaJson(loanProducts, categories, liability, expense);
+        Integer criteriaId = transactionHelper.createProvisioningCriteria(new Gson().toJson(requestCriteria));
+        Assertions.assertNotNull(criteriaId);
+
+        // Create provisioning entry using fineract-client — no active loans so m_loanproduct_provisioning_entry is empty
+        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        String date = simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant()));
+        Long entryId = Calls.ok(FineractClientHelper.getFineractClient().provisioningEntries
+                .createProvisioningEntries(new ProvisionEntryRequest()
+                        .date(date).locale("en").dateFormat("dd MMMM yyyy").createjournalentries("false")))
+                .getResourceId();
+        Assertions.assertNotNull(entryId);
+
+        // Before fix: INNER JOIN -> 0 rows -> EmptyResultDataAccessException -> HTTP 500
+        // After fix: LEFT JOIN -> 1 row with totalReserved=NULL -> HTTP 200
+        ProvisioningEntryData entry = Calls.ok(FineractClientHelper.getFineractClient().provisioningEntries
+                .retrieveProvisioningEntry(entryId));
+        Assertions.assertNotNull(entry);
+        Assertions.assertNotNull(entry.getId());
+
+        transactionHelper.deleteProvisioningCriteria(criteriaId);
     }
 
     private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
