@@ -112,7 +112,6 @@ public class ClientsApiResource {
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
         ClientData clientData = null;
-        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
         if (CommandParameterUtil.is(commandParam, "close")) {
             clientData = clientReadPlatformService.retrieveAllNarrations(ClientApiConstants.CLIENT_CLOSURE_REASON);
         } else if (CommandParameterUtil.is(commandParam, "acceptTransfer")) {
