@@ -71,7 +71,7 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Accounting Rules", description = """
         It is typical scenario in MFI's that non accountants pass journal entries on a regular basis. For Ex: A branch office might deposit their entire cash at hand to their Bank account at the end of a working day. The branch office users might not understand enough of accounting to figure out which account needs to get credited and which account needs to be debited to represent this transaction.
 
-        Enter accounting rules, an abstraction on top of manual Journal entires for enabling simpler data entry. An accounting rule can define any of the following abstractions
+        Enter accounting rules, an abstraction on top of manual journal entries for enabling simpler data entry. An accounting rule can define any of the following abstractions
 
         A Simple journal entry where both the credit and debit account have been preselected
         A Simple journal entry where either credit or debit accounts have been limited to a pre-selected list of accounts (Ex: Debit account should be one of "Bank of America" of "JP Morgan" and credit account should be "Cash")
