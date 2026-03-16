@@ -95,12 +95,12 @@ task copyDiagrams(type: Copy) {
 asciidoctor {
     languages 'en'
 
-    baseDir 'src/docs'
-    sourceDir 'src/docs'
+    baseDir = 'src/docs'
+    sourceDir = 'src/docs'
     sources {
         include('index.adoc')
     }
-    outputDir 'build/docs/html'
+    outputDir = 'build/docs/html'
 
     logging.captureStandardError LogLevel.INFO
 
@@ -112,12 +112,12 @@ asciidoctor {
 asciidoctorPdf {
     languages 'en'
 
-    baseDir 'src/docs'
-    sourceDir 'src/docs'
+    baseDir = 'src/docs'
+    sourceDir = 'src/docs'
     sources {
         include('index.adoc')
     }
-    outputDir 'build/docs/pdf'
+    outputDir = 'build/docs/pdf'
 
     logging.captureStandardError LogLevel.INFO
 

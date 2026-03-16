@@ -95,7 +95,7 @@ dependencies {
 }
 
 tasks.withType(Tar) {
-    compression Compression.GZIP
+    compression = Compression.GZIP
     archiveExtension = 'tar.gz'
     
     // Enable caching for all tar tasks
@@ -185,5 +185,5 @@ tasks.named('srcDistTar') {
 }
 
 // Disable zip distributions as they're not needed
-binaryDistZip.enabled false
-srcDistZip.enabled false
+binaryDistZip.enabled = false
+srcDistZip.enabled = false

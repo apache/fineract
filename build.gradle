@@ -87,7 +87,7 @@ buildscript {
         npmRepository = 'https://npm.pkg.github.com'
     }
     repositories {
-        maven { url 'https://plugins.gradle.org/m2/' }
+        maven { url = 'https://plugins.gradle.org/m2/' }
     }
 
     dependencies {
@@ -243,13 +243,13 @@ allprojects  {
             trimTrailingWhitespace()
         }
 
-        lineEndings 'UNIX'
+        lineEndings = 'UNIX'
     }
 
     // Configuration for Gradle license plug-in
     // https://github.com/hierynomus/license-gradle-plugin
     license {
-        header rootProject.file("$rootDir/APACHE_LICENSETEXT.md")
+        header = rootProject.file("$rootDir/APACHE_LICENSETEXT.md")
         excludes([
             "**/gradlew*",
             "**/git.properties",
@@ -266,7 +266,7 @@ allprojects  {
             "**/avro/**/*.java",
             "**/org/apache/fineract/client/**/*.java"
         ])
-        strictCheck true
+        strictCheck = true
     }
 
     licenseReport {
@@ -535,7 +535,7 @@ configure(project.fineractJavaProjects) {
             }
         }
 
-        lineEndings 'UNIX'
+        lineEndings = 'UNIX'
     }
 
     // If we are running Gradle within Eclipse to enhance classes,
@@ -722,7 +722,7 @@ configure(project.fineractJavaProjects) {
     }
 
     testlogger {
-        logLevel 'quiet'
+        logLevel = 'quiet'
     }
 
     // Configuration for spotbugs plugin
@@ -842,9 +842,9 @@ configure(project.fineractPublishProjects) {
     publishing {
         publications {
             mavenJava(MavenPublication) {
-                groupId 'org.apache.fineract'
-                artifactId project.name
-                version "${project.version}-SNAPSHOT"
+                groupId = 'org.apache.fineract'
+                artifactId = project.name
+                version = "${project.version}-SNAPSHOT"
 
                 from components.java
 
@@ -881,11 +881,11 @@ configure(project.fineractPublishProjects) {
             def stagingUrl = 'https://repository.apache.org/content/repositories/snapshots'
 
             maven {
-                name 'apache'
-                url hasProperty('fineract.release.version') ? releaseUrl : stagingUrl
+                name = 'apache'
+                url = hasProperty('fineract.release.version') ? releaseUrl : stagingUrl
                 credentials {
-                    username "${findProperty('fineract.config.username')}"
-                    password "${findProperty('fineract.config.password')}"
+                    username = "${findProperty('fineract.config.username')}"
+                    password = "${findProperty('fineract.config.password')}"
                 }
             }
         }
@@ -903,7 +903,7 @@ configure(project.fineractPublishProjects) {
 apply plugin: 'org.cyclonedx.bom'
 
 cyclonedxBom {
-    projectType = "application"
+    projectType = 'APPLICATION'
     includeBomSerialNumber = true
     includeLicenseText = true
 }
