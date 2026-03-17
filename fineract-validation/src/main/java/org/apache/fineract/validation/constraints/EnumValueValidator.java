@@ -21,6 +21,7 @@ package org.apache.fineract.validation.constraints;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,12 +31,19 @@ public class EnumValueValidator implements ConstraintValidator<EnumValue, String
 
     @Override
     public void initialize(EnumValue annotation) {
-        acceptedValues = Arrays.stream(annotation.enumClass().getEnumConstants()).map(e -> e.name().toLowerCase())
+        acceptedValues = Arrays.stream(annotation.enumClass().getEnumConstants()).map(e -> e.name().toLowerCase(Locale.US))
                 .collect(Collectors.toSet());
     }
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        return value != null && acceptedValues.contains(value.toLowerCase());
+        if (value == null || !acceptedValues.contains(value.toLowerCase(Locale.US))) {
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate(
+                    String.format(Locale.US, "Value '%s' is not valid. Accepted values are: %s", value, acceptedValues))
+                    .addConstraintViolation();
+            return false;
+        }
+        return true;
     }
 }
