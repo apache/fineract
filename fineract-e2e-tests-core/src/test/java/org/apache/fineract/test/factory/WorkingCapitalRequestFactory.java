@@ -32,11 +32,16 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.client.models.DelinquencyBucketRequest;
+import org.apache.fineract.client.models.MinimumPaymentPeriodAndRule;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostAllowAttributeOverrides;
 import org.apache.fineract.client.models.PostPaymentAllocation;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoanProductsProductIdRequest;
+import org.apache.fineract.test.data.delinquency.DelinquencyBucketType;
+import org.apache.fineract.test.data.delinquency.DelinquencyFrequencyType;
+import org.apache.fineract.test.data.delinquency.DelinquencyMinimumPayment;
 import org.apache.fineract.test.helper.Utils;
 import org.springframework.stereotype.Component;
 
@@ -154,6 +159,18 @@ public class WorkingCapitalRequestFactory {
 
         paymentAllocationData.setPaymentAllocationOrder(paymentAllocationOrders);
         return paymentAllocationData;
+    }
+
+    public DelinquencyBucketRequest defaultWorkingCapitalDelinquencyBucketRequest() {
+        return new DelinquencyBucketRequest() //
+                .name("DB-WCL-" + Utils.randomStringGenerator(8)) //
+                .bucketType(DelinquencyBucketType.WORKING_CAPITAL.getValue().toString())//
+                .ranges(List.of(1L)) //
+                .minimumPaymentPeriodAndRule(new MinimumPaymentPeriodAndRule() //
+                        .frequency(1L) //
+                        .minimumPaymentType(DelinquencyMinimumPayment.PERCENTAGE.getValue()) //
+                        .frequencyType(DelinquencyFrequencyType.WEEKS.getValue()) //
+                        .minimumPayment(BigDecimal.valueOf(1.23D)));
     }
 
 }

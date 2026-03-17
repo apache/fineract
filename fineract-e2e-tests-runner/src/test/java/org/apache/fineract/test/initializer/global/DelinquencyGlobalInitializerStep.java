@@ -21,6 +21,7 @@ package org.apache.fineract.test.initializer.global;
 import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +33,11 @@ import org.apache.fineract.client.models.DelinquencyBucketData;
 import org.apache.fineract.client.models.DelinquencyBucketRequest;
 import org.apache.fineract.client.models.DelinquencyRangeData;
 import org.apache.fineract.client.models.DelinquencyRangeRequest;
+import org.apache.fineract.client.models.MinimumPaymentPeriodAndRule;
 import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
+import org.apache.fineract.test.data.delinquency.DelinquencyBucketType;
+import org.apache.fineract.test.data.delinquency.DelinquencyFrequencyType;
+import org.apache.fineract.test.data.delinquency.DelinquencyMinimumPayment;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -46,6 +51,7 @@ public class DelinquencyGlobalInitializerStep implements FineractGlobalInitializ
     public static final String DEFAULT_LOCALE = "en";
     public static final List<Integer> DEFAULT_DELINQUENCY_RANGES = Arrays.asList(1, 3, 30, 60, 90, 120, 150, 180, 240);
     public static final String DEFAULT_DELINQUENCY_BUCKET_NAME = "Default delinquency bucket";
+    public static final String DEFAULT_WC_DELINQUENCY_BUCKET_NAME = "Default Working Capital delinquency bucket";
 
     private final FineractFeignClient fineractClient;
 
@@ -55,6 +61,7 @@ public class DelinquencyGlobalInitializerStep implements FineractGlobalInitializ
     public void initialize() {
         setDefaultDelinquencyRanges();
         setDefaultDelinquencyBucket();
+        setDefaultWCDelinquencyBucket();
     }
 
     public void setDefaultDelinquencyRanges() {
@@ -131,6 +138,32 @@ public class DelinquencyGlobalInitializerStep implements FineractGlobalInitializ
         postDelinquencyBucketRequest.ranges(createdRangeIds);
 
         executeVoid(() -> fineractClient.delinquencyRangeAndBucketsManagement().createDelinquencyBucket(postDelinquencyBucketRequest,
+                Map.of()));
+    }
+
+    public void setDefaultWCDelinquencyBucket() {
+        try {
+            List<DelinquencyBucketData> existingBuckets = fineractClient.delinquencyRangeAndBucketsManagement()
+                    .getDelinquencyBuckets(Map.of());
+            boolean bucketExists = existingBuckets.stream().anyMatch(b -> DEFAULT_WC_DELINQUENCY_BUCKET_NAME.equals(b.getName()));
+
+            if (bucketExists) {
+                return;
+            }
+        } catch (Exception e) {
+            log.debug("Could not retrieve existing working capital delinquency buckets, will create default bucket", e);
+        }
+
+        DelinquencyBucketRequest postDelinquencyBucketWCRequest = new DelinquencyBucketRequest().name(DEFAULT_WC_DELINQUENCY_BUCKET_NAME)
+                .bucketType(DelinquencyBucketType.WORKING_CAPITAL.getValue().toString())//
+                .ranges(List.of(1L)) //
+                .minimumPaymentPeriodAndRule(new MinimumPaymentPeriodAndRule() //
+                        .frequency(1L) //
+                        .minimumPaymentType(DelinquencyMinimumPayment.PERCENTAGE.getValue()) //
+                        .frequencyType(DelinquencyFrequencyType.MONTHS.getValue()) //
+                        .minimumPayment(BigDecimal.valueOf(1.23))); //
+
+        executeVoid(() -> fineractClient.delinquencyRangeAndBucketsManagement().createDelinquencyBucket(postDelinquencyBucketWCRequest,
                 Map.of()));
     }
 }

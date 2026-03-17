@@ -25,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -34,15 +33,10 @@ import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.services.WorkingCapitalLoanProductsApi;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.DeleteWorkingCapitalLoanProductsProductIdResponse;
-import org.apache.fineract.client.models.DelinquencyBucketData;
-import org.apache.fineract.client.models.DelinquencyBucketRequest;
-import org.apache.fineract.client.models.DelinquencyRangeData;
 import org.apache.fineract.client.models.GetConfigurableAttributes;
 import org.apache.fineract.client.models.GetPaymentAllocation;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanProductsProductIdResponse;
-import org.apache.fineract.client.models.MinimumPaymentPeriodAndRule;
 import org.apache.fineract.client.models.PostAllowAttributeOverrides;
-import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsResponse;
 import org.apache.fineract.client.models.PutWorkingCapitalLoanProductsProductIdRequest;
@@ -807,61 +801,4 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
                 .contains(ErrorMessageHelper.workingCapitalLoanProductIdentifiedDoesNotExistFailure(String.valueOf(productId)));
     }
 
-    @When("Admin Calls Delinquency Template")
-    public void adminCallsDelinquencyTemplate() {
-        DelinquencyBucketData template = ok(() -> fineractFeignClient.delinquencyRangeAndBucketsManagement().getTemplate3());
-        log.info("Template DelinquencyBucketData: {}", template);
-    }
-
-    @When("Admin creates WC Delinquency Bucket With Values")
-    public void adminCreatesWCDelinquencyBucketWithValues() {
-        DelinquencyBucketRequest delinquencyBucketRequest = new DelinquencyBucketRequest() //
-                .name("DB-" + System.currentTimeMillis()) //
-                .bucketType("2").ranges(List.of(1L)).minimumPaymentPeriodAndRule(new MinimumPaymentPeriodAndRule().frequency(1L)
-                        .frequencyType(1).minimumPayment(BigDecimal.valueOf(1.23D)).minimumPaymentType(1L));
-        PostDelinquencyBucketResponse ok = ok(
-                () -> fineractFeignClient.delinquencyRangeAndBucketsManagement().createDelinquencyBucket(delinquencyBucketRequest));
-        assertThat(ok).isNotNull();
-        assertThat(ok.getResourceId()).isNotNull();
-        testContext().get().put("DELINQUENCY_BUCKET_ID", ok.getResourceId());
-    }
-
-    @Then("Get Delinquency Bucket has the following values")
-    public void getDelinquencyBucketHasTheFollowingValues() {
-        Long id = (Long) testContext().get().get("DELINQUENCY_BUCKET_ID");
-        DelinquencyBucketData delinquencyBucketData = ok(
-                () -> fineractFeignClient.delinquencyRangeAndBucketsManagement().getDelinquencyBucket(id));
-        log.info("Get DelinquencyBucketData: {}", delinquencyBucketData);
-    }
-
-    @Then("Get Delinquency Bucket With Template has the following values")
-    public void getDelinquencyBucketWithTemplateHasTheFollowingValues() {
-        Long id = (Long) testContext().get().get("DELINQUENCY_BUCKET_ID");
-        DelinquencyBucketData delinquencyBucketData = ok(() -> fineractFeignClient.delinquencyRangeAndBucketsManagement()
-                .getDelinquencyBucketUniversal(id, Map.of("template", "true")));
-        log.info("Get With Template DelinquencyBucketData: {}", delinquencyBucketData);
-    }
-
-    @When("Admin modifies WC Delinquency Bucket With Values")
-    public void adminModifiesWCDelinquencyBucketWithValues() {
-        Long id = (Long) testContext().get().get("DELINQUENCY_BUCKET_ID");
-        DelinquencyBucketData delinquencyBucketData = ok(
-                () -> fineractFeignClient.delinquencyRangeAndBucketsManagement().getDelinquencyBucket(id));
-        DelinquencyBucketRequest request = new DelinquencyBucketRequest() //
-                .ranges(delinquencyBucketData.getRanges().stream().map(DelinquencyRangeData::getId).toList())
-                // 1 Regular
-                // 2 Working Capital
-                .name(delinquencyBucketData.getName()).bucketType("2").minimumPaymentPeriodAndRule(new MinimumPaymentPeriodAndRule() //
-                        .minimumPayment(BigDecimal.valueOf(7.89D)).minimumPaymentType(2L) //
-                        .frequencyType(3) //
-                        .frequency(4L) //
-                );
-        ok(() -> fineractFeignClient.delinquencyRangeAndBucketsManagement().updateDelinquencyBucket(id, request));
-    }
-
-    @When("Admin deletes WC Delinquency Bucket With Values")
-    public void adminDeletesWCDelinquencyBucketWithValues() {
-        Long id = (Long) testContext().get().get("DELINQUENCY_BUCKET_ID");
-        ok(() -> fineractFeignClient.delinquencyRangeAndBucketsManagement().deleteDelinquencyBucket(id));
-    }
 }

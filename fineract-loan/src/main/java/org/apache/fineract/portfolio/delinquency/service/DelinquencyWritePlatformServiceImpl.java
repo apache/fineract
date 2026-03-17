@@ -375,6 +375,11 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     private DelinquencyBucket updateDelinquencyBucket(DelinquencyBucket delinquencyBucket, DelinquencyBucketData data,
             Map<String, Object> changes) {
         if (!data.getName().equalsIgnoreCase(delinquencyBucket.getName())) {
+            Optional<DelinquencyBucket> existingEntityByName = repositoryBucket.findByName(data.getName());
+            if (existingEntityByName.isPresent()) {
+                throw new PlatformDataIntegrityException("error.msg.data.integrity.issue.entity.duplicated",
+                        "Data integrity issue with resource: " + existingEntityByName.get().getId());
+            }
             delinquencyBucket.setName(data.getName());
             changes.put(DelinquencyApiConstants.NAME_PARAM_NAME, data.getName());
         }

@@ -325,4 +325,11 @@ public abstract class TestContextKey {
     public static final String WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE = "workingCapitalLoanProductCreateResponse";
     public static final String WORKING_CAPITAL_LOAN_PRODUCT_UPDATE_REQUEST = "workingCapitalLoanProductUpdateRequest";
     public static final String WORKING_CAPITAL_LOAN_PRODUCT_UPDATE_RESPONSE = "workingCapitalLoanProductUpdateResponse";
+    public static final String DELINQUENCY_BUCKET_ID = "delinquencyBucketId";
+    public static final String DELINQUENCY_BUCKET_CREATE_REQUEST = "delinquencyBucketCreateRequest";
+    public static final String DELINQUENCY_BUCKET_UPDATE_REQUEST = "delinquencyBucketUpdateRequest";
+
+    public static final String DELINQUENCY_BUCKET_ID_FOR_UPDATE = "delinquencyBucketIdForUpdate";
+    public static final String DELINQUENCY_BUCKET_CREATE_REQUEST_FOR_UPDATE = "delinquencyBucketCreateRequestForUpdate";
+    public static final String DELINQUENCY_BUCKET_CREATE_RESPONSE_FOR_UPDATE_DUPLICATE = "delinquencyBucketUpdateRequestForUpdateDuplicate";
 }
