@@ -67,10 +67,16 @@ public class SavingsSchedularInterestPoster {
     public void postInterest() throws JobExecutionException {
         if (!savingAccounts.isEmpty()) {
             List<Throwable> errors = new ArrayList<>();
+            LocalDate yesterday = DateUtils.getBusinessLocalDate().minusDays(1);
             for (SavingsAccountData savingsAccountData : savingAccounts) {
                 boolean postInterestAsOn = false;
                 LocalDate transactionDate = null;
                 try {
+                    if (isInterestAlreadyPostedForPeriod(savingsAccountData, yesterday)) {
+                        log.debug("Interest already posted for savings account {} up to date {}, skipping", savingsAccountData.getId(),
+                                savingsAccountData.getSummary().getInterestPostedTillDate());
+                        continue;
+                    }
                     SavingsAccountData savingsAccountDataRet = savingsAccountWritePlatformService.postInterest(savingsAccountData,
                             postInterestAsOn, transactionDate, backdatedTxnsAllowedTill);
                     savingsAccountDataList.add(savingsAccountDataRet);
@@ -109,7 +115,6 @@ public class SavingsSchedularInterestPoster {
             for (SavingsAccountTransactionData savingsAccountTransactionData : savingsAccountTransactionDataList) {
                 if (savingsAccountTransactionData.getId() == null && !MathUtil.isZero(savingsAccountTransactionData.getAmount())) {
                     final String key = savingsAccountTransactionData.getRefNo();
-                    final Boolean isOverdraft = savingsAccountTransactionData.getIsOverdraft();
                     final SavingsAccountTransactionData dataFromFetch = savingsAccountTransactionDataHashMap.get(key);
                     savingsAccountTransactionData.setId(dataFromFetch.getId());
                     if (savingsAccountData.getGlAccountIdForSavingsControl() != 0
@@ -247,5 +252,13 @@ public class SavingsSchedularInterestPoster {
         return "UPDATE m_savings_account_transaction "
                 + "SET is_reversed=?, amount=?, overdraft_amount_derived=?, balance_end_date_derived=?, balance_number_of_days_derived=?, running_balance_derived=?, cumulative_balance_derived=?, is_reversal=?, "
                 + LAST_MODIFIED_DATE_DB_FIELD + " = ?, " + LAST_MODIFIED_BY_DB_FIELD + " = ? " + "WHERE id=?";
+    }
+
+    private boolean isInterestAlreadyPostedForPeriod(SavingsAccountData savingsAccountData, LocalDate yesterday) {
+        LocalDate interestPostedTillDate = savingsAccountData.getSummary().getInterestPostedTillDate();
+        if (interestPostedTillDate == null) {
+            return false;
+        }
+        return !interestPostedTillDate.isBefore(yesterday);
     }
 }

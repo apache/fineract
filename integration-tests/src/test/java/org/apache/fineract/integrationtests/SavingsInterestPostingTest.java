@@ -444,6 +444,69 @@ public class SavingsInterestPostingTest {
         });
     }
 
+    @Test
+    public void testNoDuplicateInterestPostingWhenMixingManualAndJobRunsAcrossBusinessDates() {
+        final Integer[] savingsAccountId = new Integer[1];
+        final int[] interestTxAfterFirstManualPost = new int[1];
+        final int[] interestTxAfterManualAsOnPost = new int[1];
+        final String accountOpeningDate = "01 January 2025";
+        final String firstManualPostingDate = "02 February 2025";
+        final String manualAsOnPostingDate = "15 March 2025";
+        final String schedulerPostingDate = "02 April 2025";
+        final String depositAmount = "10000";
+
+        runAt(accountOpeningDate, () -> {
+            final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, accountOpeningDate);
+
+            final String savingsProductJSON = new SavingsProductHelper() //
+                    .withInterestCompoundingPeriodTypeAsAnnually() //
+                    .withInterestPostingPeriodTypeAsMonthly() //
+                    .withInterestCalculationPeriodTypeAsDailyBalance() //
+                    .build();
+            final Integer productId = SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+
+            final Integer accountId = savingsAccountHelper.applyForSavingsApplicationOnDate(clientId, productId,
+                    SavingsAccountHelper.ACCOUNT_TYPE_INDIVIDUAL, accountOpeningDate);
+
+            savingsAccountHelper.approveSavingsOnDate(accountId, accountOpeningDate);
+            savingsAccountHelper.activateSavings(accountId, accountOpeningDate);
+            savingsAccountHelper.depositToSavingsAccount(accountId, depositAmount, accountOpeningDate,
+                    CommonConstants.RESPONSE_RESOURCE_ID);
+            savingsAccountId[0] = accountId;
+        });
+
+        runAt(firstManualPostingDate, () -> {
+            savingsAccountHelper.postInterestForSavings(savingsAccountId[0]);
+            interestTxAfterFirstManualPost[0] = getActiveInterestTransactions(savingsAccountId[0]).size();
+            Assertions.assertTrue(interestTxAfterFirstManualPost[0] > 0, "Expected interest transactions after first manual posting");
+        });
+
+        runAt(manualAsOnPostingDate, () -> {
+            savingsAccountHelper.postInterestAsOnSavings(savingsAccountId[0], manualAsOnPostingDate);
+            interestTxAfterManualAsOnPost[0] = getActiveInterestTransactions(savingsAccountId[0]).size();
+            Assertions.assertTrue(interestTxAfterManualAsOnPost[0] > interestTxAfterFirstManualPost[0],
+                    "Expected additional interest transaction(s) after manual post-as-on execution");
+        });
+
+        runAt(schedulerPostingDate, () -> {
+            schedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+
+            List<HashMap> activeInterestTransactions = getActiveInterestTransactions(savingsAccountId[0]);
+            Assertions.assertTrue(activeInterestTransactions.size() >= interestTxAfterManualAsOnPost[0],
+                    "Scheduler run should not reduce number of posted interest transactions");
+
+            Map<LocalDate, Integer> interestTransactionCountByDate = new HashMap<>();
+            for (HashMap tx : activeInterestTransactions) {
+                LocalDate transactionDate = coerceToLocalDate(tx);
+                Assertions.assertNotNull(transactionDate, "Could not determine date of an interest transaction");
+                interestTransactionCountByDate.merge(transactionDate, 1, Integer::sum);
+            }
+
+            interestTransactionCountByDate
+                    .forEach((txDate, txCount) -> Assertions.assertEquals(1, txCount, "Multiple interest postings found on " + txDate));
+        });
+    }
+
     private void cleanupSavingsAccountsFromDuplicatePreventionTest() {
         try {
             LOG.info("Starting cleanup of savings accounts after duplicate prevention test");
@@ -488,6 +551,16 @@ public class SavingsInterestPostingTest {
             }
         }
         return filtered;
+    }
+
+    private List<HashMap> getActiveInterestTransactions(Integer savingsAccountId) {
+        List<HashMap> activeInterestTransactions = new ArrayList<>();
+        for (HashMap tx : getInterestTransactions(savingsAccountId)) {
+            if (!isReversed(tx)) {
+                activeInterestTransactions.add(tx);
+            }
+        }
+        return activeInterestTransactions;
     }
 
     public Integer createSavingsProductWithAccrualAccountingWithOutOverdraftAllowed(final String interestPayableAccount,
