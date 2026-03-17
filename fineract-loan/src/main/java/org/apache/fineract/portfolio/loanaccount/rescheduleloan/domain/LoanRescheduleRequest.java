@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -40,6 +41,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_loan_reschedule_request")
+@Getter
 public class LoanRescheduleRequest extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
@@ -130,83 +132,6 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom<Long> {
     }
 
     /**
-     * @return the reschedule request loan object
-     **/
-    public Loan getLoan() {
-        return this.loan;
-    }
-
-    /**
-     * @return the status enum
-     **/
-    public Integer getStatusEnum() {
-        return this.statusEnum;
-    }
-
-    /**
-     * @return installment number of the rescheduling start point
-     **/
-    public Integer getRescheduleFromInstallment() {
-        return this.rescheduleFromInstallment;
-    }
-
-    /**
-     * @return due date of the rescheduling start point
-     **/
-    public LocalDate getRescheduleFromDate() {
-        return this.rescheduleFromDate;
-    }
-
-    /**
-     * @return the reschedule reason code value object
-     **/
-    public CodeValue getRescheduleReasonCodeValue() {
-        return this.rescheduleReasonCodeValue;
-    }
-
-    /**
-     * @return the reschedule reason comment added by the "submittedByUser"
-     **/
-    public String getRescheduleReasonComment() {
-        return this.rescheduleReasonComment;
-    }
-
-    /**
-     * @return the date the request was submitted
-     **/
-    public LocalDate getSubmittedOnDate() {
-        return this.submittedOnDate;
-    }
-
-    /**
-     * @return the user that submitted the request
-     **/
-    public AppUser getSubmittedByUser() {
-        return this.submittedByUser;
-    }
-
-    /**
-     * @return the date the request was approved
-     **/
-    public LocalDate getApprovedOnDate() {
-        return this.approvedOnDate;
-    }
-
-    /**
-     * @return the user that approved the request
-     **/
-    public AppUser getApprovedByUser() {
-        return this.approvedByUser;
-    }
-
-    /**
-     * @return the date the request was rejected
-     **/
-    public LocalDate getRejectedOnDate() {
-        return this.rejectedOnDate;
-    }
-
-    /**
      * @return the recalculate interest option (true/false)
      **/
     public Boolean getRecalculateInterest() {
@@ -217,13 +142,6 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom<Long> {
         }
 
         return recalculateInterest;
-    }
-
-    /**
-     * @return the user that rejected the request
-     **/
-    public AppUser getRejectedByUser() {
-        return this.rejectedByUser;
     }
 
     /**
@@ -266,10 +184,6 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom<Long> {
 
     public void updateLoanRescheduleRequestToTermVariationMappings(final List<LoanRescheduleRequestToTermVariationMapping> mapping) {
         this.loanRescheduleRequestToTermVariationMappings.addAll(mapping);
-    }
-
-    public Set<LoanRescheduleRequestToTermVariationMapping> getLoanRescheduleRequestToTermVariationMappings() {
-        return this.loanRescheduleRequestToTermVariationMappings;
     }
 
     public LoanTermVariations getInterestRateFromInstallmentTermVariationIfExists() {

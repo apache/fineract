@@ -19,9 +19,10 @@
 services:
   mariadb:
     container_name: mariadb
-    image: mariadb:11.4
+    image: mariadb:12.2
     volumes:
       - ./config/docker/mysql/conf.d/server_collation.cnf:/etc/mysql/conf.d/server_collation.cnf:ro
+      - ./config/docker/mariadb/conf.d/mariadb_compat.cnf:/etc/mysql/conf.d/mariadb_compat.cnf:ro
       - ./config/docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:Z,ro
     restart: always
     env_file:

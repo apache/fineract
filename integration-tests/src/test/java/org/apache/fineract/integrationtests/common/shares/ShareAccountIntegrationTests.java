@@ -983,6 +983,285 @@ public class ShareAccountIntegrationTests {
         Assertions.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
     }
 
+    // Refactored Test 1
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testChronologicalAdditionalSharesAfterRejectedTransaction() {
+        shareProductHelper = new ShareProductHelper();
+        final Integer productId = createShareProduct();
+        Assertions.assertNotNull(productId);
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(clientId);
+        Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
+        Assertions.assertNotNull(savingsAccountId);
+
+        // Setup and activate share account with initial shares on 01 March 2016
+        final Integer shareAccountId = setupAndActivateShareAccount(clientId, productId, savingsAccountId, "01 March 2016");
+
+        // Apply additional shares on 15 April 2016
+        applyAdditionalShares(shareAccountId, "15 April 2016", "20");
+
+        // Retrieve transactions and find the additional shares request
+        Map<String, Object> shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec,
+                responseSpec);
+        List<Map<String, Object>> transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
+        Assertions.assertNotNull(transactions);
+
+        // Find and reject the additional shares request (15 April 2016)
+        String additionalSharesRequestId = findTransactionId(transactions, "purchasedSharesType.purchased", "15 April 2016");
+        Assertions.assertNotNull(additionalSharesRequestId, "Additional shares request for 15 April 2016 should exist");
+
+        // Reject the additional shares request
+        rejectAdditionalSharesRequest(shareAccountId, additionalSharesRequestId);
+
+        // Verify transaction is rejected
+        shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
+        verifyTransactionStatus(transactions, "purchasedSharesType.purchased", "15 April 2016", "purchasedSharesStatusType.rejected");
+
+        // Now try to apply additional shares with a date BEFORE the rejected transaction (10 April 2016)
+        // This should succeed because rejected transactions should be ignored in chronological validation
+        applyAdditionalShares(shareAccountId, "10 April 2016", "15");
+
+        // Verify the new transaction was successfully added
+        shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
+        verifyTransactionWithShares(transactions, "purchasedSharesType.purchased", "10 April 2016", "15",
+                "purchasedSharesStatusType.applied");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testChronologicalAccountClosureBeforeRejectedTransaction() {
+        // FINERACT-2457: Account closure validation should ignore rejected/reversed transactions
+        shareProductHelper = new ShareProductHelper();
+        final Integer productId = createShareProduct();
+        Assertions.assertNotNull(productId);
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(clientId);
+        Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
+        Assertions.assertNotNull(savingsAccountId);
+
+        // Setup and activate share account with initial shares on 01 March 2016
+        final Integer shareAccountId = setupAndActivateShareAccount(clientId, productId, savingsAccountId, "01 March 2016");
+
+        // Apply additional shares on 20 May 2016
+        applyAdditionalShares(shareAccountId, "20 May 2016", "30");
+
+        // Retrieve transactions and find the additional shares request
+        Map<String, Object> shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec,
+                responseSpec);
+        List<Map<String, Object>> transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
+        Assertions.assertNotNull(transactions);
+
+        // Find and reject the additional shares request (20 May 2016)
+        String additionalSharesRequestId = findTransactionId(transactions, "purchasedSharesType.purchased", "20 May 2016");
+        Assertions.assertNotNull(additionalSharesRequestId, "Additional shares request for 20 May 2016 should exist");
+
+        // Reject the additional shares request
+        rejectAdditionalSharesRequest(shareAccountId, additionalSharesRequestId);
+
+        // Verify transaction is rejected
+        shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
+        verifyTransactionStatus(transactions, "purchasedSharesType.purchased", "20 May 2016", "purchasedSharesStatusType.rejected");
+
+        // Now try to close the account with a date BEFORE the rejected transaction (15 May 2016)
+        // This should succeed because rejected transactions should be ignored in chronological validation
+        Map<String, Object> closeAccountMap = new HashMap<>();
+        closeAccountMap.put("note", "Share Account Close Note");
+        closeAccountMap.put("dateFormat", "dd MMMM yyyy");
+        closeAccountMap.put("closedDate", "15 May 2016");
+        closeAccountMap.put("locale", "en");
+        String closeJson = new Gson().toJson(closeAccountMap);
+        ShareAccountTransactionHelper.postCommand("close", shareAccountId, closeJson, requestSpec, responseSpec);
+
+        // Verify the account was successfully closed
+        shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        Map<String, Object> statusMap = (Map<String, Object>) shareAccountData.get("status");
+        Assertions.assertEquals("shareAccountStatusType.closed", String.valueOf(statusMap.get("code")));
+
+        Map<String, Object> timelineMap = (Map<String, Object>) shareAccountData.get("timeline");
+        List<Integer> closedDateList = (List<Integer>) timelineMap.get("closedDate");
+        LocalDate closedDate = LocalDate.of(closedDateList.get(0), closedDateList.get(1), closedDateList.get(2));
+        Assertions.assertEquals("15 May 2016", closedDate.format(Utils.dateFormatter));
+    }
+
+    // Additional Test 1: Verify original validation still works (Negative Test)
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testChronologicalAdditionalSharesBeforeActiveTransactionShouldFail() {
+        // FINERACT-2457: Verify that the fix didn't break the original chronological validation
+        // Transactions BEFORE active/approved transactions should still be REJECTED
+        shareProductHelper = new ShareProductHelper();
+        final Integer productId = createShareProduct();
+        Assertions.assertNotNull(productId);
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(clientId);
+        Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
+        Assertions.assertNotNull(savingsAccountId);
+
+        // Setup and activate share account with initial shares on 01 March 2016
+        final Integer shareAccountId = setupAndActivateShareAccount(clientId, productId, savingsAccountId, "01 March 2016");
+
+        // Apply additional shares on 15 April 2016 (this remains active/approved)
+        applyAdditionalShares(shareAccountId, "15 April 2016", "20");
+
+        // Verify the transaction exists and is in applied/active state
+        Map<String, Object> shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec,
+                responseSpec);
+        List<Map<String, Object>> transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
+        Assertions.assertNotNull(transactions);
+
+        String transactionId = findTransactionId(transactions, "purchasedSharesType.purchased", "15 April 2016");
+        Assertions.assertNotNull(transactionId, "Transaction for 15 April 2016 should exist");
+
+        // Try to apply additional shares BEFORE the active transaction (10 April 2016)
+        // This should FAIL because the April 15 transaction is ACTIVE/APPROVED
+        Map<String, Object> additionalSharesRequestMap = new HashMap<>();
+        additionalSharesRequestMap.put("requestedDate", "10 April 2016");
+        additionalSharesRequestMap.put("dateFormat", "dd MMMM yyyy");
+        additionalSharesRequestMap.put("locale", "en");
+        additionalSharesRequestMap.put("requestedShares", "15");
+        String additionalSharesRequestJson = new Gson().toJson(additionalSharesRequestMap);
+
+        ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
+
+        try {
+            ShareAccountTransactionHelper.postCommand("applyadditionalshares", shareAccountId, additionalSharesRequestJson, requestSpec,
+                    errorResponse);
+
+        } catch (Exception e) {
+            Assertions.assertTrue(
+                    e.getMessage().contains("chronological") || e.getMessage().contains("date") || e.getMessage().contains("before"),
+                    "Error message should indicate chronological validation failure");
+        }
+    }
+
+    // Additional Test 3: Test edge case - transaction on same date as rejected transaction
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testChronologicalAdditionalSharesOnSameDateAsRejectedTransaction() {
+        // FINERACT-2457: Test behavior when applying shares on the SAME date as a rejected transaction
+        shareProductHelper = new ShareProductHelper();
+        final Integer productId = createShareProduct();
+        Assertions.assertNotNull(productId);
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(clientId);
+        Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
+        Assertions.assertNotNull(savingsAccountId);
+
+        // Setup and activate share account with initial shares on 01 March 2016
+        final Integer shareAccountId = setupAndActivateShareAccount(clientId, productId, savingsAccountId, "01 March 2016");
+
+        // Apply and reject shares on 15 April 2016
+        applyAdditionalShares(shareAccountId, "15 April 2016", "20");
+        Map<String, Object> shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec,
+                responseSpec);
+        List<Map<String, Object>> transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
+        String txId = findTransactionId(transactions, "purchasedSharesType.purchased", "15 April 2016");
+        Assertions.assertNotNull(txId);
+        rejectAdditionalSharesRequest(shareAccountId, txId);
+
+        // Verify transaction is rejected
+        shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
+        verifyTransactionStatus(transactions, "purchasedSharesType.purchased", "15 April 2016", "purchasedSharesStatusType.rejected");
+
+        // Try to apply shares on the SAME date as the rejected transaction
+        // This should succeed since rejected transactions are ignored
+        applyAdditionalShares(shareAccountId, "15 April 2016", "15");
+
+        // Verify the new transaction was successfully added
+        shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
+
+        // Count how many transactions exist for 15 April 2016
+        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
+        int countForDate = 0;
+        int appliedCountForDate = 0;
+
+        for (Map<String, Object> transaction : transactions) {
+            Map<String, Object> transactionTypeMap = (Map<String, Object>) transaction.get("type");
+            List<Integer> dateList = (List<Integer>) transaction.get("purchasedDate");
+            String transactionType = (String) transactionTypeMap.get("code");
+            String transactionDate = formatTransactionDate(dateList, simple);
+
+            if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("15 April 2016")) {
+                countForDate++;
+                Map<String, Object> transactionStatusMap = (Map<String, Object>) transaction.get("status");
+                String status = String.valueOf(transactionStatusMap.get("code"));
+                if (status.equals("purchasedSharesStatusType.applied")) {
+                    appliedCountForDate++;
+                    Assertions.assertEquals("15", String.valueOf(transaction.get("numberOfShares")));
+                }
+            }
+        }
+
+        // Should have 2 transactions for this date: 1 rejected, 1 applied
+        Assertions.assertEquals(2, countForDate, "Should have 2 transactions for 15 April 2016");
+        Assertions.assertEquals(1, appliedCountForDate, "Should have 1 applied transaction for 15 April 2016");
+    }
+
+    // Additional Test 4: Test account closure before active transaction should still fail
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testChronologicalAccountClosureBeforeActiveTransactionShouldFail() {
+        // FINERACT-2457: Verify that closing account before active transactions is still blocked
+        shareProductHelper = new ShareProductHelper();
+        final Integer productId = createShareProduct();
+        Assertions.assertNotNull(productId);
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(clientId);
+        Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
+        Assertions.assertNotNull(savingsAccountId);
+
+        // Setup and activate share account with initial shares on 01 March 2016
+        final Integer shareAccountId = setupAndActivateShareAccount(clientId, productId, savingsAccountId, "01 March 2016");
+
+        // Apply additional shares on 20 May 2016 (and keep it active/approved)
+        applyAdditionalShares(shareAccountId, "20 May 2016", "30");
+
+        // Verify the transaction exists and is active
+        Map<String, Object> shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec,
+                responseSpec);
+        List<Map<String, Object>> transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
+        String transactionId = findTransactionId(transactions, "purchasedSharesType.purchased", "20 May 2016");
+        Assertions.assertNotNull(transactionId, "Transaction for 20 May 2016 should exist");
+
+        // Try to close account on 15 May 2016 (before the active transaction)
+        // This should FAIL
+        Map<String, Object> closeAccountMap = new HashMap<>();
+        closeAccountMap.put("note", "Share Account Close Note");
+        closeAccountMap.put("dateFormat", "dd MMMM yyyy");
+        closeAccountMap.put("closedDate", "15 May 2016");
+        closeAccountMap.put("locale", "en");
+        String closeJson = new Gson().toJson(closeAccountMap);
+
+        ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
+
+        try {
+            ShareAccountTransactionHelper.postCommand("close", shareAccountId, closeJson, requestSpec, errorResponse);
+
+            // If we get here, the validation worked correctly (request was rejected)
+            // This is the expected behavior
+        } catch (Exception e) {
+            // Depending on the framework, the error might be thrown as an exception
+            // We expect this to fail, so this is acceptable
+            Assertions
+                    .assertTrue(
+                            e.getMessage().contains("chronological") || e.getMessage().contains("date") || e.getMessage().contains("before")
+                                    || e.getMessage().contains("transaction"),
+                            "Error message should indicate chronological validation failure");
+        }
+
+        // Verify account is still active (not closed)
+        shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        Map<String, Object> statusMap = (Map<String, Object>) shareAccountData.get("status");
+        Assertions.assertEquals("shareAccountStatusType.active", String.valueOf(statusMap.get("code")),
+                "Account should still be active since closure was rejected");
+    }
+
     private Integer createShareProduct() {
         String shareProductJson = shareProductHelper.build();
         return ShareProductTransactionHelper.createShareProduct(shareProductJson, requestSpec, responseSpec);
@@ -1008,5 +1287,141 @@ public class ShareAccountIntegrationTests {
         map.put("chargeId", chargeId);
         map.put("amount", amount);
         return map;
+    }
+
+    private void updateShareAccountWithInitialData(Integer shareAccountId, Integer requestedShares, String applicationDate) {
+        Map<String, Object> shareAccountDataForUpdate = new HashMap<>();
+        shareAccountDataForUpdate.put("requestedShares", requestedShares);
+        shareAccountDataForUpdate.put("applicationDate", applicationDate);
+        shareAccountDataForUpdate.put("dateFormat", "dd MMMM yyyy");
+        shareAccountDataForUpdate.put("locale", "en_GB");
+        String updateShareAccountJsonString = new Gson().toJson(shareAccountDataForUpdate);
+        ShareAccountTransactionHelper.updateShareAccount(shareAccountId, updateShareAccountJsonString, requestSpec, responseSpec);
+    }
+
+    private void approveShareAccount(Integer shareAccountId, String approvalDate) {
+        Map<String, Object> approveMap = new HashMap<>();
+        approveMap.put("note", "Share Account Approval Note");
+        approveMap.put("dateFormat", "dd MMMM yyyy");
+        approveMap.put("approvedDate", approvalDate);
+        approveMap.put("locale", "en");
+        String approve = new Gson().toJson(approveMap);
+        ShareAccountTransactionHelper.postCommand("approve", shareAccountId, approve, requestSpec, responseSpec);
+    }
+
+    private void activateShareAccount(Integer shareAccountId, String activationDate) {
+        Map<String, Object> activateMap = new HashMap<>();
+        activateMap.put("dateFormat", "dd MMMM yyyy");
+        activateMap.put("activatedDate", activationDate);
+        activateMap.put("locale", "en");
+        String activateJson = new Gson().toJson(activateMap);
+        ShareAccountTransactionHelper.postCommand("activate", shareAccountId, activateJson, requestSpec, responseSpec);
+    }
+
+    private void applyAdditionalShares(Integer shareAccountId, String requestedDate, String requestedShares) {
+        Map<String, Object> additionalSharesRequestMap = new HashMap<>();
+        additionalSharesRequestMap.put("requestedDate", requestedDate);
+        additionalSharesRequestMap.put("dateFormat", "dd MMMM yyyy");
+        additionalSharesRequestMap.put("locale", "en");
+        additionalSharesRequestMap.put("requestedShares", requestedShares);
+        String additionalSharesRequestJson = new Gson().toJson(additionalSharesRequestMap);
+        ShareAccountTransactionHelper.postCommand("applyadditionalshares", shareAccountId, additionalSharesRequestJson, requestSpec,
+                responseSpec);
+    }
+
+    private String formatTransactionDate(List<Integer> dateList, DateFormat formatter) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(dateList.get(0), dateList.get(1) - 1, dateList.get(2));
+        Date date = cal.getTime();
+        return formatter.format(date);
+    }
+
+    private String findTransactionId(List<Map<String, Object>> transactions, String transactionTypeCode, String expectedDate) {
+        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
+        for (Map<String, Object> transaction : transactions) {
+            Map<String, Object> transactionTypeMap = (Map<String, Object>) transaction.get("type");
+            List<Integer> dateList = (List<Integer>) transaction.get("purchasedDate");
+            String transactionType = (String) transactionTypeMap.get("code");
+            String transactionDate = formatTransactionDate(dateList, simple);
+
+            if (transactionType.equals(transactionTypeCode) && transactionDate.equals(expectedDate)) {
+                return String.valueOf(transaction.get("id"));
+            }
+        }
+        return null;
+    }
+
+    private void rejectAdditionalSharesRequest(Integer shareAccountId, String transactionId) {
+        Map<String, List<Map<String, Object>>> rejectMap = new HashMap<>();
+        List<Map<String, Object>> list = new ArrayList<>();
+        Map<String, Object> idsMap = new HashMap<>();
+        idsMap.put("id", transactionId);
+        list.add(idsMap);
+        rejectMap.put("requestedShares", list);
+        String rejectJson = new Gson().toJson(rejectMap);
+        ShareAccountTransactionHelper.postCommand("rejectadditionalshares", shareAccountId, rejectJson, requestSpec, responseSpec);
+    }
+
+    private void verifyTransactionStatus(List<Map<String, Object>> transactions, String transactionTypeCode, String expectedDate,
+            String expectedStatus) {
+        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
+        boolean transactionFound = false;
+
+        for (Map<String, Object> transaction : transactions) {
+            Map<String, Object> transactionTypeMap = (Map<String, Object>) transaction.get("type");
+            List<Integer> dateList = (List<Integer>) transaction.get("purchasedDate");
+            String transactionType = (String) transactionTypeMap.get("code");
+            String transactionDate = formatTransactionDate(dateList, simple);
+
+            if (transactionType.equals(transactionTypeCode) && transactionDate.equals(expectedDate)) {
+                Map<String, Object> transactionStatusMap = (Map<String, Object>) transaction.get("status");
+                Assertions.assertEquals(expectedStatus, String.valueOf(transactionStatusMap.get("code")));
+                transactionFound = true;
+                break;
+            }
+        }
+
+        Assertions.assertTrue(transactionFound,
+                String.format("Transaction with type %s for %s should exist", transactionTypeCode, expectedDate));
+    }
+
+    private void verifyTransactionWithShares(List<Map<String, Object>> transactions, String transactionTypeCode, String expectedDate,
+            String expectedShares, String expectedStatus) {
+        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
+        boolean transactionFound = false;
+
+        for (Map<String, Object> transaction : transactions) {
+            Map<String, Object> transactionTypeMap = (Map<String, Object>) transaction.get("type");
+            List<Integer> dateList = (List<Integer>) transaction.get("purchasedDate");
+            String transactionType = (String) transactionTypeMap.get("code");
+            String transactionDate = formatTransactionDate(dateList, simple);
+
+            if (transactionType.equals(transactionTypeCode) && transactionDate.equals(expectedDate)) {
+                Assertions.assertEquals(expectedShares, String.valueOf(transaction.get("numberOfShares")));
+                Map<String, Object> transactionStatusMap = (Map<String, Object>) transaction.get("status");
+                Assertions.assertEquals(expectedStatus, String.valueOf(transactionStatusMap.get("code")));
+                transactionFound = true;
+                break;
+            }
+        }
+
+        Assertions.assertTrue(transactionFound, String.format("Transaction for %s should be successfully created", expectedDate));
+    }
+
+    private Integer setupAndActivateShareAccount(Integer clientId, Integer productId, Integer savingsAccountId, String initialDate) {
+        final Integer shareAccountId = createShareAccount(clientId, productId, savingsAccountId);
+        Assertions.assertNotNull(shareAccountId);
+
+        updateShareAccountWithInitialData(shareAccountId, 25, initialDate);
+        approveShareAccount(shareAccountId, initialDate);
+        activateShareAccount(shareAccountId, initialDate);
+
+        // Verify account is active
+        Map<String, Object> shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec,
+                responseSpec);
+        Map<String, Object> statusMap = (Map<String, Object>) shareAccountData.get("status");
+        Assertions.assertEquals("shareAccountStatusType.active", String.valueOf(statusMap.get("code")));
+
+        return shareAccountId;
     }
 }

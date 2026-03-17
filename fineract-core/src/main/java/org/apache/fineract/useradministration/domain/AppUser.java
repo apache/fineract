@@ -131,6 +131,17 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
     @Column(name = "cannot_change_password", nullable = true)
     private Boolean cannotChangePassword;
 
+    @Column(name = "password_reset_required", nullable = false)
+    private boolean passwordResetRequired;
+
+    public boolean isPasswordResetRequired() {
+        return this.passwordResetRequired;
+    }
+
+    public void updatePasswordResetRequired(final boolean required) {
+        this.passwordResetRequired = required;
+    }
+
     public static AppUser fromJson(final Office userOffice, final Staff linkedStaff, final Set<Role> allRoles,
             final Collection<Client> clients, final JsonCommand command) {
 

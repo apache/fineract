@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.infrastructure.jobs.filter;
 
-import static org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelper.LOAN_GLIMACCOUNT_PATH_PATTERN;
-import static org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelper.LOAN_PATH_PATTERN;
+import static org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelperImpl.LOAN_GLIMACCOUNT_PATH_PATTERN;
+import static org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelperImpl.LOAN_PATH_PATTERN;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -49,9 +49,9 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
-import org.apache.fineract.cob.loan.RetrieveLoanIdService;
 import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
+import org.apache.fineract.cob.service.RetrieveLoanIdService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -86,7 +86,7 @@ class LoanCOBApiFilterTest {
 
     private LoanCOBApiFilter testObj;
     @InjectMocks
-    private LoanCOBFilterHelper helper;
+    private LoanCOBFilterHelperImpl helper;
     @Mock
     private LoanAccountLockService loanAccountLockService;
     @Mock
@@ -104,7 +104,7 @@ class LoanCOBApiFilterTest {
     @Mock
     private LoanRescheduleRequestRepository loanRescheduleRequestRepository;
     @Mock
-    private RetrieveLoanIdService retrieveLoanIdService;
+    private RetrieveLoanIdService retrieveIdService;
 
     @BeforeEach
     public void setUp() {
@@ -182,7 +182,7 @@ class LoanCOBApiFilterTest {
         given(context.authenticatedUser()).willReturn(appUser);
         given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
-        given(retrieveLoanIdService.retrieveLoanIdsBehindDate(eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)),
+        given(retrieveIdService.retrieveLoanIdsBehindDate(eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)),
                 anyList())).willReturn(Collections.emptyList());
 
         testObj.doFilterInternal(request, response, filterChain);
@@ -230,7 +230,7 @@ class LoanCOBApiFilterTest {
         given(context.authenticatedUser()).willReturn(appUser);
         given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
-        given(retrieveLoanIdService.retrieveLoanIdsBehindDate(eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)),
+        given(retrieveIdService.retrieveLoanIdsBehindDate(eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)),
                 anyList())).willReturn(Collections.emptyList());
 
         testObj.doFilterInternal(request, response, filterChain);
@@ -260,7 +260,7 @@ class LoanCOBApiFilterTest {
         given(loanRepository.findIdByExternalId(any())).willReturn(2L);
         given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
-        given(retrieveLoanIdService.retrieveLoanIdsBehindDate(eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)),
+        given(retrieveIdService.retrieveLoanIdsBehindDate(eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)),
                 anyList())).willReturn(Collections.emptyList());
 
         testObj.doFilterInternal(request, response, filterChain);
@@ -291,7 +291,7 @@ class LoanCOBApiFilterTest {
         given(loanRescheduleRequestRepository.getLoanIdByRescheduleRequestId(resourceId)).willReturn(Optional.of(2L));
         given(context.authenticatedUser()).willReturn(appUser);
 
-        given(retrieveLoanIdService.retrieveLoanIdsBehindDate(eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)),
+        given(retrieveIdService.retrieveLoanIdsBehindDate(eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)),
                 anyList())).willReturn(Collections.emptyList());
 
         testObj.doFilterInternal(request, response, filterChain);
@@ -323,7 +323,7 @@ class LoanCOBApiFilterTest {
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
-        given(retrieveLoanIdService.retrieveLoanIdsBehindDate(eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)),
+        given(retrieveIdService.retrieveLoanIdsBehindDate(eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)),
                 anyList())).willReturn(Collections.singletonList(result));
         given(context.authenticatedUser()).willReturn(appUser);
 
@@ -356,7 +356,7 @@ class LoanCOBApiFilterTest {
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
         given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
-        given(retrieveLoanIdService.retrieveLoanIdsBehindDate(eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)),
+        given(retrieveIdService.retrieveLoanIdsBehindDate(eq(ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE)),
                 anyList())).willReturn(Collections.emptyList());
 
         given(context.authenticatedUser()).willReturn(appUser);

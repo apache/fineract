@@ -87,19 +87,21 @@ public class AccountTransferWithdrawalFeeTest extends BaseSavingsIntegrationTest
 
         // Perform transfer - without null-checks in SavingsAccount.payWithdrawalFee(),
         // this would trigger NPE because paymentDetail is null during account transfers
-        ok(fineractClient().accountTransfers.create4(new AccountTransferRequest().fromClientId(String.valueOf(fromClientId))
+        ok(fineractClient().accountTransfers.createAccountTransfer(new AccountTransferRequest().fromClientId(String.valueOf(fromClientId))
                 .fromAccountId(String.valueOf(fromSavingsId)).fromAccountType("2").fromOfficeId("1").toClientId(String.valueOf(toClientId))
                 .toAccountId(String.valueOf(toSavingsId)).toAccountType("2").toOfficeId("1").transferDate(TRANSFER_DATE)
                 .transferAmount(ACCOUNT_TRANSFER_AMOUNT).transferDescription("Transfer").dateFormat(DATETIME_PATTERN).locale("en_GB")));
 
         // Verify balances: charge has no payment type binding, so it applies as normal withdrawal fee
         // from = 30000 - 15000 (transfer) - 100 (withdrawal fee) = 14900
-        SavingsAccountData fromSavingsAccount = ok(fineractClient().savingsAccounts.retrieveOne26(fromSavingsId, false, null, "summary"));
+        SavingsAccountData fromSavingsAccount = ok(
+                fineractClient().savingsAccounts.retrieveSavingsAccount(fromSavingsId, false, null, "summary"));
         Assertions.assertEquals(BigDecimal.valueOf(14900).setScale(0), fromSavingsAccount.getSummary().getAccountBalance().setScale(0),
                 "Verifying From Savings Account Balance after Account Transfer with Withdrawal Fee");
 
         // to = 0 + 15000 (transfer) = 15000
-        SavingsAccountData toSavingsAccount = ok(fineractClient().savingsAccounts.retrieveOne26(toSavingsId, false, null, "summary"));
+        SavingsAccountData toSavingsAccount = ok(
+                fineractClient().savingsAccounts.retrieveSavingsAccount(toSavingsId, false, null, "summary"));
         Assertions.assertEquals(BigDecimal.valueOf(15000).setScale(0), toSavingsAccount.getSummary().getAccountBalance().setScale(0),
                 "Verifying To Savings Account Balance after Account Transfer");
     }
@@ -155,7 +157,7 @@ public class AccountTransferWithdrawalFeeTest extends BaseSavingsIntegrationTest
         // Perform transfer - without null-checks in SavingsAccount.payWithdrawalFee(),
         // this throws NPE because paymentDetail is null and code tries to call
         // paymentDetail.getPaymentType().getName()
-        ok(fineractClient().accountTransfers.create4(new AccountTransferRequest().fromClientId(String.valueOf(fromClientId))
+        ok(fineractClient().accountTransfers.createAccountTransfer(new AccountTransferRequest().fromClientId(String.valueOf(fromClientId))
                 .fromAccountId(String.valueOf(fromSavingsId)).fromAccountType("2").fromOfficeId("1").toClientId(String.valueOf(toClientId))
                 .toAccountId(String.valueOf(toSavingsId)).toAccountType("2").toOfficeId("1").transferDate(TRANSFER_DATE)
                 .transferAmount(ACCOUNT_TRANSFER_AMOUNT).transferDescription("Transfer").dateFormat(DATETIME_PATTERN).locale("en_GB")));
@@ -163,12 +165,14 @@ public class AccountTransferWithdrawalFeeTest extends BaseSavingsIntegrationTest
         // The payment-type fee is not applied because paymentDetail is null during transfer
         // and the null-check skips the payment type matching
         // from = 30000 - 15000 = 15000
-        SavingsAccountData fromSavingsAccount = ok(fineractClient().savingsAccounts.retrieveOne26(fromSavingsId, false, null, "summary"));
+        SavingsAccountData fromSavingsAccount = ok(
+                fineractClient().savingsAccounts.retrieveSavingsAccount(fromSavingsId, false, null, "summary"));
         Assertions.assertEquals(BigDecimal.valueOf(15000).setScale(0), fromSavingsAccount.getSummary().getAccountBalance().setScale(0),
                 "Verifying From Savings Account Balance after Account Transfer with Payment Type Withdrawal Fee");
 
         // to = 0 + 15000 = 15000
-        SavingsAccountData toSavingsAccount = ok(fineractClient().savingsAccounts.retrieveOne26(toSavingsId, false, null, "summary"));
+        SavingsAccountData toSavingsAccount = ok(
+                fineractClient().savingsAccounts.retrieveSavingsAccount(toSavingsId, false, null, "summary"));
         Assertions.assertEquals(BigDecimal.valueOf(15000).setScale(0), toSavingsAccount.getSummary().getAccountBalance().setScale(0),
                 "Verifying To Savings Account Balance after Account Transfer");
     }

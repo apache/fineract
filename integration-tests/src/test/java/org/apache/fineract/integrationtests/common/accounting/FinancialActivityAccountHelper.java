@@ -92,7 +92,8 @@ public class FinancialActivityAccountHelper {
     }
 
     public PostFinancialActivityAccountsResponse createFinancialActivityAccount(PostFinancialActivityAccountsRequest request) {
-        return Calls.ok(FineractClientHelper.getFineractClient().financialActivyAccountMappings.createGLAccount(request));
+        return Calls.ok(FineractClientHelper.getFineractClient().financialActivyAccountMappings
+                .createGLAccountMappingFinancialActivityAccount(request));
     }
 
     public List<GetFinancialActivityAccountsResponse> getAllFinancialActivityAccounts() {
@@ -100,6 +101,7 @@ public class FinancialActivityAccountHelper {
     }
 
     public DeleteFinancialActivityAccountsResponse deleteFinancialActivityAccount(Long financialMappingId) {
-        return Calls.ok(FineractClientHelper.getFineractClient().financialActivyAccountMappings.deleteGLAccount(financialMappingId));
+        return Calls.ok(FineractClientHelper.getFineractClient().financialActivyAccountMappings
+                .deleteGLAccountMappingFinancialActivityAccount(financialMappingId));
     }
 }

@@ -114,11 +114,11 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
 
     private static final class ProvisioningEntryDataMapper implements RowMapper<ProvisioningEntryData> {
 
-        private final StringBuilder sqlQuery = new StringBuilder()
-                .append(" entry.id, entry.journal_entry_created, entry.createdby_id, entry.created_date, created.username as createduser,")
-                .append("entry.lastmodifiedby_id, modified.username as modifieduser, entry.lastmodified_date ")
-                .append("from m_provisioning_history entry ").append("left JOIN m_appuser created ON created.id = entry.createdby_id ")
-                .append("left JOIN m_appuser modified ON modified.id = entry.lastmodifiedby_id ");
+        private static final String PROVISIONING_ENTRY_SCHEMA = """
+                 entry.id, entry.journal_entry_created, entry.createdby_id, entry.created_date, created.username as createduser,
+                entry.lastmodifiedby_id, modified.username as modifieduser, entry.lastmodified_date
+                from m_provisioning_history entry left JOIN m_appuser created ON created.id = entry.createdby_id
+                left JOIN m_appuser modified ON modified.id = entry.lastmodifiedby_id\s""";
 
         @Override
         @SuppressWarnings("unused")
@@ -138,22 +138,22 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
         }
 
         public String getSchema() {
-            return sqlQuery.toString();
+            return PROVISIONING_ENTRY_SCHEMA;
         }
 
     }
 
     private static final class LoanProductProvisioningEntryRowMapper implements RowMapper<LoanProductProvisioningEntryData> {
 
-        private final StringBuilder sqlQuery = new StringBuilder().append(
-                " entry.id, entry.history_id as historyId, office_id, entry.criteria_id as criteriaid, office.name as officename, product.name as productname, entry.product_id, ")
-                .append("category_id, category.category_name, liability.id as liabilityid, liability.gl_code as liabilitycode, liability.name as liabilityname, ")
-                .append("expense.id as expenseid, expense.gl_code as expensecode, expense.name as expensename, entry.currency_code, entry.overdue_in_days, entry.reseve_amount from m_loanproduct_provisioning_entry entry ")
-                .append("left join m_office office ON office.id = entry.office_id ")
-                .append("left join m_product_loan product ON product.id = entry.product_id ")
-                .append("left join m_provision_category category ON category.id = entry.category_id ")
-                .append("left join acc_gl_account liability ON liability.id = entry.liability_account ")
-                .append("left join acc_gl_account expense ON expense.id = entry.expense_account ");
+        private static final String LOAN_PRODUCT_PROVISIONING_ENTRY_SCHEMA = """
+                 entry.id, entry.history_id as historyId, office_id, entry.criteria_id as criteriaid, office.name as officename, product.name as productname, entry.product_id,
+                category_id, category.category_name, liability.id as liabilityid, liability.gl_code as liabilitycode, liability.name as liabilityname,
+                expense.id as expenseid, expense.gl_code as expensecode, expense.name as expensename, entry.currency_code, entry.overdue_in_days, entry.reseve_amount from m_loanproduct_provisioning_entry entry
+                left join m_office office ON office.id = entry.office_id
+                left join m_product_loan product ON product.id = entry.product_id
+                left join m_provision_category category ON category.id = entry.category_id
+                left join acc_gl_account liability ON liability.id = entry.liability_account
+                left join acc_gl_account expense ON expense.id = entry.expense_account\s""";
 
         @Override
         @SuppressWarnings("unused")
@@ -185,19 +185,19 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
         }
 
         public String getSchema() {
-            return sqlQuery.toString();
+            return LOAN_PRODUCT_PROVISIONING_ENTRY_SCHEMA;
         }
     }
 
     private static final class ProvisioningEntryDataMapperWithSumReserved implements RowMapper<ProvisioningEntryData> {
 
-        private final StringBuilder sqlQuery = new StringBuilder()
-                .append(" entry.id, journal_entry_created, createdby_id, created_date, created.username as createduser,")
-                .append("lastmodifiedby_id, modified.username as modifieduser, lastmodified_date, SUM(reserved.reseve_amount) as totalreserved ")
-                .append("from m_provisioning_history entry ")
-                .append("JOIN m_loanproduct_provisioning_entry reserved on entry.id = reserved.history_id ")
-                .append("left JOIN m_appuser created ON created.id = entry.createdby_id ")
-                .append("left JOIN m_appuser modified ON modified.id = entry.lastmodifiedby_id ");
+        private static final String PROVISIONING_ENTRY_SUM_RESERVED_SCHEMA = """
+                 entry.id, journal_entry_created, createdby_id, created_date, created.username as createduser,
+                lastmodifiedby_id, modified.username as modifieduser, lastmodified_date, SUM(reserved.reseve_amount) as totalreserved
+                from m_provisioning_history entry
+                JOIN m_loanproduct_provisioning_entry reserved on entry.id = reserved.history_id
+                left JOIN m_appuser created ON created.id = entry.createdby_id
+                left JOIN m_appuser modified ON modified.id = entry.lastmodifiedby_id\s""";
 
         @Override
         @SuppressWarnings("unused")
@@ -217,7 +217,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
         }
 
         public String getSchema() {
-            return sqlQuery.toString();
+            return PROVISIONING_ENTRY_SUM_RESERVED_SCHEMA;
         }
 
     }
@@ -286,9 +286,10 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
 
     private static final class ProvisioningEntryIdDateRowMapper implements RowMapper<ProvisioningEntryData> {
 
-        StringBuilder buff = new StringBuilder().append("select history1.id, history1.created_date from m_provisioning_history history1 ")
-                .append("where history1.created_date = (select max(history2.created_date) from m_provisioning_history history2 ")
-                .append("where history2.journal_entry_created='1')");
+        private static final String PROVISIONING_ENTRY_ID_DATE_SCHEMA = """
+                select history1.id, history1.created_date from m_provisioning_history history1
+                where history1.created_date = (select max(history2.created_date) from m_provisioning_history history2
+                where history2.journal_entry_created='1')\s""";
 
         @Override
         public ProvisioningEntryData mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -306,7 +307,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
         }
 
         public String schema() {
-            return buff.toString();
+            return PROVISIONING_ENTRY_ID_DATE_SCHEMA;
         }
     }
 

@@ -54,20 +54,14 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
 
     private static final class AccountNumberFormatMapper implements RowMapper<AccountNumberFormatData> {
 
-        private final String schema;
+        private static final String ACCOUNT_NUMBER_FORMAT_SCHEMA = """
+                anf.id as id, anf.account_type_enum as accountTypeEnum, anf.prefix_type_enum as prefixTypeEnum, anf.prefix_character as prefixCharacter
+                from c_account_number_format anf\s""";
 
-        AccountNumberFormatMapper() {
-            final StringBuilder builder = new StringBuilder(400);
-
-            builder.append(
-                    " anf.id as id, anf.account_type_enum as accountTypeEnum, anf.prefix_type_enum as prefixTypeEnum, anf.prefix_character as prefixCharacter");
-            builder.append(" from c_account_number_format anf ");
-
-            this.schema = builder.toString();
-        }
+        AccountNumberFormatMapper() {}
 
         public String schema() {
-            return this.schema;
+            return ACCOUNT_NUMBER_FORMAT_SCHEMA;
         }
 
         @Override

@@ -312,10 +312,7 @@ public class FixedDepositAccount extends SavingsAccount {
         List<SavingsAccountTransactionDetailsForPostingPeriod> savingsAccountTransactionDetailsForPostingPeriodList = toSavingsAccountTransactionDetailsForPostingPeriodList(
                 transactions);
         for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
-            boolean isUserPosting = false;
-            if (postedAsOnTransactionDates.contains(periodInterval.endDate())) {
-                isUserPosting = true;
-            }
+            boolean isUserPosting = postedAsOnTransactionDates.contains(periodInterval.endDate());
             final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance,
                     savingsAccountTransactionDetailsForPostingPeriodList, this.currency, compoundingPeriodType, interestCalculationType,
                     interestRateAsFraction, daysInYearType.getValue(), maturityDate, interestPostTransactions, isInterestTransfer,

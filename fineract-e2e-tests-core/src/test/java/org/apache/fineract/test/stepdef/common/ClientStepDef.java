@@ -24,32 +24,42 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.util.Collections;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.ClientAddressRequest;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostOfficesResponse;
 import org.apache.fineract.test.factory.ClientRequestFactory;
 import org.apache.fineract.test.messaging.event.EventCheckHelper;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
-import org.springframework.beans.factory.annotation.Autowired;
 
+@RequiredArgsConstructor
 public class ClientStepDef extends AbstractStepDef {
 
-    @Autowired
-    private FineractFeignClient fineractClient;
-
-    @Autowired
-    private ClientRequestFactory clientRequestFactory;
-
-    @Autowired
-    private EventCheckHelper eventCheckHelper;
+    private final FineractFeignClient fineractClient;
+    private final ClientRequestFactory clientRequestFactory;
+    private final EventCheckHelper eventCheckHelper;
 
     @When("Admin creates a client with random data")
     public void createClientRandomFirstNameLastName() {
         PostClientsRequest clientsRequest = clientRequestFactory.defaultClientCreationRequest();
 
-        PostClientsResponse response = ok(() -> fineractClient.clients().create6(clientsRequest));
+        PostClientsResponse response = ok(() -> fineractClient.clients().createClient(clientsRequest));
+        testContext().set(TestContextKey.CLIENT_CREATE_RESPONSE, response);
+
+        eventCheckHelper.clientEventCheck(response);
+    }
+
+    @When("Admin creates a client with random data in the last created office")
+    public void createClientInLastCreatedOffice() {
+        final PostOfficesResponse officeResponse = testContext().get(TestContextKey.OFFICE_CREATE_RESPONSE);
+        assertThat(officeResponse).as("No office was created. Use 'Admin creates a new office' step first.").isNotNull();
+        final PostClientsRequest clientsRequest = clientRequestFactory.defaultClientCreationRequest()//
+                .officeId(officeResponse.getOfficeId());
+
+        final PostClientsResponse response = ok(() -> fineractClient.clients().createClient(clientsRequest));
         testContext().set(TestContextKey.CLIENT_CREATE_RESPONSE, response);
 
         eventCheckHelper.clientEventCheck(response);
@@ -59,7 +69,7 @@ public class ClientStepDef extends AbstractStepDef {
     public void createSecondClientRandomFirstNameLastName() {
         PostClientsRequest clientsRequest = clientRequestFactory.defaultClientCreationRequest();
 
-        PostClientsResponse response = ok(() -> fineractClient.clients().create6(clientsRequest));
+        PostClientsResponse response = ok(() -> fineractClient.clients().createClient(clientsRequest));
         testContext().set(TestContextKey.CLIENT_CREATE_SECOND_CLIENT_RESPONSE, response);
 
         eventCheckHelper.clientEventCheck(response);
@@ -69,7 +79,7 @@ public class ClientStepDef extends AbstractStepDef {
     public void createClient(String firstName, String lastName) {
         PostClientsRequest clientsRequest = clientRequestFactory.defaultClientCreationRequest().firstname(firstName).lastname(lastName);
 
-        PostClientsResponse response = ok(() -> fineractClient.clients().create6(clientsRequest));
+        PostClientsResponse response = ok(() -> fineractClient.clients().createClient(clientsRequest));
         testContext().set(TestContextKey.CLIENT_CREATE_RESPONSE, response);
     }
 
@@ -88,7 +98,7 @@ public class ClientStepDef extends AbstractStepDef {
         PostClientsRequest clientsRequest = clientRequestFactory.defaultClientCreationRequest().firstname(firstName).lastname(lastName)
                 .address(Collections.singletonList(addressRequest));
 
-        PostClientsResponse response = ok(() -> fineractClient.clients().create6(clientsRequest));
+        PostClientsResponse response = ok(() -> fineractClient.clients().createClient(clientsRequest));
         testContext().set(TestContextKey.CLIENT_CREATE_RESPONSE, response);
 
     }
@@ -99,7 +109,7 @@ public class ClientStepDef extends AbstractStepDef {
         PostClientsRequest clientsRequest = clientRequestFactory.defaultClientCreationRequest().firstname(firstName).lastname(lastName)
                 .activationDate(activationDate);
 
-        PostClientsResponse response = ok(() -> fineractClient.clients().create6(clientsRequest));
+        PostClientsResponse response = ok(() -> fineractClient.clients().createClient(clientsRequest));
         testContext().set(TestContextKey.CLIENT_CREATE_RESPONSE, response);
     }
 

@@ -19,6 +19,7 @@
 package org.apache.fineract.interoperation.starter;
 
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -52,12 +53,12 @@ public class InteroperationConfiguration {
             PaymentTypeRepository paymentTypeRepository, InteropIdentifierRepository identifierRepository,
             LoanRepositoryWrapper loanRepositoryWrapper, SavingsHelper savingsHelper,
             SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
-            SavingsAccountDomainService savingsAccountService, JdbcTemplate jdbcTemplate,
-            PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            SavingsAccountDomainService savingsAccountService, ConfigurationDomainService configurationDomainService,
+            JdbcTemplate jdbcTemplate, PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer, DatabaseSpecificSQLGenerator sqlGenerator) {
         return new InteropServiceImpl(securityContext, interopDataValidator, savingsAccountRepository, savingsAccountTransactionRepository,
                 applicationCurrencyRepository, noteRepository, paymentTypeRepository, identifierRepository, loanRepositoryWrapper,
-                savingsHelper, savingsAccountTransactionSummaryWrapper, savingsAccountService, jdbcTemplate,
+                savingsHelper, savingsAccountTransactionSummaryWrapper, savingsAccountService, configurationDomainService, jdbcTemplate,
                 commandsSourceWritePlatformService, toApiJsonSerializer, sqlGenerator);
     }
 }

@@ -30,6 +30,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.util.Map;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
@@ -44,9 +45,11 @@ public class InterestRateChartFields {
     @Column(name = "description", nullable = true)
     private String description;
 
+    @Getter
     @Column(name = "from_date", nullable = false)
     private LocalDate fromDate;
 
+    @Getter
     @Column(name = "end_date", nullable = true)
     private LocalDate endDate;
 
@@ -123,14 +126,6 @@ public class InterestRateChartFields {
         return compare != null && DateUtils.isAfter(getFromDate(), compare);
     }
 
-    public LocalDate getFromDate() {
-        return this.fromDate;
-    }
-
-    public LocalDate getEndDate() {
-        return this.endDate;
-    }
-
     public boolean isOverlapping(InterestRateChartFields that) {
         final LocalDate thisFromDate = this.getFromDate();
         LocalDate thisEndDate = this.getEndDate();
@@ -142,10 +137,8 @@ public class InterestRateChartFields {
         final LocalDateInterval thisInterval = LocalDateInterval.create(thisFromDate, thisEndDate);
         final LocalDateInterval thatInterval = LocalDateInterval.create(thatFromDate, thatEndDate);
 
-        if (thisInterval.containsPortionOf(thatInterval) || thatInterval.containsPortionOf(thisInterval)) {
-            return true;
-        }
-        return false;// no overlapping
+        return thisInterval.containsPortionOf(thatInterval) || thatInterval.containsPortionOf(thisInterval);// no
+                                                                                                            // overlapping
     }
 
     public boolean isApplicableChartFor(final LocalDate target) {

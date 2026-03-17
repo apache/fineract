@@ -255,7 +255,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     @Override
     public boolean isAccountTransfer(final Long transactionId, final PortfolioAccountType accountType) {
         final StringBuilder sql = new StringBuilder("select count(*) from m_account_transfer_transaction at where ");
-        if (accountType.isLoanAccount()) {
+        if (PortfolioAccountType.LOAN.equals(accountType)) {
             sql.append("at.from_loan_transaction_id=").append(transactionId).append(" or at.to_loan_transaction_id=").append(transactionId);
         } else {
             sql.append("at.from_savings_transaction_id=").append(transactionId).append(" or at.to_savings_transaction_id=")
@@ -412,15 +412,16 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
     @Override
     public BigDecimal getTotalTransactionAmount(Long accountId, Integer accountType, LocalDate transactionDate) {
-        StringBuilder sqlBuilder = new StringBuilder(" select sum(trans.amount) as totalTransactionAmount ");
-        sqlBuilder.append(" from m_account_transfer_details as det ");
-        sqlBuilder.append(" inner join m_account_transfer_transaction as trans ");
-        sqlBuilder.append(" on det.id = trans.account_transfer_details_id ");
-        sqlBuilder.append(" where trans.is_reversed = false ");
-        sqlBuilder.append(" and trans.transaction_date = ? ");
-        sqlBuilder.append(" and IF(1=?, det.from_loan_account_id = ?, det.from_savings_account_id = ?) ");
+        final String sql = """
+                select sum(trans.amount) as totalTransactionAmount
+                from m_account_transfer_details as det
+                inner join m_account_transfer_transaction as trans
+                on det.id = trans.account_transfer_details_id
+                where trans.is_reversed = false
+                and trans.transaction_date = ?
+                and IF(1=?, det.from_loan_account_id = ?, det.from_savings_account_id = ?)\s""";
 
-        return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), BigDecimal.class, DATE_TIME_FORMATTER.format(transactionDate),
-                accountType, accountId, accountId);
+        return this.jdbcTemplate.queryForObject(sql, BigDecimal.class, DATE_TIME_FORMATTER.format(transactionDate), accountType, accountId,
+                accountId);
     }
 }

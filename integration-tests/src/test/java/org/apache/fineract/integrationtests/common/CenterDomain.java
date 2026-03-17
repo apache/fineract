@@ -110,8 +110,8 @@ public class CenterDomain implements Comparable<CenterDomain> {
         return new Gson().toJson(this);
     }
 
-    public static CurrencyDomain fromJSON(final String jsonData) {
-        return new Gson().fromJson(jsonData, CurrencyDomain.class);
+    public static CenterDomain fromJSON(final String jsonData) {
+        return new Gson().fromJson(jsonData, CenterDomain.class);
     }
 
     public static Builder create(final Integer id, final Integer statusid, final String statuscode, final String statusvalue,

@@ -31,6 +31,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
+import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.data.StandingInstructionData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDuesData;
@@ -89,7 +90,7 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
 
             }
             BigDecimal transactionAmount = data.getAmount();
-            if (data.getToAccountType().isLoanAccount()
+            if (PortfolioAccountType.LOAN.equals(data.getToAccountType())
                     && (recurrenceType.isDuesRecurrence() || (isDueForTransfer && instructionType.isDuesAmoutTransfer()))) {
                 StandingInstructionDuesData standingInstructionDuesData = standingInstructionReadPlatformService
                         .retriveLoanDuesData(data.getToAccount().getId());

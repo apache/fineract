@@ -1496,3 +1496,74 @@ Feature: Contract Termination
 
     When Loan Pay-off is made on "01 March 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C4694 @AdvancedPaymentAllocation
+  Scenario: Verify contract termination after repeated re-aging across month-end should not fail due to accumulated stub periods
+    When Admin sets the business date to "28 January 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_CONTRACT_TERMINATION | 28 January 2026   | 100            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "28 January 2026" with "100" amount and expected disbursement date on "28 January 2026"
+    When Admin successfully disburse the loan on "28 January 2026" with "100" EUR transaction amount
+#   --- Re-age 4 times across late-January dates ---
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
+      | 1               | MONTHS        | 28 February 2026 | 6                    |
+    When Admin sets the business date to "29 January 2026"
+    And Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
+      | 1               | MONTHS        | 28 February 2026 | 6                    |
+    When Admin sets the business date to "30 January 2026"
+    And Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
+      | 1               | MONTHS        | 28 February 2026 | 6                    |
+    When Admin sets the business date to "31 January 2026"
+    And Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
+      | 1               | MONTHS        | 28 February 2026 | 6                    |
+#   --- Verify schedule after 4 re-ages: 7 periods (1 collapsed stub + 6 re-aged) ---
+    Then Loan Repayment schedule has 7 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 28 January 2026   |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 3    | 31 January 2026   | 28 January 2026  | 100.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 2  | 28   | 28 February 2026  |                  | 83.62           | 16.38         | 0.64     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 3  | 28   | 28 March 2026     |                  | 67.09           | 16.53         | 0.49     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 4  | 31   | 28 April 2026     |                  | 50.46           | 16.63         | 0.39     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 5  | 30   | 28 May 2026       |                  | 33.73           | 16.73         | 0.29     | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 6  | 31   | 28 June 2026      |                  | 16.91           | 16.82         | 0.2      | 0.0  | 0.0       | 17.02 | 0.0  | 0.0        | 0.0  | 17.02       |
+      | 7  | 30   | 28 July 2026      |                  | 0.0             | 16.91         | 0.1      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 2.11     | 0.0  | 0.0       | 102.11 | 0.0  | 0.0        | 0.0  | 102.11      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type     | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 28 January 2026  | Disbursement         | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 28 January 2026  | Re-age               | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 January 2026  | Re-age               | 100.02 | 100.0     | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 January 2026  | Re-age               | 100.04 | 100.0     | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 31 January 2026  | Re-age               | 100.06 | 100.0     | 0.06     | 0.0  | 0.0       | 0.0          | false    | false    |
+#   --- Contract termination on 01 February 2026: should not fail due to accumulated stubs ---
+    When Admin sets the business date to "01 February 2026"
+    And Admin successfully terminates loan contract
+#   --- Expected: 2 periods (1 collapsed stub + 1 termination period on 01 February 2026) ---
+#   --- The termination period should contain: full remaining principal (100.0) + accrued interest from Jan 28 to Feb 1 ---
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 28 January 2026   |                  | 100.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 3    | 31 January 2026   | 28 January 2026  | 100.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 2  | 1    | 01 February 2026  |                  | 0.0             | 100.0         | 0.08     | 0.0  | 0.0       | 100.08 | 0.0  | 0.0        | 0.0  | 100.08      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 0.08     | 0.0  | 0.0       | 100.08 | 0.0  | 0.0        | 0.0  | 100.08      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type     | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 28 January 2026  | Disbursement         | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
+      | 28 January 2026  | Re-age               | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 January 2026  | Re-age               | 100.02 | 100.0     | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 January 2026  | Re-age               | 100.04 | 100.0     | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 31 January 2026  | Re-age               | 100.06 | 100.0     | 0.06     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 February 2026 | Accrual              | 0.08   | 0.0       | 0.08     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 February 2026 | Contract Termination | 100.08 | 100.0     | 0.08     | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Loan Pay-off is made on "01 February 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met

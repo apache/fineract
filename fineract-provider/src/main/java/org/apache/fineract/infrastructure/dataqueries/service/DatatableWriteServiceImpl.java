@@ -277,7 +277,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
             sqlBuilder.append(constrainBuilder);
             sqlBuilder.append(")");
             if (databaseTypeResolver.isMySQL()) {
-                sqlBuilder.append(" ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;");
+                sqlBuilder.append(" ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4 COLLATE=UTF8MB4_UNICODE_CI;");
             }
             log.debug("SQL:: {}", sqlBuilder);
 

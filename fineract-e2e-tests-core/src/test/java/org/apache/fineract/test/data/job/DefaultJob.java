@@ -28,7 +28,8 @@ public enum DefaultJob implements Job {
     ACCRUAL_ACTIVITY_POSTING("Accrual Activity Posting", "ACC_ACPO"), //
     ADD_ACCRUAL_TRANSACTIONS_FOR_LOANS_WITH_INCOME_POSTED_AS_TRANSACTIONS(
             "Add Accrual Transactions For Loans With Income Posted As Transactions", "LA_AATR"), //
-    RECALCULATE_INTEREST_FOR_LOANS("Recalculate Interest For Loans", "LA_RINT"); //
+    RECALCULATE_INTEREST_FOR_LOANS("Recalculate Interest For Loans", "LA_RINT"), //
+    WORKING_CAPITAL_LOAN_COB("Working Capital Loan COB", "WC_COB"); //
 
     private final String customName;
     private final String shortName;

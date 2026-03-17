@@ -59,6 +59,10 @@ public final class Utils {
         return randomStringGenerator(prefix, len, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     }
 
+    public static String randomStringGenerator(final int len) {
+        return randomStringGenerator("", len);
+    }
+
     public static String randomFirstNameGenerator() {
         return firstNames.get(random.nextInt(firstNames.size()));
     }

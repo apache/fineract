@@ -149,6 +149,8 @@ public class CommandStrategyProvider {
         commandStrategies.put(CommandContext
                 .resource("v1\\/savingsaccounts\\/" + NUMBER_REGEX + "\\/transactions\\/" + NUMBER_REGEX + OPTIONAL_COMMAND_PARAM_REGEX)
                 .method(POST).build(), "savingsAccountAdjustTransactionCommandStrategy");
+        commandStrategies.put(CommandContext.resource("v1\\/savingsaccounts\\/" + NUMBER_REGEX + "\\/charges").method(POST).build(),
+                "createSavingsAccountChargeCommandStrategy");
         commandStrategies.put(CommandContext.resource("v1\\/loans\\/" + NUMBER_REGEX + "\\/charges").method(POST).build(),
                 "createChargeCommandStrategy");
         commandStrategies.put(

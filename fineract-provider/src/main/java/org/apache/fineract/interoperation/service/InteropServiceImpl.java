@@ -44,6 +44,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
@@ -134,6 +135,7 @@ public class InteropServiceImpl implements InteropService {
     private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
 
     private final SavingsAccountDomainService savingsAccountService;
+    private final ConfigurationDomainService configurationDomainService;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -566,7 +568,7 @@ public class InteropServiceImpl implements InteropService {
     private SavingsAccount validateAndGetSavingAccount(@NonNull InteropRequestData request) {
         // TODO: error handling
         SavingsAccount savingsAccount = validateAndGetSavingAccount(request.getAccountId());
-        savingsAccount.setHelpers(savingsAccountTransactionSummaryWrapper, savingsHelper);
+        savingsAccount.setHelpers(savingsAccountTransactionSummaryWrapper, savingsHelper, configurationDomainService);
 
         ApplicationCurrency requestCurrency = currencyRepository.findOneByCode(request.getAmount().getCurrency());
         if (!savingsAccount.getCurrency().getCode().equals(requestCurrency.getCode())) {

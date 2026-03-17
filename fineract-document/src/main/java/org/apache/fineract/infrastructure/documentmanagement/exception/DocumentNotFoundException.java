@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.exception;
 
-import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-public class DocumentNotFoundException extends AbstractPlatformDomainRuleException {
+public class DocumentNotFoundException extends AbstractPlatformResourceNotFoundException {
 
     public DocumentNotFoundException(final Long id) {
         super("error.msg.document.id.invalid", "Document with identifier " + id + " does not exist", id);

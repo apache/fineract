@@ -63,7 +63,7 @@ public class FeignAccountHelper {
                 .type(getAccountTypeId(type))//
                 .usage(1);
 
-        PostGLAccountsResponse response = ok(() -> fineractClient.generalLedgerAccount().createGLAccount1(request));
+        PostGLAccountsResponse response = ok(() -> fineractClient.generalLedgerAccount().createGLAccount(request));
 
         GetGLAccountsResponse account = ok(
                 () -> fineractClient.generalLedgerAccount().retreiveAccount(response.getResourceId(), Collections.emptyMap()));

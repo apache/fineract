@@ -20,6 +20,7 @@ package org.apache.fineract.test.initializer.base;
 
 import java.util.List;
 import org.apache.fineract.test.config.CacheConfiguration;
+import org.apache.fineract.test.config.TestDatabaseConfiguration;
 import org.apache.fineract.test.initializer.global.FineractGlobalInitializerStep;
 import org.apache.fineract.test.initializer.scenario.FineractScenarioInitializerStep;
 import org.apache.fineract.test.initializer.suite.FineractSuiteInitializerStep;
@@ -32,7 +33,7 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration
 @ComponentScan({ "org.apache.fineract.test.api", "org.apache.fineract.test.helper" })
 @PropertySource("classpath:fineract-test-application.properties")
-@Import({ CacheConfiguration.class })
+@Import({ CacheConfiguration.class, TestDatabaseConfiguration.class })
 public class BaseFineractInitializerConfiguration {
 
     @Bean

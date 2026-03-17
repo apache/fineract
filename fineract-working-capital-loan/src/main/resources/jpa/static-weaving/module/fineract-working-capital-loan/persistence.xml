@@ -31,7 +31,10 @@
     <persistence-unit name="jpa-pu" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 
+        <!-- COB (Chunk of Business) -->
+
         <!-- Working Capital Loan Module Entities -->
+
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>

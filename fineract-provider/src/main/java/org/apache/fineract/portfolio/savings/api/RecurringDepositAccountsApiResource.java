@@ -105,7 +105,7 @@ public class RecurringDepositAccountsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve recurring Deposit Account Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for recurring deposit applications. The template data returned consists of any or all of:\n"
+    @Operation(summary = "Retrieve recurring Deposit Account Template", operationId = "retrieveTemplateRecurringDepositAccount", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for recurring deposit applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Requests:\n" + "\n"
             + "recurringdepositaccounts/template?clientId=1\n" + "\n" + "\n" + "recurringdepositaccounts/template?clientId=1&productId=1")
     @ApiResponses({
@@ -129,7 +129,7 @@ public class RecurringDepositAccountsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List Recurring deposit applications/accounts", description = "Lists Recurring deposit applications/accounts\n\n"
+    @Operation(summary = "List Recurring deposit applications/accounts", operationId = "retrieveAllRecurringDepositAccounts", description = "Lists Recurring deposit applications/accounts\n\n"
             + "Example Requests:\n" + "\n" + "recurringdepositaccounts\n" + "\n" + "\n" + "recurringdepositaccounts?fields=name")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RecurringDepositAccountsApiResourceSwagger.GetRecurringDepositAccountsResponse.class)))) })
@@ -163,7 +163,7 @@ public class RecurringDepositAccountsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Submit new recurring deposit application", description = "Submits new recurring deposit application\n\n"
+    @Operation(summary = "Submit new recurring deposit application", operationId = "submitApplicationRecurringDepositAccount", description = "Submits new recurring deposit application\n\n"
             + "Mandatory Fields: clientId or groupId, productId, submittedOnDate, depositAmount, depositPeriod, depositPeriodFrequencyId\n\n"
             + "Optional Fields: accountNo, externalId, fieldOfficerId,linkAccountId(if provided initial deposit amount will be collected from this account),transferInterestToSavings(By enabling this flag all interest postings will be transferred to linked saving account )\n\n"
             + "Inherited from Product (if not provided): interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, lockinPeriodFrequency, lockinPeriodFrequencyType, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, charts, withHoldTax")
@@ -184,7 +184,7 @@ public class RecurringDepositAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a recurring deposit application/account", description = "Retrieves a recurring deposit application/account\n\n"
+    @Operation(summary = "Retrieve a recurring deposit application/account", operationId = "retrieveOneRecurringDepositAccount", description = "Retrieves a recurring deposit application/account\n\n"
             + "Example Requests :\n" + "\n" + "recurringdepositaccounts/1\n" + "\n" + "\n" + "recurringdepositaccounts/1?associations=all")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RecurringDepositAccountsApiResourceSwagger.GetRecurringDepositAccountsAccountIdResponse.class))) })
@@ -261,7 +261,7 @@ public class RecurringDepositAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Modify a recurring deposit application", description = "Recurring deposit application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc")
+    @Operation(summary = "Modify a recurring deposit application", operationId = "updateRecurringDepositAccount", description = "Recurring deposit application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RecurringDepositAccountsApiResourceSwagger.PutRecurringDepositAccountsAccountIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RecurringDepositAccountsApiResourceSwagger.PutRecurringDepositAccountsAccountIdResponse.class))) })
@@ -303,7 +303,7 @@ public class RecurringDepositAccountsApiResource {
             + "Calculates interest earned on a recurring deposit account based on todays date. It does not attempt to post or credit the interest on the account. That is responsibility of the Post Interest API that will likely be called by overnight process.\n\n"
             + "Post Interest on recurring Deposit Account:\n\n"
             + "Calculates and Posts interest earned on a recurring deposit account based on todays date and whether an interest posting or crediting event is due.\n\n"
-            + "Showing request/response for 'Post Interest on recurring Deposit Account'")
+            + "Showing request/response for 'Post Interest on recurring Deposit Account'", operationId = "handleCommandsRecurringDepositAccount")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RecurringDepositAccountsApiResourceSwagger.PostRecurringDepositAccountsAccountIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RecurringDepositAccountsApiResourceSwagger.PostRecurringDepositAccountsAccountIdResponse.class))) })
@@ -377,7 +377,7 @@ public class RecurringDepositAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete a recurring deposit application", description = "At present we support hard delete of recurring deposit application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the recurring deposit account.")
+    @Operation(summary = "Delete a recurring deposit application", operationId = "deleteRecurringDepositAccount", description = "At present we support hard delete of recurring deposit application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the recurring deposit account.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RecurringDepositAccountsApiResourceSwagger.DeleteRecurringDepositAccountsResponse.class))) })
     public String delete(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId) {
@@ -393,6 +393,7 @@ public class RecurringDepositAccountsApiResource {
     @Path("{accountId}/template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve recurring deposit account closure template", operationId = "accountClosureTemplateRecurringDepositAccount")
     public String accountClosureTemplate(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam, @Context final UriInfo uriInfo) {
 

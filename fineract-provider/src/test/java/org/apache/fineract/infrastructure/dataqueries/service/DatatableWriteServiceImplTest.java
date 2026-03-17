@@ -24,21 +24,27 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.infrastructure.codes.service.CodeReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.serialization.DatatableCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.dataqueries.data.DataTableValidator;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.search.service.SearchUtil;
@@ -244,5 +250,52 @@ class DatatableWriteServiceImplTest {
         String sql = sqlCaptor.getValue();
         assertTrue(sql.contains("INSERT INTO x_table_column_code_mappings"), "SQL should insert into code mappings table");
         assertTrue(sql.contains("VALUES (?, ?)"), "SQL should use ? placeholders");
+    }
+
+    @Test
+    void testCreateDatatableUsesUtf8mb4UnicodeCiForMySql() {
+        final JsonElement payload = JsonParser.parseString("""
+                {
+                  "datatableName": "dt_charset_test",
+                  "apptableName": "m_client",
+                  "entitySubType": "PERSON",
+                  "multiRow": false,
+                  "columns": [
+                    {
+                      "name": "itsAString",
+                      "type": "String",
+                      "mandatory": true,
+                      "length": 10
+                    }
+                  ]
+                }
+                """);
+
+        final JsonCommand command = mock(JsonCommand.class);
+        when(command.json()).thenReturn(payload.toString());
+        when(command.commandId()).thenReturn(1L);
+
+        when(databaseTypeResolver.isMySQL()).thenReturn(true);
+        when(databaseTypeResolver.databaseType()).thenReturn(DatabaseType.MYSQL);
+        when(configurationDomainService.isConstraintApproachEnabledForDatatables()).thenReturn(false);
+        when(sqlGenerator.currentSchema()).thenReturn("database()");
+        when(sqlGenerator.escape(anyString())).thenAnswer(invocation -> "`" + invocation.getArgument(0) + "`");
+        when(datatableUtil.resolveEntity("m_client")).thenReturn(EntityTables.CLIENT);
+        when(datatableUtil.getFKField(EntityTables.CLIENT)).thenReturn("client_id");
+        when(fromJsonHelper.parse(anyString())).thenReturn(payload);
+        when(fromJsonHelper.extractJsonArrayNamed(eq("columns"), eq(payload)))
+                .thenReturn(payload.getAsJsonObject().getAsJsonArray("columns"));
+        when(fromJsonHelper.extractStringNamed(eq("datatableName"), eq(payload))).thenReturn("dt_charset_test");
+        when(fromJsonHelper.extractStringNamed(eq("entitySubType"), eq(payload))).thenReturn("PERSON");
+        when(fromJsonHelper.extractStringNamed(eq("apptableName"), eq(payload))).thenReturn("m_client");
+        when(fromJsonHelper.extractBooleanNamed(eq("multiRow"), eq(payload))).thenReturn(false);
+        when(jdbcTemplate.queryForObject(anyString(), eq(String.class), eq("dt_charset_test"))).thenReturn("true");
+
+        underTest.createDatatable(command);
+
+        final ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(jdbcTemplate).execute(sqlCaptor.capture());
+        assertTrue(sqlCaptor.getValue().contains("ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4 COLLATE=UTF8MB4_UNICODE_CI;"),
+                "MySQL table creation must include utf8mb4 charset and utf8mb4_unicode_ci collation");
     }
 }

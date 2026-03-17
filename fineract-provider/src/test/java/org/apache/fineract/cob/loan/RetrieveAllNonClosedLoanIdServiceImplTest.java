@@ -75,8 +75,7 @@ public class RetrieveAllNonClosedLoanIdServiceImplTest {
     }
 
     private void testRetrieveLoanCOBPartitions(String expectedSQL, boolean isCatchup) {
-        RetrieveAllNonClosedLoanIdServiceImpl service = new RetrieveAllNonClosedLoanIdServiceImpl(loanRepository,
-                namedParameterJdbcTemplate);
+        RetrieveAllNonClosedIdServiceImpl service = new RetrieveAllNonClosedIdServiceImpl(loanRepository, namedParameterJdbcTemplate);
         LocalDate businessDate = LocalDate.parse("2023-06-28");
         service.retrieveLoanCOBPartitions(1L, businessDate, isCatchup, 5);
         Mockito.verify(namedParameterJdbcTemplate, times(1)).query(sqlCaptor.capture(), paramsCaptor.capture(), rowMapper.capture());

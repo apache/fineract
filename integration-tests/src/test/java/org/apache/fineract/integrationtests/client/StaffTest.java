@@ -52,13 +52,13 @@ public class StaffTest extends IntegrationTest {
     }
 
     Long create() {
-        return ok(fineractClient().staff.create3(new StaffRequest().officeId(1L).firstname(Utils.randomFirstNameGenerator())
+        return ok(fineractClient().staff.createStaff(new StaffRequest().officeId(1L).firstname(Utils.randomFirstNameGenerator())
                 .lastname(Utils.randomLastNameGenerator()).externalId(Utils.randomStringGenerator("", 12))
                 .joiningDate(LocalDate.now(ZoneId.of("UTC")).toString()).dateFormat("yyyy-MM-dd").locale("en_US"))).getResourceId();
     }
 
     Optional<Long> retrieveFirst() {
-        var staff = ok(fineractClient().staff.retrieveAll16(1L, true, false, "ACTIVE"));
+        var staff = ok(fineractClient().staff.retrieveAllStaff(1L, true, false, "ACTIVE"));
         if (!staff.isEmpty()) {
             return Optional.of((long) staff.get(0).getId());
         }

@@ -68,6 +68,7 @@ public class ProgressiveLoanInterestScheduleModel {
 
     @Setter
     private LocalDate lastOverdueBalanceChange;
+    private List<OverdueBalanceCorrection> overdueCorrections = new ArrayList<>();
 
     public ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods,
             final ILoanConfigurationDetails loanProductRelatedDetail, final Integer installmentAmountInMultiplesOf, final MathContext mc) {
@@ -95,9 +96,35 @@ public class ProgressiveLoanInterestScheduleModel {
                 loanProductRelatedDetail.isInterestRecalculationEnabled()));
     }
 
-    public ProgressiveLoanInterestScheduleModel deepCopy(MathContext mc) {
-        return new ProgressiveLoanInterestScheduleModel(repaymentPeriods, interestRates, loanProductRelatedDetail,
-                installmentAmountInMultiplesOf, mc, false);
+    public void recordOverdueCorrection(final LocalDate correctionDate, final Money amount, final LocalDate affectedRpDueDate) {
+        overdueCorrections.add(new OverdueBalanceCorrection(correctionDate, amount, affectedRpDueDate));
+    }
+
+    public boolean hasOverdueCorrectionsBeyondDate(final LocalDate targetDueDate) {
+        return overdueCorrections.stream().anyMatch(oc -> oc.affectedRpDueDate().isAfter(targetDueDate));
+    }
+
+    public boolean hasOverdueCorrectionsOnDate(final LocalDate targetDueDate) {
+        return overdueCorrections.stream().anyMatch(oc -> oc.affectedRpDueDate().isEqual(targetDueDate));
+    }
+
+    /**
+     * Reverses all recorded overdue corrections on this model by subtracting each correction's amount from the
+     * corresponding InterestPeriod's balanceCorrectionAmount.
+     */
+    public void reverseOverdueCorrections() {
+        for (final OverdueBalanceCorrection oc : overdueCorrections) {
+            changeOutstandingBalanceAndUpdateInterestPeriods(oc.correctionDate(), zero(), oc.amount().negated(), zero());
+        }
+        overdueCorrections.clear();
+        this.lastOverdueBalanceChange = null;
+    }
+
+    public ProgressiveLoanInterestScheduleModel deepCopy(final MathContext mc) {
+        final ProgressiveLoanInterestScheduleModel copy = new ProgressiveLoanInterestScheduleModel(repaymentPeriods, interestRates,
+                loanProductRelatedDetail, installmentAmountInMultiplesOf, mc, false);
+        copy.overdueCorrections = new ArrayList<>(this.overdueCorrections);
+        return copy;
     }
 
     public ProgressiveLoanInterestScheduleModel copyWithoutPaidAmounts() {
@@ -140,10 +167,18 @@ public class ProgressiveLoanInterestScheduleModel {
         if (repaymentPeriodDueDate == null) {
             return Optional.empty();
         }
-        return repaymentPeriods.stream()//
-                .filter(repaymentPeriodItem -> DateUtils.isEqual(repaymentPeriodItem.getFromDate(), repaymentPeriodFromDate)
-                        && DateUtils.isEqual(repaymentPeriodItem.getDueDate(), repaymentPeriodDueDate))//
+        // Exact match first
+        Optional<RepaymentPeriod> result = repaymentPeriods.stream()
+                .filter(rp -> DateUtils.isEqual(rp.getFromDate(), repaymentPeriodFromDate)
+                        && DateUtils.isEqual(rp.getDueDate(), repaymentPeriodDueDate))
                 .findFirst();
+        if (result.isEmpty()) {
+            // Fallback: find a period that encompasses the requested date range
+            // This handles collapsed stub periods where multiple periods were merged into one
+            result = repaymentPeriods.stream().filter(rp -> !DateUtils.isAfter(rp.getFromDate(), repaymentPeriodFromDate)
+                    && !DateUtils.isBefore(rp.getDueDate(), repaymentPeriodDueDate)).findFirst();
+        }
+        return result;
     }
 
     public List<RepaymentPeriod> getRelatedRepaymentPeriods(final LocalDate calculateFromRepaymentPeriodDueDate) {

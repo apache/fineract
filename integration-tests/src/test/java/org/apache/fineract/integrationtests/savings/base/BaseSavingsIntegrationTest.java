@@ -92,6 +92,7 @@ public class BaseSavingsIntegrationTest extends IntegrationTest {
         }
     }
 
+    @Override
     protected void runAt(String date, Runnable runnable) {
         runAt(date, (d) -> runnable.run());
     }
@@ -129,7 +130,7 @@ public class BaseSavingsIntegrationTest extends IntegrationTest {
     }
 
     protected PostSavingsProductsResponse createProduct(PostSavingsProductsRequest productsRequest) {
-        return ok(fineractClient().savingsProducts.create14(productsRequest));
+        return ok(fineractClient().savingsProducts.createSavingsProduct(productsRequest));
     }
 
     protected PostSavingsAccountsRequest applySavingsRequest(Long clientId, Long productId, String submittedDate) {
@@ -138,19 +139,19 @@ public class BaseSavingsIntegrationTest extends IntegrationTest {
     }
 
     protected PostSavingsAccountsResponse applySavingsAccount(PostSavingsAccountsRequest request) {
-        return ok(fineractClient().savingsAccounts.submitApplication2(request));
+        return ok(fineractClient().savingsAccounts.submitSavingsApplication(request));
     }
 
     protected PostSavingsAccountsAccountIdResponse approveSavingsAccount(Long savingsId, String date) {
         PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest().dateFormat(DATETIME_PATTERN).locale("en")
                 .approvedOnDate(date);
-        return ok(fineractClient().savingsAccounts.handleCommands6(savingsId, request, "approve"));
+        return ok(fineractClient().savingsAccounts.handleCommandsSavingsAccount(savingsId, request, "approve"));
     }
 
     protected PostSavingsAccountsAccountIdResponse activateSavingsAccount(Long savingsId, String date) {
         PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest().dateFormat(DATETIME_PATTERN).locale("en")
                 .activatedOnDate(date);
-        return ok(fineractClient().savingsAccounts.handleCommands6(savingsId, request, "activate"));
+        return ok(fineractClient().savingsAccounts.handleCommandsSavingsAccount(savingsId, request, "activate"));
     }
 
     protected PostSavingsAccountTransactionsResponse deposit(Long savingsId, String date, BigDecimal amount) {
@@ -159,15 +160,15 @@ public class BaseSavingsIntegrationTest extends IntegrationTest {
                 .locale("en") //
                 .paymentTypeId(1).transactionAmount(amount) //
                 .transactionDate(date); //
-        return ok(fineractClient().savingsTransactions.transaction2(savingsId, request, "deposit"));
+        return ok(fineractClient().savingsTransactions.createSavingsAccountTransaction(savingsId, request, "deposit"));
     }
 
     protected SavingsAccountData getSavingsAccount(Long savingsId) {
-        return ok(fineractClient().savingsAccounts.retrieveOne26(savingsId, false, null, "transactions"));
+        return ok(fineractClient().savingsAccounts.retrieveSavingsAccount(savingsId, false, null, "transactions"));
     }
 
     protected List<SavingsAccountTransactionData> getTransactions(Long savingsId) {
-        return ok(fineractClient().savingsAccounts.retrieveOne26(savingsId, false, null, "transactions")).getTransactions();
+        return ok(fineractClient().savingsAccounts.retrieveSavingsAccount(savingsId, false, null, "transactions")).getTransactions();
     }
 
     protected void verifyNoTransactions(Long savingsId) {
@@ -175,7 +176,8 @@ public class BaseSavingsIntegrationTest extends IntegrationTest {
     }
 
     protected void verifyTransactions(Long savingsId, Transaction... transactions) {
-        SavingsAccountData savingsDetails = ok(fineractClient().savingsAccounts.retrieveOne26(savingsId, false, null, "transactions"));
+        SavingsAccountData savingsDetails = ok(
+                fineractClient().savingsAccounts.retrieveSavingsAccount(savingsId, false, null, "transactions"));
         if (transactions == null || transactions.length == 0) {
             Assertions.assertTrue(savingsDetails.getTransactions().isEmpty(), "No transaction is expected on savings account " + savingsId);
         } else {

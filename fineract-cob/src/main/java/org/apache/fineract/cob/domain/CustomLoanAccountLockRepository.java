@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.cob.domain;
 
-public interface CustomLoanAccountLockRepository {
+public interface CustomLoanAccountLockRepository<T extends AccountLock> {
 
     void updateLoanFromAccountLocks();
 }

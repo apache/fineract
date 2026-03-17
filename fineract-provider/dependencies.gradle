@@ -42,6 +42,7 @@ dependencies {
     implementation(project(path: ':fineract-loan-origination'))
     implementation(project(path: ':fineract-security'))
     implementation(project(path: ':fineract-working-capital-loan'))
+    implementation(project(path: ':fineract-mix'))
 
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
@@ -58,7 +59,7 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-web',
             'org.springframework.boot:spring-boot-starter-validation',
             'org.springframework.boot:spring-boot-starter-security',
-            "org.springframework.boot:spring-boot-starter-oauth2-authorization-server",
+            'org.springframework.boot:spring-boot-starter-oauth2-authorization-server',
             'org.springframework.boot:spring-boot-starter-cache',
             'org.springframework.boot:spring-boot-starter-oauth2-resource-server',
             'org.springframework.boot:spring-boot-starter-actuator',

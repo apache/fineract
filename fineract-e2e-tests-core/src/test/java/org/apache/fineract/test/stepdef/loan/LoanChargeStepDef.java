@@ -206,6 +206,20 @@ public class LoanChargeStepDef extends AbstractStepDef {
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
     }
 
+    @And("Admin adds a {double} % Processing charge to the loan with {string} locale on date: {string} - no event")
+    public void addProcessingFeeNoEvent(double chargeAmount, String locale, String date) throws IOException {
+        eventStore.reset();
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
+        PostLoansLoanIdChargesRequest loanIdChargesRequest = LoanChargeRequestFactory.defaultLoanChargeRequest()
+                .chargeId(ChargeProductType.LOAN_PERCENTAGE_PROCESSING_FEE.value).amount(chargeAmount).dueDate(date)
+                .dateFormat(DEFAULT_DATE_FORMAT).locale(locale);
+
+        PostLoansLoanIdChargesResponse loanChargeResponse = ok(
+                () -> fineractClient.loanCharges().executeLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of()));
+        testContext().set(TestContextKey.ADD_PROCESSING_FEE_RESPONSE, loanChargeResponse);
+    }
+
     @And("Admin adds an NSF fee because of payment bounce with {string} transaction date")
     public void addNSFfee(String date) throws IOException {
         eventStore.reset();
@@ -231,8 +245,8 @@ public class LoanChargeStepDef extends AbstractStepDef {
 
         PostLoansLoanIdChargesChargeIdRequest waiveRequest = new PostLoansLoanIdChargesChargeIdRequest();
 
-        PostLoansLoanIdChargesChargeIdResponse waiveResponse = ok(() -> fineractClient.loanCharges().executeLoanCharge2(loanId, chargeId,
-                waiveRequest, Map.<String, Object>of("command", "waive")));
+        PostLoansLoanIdChargesChargeIdResponse waiveResponse = ok(() -> fineractClient.loanCharges()
+                .executeLoanChargeOnExistingCharge(loanId, chargeId, waiveRequest, Map.<String, Object>of("command", "waive")));
         testContext().set(TestContextKey.WAIVE_CHARGE_RESPONSE, waiveResponse);
     }
 
@@ -246,8 +260,8 @@ public class LoanChargeStepDef extends AbstractStepDef {
 
         PostLoansLoanIdChargesChargeIdRequest waiveRequest = new PostLoansLoanIdChargesChargeIdRequest();
 
-        PostLoansLoanIdChargesChargeIdResponse waiveResponse = ok(() -> fineractClient.loanCharges().executeLoanCharge2(loanId, chargeId,
-                waiveRequest, Map.<String, Object>of("command", "waive")));
+        PostLoansLoanIdChargesChargeIdResponse waiveResponse = ok(() -> fineractClient.loanCharges()
+                .executeLoanChargeOnExistingCharge(loanId, chargeId, waiveRequest, Map.<String, Object>of("command", "waive")));
         testContext().set(TestContextKey.WAIVE_CHARGE_RESPONSE, waiveResponse);
     }
 

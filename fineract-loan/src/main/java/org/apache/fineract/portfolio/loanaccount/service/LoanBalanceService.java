@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.persistence.FlushModeHandler;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -35,6 +36,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionComparator;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
@@ -121,7 +123,32 @@ public class LoanBalanceService {
         final Money capitalizedIncomeAdjustment = capitalizedIncomeBalanceService.calculateCapitalizedIncomeAdjustment(loan);
         loan.getSummary().updateSummary(loan.getCurrency(), principal, loan.getRepaymentScheduleInstallments(), loan.getLoanCharges(),
                 capitalizedIncome, capitalizedIncomeAdjustment);
+        reconcileChargeStatusWithSummary(loan);
         updateLoanOutstandingBalances(loan);
+    }
+
+    private void reconcileChargeStatusWithSummary(final Loan loan) {
+        final LoanSummary summary = loan.getSummary();
+        final Set<LoanCharge> charges = loan.getLoanCharges();
+        if (summary == null || charges == null) {
+            return;
+        }
+        if (MathUtil.isZero(summary.getTotalFeeChargesOutstanding())) {
+            for (final LoanCharge charge : charges) {
+                if (charge.isActive() && charge.isFeeCharge() && !charge.isPaid() && !charge.isWaived()
+                        && MathUtil.isGreaterThanZero(charge.getAmount())) {
+                    charge.reconcileFullyPaid();
+                }
+            }
+        }
+        if (MathUtil.isZero(summary.getTotalPenaltyChargesOutstanding())) {
+            for (final LoanCharge charge : charges) {
+                if (charge.isActive() && charge.isPenaltyCharge() && !charge.isPaid() && !charge.isWaived()
+                        && MathUtil.isGreaterThanZero(charge.getAmount())) {
+                    charge.reconcileFullyPaid();
+                }
+            }
+        }
     }
 
     private Money calculateTotalRecoveredPayments(Loan loan) {

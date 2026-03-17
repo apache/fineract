@@ -55,6 +55,25 @@ public class GuarantorHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
+    public Object createGuarantorWithError(final Integer loanId, final String guarantorJSON, final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
+        return Utils.performServerPost(requestSpec, responseSpec, LOAN_URL + loanId + GUARANTOR_API_URL + TENANT, guarantorJSON,
+                CommonConstants.RESPONSE_ERROR);
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    public java.util.ArrayList<HashMap> getGuarantorList(final Integer loanId) {
+        return (java.util.ArrayList<HashMap>) Utils.performServerGet(this.requestSpec, this.responseSpec,
+                LOAN_URL + loanId + GUARANTOR_API_URL + TENANT, "");
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap updateGuarantor(final Integer guarantorId, final Integer loanId, final String guarantorJSON) {
         return Utils.performServerPut(this.requestSpec, this.responseSpec, LOAN_URL + loanId + GUARANTOR_API_URL + guarantorId + TENANT,
                 guarantorJSON, CommonConstants.RESPONSE_CHANGES);

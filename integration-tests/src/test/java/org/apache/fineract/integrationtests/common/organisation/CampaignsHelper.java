@@ -65,6 +65,21 @@ public class CampaignsHelper {
                 "resourceId");
     }
 
+    public Integer createCampaignWithName(String reportName, Integer triggerType, String campaignName) {
+        log.info("---------------------------------CREATING A CAMPAIGN WITH NAME---------------------------------------------");
+        final String CREATE_SMS_CAMPAIGNS_URL = SMS_CAMPAIGNS_URL + "?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_SMS_CAMPAIGNS_URL,
+                getCreateCampaignJSONWithName(reportName, triggerType, campaignName), "resourceId");
+    }
+
+    public List<HashMap> createCampaignWithNameExpectingError(ResponseSpecification errorResponseSpec, String reportName,
+            Integer triggerType, String campaignName) {
+        log.info("---------------------------------CREATING A CAMPAIGN WITH NAME (EXPECTING ERROR)---------------------");
+        final String CREATE_SMS_CAMPAIGNS_URL = SMS_CAMPAIGNS_URL + "?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(requestSpec, errorResponseSpec, CREATE_SMS_CAMPAIGNS_URL,
+                getCreateCampaignJSONWithName(reportName, triggerType, campaignName), "errors");
+    }
+
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
@@ -132,6 +147,10 @@ public class CampaignsHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public String getCreateCampaignJSON(String reportName, Integer triggerType) {
+        return getCreateCampaignJSONWithName(reportName, triggerType, Utils.randomStringGenerator("Campaign_Name_", 5));
+    }
+
+    public String getCreateCampaignJSONWithName(String reportName, Integer triggerType, String campaignName) {
         final HashMap<String, Object> map = new HashMap<>();
         final HashMap<String, Object> paramValueMap = new HashMap<>();
         Long reportId = getSelectedReportId(reportName);
@@ -143,7 +162,7 @@ public class CampaignsHelper {
             map.put("frequency", 1);
             map.put("interval", "1");
         }
-        map.put("campaignName", Utils.randomStringGenerator("Campaign_Name_", 5));
+        map.put("campaignName", campaignName);
         map.put("campaignType", 1);
         map.put("message", "Hi, this is from integtration tests runner");
         map.put("locale", "en");

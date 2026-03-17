@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.cob.loan;
 
+import org.apache.fineract.cob.service.RetrieveLoanIdService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -37,6 +38,6 @@ public class RetrieveLoanIdConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public RetrieveLoanIdService retrieveLoanIdService() {
-        return new RetrieveAllNonClosedLoanIdServiceImpl(loanRepository, namedParameterJdbcTemplate);
+        return new RetrieveAllNonClosedIdServiceImpl(loanRepository, namedParameterJdbcTemplate);
     }
 }

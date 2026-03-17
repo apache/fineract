@@ -120,7 +120,7 @@ public class LoanRequestFactory {
                 .transactionProcessingStrategyCode(DEFAULT_TRANSACTION_PROCESSING_STRATEGY_CODE)//
                 .dateFormat(DATE_FORMAT)//
                 .graceOnArrearsAgeing(3)//
-                .maxOutstandingLoanBalance(new BigDecimal(10000));
+        ;
     }
 
     public PostLoansRequest defaultProgressiveLoansRequest(final Long clientId) {

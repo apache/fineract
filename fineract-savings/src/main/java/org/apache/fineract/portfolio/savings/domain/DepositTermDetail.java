@@ -135,9 +135,7 @@ public class DepositTermDetail {
         if (this.minDepositTerm != null && this.maxDepositTerm != null) {
             final Integer minDepositInDays = this.convertToSafeDays(minDepositTerm, SavingsPeriodFrequencyType.fromInt(minDepositTermType));
             final Integer maxDepositInDays = this.convertToSafeDays(maxDepositTerm, SavingsPeriodFrequencyType.fromInt(maxDepositTermType));
-            if (minDepositInDays.compareTo(maxDepositInDays) > 0) {
-                return true;
-            }
+            return minDepositInDays.compareTo(maxDepositInDays) > 0;
         }
         return false;
     }

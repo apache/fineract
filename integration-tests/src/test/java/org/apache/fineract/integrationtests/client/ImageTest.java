@@ -100,7 +100,7 @@ class ImageTest extends IntegrationTest {
             assertImage(body);
         }
 
-        var staff = ok(fineractClient().staff.retrieveOne8(staffId));
+        var staff = ok(fineractClient().staff.retrieveOneStaff(staffId));
         assertThat(Parts.fileName(r)).hasValue(staff.getDisplayName());
     }
 

@@ -84,7 +84,7 @@ public class AccountTransfersApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Create new Transfer", description = "Ability to create new transfer of monetary funds from one account to another.")
+    @Operation(summary = "Create new Transfer", operationId = "createAccountTransfer", description = "Ability to create new transfer of monetary funds from one account to another.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccountTransferRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountTransfersApiResourceSwagger.PostAccountTransfersResponse.class)))
     public CommandProcessingResult create(@Parameter(hidden = true) AccountTransferRequest accountTransferRequest) {

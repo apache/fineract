@@ -48,34 +48,33 @@ public class SmsCampaignMapper implements RowMapper<SmsCampaignData> {
     }
 
     private String buildCampaignColumn() {
-        final StringBuilder sql = new StringBuilder(400);
-        sql.append("sc.id as id, ");
-        sql.append("sc.campaign_name as campaignName, ");
-        sql.append("sc.campaign_type as campaignType, ");
-        sql.append("sc.campaign_trigger_type as triggerType, ");
-        sql.append("sc.report_id as runReportId, ");
-        sql.append("sc.message as message, ");
-        sql.append("sc.param_value as paramValue, ");
-        sql.append("sc.status_enum as status, ");
-        sql.append("sc.recurrence as recurrence, ");
-        sql.append("sc.recurrence_start_date as recurrenceStartDate, ");
-        sql.append("sc.next_trigger_date as nextTriggerDate, ");
-        sql.append("sc.last_trigger_date as lastTriggerDate, ");
-        sql.append("sc.submittedon_date as submittedOnDate, ");
-        sql.append("sbu.username as submittedByUsername, ");
-        sql.append("sc.closedon_date as closedOnDate, ");
-        sql.append("clu.username as closedByUsername, ");
-        sql.append("acu.username as activatedByUsername, ");
-        sql.append("sc.approvedon_date as activatedOnDate, ");
-        sql.append("sr.report_name as reportName, ");
-        sql.append("provider_id as providerId, ");
-        sql.append("sc.is_notification as isNotification ");
-        sql.append("from sms_campaign sc ");
-        sql.append("left join m_appuser sbu on sbu.id = sc.submittedon_userid ");
-        sql.append("left join m_appuser acu on acu.id = sc.approvedon_userid ");
-        sql.append("left join m_appuser clu on clu.id = sc.closedon_userid ");
-        sql.append("left join stretchy_report sr on sr.id = sc.report_id ");
-        return sql.toString();
+        return """
+                sc.id as id,
+                sc.campaign_name as campaignName,
+                sc.campaign_type as campaignType,
+                sc.campaign_trigger_type as triggerType,
+                sc.report_id as runReportId,
+                sc.message as message,
+                sc.param_value as paramValue,
+                sc.status_enum as status,
+                sc.recurrence as recurrence,
+                sc.recurrence_start_date as recurrenceStartDate,
+                sc.next_trigger_date as nextTriggerDate,
+                sc.last_trigger_date as lastTriggerDate,
+                sc.submittedon_date as submittedOnDate,
+                sbu.username as submittedByUsername,
+                sc.closedon_date as closedOnDate,
+                clu.username as closedByUsername,
+                acu.username as activatedByUsername,
+                sc.approvedon_date as activatedOnDate,
+                sr.report_name as reportName,
+                provider_id as providerId,
+                sc.is_notification as isNotification
+                from sms_campaign sc
+                left join m_appuser sbu on sbu.id = sc.submittedon_userid
+                left join m_appuser acu on acu.id = sc.approvedon_userid
+                left join m_appuser clu on clu.id = sc.closedon_userid
+                left join stretchy_report sr on sr.id = sc.report_id\s""";
     }
 
     @Override

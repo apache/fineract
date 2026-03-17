@@ -23,13 +23,13 @@ import static org.mockito.Mockito.mock;
 
 import io.cucumber.java8.En;
 import java.util.List;
-import org.apache.fineract.mix.service.XBRLResultServiceImpl;
+import org.apache.fineract.mix.service.MixReportXBRLResultServiceImpl;
 import org.assertj.core.util.Arrays;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class MixXbrlTaxonomyStepDefinitions implements En {
 
-    private XBRLResultServiceImpl readService;
+    private MixReportXBRLResultServiceImpl readService;
 
     private String template;
 
@@ -37,7 +37,7 @@ public class MixXbrlTaxonomyStepDefinitions implements En {
 
     public MixXbrlTaxonomyStepDefinitions() {
         Given("/^A XBRL template (.*)$/", (String template) -> {
-            this.readService = new XBRLResultServiceImpl(mock(JdbcTemplate.class), null, null);
+            this.readService = new MixReportXBRLResultServiceImpl(mock(JdbcTemplate.class), null, null);
             this.template = template;
         });
 

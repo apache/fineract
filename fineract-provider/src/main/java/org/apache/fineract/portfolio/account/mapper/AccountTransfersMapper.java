@@ -37,50 +37,46 @@ import org.springframework.stereotype.Component;
 @Component
 public final class AccountTransfersMapper implements RowMapper<AccountTransferData> {
 
-    private final String schemaSql;
+    private static final String ACCOUNT_TRANSFER_SCHEMA = """
+            att.id as id, att.is_reversed as isReversed,
+            att.transaction_date as transferDate, att.amount as transferAmount,
+            att.description as transferDescription,
+            att.currency_code as currencyCode, att.currency_digits as currencyDigits,
+            att.currency_multiplesof as inMultiplesOf,
+            curr.name as currencyName, curr.internationalized_name_code as currencyNameCode,
+            curr.display_symbol as currencyDisplaySymbol,
+            fromoff.id as fromOfficeId, fromoff.name as fromOfficeName,
+            tooff.id as toOfficeId, tooff.name as toOfficeName,
+            fromclient.id as fromClientId, fromclient.display_name as fromClientName,
+            toclient.id as toClientId, toclient.display_name as toClientName,
+            fromsavacc.id as fromSavingsAccountId, fromsavacc.account_no as fromSavingsAccountNo,
+            fromloanacc.id as fromLoanAccountId, fromloanacc.account_no as fromLoanAccountNo,
+            tosavacc.id as toSavingsAccountId, tosavacc.account_no as toSavingsAccountNo,
+            toloanacc.id as toLoanAccountId, toloanacc.account_no as toLoanAccountNo,
+            fromsavtran.id as fromSavingsAccountTransactionId,
+            fromsavtran.transaction_type_enum as fromSavingsAccountTransactionType,
+            tosavtran.id as toSavingsAccountTransactionId,
+            tosavtran.transaction_type_enum as toSavingsAccountTransactionType
+             FROM m_account_transfer_transaction att
+            left join m_account_transfer_details atd on atd.id = att.account_transfer_details_id
+            join m_currency curr on curr.code = att.currency_code
+            join m_office fromoff on fromoff.id = atd.from_office_id
+            join m_office tooff on tooff.id = atd.to_office_id
+            join m_client fromclient on fromclient.id = atd.from_client_id
+            join m_client toclient on toclient.id = atd.to_client_id
+            left join m_savings_account fromsavacc on fromsavacc.id = atd.from_savings_account_id
+            left join m_loan fromloanacc on fromloanacc.id = atd.from_loan_account_id
+            left join m_savings_account tosavacc on tosavacc.id = atd.to_savings_account_id
+            left join m_loan toloanacc on toloanacc.id = atd.to_loan_account_id
+            left join m_savings_account_transaction fromsavtran on fromsavtran.id = att.from_savings_transaction_id
+            left join m_savings_account_transaction tosavtran on tosavtran.id = att.to_savings_transaction_id
+            left join m_loan_transaction fromloantran on fromloantran.id = att.from_savings_transaction_id
+            left join m_loan_transaction toloantran on toloantran.id = att.to_savings_transaction_id\s""";
 
-    public AccountTransfersMapper() {
-        final StringBuilder sqlBuilder = new StringBuilder(400);
-        sqlBuilder.append("att.id as id, att.is_reversed as isReversed,");
-        sqlBuilder.append("att.transaction_date as transferDate, att.amount as transferAmount,");
-        sqlBuilder.append("att.description as transferDescription,");
-        sqlBuilder.append("att.currency_code as currencyCode, att.currency_digits as currencyDigits,");
-        sqlBuilder.append("att.currency_multiplesof as inMultiplesOf, ");
-        sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
-        sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
-        sqlBuilder.append("fromoff.id as fromOfficeId, fromoff.name as fromOfficeName,");
-        sqlBuilder.append("tooff.id as toOfficeId, tooff.name as toOfficeName,");
-        sqlBuilder.append("fromclient.id as fromClientId, fromclient.display_name as fromClientName,");
-        sqlBuilder.append("toclient.id as toClientId, toclient.display_name as toClientName,");
-        sqlBuilder.append("fromsavacc.id as fromSavingsAccountId, fromsavacc.account_no as fromSavingsAccountNo,");
-        sqlBuilder.append("fromloanacc.id as fromLoanAccountId, fromloanacc.account_no as fromLoanAccountNo,");
-        sqlBuilder.append("tosavacc.id as toSavingsAccountId, tosavacc.account_no as toSavingsAccountNo,");
-        sqlBuilder.append("toloanacc.id as toLoanAccountId, toloanacc.account_no as toLoanAccountNo,");
-        sqlBuilder.append("fromsavtran.id as fromSavingsAccountTransactionId,");
-        sqlBuilder.append("fromsavtran.transaction_type_enum as fromSavingsAccountTransactionType,");
-        sqlBuilder.append("tosavtran.id as toSavingsAccountTransactionId,");
-        sqlBuilder.append("tosavtran.transaction_type_enum as toSavingsAccountTransactionType");
-        sqlBuilder.append(" FROM m_account_transfer_transaction att ");
-        sqlBuilder.append("left join m_account_transfer_details atd on atd.id = att.account_transfer_details_id ");
-        sqlBuilder.append("join m_currency curr on curr.code = att.currency_code ");
-        sqlBuilder.append("join m_office fromoff on fromoff.id = atd.from_office_id ");
-        sqlBuilder.append("join m_office tooff on tooff.id = atd.to_office_id ");
-        sqlBuilder.append("join m_client fromclient on fromclient.id = atd.from_client_id ");
-        sqlBuilder.append("join m_client toclient on toclient.id = atd.to_client_id ");
-        sqlBuilder.append("left join m_savings_account fromsavacc on fromsavacc.id = atd.from_savings_account_id ");
-        sqlBuilder.append("left join m_loan fromloanacc on fromloanacc.id = atd.from_loan_account_id ");
-        sqlBuilder.append("left join m_savings_account tosavacc on tosavacc.id = atd.to_savings_account_id ");
-        sqlBuilder.append("left join m_loan toloanacc on toloanacc.id = atd.to_loan_account_id ");
-        sqlBuilder.append("left join m_savings_account_transaction fromsavtran on fromsavtran.id = att.from_savings_transaction_id ");
-        sqlBuilder.append("left join m_savings_account_transaction tosavtran on tosavtran.id = att.to_savings_transaction_id ");
-        sqlBuilder.append("left join m_loan_transaction fromloantran on fromloantran.id = att.from_savings_transaction_id ");
-        sqlBuilder.append("left join m_loan_transaction toloantran on toloantran.id = att.to_savings_transaction_id ");
-
-        this.schemaSql = sqlBuilder.toString();
-    }
+    public AccountTransfersMapper() {}
 
     public String schema() {
-        return this.schemaSql;
+        return ACCOUNT_TRANSFER_SCHEMA;
     }
 
     @Override

@@ -202,6 +202,15 @@ public final class SavingsEnumerations {
         return optionData;
     }
 
+    public static EnumOptionData status(final SavingsAccountStatusEnumData status) {
+
+        Long id = status.getId();
+        String code = status.getCode();
+        String value = status.getValue();
+
+        return new EnumOptionData(id, code, value);
+    }
+
     public static SavingsAccountStatusEnumData status(final Integer statusEnum) {
         return status(SavingsAccountStatusType.fromInt(statusEnum));
     }

@@ -218,6 +218,11 @@
         <class>org.apache.fineract.portfolio.collateralmanagement.domain.CollateralManagementDomain</class>
         <class>org.apache.fineract.portfolio.collateral.domain.LoanCollateral</class>
 
+        <!-- Working Capital Loan Module Entities -->
+        <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct</class>
+        <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductPaymentAllocationRule</class>
+        <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductConfigurableAttributes</class>
+
         <!-- Loan Module Converters -->
         <class>org.apache.fineract.portfolio.loanproduct.domain.AllocationTypeListConverter</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.AccountingRuleTypeConverter</class>
@@ -226,6 +231,9 @@
         <class>org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTypeListConverter</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.SupportedInterestRefundTypesListConverter</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanStatusConverter</class>
+
+        <!-- Working Capital Loan Module Converters -->
+        <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAllocationTypeListConverter</class>
 
         <!-- Tax Module Entities -->
         <class>org.apache.fineract.portfolio.tax.domain.TaxComponent</class>
@@ -272,6 +280,7 @@
         <class>org.apache.fineract.portfolio.account.domain.AccountTransferTransaction</class>
 
         <!-- Provider Module Entities -->
+
         <!-- Notification -->
         <class>org.apache.fineract.notification.domain.NotificationMapper</class>
         <class>org.apache.fineract.notification.domain.Notification</class>
@@ -279,11 +288,7 @@
         <!-- AdHocQuery -->
         <class>org.apache.fineract.adhocquery.domain.AdHoc</class>
 
-        <!-- Mix -->
-        <class>org.apache.fineract.mix.domain.MixTaxonomyMapping</class>
-
         <!-- COB (Chunk of Business) -->
-        <class>org.apache.fineract.cob.domain.LoanAccountLock</class>
         <class>org.apache.fineract.cob.domain.BatchBusinessStep</class>
 
         <!-- Template -->

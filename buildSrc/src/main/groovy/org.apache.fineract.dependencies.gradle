@@ -246,11 +246,11 @@ dependencyManagement {
 
         dependency "org.apache.avro:avro:1.12.0"
 
-        dependency ('org.mariadb.jdbc:mariadb-java-client:3.5.2') {
+        dependency ('org.mariadb.jdbc:mariadb-java-client:3.5.7') {
             exclude 'org.slf4j:jcl-over-slf4j'
             exclude 'org.slf4j:slf4j-api'
         }
-        dependency 'org.postgresql:postgresql:42.7.8'
+        dependency 'org.postgresql:postgresql:42.7.9'
 
         dependency 'com.mysql:mysql-connector-j:9.3.0'
 
@@ -303,8 +303,8 @@ dependencyManagement {
         // Force lz4-java version: CVE-2025-12183
         dependency 'at.yawk.lz4:lz4-java:1.10.1'
         // Force tomcat-embed-core version: CVE-2025-24813
-        dependency 'org.apache.tomcat.embed:tomcat-embed-core:10.1.47'
-        dependency 'org.apache.tomcat.embed:tomcat-embed-el:10.1.47'
-        dependency 'org.apache.tomcat.embed:tomcat-embed-websocket:10.1.47'
+        dependency 'org.apache.tomcat.embed:tomcat-embed-core:10.1.49'
+        dependency 'org.apache.tomcat.embed:tomcat-embed-el:10.1.49'
+        dependency 'org.apache.tomcat.embed:tomcat-embed-websocket:10.1.49'
     }
 }

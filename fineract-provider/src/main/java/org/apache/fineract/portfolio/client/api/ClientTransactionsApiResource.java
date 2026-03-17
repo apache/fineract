@@ -120,7 +120,7 @@ public class ClientTransactionsApiResource {
     @Path("external-id/{clientExternalId}/transactions")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List Client Transactions", description = "The list capability of client transaction can support pagination."
+    @Operation(summary = "List Client Transactions", operationId = "retrieveAllClientTransactionsByClientExternalId", description = "The list capability of client transaction can support pagination."
             + "\n\n" + "Example Requests:\n\n" + "clients/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions\n\n"
             + "clients/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions?offset=10&limit=50")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsResponse.class)))
@@ -144,7 +144,7 @@ public class ClientTransactionsApiResource {
     @Path("external-id/{clientExternalId}/transactions/{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Client Transaction", description = "Example Requests:\n"
+    @Operation(summary = "Retrieve a Client Transaction", operationId = "retrieveClientTransactionByClientExternalId", description = "Example Requests:\n"
             + "clients/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions/1\n" + "\n" + "\n"
             + "clients/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions/1?fields=id,officeName")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsTransactionIdResponse.class)))
@@ -169,7 +169,7 @@ public class ClientTransactionsApiResource {
     @Path("external-id/{clientExternalId}/transactions/{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Undo a Client Transaction", description = "Undoes a Client Transaction")
+    @Operation(summary = "Undo a Client Transaction", operationId = "undoClientTransactionByClientExternalId", description = "Undoes a Client Transaction")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.PostClientsClientIdTransactionsTransactionIdResponse.class)))
     public String undoClientTransaction(
             @PathParam("clientExternalId") @Parameter(description = "clientExternalId") final String clientExternalId,
@@ -191,7 +191,7 @@ public class ClientTransactionsApiResource {
     @Path("{clientId}/transactions/external-id/{transactionExternalId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Client Transaction", description = "Example Requests:\n"
+    @Operation(summary = "Retrieve a Client Transaction", operationId = "retrieveClientTransactionByTransactionExternalId", description = "Example Requests:\n"
             + "clients/1/transactions/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854\n" + "\n" + "\n"
             + "clients/1/transactions/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854?fields=id,officeName")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsTransactionIdResponse.class)))
@@ -247,7 +247,7 @@ public class ClientTransactionsApiResource {
     @Path("{clientId}/transactions/external-id/{transactionExternalId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Undo a Client Transaction", description = "Undoes a Client Transaction")
+    @Operation(summary = "Undo a Client Transaction", operationId = "undoClientTransactionByTransactionExternalId", description = "Undoes a Client Transaction")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.PostClientsClientIdTransactionsTransactionIdResponse.class)))
     public String undoClientTransaction(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("transactionExternalId") @Parameter(description = "transactionExternalId") final String transactionExternalId,

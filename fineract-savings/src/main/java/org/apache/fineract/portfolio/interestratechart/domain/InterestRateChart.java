@@ -177,9 +177,6 @@ public class InterestRateChart extends AbstractPersistableCustom<Long> {
 
                     }
                 }
-            } else if (iSlabs.slabFields().isNotProperPriodEnd()) {
-                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.end.incorrect", iSlabs.slabFields().toPeriod(),
-                        iSlabs.slabFields().getAmountRangeTo());
             }
         }
     }

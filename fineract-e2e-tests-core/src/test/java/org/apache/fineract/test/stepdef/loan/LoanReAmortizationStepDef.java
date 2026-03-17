@@ -102,8 +102,8 @@ public class LoanReAmortizationStepDef extends AbstractStepDef {
 
         PostLoansLoanIdTransactionsRequest reAmortizationRequest = LoanRequestFactory.defaultLoanReAmortizationRequest();
 
-        PostLoansLoanIdTransactionsResponse response = ok(() -> fineractClient.loanTransactions().executeLoanTransaction1(loanExternalId,
-                reAmortizationRequest, Map.of("command", "reAmortize")));
+        PostLoansLoanIdTransactionsResponse response = ok(() -> fineractClient.loanTransactions()
+                .executeLoanTransactionByLoanExternalId(loanExternalId, reAmortizationRequest, Map.of("command", "reAmortize")));
         testContext().set(TestContextKey.LOAN_REAMORTIZATION_RESPONSE, response);
     }
 
@@ -222,7 +222,7 @@ public class LoanReAmortizationStepDef extends AbstractStepDef {
 
         final Map<String, Object> queryParams = Map.of("reAmortizationInterestHandling", reAmortizationInterestHandling);
         CallFailedRuntimeException exception = fail(
-                () -> fineractClient.loanTransactions().previewReAmortizationSchedule1(loanExternalId, queryParams));
+                () -> fineractClient.loanTransactions().previewReAmortizationScheduleByLoanExternalId(loanExternalId, queryParams));
         assertThat(exception.getStatus()).isEqualTo(errorCode);
     }
 
@@ -271,7 +271,7 @@ public class LoanReAmortizationStepDef extends AbstractStepDef {
         final String reAmortizationInterestHandling = data.getFirst();
 
         final Map<String, Object> queryParams = Map.of("reAmortizationInterestHandling", reAmortizationInterestHandling);
-        return ok(() -> fineractClient.loanTransactions().previewReAmortizationSchedule1(loanExternalId, queryParams));
+        return ok(() -> fineractClient.loanTransactions().previewReAmortizationScheduleByLoanExternalId(loanExternalId, queryParams));
     }
 
     @SuppressFBWarnings("SF_SWITCH_NO_DEFAULT")

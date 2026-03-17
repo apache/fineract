@@ -113,7 +113,7 @@ public class EventCheckHelper {
 
     public void clientEventCheck(PostClientsResponse clientCreationResponse) {
         waitForTransactionCommit();
-        GetClientsClientIdResponse body = ok(() -> fineractClient.clients().retrieveOne11(clientCreationResponse.getClientId(),
+        GetClientsClientIdResponse body = ok(() -> fineractClient.clients().retrieveOneClient(clientCreationResponse.getClientId(),
                 Map.of("staffInSelectedOfficeOnly", false)));
 
         Long clientId = Long.valueOf(body.getId());

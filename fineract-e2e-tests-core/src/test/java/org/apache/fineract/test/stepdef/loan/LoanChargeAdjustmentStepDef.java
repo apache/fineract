@@ -92,7 +92,7 @@ public class LoanChargeAdjustmentStepDef extends AbstractStepDef {
         String developerMessageExpected = "Transaction amount cannot be higher than the available charge amount for adjustment: 7.000000";
 
         try {
-            fineractClient.loanCharges().executeLoanCharge2(loanId, transactionId, chargeAdjustmentRequest,
+            fineractClient.loanCharges().executeLoanChargeOnExistingCharge(loanId, transactionId, chargeAdjustmentRequest,
                     Map.<String, Object>of("command", "adjustment"));
             throw new AssertionError("Expected FeignException but request succeeded");
         } catch (FeignException e) {
@@ -165,8 +165,9 @@ public class LoanChargeAdjustmentStepDef extends AbstractStepDef {
         PostLoansLoanIdChargesChargeIdRequest chargeAdjustmentRequest = LoanRequestFactory.defaultChargeAdjustmentRequest()
                 .amount(transactionAmount).externalId(externalId);
 
-        PostLoansLoanIdChargesChargeIdResponse chargeAdjustmentResponse = ok(() -> fineractClient.loanCharges().executeLoanCharge2(loanId,
-                transactionId, chargeAdjustmentRequest, Map.<String, Object>of("command", "adjustment")));
+        PostLoansLoanIdChargesChargeIdResponse chargeAdjustmentResponse = ok(
+                () -> fineractClient.loanCharges().executeLoanChargeOnExistingCharge(loanId, transactionId, chargeAdjustmentRequest,
+                        Map.<String, Object>of("command", "adjustment")));
         testContext().set(TestContextKey.LOAN_CHARGE_ADJUSTMENT_RESPONSE, chargeAdjustmentResponse);
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
     }

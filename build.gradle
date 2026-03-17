@@ -42,6 +42,7 @@ buildscript {
                 'fineract-loan',
                 'fineract-savings',
                 'fineract-report',
+                'fineract-mix',
                 'integration-tests',
                 'twofactor-tests',
                 'oauth2-tests',
@@ -75,6 +76,7 @@ buildscript {
                 'fineract-loan',
                 'fineract-savings',
                 'fineract-report',
+                'fineract-mix',
                 'fineract-branch',
                 'fineract-document',
                 'fineract-progressive-loan',
@@ -121,9 +123,10 @@ plugins {
     id 'se.thinkcode.cucumber-runner' version '0.0.11' apply false
     id "com.github.davidmc24.gradle.plugin.avro-base" version "1.9.1" apply false
     id 'org.openapi.generator' version '7.8.0' apply false
-    id 'com.gradleup.shadow' version '8.3.5' apply false
+    id 'com.gradleup.shadow' version '9.3.2' apply false
     id 'me.champeau.jmh' version '0.7.1' apply false
     id 'org.cyclonedx.bom' version '3.1.0' apply false
+    id 'com.docktape.swagger-brake' version '2.7.0' apply false
 }
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"

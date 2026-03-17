@@ -77,6 +77,19 @@ public final class ErrorMessageHelper {
         return "The parameter 'currencies' is mandatory.";
     }
 
+    public static String currencyNotFound(String currencyCode) {
+        return String.format("Currency with code '%s' not found in currency options", currencyCode);
+    }
+
+    public static String wrongCurrencyField(String currencyCode, String fieldName, Object actual, Object expected) {
+        return String.format("Wrong %s for currency '%s'. Actual value is: %s - But expected value is: %s", fieldName, currencyCode, actual,
+                expected);
+    }
+
+    public static String wrongSelectedCurrencies(List<String> actual, List<String> expected) {
+        return String.format("Wrong selected currencies. Actual value is: %s - But expected value is: %s", actual, expected);
+    }
+
     public static String disburseDateFailure(Integer loanId) {
         String loanIdStr = parseLoanIdToString(loanId);
         return String.format("The date on which a loan with identifier : %s is disbursed cannot be in the future.", loanIdStr);
@@ -113,6 +126,10 @@ public final class ErrorMessageHelper {
 
     public static String disburseIsNotAllowedFailure() {
         return "Loan Disbursal is not allowed. Loan Account is not in approved and not disbursed state.";
+    }
+
+    public static String disburseIsNotAllowedExceedApprovedAmountFailure() {
+        return "Loan can't be disbursed, disburse amount is exceeding approved principal.";
     }
 
     public static String loanSubmitDateInFutureFailureMsg() {
@@ -997,5 +1014,34 @@ public final class ErrorMessageHelper {
 
     public static String reAmortizeSameDateFailure() {
         return "Validation errors: [id] Loan reamortization can only be done once a day. There has already been a reamortization done for today";
+    }
+
+    public static String incorrectExpectedValueInResponse() {
+        return "The parameter is not matching to expected.";
+    }
+
+    public static String fieldValueNullOrEmptyMandatoryFailure(String fieldName) {
+        return String.format("The parameter `%s` is mandatory.", fieldName);
+    }
+
+    public static String fieldValueMoreMaxLengthAllowedFailure(String fieldName, int maxAllowedLength) {
+        return String.format("The parameter `%s` exceeds max length of %d.", fieldName, maxAllowedLength);
+    }
+
+    public static String fieldValueZeroValueFailure(String fieldName) {
+        return String.format("The parameter `%s` must be greater than 0.", fieldName);
+    }
+
+    public static String paymentAllocationRulesInvalidNumberFailure(int actualNumberOfPaymentAllocationRules) {
+        return String.format("Each provided payment allocation must contain exactly 3 allocation rules, but %d were provided",
+                actualNumberOfPaymentAllocationRules);
+    }
+
+    public static String paymentAllocationRulesInvalidValueFailure() {
+        return "One or more payment allocation types are invalid or not recognized";
+    }
+
+    public static String workingCapitalLoanProductIdentifiedDoesNotExistFailure(String identifierId) {
+        return String.format("Working Capital Loan Product with identifier %s does not exist", identifierId);
     }
 }

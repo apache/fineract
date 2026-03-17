@@ -131,6 +131,7 @@ public class ExternalAssetOwnersApiResource {
     @Path("/transfers/{id}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Transfer external asset", operationId = "transferRequestWithId")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class)))
     @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated")
     public CommandProcessingResult transferRequestWithId(@PathParam("id") final Long id,
@@ -145,6 +146,7 @@ public class ExternalAssetOwnersApiResource {
     @Path("/transfers/external-id/{externalId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Transfer external asset by external ID", operationId = "transferRequestWithIdByExternalId")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class)))
     @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated")
     public CommandProcessingResult transferRequestWithId(@PathParam("externalId") final String externalId,

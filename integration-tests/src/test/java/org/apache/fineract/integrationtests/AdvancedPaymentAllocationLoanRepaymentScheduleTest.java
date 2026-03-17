@@ -278,6 +278,11 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             validateRepaymentPeriod(loanDetails, 4, 125.0, 125.0, 0.0, 25.0, 0.0);
             validateLoanTransaction(loanDetails, 4, 125.0, 100.0, 25.0, 0.0);
             assertTrue(loanDetails.getStatus().getOverpaid());
+
+            // Loan Repayment (after) Overpaid
+            GetLoansLoanIdTransactionsTemplateResponse transactionAfter = loanTransactionHelper
+                    .retrieveTransactionTemplate(loanResponse.getLoanId(), "repayment", DATETIME_PATTERN, "15 February 2023", LOCALE);
+            assertNotNull(transactionAfter);
         });
     }
     // UC3: Overpayment2
@@ -345,6 +350,11 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             validateRepaymentPeriod(loanDetails, 4, 125.0, 125.0, 0.0, 25.0, 0.0);
             validateLoanTransaction(loanDetails, 4, 125.0, 100.0, 25.0, 0.0);
             assertTrue(loanDetails.getStatus().getOverpaid());
+
+            // Loan Repayment (after) Overpaid
+            GetLoansLoanIdTransactionsTemplateResponse transactionAfter = loanTransactionHelper
+                    .retrieveTransactionTemplate(loanResponse.getLoanId(), "repayment", DATETIME_PATTERN, "15 February 2023", LOCALE);
+            assertNotNull(transactionAfter);
         });
     }
     // UC4: Delinquent balance

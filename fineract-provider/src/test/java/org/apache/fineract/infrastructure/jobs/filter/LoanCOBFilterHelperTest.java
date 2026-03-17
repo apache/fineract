@@ -22,9 +22,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
-import org.apache.fineract.cob.loan.RetrieveLoanIdService;
 import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
+import org.apache.fineract.cob.service.RetrieveIdService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.http.BodyCachingHttpServletRequestWrapper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -56,13 +56,13 @@ public class LoanCOBFilterHelperTest {
     @Mock
     private FineractProperties fineractProperties;
     @Mock
-    private RetrieveLoanIdService retrieveLoanIdService;
+    private RetrieveIdService retrieveIdService;
 
     @Mock
     private LoanRescheduleRequestRepository loanRescheduleRequestRepository;
 
     @InjectMocks
-    private LoanCOBFilterHelper helper;
+    private LoanCOBFilterHelperImpl helper;
 
     @BeforeEach
     public void initLoanCOBFilterHelper() throws Exception {

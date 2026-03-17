@@ -26,6 +26,9 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.models.PostMakerCheckersResponse;
+import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.client.util.FineractClient;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.Utils;
 
@@ -79,5 +82,9 @@ public class MakercheckersHelper {
             Long auditId) {
         String url = MAKERCHECKER_URL + "/" + auditId + "?command=approve&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, url, "", "");
+    }
+
+    public static PostMakerCheckersResponse rejectMakerCheckerEntry(FineractClient client, Long auditId) {
+        return Calls.ok(client.makerCheckers.approveMakerCheckerEntry(auditId, "reject"));
     }
 }

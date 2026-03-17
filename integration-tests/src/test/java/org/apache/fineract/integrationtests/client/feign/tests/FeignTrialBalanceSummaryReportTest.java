@@ -125,11 +125,12 @@ public class FeignTrialBalanceSummaryReportTest extends FeignIntegrationTest {
         List<GetFinancialActivityAccountsResponse> currentMappings = ok(
                 () -> fineractClient().mappingFinancialActivitiesToAccounts().retrieveAll());
         for (GetFinancialActivityAccountsResponse mapping : currentMappings) {
-            executeVoid(() -> fineractClient().mappingFinancialActivitiesToAccounts().deleteGLAccount(mapping.getId()));
+            executeVoid(() -> fineractClient().mappingFinancialActivitiesToAccounts()
+                    .deleteGLAccountMappingFinancialActivityAccount(mapping.getId()));
         }
         for (GetFinancialActivityAccountsResponse mapping : originalFinancialMappings) {
             ok(() -> fineractClient().mappingFinancialActivitiesToAccounts()
-                    .createGLAccount(new PostFinancialActivityAccountsRequest()
+                    .createGLAccountMappingFinancialActivityAccount(new PostFinancialActivityAccountsRequest()
                             .financialActivityId(Long.valueOf(mapping.getFinancialActivityData().getId()))
                             .glAccountId(mapping.getGlAccountData().getId())));
         }
@@ -146,7 +147,7 @@ public class FeignTrialBalanceSummaryReportTest extends FeignIntegrationTest {
         assertFalse(response.getColumnHeaders().isEmpty());
 
         List<String> expectedColumns = List.of("postingdate", "product", "glacct", "description", "assetowner", "beginningbalance",
-                "debitmovement", "creditmovement", "endingbalance");
+                "debitmovement", "creditmovement", "endingbalance", "originators");
         List<String> actualColumns = response.getColumnHeaders().stream().map(ResultsetColumnHeaderData::getColumnName).toList();
         Assertions.assertEquals(expectedColumns, actualColumns);
     }
@@ -263,9 +264,10 @@ public class FeignTrialBalanceSummaryReportTest extends FeignIntegrationTest {
         List<GetFinancialActivityAccountsResponse> mappings = ok(
                 () -> fineractClient().mappingFinancialActivitiesToAccounts().retrieveAll());
         for (GetFinancialActivityAccountsResponse mapping : mappings) {
-            executeVoid(() -> fineractClient().mappingFinancialActivitiesToAccounts().deleteGLAccount(mapping.getId()));
+            executeVoid(() -> fineractClient().mappingFinancialActivitiesToAccounts()
+                    .deleteGLAccountMappingFinancialActivityAccount(mapping.getId()));
         }
-        ok(() -> fineractClient().mappingFinancialActivitiesToAccounts().createGLAccount(
+        ok(() -> fineractClient().mappingFinancialActivitiesToAccounts().createGLAccountMappingFinancialActivityAccount(
                 new PostFinancialActivityAccountsRequest().financialActivityId(100L).glAccountId((long) transferAccount.getAccountID())));
     }
 

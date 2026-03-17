@@ -1126,6 +1126,16 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
                 MathUtil.nullToZero(MathUtil.add(getPrincipal(), getInterestCharged(), getFeeChargesCharged(), getPenaltyCharges())));
     }
 
+    public boolean isOutstandingBalanceNotZero(AllocationType allocationType, MonetaryCurrency currency) {
+        Money balance = switch (allocationType) {
+            case PENALTY -> this.getPenaltyChargesOutstanding(currency);
+            case FEE -> this.getFeeChargesOutstanding(currency);
+            case PRINCIPAL -> this.getPrincipalOutstanding(currency);
+            case INTEREST -> this.getInterestOutstanding(currency);
+        };
+        return MathUtil.isGreaterThanZero(balance);
+    }
+
     public void copyFrom(final LoanScheduleModelPeriod period) {
         // Reset fields and relations
         resetBalances();

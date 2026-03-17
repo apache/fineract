@@ -36,16 +36,20 @@ import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationC
 import org.apache.fineract.integrationtests.common.AuditHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.commands.MakercheckersHelper;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
+import org.apache.fineract.integrationtests.common.system.DatatableHelper;
 import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
 import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @SuppressWarnings({ "unused" })
 public class MakercheckerTest {
@@ -191,6 +195,78 @@ public class MakercheckerTest {
 
             PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("WITHDRAWAL_SAVINGSACCOUNT",
                     false);
+            rolesHelper.updatePermissions(putPermissionsRequest);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "m_client", "m_group", "m_center", "m_loan", "m_office", "m_savings_account" })
+    public void testRejectDatatableCreationCleansUpOrphanedTable(String apptableName) {
+
+        // enable maker-checker globally
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
+                new PutGlobalConfigurationsRequest().enabled(true));
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_SAME_MAKER_CHECKER,
+                new PutGlobalConfigurationsRequest().enabled(false));
+
+        try {
+            // enable maker-checker for datatable creation
+            PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_DATATABLE", true);
+            rolesHelper.updatePermissions(putPermissionsRequest);
+
+            // create role with permissions for maker and checker
+            Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+            Map<String, Boolean> permissionMap = Map.of("CREATE_DATATABLE", true, "CREATE_DATATABLE_CHECKER", true);
+            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
+
+            // create maker user
+            Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+            String maker = Utils.uniqueRandomStringGenerator("user", 8);
+            Integer makerUserId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, maker,
+                    "A1b2c3d4e5f$", "resourceId");
+
+            // create checker user
+            String checker = Utils.uniqueRandomStringGenerator("user", 8);
+            UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, checker, "A1b2c3d4e5f$", "resourceId");
+
+            RequestSpecification makerRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
+                    .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(maker, "A1b2c3d4e5f$"));
+
+            // maker creates datatable with maker-checker enabled, this creates the physical table but queues for
+            // approval
+            DatatableHelper makerDatatableHelper = new DatatableHelper(makerRequestSpec, this.responseSpec);
+            String datatableJson = DatatableHelper.getTestDatatableAsJSON(apptableName, false);
+            String datatableName = com.google.gson.JsonParser.parseString(datatableJson).getAsJsonObject().get("datatableName")
+                    .getAsString();
+            makerDatatableHelper.createDatatable(datatableJson, "");
+
+            // find the pending command
+            List<Map<String, Object>> auditDetails = makercheckersHelper
+                    .getMakerCheckerList(Map.of("actionName", "CREATE", "entityName", "DATATABLE", "makerId", makerUserId.toString()));
+            assertEquals(1, auditDetails.size(), "Error: Expected only one pending CREATE DATATABLE command");
+            Long commandId = ((Double) auditDetails.get(0).get("id")).longValue();
+
+            // checker rejects the command which should drop the orphaned table
+            MakercheckersHelper.rejectMakerCheckerEntry(FineractClientHelper.createNewFineractClient(checker, "A1b2c3d4e5f$"), commandId);
+
+            // verify the datatable no longer exists by trying to create it again
+            // verify without maker checker, so transaction rollback in postgres doesn't break the test
+            putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_DATATABLE", false);
+            rolesHelper.updatePermissions(putPermissionsRequest);
+
+            DatatableHelper adminDatatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
+            String recreatedName = adminDatatableHelper.createDatatable(datatableJson, "resourceIdentifier");
+            assertEquals(datatableName, recreatedName, "Error: Was not able to recreate datatable after rejection cleanup");
+
+            // cleanup after test
+            adminDatatableHelper.deleteDatatable(datatableName);
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_SAME_MAKER_CHECKER,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+
+            PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_DATATABLE", false);
             rolesHelper.updatePermissions(putPermissionsRequest);
         }
     }

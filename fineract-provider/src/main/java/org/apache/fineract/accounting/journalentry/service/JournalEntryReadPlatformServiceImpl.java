@@ -212,12 +212,12 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
                 TransactionTypeEnumData transactionTypeEnumData = null;
 
-                if (PortfolioAccountType.fromInt(entityTypeId).isLoanAccount()) {
+                if (PortfolioAccountType.LOAN.equals(PortfolioAccountType.fromInt(entityTypeId))) {
                     final LoanTransactionEnumData loanTransactionType = LoanEnumerations
                             .transactionType(JdbcSupport.getInteger(rs, "loanTransactionType"));
                     transactionTypeEnumData = new TransactionTypeEnumData(loanTransactionType.getId(), loanTransactionType.getCode(),
                             loanTransactionType.getValue());
-                } else if (PortfolioAccountType.fromInt(entityTypeId).isSavingsAccount()) {
+                } else if (PortfolioAccountType.SAVINGS.equals(PortfolioAccountType.fromInt(entityTypeId))) {
                     final SavingsAccountTransactionEnumData savingsTransactionType = SavingsEnumerations
                             .transactionType(JdbcSupport.getInteger(rs, "savingsTransactionType"));
                     transactionTypeEnumData = new TransactionTypeEnumData(savingsTransactionType.getId(), savingsTransactionType.getCode(),

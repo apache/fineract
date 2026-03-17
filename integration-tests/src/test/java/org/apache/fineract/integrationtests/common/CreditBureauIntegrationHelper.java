@@ -18,64 +18,29 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import static io.restassured.RestAssured.given;
-
-import com.google.gson.Gson;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.io.File;
 import java.util.HashMap;
+import org.apache.fineract.client.services.CreditBureauIntegrationApi;
+import org.apache.fineract.client.util.Calls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CreditBureauIntegrationHelper {
+public final class CreditBureauIntegrationHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(CreditBureauIntegrationHelper.class);
-    private final RequestSpecification requestSpec;
-    private final ResponseSpecification responseSpec;
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public CreditBureauIntegrationHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        this.requestSpec = requestSpec;
-        this.responseSpec = responseSpec;
+    private CreditBureauIntegrationHelper() {}
+
+    private static CreditBureauIntegrationApi api() {
+        return FineractClientHelper.getFineractClient().creditBureauIntegration;
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Object getCreditReport(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String creditBureauId, String nrc) {
-        LOG.info("---------------------------------CREATING A CREDIT_BUREAU_CONFIGURATION---------------------------------------------");
-        final String CREDITBUREAU_CONFIGURATION_URL = "/fineract-provider/api/v1/creditBureauIntegration/creditReport?"
-                + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(requestSpec, responseSpec, CREDITBUREAU_CONFIGURATION_URL,
-                createGetCreditReportAsJson(creditBureauId, nrc), null);
-    }
-
-    public static String uploadCreditReport(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String creditBureauId, File file) {
-        LOG.info("---------------------------------CREATING A CREDIT_BUREAU_CONFIGURATION---------------------------------------------");
-        final String CREDITBUREAU_CONFIGURATION_URL = "/fineract-provider/api/v1/creditBureauIntegration/addCreditReport?"
-                + Utils.TENANT_IDENTIFIER;
-        return given().spec(requestSpec).queryParam("creditBureauId", creditBureauId).contentType("multipart/form-data")
-                .multiPart("file", file).expect().spec(responseSpec).log().ifError().when().post(CREDITBUREAU_CONFIGURATION_URL).andReturn()
-                .asString();
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String createGetCreditReportAsJson(final String creditBureauId, final String nrc) {
+    public static String getCreditReport(final String creditBureauId, final String nrc) {
+        LOG.info("---------------------------------FETCHING CREDIT REPORT---------------------------------------------");
         final HashMap<String, String> map = new HashMap<>();
         map.put("creditBureauID", creditBureauId);
         map.put("NRC", nrc);
         LOG.info("map :  {}", map);
-        return new Gson().toJson(map);
+        return Calls.ok(api().fetchCreditReport((Object) map));
     }
 
 }

@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -42,17 +43,21 @@ import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants.Gu
 @Table(name = "m_guarantor")
 public class Guarantor extends AbstractPersistableCustom<Long> {
 
+    @Getter
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;
 
+    @Getter
     @ManyToOne
     @JoinColumn(name = "client_reln_cv_id", nullable = false)
     private CodeValue clientRelationshipType;
 
+    @Getter
     @Column(name = "type_enum", nullable = false)
     private Integer gurantorType;
 
+    @Getter
     @Column(name = "entity_id")
     private Long entityId;
 
@@ -95,6 +100,7 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
     @Column(name = "is_active", nullable = false)
     private boolean active;
 
+    @Getter
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "guarantor", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<GuarantorFundingDetails> guarantorFundDetails = new ArrayList<>();
 
@@ -188,6 +194,10 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
         return GuarantorType.STAFF.getValue().equals(this.gurantorType);
     }
 
+    public boolean isExistingGroup() {
+        return GuarantorType.GROUP.getValue().equals(this.gurantorType);
+    }
+
     public boolean isExternalGuarantor() {
         return GuarantorType.EXTERNAL.getValue().equals(this.gurantorType);
     }
@@ -202,7 +212,6 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
                 newValue = command.integerValueOfParameterNamed(paramName);
             }
             actualChanges.put(paramName, newValue);
-            // propertyToBeUpdated = newValue;
 
             // now update actual property
             if (paramName.equals(GuarantorJSONinputParams.GUARANTOR_TYPE_ID.getValue())) {
@@ -216,7 +225,6 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
         if (command.isChangeInStringParameterNamed(paramName, propertyToBeUpdated)) {
             final String newValue = command.stringValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
-            // propertyToBeUpdated = newValue;
 
             // now update actual property
             if (paramName.equals(GuarantorJSONinputParams.FIRSTNAME.getValue())) {
@@ -250,17 +258,12 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
         if (command.isChangeInDateParameterNamed(paramName, propertyToBeUpdated)) {
             final LocalDate newValue = command.localDateValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
-            // propertyToBeUpdated = newValue;
 
             // now update actual property
             if (paramName.equals(GuarantorJSONinputParams.DATE_OF_BIRTH.getValue())) {
                 this.dateOfBirth = newValue;
             }
         }
-    }
-
-    public Long getEntityId() {
-        return this.entityId;
     }
 
     public Long getLoanId() {
@@ -275,20 +278,12 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
         return this.loan.getOfficeId();
     }
 
-    public CodeValue getClientRelationshipType() {
-        return this.clientRelationshipType;
-    }
-
     public void updateClientRelationshipType(final CodeValue clientRelationshipType) {
         this.clientRelationshipType = clientRelationshipType;
     }
 
     private void updateExistingEntityToNull() {
         this.entityId = null;
-    }
-
-    public Integer getGurantorType() {
-        return this.gurantorType;
     }
 
     public boolean isActive() {
@@ -330,14 +325,6 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
         this.active = isActive;
     }
 
-    public Loan getLoan() {
-        return this.loan;
-    }
-
-    public List<GuarantorFundingDetails> getGuarantorFundDetails() {
-        return this.guarantorFundDetails;
-    }
-
     public boolean hasGuarantor(Long savingsId) {
         if (savingsId == null) {
             return false;
@@ -354,10 +341,6 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
     }
 
     public boolean isSelfGuarantee() {
-        boolean isSelf = false;
-        if (isExistingCustomer() && getEntityId().equals(getClientId())) {
-            isSelf = true;
-        }
-        return isSelf;
+        return isExistingCustomer() && getEntityId().equals(getClientId());
     }
 }

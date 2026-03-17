@@ -3461,6 +3461,7 @@
         </insert>
     </changeSet>
     <changeSet author="fineract" id="24">
+        <validCheckSum>ANY</validCheckSum>
         <insert tableName="m_permission">
             <column name="id" valueNumeric="1"/>
             <column name="grouping" value="special"/>
@@ -7822,98 +7823,10 @@
             <column name="can_maker_checker" valueBoolean="true"/>
         </insert>
         <insert tableName="m_permission">
-            <column name="id" valueNumeric="568"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Active Loans - Summary(Pentaho)"/>
-            <column name="entity_name" value="Active Loans - Summary(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="569"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Active Loans by Disbursal Period(Pentaho)"/>
-            <column name="entity_name" value="Active Loans by Disbursal Period(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="570"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Active Loans in last installment Summary(Pentaho)"/>
-            <column name="entity_name" value="Active Loans in last installment Summary(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="571"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Active Loans in last installment(Pentaho)"/>
-            <column name="entity_name" value="Active Loans in last installment(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="572"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Active Loans Passed Final Maturity Summary(Pentaho)"/>
-            <column name="entity_name" value="Active Loans Passed Final Maturity Summary(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="573"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Active Loans Passed Final Maturity(Pentaho)"/>
-            <column name="entity_name" value="Active Loans Passed Final Maturity(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="574"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Aging Detail(Pentaho)"/>
-            <column name="entity_name" value="Aging Detail(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="575"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Aging Summary (Arrears in Months)(Pentaho)"/>
-            <column name="entity_name" value="Aging Summary (Arrears in Months)(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="576"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Aging Summary (Arrears in Weeks)(Pentaho)"/>
-            <column name="entity_name" value="Aging Summary (Arrears in Weeks)(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="577"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Client Listing(Pentaho)"/>
-            <column name="entity_name" value="Client Listing(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
             <column name="id" valueNumeric="578"/>
             <column name="grouping" value="report"/>
             <column name="code" value="READ_Client Loan Account Schedule"/>
             <column name="entity_name" value="Client Loan Account Schedule"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="579"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Client Loans Listing(Pentaho)"/>
-            <column name="entity_name" value="Client Loans Listing(Pentaho)"/>
             <column name="action_name" value="READ"/>
             <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
@@ -7982,30 +7895,6 @@
             <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
         <insert tableName="m_permission">
-            <column name="id" valueNumeric="588"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Expected Payments By Date - Basic(Pentaho)"/>
-            <column name="entity_name" value="Expected Payments By Date - Basic(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="589"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Funds Disbursed Between Dates Summary by Office(Pentaho)"/>
-            <column name="entity_name" value="Funds Disbursed Between Dates Summary by Office(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="590"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Funds Disbursed Between Dates Summary(Pentaho)"/>
-            <column name="entity_name" value="Funds Disbursed Between Dates Summary(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
             <column name="id" valueNumeric="591"/>
             <column name="grouping" value="report"/>
             <column name="code" value="READ_GroupNamesByStaff"/>
@@ -8026,38 +7915,6 @@
             <column name="grouping" value="report"/>
             <column name="code" value="READ_LoanCyclePerProduct"/>
             <column name="entity_name" value="LoanCyclePerProduct"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="594"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Loans Awaiting Disbursal Summary by Month(Pentaho)"/>
-            <column name="entity_name" value="Loans Awaiting Disbursal Summary by Month(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="595"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Loans Awaiting Disbursal Summary(Pentaho)"/>
-            <column name="entity_name" value="Loans Awaiting Disbursal Summary(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="596"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Loans Awaiting Disbursal(Pentaho)"/>
-            <column name="entity_name" value="Loans Awaiting Disbursal(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="597"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Loans Pending Approval(Pentaho)"/>
-            <column name="entity_name" value="Loans Pending Approval(Pentaho)"/>
             <column name="action_name" value="READ"/>
             <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
@@ -8086,66 +7943,10 @@
             <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
         <insert tableName="m_permission">
-            <column name="id" valueNumeric="601"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Obligation Met Loans Details(Pentaho)"/>
-            <column name="entity_name" value="Obligation Met Loans Details(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="602"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Obligation Met Loans Summary(Pentaho)"/>
-            <column name="entity_name" value="Obligation Met Loans Summary(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="603"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Portfolio at Risk by Branch(Pentaho)"/>
-            <column name="entity_name" value="Portfolio at Risk by Branch(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="604"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Portfolio at Risk(Pentaho)"/>
-            <column name="entity_name" value="Portfolio at Risk(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="605"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Rescheduled Loans(Pentaho)"/>
-            <column name="entity_name" value="Rescheduled Loans(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
             <column name="id" valueNumeric="606"/>
             <column name="grouping" value="report"/>
             <column name="code" value="READ_Savings Transactions"/>
             <column name="entity_name" value="Savings Transactions"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="607"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_TxnRunningBalances(Pentaho)"/>
-            <column name="entity_name" value="TxnRunningBalances(Pentaho)"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="608"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Written-Off Loans(Pentaho)"/>
-            <column name="entity_name" value="Written-Off Loans(Pentaho)"/>
             <column name="action_name" value="READ"/>
             <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
@@ -8594,14 +8395,6 @@
             <column name="grouping" value="portfolio"/>
             <column name="code" value="READ_PAYMENTTYPE"/>
             <column name="entity_name" value="PAYMENTTYPE"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-        <insert tableName="m_permission">
-            <column name="id" valueNumeric="665"/>
-            <column name="grouping" value="report"/>
-            <column name="code" value="READ_Staff Assignment History"/>
-            <column name="entity_name" value="Staff Assignment History(Pentaho)"/>
             <column name="action_name" value="READ"/>
             <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
@@ -12686,6 +12479,7 @@
         </insert>
     </changeSet>
     <changeSet author="fineract" id="41-mysql" context="mysql">
+        <validCheckSum>ANY</validCheckSum>
         <insert tableName="stretchy_report">
             <column name="id" valueNumeric="1"/>
             <column name="report_name" value="Client Listing"/>
@@ -12873,42 +12667,6 @@
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="48"/>
-            <column name="report_name" value="Balance Sheet"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Accounting"/>
-            <column name="report_sql"/>
-            <column name="description" value="Balance Sheet"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="49"/>
-            <column name="report_name" value="Income Statement"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Accounting"/>
-            <column name="report_sql"/>
-            <column name="description" value="Profit and Loss Statement"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="50"/>
-            <column name="report_name" value="Trial Balance"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Accounting"/>
-            <column name="report_sql"/>
-            <column name="description" value="Trial Balance Report"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
             <column name="id" valueNumeric="51"/>
             <column name="report_name" value="Written-Off Loans"/>
             <column name="report_type" value="Table"/>
@@ -13040,30 +12798,6 @@
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="91"/>
-            <column name="report_name" value="Loan Account Schedule"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="92"/>
-            <column name="report_name" value="Branch Expected Cash Flow"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
             <column name="id" valueNumeric="93"/>
             <column name="report_name" value="Expected Payments By Date - Basic"/>
             <column name="report_type" value="Table"/>
@@ -13072,18 +12806,6 @@
             <column name="report_sql"
                     value="SELECT &#13;&#10;      ounder.name 'Office', &#13;&#10;      IFNULL(ms.display_name,'-') 'Loan Officer',&#13;&#10;&#9;  mc.account_no 'Client Account Number',&#13;&#10;&#9;  mc.display_name 'Name',&#13;&#10;&#9;  mp.name 'Product',&#13;&#10;&#9;  ml.account_no 'Loan Account Number',&#13;&#10;&#9;  mr.duedate 'Due Date',&#13;&#10;&#9;  mr.installment 'Installment',&#13;&#10;&#9;  cu.display_symbol 'Currency',&#13;&#10;&#9;  mr.principal_amount- IFNULL(mr.principal_completed_derived,0) 'Principal Due',&#13;&#10;&#9;  mr.interest_amount- IFNULL(IFNULL(mr.interest_completed_derived,mr.interest_waived_derived),0) 'Interest Due', &#13;&#10;&#9;  IFNULL(mr.fee_charges_amount,0)- IFNULL(IFNULL(mr.fee_charges_completed_derived,mr.fee_charges_waived_derived),0) 'Fees Due', &#13;&#10;&#9;  IFNULL(mr.penalty_charges_amount,0)- IFNULL(IFNULL(mr.penalty_charges_completed_derived,mr.penalty_charges_waived_derived),0) 'Penalty Due',&#13;&#10;      (mr.principal_amount- IFNULL(mr.principal_completed_derived,0)) +&#13;&#10;       (mr.interest_amount- IFNULL(IFNULL(mr.interest_completed_derived,mr.interest_waived_derived),0)) + &#13;&#10;       (IFNULL(mr.fee_charges_amount,0)- IFNULL(IFNULL(mr.fee_charges_completed_derived,mr.fee_charges_waived_derived),0)) + &#13;&#10;       (IFNULL(mr.penalty_charges_amount,0)- IFNULL(IFNULL(mr.penalty_charges_completed_derived,mr.penalty_charges_waived_derived),0)) 'Total Due', &#13;&#10;     mlaa.total_overdue_derived 'Total Overdue'&#13;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9; &#13;&#10; FROM m_office mo&#13;&#10;  JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, '%')&#13;&#10;  &#13;&#10;  AND ounder.hierarchy like CONCAT('${currentUserHierarchy}', '%')&#13;&#10;&#9;&#13;&#10;  LEFT JOIN m_client mc ON mc.office_id=ounder.id&#13;&#10;  LEFT JOIN m_loan ml ON ml.client_id=mc.id AND ml.loan_status_id=300&#13;&#10;  LEFT JOIN m_loan_arrears_aging mlaa ON mlaa.loan_id=ml.id&#13;&#10;  LEFT JOIN m_loan_repayment_schedule mr ON mr.loan_id=ml.id AND mr.completed_derived=0&#13;&#10;  LEFT JOIN m_product_loan mp ON mp.id=ml.product_id&#13;&#10;  LEFT JOIN m_staff ms ON ms.id=ml.loan_officer_id&#13;&#10;  LEFT JOIN m_currency cu ON cu.code=ml.currency_code&#13;&#10; WHERE mo.id=${officeId}&#13;&#10; AND (IFNULL(ml.loan_officer_id, -10) = &quot;${loanOfficerId}&quot; OR &quot;-1&quot; = &quot;${loanOfficerId}&quot;)&#13;&#10; AND mr.duedate BETWEEN '${startDate}' AND '${endDate}'&#13;&#10; ORDER BY ounder.id,mr.duedate,ml.account_no"/>
             <column name="description" value="Test"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="94"/>
-            <column name="report_name" value="Expected Payments By Date - Formatted"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql"/>
-            <column name="description"/>
             <column name="core_report" valueBoolean="true"/>
             <column name="use_report" valueBoolean="true"/>
             <column name="self_service_user_report" valueBoolean="false"/>
@@ -13098,7 +12820,7 @@
                     value="&#10;/*&#10;Active Client is a client linked to the 'group' via m_group_client&#10;and with an active 'status_enum'.)&#10;Active Borrowers - Borrower may be a client or a 'group'&#10;*/&#10;select x.*&#10;from m_office o,&#10;m_group g,&#10;&#10;(select a.activeClients,&#10;(b.activeClientLoans + c.activeGroupLoans) as activeLoans,&#10;b.activeClientLoans, c.activeGroupLoans,&#10;(b.activeClientBorrowers + c.activeGroupBorrowers) as activeBorrowers,&#10;b.activeClientBorrowers, c.activeGroupBorrowers,&#10;(b.overdueClientLoans +  c.overdueGroupLoans) as overdueLoans,&#10;b.overdueClientLoans, c.overdueGroupLoans&#10;from&#10;(select count(*) as activeClients&#10;from m_group topgroup&#10;join m_group g on g.hierarchy like concat(topgroup.hierarchy, '%')&#10;join m_group_client gc on gc.group_id = g.id&#10;join m_client c on c.id = gc.client_id&#10;where topgroup.id = ${groupId}&#10;and c.status_enum = 300) a,&#10;&#10;(select count(*) as activeClientLoans,&#10;count(distinct(l.client_id)) as activeClientBorrowers,&#10;ifnull(sum(if(laa.loan_id is not null, 1, 0)), 0) as overdueClientLoans&#10;from m_group topgroup&#10;join m_group g on g.hierarchy like concat(topgroup.hierarchy, '%')&#10;join m_loan l on l.group_id = g.id and l.client_id is not null&#10;left join m_loan_arrears_aging laa on laa.loan_id = l.id&#10;where topgroup.id = ${groupId}&#10;and l.loan_status_id = 300) b,&#10;&#10;(select count(*) as activeGroupLoans,&#10;count(distinct(l.group_id)) as activeGroupBorrowers,&#10;ifnull(sum(if(laa.loan_id is not null, 1, 0)), 0) as overdueGroupLoans&#10;from m_group topgroup&#10;join m_group g on g.hierarchy like concat(topgroup.hierarchy, '%')&#10;join m_loan l on l.group_id = g.id and l.client_id is null&#10;left join m_loan_arrears_aging laa on laa.loan_id = l.id&#10;where topgroup.id = ${groupId}&#10;and l.loan_status_id = 300) c&#10;) x&#10;&#10;where g.id = ${groupId}&#10;and o.id = g.office_id&#10;and o.hierarchy like concat('${currentUserHierarchy}', '%')&#10;"/>
             <column name="description" value="Utility query for getting group summary count details for a group_id"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13112,7 +12834,7 @@
             <column name="description"
                     value="Utility query for getting group summary currency amount details for a group_id"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13126,7 +12848,7 @@
             <column name="description"
                     value="Running Balance Txn report for Individual Lending.&#10;Suitable for small MFI's.  Larger could use it using the branch or other parameters.&#10;Basically, suck it and see if its quick enough for you out-of-te box or whether it needs performance work in your situation.&#10;"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13139,7 +12861,7 @@
                     value="&#10;select ifnull(cur.display_symbol, l.currency_code) as Currency,&#10;/*This query will return more than one entry if more than one currency is used */&#10;count(distinct(c.id)) as activeClients, count(*) as activeLoans,&#10;sum(l.principal_disbursed_derived) as disbursedAmount,&#10;sum(l.principal_outstanding_derived) as loanOutstandingAmount,&#10;round((sum(l.principal_outstanding_derived) * 100) /  sum(l.principal_disbursed_derived),2) as loanOutstandingPC,&#10;sum(ifnull(lpa.principal_in_advance_derived,0.0)) as LoanPaidInAdvance,&#10;sum(&#10;    if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;        l.principal_outstanding_derived,0)) as portfolioAtRisk,&#10;&#10;round((sum(&#10;    if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;        l.principal_outstanding_derived,0)) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC,&#10;&#10;count(distinct(&#10;        if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;            c.id,null))) as clientsInDefault,&#10;round((count(distinct(&#10;        if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;            c.id,null))) * 100) / count(distinct(c.id)),2) as clientsInDefaultPC,&#10;(sum(l.principal_disbursed_derived) / count(*))  as averageLoanAmount&#10;from m_staff fa&#10;join m_office o on o.id = fa.office_id&#10;            and o.hierarchy like concat('${currentUserHierarchy}', '%')&#10;join m_group pgm on pgm.staff_id = fa.id&#10;join m_loan l on l.group_id = pgm.id and l.client_id is not null&#10;left join m_currency cur on cur.code = l.currency_code&#10;left join m_loan_arrears_aging laa on laa.loan_id = l.id&#10;left join m_loan_paid_in_advance lpa on lpa.loan_id = l.id&#10;join m_client c on c.id = l.client_id&#10;where fa.id = ${staffId}&#10;and l.loan_status_id = 300&#10;group  by l.currency_code&#10;"/>
             <column name="description" value="Field Agent Statistics"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13152,7 +12874,7 @@
                     value="&#10;select pgm.id, pgm.display_name as `name`, sts.enum_message_property as status&#10; from m_group pgm&#10; join m_office o on o.id = pgm.office_id&#10;            and o.hierarchy like concat('${currentUserHierarchy}', '%')&#10; left join r_enum_value sts on sts.enum_name = 'status_enum' and sts.enum_id = pgm.status_enum&#10; where pgm.staff_id = ${staffId}&#10;"/>
             <column name="description" value="List of Field Agent Programs"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13165,7 +12887,7 @@
                     value="&#10; select l.id as loanId, l.account_no as loanAccountNo, c.id as clientId, c.account_no as clientAccountNo,&#10; pgm.display_name as programName,&#10;&#10;(select count(*)&#10;from m_loan cy&#10;where cy.group_id = pgm.id and cy.client_id =c.id&#10;and cy.disbursedon_date &lt;= l.disbursedon_date) as loanCycleNo,&#10;&#10;c.display_name as clientDisplayName,&#10; ifnull(cur.display_symbol, l.currency_code) as Currency,&#10;ifnull(l.principal_repaid_derived,0.0) as loanRepaidAmount,&#10;ifnull(l.principal_outstanding_derived, 0.0) as loanOutstandingAmount,&#10;ifnull(lpa.principal_in_advance_derived,0.0) as LoanPaidInAdvance,&#10;&#10;ifnull(laa.principal_overdue_derived, 0.0) as loanInArrearsAmount,&#10;if(ifnull(laa.principal_overdue_derived, 0.00) &gt; 0, 'Yes', 'No') as inDefault,&#10;&#10;if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;        l.principal_outstanding_derived,0)  as portfolioAtRisk&#10;&#10; from m_group pgm&#10; join m_office o on o.id = pgm.office_id&#10;            and o.hierarchy like concat('${currentUserHierarchy}', '%')&#10; join m_loan l on l.group_id = pgm.id and l.client_id is not null&#10; left join m_currency cur on cur.code = l.currency_code&#10; join m_client c on c.id = l.client_id&#10; left join m_loan_arrears_aging laa on laa.loan_id = l.id&#10; left join m_loan_paid_in_advance lpa on lpa.loan_id = l.id&#10; where pgm.id = ${programId}&#10; and l.loan_status_id = 300&#10;order by c.display_name, l.account_no&#10;&#10;"/>
             <column name="description" value="List of Loans in a Program"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13178,7 +12900,7 @@
                     value="&#10; select s.id, s.display_name,&#10;s.firstname, s.lastname, s.organisational_role_enum,&#10;s.organisational_role_parent_staff_id,&#10;sp.display_name as `organisational_role_parent_staff_display_name`&#10;from m_staff s&#10;join m_staff sp on s.organisational_role_parent_staff_id = sp.id&#10;where s.organisational_role_parent_staff_id = ${staffId}&#10;"/>
             <column name="description" value="Get Next Level Down Staff"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13191,7 +12913,7 @@
                     value="&#10;select ifnull(cur.display_symbol, l.currency_code) as Currency,&#10;/*This query will return more than one entry if more than one currency is used */&#10;count(distinct(c.id)) as activeClients, count(*) as activeLoans,&#10;sum(l.principal_disbursed_derived) as disbursedAmount,&#10;sum(l.principal_outstanding_derived) as loanOutstandingAmount,&#10;round((sum(l.principal_outstanding_derived) * 100) /  sum(l.principal_disbursed_derived),2) as loanOutstandingPC,&#10;sum(ifnull(lpa.principal_in_advance_derived,0.0)) as LoanPaidInAdvance,&#10;sum(&#10;    if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;        l.principal_outstanding_derived,0)) as portfolioAtRisk,&#10;&#10;round((sum(&#10;    if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;        l.principal_outstanding_derived,0)) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC,&#10;&#10;count(distinct(&#10;        if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;            c.id,null))) as clientsInDefault,&#10;round((count(distinct(&#10;        if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;            c.id,null))) * 100) / count(distinct(c.id)),2) as clientsInDefaultPC,&#10;(sum(l.principal_disbursed_derived) / count(*))  as averageLoanAmount&#10;from m_staff coord&#10;join m_staff fa on fa.organisational_role_parent_staff_id = coord.id&#10;join m_office o on o.id = fa.office_id&#10;            and o.hierarchy like concat('${currentUserHierarchy}', '%')&#10;join m_group pgm on pgm.staff_id = fa.id&#10;join m_loan l on l.group_id = pgm.id and l.client_id is not null&#10;left join m_currency cur on cur.code = l.currency_code&#10;left join m_loan_arrears_aging laa on laa.loan_id = l.id&#10;left join m_loan_paid_in_advance lpa on lpa.loan_id = l.id&#10;join m_client c on c.id = l.client_id&#10;where coord.id = ${staffId}&#10;and l.loan_status_id = 300&#10;group  by l.currency_code&#10;"/>
             <column name="description" value="Coordinator Statistics"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13204,7 +12926,7 @@
                     value="&#10;select ifnull(cur.display_symbol, l.currency_code) as Currency,&#10;/*This query will return more than one entry if more than one currency is used */&#10;count(distinct(c.id)) as activeClients, count(*) as activeLoans,&#10;sum(l.principal_disbursed_derived) as disbursedAmount,&#10;sum(l.principal_outstanding_derived) as loanOutstandingAmount,&#10;round((sum(l.principal_outstanding_derived) * 100) /  sum(l.principal_disbursed_derived),2) as loanOutstandingPC,&#10;sum(ifnull(lpa.principal_in_advance_derived,0.0)) as LoanPaidInAdvance,&#10;sum(&#10;    if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;        l.principal_outstanding_derived,0)) as portfolioAtRisk,&#10;&#10;round((sum(&#10;    if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;        l.principal_outstanding_derived,0)) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC,&#10;&#10;count(distinct(&#10;        if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;            c.id,null))) as clientsInDefault,&#10;round((count(distinct(&#10;        if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;            c.id,null))) * 100) / count(distinct(c.id)),2) as clientsInDefaultPC,&#10;(sum(l.principal_disbursed_derived) / count(*))  as averageLoanAmount&#10;from m_staff bm&#10;join m_staff coord on coord.organisational_role_parent_staff_id = bm.id&#10;join m_staff fa on fa.organisational_role_parent_staff_id = coord.id&#10;join m_office o on o.id = fa.office_id&#10;            and o.hierarchy like concat('${currentUserHierarchy}', '%')&#10;join m_group pgm on pgm.staff_id = fa.id&#10;join m_loan l on l.group_id = pgm.id and l.client_id is not null&#10;left join m_currency cur on cur.code = l.currency_code&#10;left join m_loan_arrears_aging laa on laa.loan_id = l.id&#10;left join m_loan_paid_in_advance lpa on lpa.loan_id = l.id&#10;join m_client c on c.id = l.client_id&#10;where bm.id = ${staffId}&#10;and l.loan_status_id = 300&#10;group  by l.currency_code&#10;"/>
             <column name="description" value="Branch Manager Statistics"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13217,7 +12939,7 @@
                     value="&#10;select ifnull(cur.display_symbol, l.currency_code) as Currency,&#10;/*This query will return more than one entry if more than one currency is used */&#10;count(distinct(c.id)) as activeClients, count(*) as activeLoans,&#10;sum(l.principal_disbursed_derived) as disbursedAmount,&#10;sum(l.principal_outstanding_derived) as loanOutstandingAmount,&#10;round((sum(l.principal_outstanding_derived) * 100) /  sum(l.principal_disbursed_derived),2) as loanOutstandingPC,&#10;sum(ifnull(lpa.principal_in_advance_derived,0.0)) as LoanPaidInAdvance,&#10;sum(&#10;    if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;        l.principal_outstanding_derived,0)) as portfolioAtRisk,&#10;&#10;round((sum(&#10;    if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;        l.principal_outstanding_derived,0)) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC,&#10;&#10;count(distinct(&#10;        if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;            c.id,null))) as clientsInDefault,&#10;round((count(distinct(&#10;        if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;            c.id,null))) * 100) / count(distinct(c.id)),2) as clientsInDefaultPC,&#10;(sum(l.principal_disbursed_derived) / count(*))  as averageLoanAmount&#10;from m_staff pd&#10;join m_staff bm on bm.organisational_role_parent_staff_id = pd.id&#10;join m_staff coord on coord.organisational_role_parent_staff_id = bm.id&#10;join m_staff fa on fa.organisational_role_parent_staff_id = coord.id&#10;join m_office o on o.id = fa.office_id&#10;            and o.hierarchy like concat('${currentUserHierarchy}', '%')&#10;join m_group pgm on pgm.staff_id = fa.id&#10;join m_loan l on l.group_id = pgm.id and l.client_id is not null&#10;left join m_currency cur on cur.code = l.currency_code&#10;left join m_loan_arrears_aging laa on laa.loan_id = l.id&#10;left join m_loan_paid_in_advance lpa on lpa.loan_id = l.id&#10;join m_client c on c.id = l.client_id&#10;where pd.id = ${staffId}&#10;and l.loan_status_id = 300&#10;group  by l.currency_code&#10;"/>
             <column name="description" value="Program DirectorStatistics"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13230,7 +12952,7 @@
                     value="&#10;select ifnull(cur.display_symbol, l.currency_code) as Currency,&#10;/*This query will return more than one entry if more than one currency is used */&#10;count(distinct(c.id)) as activeClients, count(*) as activeLoans,&#10;sum(l.principal_disbursed_derived) as disbursedAmount,&#10;sum(l.principal_outstanding_derived) as loanOutstandingAmount,&#10;round((sum(l.principal_outstanding_derived) * 100) /  sum(l.principal_disbursed_derived),2) as loanOutstandingPC,&#10;sum(ifnull(lpa.principal_in_advance_derived,0.0)) as LoanPaidInAdvance,&#10;sum(&#10;    if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;        l.principal_outstanding_derived,0)) as portfolioAtRisk,&#10;&#10;round((sum(&#10;    if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;        l.principal_outstanding_derived,0)) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC,&#10;&#10;count(distinct(&#10;        if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;            c.id,null))) as clientsInDefault,&#10;round((count(distinct(&#10;        if(date_sub(curdate(), interval 28 day) &gt; ifnull(laa.overdue_since_date_derived, curdate()),&#10;            c.id,null))) * 100) / count(distinct(c.id)),2) as clientsInDefaultPC,&#10;(sum(l.principal_disbursed_derived) / count(*))  as averageLoanAmount&#10;from m_group pgm&#10;join m_office o on o.id = pgm.office_id&#10;            and o.hierarchy like concat('${currentUserHierarchy}', '%')&#10;join m_loan l on l.group_id = pgm.id and l.client_id is not null&#10;left join m_currency cur on cur.code = l.currency_code&#10;left join m_loan_arrears_aging laa on laa.loan_id = l.id&#10;left join m_loan_paid_in_advance lpa on lpa.loan_id = l.id&#10;join m_client c on c.id = l.client_id&#10;where pgm.id = ${programId}&#10;and l.loan_status_id = 300&#10;group  by l.currency_code&#10;"/>
             <column name="description" value="Program Statistics"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13243,7 +12965,7 @@
                     value="SELECT x.* FROM m_client c, m_office o, &#10;(&#10;       SELECT a.loanCycle, a.activeLoans, b.lastLoanAmount, d.activeSavings, d.totalSavings FROM &#10;&#9;(SELECT IFNULL(MAX(l.loan_counter),0) AS loanCycle, COUNT(l.id) AS activeLoans FROM m_loan l WHERE l.loan_status_id=300 AND l.client_id=${clientId}) a, &#10;&#9;(SELECT count(l.id), IFNULL(l.principal_amount,0) AS 'lastLoanAmount' FROM m_loan l WHERE l.client_id=${clientId} AND l.disbursedon_date = (SELECT IFNULL(MAX(disbursedon_date),NOW()) FROM m_loan where client_id=${clientId} and loan_status_id=300) group by l.principal_amount) b, &#10;&#9;(SELECT COUNT(s.id) AS 'activeSavings', IFNULL(SUM(s.account_balance_derived),0) AS 'totalSavings' FROM m_savings_account s WHERE s.status_enum=300 AND s.client_id=${clientId}) d&#10;) x&#10;WHERE c.id=${clientId} AND o.id = c.office_id AND o.hierarchy LIKE CONCAT('${currentUserHierarchy}', '%')"/>
             <column name="description" value="Utility query for getting the client summary details"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13256,7 +12978,7 @@
                     value="SELECT lp.name AS 'productName', MAX(l.loan_product_counter) AS 'loanProductCycle' FROM m_loan l JOIN m_product_loan lp ON l.product_id=lp.id WHERE lp.include_in_borrower_cycle=1 AND l.loan_product_counter IS NOT NULL AND l.client_id=${clientId} GROUP BY l.product_id"/>
             <column name="description" value="Utility query for getting the client loan cycle details"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13270,367 +12992,7 @@
             <column name="description"
                     value="Utility query for getting group or center saving summary details for a group_id"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="118"/>
-            <column name="report_name" value="Savings Transactions"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Savings"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="119"/>
-            <column name="report_name" value="Client Savings Summary"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Savings"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="120"/>
-            <column name="report_name" value="Active Loans - Details(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="121"/>
-            <column name="report_name" value="Active Loans - Summary(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="122"/>
-            <column name="report_name" value="Active Loans by Disbursal Period(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="123"/>
-            <column name="report_name" value="Active Loans in last installment Summary(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="124"/>
-            <column name="report_name" value="Active Loans in last installment(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="125"/>
-            <column name="report_name" value="Active Loans Passed Final Maturity Summary(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="126"/>
-            <column name="report_name" value="Active Loans Passed Final Maturity(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="127"/>
-            <column name="report_name" value="Aging Detail(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="128"/>
-            <column name="report_name" value="Aging Summary (Arrears in Months)(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="129"/>
-            <column name="report_name" value="Aging Summary (Arrears in Weeks)(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="130"/>
-            <column name="report_name" value="Client Listing(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Client"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="131"/>
-            <column name="report_name" value="Client Loans Listing(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Client"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="132"/>
-            <column name="report_name" value="Expected Payments By Date - Basic(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="133"/>
-            <column name="report_name" value="Funds Disbursed Between Dates Summary by Office(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Fund"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="134"/>
-            <column name="report_name" value="Funds Disbursed Between Dates Summary(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Fund"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="135"/>
-            <column name="report_name" value="Loans Awaiting Disbursal Summary by Month(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="136"/>
-            <column name="report_name" value="Loans Awaiting Disbursal Summary(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="137"/>
-            <column name="report_name" value="Loans Awaiting Disbursal(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="138"/>
-            <column name="report_name" value="Loans Pending Approval(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="139"/>
-            <column name="report_name" value="Obligation Met Loans Details(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="140"/>
-            <column name="report_name" value="Obligation Met Loans Summary(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="141"/>
-            <column name="report_name" value="Portfolio at Risk by Branch(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="142"/>
-            <column name="report_name" value="Portfolio at Risk(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="143"/>
-            <column name="report_name" value="Rescheduled Loans(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="144"/>
-            <column name="report_name" value="TxnRunningBalances(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Transaction"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="145"/>
-            <column name="report_name" value="Written-Off Loans(Pentaho)"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql" value="(NULL)"/>
-            <column name="description" value="(NULL)"/>
-            <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="146"/>
-            <column name="report_name" value="Client Saving Transactions"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Savings"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="147"/>
-            <column name="report_name" value="Client Loan Account Schedule"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13643,7 +13005,7 @@
                     value="Select gr.id as id, gr.display_name as name from m_group gr where gr.level_id=1 and gr.staff_id = ${staffId}"/>
             <column name="description" value=""/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13656,7 +13018,7 @@
                     value="SELECT &#9;COUNT(cl.id) AS count, &#10;&#9;&#9;cl.activation_date AS days&#10;FROM m_office of &#10;&#9;LEFT JOIN m_client cl on of.id = cl.office_id&#10;WHERE of.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),&quot;%&quot; ) &#10;&#9;AND (cl.activation_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 DAY) AND DATE(NOW()- INTERVAL 1 DAY))&#10;GROUP BY days"/>
             <column name="description" value="Retrieves the number of clients joined in last 12 days"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13669,7 +13031,7 @@
                     value="SELECT &#9;COUNT(cl.id) AS count, &#10;&#9;&#9;WEEK(cl.activation_date) AS Weeks&#10;FROM m_office of &#10;&#9;LEFT JOIN m_client cl on of.id = cl.office_id&#10;WHERE of.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),&quot;%&quot; ) &#10;&#9;AND (cl.activation_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 WEEK) AND DATE(NOW()))&#10;GROUP BY Weeks"/>
             <column name="description" value=""/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13682,7 +13044,7 @@
                     value="SELECT &#9;COUNT(cl.id) AS count, &#10;&#9;&#9;MONTHNAME(cl.activation_date) AS Months&#10;FROM m_office of &#10;&#9;LEFT JOIN m_client cl on of.id = cl.office_id&#10;WHERE of.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),&quot;%&quot; ) &#10;&#9;AND (cl.activation_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 MONTH) AND DATE(NOW()))&#10;GROUP BY Months"/>
             <column name="description" value=""/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13695,7 +13057,7 @@
                     value="SELECT &#9;COUNT(ln.id) AS lcount, &#10;&#9;&#9;ln.disbursedon_date AS days&#10;FROM m_office of &#10;&#9;LEFT JOIN m_client cl on of.id = cl.office_id&#10;&#9;LEFT JOIN m_loan ln on cl.id = ln.client_id&#10;WHERE of.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),&quot;%&quot; ) &#10;&#9;AND (ln.disbursedon_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 DAY) AND DATE(NOW()- INTERVAL 1 DAY))&#10;GROUP BY days"/>
             <column name="description" value="Retrieves Number of loans disbursed for last 12 days"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13708,7 +13070,7 @@
                     value="SELECT &#9;COUNT(ln.id) AS lcount, &#10;&#9;&#9;WEEK(ln.disbursedon_date) AS Weeks&#10;FROM m_office of &#10;&#9;LEFT JOIN m_client cl on of.id = cl.office_id&#10;&#9;LEFT JOIN m_loan ln on cl.id = ln.client_id&#10;WHERE of.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),&quot;%&quot; ) &#10;&#9;AND (ln.disbursedon_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 WEEK) AND DATE(NOW()))&#10;GROUP BY Weeks"/>
             <column name="description" value=""/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13721,7 +13083,7 @@
                     value="SELECT &#9;COUNT(ln.id) AS lcount, &#10;&#9;&#9;MONTHNAME(ln.disbursedon_date) AS Months&#10;FROM m_office of &#10;&#9;LEFT JOIN m_client cl on of.id = cl.office_id&#10;&#9;LEFT JOIN m_loan ln on cl.id = ln.client_id&#10;WHERE of.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),&quot;%&quot; ) &#10;&#9;AND (ln.disbursedon_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 MONTH) AND DATE(NOW()))&#10;GROUP BY Months"/>
             <column name="description" value=""/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13734,7 +13096,7 @@
                     value="select amount.AmountDue-amount.AmountPaid as AmountDue, amount.AmountPaid as AmountPaid from&#10;(SELECT &#10;(IFNULL(SUM(ls.principal_amount),0) - IFNULL(SUM(ls.principal_writtenoff_derived),0)&#10; + IFNULL(SUM(ls.interest_amount),0) - IFNULL(SUM(ls.interest_writtenoff_derived),0) &#10; - IFNULL(SUM(ls.interest_waived_derived),0)&#10; + IFNULL(SUM(ls.fee_charges_amount),0) - IFNULL(SUM(ls.fee_charges_writtenoff_derived),0) &#10; - IFNULL(SUM(ls.fee_charges_waived_derived),0)&#10; + IFNULL(SUM(ls.penalty_charges_amount),0) - IFNULL(SUM(ls.penalty_charges_writtenoff_derived),0) &#10; - IFNULL(SUM(ls.penalty_charges_waived_derived),0)&#10;) AS AmountDue, &#10;&#10;(IFNULL(SUM(ls.principal_completed_derived),0) - IFNULL(SUM(ls.principal_writtenoff_derived),0) + IFNULL(SUM(ls.interest_completed_derived),0) - IFNULL(SUM(ls.interest_writtenoff_derived),0) &#10; - IFNULL(SUM(ls.interest_waived_derived),0)&#10; + IFNULL(SUM(ls.fee_charges_completed_derived),0) - IFNULL(SUM(ls.fee_charges_writtenoff_derived),0) &#10; - IFNULL(SUM(ls.fee_charges_waived_derived),0)&#10; + IFNULL(SUM(ls.penalty_charges_completed_derived),0) - IFNULL(SUM(ls.penalty_charges_writtenoff_derived),0) &#10; - IFNULL(SUM(ls.penalty_charges_waived_derived),0)&#10;) AS AmountPaid&#10;FROM m_office of&#10;LEFT JOIN m_client cl ON of.id = cl.office_id&#10;LEFT JOIN m_loan ln ON cl.id = ln.client_id&#10;LEFT JOIN m_loan_repayment_schedule ls ON ln.id = ls.loan_id&#10;WHERE ls.duedate = DATE(NOW()) AND &#10; (of.hierarchy LIKE CONCAT((&#10;SELECT ino.hierarchy&#10;FROM m_office ino&#10;WHERE ino.id = ${officeId}),&quot;%&quot;))) as amount"/>
             <column name="description" value="Demand Vs Collection"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -13747,103 +13109,7 @@
                     value="select awaitinddisbursal.amount-disbursedAmount.amount as amountToBeDisburse, disbursedAmount.amount as disbursedAmount from &#10;(&#10;SELECT &#9;COUNT(ln.id) AS noOfLoans, &#10;&#9;&#9;&#9;IFNULL(SUM(ln.principal_amount),0) AS amount&#10;FROM &#10;m_office of&#10;LEFT JOIN m_client cl ON cl.office_id = of.id&#10;LEFT JOIN m_loan ln ON cl.id = ln.client_id&#10;WHERE &#10;ln.expected_disbursedon_date = DATE(NOW()) AND &#10;(ln.loan_status_id=200 OR ln.loan_status_id=300) AND&#10; of.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),&quot;%&quot; )&#10;) awaitinddisbursal,&#10;(&#10;SELECT &#9;COUNT(ltrxn.id) as count, &#10;&#9;&#9;&#9;IFNULL(SUM(ltrxn.amount),0) as amount &#10;FROM &#10;m_office of&#10;LEFT JOIN m_client cl ON cl.office_id = of.id&#10;LEFT JOIN m_loan ln ON cl.id = ln.client_id&#10;LEFT JOIN m_loan_transaction ltrxn ON ln.id = ltrxn.loan_id&#10;WHERE &#10;ltrxn.transaction_date = DATE(NOW()) AND &#10;ltrxn.is_reversed = 0 AND&#10;ltrxn.transaction_type_enum=1 AND&#10; of.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),&quot;%&quot; ) &#10;) disbursedAmount"/>
             <column name="description" value="Disbursal_Vs_Awaitingdisbursal"/>
             <column name="core_report" valueBoolean="true"/>
-            <column name="use_report" valueBoolean="falsee"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="157"/>
-            <column name="report_name" value="Savings Transaction Receipt"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="158"/>
-            <column name="report_name" value="Loan Transaction Receipt"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="159"/>
-            <column name="report_name" value="Staff Assignment History"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="160"/>
-            <column name="report_name" value="GeneralLedgerReport"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Accounting"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="161"/>
-            <column name="report_name" value="Active Loan Summary per Branch"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="162"/>
-            <column name="report_name" value="Balance Outstanding"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="163"/>
-            <column name="report_name" value="Collection Report"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
-            <column name="self_service_user_report" valueBoolean="false"/>
-        </insert>
-        <insert tableName="stretchy_report">
-            <column name="id" valueNumeric="164"/>
-            <column name="report_name" value="Disbursal Report"/>
-            <column name="report_type" value="Pentaho"/>
-            <column name="report_subtype"/>
-            <column name="report_category" value="Loan"/>
-            <column name="report_sql"/>
-            <column name="description"/>
-            <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="true"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -14047,7 +13313,7 @@
                     value="select ml.id as loanId,mc.id, mc.firstname, ifnull(mc.middlename,'') as middlename, mc.lastname, mc.display_name as FullName, mobile_no as mobileNo, mc.group_name as GroupName, round(ml.principal_amount, ml.currency_digits) as LoanAmount, round(ml.`total_outstanding_derived`, ml.currency_digits) as LoanOutstanding,&#10;ml.`account_no` as LoanAccountId, round(mlt.amountPaid, ml.currency_digits) as repaymentAmount&#10;FROM m_office mo&#10;JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, '%')&#10;AND ounder.hierarchy like CONCAT('.', '%')&#10;LEFT JOIN (&#10; select &#10; ml.id as loanId, &#10; ifnull(mc.id,mc2.id) as id, &#10; ifnull(mc.firstname,mc2.firstname) as firstname, &#10; ifnull(mc.middlename,ifnull(mc2.middlename,(''))) as middlename, &#10; ifnull(mc.lastname,mc2.lastname) as lastname, &#10; ifnull(mc.display_name,mc2.display_name) as display_name, &#10; ifnull(mc.status_enum,mc2.status_enum) as status_enum,&#10; ifnull(mc.mobile_no,mc2.mobile_no) as mobile_no,&#10; ifnull(mg.office_id,mc2.office_id) as office_id,&#10; ifnull(mg.staff_id,mc2.staff_id) as staff_id,&#10; mg.id as group_id, &#10;mg.display_name as group_name&#10; from&#10; m_loan ml&#10; left join m_group mg on mg.id = ml.group_id&#10; left join m_group_client mgc on mgc.group_id = mg.id&#10; left join m_client mc on mc.id = mgc.client_id&#10; left join m_client mc2 on mc2.id = ml.client_id&#10; order by loanId&#10; ) mc on mc.office_id = ounder.id&#10;right join m_loan as ml on mc.loanId = ml.id&#10;right join(&#10;select mlt.amount as amountPaid,mlt.id,mlt.loan_id&#10;from m_loan_transaction mlt&#10;where mlt.is_reversed = 0 &#10;group by mlt.loan_id&#10;) as mlt on mlt.loan_id = ml.id&#10;right join m_loan_repayment_schedule as mls1 on ml.id = mls1.loan_id and mls1.`completed_derived` = 0&#10;and mls1.installment = (SELECT MIN(installment) from m_loan_repayment_schedule where loan_id = ml.id and duedate &lt;= CURDATE() and completed_derived=0)&#10;where mc.status_enum = 300 and mobile_no is not null and ml.`loan_status_id` = 300&#10;and (mo.id = ${officeId} or ${officeId} = -1)&#10;and (mc.staff_id = ${loanOfficerId} or ${loanOfficerId} = -1)&#10;and (ml.loan_type_enum = ${loanType} or ${loanType} = -1)&#10;and ml.id in (select mla.loan_id from m_loan_arrears_aging mla)&#10;group by ml.id"/>
             <column name="description" value="Loan Repayment"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -14060,7 +13326,7 @@
                     value="SELECT mc.id, mc.firstname, mc.middlename as middlename, mc.lastname, mc.display_name as FullName, mc.mobile_no as mobileNo, mc.group_name as GroupName, mo.name as officename, ml.id as loanId, ml.account_no as accountnumber, ml.principal_amount_proposed as loanamount, ml.annual_nominal_interest_rate as annualinterestrate FROM m_office mo JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, '%') AND ounder.hierarchy like CONCAT('.', '%') LEFT JOIN ( select  ml.id as loanId,  ifnull(mc.id,mc2.id) as id,  ifnull(mc.firstname,mc2.firstname) as firstname,  ifnull(mc.middlename,ifnull(mc2.middlename,(''))) as middlename,  ifnull(mc.lastname,mc2.lastname) as lastname,  ifnull(mc.display_name,mc2.display_name) as display_name,  ifnull(mc.status_enum,mc2.status_enum) as status_enum, ifnull(mc.mobile_no,mc2.mobile_no) as mobile_no, ifnull(mg.office_id,mc2.office_id) as office_id, ifnull(mg.staff_id,mc2.staff_id) as staff_id, mg.id as group_id, mg.display_name as group_name from m_loan ml left join m_group mg on mg.id = ml.group_id left join m_group_client mgc on mgc.group_id = mg.id left join m_client mc on mc.id = mgc.client_id left join m_client mc2 on mc2.id = ml.client_id order by loanId ) mc on mc.office_id = ounder.id  left join m_loan ml on ml.id = mc.loanId WHERE mc.status_enum = 300 and mc.mobile_no is not null and (mo.id = ${officeId} or ${officeId} = -1) and (mc.staff_id = ${loanOfficerId} or ${loanOfficerId} = -1)and (ml.id = ${loanId} or ${loanId} = -1)and (mc.id = ${clientId} or ${clientId} = -1)and (mc.group_id = ${groupId} or ${groupId} = -1)and (ml.loan_type_enum = ${loanType} or ${loanType} = -1)"/>
             <column name="description" value="Loan and client data of approved loan"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -14073,7 +13339,7 @@
                     value="SELECT mc.id, mc.firstname, mc.middlename as middlename, mc.lastname, mc.display_name as FullName, mc.mobile_no as mobileNo, mc.group_name as GroupName,  mo.name as officename, ml.id as loanId, ml.account_no as accountnumber, ml.principal_amount_proposed as loanamount, ml.annual_nominal_interest_rate as annualinterestrate  FROM  m_office mo  JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, '%')  AND ounder.hierarchy like CONCAT('.', '%')  LEFT JOIN (  select   ml.id as loanId,   ifnull(mc.id,mc2.id) as id,   ifnull(mc.firstname,mc2.firstname) as firstname,   ifnull(mc.middlename,ifnull(mc2.middlename,(''))) as middlename,   ifnull(mc.lastname,mc2.lastname) as lastname,   ifnull(mc.display_name,mc2.display_name) as display_name,   ifnull(mc.status_enum,mc2.status_enum) as status_enum,  ifnull(mc.mobile_no,mc2.mobile_no) as mobile_no,  ifnull(mg.office_id,mc2.office_id) as office_id,  ifnull(mg.staff_id,mc2.staff_id) as staff_id,  mg.id as group_id,  mg.display_name as group_name  from  m_loan ml  left join m_group mg on mg.id = ml.group_id  left join m_group_client mgc on mgc.group_id = mg.id  left join m_client mc on mc.id = mgc.client_id  left join m_client mc2 on mc2.id = ml.client_id  order by loanId  ) mc on mc.office_id = ounder.id  left join m_loan ml on ml.id = mc.loanId  WHERE mc.status_enum = 300 and mc.mobile_no is not null  and (mo.id = ${officeId} or ${officeId} = -1)  and (mc.staff_id = ${loanOfficerId} or ${loanOfficerId} = -1) and (ml.id = ${loanId} or ${loanId} = -1) and (mc.id = ${clientId} or ${clientId} = -1) and (mc.group_id = ${groupId} or ${groupId} = -1)  and (ml.loan_type_enum = ${loanType} or ${loanType} = -1)"/>
             <column name="description" value="Loan and client data of rejected loan"/>
             <column name="core_report" valueBoolean="false"/>
-            <column name="use_report" valueBoolean="falsee"/>
+            <column name="use_report" valueBoolean="false"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
         <insert tableName="stretchy_report">
@@ -14724,54 +13990,6 @@
             <column name="report_parameter_name"/>
         </insert>
         <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="85"/>
-            <column name="report_id" valueNumeric="48"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="86"/>
-            <column name="report_id" valueNumeric="48"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="date"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="87"/>
-            <column name="report_id" valueNumeric="49"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="88"/>
-            <column name="report_id" valueNumeric="49"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="fromDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="89"/>
-            <column name="report_id" valueNumeric="49"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="toDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="90"/>
-            <column name="report_id" valueNumeric="50"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="91"/>
-            <column name="report_id" valueNumeric="50"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="fromDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="92"/>
-            <column name="report_id" valueNumeric="50"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="toDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
             <column name="id" valueNumeric="93"/>
             <column name="report_id" valueNumeric="51"/>
             <column name="parameter_id" valueNumeric="1"/>
@@ -15066,24 +14284,6 @@
             <column name="report_parameter_name"/>
         </insert>
         <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="142"/>
-            <column name="report_id" valueNumeric="92"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="fromDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="143"/>
-            <column name="report_id" valueNumeric="92"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="selectOffice"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="144"/>
-            <column name="report_id" valueNumeric="92"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="toDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
             <column name="id" valueNumeric="145"/>
             <column name="report_id" valueNumeric="93"/>
             <column name="parameter_id" valueNumeric="1"/>
@@ -15108,30 +14308,6 @@
             <column name="report_parameter_name"/>
         </insert>
         <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="149"/>
-            <column name="report_id" valueNumeric="94"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="endDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="150"/>
-            <column name="report_id" valueNumeric="94"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="loanOfficerId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="151"/>
-            <column name="report_id" valueNumeric="94"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="officeId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="152"/>
-            <column name="report_id" valueNumeric="94"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="startDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
             <column name="id" valueNumeric="256"/>
             <column name="report_id" valueNumeric="106"/>
             <column name="parameter_id" valueNumeric="2"/>
@@ -15154,936 +14330,6 @@
             <column name="report_id" valueNumeric="106"/>
             <column name="parameter_id" valueNumeric="1"/>
             <column name="report_parameter_name"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="263"/>
-            <column name="report_id" valueNumeric="118"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="fromDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="264"/>
-            <column name="report_id" valueNumeric="118"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="toDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="265"/>
-            <column name="report_id" valueNumeric="118"/>
-            <column name="parameter_id" valueNumeric="1004"/>
-            <column name="report_parameter_name" value="accountNo"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="266"/>
-            <column name="report_id" valueNumeric="119"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="fromDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="267"/>
-            <column name="report_id" valueNumeric="119"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="toDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="268"/>
-            <column name="report_id" valueNumeric="119"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="selectOffice"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="269"/>
-            <column name="report_id" valueNumeric="119"/>
-            <column name="parameter_id" valueNumeric="1005"/>
-            <column name="report_parameter_name" value="selectProduct"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="270"/>
-            <column name="report_id" valueNumeric="120"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="271"/>
-            <column name="report_id" valueNumeric="120"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="loanOfficer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="272"/>
-            <column name="report_id" valueNumeric="120"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="currencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="273"/>
-            <column name="report_id" valueNumeric="120"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="274"/>
-            <column name="report_id" valueNumeric="120"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="275"/>
-            <column name="report_id" valueNumeric="120"/>
-            <column name="parameter_id" valueNumeric="26"/>
-            <column name="report_parameter_name" value="loanPurposeId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="276"/>
-            <column name="report_id" valueNumeric="121"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="277"/>
-            <column name="report_id" valueNumeric="121"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="loanOfficer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="278"/>
-            <column name="report_id" valueNumeric="121"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="279"/>
-            <column name="report_id" valueNumeric="121"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="280"/>
-            <column name="report_id" valueNumeric="121"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="281"/>
-            <column name="report_id" valueNumeric="121"/>
-            <column name="parameter_id" valueNumeric="26"/>
-            <column name="report_parameter_name" value="loanPurposeId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="282"/>
-            <column name="report_id" valueNumeric="121"/>
-            <column name="parameter_id" valueNumeric="100"/>
-            <column name="report_parameter_name" value="parType"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="283"/>
-            <column name="report_id" valueNumeric="122"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="284"/>
-            <column name="report_id" valueNumeric="122"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="loanOfficer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="285"/>
-            <column name="report_id" valueNumeric="122"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="286"/>
-            <column name="report_id" valueNumeric="122"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="287"/>
-            <column name="report_id" valueNumeric="122"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="288"/>
-            <column name="report_id" valueNumeric="122"/>
-            <column name="parameter_id" valueNumeric="26"/>
-            <column name="report_parameter_name" value="loanPurposeId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="289"/>
-            <column name="report_id" valueNumeric="122"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="startDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="290"/>
-            <column name="report_id" valueNumeric="122"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="endDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="291"/>
-            <column name="report_id" valueNumeric="123"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="292"/>
-            <column name="report_id" valueNumeric="123"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="Loan Officer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="293"/>
-            <column name="report_id" valueNumeric="123"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="294"/>
-            <column name="report_id" valueNumeric="123"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="295"/>
-            <column name="report_id" valueNumeric="123"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="296"/>
-            <column name="report_id" valueNumeric="123"/>
-            <column name="parameter_id" valueNumeric="26"/>
-            <column name="report_parameter_name" value="loanPurposeId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="297"/>
-            <column name="report_id" valueNumeric="123"/>
-            <column name="parameter_id" valueNumeric="100"/>
-            <column name="report_parameter_name" value="parType"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="298"/>
-            <column name="report_id" valueNumeric="124"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="299"/>
-            <column name="report_id" valueNumeric="124"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="Loan Officer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="300"/>
-            <column name="report_id" valueNumeric="124"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="301"/>
-            <column name="report_id" valueNumeric="124"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="302"/>
-            <column name="report_id" valueNumeric="124"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="303"/>
-            <column name="report_id" valueNumeric="124"/>
-            <column name="parameter_id" valueNumeric="26"/>
-            <column name="report_parameter_name" value="loanPurposeId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="304"/>
-            <column name="report_id" valueNumeric="125"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="305"/>
-            <column name="report_id" valueNumeric="125"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="Loan Officer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="306"/>
-            <column name="report_id" valueNumeric="125"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="307"/>
-            <column name="report_id" valueNumeric="125"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="308"/>
-            <column name="report_id" valueNumeric="125"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="309"/>
-            <column name="report_id" valueNumeric="125"/>
-            <column name="parameter_id" valueNumeric="26"/>
-            <column name="report_parameter_name" value="loanPurposeId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="310"/>
-            <column name="report_id" valueNumeric="125"/>
-            <column name="parameter_id" valueNumeric="100"/>
-            <column name="report_parameter_name" value="parType"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="311"/>
-            <column name="report_id" valueNumeric="126"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="312"/>
-            <column name="report_id" valueNumeric="126"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="Loan Officer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="313"/>
-            <column name="report_id" valueNumeric="126"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="314"/>
-            <column name="report_id" valueNumeric="126"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="315"/>
-            <column name="report_id" valueNumeric="126"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="316"/>
-            <column name="report_id" valueNumeric="126"/>
-            <column name="parameter_id" valueNumeric="26"/>
-            <column name="report_parameter_name" value="loanPurposeId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="317"/>
-            <column name="report_id" valueNumeric="127"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="318"/>
-            <column name="report_id" valueNumeric="128"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="319"/>
-            <column name="report_id" valueNumeric="128"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="320"/>
-            <column name="report_id" valueNumeric="129"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="321"/>
-            <column name="report_id" valueNumeric="129"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="322"/>
-            <column name="report_id" valueNumeric="130"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="selectOffice"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="323"/>
-            <column name="report_id" valueNumeric="131"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="324"/>
-            <column name="report_id" valueNumeric="131"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="Loan Officer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="325"/>
-            <column name="report_id" valueNumeric="131"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="326"/>
-            <column name="report_id" valueNumeric="131"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="327"/>
-            <column name="report_id" valueNumeric="131"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="328"/>
-            <column name="report_id" valueNumeric="131"/>
-            <column name="parameter_id" valueNumeric="26"/>
-            <column name="report_parameter_name" value="loanPurposeId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="329"/>
-            <column name="report_id" valueNumeric="132"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="330"/>
-            <column name="report_id" valueNumeric="132"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="Loan Officer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="331"/>
-            <column name="report_id" valueNumeric="132"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="startDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="332"/>
-            <column name="report_id" valueNumeric="132"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="endDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="333"/>
-            <column name="report_id" valueNumeric="133"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="334"/>
-            <column name="report_id" valueNumeric="133"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="335"/>
-            <column name="report_id" valueNumeric="133"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="336"/>
-            <column name="report_id" valueNumeric="133"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="startDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="337"/>
-            <column name="report_id" valueNumeric="133"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="endDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="338"/>
-            <column name="report_id" valueNumeric="134"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="339"/>
-            <column name="report_id" valueNumeric="134"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="340"/>
-            <column name="report_id" valueNumeric="134"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="startDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="341"/>
-            <column name="report_id" valueNumeric="134"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="endDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="342"/>
-            <column name="report_id" valueNumeric="135"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="343"/>
-            <column name="report_id" valueNumeric="135"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="Loan Officer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="344"/>
-            <column name="report_id" valueNumeric="135"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="345"/>
-            <column name="report_id" valueNumeric="135"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="346"/>
-            <column name="report_id" valueNumeric="135"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="347"/>
-            <column name="report_id" valueNumeric="135"/>
-            <column name="parameter_id" valueNumeric="26"/>
-            <column name="report_parameter_name" value="loanPurposeId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="348"/>
-            <column name="report_id" valueNumeric="136"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="349"/>
-            <column name="report_id" valueNumeric="136"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="Loan Officer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="350"/>
-            <column name="report_id" valueNumeric="136"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="351"/>
-            <column name="report_id" valueNumeric="136"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="352"/>
-            <column name="report_id" valueNumeric="136"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="353"/>
-            <column name="report_id" valueNumeric="136"/>
-            <column name="parameter_id" valueNumeric="26"/>
-            <column name="report_parameter_name" value="loanPurposeId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="354"/>
-            <column name="report_id" valueNumeric="137"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="355"/>
-            <column name="report_id" valueNumeric="137"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="Loan Officer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="356"/>
-            <column name="report_id" valueNumeric="137"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="357"/>
-            <column name="report_id" valueNumeric="137"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="358"/>
-            <column name="report_id" valueNumeric="137"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="359"/>
-            <column name="report_id" valueNumeric="137"/>
-            <column name="parameter_id" valueNumeric="26"/>
-            <column name="report_parameter_name" value="loanPurposeId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="360"/>
-            <column name="report_id" valueNumeric="138"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="361"/>
-            <column name="report_id" valueNumeric="138"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="Loan Officer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="362"/>
-            <column name="report_id" valueNumeric="138"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="363"/>
-            <column name="report_id" valueNumeric="138"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="364"/>
-            <column name="report_id" valueNumeric="138"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="365"/>
-            <column name="report_id" valueNumeric="138"/>
-            <column name="parameter_id" valueNumeric="26"/>
-            <column name="report_parameter_name" value="loanPurposeId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="366"/>
-            <column name="report_id" valueNumeric="139"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="367"/>
-            <column name="report_id" valueNumeric="139"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="Loan Officer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="368"/>
-            <column name="report_id" valueNumeric="139"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="369"/>
-            <column name="report_id" valueNumeric="139"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="370"/>
-            <column name="report_id" valueNumeric="139"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="371"/>
-            <column name="report_id" valueNumeric="139"/>
-            <column name="parameter_id" valueNumeric="26"/>
-            <column name="report_parameter_name" value="loanPurposeId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="372"/>
-            <column name="report_id" valueNumeric="139"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="startDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="373"/>
-            <column name="report_id" valueNumeric="139"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="endDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="374"/>
-            <column name="report_id" valueNumeric="139"/>
-            <column name="parameter_id" valueNumeric="3"/>
-            <column name="report_parameter_name" value="obligDateType"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="375"/>
-            <column name="report_id" valueNumeric="140"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="376"/>
-            <column name="report_id" valueNumeric="140"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="Loan Officer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="377"/>
-            <column name="report_id" valueNumeric="140"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="378"/>
-            <column name="report_id" valueNumeric="140"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="379"/>
-            <column name="report_id" valueNumeric="140"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="380"/>
-            <column name="report_id" valueNumeric="140"/>
-            <column name="parameter_id" valueNumeric="26"/>
-            <column name="report_parameter_name" value="loanPurposeId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="381"/>
-            <column name="report_id" valueNumeric="140"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="Startdate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="382"/>
-            <column name="report_id" valueNumeric="140"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="Enddate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="383"/>
-            <column name="report_id" valueNumeric="140"/>
-            <column name="parameter_id" valueNumeric="3"/>
-            <column name="report_parameter_name" value="obligDateType"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="384"/>
-            <column name="report_id" valueNumeric="141"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="385"/>
-            <column name="report_id" valueNumeric="141"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="Loan Officer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="386"/>
-            <column name="report_id" valueNumeric="141"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="387"/>
-            <column name="report_id" valueNumeric="141"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="388"/>
-            <column name="report_id" valueNumeric="141"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="389"/>
-            <column name="report_id" valueNumeric="141"/>
-            <column name="parameter_id" valueNumeric="26"/>
-            <column name="report_parameter_name" value="loanPurposeId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="390"/>
-            <column name="report_id" valueNumeric="141"/>
-            <column name="parameter_id" valueNumeric="100"/>
-            <column name="report_parameter_name" value="parType"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="391"/>
-            <column name="report_id" valueNumeric="142"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="392"/>
-            <column name="report_id" valueNumeric="142"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="loanOfficer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="393"/>
-            <column name="report_id" valueNumeric="142"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="394"/>
-            <column name="report_id" valueNumeric="142"/>
-            <column name="parameter_id" valueNumeric="20"/>
-            <column name="report_parameter_name" value="fundId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="395"/>
-            <column name="report_id" valueNumeric="142"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="396"/>
-            <column name="report_id" valueNumeric="142"/>
-            <column name="parameter_id" valueNumeric="26"/>
-            <column name="report_parameter_name" value="loanPurposeId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="397"/>
-            <column name="report_id" valueNumeric="142"/>
-            <column name="parameter_id" valueNumeric="100"/>
-            <column name="report_parameter_name" value="parType"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="398"/>
-            <column name="report_id" valueNumeric="143"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="399"/>
-            <column name="report_id" valueNumeric="143"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="400"/>
-            <column name="report_id" valueNumeric="143"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="401"/>
-            <column name="report_id" valueNumeric="143"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="startDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="402"/>
-            <column name="report_id" valueNumeric="143"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="endDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="403"/>
-            <column name="report_id" valueNumeric="144"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="404"/>
-            <column name="report_id" valueNumeric="144"/>
-            <column name="parameter_id" valueNumeric="6"/>
-            <column name="report_parameter_name" value="Loan Officer"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="405"/>
-            <column name="report_id" valueNumeric="144"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="startDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="406"/>
-            <column name="report_id" valueNumeric="144"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="endDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="407"/>
-            <column name="report_id" valueNumeric="145"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="Branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="408"/>
-            <column name="report_id" valueNumeric="145"/>
-            <column name="parameter_id" valueNumeric="10"/>
-            <column name="report_parameter_name" value="CurrencyId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="409"/>
-            <column name="report_id" valueNumeric="145"/>
-            <column name="parameter_id" valueNumeric="25"/>
-            <column name="report_parameter_name" value="loanProductId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="410"/>
-            <column name="report_id" valueNumeric="145"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="startDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="411"/>
-            <column name="report_id" valueNumeric="145"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="endDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="412"/>
-            <column name="report_id" valueNumeric="146"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="startDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="413"/>
-            <column name="report_id" valueNumeric="146"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="endDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="414"/>
-            <column name="report_id" valueNumeric="146"/>
-            <column name="parameter_id" valueNumeric="1004"/>
-            <column name="report_parameter_name" value="accountNo"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="415"/>
-            <column name="report_id" valueNumeric="147"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="startDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="416"/>
-            <column name="report_id" valueNumeric="147"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="endDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="417"/>
-            <column name="report_id" valueNumeric="147"/>
-            <column name="parameter_id" valueNumeric="1004"/>
-            <column name="report_parameter_name" value="selectLoan"/>
         </insert>
         <insert tableName="stretchy_report_parameter">
             <column name="id" valueNumeric="418"/>
@@ -16132,96 +14378,6 @@
             <column name="report_id" valueNumeric="156"/>
             <column name="parameter_id" valueNumeric="5"/>
             <column name="report_parameter_name" value=""/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="426"/>
-            <column name="report_id" valueNumeric="157"/>
-            <column name="parameter_id" valueNumeric="1006"/>
-            <column name="report_parameter_name" value="transactionId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="427"/>
-            <column name="report_id" valueNumeric="158"/>
-            <column name="parameter_id" valueNumeric="1006"/>
-            <column name="report_parameter_name" value="transactionId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="428"/>
-            <column name="report_id" valueNumeric="159"/>
-            <column name="parameter_id" valueNumeric="1007"/>
-            <column name="report_parameter_name" value="centerId"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="429"/>
-            <column name="report_id" valueNumeric="160"/>
-            <column name="parameter_id" valueNumeric="1008"/>
-            <column name="report_parameter_name" value="account"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="430"/>
-            <column name="report_id" valueNumeric="160"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="fromDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="431"/>
-            <column name="report_id" valueNumeric="160"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="toDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="432"/>
-            <column name="report_id" valueNumeric="160"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="433"/>
-            <column name="report_id" valueNumeric="162"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="434"/>
-            <column name="report_id" valueNumeric="162"/>
-            <column name="parameter_id" valueNumeric="1009"/>
-            <column name="report_parameter_name" value="ondate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="435"/>
-            <column name="report_id" valueNumeric="163"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="436"/>
-            <column name="report_id" valueNumeric="163"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="fromDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="437"/>
-            <column name="report_id" valueNumeric="163"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="toDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="438"/>
-            <column name="report_id" valueNumeric="164"/>
-            <column name="parameter_id" valueNumeric="5"/>
-            <column name="report_parameter_name" value="branch"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="439"/>
-            <column name="report_id" valueNumeric="164"/>
-            <column name="parameter_id" valueNumeric="1"/>
-            <column name="report_parameter_name" value="fromDate"/>
-        </insert>
-        <insert tableName="stretchy_report_parameter">
-            <column name="id" valueNumeric="440"/>
-            <column name="report_id" valueNumeric="164"/>
-            <column name="parameter_id" valueNumeric="2"/>
-            <column name="report_parameter_name" value="toDate"/>
         </insert>
         <insert tableName="stretchy_report_parameter">
             <column name="id" valueNumeric="441"/>

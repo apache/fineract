@@ -50,7 +50,7 @@ public class SavingsAccountStepDef extends AbstractStepDef {
                 .clientId(clientId).submittedOnDate(submittedOnDate);
 
         PostSavingsAccountsResponse createSavingsAccountResponse = ok(
-                () -> fineractClient.savingsAccount().submitApplication2(createSavingsAccountRequest));
+                () -> fineractClient.savingsAccount().submitSavingsApplication(createSavingsAccountRequest));
         testContext().set(TestContextKey.EUR_SAVINGS_ACCOUNT_CREATE_RESPONSE, createSavingsAccountResponse);
     }
 
@@ -63,7 +63,7 @@ public class SavingsAccountStepDef extends AbstractStepDef {
                 .clientId(clientId).submittedOnDate(submittedOnDate);
 
         PostSavingsAccountsResponse createSavingsAccountResponse = ok(
-                () -> fineractClient.savingsAccount().submitApplication2(createSavingsAccountRequest));
+                () -> fineractClient.savingsAccount().submitSavingsApplication(createSavingsAccountRequest));
         testContext().set(TestContextKey.USD_SAVINGS_ACCOUNT_CREATE_RESPONSE, createSavingsAccountResponse);
     }
 
@@ -76,7 +76,7 @@ public class SavingsAccountStepDef extends AbstractStepDef {
                 .approvedOnDate(approvedOnDate);
 
         PostSavingsAccountsAccountIdResponse approveSavingsAccountResponse = ok(() -> fineractClient.savingsAccount()
-                .handleCommands6(savingsAccountID, approveSavingsAccountRequest, Map.of("command", "approve")));
+                .handleCommandsSavingsAccount(savingsAccountID, approveSavingsAccountRequest, Map.of("command", "approve")));
         testContext().set(TestContextKey.EUR_SAVINGS_ACCOUNT_APPROVE_RESPONSE, approveSavingsAccountResponse);
     }
 
@@ -89,7 +89,7 @@ public class SavingsAccountStepDef extends AbstractStepDef {
                 .approvedOnDate(approvedOnDate);
 
         PostSavingsAccountsAccountIdResponse approveSavingsAccountResponse = ok(() -> fineractClient.savingsAccount()
-                .handleCommands6(savingsAccountID, approveSavingsAccountRequest, Map.of("command", "approve")));
+                .handleCommandsSavingsAccount(savingsAccountID, approveSavingsAccountRequest, Map.of("command", "approve")));
         testContext().set(TestContextKey.USD_SAVINGS_ACCOUNT_APPROVE_RESPONSE, approveSavingsAccountResponse);
     }
 
@@ -102,7 +102,7 @@ public class SavingsAccountStepDef extends AbstractStepDef {
                 .activatedOnDate(activatedOnDate);
 
         PostSavingsAccountsAccountIdResponse activateSavingsAccountResponse = ok(() -> fineractClient.savingsAccount()
-                .handleCommands6(savingsAccountID, activateSavingsAccountRequest, Map.of("command", "activate")));
+                .handleCommandsSavingsAccount(savingsAccountID, activateSavingsAccountRequest, Map.of("command", "activate")));
         testContext().set(TestContextKey.EUR_SAVINGS_ACCOUNT_ACTIVATED_RESPONSE, activateSavingsAccountResponse);
     }
 
@@ -115,7 +115,7 @@ public class SavingsAccountStepDef extends AbstractStepDef {
                 .activatedOnDate(activatedOnDate);
 
         PostSavingsAccountsAccountIdResponse activateSavingsAccountResponse = ok(() -> fineractClient.savingsAccount()
-                .handleCommands6(savingsAccountID, activateSavingsAccountRequest, Map.of("command", "activate")));
+                .handleCommandsSavingsAccount(savingsAccountID, activateSavingsAccountRequest, Map.of("command", "activate")));
         testContext().set(TestContextKey.USD_SAVINGS_ACCOUNT_ACTIVATED_RESPONSE, activateSavingsAccountResponse);
     }
 
@@ -128,7 +128,7 @@ public class SavingsAccountStepDef extends AbstractStepDef {
                 .transactionDate(depositDate).transactionAmount(BigDecimal.valueOf(depositAmount));
 
         PostSavingsAccountTransactionsResponse depositResponse = ok(() -> fineractClient.savingsAccountTransactions()
-                .transaction2(savingsAccountID, depositRequest, Map.of("command", "deposit")));
+                .createSavingsAccountTransaction(savingsAccountID, depositRequest, Map.of("command", "deposit")));
         testContext().set(TestContextKey.EUR_SAVINGS_ACCOUNT_DEPOSIT_RESPONSE, depositResponse);
     }
 
@@ -141,7 +141,7 @@ public class SavingsAccountStepDef extends AbstractStepDef {
                 .transactionDate(depositDate).transactionAmount(BigDecimal.valueOf(depositAmount));
 
         PostSavingsAccountTransactionsResponse depositResponse = ok(() -> fineractClient.savingsAccountTransactions()
-                .transaction2(savingsAccountID, depositRequest, Map.of("command", "deposit")));
+                .createSavingsAccountTransaction(savingsAccountID, depositRequest, Map.of("command", "deposit")));
         testContext().set(TestContextKey.USD_SAVINGS_ACCOUNT_DEPOSIT_RESPONSE, depositResponse);
     }
 
@@ -154,7 +154,7 @@ public class SavingsAccountStepDef extends AbstractStepDef {
                 .transactionDate(transcationDate).transactionAmount(BigDecimal.valueOf(withdrawAmount));
 
         PostSavingsAccountTransactionsResponse withdrawalResponse = ok(() -> fineractClient.savingsAccountTransactions()
-                .transaction2(savingsAccountID, withdrawRequest, Map.of("command", "withdrawal")));
+                .createSavingsAccountTransaction(savingsAccountID, withdrawRequest, Map.of("command", "withdrawal")));
         testContext().set(TestContextKey.EUR_SAVINGS_ACCOUNT_WITHDRAW_RESPONSE, withdrawalResponse);
     }
 
@@ -167,7 +167,7 @@ public class SavingsAccountStepDef extends AbstractStepDef {
                 .transactionDate(transcationDate).transactionAmount(BigDecimal.valueOf(withdrawAmount));
 
         PostSavingsAccountTransactionsResponse withdrawalResponse = ok(() -> fineractClient.savingsAccountTransactions()
-                .transaction2(savingsAccountID, withdrawRequest, Map.of("command", "withdrawal")));
+                .createSavingsAccountTransaction(savingsAccountID, withdrawRequest, Map.of("command", "withdrawal")));
         testContext().set(TestContextKey.USD_SAVINGS_ACCOUNT_WITHDRAW_RESPONSE, withdrawalResponse);
     }
 }

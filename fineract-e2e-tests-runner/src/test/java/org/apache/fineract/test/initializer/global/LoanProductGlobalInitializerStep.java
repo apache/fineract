@@ -1312,7 +1312,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .recalculationRestFrequencyType(1)//
                 .recalculationRestFrequencyInterval(1)//
                 .repaymentEvery(1)//
-                .interestRatePerPeriod((double) 7.0)//
+                .interestRatePerPeriod(7.0)//
                 .interestRateFrequencyType(INTEREST_RATE_FREQUENCY_TYPE_MONTH)//
                 .enableDownPayment(false)//
                 .interestRecalculationCompoundingMethod(0)//
@@ -4585,6 +4585,60 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INT_DAILY_EMI_360_30_INT_RECALC_DAILY_MULTIDISB_FULL_TERM_TRANCHE_ACCELERATE_MATURITY,
                 responseLoanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcDailyMultiDisburseFullTermTrancheAccelerateMaturity);
+
+        // LP2 with progressive loan schedule + horizontal + interest EMI + 360/30
+        // + interest recalculation, buy down fees enabled, FEE income type
+        final String name178 = DefaultLoanProduct.LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES_FEE_INCOME.getName();
+        final PostLoanProductsRequest loanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesFeeIncome = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2BuyDownFeesFeeIncome()//
+                .name(name178)//
+                .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
+                .loanScheduleType("PROGRESSIVE") //
+                .isInterestRecalculationEnabled(true)//
+                .preClosureInterestCalculationStrategy(1)//
+                .rescheduleStrategyMethod(4)//
+                .interestRecalculationCompoundingMethod(0)//
+                .recalculationRestFrequencyType(2)//
+                .recalculationRestFrequencyInterval(1)//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+        final PostLoanProductsResponse responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesFeeIncome = createLoanProductIdempotent(
+                loanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesFeeIncome);
+        TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_PROGRESSIVE_ADV_PYMNT_BUYDOWN_FEES_FEE_INCOME,
+                responseLoanProductsRequestLP2ProgressiveAdvPaymentBuyDownFeesFeeIncome);
+
+        // LP2 with Down-payment + advanced payment allocation + progressive loan schedule + vertical
+        // (LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL)
+        String name179 = DefaultLoanProduct.LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL_INTEREST_RECALC.getName();
+        PostLoanProductsRequest loanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanScheduleVerticalInterestRecalc = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2Emi()//
+                .name(name179)//
+                .loanScheduleProcessingType("VERTICAL").daysInYearType(DaysInYearType.ACTUAL.value)//
+                .daysInMonthType(DaysInMonthType.ACTUAL.value)//
+                .isInterestRecalculationEnabled(true)//
+                .preClosureInterestCalculationStrategy(1)//
+                .rescheduleStrategyMethod(4)//
+                .interestRecalculationCompoundingMethod(0)//
+                .recalculationRestFrequencyType(2)//
+                .recalculationRestFrequencyInterval(1)//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("REPAYMENT", "NEXT_INSTALLMENT"))) //
+                .chargeOffBehaviour(ACCELERATE_MATURITY.value)//
+                .multiDisburseLoan(true)//
+                .disallowExpectedDisbursements(true)//
+                .allowFullTermForTranche(true)//
+                .maxTrancheCount(10)//
+                .maxPrincipal(25000000.0)//
+                .outstandingLoanBalance(25000000.0);//
+        PostLoanProductsResponse responseLoanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanScheduleVerticalInterestRecalc = createLoanProductIdempotent(
+                loanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanScheduleVerticalInterestRecalc);
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL_INTEREST_RECALC,
+                responseLoanProductsRequestDownPaymentAdvPaymentAllocationProgressiveLoanScheduleVerticalInterestRecalc);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,

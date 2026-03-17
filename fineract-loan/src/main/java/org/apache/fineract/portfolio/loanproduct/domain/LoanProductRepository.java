@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanproduct.domain;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
@@ -41,4 +42,7 @@ public interface LoanProductRepository extends JpaRepository<LoanProduct, Long>,
     @Override
     @Query("SELECT CASE WHEN COUNT(loanProduct)>0 THEN TRUE ELSE FALSE END FROM LoanProduct loanProduct WHERE loanProduct.id = :loanProductId")
     boolean existsById(@NonNull @Param("loanProductId") Long loanProductId);
+
+    @Query("select loanProduct from LoanProduct loanProduct where loanProduct.closeDate is null or loanProduct.closeDate >= :businessDate")
+    List<LoanProduct> fetchActiveLoanProducts(LocalDate businessDate);
 }

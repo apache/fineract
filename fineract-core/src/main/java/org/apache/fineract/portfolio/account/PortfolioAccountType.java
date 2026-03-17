@@ -58,14 +58,4 @@ public enum PortfolioAccountType {
         }
         return enumType;
     }
-
-    // TODO: bad practice and unnecessary code! why not just use the enum values themselves!?!
-    public boolean isSavingsAccount() {
-        return this.equals(SAVINGS);
-    }
-
-    // TODO: bad practice and unnecessary code! why not just use the enum values themselves!?!
-    public boolean isLoanAccount() {
-        return this.equals(LOAN);
-    }
 }

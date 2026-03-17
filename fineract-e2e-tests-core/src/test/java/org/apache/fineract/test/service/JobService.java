@@ -71,7 +71,7 @@ public class JobService {
                 .until(() -> {
                     log.debug("Waiting for job {} to finish", jobName);
                     Long jobId = jobResolver.resolve(job);
-                    GetJobsResponse getJobsResponse = ok(() -> fineractClient.schedulerJob().retrieveOne5(jobId));
+                    GetJobsResponse getJobsResponse = ok(() -> fineractClient.schedulerJob().retrieveOneSchedulerJob(jobId));
                     Boolean currentlyRunning = getJobsResponse.getCurrentlyRunning();
                     return BooleanUtils.isFalse(currentlyRunning);
                 });

@@ -59,6 +59,7 @@ import org.apache.fineract.client.services.ClientsAddressApi;
 import org.apache.fineract.client.services.CodeValuesApi;
 import org.apache.fineract.client.services.CodesApi;
 import org.apache.fineract.client.services.CreditBureauConfigurationApi;
+import org.apache.fineract.client.services.CreditBureauIntegrationApi;
 import org.apache.fineract.client.services.CurrencyApi;
 import org.apache.fineract.client.services.DataTablesApi;
 import org.apache.fineract.client.services.DefaultApi;
@@ -95,6 +96,7 @@ import org.apache.fineract.client.services.LoanCollateralApi;
 import org.apache.fineract.client.services.LoanDisbursementDetailsApi;
 import org.apache.fineract.client.services.LoanInterestPauseApi;
 import org.apache.fineract.client.services.LoanProductsApi;
+import org.apache.fineract.client.services.LoanProductsDetailsApi;
 import org.apache.fineract.client.services.LoanReschedulingApi;
 import org.apache.fineract.client.services.LoanTransactionsApi;
 import org.apache.fineract.client.services.LoansApi;
@@ -201,6 +203,7 @@ public final class FineractClient {
     public final ChargesApi charges;
     public final ClientApi clients;
     public final CreditBureauConfigurationApi creditBureauConfiguration;
+    public final CreditBureauIntegrationApi creditBureauIntegration;
 
     public final ClientSearchV2Api clientSearchV2;
     public final ClientChargesApi clientCharges;
@@ -238,6 +241,7 @@ public final class FineractClient {
     public final LoanCollateralApi loanCollaterals;
     public final LoanCapitalizedIncomeApi loanCapitalizedIncome;
     public final LoanProductsApi loanProducts;
+    public final LoanProductsDetailsApi loanProductsDetails;
     public final LoanReschedulingApi loanSchedules;
     public final LoansPointInTimeApi loansPointInTimeApi;
     public final LoansApi loans;
@@ -336,6 +340,7 @@ public final class FineractClient {
         charges = retrofit.create(ChargesApi.class);
         clients = retrofit.create(ClientApi.class);
         creditBureauConfiguration = retrofit.create(CreditBureauConfigurationApi.class);
+        creditBureauIntegration = retrofit.create(CreditBureauIntegrationApi.class);
         clientSearchV2 = retrofit.create(ClientSearchV2Api.class);
         clientCharges = retrofit.create(ClientChargesApi.class);
         clientIdentifiers = retrofit.create(ClientIdentifierApi.class);
@@ -371,6 +376,7 @@ public final class FineractClient {
         loanCollaterals = retrofit.create(LoanCollateralApi.class);
         loanCapitalizedIncome = retrofit.create(LoanCapitalizedIncomeApi.class);
         loanProducts = retrofit.create(LoanProductsApi.class);
+        loanProductsDetails = retrofit.create(LoanProductsDetailsApi.class);
         loanSchedules = retrofit.create(LoanReschedulingApi.class);
         loansPointInTimeApi = retrofit.create(LoansPointInTimeApi.class);
         loans = retrofit.create(LoansApi.class);

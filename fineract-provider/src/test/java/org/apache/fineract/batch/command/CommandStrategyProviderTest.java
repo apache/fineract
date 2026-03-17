@@ -40,6 +40,7 @@ import org.apache.fineract.batch.command.internal.CreateChargeCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateClientCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateDatatableEntryCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateLoanRescheduleRequestCommandStrategy;
+import org.apache.fineract.batch.command.internal.CreateSavingsAccountChargeCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateTransactionByLoanExternalIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy;
@@ -91,6 +92,8 @@ public class CommandStrategyProviderTest {
                 Arguments.of("loans/external-id/8dfad438-2319-48ce-8520-10a62801e9a1?associations=all&exclude=guarantors", HttpMethod.GET,
                         "getLoanByExternalIdCommandStrategy", mock(GetLoanByExternalIdCommandStrategy.class)),
                 Arguments.of("savingsaccounts", HttpMethod.POST, "applySavingsCommandStrategy", mock(ApplySavingsCommandStrategy.class)),
+                Arguments.of("savingsaccounts/123/charges", HttpMethod.POST, "createSavingsAccountChargeCommandStrategy",
+                        mock(CreateSavingsAccountChargeCommandStrategy.class)),
                 Arguments.of("loans/123/charges", HttpMethod.POST, "createChargeCommandStrategy", mock(CreateChargeCommandStrategy.class)),
                 Arguments.of("loans/external-id/8dfad438-2319-48ce-8520-10a62801e9a1/charges", HttpMethod.POST,
                         "createChargeByLoanExternalIdCommandStrategy", mock(CreateChargeByLoanExternalIdCommandStrategy.class)),
