@@ -141,9 +141,6 @@ public class AccountNumberFormatDataValidator {
             case SHARES:
                 validAccountNumberPrefixes = Collections.emptySet();
             break;
-            case WORKING_CAPITAL_LOAN:
-                validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForWorkingCapitalLoanAccounts;
-            break;
         }
 
         Set<Integer> validAccountNumberPrefixValues = new HashSet<>();

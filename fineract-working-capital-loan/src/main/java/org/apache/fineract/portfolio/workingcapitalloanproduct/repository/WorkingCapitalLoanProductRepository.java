@@ -38,14 +38,12 @@ public interface WorkingCapitalLoanProductRepository
     boolean existsByShortName(String shortName);
 
     @Query("""
-            SELECT DISTINCT wclp FROM WorkingCapitalLoanProduct wclp
+            SELECT wclp FROM WorkingCapitalLoanProduct wclp
             LEFT JOIN FETCH wclp.fund
             LEFT JOIN FETCH wclp.delinquencyBucket
-            LEFT JOIN FETCH wclp.paymentAllocationRules
-            LEFT JOIN FETCH wclp.configurableAttributes
             ORDER BY wclp.name
             """)
-    List<WorkingCapitalLoanProduct> findAllWithDetails();
+    List<WorkingCapitalLoanProduct> findAllWithFund();
 
     @Query("""
             SELECT wclp FROM WorkingCapitalLoanProduct wclp
@@ -69,4 +67,10 @@ public interface WorkingCapitalLoanProductRepository
 
     @Query("select wclp FROM WorkingCapitalLoanProduct wclp where wclp.closeDate is null or wclp.closeDate >= :businessDate")
     List<WorkingCapitalLoanProduct> fetchActiveWorkingCapitalLoanProducts(LocalDate businessDate);
+
+    // TODO: Check if product is used in any loans (for deletion validation)
+    // This will be implemented when Working Capital Loan entity is created
+    // @Query("SELECT CASE WHEN COUNT(l)>0 THEN TRUE ELSE FALSE END FROM WorkingCapitalLoan l WHERE l.wcpProduct.id =
+    // :productId")
+    // boolean isProductInUse(@Param("productId") Long productId);
 }

@@ -63,7 +63,7 @@ import org.springframework.stereotype.Component;
         closingDate
         The date for which the accounting closure is defined
         officeId
-        The identifier of the branch for which accounting has been closed
+        The identifer of the branch for which accounting has been closed
         comments
         Description associated with an Accounting closure
         """)

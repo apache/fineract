@@ -60,6 +60,7 @@ public class WorkingCapitalLoanProductData implements Serializable {
 
     // Settings details
     private StringEnumOptionData amortizationType;
+    private BigDecimal flatPercentageAmount;
     private DelinquencyBucketData delinquencyBucket;
     private Integer npvDayCount;
     private List<WorkingCapitalPaymentAllocationData> paymentAllocation;

@@ -155,7 +155,6 @@ import org.apache.fineract.client.feign.services.UserGeneratedDocumentsApi;
 import org.apache.fineract.client.feign.services.UsersApi;
 import org.apache.fineract.client.feign.services.WorkingCapitalLoanCobCatchUpApi;
 import org.apache.fineract.client.feign.services.WorkingCapitalLoanProductsApi;
-import org.apache.fineract.client.feign.services.WorkingCapitalLoansApi;
 import org.apache.fineract.client.feign.services.WorkingDaysApi;
 
 /**
@@ -751,10 +750,6 @@ public final class FineractFeignClient {
 
     public WorkingCapitalLoanCobCatchUpApi workingCapitalLoanCobCatchUpApi() {
         return create(WorkingCapitalLoanCobCatchUpApi.class);
-    }
-
-    public WorkingCapitalLoansApi workingCapitalLoans() {
-        return create(WorkingCapitalLoansApi.class);
     }
 
     public WorkingDaysApi workingDays() {

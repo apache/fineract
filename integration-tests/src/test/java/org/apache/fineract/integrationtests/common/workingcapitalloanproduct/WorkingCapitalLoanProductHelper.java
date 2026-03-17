@@ -41,7 +41,7 @@ public class WorkingCapitalLoanProductHelper {
 
     public GetWorkingCapitalLoanProductsProductIdResponse retrieveWorkingCapitalLoanProductByExternalId(final String externalId) {
         return FeignCalls.ok(() -> FineractFeignClientHelper.getFineractFeignClient().workingCapitalLoanProducts()
-                .retrieveWorkingCapitalLoanProductDetailsByExternalId(externalId));
+                .retrieveWorkingCapitalLoanProductDetails1(externalId));
     }
 
     public GetWorkingCapitalLoanProductsProductIdResponse retrieveWorkingCapitalLoanProductById(final Long productId) {
@@ -55,14 +55,13 @@ public class WorkingCapitalLoanProductHelper {
     }
 
     public GetWorkingCapitalLoanProductsTemplateResponse retrieveTemplate() {
-        return FeignCalls.ok(() -> FineractFeignClientHelper.getFineractFeignClient().workingCapitalLoanProducts()
-                .retrieveWorkingCapitalLoanProductTemplate());
+        return FeignCalls.ok(() -> FineractFeignClientHelper.getFineractFeignClient().workingCapitalLoanProducts().retrieveTemplate23());
     }
 
     public PutWorkingCapitalLoanProductsProductIdResponse updateWorkingCapitalLoanProductByExternalId(final String externalId,
             final PutWorkingCapitalLoanProductsProductIdRequest request) {
         return FeignCalls.ok(() -> FineractFeignClientHelper.getFineractFeignClient().workingCapitalLoanProducts()
-                .updateWorkingCapitalLoanProductByExternalId(externalId, request));
+                .updateWorkingCapitalLoanProduct1(externalId, request));
     }
 
     public PutWorkingCapitalLoanProductsProductIdResponse updateWorkingCapitalLoanProductById(final Long productId,
@@ -73,7 +72,7 @@ public class WorkingCapitalLoanProductHelper {
 
     public DeleteWorkingCapitalLoanProductsProductIdResponse deleteWorkingCapitalLoanProductByExternalId(final String externalId) {
         return FeignCalls.ok(() -> FineractFeignClientHelper.getFineractFeignClient().workingCapitalLoanProducts()
-                .deleteWorkingCapitalLoanProductByExternalId(externalId));
+                .deleteWorkingCapitalLoanProduct1(externalId));
     }
 
     public DeleteWorkingCapitalLoanProductsProductIdResponse deleteWorkingCapitalLoanProductById(final Long productId) {

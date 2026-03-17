@@ -35,7 +35,6 @@ public class AccountSummaryCollectionData {
     private final Collection<LoanAccountSummaryData> memberLoanAccounts;
     private final Collection<SavingsAccountSummaryData> memberSavingsAccounts;
     private final Collection<GuarantorAccountSummaryData> memberGuarantorAccounts;
-    private final Collection<WorkingCapitalLoanAccountSummaryData> workingCapitalLoanAccounts;
 
     /*
      * METHOD SIGNATURE CHANGE NOTICE: Method's signature was changed for GLIM & GSIM implementation
@@ -43,8 +42,7 @@ public class AccountSummaryCollectionData {
     public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,
             final Collection<LoanAccountSummaryData> groupLoanIndividualMonitoringAccounts,
             final Collection<SavingsAccountSummaryData> savingsAccounts, final Collection<ShareAccountSummaryData> shareAccounts,
-            final Collection<GuarantorAccountSummaryData> guarantorAccounts,
-            final Collection<WorkingCapitalLoanAccountSummaryData> workingCapitalLoanAccounts) {
+            final Collection<GuarantorAccountSummaryData> guarantorAccounts) {
 
         this.loanAccounts = defaultLoanAccountsIfEmpty(loanAccounts);
         this.groupLoanIndividualMonitoringAccounts = groupLoanIndividualMonitoringAccounts;
@@ -54,7 +52,6 @@ public class AccountSummaryCollectionData {
         this.memberLoanAccounts = null;
         this.memberSavingsAccounts = null;
         this.memberGuarantorAccounts = null;
-        this.workingCapitalLoanAccounts = workingCapitalLoanAccounts;
     }
 
     public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,
@@ -72,7 +69,6 @@ public class AccountSummaryCollectionData {
         this.memberLoanAccounts = defaultLoanAccountsIfEmpty(memberLoanAccounts);
         this.memberSavingsAccounts = defaultSavingsAccountsIfEmpty(memberSavingsAccounts);
         this.memberGuarantorAccounts = defaultGuarantorAccountsIfEmpty(memberGuarantorAccounts);
-        this.workingCapitalLoanAccounts = null;
     }
 
     private Collection<LoanAccountSummaryData> defaultLoanAccountsIfEmpty(final Collection<LoanAccountSummaryData> collection) {

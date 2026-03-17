@@ -42,8 +42,6 @@ import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.InlineJobRequest;
 import org.apache.fineract.client.models.IsCatchUpRunningDTO;
 import org.apache.fineract.client.models.OldestCOBProcessedLoanDTO;
-import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsResponse;
 import org.apache.fineract.test.data.LoanStatus;
 import org.apache.fineract.test.helper.BusinessDateHelper;
 import org.apache.fineract.test.helper.WorkingCapitalLoanTestHelper;
@@ -104,17 +102,15 @@ public class WorkingCapitalLoanCobStepDef extends AbstractStepDef {
 
     @Given("Admin inserts an active WC loan into the database")
     public void insertActiveWcLoan() {
-        Long loanId = wcLoanHelper.insertActiveLoan(getClientId(), getProductId());
+        Long loanId = wcLoanHelper.insertActiveLoan();
         log.debug("Inserted WC loan with id={}", loanId);
         getTrackedLoanIds().add(loanId);
     }
 
     @Given("Admin inserts {int} active WC loans into the database")
     public void insertMultipleActiveWcLoans(int count) {
-        final Long clientId = getClientId();
-        final Long productId = getProductId();
         for (int i = 0; i < count; i++) {
-            Long loanId = wcLoanHelper.insertActiveLoan(clientId, productId);
+            Long loanId = wcLoanHelper.insertActiveLoan();
             log.debug("Inserted WC loan with id={}", loanId);
             getTrackedLoanIds().add(loanId);
         }
@@ -136,18 +132,19 @@ public class WorkingCapitalLoanCobStepDef extends AbstractStepDef {
 
     @Given("Admin inserts a WC loan with status {string} into the database")
     public void insertWcLoanWithStatus(String statusName) {
-        final LoanStatus status = LoanStatus.valueOf(statusName);
-        Long loanId = wcLoanHelper.insertLoan(status, null, getClientId(), getProductId());
-        log.debug("Inserted WC loan with id={}, status={}", loanId, statusName);
+        LoanStatus status = LoanStatus.valueOf(statusName);
+        Long loanId = wcLoanHelper.insertLoan(status.getValue(), null);
+        log.debug("Inserted WC loan with id={}, status={}({})", loanId, statusName, status.getValue());
         getTrackedLoanIds().add(loanId);
     }
 
     @Given("Admin inserts a WC loan with status {string} and lastClosedBusinessDate {string} into the database")
     public void insertWcLoanWithStatusAndDate(String statusName, String dateStr) {
-        final LoanStatus status = LoanStatus.valueOf(statusName);
-        final LocalDate lastClosedBusinessDate = LocalDate.parse(dateStr, DATE_FORMAT);
-        Long loanId = wcLoanHelper.insertLoan(status, lastClosedBusinessDate, getClientId(), getProductId());
-        log.debug("Inserted WC loan with id={}, status={}, lastClosedBusinessDate={}", loanId, statusName, lastClosedBusinessDate);
+        LoanStatus status = LoanStatus.valueOf(statusName);
+        LocalDate lastClosedBusinessDate = LocalDate.parse(dateStr, DATE_FORMAT);
+        Long loanId = wcLoanHelper.insertLoan(status.getValue(), lastClosedBusinessDate);
+        log.debug("Inserted WC loan with id={}, status={}({}), lastClosedBusinessDate={}", loanId, statusName, status.getValue(),
+                lastClosedBusinessDate);
         getTrackedLoanIds().add(loanId);
     }
 
@@ -258,16 +255,5 @@ public class WorkingCapitalLoanCobStepDef extends AbstractStepDef {
     @SuppressWarnings("unchecked")
     private List<Long> getTrackedLoanIds() {
         return testContext().get(TestContextKey.WC_LOAN_IDS);
-    }
-
-    private Long getClientId() {
-        final PostClientsResponse clientResponse = testContext().get(TestContextKey.CLIENT_CREATE_RESPONSE);
-        return clientResponse.getClientId();
-    }
-
-    private Long getProductId() {
-        final PostWorkingCapitalLoanProductsResponse workingCapitalLoanProductsResponse = testContext()
-                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
-        return workingCapitalLoanProductsResponse.getResourceId();
     }
 }

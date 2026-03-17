@@ -35,6 +35,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class WorkingCapitalLoanProductConfigurableAttributesData implements Serializable {
 
+    private Boolean flatPercentageAmount;
     private Boolean delinquencyBucketClassification;
     private Boolean discountDefault;
     private Boolean periodPaymentFrequency;

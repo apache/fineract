@@ -66,6 +66,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         // Core product parameters (related detail: amortization, repayment defaults)
         @Schema(example = "EIR", allowableValues = { "EIR", "FLAT" })
         public String amortizationType;
+        @Schema(example = "5.5")
+        public BigDecimal flatPercentageAmount;
         @Schema(example = "1")
         public Long delinquencyBucketId;
         @Schema(example = "365")
@@ -131,6 +133,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
             private PostAllowAttributeOverrides() {}
 
             @Schema(example = "true")
+            public Boolean flatPercentageAmount;
+            @Schema(example = "true")
             public Boolean delinquencyBucketClassification;
             @Schema(example = "true")
             public Boolean discountDefault;
@@ -181,6 +185,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
 
         // Core product parameters (related detail)
         public StringEnumOptionData amortizationType;
+        @Schema(example = "5.5")
+        public BigDecimal flatPercentageAmount;
         public GetDelinquencyBucket delinquencyBucket;
         @Schema(example = "365")
         public Integer npvDayCount;
@@ -262,6 +268,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
             private GetConfigurableAttributes() {}
 
             @Schema(example = "true")
+            public Boolean flatPercentageAmount;
+            @Schema(example = "true")
             public Boolean delinquencyBucketClassification;
             @Schema(example = "true")
             public Boolean discountDefault;
@@ -317,6 +325,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
 
         // Core product parameters (related detail)
         public StringEnumOptionData amortizationType;
+        @Schema(example = "5.5")
+        public BigDecimal flatPercentageAmount;
         public GetWorkingCapitalLoanProductsResponse.GetDelinquencyBucket delinquencyBucket;
         @Schema(example = "365")
         public Integer npvDayCount;
@@ -377,6 +387,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         // Core product parameters (related detail)
         @Schema(example = "EIR", allowableValues = { "EIR", "FLAT" })
         public String amortizationType;
+        @Schema(example = "5.5")
+        public BigDecimal flatPercentageAmount;
         @Schema(example = "1")
         public Long delinquencyBucketId;
         @Schema(example = "365")
