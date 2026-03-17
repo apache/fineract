@@ -239,4 +239,5 @@
     <include file="parts/0218_standardize_character_set_and_collation.xml" relativeToChangelogFile="true" />
     <include file="parts/0219_remove_self_service_feature.xml" relativeToChangelogFile="true"/>
     <include file="parts/0220_add_login_retry_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0221_transaction_summary_reports_fix_after_originator_details.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
