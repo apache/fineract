@@ -279,7 +279,7 @@ We have an automated bot which marks pull requests as "stale" after a while, and
 
 This project's committers typically prefer to bring your pull requests in through _Rebase and Merge_ instead of _Create a Merge Commit_. (If you are unfamiliar with GitHub's UI regarding this, note the somewhat hidden little triangle drop-down at the bottom of the PR, visible only to committers, not contributors.)  This avoids the "merge commits" which we consider to be somewhat "polluting" the project's commit log history view.  We understand this doesn't give an easy automatic reference to the original PR (which GitHub automatically adds to the merge commit message it generates), but we consider this an only very minor inconvenience; it's typically relatively easy to find the original PR even just from the commit message, and JIRA.
 
-We expect most proposed PRs to typically consist of a single commit. Committers may use _Squash and merge_ to combine your commits at merge time, and if they do so, will rewrite your commit message as they see fit.
+Contributors may include multiple commits in a PR. There is no longer a one-commit-per-user expectation. Authors are encouraged to organize commits in a way that best communicates the development and review history of the change. Keeping commits logical and reviewable is preferred, but preserving intermediate work, follow-up fixes, and signed commits is fully acceptable. 
 
 Neither of these two are hard absolute rules, but mere conventions. Multiple commits in single PRs make sense in certain cases (e.g. branch backports).
 
