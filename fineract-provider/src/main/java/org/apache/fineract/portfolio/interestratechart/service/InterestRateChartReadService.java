@@ -16,16 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.portfolio.interestratechart.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import java.util.Collection;
+import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartData;
 
-public interface InterestRateChartWritePlatformService {
+public interface InterestRateChartReadService {
 
-    CommandProcessingResult create(JsonCommand command);
+    InterestRateChartData retrieveOne(Long interestChartId);
 
-    CommandProcessingResult update(Long interestChartId, JsonCommand command);
+    Collection<InterestRateChartData> retrieveAllWithSlabs(Long savingsProductId);
 
-    CommandProcessingResult deleteChart(Long interestChartId);
+    Collection<InterestRateChartData> retrieveAllWithSlabsWithTemplate(Long savingsProductId);
+
+    InterestRateChartData retrieveOneWithSlabs(Long interestChartId);
+
+    InterestRateChartData retrieveWithTemplate(InterestRateChartData interestRateChartData);
+
+    InterestRateChartData template();
+
+    InterestRateChartData retrieveActiveChartWithTemplate(Long productId);
 }

@@ -18,9 +18,11 @@
  */
 package org.apache.fineract.portfolio.interestratechart.data;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -28,6 +30,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 /**
  * Immutable data object representing a InterestRateChart.
  */
+@Getter
 public final class InterestRateChartData {
 
     private final Long id;
@@ -35,12 +38,14 @@ public final class InterestRateChartData {
     private final String description;
     private final LocalDate fromDate;
     private final LocalDate endDate;
+    @JsonProperty("savingsProductId")
     private final Long productId;
+    @JsonProperty("savingsProductName")
     private final String productName;
     private final boolean isPrimaryGroupingByAmount;
 
     // associations
-    private Collection<InterestRateChartSlabData> chartSlabs;
+    private Collection<InterestRateChartSlabData> chartSlabs = new ArrayList<>();
 
     // template
     private final Collection<EnumOptionData> periodTypes;
@@ -55,7 +60,7 @@ public final class InterestRateChartData {
     public static InterestRateChartData instance(Long id, String name, String description, LocalDate fromDate, LocalDate endDate,
             boolean isPrimaryGroupingByAmount, Long savingsProductId, String savingsProductName) {
         Collection<EnumOptionData> periodTypes = null;
-        Collection<InterestRateChartSlabData> chartSlabs = null;
+        Collection<InterestRateChartSlabData> chartSlabs = new ArrayList<>();
         final Collection<EnumOptionData> entityTypeOptions = null;
         final Collection<EnumOptionData> attributeNameOptions = null;
         final Collection<EnumOptionData> conditionTypeOptions = null;
@@ -102,7 +107,7 @@ public final class InterestRateChartData {
         final boolean isPrimaryGroupingByAmount = false;
         final Long savingsProductId = null;
         final String savingsProductName = null;
-        final Collection<InterestRateChartSlabData> chartSlabs = null;
+        final Collection<InterestRateChartSlabData> chartSlabs = new ArrayList<>();
 
         return new InterestRateChartData(id, name, description, fromDate, endDate, isPrimaryGroupingByAmount, savingsProductId,
                 savingsProductName, chartSlabs, periodTypes, entityTypeOptions, attributeNameOptions, conditionTypeOptions,
@@ -136,10 +141,6 @@ public final class InterestRateChartData {
     }
 
     public void addChartSlab(final InterestRateChartSlabData chartSlab) {
-        if (this.chartSlabs == null) {
-            this.chartSlabs = new ArrayList<>();
-        }
-
         this.chartSlabs.add(chartSlab);
     }
 

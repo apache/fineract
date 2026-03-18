@@ -31,12 +31,15 @@ import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.util.Map;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Embeddable
+@Getter
+@Setter
 public class InterestRateChartFields {
 
     @Column(name = "name", length = 100, unique = false, nullable = false)
@@ -45,11 +48,9 @@ public class InterestRateChartFields {
     @Column(name = "description", nullable = true)
     private String description;
 
-    @Getter
     @Column(name = "from_date", nullable = false)
     private LocalDate fromDate;
 
-    @Getter
     @Column(name = "end_date", nullable = true)
     private LocalDate endDate;
 
@@ -145,10 +146,6 @@ public class InterestRateChartFields {
         final LocalDate endDate = this.endDate == null ? DateUtils.getBusinessLocalDate() : this.getEndDate();
         final LocalDateInterval interval = LocalDateInterval.create(getFromDate(), endDate);
         return interval.contains(target);
-    }
-
-    public boolean isPrimaryGroupingByAmount() {
-        return this.isPrimaryGroupingByAmount;
     }
 
 }

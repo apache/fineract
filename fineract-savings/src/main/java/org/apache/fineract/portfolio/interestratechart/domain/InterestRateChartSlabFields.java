@@ -35,12 +35,16 @@ import java.util.Comparator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 
 @Embeddable
+@Getter
+@Setter
 public class InterestRateChartSlabFields {
 
     @Column(name = "description", nullable = true)
@@ -57,14 +61,6 @@ public class InterestRateChartSlabFields {
 
     @Column(name = "amount_range_from", scale = 6, precision = 19)
     private BigDecimal amountRangeFrom;
-
-    public BigDecimal getAmountRangeFrom() {
-        return this.amountRangeFrom;
-    }
-
-    public BigDecimal getAmountRangeTo() {
-        return this.amountRangeTo;
-    }
 
     @Column(name = "amount_range_to", scale = 6, precision = 19)
     private BigDecimal amountRangeTo;

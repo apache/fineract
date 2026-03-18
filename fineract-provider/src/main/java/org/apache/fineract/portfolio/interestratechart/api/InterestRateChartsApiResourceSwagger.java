@@ -22,9 +22,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.Set;
 
-/**
- * Created by Chirag Gupta on 12/04/17.
- */
 final class InterestRateChartsApiResourceSwagger {
 
     private InterestRateChartsApiResourceSwagger() {}
@@ -95,62 +92,5 @@ final class InterestRateChartsApiResourceSwagger {
         @Schema(example = "Fixed Deposit Product 001")
         public String savingsProductName;
         public Set<GetInterestRateChartsChartSlabs> chartSlabs;
-    }
-
-    @Schema(description = "PostInterestRateChartsRequest")
-    public static final class PostInterestRateChartsRequest {
-
-        private PostInterestRateChartsRequest() {}
-
-        @Schema(example = "Chart - 2014")
-        public String name;
-        @Schema(example = "This chart is applicable for year 2014")
-        public String description;
-        @Schema(example = "Document")
-        public String type;
-        @Schema(example = "en")
-        public String locale;
-        @Schema(example = "dd MMMM yyyy")
-        public String dateFormat;
-        @Schema(example = "01 Jan 2014")
-        public String fromDate;
-    }
-
-    @Schema(description = "PostInterestRateChartsResponse")
-    public static final class PostInterestRateChartsResponse {
-
-        private PostInterestRateChartsResponse() {}
-
-        @Schema(example = "1")
-        public Long resourceId;
-    }
-
-    @Schema(description = "PutInterestRateChartsChartIdRequest")
-    public static final class PutInterestRateChartsChartIdRequest {
-
-        private PutInterestRateChartsChartIdRequest() {}
-
-        @Schema(example = "Interest rate chart for 2014")
-        public String name;
-        @Schema(example = "Interest rate chart for 2014")
-        public String description;
-    }
-
-    @Schema(description = "PutInterestRateChartsChartIdResponse")
-    public static final class PutInterestRateChartsChartIdResponse {
-
-        private PutInterestRateChartsChartIdResponse() {}
-
-        @Schema(example = "1")
-        public Long resourceId;
-    }
-
-    @Schema(description = "DeleteInterestRateChartsChartIdResponse")
-    public static final class DeleteInterestRateChartsChartIdResponse {
-
-        private DeleteInterestRateChartsChartIdResponse() {}
-
-        @Schema(example = "1")
-        public Long resourceId;
     }
 }

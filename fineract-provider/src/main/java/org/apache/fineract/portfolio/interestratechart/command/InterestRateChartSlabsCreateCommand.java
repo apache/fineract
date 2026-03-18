@@ -16,12 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.interestratechart.service;
 
-import java.util.Collection;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+package org.apache.fineract.portfolio.interestratechart.command;
 
-public interface InterestRateChartDropdownReadPlatformService {
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartSlabsCreateRequest;
 
-    Collection<EnumOptionData> retrievePeriodTypeOptions();
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class InterestRateChartSlabsCreateCommand extends Command<InterestRateChartSlabsCreateRequest> {}

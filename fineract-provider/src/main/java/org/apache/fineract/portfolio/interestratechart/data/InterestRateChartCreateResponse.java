@@ -16,19 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.interestratechart.service;
 
-import java.util.Collection;
+package org.apache.fineract.portfolio.interestratechart.data;
+
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
+@Builder
+@Data
 @NoArgsConstructor
-public class InterestRateChartDropdownReadPlatformServiceImpl implements InterestRateChartDropdownReadPlatformService {
+@AllArgsConstructor
+public class InterestRateChartCreateResponse implements Serializable {
 
-    @Override
-    public Collection<EnumOptionData> retrievePeriodTypeOptions() {
-        return InterestRateChartEnumerations.periodType(PeriodFrequencyType.values());
-    }
+    @Serial
+    private static final long serialVersionUID = 1L;
 
+    private Long resourceId;
 }

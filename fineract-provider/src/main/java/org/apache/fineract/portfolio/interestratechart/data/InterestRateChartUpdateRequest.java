@@ -16,16 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.interestratechart.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+package org.apache.fineract.portfolio.interestratechart.data;
 
-public interface InterestRateChartSlabWritePlatformService {
+import io.swagger.v3.oas.annotations.Hidden;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    CommandProcessingResult create(JsonCommand command);
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class InterestRateChartUpdateRequest implements Serializable {
 
-    CommandProcessingResult update(Long chartSlabId, Long interestChartId, JsonCommand command);
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    CommandProcessingResult deleteChartSlab(Long chartSlabId, Long interestRateChartId);
+    @Hidden
+    private Long id;
+
+    private String name;
+
+    private String description;
 }

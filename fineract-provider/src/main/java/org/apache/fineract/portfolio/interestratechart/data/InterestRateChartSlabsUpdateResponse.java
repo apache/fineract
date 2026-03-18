@@ -16,24 +16,41 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.portfolio.interestratechart.data;
 
+import java.io.Serial;
 import java.io.Serializable;
-import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
-public class InterestIncentiveRequest implements Serializable {
+@Data
+public class InterestRateChartSlabsUpdateResponse implements Serializable {
 
-    private Long id;
-    private String description;
-    private Integer entityType;
-    private Integer attributeName;
-    private Integer conditionType;
-    private String attributeValue;
-    private Integer incentiveType;
-    private BigDecimal amount;
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private Long resourceId;
+
+    private InterestRateChartSlabsUpdateChanges changes;
+
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
+    public static class InterestRateChartSlabsUpdateChanges implements Serializable {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        private Double annualInterestRate;
+
+        private String description;
+    }
 
 }

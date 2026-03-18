@@ -16,30 +16,76 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.portfolio.interestratechart.data;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
+@AllArgsConstructor
 @NoArgsConstructor
-public class InterestRateChartStabRequest implements Serializable {
+@Data
+@Builder
+public class InterestRateChartSlabsCreateRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String locale;
-    private String currencyCode;
-    private String description;
+    @Hidden
+    private Long chartId;
+
+    private Long chartSlabId;
+
     private Integer periodType;
+
     private Integer fromPeriod;
+
     private Integer toPeriod;
+
     private BigDecimal amountRangeFrom;
+
     private BigDecimal amountRangeTo;
-    private BigDecimal annualInterestRate;
-    private List<InterestIncentiveRequest> incentives;
+
+    private Double annualInterestRate;
+
+    private String currencyCode;
+
+    private String description;
+
+    private String locale;
+
+    private List<Incentive> incentives;
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
+    @Builder
+    public static class Incentive implements Serializable {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        private Long id;
+
+        private String description;
+
+        private Integer entityType;
+
+        private Integer attributeName;
+
+        private Integer conditionType;
+
+        private String attributeValue;
+
+        private Integer incentiveType;
+
+        private BigDecimal amount;
+    }
 }

@@ -101,8 +101,6 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
 
             final RecurringDepositProduct product = this.recurringDepositProductRepository.findById(productId)
                     .orElseThrow(() -> new RecurringDepositProductNotFoundException(productId));
-            product.setHelpers(this.chartAssembler);
-
             final Map<String, Object> changes = product.update(command);
 
             if (changes.containsKey(chargesParamName)) {

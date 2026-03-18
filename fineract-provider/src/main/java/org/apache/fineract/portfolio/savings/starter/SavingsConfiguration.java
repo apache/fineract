@@ -60,10 +60,10 @@ import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
-import org.apache.fineract.portfolio.interestratechart.service.InterestIncentiveDropdownReadPlatformService;
+import org.apache.fineract.portfolio.interestratechart.service.InterestIncentiveDropdownReadService;
 import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartAssembler;
-import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartDropdownReadPlatformService;
-import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartReadPlatformService;
+import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartDropdownReadService;
+import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartReadService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
@@ -168,11 +168,11 @@ public class SavingsConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(DepositAccountInterestRateChartReadPlatformService.class)
-    public DepositAccountInterestRateChartReadPlatformService depositAccountInterestRateChartReadPlatformService(
-            PlatformSecurityContext context, JdbcTemplate jdbcTemplate,
+    public DepositAccountInterestRateChartReadPlatformService depositAccountInterestRateChartReadService(PlatformSecurityContext context,
+            JdbcTemplate jdbcTemplate,
             DepositAccountInterestRateChartReadPlatformServiceImpl.DepositAccountInterestRateChartExtractor chartExtractor,
-            InterestRateChartDropdownReadPlatformService chartDropdownReadPlatformService,
-            InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService,
+            InterestRateChartDropdownReadService chartDropdownReadPlatformService,
+            InterestIncentiveDropdownReadService interestIncentiveDropdownReadPlatformService,
             CodeValueReadPlatformService codeValueReadPlatformService) {
         return new DepositAccountInterestRateChartReadPlatformServiceImpl(context, jdbcTemplate, chartExtractor,
                 chartDropdownReadPlatformService, interestIncentiveDropdownReadPlatformService, codeValueReadPlatformService);
@@ -200,7 +200,7 @@ public class SavingsConfiguration {
     @ConditionalOnMissingBean(DepositAccountReadPlatformService.class)
     public DepositAccountReadPlatformService depositAccountReadPlatformService(PlatformSecurityContext context, JdbcTemplate jdbcTemplate,
             DepositAccountInterestRateChartReadPlatformService chartReadPlatformService,
-            InterestRateChartReadPlatformService productChartReadPlatformService,
+            InterestRateChartReadService productChartReadPlatformService,
             PaginationParametersDataValidator paginationParametersDataValidator, DatabaseSpecificSQLGenerator sqlGenerator,
             PaginationHelper paginationHelper, ClientReadPlatformService clientReadPlatformService,
             GroupReadPlatformService groupReadPlatformService, DepositProductReadPlatformService depositProductReadPlatformService,
@@ -268,7 +268,7 @@ public class SavingsConfiguration {
     @Bean
     @ConditionalOnMissingBean(DepositProductReadPlatformService.class)
     public DepositProductReadPlatformService depositProductReadPlatformService(PlatformSecurityContext context, JdbcTemplate jdbcTemplate,
-            InterestRateChartReadPlatformService interestRateChartReadPlatformService) {
+            InterestRateChartReadService interestRateChartReadPlatformService) {
         return new DepositProductReadPlatformServiceImpl(context, jdbcTemplate, interestRateChartReadPlatformService);
     }
 

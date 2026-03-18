@@ -29,7 +29,7 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartData;
-import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartReadPlatformService;
+import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartReadService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.DepositProductData;
 import org.apache.fineract.portfolio.savings.data.FixedDepositProductData;
@@ -48,7 +48,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
     private static final DepositProductLookupMapper DEPOSIT_PRODUCT_LOOKUP_MAPPER = new DepositProductLookupMapper();
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
-    private final InterestRateChartReadPlatformService chartReadPlatformService;
+    private final InterestRateChartReadService chartReadPlatformService;
 
     @Override
     public Collection<DepositProductData> retrieveAll(final DepositAccountType depositAccountType) {
