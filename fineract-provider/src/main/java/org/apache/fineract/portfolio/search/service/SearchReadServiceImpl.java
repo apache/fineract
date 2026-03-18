@@ -28,7 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
@@ -42,29 +42,28 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountStatusEnumData;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.apache.fineract.portfolio.search.SearchConstants;
 import org.apache.fineract.portfolio.search.data.AdHocQuerySearchConditions;
+import org.apache.fineract.portfolio.search.data.AdHocQuerySearchRequest;
 import org.apache.fineract.portfolio.search.data.AdHocSearchQueryData;
 import org.apache.fineract.portfolio.search.data.SearchConditions;
 import org.apache.fineract.portfolio.search.data.SearchData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountStatusEnumData;
 import org.apache.fineract.portfolio.shareaccounts.service.SharesEnumerations;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 @RequiredArgsConstructor
-public class SearchReadPlatformServiceImpl implements SearchReadPlatformService {
+public class SearchReadServiceImpl implements SearchReadService {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private final PlatformSecurityContext context;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
+    private final SqlValidator sqlValidator;
 
     @Override
     public List<SearchData> retriveMatchingData(final SearchConditions searchConditions) {
-        final AppUser currentUser = context.authenticatedUser();
-        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final String hierarchy = searchConditions.getHierarchy();
 
         final SearchMapper rm = new SearchMapper();
 
@@ -81,37 +80,79 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
     public String searchSchema(final SearchConditions searchConditions) {
 
         final String union = " union ";
-        final String clientMatchSql = "( (select 'CLIENT' as entityType, c.id as entityId, c.display_name as entityName, c.external_id as entityExternalId, c.account_no as entityAccountNo "
-                + " , c.office_id as parentId, o.name as parentName, c.mobile_no as entityMobileNo,c.status_enum as entityStatusEnum, null as subEntityType, null as parentType "
-                + " from m_client c join m_office o on o.id = c.office_id where o.hierarchy like :hierarchy and (c.account_no like :search or c.display_name like :search or c.external_id like :search or c.mobile_no like :search)) "
-                + " order by c.id desc)";
+        final String clientMatchSql = """
+                ( (select 'CLIENT' as entityType, c.id as entityId, c.display_name as entityName, \
+                c.external_id as entityExternalId, c.account_no as entityAccountNo, \
+                c.office_id as parentId, o.name as parentName, c.mobile_no as entityMobileNo, \
+                c.status_enum as entityStatusEnum, null as subEntityType, null as parentType \
+                from m_client c join m_office o on o.id = c.office_id \
+                where o.hierarchy like :hierarchy \
+                and (c.account_no like :search or c.display_name like :search \
+                or c.external_id like :search or c.mobile_no like :search)) \
+                order by c.id desc)""";
 
-        final String loanMatchSql = "( (select 'LOAN' as entityType, l.id as entityId, pl.name as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
-                + " , coalesce(c.id,g.id) as parentId, coalesce(c.display_name,g.display_name) as parentName, null as entityMobileNo, l.loan_status_id as entityStatusEnum, null as subEntityType, CASE WHEN g.id is null THEN 'client' ELSE 'group' END as parentType "
-                + " from m_loan l left join m_client c on l.client_id = c.id left join m_group g ON l.group_id = g.id left join m_office o on o.id = c.office_id left join m_product_loan pl on pl.id=l.product_id where (o.hierarchy IS NULL OR o.hierarchy like :hierarchy) and (l.account_no like :search or l.external_id like :search)) "
-                + " order by l.id desc)";
+        final String loanMatchSql = """
+                ( (select 'LOAN' as entityType, l.id as entityId, pl.name as entityName, \
+                l.external_id as entityExternalId, l.account_no as entityAccountNo, \
+                coalesce(c.id,g.id) as parentId, coalesce(c.display_name,g.display_name) as parentName, \
+                null as entityMobileNo, l.loan_status_id as entityStatusEnum, null as subEntityType, \
+                CASE WHEN g.id is null THEN 'client' ELSE 'group' END as parentType \
+                from m_loan l left join m_client c on l.client_id = c.id \
+                left join m_group g ON l.group_id = g.id \
+                left join m_office o on o.id = c.office_id \
+                left join m_product_loan pl on pl.id=l.product_id \
+                where (o.hierarchy IS NULL OR o.hierarchy like :hierarchy) \
+                and (l.account_no like :search or l.external_id like :search)) \
+                order by l.id desc)""";
 
-        final String savingMatchSql = "( (select 'SAVING' as entityType, s.id as entityId, sp.name as entityName, s.external_id as entityExternalId, s.account_no as entityAccountNo "
-                + " , coalesce(c.id,g.id) as parentId, coalesce(c.display_name, g.display_name) as parentName, null as entityMobileNo, s.status_enum as entityStatusEnum, concat(s.deposit_type_enum, '') as subEntityType, CASE WHEN g.id is null THEN 'client' ELSE 'group' END as parentType "
-                + " from m_savings_account s left join m_client c on s.client_id = c.id left join m_group g ON s.group_id = g.id left join m_office o on o.id = c.office_id left join m_savings_product sp on sp.id=s.product_id "
-                + " where (o.hierarchy IS NULL OR o.hierarchy like :hierarchy) and (s.account_no like :search or s.external_id like :search)) "
-                + " order by s.id desc)";
+        final String savingMatchSql = """
+                ( (select 'SAVING' as entityType, s.id as entityId, sp.name as entityName, \
+                s.external_id as entityExternalId, s.account_no as entityAccountNo, \
+                coalesce(c.id,g.id) as parentId, coalesce(c.display_name, g.display_name) as parentName, \
+                null as entityMobileNo, s.status_enum as entityStatusEnum, \
+                concat(s.deposit_type_enum, '') as subEntityType, \
+                CASE WHEN g.id is null THEN 'client' ELSE 'group' END as parentType \
+                from m_savings_account s left join m_client c on s.client_id = c.id \
+                left join m_group g ON s.group_id = g.id \
+                left join m_office o on o.id = c.office_id \
+                left join m_savings_product sp on sp.id=s.product_id \
+                where (o.hierarchy IS NULL OR o.hierarchy like :hierarchy) \
+                and (s.account_no like :search or s.external_id like :search)) \
+                order by s.id desc)""";
 
-        final String shareMatchSql = "( (select 'SHARE' as entityType, s.id as entityId, sp.name as entityName, s.external_id as entityExternalId, s.account_no as entityAccountNo "
-                + " , c.id as parentId, c.display_name as parentName, null as entityMobileNo, s.status_enum as entityStatusEnum, null as subEntityType, 'client' as parentType "
-                + " from m_share_account s left join m_client c on s.client_id = c.id left join m_office o on o.id = c.office_id left join m_share_product sp on sp.id=s.product_id "
-                + " where (o.hierarchy IS NULL OR o.hierarchy like :hierarchy) and (s.account_no like :search or s.external_id like :search)) "
-                + " order by s.id desc)";
+        final String shareMatchSql = """
+                ( (select 'SHARE' as entityType, s.id as entityId, sp.name as entityName, \
+                s.external_id as entityExternalId, s.account_no as entityAccountNo, \
+                c.id as parentId, c.display_name as parentName, null as entityMobileNo, \
+                s.status_enum as entityStatusEnum, null as subEntityType, 'client' as parentType \
+                from m_share_account s left join m_client c on s.client_id = c.id \
+                left join m_office o on o.id = c.office_id \
+                left join m_share_product sp on sp.id=s.product_id \
+                where (o.hierarchy IS NULL OR o.hierarchy like :hierarchy) \
+                and (s.account_no like :search or s.external_id like :search)) \
+                order by s.id desc)""";
 
-        final String clientIdentifierMatchSql = "( (select 'CLIENTIDENTIFIER' as entityType, ci.id as entityId, ci.document_key as entityName, "
-                + " null as entityExternalId, null as entityAccountNo, c.id as parentId, c.display_name as parentName,null as entityMobileNo, c.status_enum as entityStatusEnum, null as subEntityType, null as parentType "
-                + " from m_client_identifier ci join m_client c on ci.client_id=c.id join m_office o on o.id = c.office_id "
-                + " where o.hierarchy like :hierarchy and ci.document_key like :search ) " + " order by ci.id desc)";
+        final String clientIdentifierMatchSql = """
+                ( (select 'CLIENTIDENTIFIER' as entityType, ci.id as entityId, ci.document_key as entityName, \
+                null as entityExternalId, null as entityAccountNo, c.id as parentId, \
+                c.display_name as parentName, null as entityMobileNo, \
+                c.status_enum as entityStatusEnum, null as subEntityType, null as parentType \
+                from m_client_identifier ci join m_client c on ci.client_id=c.id \
+                join m_office o on o.id = c.office_id \
+                where o.hierarchy like :hierarchy and ci.document_key like :search) \
+                order by ci.id desc)""";
 
-        final String groupMatchSql = "( (select CASE WHEN g.level_id=1 THEN 'CENTER' ELSE 'GROUP' END as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, g.account_no as entityAccountNo, "
-                + " g.office_id as parentId, o.name as parentName, null as entityMobileNo, g.status_enum as entityStatusEnum, null as subEntityType, null as parentType "
-                + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and (g.account_no like :search or g.display_name like :search or g.external_id like :search )) "
-                + " order by g.id desc)";
+        final String groupMatchSql = """
+                ( (select CASE WHEN g.level_id=1 THEN 'CENTER' ELSE 'GROUP' END as entityType, \
+                g.id as entityId, g.display_name as entityName, \
+                g.external_id as entityExternalId, g.account_no as entityAccountNo, \
+                g.office_id as parentId, o.name as parentName, null as entityMobileNo, \
+                g.status_enum as entityStatusEnum, null as subEntityType, null as parentType \
+                from m_group g join m_office o on o.id = g.office_id \
+                where o.hierarchy like :hierarchy \
+                and (g.account_no like :search or g.display_name like :search \
+                or g.external_id like :search)) \
+                order by g.id desc)""";
 
         final StringBuilder sql = new StringBuilder();
 
@@ -192,9 +233,6 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
 
     @Override
     public AdHocSearchQueryData retrieveAdHocQueryTemplate() {
-
-        context.authenticatedUser();
-
         final Collection<LoanProductData> loanProducts = loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
         final Collection<OfficeData> offices = officeReadPlatformService.retrieveAllOfficesForDropdown();
 
@@ -202,14 +240,34 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
     }
 
     @Override
-    public List<AdHocSearchQueryData> retrieveAdHocQueryMatchingData(final AdHocQuerySearchConditions searchConditions) {
-
-        context.authenticatedUser();
+    public List<AdHocSearchQueryData> retrieveAdHocQueryMatchingData(final AdHocQuerySearchRequest request) {
+        final AdHocQuerySearchConditions searchConditions = convertToSearchConditions(request);
 
         final AdHocQuerySearchMapper rm = new AdHocQuerySearchMapper();
         final MapSqlParameterSource params = new MapSqlParameterSource();
 
         return namedParameterJdbcTemplate.query(rm.schema(searchConditions, params), params, rm);
+    }
+
+    private AdHocQuerySearchConditions convertToSearchConditions(final AdHocQuerySearchRequest request) {
+        if (request.getLoanDateOption() != null) {
+            sqlValidator.validate(request.getLoanDateOption());
+        }
+        if (request.getOutStandingAmountPercentageCondition() != null) {
+            sqlValidator.validate(request.getOutStandingAmountPercentageCondition());
+        }
+        if (request.getOutstandingAmountCondition() != null) {
+            sqlValidator.validate(request.getOutstandingAmountCondition());
+        }
+
+        return AdHocQuerySearchConditions.instance(request.getLoanStatus(), request.getLoanProducts(), request.getOffices(),
+                request.getLoanDateOption(), request.getLoanFromDate(), request.getLoanToDate(),
+                request.getIncludeOutStandingAmountPercentage() != null ? request.getIncludeOutStandingAmountPercentage() : false,
+                request.getOutStandingAmountPercentageCondition(), request.getMinOutStandingAmountPercentage(),
+                request.getMaxOutStandingAmountPercentage(), request.getOutStandingAmountPercentage(),
+                request.getIncludeOutstandingAmount() != null ? request.getIncludeOutstandingAmount() : false,
+                request.getOutstandingAmountCondition(), request.getMinOutstandingAmount(), request.getMaxOutstandingAmount(),
+                request.getOutstandingAmount());
     }
 
     private static final class AdHocQuerySearchMapper implements RowMapper<AdHocSearchQueryData> {

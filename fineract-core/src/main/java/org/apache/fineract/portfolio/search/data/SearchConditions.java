@@ -31,11 +31,13 @@ public class SearchConditions {
     private final Boolean shareSeach;
     private final Boolean clientIdentifierSearch;
     private Boolean exactMatch;
+    private final String hierarchy;
 
-    public SearchConditions(final String searchQueryParam, final String searchResource, Boolean exactMatch) {
+    public SearchConditions(final String searchQueryParam, final String searchResource, Boolean exactMatch, final String hierarchy) {
         this.searchQuery = searchQueryParam;
         this.searchResource = searchResource;
         this.exactMatch = exactMatch;
+        this.hierarchy = hierarchy;
         this.clientSearch = null == searchResource
                 || searchResource.toLowerCase().contains(SearchSupportedResources.CLIENTS.name().toLowerCase());
         this.groupSearch = null == searchResource
@@ -52,7 +54,7 @@ public class SearchConditions {
 
     public SearchConditions(final String searchQueryParam, final String searchResource, final Boolean clientSearch,
             final Boolean groupSearch, final Boolean loanSeach, final Boolean savingSeach, final Boolean shareSeach,
-            final Boolean clientIdentifierSearch, Boolean exactMatch) {
+            final Boolean clientIdentifierSearch, Boolean exactMatch, final String hierarchy) {
         this.searchQuery = searchQueryParam;
         this.searchResource = searchResource;
         this.clientSearch = clientSearch;
@@ -62,6 +64,7 @@ public class SearchConditions {
         this.shareSeach = shareSeach;
         this.clientIdentifierSearch = clientIdentifierSearch;
         this.exactMatch = exactMatch;
+        this.hierarchy = hierarchy;
     }
 
     public String getSearchQuery() {
@@ -98,6 +101,10 @@ public class SearchConditions {
 
     public Boolean isClientIdentifierSearch() {
         return this.clientIdentifierSearch;
+    }
+
+    public String getHierarchy() {
+        return this.hierarchy;
     }
 
 }

@@ -35,69 +35,79 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.portfolio.search.SearchConstants.SearchResponseParameters;
-import org.apache.fineract.portfolio.search.data.AdHocQueryDataValidator;
-import org.apache.fineract.portfolio.search.data.AdHocQuerySearchConditions;
+import org.apache.fineract.portfolio.search.data.AdHocQuerySearchRequest;
 import org.apache.fineract.portfolio.search.data.AdHocSearchQueryData;
 import org.apache.fineract.portfolio.search.data.SearchConditions;
 import org.apache.fineract.portfolio.search.data.SearchData;
-import org.apache.fineract.portfolio.search.service.SearchReadPlatformService;
+import org.apache.fineract.portfolio.search.service.SearchReadService;
+import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/search")
 @Component
 @Tag(name = "Search API", description = "Search API allows to search scoped resources clients, loans and groups on specified fields.")
 @RequiredArgsConstructor
+@Consumes({ MediaType.APPLICATION_JSON })
+@Produces({ MediaType.APPLICATION_JSON })
 public class SearchApiResource {
 
-    private static final Set<String> SEARCH_RESPONSE_PARAMETERS = SearchResponseParameters.getAllValues();
-
-    private final SearchReadPlatformService searchReadPlatformService;
-    private final AdHocQueryDataValidator fromApiJsonDeserializer;
+    private final SearchReadService searchReadService;
 
     @GET
     @Path("/template")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrive Adhoc Search query template", description = "Mandatory Fields\n" + "\n" + "search?query=000000001\n")
+    @Operation(summary = "Retrive Adhoc Search query template", description = """
+            Mandatory Fields
+
+            search?query=000000001
+            """)
     public AdHocSearchQueryData retrieveAdHocSearchQueryTemplate() {
 
-        return this.searchReadPlatformService.retrieveAdHocQueryTemplate();
+        return searchReadService.retrieveAdHocQueryTemplate();
     }
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Search Resources", description = "Example Requests:\n" + "\n" + "search?query=000000001\n" + "\n" + "\n"
-            + "search?query=Petra&resource=clients,groups\n" + "\n" + "\n" + "search?query=Petra&resource=clients,groups&exactMatch=true")
+    @Operation(summary = "Search Resources", description = """
+            Example Requests:
+
+            search?query=000000001
+
+
+            search?query=Petra&resource=clients,groups
+
+
+            search?query=Petra&resource=clients,groups&exactMatch=true""")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SearchApiResourceSwagger.GetSearchResponse.class))))
     public List<SearchData> searchData(@QueryParam("query") @Parameter(description = "query") final String query,
             @QueryParam("resource") @Parameter(description = "resource") final String resource,
             @DefaultValue("false") @QueryParam("exactMatch") @Parameter(description = "exactMatch") Boolean exactMatch) {
 
-        final SearchConditions searchConditions = new SearchConditions(query, resource, exactMatch);
+        final AppUser currentUser = (AppUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final SearchConditions searchConditions = new SearchConditions(query, resource, exactMatch, hierarchy);
 
-        return this.searchReadPlatformService.retriveMatchingData(searchConditions);
+        return searchReadService.retriveMatchingData(searchConditions);
     }
 
     @POST
     @Path("/advance")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Adhoc query search", description = "AdHocQuery search has more search options, it is a POST request, it uses request body to send search parameters\n"
-            + "\n" + "\n" + "Mandatory fields:" + "entities" + "\n" + "\n" + "Optional fields:"
-            + "loanStatus, loanProducts, offices, loanDateOption, loanFromDate, loanToDate, \n"
-            + "includeOutStandingAmountPercentage, outStandingAmountPercentageCondition, \n"
-            + "minOutStandingAmountPercentage and maxOutStandingAmountPercentage OR outStandingAmountPercentage, \n"
-            + "includeOutstandingAmount, outstandingAmountCondition, \n"
-            + "minOutstandingAmount and maxOutstandingAmount OR outstandingAmount")
+    @Operation(summary = "Adhoc query search", description = """
+            AdHocQuery search has more search options, it is a POST request, \
+            it uses request body to send search parameters
+
+
+            Mandatory fields: entities
+
+            Optional fields: \
+            loanStatus, loanProducts, offices, loanDateOption, loanFromDate, loanToDate,
+            includeOutStandingAmountPercentage, outStandingAmountPercentageCondition,
+            minOutStandingAmountPercentage and maxOutStandingAmountPercentage OR outStandingAmountPercentage,
+            includeOutstandingAmount, outstandingAmountCondition,
+            minOutstandingAmount and maxOutstandingAmount OR outstandingAmount""")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SearchApiResourceSwagger.PostAdhocQuerySearchRequest.class)))
-    public List<AdHocSearchQueryData> advancedSearch(final String json) {
+    public List<AdHocSearchQueryData> advancedSearch(final AdHocQuerySearchRequest request) {
 
-        final AdHocQuerySearchConditions searchConditions = this.fromApiJsonDeserializer.retrieveSearchConditions(json);
-
-        return this.searchReadPlatformService.retrieveAdHocQueryMatchingData(searchConditions);
+        return searchReadService.retrieveAdHocQueryMatchingData(request);
     }
 }
