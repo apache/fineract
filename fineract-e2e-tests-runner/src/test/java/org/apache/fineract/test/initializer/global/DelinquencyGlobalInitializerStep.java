@@ -29,10 +29,10 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.models.DelinquencyBucketData;
 import org.apache.fineract.client.models.DelinquencyBucketRequest;
-import org.apache.fineract.client.models.DelinquencyRangeData;
+import org.apache.fineract.client.models.DelinquencyBucketResponse;
 import org.apache.fineract.client.models.DelinquencyRangeRequest;
+import org.apache.fineract.client.models.DelinquencyRangeResponse;
 import org.apache.fineract.client.models.MinimumPaymentPeriodAndRule;
 import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
 import org.apache.fineract.test.data.delinquency.DelinquencyBucketType;
@@ -65,9 +65,9 @@ public class DelinquencyGlobalInitializerStep implements FineractGlobalInitializ
     }
 
     public void setDefaultDelinquencyRanges() {
-        List<DelinquencyRangeData> existingRanges;
+        List<DelinquencyRangeResponse> existingRanges;
         try {
-            existingRanges = fineractClient.delinquencyRangeAndBucketsManagement().getDelinquencyRanges(Map.of());
+            existingRanges = fineractClient.delinquencyRangeAndBucketsManagement().getRanges(Map.of());
         } catch (Exception e) {
             log.debug("Could not retrieve existing delinquency ranges, will create them", e);
             existingRanges = new ArrayList<>();
@@ -76,7 +76,7 @@ public class DelinquencyGlobalInitializerStep implements FineractGlobalInitializ
         for (int i = 0; i < DEFAULT_DELINQUENCY_RANGES.size() - 1; i++) {
             String classification = "Delinquency range " + DEFAULT_DELINQUENCY_RANGES.get(i).toString();
 
-            DelinquencyRangeData existingRange = existingRanges.stream().filter(r -> classification.equals(r.getClassification()))
+            DelinquencyRangeResponse existingRange = existingRanges.stream().filter(r -> classification.equals(r.getClassification()))
                     .findFirst().orElse(null);
 
             if (existingRange != null) {
@@ -95,13 +95,13 @@ public class DelinquencyGlobalInitializerStep implements FineractGlobalInitializ
                 postDelinquencyRangeRequest.maximumAgeDays(DEFAULT_DELINQUENCY_RANGES.get(i + 1));
             }
 
-            PostDelinquencyRangeResponse response = ok(() -> fineractClient.delinquencyRangeAndBucketsManagement()
-                    .createDelinquencyRange(postDelinquencyRangeRequest, Map.of()));
+            PostDelinquencyRangeResponse response = ok(
+                    () -> fineractClient.delinquencyRangeAndBucketsManagement().createRange(postDelinquencyRangeRequest, Map.of()));
             createdRangeIds.add(response.getResourceId());
         }
 
         String lastClassification = "Delinquency range " + DEFAULT_DELINQUENCY_RANGES.get(DEFAULT_DELINQUENCY_RANGES.size() - 1).toString();
-        DelinquencyRangeData existingLastRange = existingRanges.stream().filter(r -> lastClassification.equals(r.getClassification()))
+        DelinquencyRangeResponse existingLastRange = existingRanges.stream().filter(r -> lastClassification.equals(r.getClassification()))
                 .findFirst().orElse(null);
 
         if (existingLastRange != null) {
@@ -116,14 +116,13 @@ public class DelinquencyGlobalInitializerStep implements FineractGlobalInitializ
         lastRange.maximumAgeDays(null);
 
         PostDelinquencyRangeResponse lastResponse = ok(
-                () -> fineractClient.delinquencyRangeAndBucketsManagement().createDelinquencyRange(lastRange, Map.of()));
+                () -> fineractClient.delinquencyRangeAndBucketsManagement().createRange(lastRange, Map.of()));
         createdRangeIds.add(lastResponse.getResourceId());
     }
 
     public void setDefaultDelinquencyBucket() {
         try {
-            List<DelinquencyBucketData> existingBuckets = fineractClient.delinquencyRangeAndBucketsManagement()
-                    .getDelinquencyBuckets(Map.of());
+            List<DelinquencyBucketResponse> existingBuckets = fineractClient.delinquencyRangeAndBucketsManagement().getBuckets(Map.of());
             boolean bucketExists = existingBuckets.stream().anyMatch(b -> DEFAULT_DELINQUENCY_BUCKET_NAME.equals(b.getName()));
 
             if (bucketExists) {
@@ -137,14 +136,12 @@ public class DelinquencyGlobalInitializerStep implements FineractGlobalInitializ
         postDelinquencyBucketRequest.name(DEFAULT_DELINQUENCY_BUCKET_NAME);
         postDelinquencyBucketRequest.ranges(createdRangeIds);
 
-        executeVoid(() -> fineractClient.delinquencyRangeAndBucketsManagement().createDelinquencyBucket(postDelinquencyBucketRequest,
-                Map.of()));
+        executeVoid(() -> fineractClient.delinquencyRangeAndBucketsManagement().createBucket(postDelinquencyBucketRequest, Map.of()));
     }
 
     public void setDefaultWCDelinquencyBucket() {
         try {
-            List<DelinquencyBucketData> existingBuckets = fineractClient.delinquencyRangeAndBucketsManagement()
-                    .getDelinquencyBuckets(Map.of());
+            List<DelinquencyBucketResponse> existingBuckets = fineractClient.delinquencyRangeAndBucketsManagement().getBuckets(Map.of());
             boolean bucketExists = existingBuckets.stream().anyMatch(b -> DEFAULT_WC_DELINQUENCY_BUCKET_NAME.equals(b.getName()));
 
             if (bucketExists) {
@@ -155,15 +152,14 @@ public class DelinquencyGlobalInitializerStep implements FineractGlobalInitializ
         }
 
         DelinquencyBucketRequest postDelinquencyBucketWCRequest = new DelinquencyBucketRequest().name(DEFAULT_WC_DELINQUENCY_BUCKET_NAME)
-                .bucketType(DelinquencyBucketType.WORKING_CAPITAL.getValue().toString())//
+                .bucketType(DelinquencyBucketType.WORKING_CAPITAL.name())//
                 .ranges(List.of(1L)) //
                 .minimumPaymentPeriodAndRule(new MinimumPaymentPeriodAndRule() //
-                        .frequency(1L) //
-                        .minimumPaymentType(DelinquencyMinimumPayment.PERCENTAGE.getValue()) //
-                        .frequencyType(DelinquencyFrequencyType.MONTHS.getValue()) //
+                        .frequency(1) //
+                        .minimumPaymentType(DelinquencyMinimumPayment.PERCENTAGE.name()) //
+                        .frequencyType(DelinquencyFrequencyType.MONTHS.name()) //
                         .minimumPayment(BigDecimal.valueOf(1.23))); //
 
-        executeVoid(() -> fineractClient.delinquencyRangeAndBucketsManagement().createDelinquencyBucket(postDelinquencyBucketWCRequest,
-                Map.of()));
+        executeVoid(() -> fineractClient.delinquencyRangeAndBucketsManagement().createBucket(postDelinquencyBucketWCRequest, Map.of()));
     }
 }

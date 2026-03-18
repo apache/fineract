@@ -121,10 +121,8 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
         final Loan loan = this.loanRepository.getReferenceById(loanId);
         Optional<LoanDelinquencyTagHistory> optLoanDelinquencyTag = this.repositoryLoanDelinquencyTagHistory.findByLoanAndLiftedOnDate(loan,
                 null);
-        if (optLoanDelinquencyTag.isPresent()) {
-            return mapperRange.map(optLoanDelinquencyTag.get().getDelinquencyRange());
-        }
-        return null;
+        return optLoanDelinquencyTag.map(loanDelinquencyTagHistory -> mapperRange.map(loanDelinquencyTagHistory.getDelinquencyRange()))
+                .orElse(null);
     }
 
     @Override

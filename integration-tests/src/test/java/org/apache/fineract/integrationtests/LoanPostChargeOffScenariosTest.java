@@ -1154,7 +1154,7 @@ public class LoanPostChargeOffScenariosTest extends BaseLoanIntegrationTest {
         Assertions.assertNotNull(fundID);
 
         // Delinquency Bucket
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
+        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
 
         PostLoanProductsRequest loanProductsRequest = new PostLoanProductsRequest().name(name)//
                 .shortName(shortName)//

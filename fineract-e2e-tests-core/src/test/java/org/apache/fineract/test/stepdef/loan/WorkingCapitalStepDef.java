@@ -46,7 +46,6 @@ import org.apache.fineract.test.factory.WorkingCapitalRequestFactory;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
 import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
-import org.apache.fineract.test.support.TestContext;
 import org.apache.fineract.test.support.TestContextKey;
 import org.assertj.core.api.SoftAssertions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -225,8 +224,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         final PutWorkingCapitalLoanProductsProductIdRequest workingCapitalLoanProductUpdateRequestUpdated = setWorkingCapitalLoanProductsUpdateRequest(
                 defaultWorkingCapitalLoanProductUpdateRequest, fieldName, value);
 
-        PostWorkingCapitalLoanProductsResponse workingCapitalLoanProductsResponse = TestContext.GLOBAL
-                .get(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_FOR_UPDATE_WCLP);
+        PostWorkingCapitalLoanProductsResponse workingCapitalLoanProductsResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
         Long resourceId = workingCapitalLoanProductsResponse.getResourceId();
 
         String errorMessage = ErrorMessageHelper.fieldValueMoreMaxLengthAllowedFailure(fieldName, maxAllowedLengthValue);
@@ -235,8 +234,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
 
     @Then("Admin failed to update a new Working Capital Loan Product field {string} with zero incorrect value")
     public void updateWorkingCapitalLoanProductWithZeroValueDataFailed(String fieldName) {
-        PostWorkingCapitalLoanProductsResponse workingCapitalLoanProductsResponse = TestContext.GLOBAL
-                .get(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_FOR_UPDATE_WCLP);
+        PostWorkingCapitalLoanProductsResponse workingCapitalLoanProductsResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
         Long resourceId = workingCapitalLoanProductsResponse.getResourceId();
         String errorMessage = ErrorMessageHelper.fieldValueZeroValueFailure(fieldName);
         updateWorkingCapitalLoanProductWithInvalidDataFailure(resourceId, fieldName, "0", errorMessage);
@@ -244,15 +243,15 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
 
     @Then("Admin failed to update a new Working Capital Loan Product field {string} with invalid data {string} and got an error {string}")
     public void updateWorkingCapitalLoanProductWithInvalidDataFailed(String fieldName, String value, String errorMessage) {
-        final PostWorkingCapitalLoanProductsRequest workingCapitalProductForUpdateRequest = TestContext.GLOBAL
-                .get(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST_FOR_UPDATE_WCLP);
+        final PostWorkingCapitalLoanProductsRequest workingCapitalProductForUpdateRequest = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST);
         String workingCapitalProductName = workingCapitalProductForUpdateRequest.getName();
         final PutWorkingCapitalLoanProductsProductIdRequest defaultWorkingCapitalLoanProductUpdateRequest = workingCapitalRequestFactory
                 .defaultWorkingCapitalLoanProductRequestUpdate() //
                 .name(workingCapitalProductName); //
 
-        PostWorkingCapitalLoanProductsResponse workingCapitalLoanProductsResponse = TestContext.GLOBAL
-                .get(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_FOR_UPDATE_WCLP);
+        PostWorkingCapitalLoanProductsResponse workingCapitalLoanProductsResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
         Long resourceId = workingCapitalLoanProductsResponse.getResourceId();
         updateWorkingCapitalLoanProductWithInvalidDataFailure(defaultWorkingCapitalLoanProductUpdateRequest, resourceId, fieldName, value,
                 errorMessage);
@@ -263,8 +262,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         final PutWorkingCapitalLoanProductsProductIdRequest defaultWorkingCapitalLoanProductUpdateRequest = new PutWorkingCapitalLoanProductsProductIdRequest()
                 .paymentAllocation(
                         workingCapitalRequestFactory.invalidNumberOfPaymentAllocationRulesForWorkingCapitalLoanProductUpdateRequest());
-        PostWorkingCapitalLoanProductsResponse workingCapitalLoanProductsResponse = TestContext.GLOBAL
-                .get(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_FOR_UPDATE_WCLP);
+        PostWorkingCapitalLoanProductsResponse workingCapitalLoanProductsResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
         Long resourceId = workingCapitalLoanProductsResponse.getResourceId();
 
         String errorMessage = ErrorMessageHelper.paymentAllocationRulesInvalidNumberFailure(4);
@@ -275,8 +274,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
     public void updateWorkingCapitalLoanProductWithInvalidPaymentAllocationFailed() {
         final PutWorkingCapitalLoanProductsProductIdRequest defaultWorkingCapitalLoanProductUpdateRequest = new PutWorkingCapitalLoanProductsProductIdRequest()
                 .paymentAllocation(workingCapitalRequestFactory.invalidPaymentAllocationRulesForWorkingCapitalLoanProductUpdateRequest());
-        PostWorkingCapitalLoanProductsResponse workingCapitalLoanProductsResponse = TestContext.GLOBAL
-                .get(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_FOR_UPDATE_WCLP);
+        PostWorkingCapitalLoanProductsResponse workingCapitalLoanProductsResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
         Long resourceId = workingCapitalLoanProductsResponse.getResourceId();
 
         String errorMessage = ErrorMessageHelper.paymentAllocationRulesInvalidValueFailure();

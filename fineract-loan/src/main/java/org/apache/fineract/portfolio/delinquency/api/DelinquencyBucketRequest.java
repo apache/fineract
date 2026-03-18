@@ -47,9 +47,9 @@ public class DelinquencyBucketRequest implements Serializable {
         @Serial
         private static final long serialVersionUID = 1L;
 
-        private Long frequency;
-        private Integer frequencyType;
+        private Integer frequency;
+        private String frequencyType;
         private BigDecimal minimumPayment;
-        private Long minimumPaymentType;
+        private String minimumPaymentType;
     }
 }

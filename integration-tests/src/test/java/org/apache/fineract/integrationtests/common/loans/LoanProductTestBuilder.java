@@ -154,7 +154,7 @@ public class LoanProductTestBuilder {
     private String fixedPrincipalPercentagePerInstallment;
     private String installmentAmountInMultiplesOf;
     private boolean canDefineInstallmentAmount;
-    private Integer delinquencyBucketId;
+    private Long delinquencyBucketId;
     private Integer dueDaysForRepaymentEvent = null;
     private Integer overDueDaysForRepaymentEvent = null;
     private boolean enableDownPayment = false;
@@ -181,7 +181,7 @@ public class LoanProductTestBuilder {
         return new Gson().toJson(map);
     }
 
-    public HashMap<String, Object> build(final String chargeId, final Integer delinquencyBucketId) {
+    public HashMap<String, Object> build(final String chargeId, final Long delinquencyBucketId) {
         final HashMap<String, Object> map = new HashMap<>();
 
         if (chargeId != null) {
@@ -371,7 +371,7 @@ public class LoanProductTestBuilder {
         return this;
     }
 
-    public LoanProductTestBuilder withDelinquencyBucket(Integer delinquencyBucketId) {
+    public LoanProductTestBuilder withDelinquencyBucket(Long delinquencyBucketId) {
         this.delinquencyBucketId = delinquencyBucketId;
         return this;
     }

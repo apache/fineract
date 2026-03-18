@@ -34,7 +34,9 @@ import java.util.UUID;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
 import org.apache.fineract.client.models.DeleteLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
-import org.apache.fineract.client.models.DelinquencyRangeData;
+import org.apache.fineract.client.models.DelinquencyBucketRequest;
+import org.apache.fineract.client.models.DelinquencyRangeRequest;
+import org.apache.fineract.client.models.DelinquencyRangeResponse;
 import org.apache.fineract.client.models.GetDelinquencyTagHistoryResponse;
 import org.apache.fineract.client.models.GetLoansApprovalTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
@@ -834,31 +836,27 @@ public class ExternalIdSupportIntegrationTest extends BaseLoanIntegrationTest {
         new BusinessDateHelper().updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
                 .date("2022.10.10").dateFormat("yyyy.MM.dd").locale("en"));
         try {
-            ArrayList<Integer> rangeIds = new ArrayList<>();
+            ArrayList<Long> rangeIds = new ArrayList<>();
             // First Range
-            String jsonRange = DelinquencyRangesHelper.getAsJSON(1, 3);
-            PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec,
-                    responseSpec, jsonRange);
-            rangeIds.add(Math.toIntExact(delinquencyRangeResponse.getResourceId()));
-            jsonRange = DelinquencyRangesHelper.getAsJSON(4, 60);
-
-            DelinquencyRangeData range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
-                    Math.toIntExact(delinquencyRangeResponse.getResourceId()));
+            PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createRange(new DelinquencyRangeRequest()
+                    .minimumAgeDays(1).maximumAgeDays(3).locale("en").classification(Utils.randomStringGenerator("DLQ_R_", 10)));
+            rangeIds.add(delinquencyRangeResponse.getResourceId());
+            DelinquencyRangeResponse range = DelinquencyRangesHelper.getRange(delinquencyRangeResponse.getResourceId());
 
             // Second Range
-            delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec, responseSpec, jsonRange);
-            rangeIds.add(Math.toIntExact(delinquencyRangeResponse.getResourceId()));
+            delinquencyRangeResponse = DelinquencyRangesHelper.createRange(new DelinquencyRangeRequest().minimumAgeDays(4)
+                    .maximumAgeDays(60).locale("en").classification(Utils.randomStringGenerator("DLQ_R_", 10)));
+            rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-            String jsonBucket = DelinquencyBucketsHelper.getAsJSON(rangeIds);
-            PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec,
-                    responseSpec, jsonBucket);
+            PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper
+                    .createBucket(new DelinquencyBucketRequest().name(Utils.randomStringGenerator("DLQ_B_", 10)).ranges(rangeIds));
 
             final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                     .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                     .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment()
                     .withInterestTypeAsDecliningBalance().withAccountingRuleAsNone()
                     .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30").withDaysInYear("365")
-                    .withMoratorium("0", "0").withDelinquencyBucket(Math.toIntExact(delinquencyBucketResponse.getResourceId()))
+                    .withMoratorium("0", "0").withDelinquencyBucket(delinquencyBucketResponse.getResourceId())
                     .withInArrearsTolerance("1001").withMultiDisburse().withDisallowExpectedDisbursements(true).build(null);
             final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
 

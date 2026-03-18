@@ -16,23 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.portfolio.delinquency.api.data;
 
-package org.apache.fineract.portfolio.delinquency.domain;
+import java.io.Serializable;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
-import java.util.Optional;
+@ToString
+@AllArgsConstructor
+@Getter
+@Setter
+public class DelinquencyBucketResponse implements Serializable {
 
-@Converter(autoApply = true)
-public class DelinquencyBucketTypeConverter implements AttributeConverter<DelinquencyBucketType, Long> {
-
-    @Override
-    public Long convertToDatabaseColumn(DelinquencyBucketType delinquencyBucketType) {
-        return Optional.ofNullable(delinquencyBucketType).map(DelinquencyBucketType::getValue).orElse(null);
-    }
-
-    @Override
-    public DelinquencyBucketType convertToEntityAttribute(Long aLong) {
-        return DelinquencyBucketType.fromLong(aLong);
-    }
+    private Long id;
+    private String name;
+    private List<DelinquencyRangeResponse> ranges;
+    private StringEnumOptionData bucketType;
+    private DelinquencyMinimumPaymentPeriodAndRuleResponse minimumPaymentPeriodAndRule;
 }

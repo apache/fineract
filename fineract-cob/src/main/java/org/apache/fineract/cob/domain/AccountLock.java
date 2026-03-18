@@ -27,6 +27,7 @@ import jakarta.persistence.PostLoad;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -38,47 +39,41 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.springframework.data.domain.Persistable;
 
 @Getter
+@Setter
 @MappedSuperclass
 @NoArgsConstructor
 public abstract class AccountLock implements Persistable<Long>, Serializable {
 
-    protected static final long serialVersionUID = 2272591907035824317L;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
-    @Getter
     @Column(name = "loan_id", nullable = false)
-    protected Long loanId;
+    private Long loanId;
 
     @Version
-    @Getter
     @Column(name = "version")
-    protected Long version;
+    private Long version;
 
     @Enumerated(EnumType.STRING)
-    @Getter
     @Column(name = "lock_owner", nullable = false)
-    protected LockOwner lockOwner;
+    private LockOwner lockOwner;
 
     @Column(name = "lock_placed_on", nullable = false)
-    @Getter
-    protected OffsetDateTime lockPlacedOn;
+    private OffsetDateTime lockPlacedOn;
 
     @Column(name = "error")
-    @Getter
-    protected String error;
+    private String error;
 
     @Column(name = "stacktrace")
-    @Getter
-    protected String stacktrace;
+    private String stacktrace;
 
     @Column(name = "lock_placed_on_cob_business_date")
-    @Getter
-    protected LocalDate lockPlacedOnCobBusinessDate;
+    private LocalDate lockPlacedOnCobBusinessDate;
 
     @Transient
     @Setter(value = AccessLevel.NONE)
-    @Getter
-    protected boolean isNew = true;
+    private boolean isNew = true;
 
     @PrePersist
     @PostLoad
@@ -88,7 +83,7 @@ public abstract class AccountLock implements Persistable<Long>, Serializable {
 
     @Override
     public Long getId() {
-        return getLoanId();
+        return loanId;
     }
 
     public AccountLock(Long loanId, LockOwner lockOwner, LocalDate lockPlacedOnCobBusinessDate) {

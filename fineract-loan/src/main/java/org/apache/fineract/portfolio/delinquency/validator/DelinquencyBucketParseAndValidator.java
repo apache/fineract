@@ -35,7 +35,7 @@ import org.apache.fineract.portfolio.delinquency.data.DelinquencyMinimumPaymentP
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketType;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyFrequencyType;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPayment;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentType;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
@@ -69,10 +69,14 @@ public class DelinquencyBucketParseAndValidator extends ParseAndValidator {
 
         dataValidator.reset().parameter(DelinquencyApiConstants.NAME_PARAM_NAME).value(name).notBlank();
 
-        final Long bucketTypeParam = jsonHelper.extractLongNamed(DelinquencyApiConstants.BUCKET_TYPE_PARAM_NAME, element);
+        final String bucketTypeParam = jsonHelper.extractStringNamed(DelinquencyApiConstants.BUCKET_TYPE_PARAM_NAME, element);
         dataValidator.reset().parameter(DelinquencyApiConstants.BUCKET_TYPE_PARAM_NAME).value(bucketTypeParam).ignoreIfNull()
-                .isOneOfTheseValues(DelinquencyBucketType.REGULAR.getValue(), DelinquencyBucketType.WORKING_CAPITAL.getValue());
-        Long bucketType = bucketTypeParam == null ? DelinquencyBucketType.REGULAR.getValue() : bucketTypeParam;
+                .isOneOfEnumValues(DelinquencyBucketType.class);
+        if (dataValidator.hasError()) {
+            return null;
+        }
+        DelinquencyBucketType bucketType = bucketTypeParam == null ? DelinquencyBucketType.REGULAR
+                : DelinquencyBucketType.valueOf(bucketTypeParam);
 
         ArrayList<DelinquencyRangeData> ranges = new ArrayList<>();
         final String[] rangeIds = jsonHelper.extractArrayNamed(DelinquencyApiConstants.RANGES_PARAM_NAME, element);
@@ -85,7 +89,7 @@ public class DelinquencyBucketParseAndValidator extends ParseAndValidator {
         }
 
         DelinquencyMinimumPaymentPeriodAndRuleData minimumPaymentPeriodAndRule = null;
-        if (DelinquencyBucketType.WORKING_CAPITAL.getValue().equals(bucketType)) {
+        if (DelinquencyBucketType.WORKING_CAPITAL.equals(bucketType)) {
             JsonObject minimumPaymentPeriodAndRuleElement = jsonHelper
                     .extractJsonObjectNamed(DelinquencyApiConstants.MINIMUM_PAYMENT_PERIOD_AND_RULE_PARAM_NAME, element);
             minimumPaymentPeriodAndRule = validateAndParseUpdateMinimumPaymentPeriodAndRule(dataValidator,
@@ -93,36 +97,41 @@ public class DelinquencyBucketParseAndValidator extends ParseAndValidator {
 
         }
 
-        return dataValidator.hasError() ? null
-                : DelinquencyBucketData.getDataInstance(null, name, ranges, bucketType, minimumPaymentPeriodAndRule);
+        return dataValidator.hasError() ? null : new DelinquencyBucketData(null, name, ranges, bucketType, minimumPaymentPeriodAndRule);
     }
 
     private DelinquencyMinimumPaymentPeriodAndRuleData validateAndParseUpdateMinimumPaymentPeriodAndRule(DataValidatorBuilder dataValidator,
             JsonObject element, FromJsonHelper jsonHelper) {
         dataValidator.reset().parameter(DelinquencyApiConstants.MINIMUM_PAYMENT_PERIOD_AND_RULE_PARAM_NAME).value(element).notNull();
         if (element != null) {
-            Long frequency = jsonHelper.extractLongNamed(DelinquencyApiConstants.FREQUENCY_PARAM_NAME, element);
+            Locale locale = jsonHelper.extractLocaleParameter(element);
+            Integer frequency = jsonHelper.extractIntegerNamed(DelinquencyApiConstants.FREQUENCY_PARAM_NAME, element);
             dataValidator.reset().parameter(DelinquencyApiConstants.FREQUENCY_PARAM_NAME).value(frequency).notNull();
 
-            Integer frequencyType = Math
-                    .toIntExact(jsonHelper.extractLongNamed(DelinquencyApiConstants.FREQUENCY_TYPE_PARAM_NAME, element));
+            String frequencyType = jsonHelper.extractStringNamed(DelinquencyApiConstants.FREQUENCY_TYPE_PARAM_NAME, element);
             dataValidator.reset().parameter(DelinquencyApiConstants.FREQUENCY_TYPE_PARAM_NAME).value(frequencyType).notNull()
-                    .inMinMaxRange(0, 3);
-            final DelinquencyFrequencyType delinquencyFrequencyType = DelinquencyFrequencyType.fromInt(frequencyType);
+                    .isOneOfEnumValues(DelinquencyFrequencyType.class);
+            if (dataValidator.hasError()) {
+                return null;
+            }
+            final DelinquencyFrequencyType delinquencyFrequencyType = DelinquencyFrequencyType.valueOf(frequencyType);
 
             BigDecimal minimumPayment = jsonHelper.extractBigDecimalNamed(DelinquencyApiConstants.MINIMUM_PAYMENT_PARAM_NAME, element,
-                    Locale.US);
+                    locale);
             dataValidator.reset().parameter(DelinquencyApiConstants.MINIMUM_PAYMENT_PARAM_NAME).value(minimumPayment).notNull()
-                    .zeroOrPositiveAmount();
+                    .positiveAmount();
 
-            Long minimumPaymentType = jsonHelper.extractLongNamed(DelinquencyApiConstants.MINIMUM_PAYMENT_TYPE_PARAM_NAME, element);
+            String minimumPaymentType = jsonHelper.extractStringNamed(DelinquencyApiConstants.MINIMUM_PAYMENT_TYPE_PARAM_NAME, element);
             dataValidator.reset().parameter(DelinquencyApiConstants.MINIMUM_PAYMENT_TYPE_PARAM_NAME).value(minimumPaymentType).notNull()
-                    .inMinMaxRange(1, 2);
-            final DelinquencyMinimumPayment delinquencyMinimumPayment = DelinquencyMinimumPayment.fromLong(minimumPaymentType);
+                    .isOneOfEnumValues(DelinquencyMinimumPaymentType.class);
+            if (dataValidator.hasError()) {
+                return null;
+            }
+            final DelinquencyMinimumPaymentType delinquencyMinimumPayment = DelinquencyMinimumPaymentType.valueOf(minimumPaymentType);
 
             return dataValidator.hasError() ? null
-                    : new DelinquencyMinimumPaymentPeriodAndRuleData(frequency, delinquencyFrequencyType.toData(), minimumPayment,
-                            delinquencyMinimumPayment.toData());
+                    : new DelinquencyMinimumPaymentPeriodAndRuleData(frequency, delinquencyFrequencyType, minimumPayment,
+                            delinquencyMinimumPayment);
         }
         return null;
     }

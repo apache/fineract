@@ -20,29 +20,12 @@
 package org.apache.fineract.portfolio.delinquency.mapper;
 
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyMinimumPaymentPeriodAndRuleData;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyFrequencyType;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPayment;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentPeriodAndRule;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 
 @Mapper(config = MapstructMapperConfig.class)
 public interface DelinquencyMinimumPaymentPeriodAndRuleMapper {
 
-    @Mapping(target = "frequencyType", source = "frequencyType", qualifiedByName = "frequencyTypeData")
-    @Mapping(target = "minimumPaymentType", source = "minimumPaymentType", qualifiedByName = "minimumPaymentTypeData")
     DelinquencyMinimumPaymentPeriodAndRuleData map(DelinquencyMinimumPaymentPeriodAndRule source);
-
-    @Named("frequencyTypeData")
-    default EnumOptionData frequencyTypeData(final DelinquencyFrequencyType frequencyType) {
-        return frequencyType.toData();
-    }
-
-    @Named("minimumPaymentTypeData")
-    default EnumOptionData minimumPaymentTypeData(final DelinquencyMinimumPayment minimumPaymentType) {
-        return minimumPaymentType.toData();
-    }
 }

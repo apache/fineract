@@ -19,161 +19,75 @@
 package org.apache.fineract.integrationtests.common.products;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.client.models.DeleteDelinquencyBucketResponse;
-import org.apache.fineract.client.models.DelinquencyBucketData;
+import org.apache.fineract.client.models.DelinquencyBucketRequest;
+import org.apache.fineract.client.models.DelinquencyBucketResponse;
 import org.apache.fineract.client.models.DelinquencyRangeData;
+import org.apache.fineract.client.models.DelinquencyRangeRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdDelinquencySummary;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
-import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
 import org.apache.fineract.client.models.PutDelinquencyBucketResponse;
-import org.apache.fineract.client.util.JSON;
+import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 
 @Slf4j
 public class DelinquencyBucketsHelper {
 
-    private static final String DELINQUENCY_BUCKETS_URL = "/fineract-provider/api/v1/delinquency/buckets";
-    private static final Gson GSON = new JSON().getGson();
-
     protected DelinquencyBucketsHelper() {}
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static ArrayList<DelinquencyBucketData> getDelinquencyBuckets(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
-        String response = Utils.performServerGet(requestSpec, responseSpec, DELINQUENCY_BUCKETS_URL + "?" + Utils.TENANT_IDENTIFIER);
-
-        Type delinquencyBucketListType = new TypeToken<ArrayList<DelinquencyBucketData>>() {}.getType();
-        return GSON.fromJson(response, delinquencyBucketListType);
+    public static List<DelinquencyBucketResponse> getBuckets() {
+        return Calls.ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement.getBuckets());
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static DelinquencyBucketData getDelinquencyBucket(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer resourceId) {
-        String response = Utils.performServerGet(requestSpec, responseSpec,
-                DELINQUENCY_BUCKETS_URL + "/" + resourceId + "?" + Utils.TENANT_IDENTIFIER);
-        return GSON.fromJson(response, DelinquencyBucketData.class);
+    public static DelinquencyBucketResponse getBucket(Long id) {
+        return Calls.ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement.getBucket(id));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static PostDelinquencyBucketResponse createDelinquencyBucket(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String json) {
-        log.info("JSON: {}", json);
-        final String response = Utils.performServerPost(requestSpec, responseSpec, DELINQUENCY_BUCKETS_URL + "?" + Utils.TENANT_IDENTIFIER,
-                json, null);
-        return GSON.fromJson(response, PostDelinquencyBucketResponse.class);
+    public static Long createDefaultBucket() {
+        Long range1Id = Calls
+                .ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement.createRange(new DelinquencyRangeRequest()
+                        .classification(Utils.randomStringGenerator("DLQ_R_", 10)).minimumAgeDays(1).maximumAgeDays(3).locale("en")))
+                .getResourceId();
+        Long range2Id = Calls
+                .ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement.createRange(new DelinquencyRangeRequest()
+                        .classification(Utils.randomStringGenerator("DLQ_R_", 10)).minimumAgeDays(4).maximumAgeDays(60).locale("en")))
+                .getResourceId();
+        return Calls
+                .ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement.createBucket(
+                        new DelinquencyBucketRequest().name(Utils.randomStringGenerator("DLQ_B_", 10)).ranges(List.of(range1Id, range2Id))))
+                .getResourceId();
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static PutDelinquencyBucketResponse updateDelinquencyBucket(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer resourceId, final String json) {
-        log.info("JSON: {}", json);
-        final String response = Utils.performServerPut(requestSpec, responseSpec,
-                DELINQUENCY_BUCKETS_URL + "/" + resourceId + "?" + Utils.TENANT_IDENTIFIER, json, null);
-        return GSON.fromJson(response, PutDelinquencyBucketResponse.class);
+    public static PostDelinquencyBucketResponse createBucket(DelinquencyBucketRequest bucket) {
+        return Calls.ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement.createBucket(bucket));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static DeleteDelinquencyBucketResponse deleteDelinquencyBucket(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer resourceId) {
-        final String response = Utils.performServerDelete(requestSpec, responseSpec,
-                DELINQUENCY_BUCKETS_URL + "/" + resourceId + "?" + Utils.TENANT_IDENTIFIER, Utils.emptyJson(), null);
-        return GSON.fromJson(response, DeleteDelinquencyBucketResponse.class);
+    public static Long createBucket(List<Pair<Integer, Integer>> rangesDef) {
+        List<Long> rangeIds = new ArrayList<>();
+        rangesDef.forEach(range -> {
+            rangeIds.add(Calls.ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement
+                    .createRange(new DelinquencyRangeRequest().classification(Utils.randomStringGenerator("DLQ_R_", 10))
+                            .minimumAgeDays(range.getLeft()).maximumAgeDays(range.getRight()).locale("en")))
+                    .getResourceId());
+        });
+        return createBucket(new DelinquencyBucketRequest().name(Utils.randomStringGenerator("DLQ_B_", 10)).ranges(rangeIds))
+                .getResourceId();
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String getAsJSON(final List<Integer> rangeIds) {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("name", Utils.uniqueRandomStringGenerator("Delinquency_Bucket_", 4));
-        map.put("ranges", rangeIds.toArray());
-        return new Gson().toJson(map);
+    public static PutDelinquencyBucketResponse updateBucket(Long id, DelinquencyBucketRequest bucket) {
+        return Calls.ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement.updateBucket(id, bucket));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer createDelinquencyBucket(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            List<Pair<Integer, Integer>> ranges) {
-        List<Integer> rangeIds = ranges.stream().map(r -> createDelinquencyRange(requestSpec, responseSpec, r)).toList();
-        String jsonBucket = DelinquencyBucketsHelper.getAsJSON(rangeIds);
-        PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec,
-                responseSpec, jsonBucket);
-        assertNotNull(delinquencyBucketResponse);
-        return Math.toIntExact(delinquencyBucketResponse.getResourceId());
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer createDelinquencyRange(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            Pair<Integer, Integer> range) {
-        String jsonRange = DelinquencyRangesHelper.getAsJSON(range.getLeft(), range.getRight());
-        PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec, responseSpec,
-                jsonRange);
-        return Math.toIntExact(delinquencyRangeResponse.getResourceId());
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer createDelinquencyBucket(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        ArrayList<Integer> rangeIds = new ArrayList<>();
-
-        // First Range
-        String jsonRange = DelinquencyRangesHelper.getAsJSON(1, 3);
-        PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec, responseSpec,
-                jsonRange);
-        rangeIds.add(Math.toIntExact(delinquencyRangeResponse.getResourceId()));
-        jsonRange = DelinquencyRangesHelper.getAsJSON(4, 60);
-        DelinquencyRangeData range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
-                Math.toIntExact(delinquencyRangeResponse.getResourceId()));
-
-        // Second Range
-        delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec, responseSpec, jsonRange);
-        rangeIds.add(Math.toIntExact(delinquencyRangeResponse.getResourceId()));
-        range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
-                Math.toIntExact(delinquencyRangeResponse.getResourceId()));
-
-        String jsonBucket = DelinquencyBucketsHelper.getAsJSON(rangeIds);
-        PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec,
-                responseSpec, jsonBucket);
-        assertNotNull(delinquencyBucketResponse);
-
-        return Math.toIntExact(delinquencyBucketResponse.getResourceId());
+    public static DeleteDelinquencyBucketResponse deleteBucket(Long id) {
+        return Calls.ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement.deleteBucket(id));
     }
 
     public static void evaluateLoanCollectionData(GetLoansLoanIdResponse getLoansLoanIdResponse, Integer pastDueDays,

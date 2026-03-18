@@ -36,8 +36,10 @@ import java.util.stream.LongStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
-import org.apache.fineract.client.models.DelinquencyBucketData;
-import org.apache.fineract.client.models.DelinquencyRangeData;
+import org.apache.fineract.client.models.DelinquencyBucketRequest;
+import org.apache.fineract.client.models.DelinquencyBucketResponse;
+import org.apache.fineract.client.models.DelinquencyRangeRequest;
+import org.apache.fineract.client.models.DelinquencyRangeResponse;
 import org.apache.fineract.client.models.GetDelinquencyTagHistoryResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
@@ -162,34 +164,30 @@ public class InlineLoanCOBTest extends BaseLoanIntegrationTest {
                     ChargesHelper.getLoanOverdueFeeJSONWithCalculationTypePercentage("1"));
             Assertions.assertNotNull(overdueFeeChargeId);
 
-            ArrayList<Integer> rangeIds = new ArrayList<>();
+            ArrayList<Long> rangeIds = new ArrayList<>();
             // First Range
-            String jsonRange = DelinquencyRangesHelper.getAsJSON(1, 3);
-            PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec,
-                    responseSpec, jsonRange);
-            rangeIds.add(Math.toIntExact(delinquencyRangeResponse.getResourceId()));
-            jsonRange = DelinquencyRangesHelper.getAsJSON(4, 60);
+            PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createRange(new DelinquencyRangeRequest()
+                    .minimumAgeDays(1).maximumAgeDays(3).locale("en").classification(Utils.randomStringGenerator("DLQ_R_", 10)));
+            rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-            DelinquencyRangeData range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
-                    Math.toIntExact(delinquencyRangeResponse.getResourceId()));
+            DelinquencyRangeResponse range = DelinquencyRangesHelper.getRange(delinquencyRangeResponse.getResourceId());
 
             // Second Range
-            delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec, responseSpec, jsonRange);
-            rangeIds.add(Math.toIntExact(delinquencyRangeResponse.getResourceId()));
+            delinquencyRangeResponse = DelinquencyRangesHelper.createRange(new DelinquencyRangeRequest().minimumAgeDays(4)
+                    .maximumAgeDays(60).locale("en").classification(Utils.randomStringGenerator("DLQ_R_", 10)));
+            rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-            range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
-                    Math.toIntExact(delinquencyRangeResponse.getResourceId()));
+            range = DelinquencyRangesHelper.getRange(delinquencyRangeResponse.getResourceId());
             final String classificationExpected = range.getClassification();
             log.info("Expected Delinquency Range classification after Disbursement {}", classificationExpected);
 
-            String jsonBucket = DelinquencyBucketsHelper.getAsJSON(rangeIds);
-            PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec,
-                    responseSpec, jsonBucket);
+            PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper
+                    .createBucket(new DelinquencyBucketRequest().name(Utils.randomStringGenerator("DLQ_B_", 10)).ranges(rangeIds));
             assertNotNull(delinquencyBucketResponse);
-            final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
-                    Math.toIntExact(delinquencyBucketResponse.getResourceId()));
+            final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper
+                    .getBucket(delinquencyBucketResponse.getResourceId());
 
-            final Integer loanProductID = createLoanProduct(loanTransactionHelper, Math.toIntExact(delinquencyBucket.getId()));
+            final Integer loanProductID = createLoanProduct(loanTransactionHelper, delinquencyBucket.getId());
 
             Assertions.assertNotNull(loanProductID);
             HashMap loanStatusHashMap;
@@ -524,7 +522,7 @@ public class InlineLoanCOBTest extends BaseLoanIntegrationTest {
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
-    private Integer createLoanProduct(final LoanTransactionHelper loanTransactionHelper, final Integer delinquencyBucketId) {
+    private Integer createLoanProduct(final LoanTransactionHelper loanTransactionHelper, final Long delinquencyBucketId) {
         final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().build(null, delinquencyBucketId);
         return loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
     }

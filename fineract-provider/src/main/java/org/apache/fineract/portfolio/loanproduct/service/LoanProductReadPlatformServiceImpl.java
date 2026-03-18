@@ -549,8 +549,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             // Delinquency Buckets
             final Long delinquencyBucketId = JdbcSupport.getLong(rs, "delinquencyBucketId");
             final String delinquencyBucketName = rs.getString("delinquencyBucketName");
-            final DelinquencyBucketData delinquencyBucket = DelinquencyBucketData.getDataInstance(delinquencyBucketId,
-                    delinquencyBucketName, new ArrayList<>(), DelinquencyBucketType.REGULAR.getValue(), null);
+            final DelinquencyBucketData delinquencyBucket = new DelinquencyBucketData(delinquencyBucketId, delinquencyBucketName,
+                    new ArrayList<>(), DelinquencyBucketType.REGULAR, null);
 
             final String loanScheduleTypeStr = rs.getString("loanScheduleType");
             final LoanScheduleType loanScheduleType = LoanScheduleType.valueOf(loanScheduleTypeStr);

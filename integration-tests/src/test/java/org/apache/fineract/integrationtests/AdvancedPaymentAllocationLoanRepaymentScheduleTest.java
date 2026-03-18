@@ -6031,7 +6031,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         AtomicLong createdLoanChargeId = new AtomicLong();
         final BigDecimal interestRatePerPeriod = BigDecimal.valueOf(11.32);
         final BigDecimal principalAmount = BigDecimal.valueOf(135.94);
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec, List.of(//
+        final Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
                 Pair.of(1, 10), //
                 Pair.of(11, 30), //
                 Pair.of(31, 60), //
@@ -6173,7 +6173,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         GetLoansLoanIdTransactions[] accrualActivityId = new GetLoansLoanIdTransactions[1];
         final BigDecimal interestRatePerPeriod = BigDecimal.valueOf(11.32);
         final BigDecimal principalAmount = BigDecimal.valueOf(135.94);
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec, List.of(//
+        final Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
                 Pair.of(1, 10), //
                 Pair.of(11, 30), //
                 Pair.of(31, 60), //

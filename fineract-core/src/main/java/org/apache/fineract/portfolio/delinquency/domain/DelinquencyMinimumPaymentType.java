@@ -19,32 +19,27 @@
 package org.apache.fineract.portfolio.delinquency.domain;
 
 import java.util.Arrays;
+import java.util.List;
 import lombok.Getter;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 
-public enum DelinquencyMinimumPayment {
+@Getter
+@RequiredArgsConstructor
+public enum DelinquencyMinimumPaymentType {
 
-    PERCENTAGE(1L, "delinquencyMinimumPayment.percentage"), //
-    FLAT(2L, "delinquencyMinimumPayment.flat");
+    PERCENTAGE(1L, "delinquencyMinimumPayment.percentage", "Percentage payment type"), //
+    FLAT(2L, "delinquencyMinimumPayment.flat", "Flat payment type");
 
-    @Getter
-    private final Long value;
-    @Getter
+    private final Long id;
     private final String code;
+    private final String description;
 
-    DelinquencyMinimumPayment(Long value, String code) {
-        this.value = value;
-        this.code = code;
+    public static List<StringEnumOptionData> toStringEnumOptions() {
+        return Arrays.stream(values()).map(DelinquencyMinimumPaymentType::toData).toList();
     }
 
-    public static DelinquencyMinimumPayment fromLong(Long value) {
-        if (value == null) {
-            return null;
-        }
-        return Arrays.stream(DelinquencyMinimumPayment.values()).filter(v -> v.getValue().equals(value)).findAny().orElse(null);
-    }
-
-    public EnumOptionData toData() {
-        return new EnumOptionData(getValue(), getCode(), getCode());
+    public StringEnumOptionData toData() {
+        return new StringEnumOptionData(name(), getCode(), getDescription());
     }
 }

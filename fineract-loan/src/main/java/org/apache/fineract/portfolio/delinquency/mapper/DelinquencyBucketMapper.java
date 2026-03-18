@@ -24,21 +24,16 @@ import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketType;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper(config = MapstructMapperConfig.class)
 public interface DelinquencyBucketMapper extends DelinquencyMinimumPaymentPeriodAndRuleMapper {
 
-    @Mapping(target = "rangesOptions", ignore = true)
-    @Mapping(target = "bucketTypeOptions", ignore = true)
-    @Mapping(target = "frequencyTypeOptions", ignore = true)
-    @Mapping(target = "minimumPaymentOptions", ignore = true)
     DelinquencyBucketData map(DelinquencyBucket source);
 
     List<DelinquencyBucketData> map(List<DelinquencyBucket> sources);
 
-    default Long map(DelinquencyBucketType value) {
-        return value.getValue();
+    default String map(DelinquencyBucketType value) {
+        return value.name();
     }
 
 }

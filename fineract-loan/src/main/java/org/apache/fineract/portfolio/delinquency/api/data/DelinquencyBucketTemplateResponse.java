@@ -16,24 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.portfolio.delinquency.api.data;
 
-package org.apache.fineract.portfolio.delinquency.domain;
+import java.util.List;
+import lombok.Data;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
-import java.util.Optional;
+@Data
+public class DelinquencyBucketTemplateResponse {
 
-@Converter(autoApply = true)
-public class DelinquencyFrequencyTypeConverter implements AttributeConverter<DelinquencyFrequencyType, Integer> {
-
-    @Override
-    public Integer convertToDatabaseColumn(DelinquencyFrequencyType delinquencyFrequencyType) {
-        return Optional.ofNullable(delinquencyFrequencyType).map(DelinquencyFrequencyType::getValue).orElse(null);
-    }
-
-    @Override
-    public DelinquencyFrequencyType convertToEntityAttribute(Integer intValue) {
-        return DelinquencyFrequencyType.fromInt(intValue);
-
-    }
+    private final List<DelinquencyRangeResponse> rangesOptions;
+    private final List<StringEnumOptionData> bucketTypeOptions;
+    private final List<StringEnumOptionData> frequencyTypeOptions;
+    private final List<StringEnumOptionData> minimumPaymentOptions;
 }

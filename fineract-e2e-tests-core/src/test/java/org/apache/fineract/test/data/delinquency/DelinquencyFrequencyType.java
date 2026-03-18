@@ -20,22 +20,19 @@
 package org.apache.fineract.test.data.delinquency;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+@Getter
+@RequiredArgsConstructor
 public enum DelinquencyFrequencyType {
 
-    DAYS(0, "delinquencyFrequencyType.days"), //
-    WEEKS(1, "delinquencyFrequencyType.weeks"), //
-    MONTHS(2, "delinquencyFrequencyType.months"), //
-    YEARS(3, "delinquencyFrequencyType.years");
+    DAYS(0L, "delinquencyFrequencyType.days", "Days frequency"), //
+    WEEKS(1L, "delinquencyFrequencyType.weeks", "Week frequency"), //
+    MONTHS(2L, "delinquencyFrequencyType.months", "Month frequency"), //
+    YEARS(3L, "delinquencyFrequencyType.years", "Year frequency");
 
-    @Getter
-    private final Integer value;
-    @Getter
+    private final Long id;
     private final String code;
-
-    DelinquencyFrequencyType(final Integer value, final String code) {
-        this.value = value;
-        this.code = code;
-    }
+    private final String description;
 
 }

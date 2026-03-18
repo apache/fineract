@@ -29,4 +29,5 @@
   <include relativeToChangelogFile="true" file="parts/0005_alter_wc_loan_add_columns.xml"/>
   <include relativeToChangelogFile="true" file="parts/0006_wc_loan_disbursement_details.xml"/>
   <include relativeToChangelogFile="true" file="parts/0007_drop_flat_percentage_amount.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0008_delinquency_for_working_capital_loans.xml"/>
 </databaseChangeLog>

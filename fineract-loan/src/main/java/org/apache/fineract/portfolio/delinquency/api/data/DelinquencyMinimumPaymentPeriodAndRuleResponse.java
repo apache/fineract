@@ -17,32 +17,23 @@
  * under the License.
  */
 
-package org.apache.fineract.portfolio.delinquency.domain;
+package org.apache.fineract.portfolio.delinquency.api.data;
 
-import java.util.Arrays;
-import java.util.List;
+import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 
+@ToString
+@AllArgsConstructor
 @Getter
-@RequiredArgsConstructor
-public enum DelinquencyFrequencyType {
+@Setter
+public class DelinquencyMinimumPaymentPeriodAndRuleResponse {
 
-    DAYS(0L, "delinquencyFrequencyType.days", "Days frequency"), //
-    WEEKS(1L, "delinquencyFrequencyType.weeks", "Week frequency"), //
-    MONTHS(2L, "delinquencyFrequencyType.months", "Month frequency"), //
-    YEARS(3L, "delinquencyFrequencyType.years", "Year frequency");
-
-    private final Long id;
-    private final String code;
-    private final String description;
-
-    public static List<StringEnumOptionData> toStringEnumOptions() {
-        return Arrays.stream(values()).map(DelinquencyFrequencyType::toData).toList();
-    }
-
-    public StringEnumOptionData toData() {
-        return new StringEnumOptionData(name(), getCode(), getDescription());
-    }
+    private Integer frequency;
+    private StringEnumOptionData frequencyType;
+    private BigDecimal minimumPayment;
+    private StringEnumOptionData minimumPaymentType;
 }

@@ -144,10 +144,14 @@
         <class>org.apache.fineract.portfolio.floatingrates.domain.FloatingRate</class>
         <class>org.apache.fineract.portfolio.floatingrates.domain.FloatingRatePeriod</class>
 
+        <!-- COB (Chunk of Business) -->
+        <class>org.apache.fineract.cob.domain.BatchBusinessStep</class>
+        <class>org.apache.fineract.cob.domain.AccountLock</class>
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.weaving" value="static" />
+            <property name="eclipselink.weaving.internal" value="false"/>
         </properties>
     </persistence-unit>
 </persistence>

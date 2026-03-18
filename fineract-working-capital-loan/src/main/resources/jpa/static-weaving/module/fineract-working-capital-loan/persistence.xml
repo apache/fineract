@@ -31,14 +31,62 @@
     <persistence-unit name="jpa-pu" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 
+        <!-- Core Module Entities -->
+        <class>org.apache.fineract.useradministration.domain.Role</class>
+        <class>org.apache.fineract.portfolio.fund.domain.Fund</class>
+        <class>org.apache.fineract.organisation.workingdays.domain.WorkingDays</class>
+        <class>org.apache.fineract.useradministration.domain.Permission</class>
+        <class>org.apache.fineract.commands.domain.CommandSource</class>
+        <class>org.apache.fineract.useradministration.domain.AppUser</class>
+        <class>org.apache.fineract.accounting.glaccount.domain.GLAccount</class>
+        <class>org.apache.fineract.organisation.monetary.domain.OrganisationCurrency</class>
+        <class>org.apache.fineract.organisation.staff.domain.Staff</class>
+        <class>org.apache.fineract.portfolio.rate.domain.Rate</class>
+        <class>org.apache.fineract.organisation.monetary.domain.ApplicationCurrency</class>
+        <class>org.apache.fineract.portfolio.calendar.domain.CalendarInstance</class>
+        <class>org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail</class>
+        <class>org.apache.fineract.portfolio.calendar.domain.Calendar</class>
+        <class>org.apache.fineract.portfolio.calendar.domain.CalendarHistory</class>
+        <class>org.apache.fineract.portfolio.client.domain.ClientIdentifier</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentPeriodAndRule</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange</class>
+        <class>org.apache.fineract.portfolio.group.domain.StaffAssignmentHistory</class>
+        <class>org.apache.fineract.portfolio.group.domain.Group</class>
+        <class>org.apache.fineract.portfolio.client.domain.Client</class>
+        <class>org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventConfiguration</class>
+        <class>org.apache.fineract.portfolio.group.domain.GroupRole</class>
+        <class>org.apache.fineract.portfolio.paymenttype.domain.PaymentType</class>
+        <class>org.apache.fineract.portfolio.group.domain.GroupLevel</class>
+        <class>org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEvent</class>
+        <class>org.apache.fineract.organisation.office.domain.Office</class>
+        <class>org.apache.fineract.organisation.holiday.domain.Holiday</class>
+        <class>org.apache.fineract.infrastructure.cache.domain.PlatformCache</class>
+        <class>org.apache.fineract.infrastructure.codes.domain.Code</class>
+        <class>org.apache.fineract.infrastructure.businessdate.domain.BusinessDate</class>
+        <class>org.apache.fineract.infrastructure.codes.domain.CodeValue</class>
+
         <!-- COB (Chunk of Business) -->
+        <class>org.apache.fineract.cob.domain.BatchBusinessStep</class>
+        <class>org.apache.fineract.cob.domain.AccountLock</class>
 
         <!-- Working Capital Loan Module Entities -->
-
+        <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct</class>
+        <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductPaymentAllocationRule</class>
+        <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductConfigurableAttributes</class>
+        <class>org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPaymentAllocationRule</class>
+        <class>org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanNote</class>
+        <class>org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails</class>
+        <class>org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance</class>
+        <class>org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan</class>
+        <class>org.apache.fineract.cob.domain.WorkingCapitalLoanAccountLock</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanStatusConverter</class>
+        <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAllocationTypeListConverter</class>
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.weaving" value="static" />
+            <property name="eclipselink.weaving.internal" value="false"/>
         </properties>
     </persistence-unit>
 </persistence>

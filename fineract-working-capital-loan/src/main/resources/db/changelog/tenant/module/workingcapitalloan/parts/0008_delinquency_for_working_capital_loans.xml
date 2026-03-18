@@ -54,11 +54,11 @@
                 <constraints nullable="false"/>
             </column>
 
-            <column name="frequency" type="BIGINT">
+            <column name="frequency" type="INT">
                 <constraints nullable="false"/>
             </column>
 
-            <column name="frequency_type" type="BIGINT">
+            <column name="frequency_type" type="VARCHAR(50)">
                 <constraints nullable="false"/>
             </column>
 
@@ -66,7 +66,7 @@
                 <constraints nullable="false"/>
             </column>
 
-            <column name="minimum_payment_type" type="BIGINT">
+            <column name="minimum_payment_type" type="VARCHAR(50)">
                 <constraints nullable="false"/>
             </column>
 
@@ -142,7 +142,7 @@
         </preConditions>
 
         <addColumn tableName="m_delinquency_bucket">
-            <column name="bucket_type" type="BIGINT" defaultValueNumeric="1">
+            <column name="bucket_type" type="VARCHAR(50)" defaultValue="REGULAR">
                 <constraints nullable="false"/>
             </column>
         </addColumn>

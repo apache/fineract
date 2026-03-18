@@ -16,23 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.portfolio.delinquency.api.data;
 
-package org.apache.fineract.portfolio.delinquency.domain;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
-import java.util.Optional;
+@ToString
+@AllArgsConstructor
+@Getter
+@Setter
+public class DelinquencyRangeResponse implements Serializable {
 
-@Converter(autoApply = true)
-public class DelinquencyMinimumPaymentConverter implements AttributeConverter<DelinquencyMinimumPayment, Long> {
-
-    @Override
-    public Long convertToDatabaseColumn(DelinquencyMinimumPayment delinquencyMinimumPayment) {
-        return Optional.ofNullable(delinquencyMinimumPayment).map(DelinquencyMinimumPayment::getValue).orElse(null);
-    }
-
-    @Override
-    public DelinquencyMinimumPayment convertToEntityAttribute(Long aLong) {
-        return DelinquencyMinimumPayment.fromLong(aLong);
-    }
+    private Long id;
+    private String classification;
+    private Integer minimumAgeDays;
+    private Integer maximumAgeDays;
 }

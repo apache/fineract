@@ -29,7 +29,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.UUID;
-import org.apache.fineract.client.models.DelinquencyBucketData;
+import org.apache.fineract.client.models.DelinquencyBucketResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
@@ -72,9 +72,8 @@ public class LoanProductRepaymentStartDateConfigurationTest {
         // create product with repayment start date configuration, get , modify
 
         // Delinquency Bucket
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
-                delinquencyBucketId);
+        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
 
         final Integer repaymentStartDateType = 2;
 
@@ -105,9 +104,8 @@ public class LoanProductRepaymentStartDateConfigurationTest {
         // create loan product with no configuration for repayment start date and verify that it is disbursement date by
         // default
         // Delinquency Bucket
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
-                delinquencyBucketId);
+        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
 
         final Integer repaymentStartDateType = null;
 
@@ -462,7 +460,7 @@ public class LoanProductRepaymentStartDateConfigurationTest {
     }
 
     private Integer createLoanProductWithRepaymentStartDateTypeConfiguration(final LoanTransactionHelper loanTransactionHelper,
-            final Integer delinquencyBucketId, final Integer repaymentStartDateType) {
+            final Long delinquencyBucketId, final Integer repaymentStartDateType) {
         final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().withRepaymentStartDateType(repaymentStartDateType)
                 .build(null, delinquencyBucketId);
         final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));

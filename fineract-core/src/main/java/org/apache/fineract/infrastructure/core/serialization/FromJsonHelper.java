@@ -329,4 +329,8 @@ public class FromJsonHelper {
                     "Enum value not exists: ", enumType.getName(), value)), e);
         }
     }
+
+    public Integer extractIntegerNamed(String paramName, JsonObject element) {
+        return extractIntegerNamed(paramName, element, new HashSet<>());
+    }
 }

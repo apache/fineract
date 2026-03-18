@@ -83,7 +83,7 @@ public abstract class ApplyCommonLockTasklet<T extends AccountLock> implements T
         loanIdPartitions.forEach(loanIdPartition -> accountLocks.addAll(loanLockingService.findAllByLoanIdIn(loanIdPartition)));
 
         List<Long> toBeProcessedLoanIds = new ArrayList<>(loanIds);
-        List<Long> alreadyLockedAccountIds = accountLocks.stream().map(AccountLock::getLoanId).toList();
+        List<Long> alreadyLockedAccountIds = accountLocks.stream().map(AccountLock::getId).toList();
 
         toBeProcessedLoanIds.removeAll(alreadyLockedAccountIds);
         try {

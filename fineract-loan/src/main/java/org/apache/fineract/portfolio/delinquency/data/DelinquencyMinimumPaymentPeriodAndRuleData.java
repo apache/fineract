@@ -24,7 +24,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyFrequencyType;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentType;
 
 @ToString
 @AllArgsConstructor
@@ -32,8 +33,8 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 @Setter
 public class DelinquencyMinimumPaymentPeriodAndRuleData {
 
-    private Long frequency;
-    private EnumOptionData frequencyType;
+    private Integer frequency;
+    private DelinquencyFrequencyType frequencyType;
     private BigDecimal minimumPayment;
-    private EnumOptionData minimumPaymentType;
+    private DelinquencyMinimumPaymentType minimumPaymentType;
 }

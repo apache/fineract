@@ -42,6 +42,7 @@
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.weaving" value="static" />
+            <property name="eclipselink.weaving.internal" value="false"/>
         </properties>
     </persistence-unit>
 </persistence>

@@ -44,7 +44,7 @@ public class LoanDelinquencyForNonActiveAccountsTest extends BaseLoanIntegration
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             // Create DelinquencyBuckets
-            Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec, List.of(//
+            Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
                     Pair.of(31, 60), //
@@ -88,7 +88,7 @@ public class LoanDelinquencyForNonActiveAccountsTest extends BaseLoanIntegration
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             // Create DelinquencyBuckets
-            Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec, List.of(//
+            Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
                     Pair.of(31, 60), //
@@ -142,7 +142,7 @@ public class LoanDelinquencyForNonActiveAccountsTest extends BaseLoanIntegration
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             // Create DelinquencyBuckets
-            Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec, List.of(//
+            Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
                     Pair.of(31, 60), //
@@ -186,7 +186,7 @@ public class LoanDelinquencyForNonActiveAccountsTest extends BaseLoanIntegration
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             // Create DelinquencyBuckets
-            Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec, List.of(//
+            Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
                     Pair.of(31, 60), //

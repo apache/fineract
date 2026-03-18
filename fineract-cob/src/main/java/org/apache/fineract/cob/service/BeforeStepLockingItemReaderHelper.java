@@ -64,6 +64,6 @@ public class BeforeStepLockingItemReaderHelper<T extends AccountLock> {
     private List<Long> getLoanIdsLockedWithChunkProcessingLock(List<Long> loanIds) {
         List<T> accountLocks = new ArrayList<>(
                 loanLockingService.findAllByLoanIdInAndLockOwner(loanIds, LockOwner.LOAN_COB_CHUNK_PROCESSING));
-        return accountLocks.stream().map(T::getLoanId).toList();
+        return accountLocks.stream().map(T::getId).toList();
     }
 }

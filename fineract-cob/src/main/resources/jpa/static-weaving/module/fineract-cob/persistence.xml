@@ -66,10 +66,12 @@
         <class>org.apache.fineract.infrastructure.codes.domain.CodeValue</class>
 
         <!-- COB Module Entities -->
-
+        <class>org.apache.fineract.cob.domain.AccountLock</class>
+        <class>org.apache.fineract.cob.domain.BatchBusinessStep</class>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.weaving" value="static" />
+            <property name="eclipselink.weaving.internal" value="false"/>
         </properties>
     </persistence-unit>
 </persistence>

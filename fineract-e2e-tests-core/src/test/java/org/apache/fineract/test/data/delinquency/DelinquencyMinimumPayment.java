@@ -19,18 +19,17 @@
 package org.apache.fineract.test.data.delinquency;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+@Getter
+@RequiredArgsConstructor
 public enum DelinquencyMinimumPayment {
 
-    PERCENTAGE(1L, "delinquencyMinimumPayment.percentage"), FLAT(2L, "delinquencyMinimumPayment.flat");
+    PERCENTAGE(1L, "delinquencyMinimumPayment.percentage", "Percentage payment type"), //
+    FLAT(2L, "delinquencyMinimumPayment.flat", "Flat payment type");
 
-    @Getter
-    private final Long value;
-    @Getter
+    private final Long id;
     private final String code;
+    private final String description;
 
-    DelinquencyMinimumPayment(Long value, String code) {
-        this.value = value;
-        this.code = code;
-    }
 }

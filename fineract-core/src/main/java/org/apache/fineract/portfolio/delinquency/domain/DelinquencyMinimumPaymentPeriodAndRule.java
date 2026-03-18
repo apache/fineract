@@ -19,10 +19,10 @@
 
 package org.apache.fineract.portfolio.delinquency.domain;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -43,19 +43,21 @@ public class DelinquencyMinimumPaymentPeriodAndRule extends AbstractAuditableWit
     @Serial
     private static final long serialVersionUID = -9204385885041120403L;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "bucket_id", nullable = false, unique = true)
     private DelinquencyBucket bucket;
 
     @Column(name = "frequency", nullable = false)
-    private Long frequency;
+    private Integer frequency;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "frequency_type", nullable = false)
     private DelinquencyFrequencyType frequencyType;
 
-    @Column(name = "minimum_payment", nullable = false)
+    @Column(name = "minimum_payment", scale = 6, precision = 19, nullable = false)
     private BigDecimal minimumPayment;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "minimum_payment_type", nullable = false)
-    private DelinquencyMinimumPayment minimumPaymentType;
+    private DelinquencyMinimumPaymentType minimumPaymentType;
 }

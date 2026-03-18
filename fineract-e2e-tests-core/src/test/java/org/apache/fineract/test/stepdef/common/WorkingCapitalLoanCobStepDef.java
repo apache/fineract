@@ -77,7 +77,7 @@ public class WorkingCapitalLoanCobStepDef extends AbstractStepDef {
             log.debug("After hook: cleaning up {} WC loan(s)", loanIds.size());
             for (Long loanId : loanIds) {
                 try {
-                    wcLoanHelper.deleteById(loanId);
+                    // wcLoanHelper.deleteById(loanId);
                     log.debug("After hook: deleted WC loan id={}", loanId);
                 } catch (Exception e) {
                     log.warn("After hook: failed to delete WC loan id={}: {}", loanId, e.getMessage());

@@ -216,10 +216,12 @@
         <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct</class>
         <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductPaymentAllocationRule</class>
         <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductConfigurableAttributes</class>
-        <class>org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan</class>
-        <class>org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance</class>
-        <class>org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails</class>
         <class>org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPaymentAllocationRule</class>
+        <class>org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanNote</class>
+        <class>org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails</class>
+        <class>org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance</class>
+        <class>org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan</class>
+        <class>org.apache.fineract.cob.domain.WorkingCapitalLoanAccountLock</class>
 
         <!-- Loan Module Converters -->
         <class>org.apache.fineract.portfolio.loanproduct.domain.AllocationTypeListConverter</class>
@@ -288,6 +290,7 @@
 
         <!-- COB (Chunk of Business) -->
         <class>org.apache.fineract.cob.domain.BatchBusinessStep</class>
+        <class>org.apache.fineract.cob.domain.AccountLock</class>
 
         <!-- Template -->
         <class>org.apache.fineract.template.domain.Template</class>
@@ -363,6 +366,7 @@
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.weaving" value="static" />
+            <property name="eclipselink.weaving.internal" value="false"/>
         </properties>
     </persistence-unit>
 </persistence>

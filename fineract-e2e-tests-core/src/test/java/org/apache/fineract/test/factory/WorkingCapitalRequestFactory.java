@@ -164,13 +164,13 @@ public class WorkingCapitalRequestFactory {
     public DelinquencyBucketRequest defaultWorkingCapitalDelinquencyBucketRequest() {
         return new DelinquencyBucketRequest() //
                 .name("DB-WCL-" + Utils.randomStringGenerator(8)) //
-                .bucketType(DelinquencyBucketType.WORKING_CAPITAL.getValue().toString())//
+                .bucketType(DelinquencyBucketType.WORKING_CAPITAL.name())//
                 .ranges(List.of(1L)) //
                 .minimumPaymentPeriodAndRule(new MinimumPaymentPeriodAndRule() //
-                        .frequency(1L) //
-                        .minimumPaymentType(DelinquencyMinimumPayment.PERCENTAGE.getValue()) //
-                        .frequencyType(DelinquencyFrequencyType.WEEKS.getValue()) //
-                        .minimumPayment(BigDecimal.valueOf(1.23D)));
+                        .frequency(1) //
+                        .minimumPaymentType(DelinquencyMinimumPayment.PERCENTAGE.name()) //
+                        .frequencyType(DelinquencyFrequencyType.WEEKS.name()) //
+                        .minimumPayment(new BigDecimal("1.23")));
     }
 
 }

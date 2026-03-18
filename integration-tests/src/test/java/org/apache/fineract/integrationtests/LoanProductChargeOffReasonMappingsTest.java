@@ -122,7 +122,7 @@ public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationT
         final Integer fundId = createFund(requestSpec, responseSpec);
         Assertions.assertNotNull(fundId);
 
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
+        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
         Assertions.assertNotNull(delinquencyBucketId);
 
         return new PostLoanProductsRequest()//

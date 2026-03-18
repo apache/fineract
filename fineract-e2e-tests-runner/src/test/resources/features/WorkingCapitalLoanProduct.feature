@@ -47,6 +47,7 @@ Feature: WorkingCapitalLoanProduct
 
   @TestRailId:C70212
   Scenario Outline: Verify Working capital Loan Product update with invalid data shall outcome with error - validation check with max allowed length - UC5
+    When Admin creates a new Working Capital Loan Product
     Then Admin failed to update a new Working Capital Loan Product field "<wcp_field_name_max_length>" with max length data <wcp_invalid_field_value_max_length> while max allowed is <wcp_invalid_field_value_max_allowed_length>
 
     Examples:
@@ -70,6 +71,7 @@ Feature: WorkingCapitalLoanProduct
 
   @TestRailId:C70214
   Scenario Outline: Verify Working capital Loan Product update with invalid data shall outcome with error - validation check with zero values - UC7
+    When Admin creates a new Working Capital Loan Product
     Then Admin failed to update a new Working Capital Loan Product field "<wcp_field_name_zero_value>" with zero incorrect value
 
     Examples:
@@ -94,6 +96,7 @@ Feature: WorkingCapitalLoanProduct
 
   @TestRailId:C70216
   Scenario Outline: Verify Working capital Loan Product update with invalid data shall outcome with error - validation check with diff values - UC9
+    When Admin creates a new Working Capital Loan Product
     Then Admin failed to update a new Working Capital Loan Product field "<wcp_field_name>" with invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
 
     Examples:
@@ -112,10 +115,12 @@ Feature: WorkingCapitalLoanProduct
 
   @TestRailId:C70219
   Scenario: Verify Working capital Loan Product update with invalid data shall outcome with error - validation check with number of payment allocation rules - UC12
+    When Admin creates a new Working Capital Loan Product
     Then Admin failed to update a new Working Capital Loan Product with invalid number of payment allocation rules
 
   @TestRailId:C70220
   Scenario: Verify Working capital Loan Product update with invalid data shall outcome with error - validation check with payment allocation rules - UC13
+    When Admin creates a new Working Capital Loan Product
     Then Admin failed to update a new Working Capital Loan Product with invalid value of payment allocation rules
 
   @TestRailId:C70221

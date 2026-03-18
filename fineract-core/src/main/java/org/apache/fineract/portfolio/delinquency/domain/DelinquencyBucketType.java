@@ -20,28 +20,27 @@
 package org.apache.fineract.portfolio.delinquency.domain;
 
 import java.util.Arrays;
+import java.util.List;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 
+@Getter
+@RequiredArgsConstructor
 public enum DelinquencyBucketType {
 
-    REGULAR(1L, "bucketType.regular"), //
-    WORKING_CAPITAL(2L, "bucketType.workingCapital");
+    REGULAR(1L, "bucketType.regular", "Reqular Loan Product"), //
+    WORKING_CAPITAL(2L, "bucketType.workingCapital", "Working Capital Loan Product");
 
-    @Getter
-    private final Long value;
-
-    @Getter
+    private final Long id;
     private final String code;
+    private final String description;
 
-    DelinquencyBucketType(Long value, String code) {
-        this.value = value;
-        this.code = code;
+    public static List<StringEnumOptionData> toStringEnumOptions() {
+        return Arrays.stream(values()).map(DelinquencyBucketType::toData).toList();
     }
 
-    public static DelinquencyBucketType fromLong(Long value) {
-        if (value == null) {
-            return null;
-        }
-        return Arrays.stream(DelinquencyBucketType.values()).filter(v -> v.getValue().equals(value)).findAny().orElse(REGULAR);
+    public StringEnumOptionData toData() {
+        return new StringEnumOptionData(name(), getCode(), getDescription());
     }
 }

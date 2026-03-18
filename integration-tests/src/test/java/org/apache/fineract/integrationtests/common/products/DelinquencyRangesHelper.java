@@ -18,102 +18,37 @@
  */
 package org.apache.fineract.integrationtests.common.products;
 
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 import org.apache.fineract.client.models.DeleteDelinquencyRangeResponse;
-import org.apache.fineract.client.models.DelinquencyRangeData;
+import org.apache.fineract.client.models.DelinquencyRangeRequest;
+import org.apache.fineract.client.models.DelinquencyRangeResponse;
 import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
 import org.apache.fineract.client.models.PutDelinquencyRangeResponse;
-import org.apache.fineract.client.util.JSON;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 
 public class DelinquencyRangesHelper {
 
-    private static final String DELINQUENCY_RANGES_URL = "/fineract-provider/api/v1/delinquency/ranges";
-    private static final Gson GSON = new JSON().getGson();
-
-    private static final Logger LOG = LoggerFactory.getLogger(DelinquencyRangesHelper.class);
-
     protected DelinquencyRangesHelper() {}
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static ArrayList<DelinquencyRangeData> getDelinquencyRanges(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
-        String response = Utils.performServerGet(requestSpec, responseSpec, DELINQUENCY_RANGES_URL + "?" + Utils.TENANT_IDENTIFIER);
-
-        Type delinquencyRangeListType = new TypeToken<ArrayList<DelinquencyRangeData>>() {}.getType();
-        return GSON.fromJson(response, delinquencyRangeListType);
+    public static List<DelinquencyRangeResponse> getRanges() {
+        return Calls.ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement.getRanges());
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static DelinquencyRangeData getDelinquencyRange(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer resourceId) {
-        String response = Utils.performServerGet(requestSpec, responseSpec,
-                DELINQUENCY_RANGES_URL + "/" + resourceId + "?" + Utils.TENANT_IDENTIFIER);
-        LOG.info("----- {}", response);
-        return GSON.fromJson(response, DelinquencyRangeData.class);
+    public static DelinquencyRangeResponse getRange(Long id) {
+        return Calls.ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement.getRange(id));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static PostDelinquencyRangeResponse createDelinquencyRange(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String json) {
-        final String response = Utils.performServerPost(requestSpec, responseSpec, DELINQUENCY_RANGES_URL + "?" + Utils.TENANT_IDENTIFIER,
-                json, null);
-        LOG.info("----- {}", response);
-        return GSON.fromJson(response, PostDelinquencyRangeResponse.class);
+    public static PostDelinquencyRangeResponse createRange(DelinquencyRangeRequest delinquencyRangeData) {
+        return Calls.ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement.createRange(delinquencyRangeData));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static PutDelinquencyRangeResponse updateDelinquencyRange(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer resourceId, final String json) {
-        final String response = Utils.performServerPut(requestSpec, responseSpec,
-                DELINQUENCY_RANGES_URL + "/" + resourceId + "?" + Utils.TENANT_IDENTIFIER, json, null);
-        LOG.info("----- {}", response);
-        return GSON.fromJson(response, PutDelinquencyRangeResponse.class);
+    public static PutDelinquencyRangeResponse updateRange(Long id, DelinquencyRangeRequest delinquencyRangeData) {
+        return Calls
+                .ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement.updateRange(id, delinquencyRangeData));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static DeleteDelinquencyRangeResponse deleteDelinquencyRange(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer resourceId) {
-        final String response = Utils.performServerDelete(requestSpec, responseSpec,
-                DELINQUENCY_RANGES_URL + "/" + resourceId + "?" + Utils.TENANT_IDENTIFIER, Utils.emptyJson(), null);
-        LOG.info("----- {}", response);
-        return GSON.fromJson(response, DeleteDelinquencyRangeResponse.class);
+    public static DeleteDelinquencyRangeResponse deleteRange(Long id) {
+        return Calls.ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement.deleteRange(id));
     }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String getAsJSON(Integer minimumAgeDays, Integer maximumAgeDays) {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("classification", Utils.uniqueRandomStringGenerator("Delinquency__" + minimumAgeDays + "_" + maximumAgeDays + "__", 4));
-        map.put("minimumAgeDays", minimumAgeDays);
-        map.put("maximumAgeDays", maximumAgeDays);
-        map.put("locale", "en");
-        return new Gson().toJson(map);
-    }
-
 }
