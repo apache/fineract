@@ -144,7 +144,7 @@ public class ClientHelper {
     }
 
     public PageClientSearchData searchClients(PagedRequestClientTextSearch request) {
-        return Calls.ok(FineractClientHelper.getFineractClient().clientSearchV2.searchByText(request));
+        return Calls.ok(FineractClientHelper.getFineractClient().clientSearchV2.searchClientsByText(request));
     }
 
     // TODO: Rewrite to use fineract-client instead!
