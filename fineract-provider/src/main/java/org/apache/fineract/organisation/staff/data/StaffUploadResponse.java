@@ -16,11 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.organisation.staff.data;
 
-import org.apache.fineract.portfolio.loanaccount.data.StaffAccountSummaryCollectionData;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public interface BulkLoansReadPlatformService {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class StaffUploadResponse implements Serializable {
 
-    StaffAccountSummaryCollectionData retrieveLoanOfficerAccountSummary(Long loanOfficerId);
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private Long resourceId;
 }

@@ -104,6 +104,6 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom {
     }
 
     public boolean isSameLoanOfficer(final Staff staff) {
-        return this.loanOfficer.identifiedBy(staff);
+        return this.loanOfficer.getId().equals(staff.getId());
     }
 }

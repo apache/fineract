@@ -50,6 +50,7 @@ public class StaffTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        // TODO: fiugre out why Jakarta validation throws 403 instead of 400
         this.responseSpecForValidationError = new ResponseSpecBuilder().expectStatusCode(400).build();
         this.responseSpecForNotFoundError = new ResponseSpecBuilder().expectStatusCode(404).build();
     }

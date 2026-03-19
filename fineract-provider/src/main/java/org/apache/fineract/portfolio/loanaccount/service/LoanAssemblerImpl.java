@@ -415,7 +415,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
         Staff staff = null;
         if (loanOfficerId != null) {
             staff = this.staffRepository.findById(loanOfficerId).orElseThrow(() -> new StaffNotFoundException(loanOfficerId));
-            if (staff.isNotLoanOfficer()) {
+            if (!staff.isLoanOfficer()) {
                 throw new StaffRoleException(loanOfficerId, StaffRoleException.StaffRole.LOAN_OFFICER);
             }
         }

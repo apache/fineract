@@ -206,11 +206,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder withEntityName(final String withEntityName) {
-        this.entityName = withEntityName;
-        return this;
-    }
-
     public CommandWrapperBuilder withSubEntityId(final Long withSubEntityId) {
         this.subentityId = withSubEntityId;
         return this;
@@ -329,22 +324,6 @@ public class CommandWrapperBuilder {
         this.entityName = "OFFICETRANSACTION";
         this.entityId = transactionId;
         this.href = "/officetransactions/" + transactionId;
-        return this;
-    }
-
-    public CommandWrapperBuilder createStaff() {
-        this.actionName = "CREATE";
-        this.entityName = "STAFF";
-        this.entityId = null;
-        this.href = "/staff/template";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateStaff(final Long staffId) {
-        this.actionName = "UPDATE";
-        this.entityName = "STAFF";
-        this.entityId = staffId;
-        this.href = "/staff/" + staffId;
         return this;
     }
 
@@ -1430,14 +1409,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder updateOpeningBalanceForJournalEntry() {
-        this.actionName = "UPDATEOPENINGBALANCE";
-        this.entityName = "JOURNALENTRY";
-        this.entityId = null;
-        this.href = "/journalentries/update";
-        return this;
-    }
-
     public CommandWrapperBuilder createSavingProduct() {
         this.actionName = "CREATE";
         this.entityName = "SAVINGSPRODUCT";
@@ -1824,57 +1795,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder createInterestRateChart() {
-        this.actionName = "CREATE";
-        this.entityName = "INTERESTRATECHART";
-        this.entityId = null;
-        this.href = "/interestratechart/template";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateInterestRateChart(final Long interestRateChartId) {
-        this.actionName = "UPDATE";
-        this.entityName = "INTERESTRATECHART";
-        this.entityId = interestRateChartId;
-        this.href = "/interestratechart/" + interestRateChartId;
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteInterestRateChart(final Long interestRateChartId) {
-        this.actionName = "DELETE";
-        this.entityName = "INTERESTRATECHART";
-        this.entityId = interestRateChartId;
-        this.href = "/interestratechart/" + interestRateChartId;
-        return this;
-    }
-
-    public CommandWrapperBuilder createInterestRateChartSlab(final Long chartId) {
-        this.actionName = "CREATE";
-        this.entityName = "CHARTSLAB";
-        this.entityId = null;
-        this.subentityId = chartId; // refer to chart id
-        this.href = "/interestratechart/" + chartId + "/chartdetails/template";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateInterestRateChartSlab(final Long chartId, final Long chartSlabId) {
-        this.actionName = "UPDATE";
-        this.entityName = "CHARTSLAB";
-        this.entityId = chartSlabId;
-        this.subentityId = chartId;// refers parent chart
-        this.href = "/interestratechart/" + chartId + "/chartdetails/" + chartSlabId;
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteInterestRateChartSlab(final Long chartId, final Long chartSlabId) {
-        this.actionName = "DELETE";
-        this.entityName = "CHARTSLAB";
-        this.entityId = chartSlabId;
-        this.subentityId = chartId;// refers parent chart
-        this.href = "/interestratechart/" + chartId + "/chartdetails/" + chartSlabId;
-        return this;
-    }
-
     public CommandWrapperBuilder createCalendar(final CommandWrapper resourceDetails, final String supportedEntityType,
             final Long supportedEntityId) {
         this.actionName = "CREATE";
@@ -2082,14 +2002,6 @@ public class CommandWrapperBuilder {
         this.entityName = "CLIENT_COLLATERAL_PRODUCT";
         this.clientId = clientId;
         this.href = "/clients/" + clientId + "/collateral-management";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateCollectionSheet(final Long groupId) {
-        this.actionName = "UPDATE";
-        this.entityName = "COLLECTIONSHEET";
-        this.entityId = groupId;
-        this.href = "/groups/" + groupId + "/collectionsheet";
         return this;
     }
 
@@ -2732,15 +2644,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder savingsInterestPostingAsOnDate(final Long accountId) {
-        this.actionName = "POSTINTERESTASONDATE";
-        this.entityName = "SAVINGSACCOUNT";
-        this.savingsId = accountId;
-        this.entityId = null;
-        this.href = "/savingsaccounts/" + accountId + "?command=postInterestAsOn";
-        return this;
-    }
-
     public CommandWrapperBuilder createLoanRescheduleRequest(final String entityName) {
         this.actionName = "CREATE";
         this.entityName = entityName;
@@ -3375,24 +3278,6 @@ public class CommandWrapperBuilder {
         this.savingsId = accountId;
         this.entityId = null;
         this.href = "/savingsaccounts/" + accountId + "?command=unblock";
-        return this;
-    }
-
-    public CommandWrapperBuilder disableAdHoc(Long adHocId) {
-        this.actionName = "DISABLE";
-        this.entityName = "ADHOC";
-        this.entityId = adHocId;
-        this.href = "/adhoc/" + adHocId + "/disbale";
-        this.json = "{}";
-        return this;
-    }
-
-    public CommandWrapperBuilder enableAdHoc(Long adHocId) {
-        this.actionName = "ENABLE";
-        this.entityName = "ADHOC";
-        this.entityId = adHocId;
-        this.href = "/adhoc/" + adHocId + "/enable";
-        this.json = "{}";
         return this;
     }
 

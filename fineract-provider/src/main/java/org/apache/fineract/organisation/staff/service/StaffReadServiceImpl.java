@@ -39,7 +39,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
 @RequiredArgsConstructor
-public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
+public class StaffReadServiceImpl implements StaffReadService {
 
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
@@ -70,8 +70,9 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             final boolean isActive = rs.getBoolean("isActive");
             final LocalDate joiningDate = JdbcSupport.getLocalDate(rs, "joiningDate");
 
-            return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, externalId, mobileNo,
-                    isActive, joiningDate);
+            return StaffData.builder().id(id).firstname(firstname).lastname(lastname).displayName(displayName).officeId(officeId)
+                    .officeName(officeName).isLoanOfficer(isLoanOfficer).externalId(externalId).mobileNo(mobileNo).isActive(isActive)
+                    .joiningDate(joiningDate).build();
         }
     }
 
@@ -113,8 +114,9 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             final boolean isActive = rs.getBoolean("isActive");
             final LocalDate joiningDate = JdbcSupport.getLocalDate(rs, "joiningDate");
 
-            return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, externalId, mobileNo,
-                    isActive, joiningDate);
+            return StaffData.builder().id(id).firstname(firstname).lastname(lastname).displayName(displayName).officeId(officeId)
+                    .officeName(officeName).isLoanOfficer(isLoanOfficer).externalId(externalId).mobileNo(mobileNo).isActive(isActive)
+                    .joiningDate(joiningDate).build();
         }
     }
 
@@ -141,7 +143,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
             final Long id = rs.getLong("id");
             final String displayName = rs.getString("displayName");
-            return StaffData.lookup(id, displayName);
+            return StaffData.builder().id(id).displayName(displayName).build();
         }
     }
 

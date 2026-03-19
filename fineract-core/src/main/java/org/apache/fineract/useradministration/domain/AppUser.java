@@ -50,6 +50,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncod
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
+import org.apache.fineract.organisation.staff.domain.StaffEnumerations;
 import org.apache.fineract.useradministration.service.AppUserConstants;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -215,8 +216,8 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
 
     public EnumOptionData organisationalRoleData() {
         EnumOptionData organisationalRole = null;
-        if (this.staff != null) {
-            organisationalRole = this.staff.organisationalRoleData();
+        if (this.staff != null && this.staff.getOrganisationalRoleType() != null) {
+            organisationalRole = StaffEnumerations.organisationalRole(this.staff.getOrganisationalRoleType());
         }
         return organisationalRole;
     }
@@ -407,8 +408,8 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
     }
 
     public String getDisplayName() {
-        if (this.staff != null && StringUtils.isNotBlank(this.staff.displayName())) {
-            return this.staff.displayName();
+        if (this.staff != null && StringUtils.isNotBlank(this.staff.getDisplayName())) {
+            return this.staff.getDisplayName();
         }
         String firstName = StringUtils.isNotBlank(this.firstname) ? this.firstname : "";
         if (StringUtils.isNotBlank(this.lastname)) {
@@ -663,7 +664,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
     public String getStaffDisplayName() {
         String staffDisplayName = null;
         if (this.staff != null) {
-            staffDisplayName = this.staff.displayName();
+            staffDisplayName = this.staff.getDisplayName();
         }
         return staffDisplayName;
     }

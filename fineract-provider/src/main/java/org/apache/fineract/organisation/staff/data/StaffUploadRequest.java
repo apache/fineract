@@ -19,40 +19,45 @@
 package org.apache.fineract.organisation.staff.data;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.io.File;
+import java.io.InputStream;
 import java.io.Serial;
 import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.FieldNameConstants;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
+@Builder
 @Data
 @NoArgsConstructor
-@FieldNameConstants
-public class StaffRequest implements Serializable {
+@AllArgsConstructor
+public class StaffUploadRequest implements Serializable {
+    // TODO: prefixing attributes with "upload" when we are already in a class named "XXXUploadXXX" is inconvenient; I'd
+    // just name it "data"; we don't have to replicate the data types in the attribute names
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Schema(example = "1")
-    private Long officeId;
-    @Schema(example = "John")
-    private String firstname;
-    @Schema(example = "Doe")
-    private String lastname;
-    @Schema(example = "true")
-    private Boolean isLoanOfficer;
-    @Schema(example = "17H")
-    private String externalId;
-    @Schema(example = "+353851239876")
-    private String mobileNo;
-    @Schema(example = "true")
-    private Boolean isActive;
-    @Schema(example = "01 January 2009")
-    private String joiningDate;
-    @Schema(example = "en")
+    @Schema(type = "string", format = "binary")
+    @FormDataParam("file")
+    private InputStream uploadedInputStream;
+
+    @Schema(implementation = File.class, hidden = true)
+    @FormDataParam("file")
+    private File file;
+
+    @Schema(implementation = FormDataContentDisposition.class, hidden = true)
+    @FormDataParam("file")
+    private FormDataContentDisposition fileDetail;
+
+    @Schema(name = "locale")
+    @FormDataParam("locale")
     private String locale;
-    @Schema(example = "dd MMMM yyyy")
+
+    @Schema(name = "dateFormat")
+    @FormDataParam("dateFormat")
     private String dateFormat;
-    @Schema(example = "true")
-    private Boolean forceStatus;
 }

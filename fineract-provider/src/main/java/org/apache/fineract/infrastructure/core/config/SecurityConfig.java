@@ -339,8 +339,6 @@ public class SecurityConfig {
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/interestratecharts/*/chartslabs/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CHARTSLAB")
                     // interest rate chart
-                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/interestratecharts"))
-                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_INTERESTRATECHART")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/interestratecharts/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_INTERESTRATECHART")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/interestratecharts"))
@@ -349,6 +347,13 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_INTERESTRATECHART")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/interestratecharts/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_INTERESTRATECHART")
+                    // staff
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/staff/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STAFF")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/staff/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_STAFF")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/staff/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_STAFF")
 
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/*/twofactor")).fullyAuthenticated()

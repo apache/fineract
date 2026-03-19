@@ -81,7 +81,7 @@ public class SavingsOfficerAssignmentHistory extends AbstractAuditableWithUTCDat
     }
 
     public boolean isSameSavingsOfficer(final Staff staff) {
-        return this.savingsOfficer.identifiedBy(staff);
+        return this.savingsOfficer.getId().equals(staff.getId());
     }
 
     public LocalDate getStartDate() {

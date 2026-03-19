@@ -40,7 +40,7 @@ public class LoanOfficerService {
         loanOfficerValidator.validateReassignment(loan, assignmentDate, lastAssignmentRecord);
         loanOfficerValidator.validateAssignmentDateWithHistory(loan, latestHistoryRecord, assignmentDate);
 
-        if (latestHistoryRecord.isPresent() && loan.getLoanOfficer().identifiedBy(newLoanOfficer)) {
+        if (latestHistoryRecord.isPresent() && loan.getLoanOfficer().getId().equals(newLoanOfficer.getId())) {
             latestHistoryRecord.get().updateStartDate(assignmentDate);
         } else if (latestHistoryRecord.isPresent() && latestHistoryRecord.get().matchesStartDateOf(assignmentDate)) {
             latestHistoryRecord.get().updateLoanOfficer(newLoanOfficer);

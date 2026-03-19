@@ -2115,7 +2115,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
         boolean matchesCurrentSavingsOfficer = false;
         if (this.savingsOfficer != null) {
-            matchesCurrentSavingsOfficer = this.savingsOfficer.identifiedBy(fromSavingsOfficer);
+            matchesCurrentSavingsOfficer = this.savingsOfficer.getId().equals(fromSavingsOfficer.getId());
         } else {
             matchesCurrentSavingsOfficer = fromSavingsOfficer == null;
         }
@@ -2140,7 +2140,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         } else if (DateUtils.isDateInTheFuture(assignmentDate)) {
             final String errorMessage = "The Savings Officer assignment date (" + assignmentDate + ") cannot be in the future.";
             throw new SavingsOfficerAssignmentDateException("cannot.be.a.future.date", errorMessage, assignmentDate);
-        } else if (latestHistoryRecord != null && this.savingsOfficer.identifiedBy(newSavingsOfficer)) {
+        } else if (latestHistoryRecord != null && this.savingsOfficer.getId().equals(newSavingsOfficer.getId())) {
             latestHistoryRecord.setStartDate(assignmentDate);
         } else if (latestHistoryRecord != null && latestHistoryRecord.matchesStartDateOf(assignmentDate)) {
             latestHistoryRecord.setSavingsOfficer(newSavingsOfficer);

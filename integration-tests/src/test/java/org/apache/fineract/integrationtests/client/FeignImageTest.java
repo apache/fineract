@@ -29,8 +29,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.models.CreateStaffResponse;
-import org.apache.fineract.client.models.StaffRequest;
+import org.apache.fineract.client.models.StaffCreateRequest;
+import org.apache.fineract.client.models.StaffCreateResponse;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ public class FeignImageTest extends FeignIntegrationTest {
     @Test
     @Order(1)
     void setupStaff() {
-        StaffRequest request = new StaffRequest();
+        var request = new StaffCreateRequest();
         request.setOfficeId(1L);
         request.setFirstname("Feign");
         request.setLastname("ImageTest" + System.currentTimeMillis());
@@ -60,7 +60,7 @@ public class FeignImageTest extends FeignIntegrationTest {
         request.setDateFormat("yyyy-MM-dd");
         request.setLocale("en_US");
 
-        CreateStaffResponse response = ok(() -> fineractClient().staff().createStaff(request));
+        StaffCreateResponse response = ok(() -> fineractClient().staff().createStaff(request));
         assertThat(response).isNotNull();
         assertThat(response.getResourceId()).isNotNull();
         staffId = response.getResourceId();

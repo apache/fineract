@@ -27,11 +27,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.apache.fineract.command.core.CommandPipeline;
 import org.apache.fineract.infrastructure.bulkimport.data.BulkImportEvent;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.data.ImportData;
@@ -44,9 +42,9 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCreateCommand;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentCreateRequest;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentCreateResponse;
+import org.apache.fineract.infrastructure.documentmanagement.service.DocumentWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -66,9 +64,9 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
     private final ApplicationContext applicationContext;
     private final PlatformSecurityContext securityContext;
     private final ImportDocumentRepository importDocumentRepository;
+    private final DocumentWritePlatformService writePlatformService;
     private final JdbcTemplate jdbcTemplate;
     private final ContentPipe pipe;
-    private final CommandPipeline commandPipeline;
     private final ImportDocumentMapper mapper;
 
     @Override
@@ -174,16 +172,12 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
             workbook.write(output);
         });
 
-        final var command = new DocumentCreateCommand();
-
         // TODO: does it really make sense to use the current user's ID?
         // TODO: wouldn't it be better to use "entityType.name()" as entity name?
-        command.setPayload(DocumentCreateRequest.builder().entityId(this.securityContext.authenticatedUser().getId()).entityType("IMPORT")
-                .name(fileDetail.getFileName()).description(fileDetail.getFileName()).fileName(fileDetail.getFileName())
-                .size(fileDetail.getSize()).type(fileType).stream(pipedInputStream).build());
-
-        final Supplier<DocumentCreateResponse> response = commandPipeline.send(command);
-        return response.get();
+        return writePlatformService
+                .createDocument(DocumentCreateRequest.builder().entityId(this.securityContext.authenticatedUser().getId())
+                        .entityType("IMPORT").name(fileDetail.getFileName()).description(fileDetail.getFileName())
+                        .fileName(fileDetail.getFileName()).size(fileDetail.getSize()).type(fileType).stream(pipedInputStream).build());
     }
 
     private Long publishEvent(final Integer primaryColumn, final FormDataContentDisposition fileDetail, final String fileType,
@@ -203,9 +197,6 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                 ThreadLocalContextUtil.getContext(), this.securityContext.authenticatedUser().getId());
 
         applicationContext.publishEvent(event);
-
-        // TODO: remove when done
-        log.warn("Import document ID: {} ({})", importDocument.getId(), importDocument.getDocumentId());
 
         return importDocument.getId();
     }

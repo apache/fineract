@@ -66,7 +66,7 @@ import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepos
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.staff.data.StaffData;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
 import org.apache.fineract.portfolio.accountdetails.data.LoanAccountSummaryData;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
@@ -177,7 +177,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
-    private final StaffReadPlatformService staffReadPlatformService;
+    private final StaffReadService staffReadPlatformService;
     private final PaginationHelper paginationHelper;
     private final PaymentTypeReadService paymentTypeReadPlatformService;
     private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;

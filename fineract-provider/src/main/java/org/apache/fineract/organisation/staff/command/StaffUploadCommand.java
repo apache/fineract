@@ -16,14 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.staff.service;
+package org.apache.fineract.organisation.staff.command;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.organisation.staff.data.StaffUploadRequest;
 
-public interface StaffWritePlatformService {
-
-    CommandProcessingResult createStaff(JsonCommand command);
-
-    CommandProcessingResult updateStaff(Long staffId, JsonCommand command);
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class StaffUploadCommand extends Command<StaffUploadRequest> {}

@@ -98,7 +98,7 @@ public class TwoFactorServiceImpl implements TwoFactorService {
             }
             final OTPRequest request = generateNewToken(smsDelivery, extendedAccessToken);
             final String smsText = configurationService.getFormattedSmsTextFor(user, request);
-            SmsMessage smsMessage = SmsMessage.pendingSms(null, null, null, user.getStaff(), smsText, user.getStaff().mobileNo(), null,
+            SmsMessage smsMessage = SmsMessage.pendingSms(null, null, null, user.getStaff(), smsText, user.getStaff().getMobileNo(), null,
                     false);
             this.smsMessageRepository.save(smsMessage);
             smsMessageScheduledJobService.sendTriggeredMessage(Collections.singleton(smsMessage), configurationService.getSMSProviderId());
@@ -192,7 +192,7 @@ public class TwoFactorServiceImpl implements TwoFactorService {
         if (user.getStaff() == null) {
             return null;
         }
-        String mobileNo = user.getStaff().mobileNo();
+        String mobileNo = user.getStaff().getMobileNo();
         if (StringUtils.isBlank(mobileNo)) {
             return null;
         }

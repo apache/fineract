@@ -51,7 +51,7 @@ import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.calendar.service.CalendarEnumerations;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
@@ -79,7 +79,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     private final PlatformSecurityContext context;
     private final ClientReadPlatformService clientReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
-    private final StaffReadPlatformService staffReadPlatformService;
+    private final StaffReadService staffReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
     private final ColumnValidator columnValidator;

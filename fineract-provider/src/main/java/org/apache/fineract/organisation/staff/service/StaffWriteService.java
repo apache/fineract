@@ -16,11 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.organisation.staff.service;
 
-import org.apache.fineract.portfolio.loanaccount.data.StaffAccountSummaryCollectionData;
+import org.apache.fineract.organisation.staff.data.StaffCreateRequest;
+import org.apache.fineract.organisation.staff.data.StaffCreateResponse;
+import org.apache.fineract.organisation.staff.data.StaffUpdateRequest;
+import org.apache.fineract.organisation.staff.data.StaffUpdateResponse;
 
-public interface BulkLoansReadPlatformService {
+public interface StaffWriteService {
 
-    StaffAccountSummaryCollectionData retrieveLoanOfficerAccountSummary(Long loanOfficerId);
+    StaffCreateResponse createStaff(StaffCreateRequest request);
+
+    StaffUpdateResponse updateStaff(StaffUpdateRequest request);
 }

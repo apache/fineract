@@ -41,7 +41,8 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
-import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
+import org.apache.fineract.organisation.staff.domain.StaffRepository;
+import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserPreviousPassword;
 import org.apache.fineract.useradministration.domain.AppUserPreviousPasswordRepository;
@@ -74,7 +75,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     private final RoleRepository roleRepository;
     private final UserDataValidator fromApiJsonDeserializer;
     private final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository;
-    private final StaffRepositoryWrapper staffRepositoryWrapper;
+    private final StaffRepository staffRepository;
     private final ConfigurationDomainService configurationDomainService;
 
     @Override
@@ -99,7 +100,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
             Staff linkedStaff;
             if (staffId != null) {
-                linkedStaff = this.staffRepositoryWrapper.findByOfficeWithNotFoundDetection(staffId, userOffice.getId());
+                linkedStaff = this.staffRepository.findByOffice(staffId, userOffice.getId())
+                        .orElseThrow(() -> new StaffNotFoundException(staffId));
             } else {
                 linkedStaff = null;
             }
@@ -193,7 +195,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                 final Long staffId = (Long) changes.get("staffId");
                 Staff linkedStaff = null;
                 if (staffId != null) {
-                    linkedStaff = this.staffRepositoryWrapper.findByOfficeWithNotFoundDetection(staffId, userToUpdate.getOffice().getId());
+                    linkedStaff = this.staffRepository.findByOffice(staffId, userToUpdate.getOffice().getId())
+                            .orElseThrow(() -> new StaffNotFoundException(staffId));
                 }
                 userToUpdate.changeStaff(linkedStaff);
             }

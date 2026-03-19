@@ -29,7 +29,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.useradministration.data.AppUserData;
 import org.apache.fineract.useradministration.data.RoleData;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -48,7 +48,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
     private final OfficeReadPlatformService officeReadPlatformService;
     private final RoleReadPlatformService roleReadPlatformService;
     private final AppUserRepository appUserRepository;
-    private final StaffReadPlatformService staffReadPlatformService;
+    private final StaffReadService staffReadPlatformService;
 
     /*
      * used for caching in spring expression language.
@@ -129,9 +129,9 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
     private static final class AppUserMapper implements RowMapper<AppUserData> {
 
         private final RoleReadPlatformService roleReadPlatformService;
-        private final StaffReadPlatformService staffReadPlatformService;
+        private final StaffReadService staffReadPlatformService;
 
-        AppUserMapper(final RoleReadPlatformService roleReadPlatformService, final StaffReadPlatformService staffReadPlatformService) {
+        AppUserMapper(final RoleReadPlatformService roleReadPlatformService, final StaffReadService staffReadPlatformService) {
             this.roleReadPlatformService = roleReadPlatformService;
             this.staffReadPlatformService = staffReadPlatformService;
         }

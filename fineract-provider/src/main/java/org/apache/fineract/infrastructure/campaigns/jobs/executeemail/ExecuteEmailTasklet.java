@@ -179,7 +179,7 @@ public class ExecuteEmailTasklet implements Tasklet {
             switch (entry.getKey()) {
                 case "selectOffice":
                     if (client.getStaff() != null) {
-                        actualParams.put(entry.getKey(), client.getStaff().officeId().toString());
+                        actualParams.put(entry.getKey(), client.getStaff().getOffice().getId().toString());
                     } else {
                         actualParams.put(entry.getKey(), client.getOffice().getId().toString());
                     }

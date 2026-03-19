@@ -21,7 +21,8 @@ package org.apache.fineract.integrationtests.client;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Optional;
-import org.apache.fineract.client.models.StaffRequest;
+import org.apache.fineract.client.models.StaffCreateRequest;
+import org.apache.fineract.client.models.StaffData;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Michael Vorburger.ch
  */
-public class StaffTest extends IntegrationTest {
+class StaffTest extends IntegrationTest {
 
     @Test
     @Order(1)
@@ -52,7 +53,7 @@ public class StaffTest extends IntegrationTest {
     }
 
     Long create() {
-        return ok(fineractClient().staff.createStaff(new StaffRequest().officeId(1L).firstname(Utils.randomFirstNameGenerator())
+        return ok(fineractClient().staff.createStaff(new StaffCreateRequest().officeId(1L).firstname(Utils.randomFirstNameGenerator())
                 .lastname(Utils.randomLastNameGenerator()).externalId(Utils.randomStringGenerator("", 12))
                 .joiningDate(LocalDate.now(ZoneId.of("UTC")).toString()).dateFormat("yyyy-MM-dd").locale("en_US"))).getResourceId();
     }
@@ -60,7 +61,7 @@ public class StaffTest extends IntegrationTest {
     Optional<Long> retrieveFirst() {
         var staff = ok(fineractClient().staff.retrieveAllStaff(1L, true, false, "ACTIVE"));
         if (!staff.isEmpty()) {
-            return Optional.of((long) staff.get(0).getId());
+            return staff.stream().findFirst().map(StaffData::getId);
         }
         return Optional.empty();
     }

@@ -28,7 +28,7 @@ import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformSer
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.domain.StaffRepository;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.organisation.teller.data.CashierTransactionDataValidator;
 import org.apache.fineract.organisation.teller.domain.CashierRepository;
 import org.apache.fineract.organisation.teller.domain.CashierTransactionRepository;
@@ -49,9 +49,9 @@ public class OrganisationTellerConfiguration {
     @Bean
     @ConditionalOnMissingBean(TellerManagementReadPlatformService.class)
     public TellerManagementReadPlatformService tellerManagementReadPlatformService(JdbcTemplate jdbcTemplate,
-            PlatformSecurityContext context, OfficeReadPlatformService officeReadPlatformService,
-            StaffReadPlatformService staffReadPlatformService, CurrencyReadPlatformService currencyReadPlatformService,
-            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper, SqlValidator sqlValidator) {
+            PlatformSecurityContext context, OfficeReadPlatformService officeReadPlatformService, StaffReadService staffReadPlatformService,
+            CurrencyReadPlatformService currencyReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator,
+            PaginationHelper paginationHelper, SqlValidator sqlValidator) {
         return new TellerManagementReadPlatformServiceImpl(jdbcTemplate, context, officeReadPlatformService, staffReadPlatformService,
                 currencyReadPlatformService, sqlGenerator, paginationHelper, sqlValidator);
     }

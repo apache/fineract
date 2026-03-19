@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.staff.data;
+package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import org.apache.fineract.organisation.office.data.OfficeData;
+import org.apache.fineract.organisation.staff.data.StaffData;
 
 /**
  * Immutable data object returned for loan-officer bulk transfer screens.
@@ -47,11 +48,6 @@ public final class BulkTransferLoanOfficerData {
             final StaffAccountSummaryCollectionData accountSummaryCollection) {
         return new BulkTransferLoanOfficerData(officeId, fromLoanOfficerId, assignmentDate, officeOptions, loanOfficerOptions,
                 accountSummaryCollection);
-    }
-
-    public static BulkTransferLoanOfficerData template(final Long fromLoanOfficerId, final Collection<StaffData> loanOfficerOptions,
-            final LocalDate assignmentDate) {
-        return new BulkTransferLoanOfficerData(null, fromLoanOfficerId, assignmentDate, null, loanOfficerOptions, null);
     }
 
     private BulkTransferLoanOfficerData(final Long officeId, final Long fromLoanOfficerId, final LocalDate assignmentDate,

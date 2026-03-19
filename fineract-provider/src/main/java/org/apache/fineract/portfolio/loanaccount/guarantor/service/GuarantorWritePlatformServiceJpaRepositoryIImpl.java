@@ -151,7 +151,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                         /** Get the right guarantor based on guarantorType **/
                         String defaultUserMessage = null;
                         if (guarantorTypeId.equals(GuarantorType.STAFF.getValue())) {
-                            defaultUserMessage = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId).displayName();
+                            defaultUserMessage = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
                         } else if (guarantorTypeId.equals(GuarantorType.GROUP.getValue())) {
                             defaultUserMessage = this.groupRepositoryWrapper.findOneWithNotFoundDetection(entityId).getName();
                         } else {
@@ -238,7 +238,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                             && !guarantorForUpdate.getId().equals(guarantor.getId())) {
                         String defaultUserMessage = null;
                         if (guarantorTypeId.equals(GuarantorType.STAFF.getValue())) {
-                            defaultUserMessage = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId).displayName();
+                            defaultUserMessage = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
                         } else if (guarantorTypeId.equals(GuarantorType.GROUP.getValue())) {
                             defaultUserMessage = this.groupRepositoryWrapper.findOneWithNotFoundDetection(entityId).getName();
                         } else {

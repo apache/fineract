@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.staff.data;
+package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.util.Collection;
 import java.util.List;

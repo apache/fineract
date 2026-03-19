@@ -16,11 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.organisation.staff.mapper;
 
-import org.apache.fineract.portfolio.loanaccount.data.StaffAccountSummaryCollectionData;
+import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
+import org.apache.fineract.organisation.staff.data.StaffCreateRequest;
+import org.apache.fineract.organisation.staff.data.StaffData;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-public interface BulkLoansReadPlatformService {
+@Mapper(config = MapstructMapperConfig.class, uses = StaffDateMapper.class)
+public abstract class StaffDataMapper {
 
-    StaffAccountSummaryCollectionData retrieveLoanOfficerAccountSummary(Long loanOfficerId);
+    protected final StaffDateMapper dateMapper = new StaffDateMapper();
+
+    @Mapping(ignore = true, target = "emailAddress")
+    @Mapping(ignore = true, target = "forceStatus")
+    @Mapping(expression = "java( dateMapper.map(source.getJoiningDate(), source.getDateFormat()) )", target = "joiningDate")
+    public abstract StaffCreateRequest map(StaffData source);
 }

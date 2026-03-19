@@ -16,11 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.organisation.staff.service;
 
-import org.apache.fineract.portfolio.loanaccount.data.StaffAccountSummaryCollectionData;
+import java.util.List;
+import org.apache.fineract.organisation.staff.data.StaffData;
 
-public interface BulkLoansReadPlatformService {
+public interface StaffReadService {
 
-    StaffAccountSummaryCollectionData retrieveLoanOfficerAccountSummary(Long loanOfficerId);
+    StaffData retrieveStaff(Long staffId);
+
+    List<StaffData> retrieveAllStaffForDropdown(Long officeId);
+
+    List<StaffData> retrieveAllLoanOfficersInOfficeById(Long officeId);
+
+    List<StaffData> retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(Long officeId, boolean loanOfficersOnly);
+
+    List<StaffData> retrieveAllStaff(Long officeId, boolean loanOfficersOnly, String status);
+
+    Object[] hasAssociatedItems(Long staffId);
 }

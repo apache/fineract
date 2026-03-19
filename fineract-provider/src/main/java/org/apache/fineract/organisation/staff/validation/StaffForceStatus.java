@@ -16,25 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.staff.service;
+package org.apache.fineract.organisation.staff.validation;
 
-import java.util.List;
-import org.apache.fineract.organisation.staff.data.StaffData;
+import jakarta.validation.Constraint;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public interface StaffReadPlatformService {
+@Target({ ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+@Constraint(validatedBy = StaffForceStatusValidator.class)
+public @interface StaffForceStatus {
 
-    StaffData retrieveStaff(Long staffId);
+    String message() default "Force status rule not satisfied";
 
-    List<StaffData> retrieveAllStaffForDropdown(Long officeId);
+    Class<?>[] groups() default {};
 
-    List<StaffData> retrieveAllLoanOfficersInOfficeById(Long officeId);
-
-    /**
-     * returns all staff in offices that are above the provided <code>officeId</code>.
-     */
-    List<StaffData> retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(Long officeId, boolean loanOfficersOnly);
-
-    List<StaffData> retrieveAllStaff(Long officeId, boolean loanOfficersOnly, String status);
-
-    Object[] hasAssociatedItems(Long staffId);
+    Class<?>[] payload() default {};
 }

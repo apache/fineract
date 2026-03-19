@@ -16,28 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.staff.domain;
+package org.apache.fineract.organisation.staff.mapper;
 
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-@RequiredArgsConstructor
+@Slf4j
 @Component
-public class StaffRepositoryWrapper {
+public class StaffDateMapper {
 
-    private final StaffRepository repository;
+    public static final String DEFAULT_DATE_FORMAT = "dd MMMM yyyy";
 
-    public Staff findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id).orElseThrow(() -> new StaffNotFoundException(id));
+    public String map(LocalDate date, String format) {
+        if (date == null) {
+            return null;
+        }
+
+        return DateTimeFormatter.ofPattern(Optional.ofNullable(format).orElse(DEFAULT_DATE_FORMAT)).format(date);
     }
 
-    public Staff findByOfficeHierarchyWithNotFoundDetection(final Long staffId, final String hierarchy) {
-        final Staff staff = this.repository.findById(staffId).orElseThrow(() -> new StaffNotFoundException(staffId));
-        final String staffhierarchy = staff.getOffice().getHierarchy();
-        if (!hierarchy.startsWith(staffhierarchy)) {
-            throw new StaffNotFoundException(staffId);
+    public LocalDate map(String date, String format) {
+        if (StringUtils.isEmpty(date)) {
+            return null;
         }
-        return staff;
+
+        return LocalDate.parse(date, DateTimeFormatter.ofPattern(Optional.ofNullable(format).orElse(DEFAULT_DATE_FORMAT)));
     }
 }

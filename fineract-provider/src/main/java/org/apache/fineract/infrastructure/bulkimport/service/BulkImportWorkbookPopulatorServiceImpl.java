@@ -75,7 +75,7 @@ import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformSer
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.client.data.ClientData;
@@ -119,7 +119,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     private static final Logger LOG = LoggerFactory.getLogger(BulkImportWorkbookPopulatorServiceImpl.class);
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService officeReadPlatformService;
-    private final StaffReadPlatformService staffReadPlatformService;
+    private final StaffReadService staffReadPlatformService;
     private final ClientReadPlatformService clientReadPlatformService;
     private final CenterReadPlatformService centerReadPlatformService;
     private final GroupReadPlatformService groupReadPlatformService;
@@ -139,7 +139,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
 
     @Autowired
     public BulkImportWorkbookPopulatorServiceImpl(final PlatformSecurityContext context,
-            final OfficeReadPlatformService officeReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
+            final OfficeReadPlatformService officeReadPlatformService, final StaffReadService staffReadPlatformService,
             final ClientReadPlatformService clientReadPlatformService, final CenterReadPlatformService centerReadPlatformService,
             final GroupReadPlatformService groupReadPlatformService, final FundReadPlatformService fundReadPlatformService,
             final PaymentTypeReadService paymentTypeReadPlatformService,

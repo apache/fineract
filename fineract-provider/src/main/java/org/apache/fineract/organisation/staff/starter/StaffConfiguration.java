@@ -19,31 +19,31 @@
 package org.apache.fineract.organisation.staff.starter;
 
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
+import org.apache.fineract.organisation.office.domain.OfficeRepository;
 import org.apache.fineract.organisation.staff.domain.StaffRepository;
-import org.apache.fineract.organisation.staff.serialization.StaffCommandFromApiJsonDeserializer;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformServiceImpl;
-import org.apache.fineract.organisation.staff.service.StaffWritePlatformService;
-import org.apache.fineract.organisation.staff.service.StaffWritePlatformServiceJpaRepositoryImpl;
+import org.apache.fineract.organisation.staff.mapper.StaffCreateRequestMapper;
+import org.apache.fineract.organisation.staff.service.StaffReadService;
+import org.apache.fineract.organisation.staff.service.StaffReadServiceImpl;
+import org.apache.fineract.organisation.staff.service.StaffWriteService;
+import org.apache.fineract.organisation.staff.service.StaffWriteServiceImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
-public class OrganisationStaffConfiguration {
+class StaffConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(StaffReadPlatformService.class)
-    public StaffReadPlatformService staffReadPlatformService(PlatformSecurityContext context, JdbcTemplate jdbcTemplate) {
-        return new StaffReadPlatformServiceImpl(context, jdbcTemplate);
+    @ConditionalOnMissingBean(StaffReadService.class)
+    StaffReadService staffReadService(PlatformSecurityContext context, JdbcTemplate jdbcTemplate) {
+        return new StaffReadServiceImpl(context, jdbcTemplate);
     }
 
     @Bean
-    @ConditionalOnMissingBean(StaffWritePlatformService.class)
-    public StaffWritePlatformService staffWritePlatformService(StaffCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            StaffRepository staffRepository, OfficeRepositoryWrapper officeRepositoryWrapper) {
-        return new StaffWritePlatformServiceJpaRepositoryImpl(fromApiJsonDeserializer, staffRepository, officeRepositoryWrapper);
+    @ConditionalOnMissingBean(StaffWriteService.class)
+    StaffWriteService staffWriteService(StaffRepository staffRepository, OfficeRepository officeRepository,
+            StaffCreateRequestMapper staffCreateRequestMapper) {
+        return new StaffWriteServiceImpl(staffRepository, officeRepository, staffCreateRequestMapper);
     }
 }

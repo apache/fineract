@@ -30,7 +30,7 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.organisation.staff.data.StaffData;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
 import org.apache.fineract.portfolio.client.data.ClientData;
@@ -55,12 +55,12 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
 
     private final JdbcTemplate jdbcTemplate;
     private final ClientReadPlatformService clientReadPlatformService;
-    private final StaffReadPlatformService staffReadPlatformService;
+    private final StaffReadService staffReadPlatformService;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
 
     @Autowired
     public GuarantorReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ClientReadPlatformService clientReadPlatformService,
-            final StaffReadPlatformService staffReadPlatformService, final LoanRepositoryWrapper loanRepositoryWrapper) {
+            final StaffReadService staffReadPlatformService, final LoanRepositoryWrapper loanRepositoryWrapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.clientReadPlatformService = clientReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;

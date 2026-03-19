@@ -34,7 +34,7 @@ import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
@@ -72,7 +72,7 @@ public class GroupConfiguration {
     @ConditionalOnMissingBean(CenterReadPlatformService.class)
     public CenterReadPlatformService centerReadPlatformService(JdbcTemplate jdbcTemplate, PlatformSecurityContext context,
             ClientReadPlatformService clientReadPlatformService, OfficeReadPlatformService officeReadPlatformService,
-            StaffReadPlatformService staffReadPlatformService, CodeValueReadPlatformService codeValueReadPlatformService,
+            StaffReadService staffReadPlatformService, CodeValueReadPlatformService codeValueReadPlatformService,
             ConfigurationDomainService configurationDomainService, ColumnValidator columnValidator, PaginationHelper paginationHelper,
             DatabaseSpecificSQLGenerator sqlGenerator, PaginationParametersDataValidator paginationParametersDataValidator) {
         return new CenterReadPlatformServiceImpl(jdbcTemplate, context, clientReadPlatformService, officeReadPlatformService,
@@ -112,7 +112,7 @@ public class GroupConfiguration {
     @Bean
     @ConditionalOnMissingBean(GroupReadPlatformService.class)
     public GroupReadPlatformService groupReadPlatformService(JdbcTemplate jdbcTemplate, PlatformSecurityContext context,
-            OfficeReadPlatformService officeReadPlatformService, StaffReadPlatformService staffReadPlatformService,
+            OfficeReadPlatformService officeReadPlatformService, StaffReadService staffReadPlatformService,
             CenterReadPlatformService centerReadPlatformService, CodeValueReadPlatformService codeValueReadPlatformService,
             PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator,
             PaginationParametersDataValidator paginationParametersDataValidator, ColumnValidator columnValidator,

@@ -1071,7 +1071,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public boolean hasLoanOfficer(final Staff fromLoanOfficer) {
         if (this.loanOfficer != null) {
-            return this.loanOfficer.identifiedBy(fromLoanOfficer);
+            return this.loanOfficer.getId().equals(fromLoanOfficer.getId());
         } else {
             return fromLoanOfficer == null;
         }
