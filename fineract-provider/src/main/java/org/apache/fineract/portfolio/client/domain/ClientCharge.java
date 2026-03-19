@@ -140,7 +140,10 @@ public class ClientCharge extends AbstractPersistableCustom<Long> {
         this.amountPaid = amountPaid.getAmount();
         this.amountOutstanding = calculateOutstanding();
         this.paid = false;
-        this.status = true;
+        // Only restore active status if charge was never explicitly inactivated
+        if (this.inactivationDate == null) {
+            this.status = true;
+        }
     }
 
     public Money waive() {
@@ -159,7 +162,15 @@ public class ClientCharge extends AbstractPersistableCustom<Long> {
         this.amountWaived = amountWaived.getAmount();
         this.amountOutstanding = calculateOutstanding();
         this.waived = false;
-        this.status = true;
+        // Only restore active status if charge was never explicitly inactivated
+        if (this.inactivationDate == null) {
+            this.status = true;
+        }
+    }
+
+    public void inactivate(final LocalDate inactivationOnDate) {
+        this.status = false;
+        this.inactivationDate = inactivationOnDate;
     }
 
     private void populateDerivedFields(final BigDecimal amount) {

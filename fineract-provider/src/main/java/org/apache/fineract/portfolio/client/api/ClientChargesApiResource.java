@@ -182,7 +182,7 @@ public class ClientChargesApiResource {
     @Path("{chargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Pay a Client Charge | Waive a Client Charge", operationId = "payOrWaiveClientCharge", description = "Pay a Client Charge:\n\n"
+    @Operation(summary = "Pay a Client Charge | Waive a Client Charge | Inactivate a Client Charge", operationId = "payOrWaiveClientCharge", description = "Pay a Client Charge:\n\n"
             + "Mandatory Fields:" + "transactionDate and amount " + ""
             + "\"Pay either a part of or the entire due amount for a charge.(command=paycharge)\n" + "\n" + "Waive a Client Charge:\n"
             + "\n" + "\n" + "This API provides the facility of waiving off the remaining amount on a client charge (command=waive)\n\n"

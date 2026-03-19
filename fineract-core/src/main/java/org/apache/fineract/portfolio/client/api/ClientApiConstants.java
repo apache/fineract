@@ -50,6 +50,8 @@ public class ClientApiConstants {
     public static final String CLIENT_CHARGE_COMMAND_WAIVE_CHARGE = "waive";
     public static final String CLIENT_CHARGE_COMMAND_PAY_CHARGE = "paycharge";
     public static final String CLIENT_CHARGE_COMMAND_INACTIVATE_CHARGE = "inactivate";
+    public static final String isActiveParamName = "isActive";
+    public static final String inactivationDateParamName = "inactivationDate";
     public static final String CLIENT_TRANSACTION_COMMAND_UNDO = "undo";
 
     public static final String CLIENT_CLOSURE_REASON = "ClientClosureReason";
@@ -199,10 +201,11 @@ public class ClientApiConstants {
             staffOptionsParamName, dateOfBirthParamName, genderParamName, clientTypeParamName, clientClassificationParamName,
             legalFormParamName, clientNonPersonDetailsParamName, isStaffParamName, legalFormParamName));
 
-    protected static final Set<String> CLIENT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(chargeIdParamName,
-            clientIdParamName, chargeNameParamName, penaltyParamName, chargeTimeTypeParamName, dueAsOfDateParamName,
-            chargeCalculationTypeParamName, currencyParamName, amountWaivedParamName, amountWrittenOffParamName, amountOutstandingParamName,
-            amountOrPercentageParamName, amountParamName, amountPaidParamName, chargeOptionsParamName, transactionsParamName));
+    protected static final Set<String> CLIENT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(chargeIdParamName, clientIdParamName, chargeNameParamName, penaltyParamName, chargeTimeTypeParamName,
+                    dueAsOfDateParamName, chargeCalculationTypeParamName, currencyParamName, amountWaivedParamName,
+                    amountWrittenOffParamName, amountOutstandingParamName, amountOrPercentageParamName, amountParamName,
+                    amountPaidParamName, chargeOptionsParamName, transactionsParamName, isActiveParamName, inactivationDateParamName));
 
     protected static final Set<String> CLIENT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
             transactionAmountParamName, paymentDetailDataParamName, reversedParamName, dateParamName, officeIdParamName,

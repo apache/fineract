@@ -1090,6 +1090,19 @@ public class ClientHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
+    public static Integer inactivateChargesForClients(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer clientId, final Integer clientChargeId) {
+        log.info("--------------------------------- INACTIVATE CHARGE FOR CLIENT --------------------------------");
+        final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?command=inactivate&"
+                + Utils.TENANT_IDENTIFIER;
+        final HashMap<?, ?> response = Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, "", "");
+        return response != null ? (Integer) response.get("resourceId") : null;
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String waiveChargesForClients(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer clientId, final Integer clientChargeId, final String json) {
         log.info("--------------------------------- WAIVE CHARGES FOR CLIENT --------------------------------");
@@ -1131,6 +1144,22 @@ public class ClientHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
+    public static Object getClientChargeField(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String clientId, final String clientChargeId, final String field) {
+        log.info("---------------------------------GET CLIENT CHARGE FIELD---------------------------------------------");
+        final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?"
+                + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL, field);
+    }
+
+    public static Object getClientChargeFieldWithFilter(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String clientId, final String clientChargeId, final String fields, final String returnField) {
+        log.info("---------------------------------GET CLIENT CHARGE WITH FIELDS FILTER---------------------------------------------");
+        final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?fields=" + fields
+                + "&" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL, returnField);
+    }
+
     public static Boolean getClientTransactions(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId, final String transactionId) {
         log.info("---------------------------------GET CLIENT CHARGE TRANSACTIONS---------------------------------------------");

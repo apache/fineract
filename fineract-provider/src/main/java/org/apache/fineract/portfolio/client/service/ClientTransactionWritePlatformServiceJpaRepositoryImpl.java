@@ -18,13 +18,19 @@
  */
 package org.apache.fineract.portfolio.client.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepositoryWrapper;
+import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientCharge;
 import org.apache.fineract.portfolio.client.domain.ClientChargePaidBy;
@@ -67,6 +73,16 @@ public class ClientTransactionWritePlatformServiceJpaRepositoryImpl implements C
                 final ClientCharge clientCharge = clientChargePaidBy.getClientCharge();
                 clientCharge.setCurrency(
                         organisationCurrencyRepository.findOneWithNotFoundDetection(clientCharge.getCharge().getCurrencyCode()));
+
+                // Cannot undo a transaction on an explicitly inactivated charge
+                if (clientCharge.isNotActive()) {
+                    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                    final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                            .resource(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
+                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.undo.not.allowed.charge.is.inactive");
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
+
                 if (clientTransaction.isPayChargeTransaction()) {
                     clientCharge.undoPayment(clientTransaction.getAmount());
                 } else if (clientTransaction.isWaiveChargeTransaction()) {

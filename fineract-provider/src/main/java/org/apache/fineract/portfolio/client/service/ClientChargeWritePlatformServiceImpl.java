@@ -353,10 +353,50 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
     }
 
     @Override
-    @SuppressWarnings("unused")
     public CommandProcessingResult inactivateCharge(Long clientId, Long clientChargeId) {
-        // functionality not yet supported
-        return null;
+        try {
+            final Client client = this.clientRepository.getActiveClientInUserScope(clientId);
+            final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                    .resource(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
+
+            if (clientCharge.isNotActive()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("charge.is.already.inactive");
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
+            }
+
+            if (clientCharge.isWaived()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("charge.is.already.waived");
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
+            }
+
+            if (clientCharge.isPaid()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("charge.is.already.paid");
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
+            }
+
+            final LocalDate inactivationOnDate = DateUtils.getBusinessLocalDate();
+            clientCharge.inactivate(inactivationOnDate);
+            this.clientChargeRepository.saveAndFlush(clientCharge);
+
+            return new CommandProcessingResultBuilder() //
+                    .withEntityId(clientCharge.getId()) //
+                    .withOfficeId(client.getOffice().getId()) //
+                    .withClientId(client.getId()) //
+                    .build();
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleDataIntegrityIssues(clientId, clientChargeId, throwable, dve);
+            return CommandProcessingResult.empty();
+        }
     }
 
     /**

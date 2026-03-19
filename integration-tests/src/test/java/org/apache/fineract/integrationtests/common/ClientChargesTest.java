@@ -149,6 +149,100 @@ public class ClientChargesTest {
 
     }
 
+    @Test
+    public void clientChargeInactivateTest() {
+
+        // Create a charge definition applicable to clients
+        final Integer chargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+                ChargesHelper.getChargeSpecifiedDueDateJSON());
+        Assertions.assertNotNull(chargeId);
+
+        // Create a client with activation date
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 October 2011");
+        Assertions.assertNotNull(clientId);
+
+        // Associate the charge with the client
+        final Integer clientChargeId = ClientHelper.addChargesForClient(this.requestSpec, this.responseSpec, clientId,
+                ClientHelper.getSpecifiedDueDateChargesClientAsJSON(chargeId.toString(), "29 October 2011"));
+        Assertions.assertNotNull(clientChargeId);
+
+        // Inactivate the charge - this is the core operation under test
+        final Integer inactivatedChargeId = ClientHelper.inactivateChargesForClients(this.requestSpec, this.responseSpec, clientId,
+                clientChargeId);
+        Assertions.assertNotNull(inactivatedChargeId);
+        Assertions.assertEquals(clientChargeId, inactivatedChargeId);
+
+        // Retrieve and assert the charge is now inactive
+        // The JSON field name matches the Java field name in ClientChargeData: isActive
+        final Object isActive = ClientHelper.getClientChargeField(requestSpec, responseSpec, clientId.toString(), clientChargeId.toString(),
+                "isActive");
+        Assertions.assertEquals(Boolean.FALSE, isActive);
+
+        // Attempting to inactivate an already inactive charge must fail with 400
+        final ResponseSpecification responseSpecFailure = new ResponseSpecBuilder().expectStatusCode(400).build();
+        final Integer duplicateInactivate = ClientHelper.inactivateChargesForClients(this.requestSpec, responseSpecFailure, clientId,
+                clientChargeId);
+        Assertions.assertNull(duplicateInactivate);
+    }
+
+    @Test
+    public void clientChargeInactivateBlocksUndoTest() {
+
+        // Create charge and client
+        final Integer chargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+                ChargesHelper.getChargeSpecifiedDueDateJSON());
+        Assertions.assertNotNull(chargeId);
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 October 2011");
+        Assertions.assertNotNull(clientId);
+        final Integer clientChargeId = ClientHelper.addChargesForClient(this.requestSpec, this.responseSpec, clientId,
+                ClientHelper.getSpecifiedDueDateChargesClientAsJSON(chargeId.toString(), "29 October 2011"));
+        Assertions.assertNotNull(clientChargeId);
+
+        // Pay the charge partially
+        final String transactionId = ClientHelper.payChargesForClients(this.requestSpec, this.responseSpec, clientId, clientChargeId,
+                ClientHelper.getPayChargeJSON("25 August 2015", "10"));
+        Assertions.assertNotNull(transactionId);
+
+        // Inactivate the charge
+        final Integer inactivatedId = ClientHelper.inactivateChargesForClients(this.requestSpec, this.responseSpec, clientId,
+                clientChargeId);
+        Assertions.assertNotNull(inactivatedId);
+
+        // Attempt to undo the payment - must fail with 400 because charge is inactive
+        final ResponseSpecification responseSpecFailure = new ResponseSpecBuilder().expectStatusCode(400).build();
+        final Integer undoResult = ClientHelper.revertClientChargeTransaction(this.requestSpec, responseSpecFailure, clientId.toString(),
+                transactionId);
+        Assertions.assertNull(undoResult);
+    }
+
+    @Test
+    public void clientChargeInactivateFieldsFilterTest() {
+
+        // Create charge and client
+        final Integer chargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+                ChargesHelper.getChargeSpecifiedDueDateJSON());
+        Assertions.assertNotNull(chargeId);
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 October 2011");
+        Assertions.assertNotNull(clientId);
+        final Integer clientChargeId = ClientHelper.addChargesForClient(this.requestSpec, this.responseSpec, clientId,
+                ClientHelper.getSpecifiedDueDateChargesClientAsJSON(chargeId.toString(), "29 October 2011"));
+        Assertions.assertNotNull(clientChargeId);
+
+        // Inactivate the charge
+        ClientHelper.inactivateChargesForClients(this.requestSpec, this.responseSpec, clientId, clientChargeId);
+
+        // Assert isActive is returned correctly in full response
+        final Object isActive = ClientHelper.getClientChargeField(requestSpec, responseSpec, clientId.toString(), clientChargeId.toString(),
+                "isActive");
+        Assertions.assertEquals(Boolean.FALSE, isActive);
+
+        // Assert isActive is returned when using explicit ?fields= filter
+        // This validates CLIENT_CHARGES_RESPONSE_DATA_PARAMETERS includes isActive
+        final Object isActiveFiltered = ClientHelper.getClientChargeFieldWithFilter(requestSpec, responseSpec, clientId.toString(),
+                clientChargeId.toString(), "isActive", "isActive");
+        Assertions.assertEquals(Boolean.FALSE, isActiveFiltered);
+    }
+
     /**
      * It checks whether the client charge transaction is reversed or not.
      *
