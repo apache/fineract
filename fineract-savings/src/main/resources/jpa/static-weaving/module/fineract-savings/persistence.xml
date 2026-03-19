@@ -31,62 +31,69 @@
     <persistence-unit name="jpa-pu" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 
-        <!-- Core Module Entities -->
-        <class>org.apache.fineract.useradministration.domain.Role</class>
-        <class>org.apache.fineract.portfolio.fund.domain.Fund</class>
-        <class>org.apache.fineract.organisation.workingdays.domain.WorkingDays</class>
-        <class>org.apache.fineract.useradministration.domain.Permission</class>
-        <class>org.apache.fineract.commands.domain.CommandSource</class>
-        <class>org.apache.fineract.useradministration.domain.AppUser</class>
-        <class>org.apache.fineract.accounting.glaccount.domain.GLAccount</class>
-        <class>org.apache.fineract.organisation.monetary.domain.OrganisationCurrency</class>
-        <class>org.apache.fineract.organisation.staff.domain.Staff</class>
-        <class>org.apache.fineract.portfolio.rate.domain.Rate</class>
-        <class>org.apache.fineract.organisation.monetary.domain.ApplicationCurrency</class>
-        <class>org.apache.fineract.portfolio.calendar.domain.CalendarInstance</class>
-        <class>org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail</class>
-        <class>org.apache.fineract.portfolio.calendar.domain.Calendar</class>
-        <class>org.apache.fineract.portfolio.calendar.domain.CalendarHistory</class>
-        <class>org.apache.fineract.portfolio.client.domain.ClientIdentifier</class>
-        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentPeriodAndRule</class>
-        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket</class>
-        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange</class>
-        <class>org.apache.fineract.portfolio.group.domain.StaffAssignmentHistory</class>
-        <class>org.apache.fineract.portfolio.group.domain.Group</class>
-        <class>org.apache.fineract.portfolio.client.domain.Client</class>
-        <class>org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventConfiguration</class>
-        <class>org.apache.fineract.portfolio.group.domain.GroupRole</class>
-        <class>org.apache.fineract.portfolio.paymenttype.domain.PaymentType</class>
-        <class>org.apache.fineract.portfolio.group.domain.GroupLevel</class>
-        <class>org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEvent</class>
-        <class>org.apache.fineract.organisation.office.domain.Office</class>
-        <class>org.apache.fineract.organisation.holiday.domain.Holiday</class>
-        <class>org.apache.fineract.infrastructure.cache.domain.PlatformCache</class>
-        <class>org.apache.fineract.infrastructure.codes.domain.Code</class>
-        <class>org.apache.fineract.infrastructure.businessdate.domain.BusinessDate</class>
-        <class>org.apache.fineract.infrastructure.codes.domain.CodeValue</class>
-
-        <!-- Accounting Module Entities -->
+        <!--  fineract-accounting module: -->
         <class>org.apache.fineract.accounting.closure.domain.GLClosure</class>
         <class>org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccount</class>
         <class>org.apache.fineract.accounting.glaccount.domain.TrialBalance</class>
+        <class>org.apache.fineract.accounting.journalentry.domain.JournalEntry</class>
         <class>org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMapping</class>
         <class>org.apache.fineract.accounting.rule.domain.AccountingRule</class>
         <class>org.apache.fineract.accounting.rule.domain.AccountingTagRule</class>
-        <class>org.apache.fineract.accounting.journalentry.domain.JournalEntry</class>
 
+        <!--  fineract-charge module: -->
+        <class>org.apache.fineract.portfolio.charge.domain.Charge</class>
 
-        <!-- Tax Module Entities -->
-        <class>org.apache.fineract.portfolio.tax.domain.TaxComponent</class>
-        <class>org.apache.fineract.portfolio.tax.domain.TaxComponentHistory</class>
-        <class>org.apache.fineract.portfolio.tax.domain.TaxGroup</class>
-        <class>org.apache.fineract.portfolio.tax.domain.TaxGroupMappings</class>
+        <!--  fineract-cob module: -->
+        <class>org.apache.fineract.cob.domain.AccountLock</class>
+        <class>org.apache.fineract.cob.domain.BatchBusinessStep</class>
 
-        <!-- Rates Module Entities -->
+        <!--  fineract-core module: -->
+        <class>org.apache.fineract.accounting.glaccount.domain.GLAccount</class>
+        <class>org.apache.fineract.commands.domain.CommandSource</class>
+        <class>org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat</class>
+        <class>org.apache.fineract.infrastructure.businessdate.domain.BusinessDate</class>
+        <class>org.apache.fineract.infrastructure.cache.domain.PlatformCache</class>
+        <class>org.apache.fineract.infrastructure.codes.domain.Code</class>
+        <class>org.apache.fineract.infrastructure.codes.domain.CodeValue</class>
+        <class>org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty</class>
+        <class>org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom</class>
+        <class>org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom</class>
+        <class>org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom</class>
+        <class>org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEvent</class>
+        <class>org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventConfiguration</class>
+        <class>org.apache.fineract.infrastructure.jobs.domain.CustomJobParameter</class>
+        <class>org.apache.fineract.organisation.holiday.domain.Holiday</class>
+        <class>org.apache.fineract.organisation.monetary.domain.ApplicationCurrency</class>
+        <class>org.apache.fineract.organisation.monetary.domain.OrganisationCurrency</class>
+        <class>org.apache.fineract.organisation.office.domain.Office</class>
+        <class>org.apache.fineract.organisation.staff.domain.Staff</class>
+        <class>org.apache.fineract.organisation.workingdays.domain.WorkingDays</class>
+        <class>org.apache.fineract.portfolio.calendar.domain.Calendar</class>
+        <class>org.apache.fineract.portfolio.calendar.domain.CalendarHistory</class>
+        <class>org.apache.fineract.portfolio.calendar.domain.CalendarInstance</class>
+        <class>org.apache.fineract.portfolio.client.domain.Client</class>
+        <class>org.apache.fineract.portfolio.client.domain.ClientIdentifier</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentPeriodAndRule</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange</class>
+        <class>org.apache.fineract.portfolio.fund.domain.Fund</class>
+        <class>org.apache.fineract.portfolio.group.domain.Group</class>
+        <class>org.apache.fineract.portfolio.group.domain.GroupLevel</class>
+        <class>org.apache.fineract.portfolio.group.domain.GroupRole</class>
+        <class>org.apache.fineract.portfolio.group.domain.StaffAssignmentHistory</class>
+        <class>org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail</class>
+        <class>org.apache.fineract.portfolio.paymenttype.domain.PaymentType</class>
+        <class>org.apache.fineract.portfolio.rate.domain.Rate</class>
+        <class>org.apache.fineract.useradministration.domain.AppUser</class>
+        <class>org.apache.fineract.useradministration.domain.Permission</class>
+        <class>org.apache.fineract.useradministration.domain.Role</class>
+
+        <!--  fineract-rates module: -->
         <class>org.apache.fineract.portfolio.floatingrates.domain.FloatingRate</class>
         <class>org.apache.fineract.portfolio.floatingrates.domain.FloatingRatePeriod</class>
 
-        <!-- Savings Module Entities -->
+        <!--  fineract-savings module: -->
+        <class>org.apache.fineract.cob.savings.SavingsAccountLock</class>
         <class>org.apache.fineract.interoperation.domain.InteropIdentifier</class>
         <class>org.apache.fineract.portfolio.interestratechart.domain.InterestIncentives</class>
         <class>org.apache.fineract.portfolio.interestratechart.domain.InterestRateChart</class>
@@ -110,12 +117,11 @@
         <class>org.apache.fineract.portfolio.savings.domain.SavingsOfficerAssignmentHistory</class>
         <class>org.apache.fineract.portfolio.savings.domain.SavingsProduct</class>
 
-        <!-- Charge Module Entities -->
-        <class>org.apache.fineract.portfolio.charge.domain.Charge</class>
-
-        <!-- COB (Chunk of Business) -->
-        <class>org.apache.fineract.cob.domain.BatchBusinessStep</class>
-        <class>org.apache.fineract.cob.domain.AccountLock</class>
+        <!--  fineract-tax module: -->
+        <class>org.apache.fineract.portfolio.tax.domain.TaxComponent</class>
+        <class>org.apache.fineract.portfolio.tax.domain.TaxComponentHistory</class>
+        <class>org.apache.fineract.portfolio.tax.domain.TaxGroup</class>
+        <class>org.apache.fineract.portfolio.tax.domain.TaxGroupMappings</class>
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
