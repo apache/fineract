@@ -33,6 +33,7 @@ public class LoanApprovalData {
     private final BigDecimal approvalAmount;
     private final BigDecimal netDisbursalAmount;
     private final BigDecimal availableDisbursementAmountWithOverApplied;
+    private final LocalDate expectedDisbursementDate;
 
     // import fields
     private LocalDate approvedOnDate;
@@ -56,15 +57,18 @@ public class LoanApprovalData {
         this.approvalDate = null;
         this.netDisbursalAmount = null;
         this.availableDisbursementAmountWithOverApplied = null;
+        this.expectedDisbursementDate = null;
     }
 
     public LoanApprovalData(final BigDecimal approvalAmount, final LocalDate approvalDate, final BigDecimal netDisbursalAmount,
-            final CurrencyData currency, final BigDecimal availableDisbursementAmountWithOverApplied) {
+            final CurrencyData currency, final BigDecimal availableDisbursementAmountWithOverApplied,
+            final LocalDate expectedDisbursementDate) {
         this.approvalDate = approvalDate;
         this.approvalAmount = approvalAmount;
         this.netDisbursalAmount = netDisbursalAmount;
         this.currency = currency;
         this.availableDisbursementAmountWithOverApplied = availableDisbursementAmountWithOverApplied;
+        this.expectedDisbursementDate = expectedDisbursementDate;
     }
 
 }

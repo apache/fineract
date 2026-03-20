@@ -42,4 +42,8 @@ public final class WorkingCapitalLoanConstants {
     public static final String submittedOnNoteParameterName = "submittedOnNote";
     public static final String totalPaymentParamName = "totalPayment";
     public static final String principalAmountParamName = "principalAmount";
+
+    // Loan commands
+    public static final String APPROVE_LOAN_COMMAND = "approve";
+    public static final String DISBURSE_LOAN_COMMAND = "disburse";
 }
