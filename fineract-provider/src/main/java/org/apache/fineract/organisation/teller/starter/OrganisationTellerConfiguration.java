@@ -35,6 +35,11 @@ import org.apache.fineract.organisation.teller.domain.CashierRepository;
 import org.apache.fineract.organisation.teller.domain.CashierTransactionRepository;
 import org.apache.fineract.organisation.teller.domain.TellerRepositoryWrapper;
 import org.apache.fineract.organisation.teller.serialization.TellerCommandFromApiJsonDeserializer;
+import org.apache.fineract.organisation.teller.domain.CashierSessionRepository;
+import org.apache.fineract.organisation.teller.service.CashierSessionReadPlatformService;
+import org.apache.fineract.organisation.teller.service.CashierSessionReadPlatformServiceImpl;
+import org.apache.fineract.organisation.teller.service.CashierSessionWritePlatformService;
+import org.apache.fineract.organisation.teller.service.CashierSessionWritePlatformServiceImpl;
 import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatformService;
 import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatformServiceImpl;
 import org.apache.fineract.organisation.teller.service.TellerWritePlatformService;
@@ -69,5 +74,19 @@ public class OrganisationTellerConfiguration {
         return new TellerWritePlatformServiceJpaImpl(context, fromApiJsonDeserializer, tellerRepositoryWrapper, officeRepositoryWrapper,
                 staffRepository, cashierRepository, cashierTxnRepository, glJournalEntryRepository,
                 financialActivityAccountRepositoryWrapper, cashierTransactionDataValidator, glAccountRepositoryWrapper);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(CashierSessionReadPlatformService.class)
+    public CashierSessionReadPlatformService cashierSessionReadPlatformService(JdbcTemplate jdbcTemplate) {
+        return new CashierSessionReadPlatformServiceImpl(jdbcTemplate);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(CashierSessionWritePlatformService.class)
+    public CashierSessionWritePlatformService cashierSessionWritePlatformService(PlatformSecurityContext context,
+            CashierSessionRepository cashierSessionRepository, CashierRepository cashierRepository,
+            TellerRepositoryWrapper tellerRepositoryWrapper) {
+        return new CashierSessionWritePlatformServiceImpl(context, cashierSessionRepository, cashierRepository, tellerRepositoryWrapper);
     }
 }
