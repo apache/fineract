@@ -32,10 +32,15 @@ public interface CashierSessionRepository extends JpaRepository<CashierSession, 
     Optional<CashierSession> findOpenSession(@Param("cashierId") Long cashierId, @Param("tellerId") Long tellerId,
             @Param("sessionDate") LocalDate sessionDate);
 
-    // Find OPEN session by user on any teller (for GL routing)
+    // Find all OPEN sessions by user on any teller (for GL routing; supports multi-teller scenario)
     @Query("SELECT cs FROM CashierSession cs WHERE cs.userId = :userId AND cs.office.id = :officeId AND cs.sessionDate = :sessionDate AND cs.status = org.apache.fineract.organisation.teller.domain.CashierSessionStatus.OPEN")
-    Optional<CashierSession> findOpenSessionByUser(@Param("userId") Long userId, @Param("officeId") Long officeId,
+    List<CashierSession> findOpenSessionByUser(@Param("userId") Long userId, @Param("officeId") Long officeId,
             @Param("sessionDate") LocalDate sessionDate);
+
+    // Find OPEN session by user on a specific teller (for per-teller GL routing)
+    @Query("SELECT cs FROM CashierSession cs WHERE cs.userId = :userId AND cs.teller.id = :tellerId AND cs.office.id = :officeId AND cs.sessionDate = :sessionDate AND cs.status = org.apache.fineract.organisation.teller.domain.CashierSessionStatus.OPEN")
+    Optional<CashierSession> findOpenSessionByUserAndTeller(@Param("userId") Long userId, @Param("tellerId") Long tellerId,
+            @Param("officeId") Long officeId, @Param("sessionDate") LocalDate sessionDate);
 
     // Find any unsettled OPEN sessions from prior days (blocks opening new session)
     @Query("SELECT cs FROM CashierSession cs WHERE cs.userId = :userId AND cs.sessionDate < :today AND cs.status = org.apache.fineract.organisation.teller.domain.CashierSessionStatus.OPEN")
