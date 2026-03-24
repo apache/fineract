@@ -53,6 +53,8 @@ public final class CashierData implements Serializable {
     private String startTime;
     private String endTime;
 
+    private boolean expiryWarning;
+
     // Template fields
     private String officeName;
     private String tellerName;
