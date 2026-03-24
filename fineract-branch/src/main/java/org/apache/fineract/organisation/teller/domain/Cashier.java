@@ -26,7 +26,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -48,8 +47,7 @@ import org.apache.fineract.organisation.staff.domain.Staff;
  * @since 2.0.0
  */
 @Entity
-@Table(name = "m_cashiers", uniqueConstraints = {
-        @UniqueConstraint(name = "ux_cashiers_staff_teller", columnNames = { "staff_id", "teller_id" }) })
+@Table(name = "m_cashiers")
 @Getter
 @Setter
 @NoArgsConstructor

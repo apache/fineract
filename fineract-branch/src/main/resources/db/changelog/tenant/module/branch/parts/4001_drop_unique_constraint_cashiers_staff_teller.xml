@@ -20,9 +20,12 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-  <!-- Sequence is starting from 4000 to make it easier to move existing liquibase changesets here -->
-  <include file="parts/4001_drop_unique_constraint_cashiers_staff_teller.xml"
-           relativeToChangelogFile="true"/>
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="fineract" id="4001-1">
+        <preConditions onFail="MARK_RAN">
+            <indexExists tableName="m_cashiers" indexName="ux_cashiers_staff_teller"/>
+        </preConditions>
+        <dropIndex tableName="m_cashiers" indexName="ux_cashiers_staff_teller"/>
+    </changeSet>
 </databaseChangeLog>
