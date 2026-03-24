@@ -138,6 +138,10 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
     @Column(name = "ref_no", nullable = true)
     private String refNo;
 
+    @Setter
+    @Column(name = "cashier_session_id")
+    private Long cashierSessionId;
+
     SavingsAccountTransaction() {}
 
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final PaymentDetail paymentDetail,
