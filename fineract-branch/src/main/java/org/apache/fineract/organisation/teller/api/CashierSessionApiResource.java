@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.teller.api;
 
+import com.google.gson.JsonObject;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -38,11 +39,9 @@ import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.teller.data.CashierSessionData;
 import org.apache.fineract.organisation.teller.data.CashierSessionSummaryData;
 import org.apache.fineract.organisation.teller.service.CashierSessionReadPlatformService;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/tellers")
@@ -53,7 +52,6 @@ public class CashierSessionApiResource {
 
     private final CashierSessionReadPlatformService readService;
     private final PortfolioCommandSourceWritePlatformService commandWritePlatformService;
-    private final PlatformSecurityContext context;
 
     /**
      * POST /tellers/{id}/cashiers/{cId}/sessions — Open a new cashier session.
@@ -68,10 +66,11 @@ public class CashierSessionApiResource {
             @PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @PathParam("cashierId") @Parameter(description = "cashierId") final Long cashierId,
             @QueryParam("currencyCode") @Parameter(description = "currencyCode") final String currencyCode) {
-        final String json = "{\"currencyCode\":\"" + (currencyCode != null ? currencyCode : "") + "\"}";
+        final JsonObject json = new JsonObject();
+        json.addProperty("currencyCode", currencyCode != null ? currencyCode : "");
         final CommandWrapper request = new CommandWrapperBuilder()
                 .openCashierSession(tellerId, cashierId)
-                .withJson(json)
+                .withJson(json.toString())
                 .build();
         return commandWritePlatformService.logCommandSource(request);
     }
