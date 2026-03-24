@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -439,6 +440,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     private static final class CashierMapper implements RowMapper<CashierData> {
 
+        private static final int EXPIRY_WARNING_DAYS = 7;
+
         public String schema() {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
@@ -470,8 +473,11 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             final String startTime = rs.getString("start_time");
             final String endTime = rs.getString("end_time");
 
+            final LocalDate today = DateUtils.getLocalDateOfTenant();
+            final boolean expiryWarning = endDate != null && !endDate.isBefore(today) && endDate.isBefore(today.plusDays(EXPIRY_WARNING_DAYS + 1));
+
             return CashierData.instance(id, null, null, staffId, staffName, tellerId, tellerName, description, startDate, endDate, fullDay,
-                    startTime, endTime);
+                    startTime, endTime).setExpiryWarning(expiryWarning);
         }
     }
 

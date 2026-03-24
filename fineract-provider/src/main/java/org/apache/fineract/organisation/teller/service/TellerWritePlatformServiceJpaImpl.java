@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -52,6 +53,7 @@ import org.apache.fineract.organisation.teller.domain.CashierTransactionReposito
 import org.apache.fineract.organisation.teller.domain.CashierTxnType;
 import org.apache.fineract.organisation.teller.domain.Teller;
 import org.apache.fineract.organisation.teller.domain.TellerRepositoryWrapper;
+import org.apache.fineract.organisation.teller.exception.CashierAssignmentExpiredException;
 import org.apache.fineract.organisation.teller.exception.CashierExistForTellerException;
 import org.apache.fineract.organisation.teller.exception.CashierNotFoundException;
 import org.apache.fineract.organisation.teller.serialization.TellerCommandFromApiJsonDeserializer;
@@ -364,6 +366,11 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
             final AppUser currentUser = this.context.authenticatedUser();
 
             final Cashier cashier = this.cashierRepository.findById(cashierId).orElseThrow(() -> new CashierNotFoundException(cashierId));
+
+            if (cashier.getEndDate() != null && cashier.getEndDate().isBefore(DateUtils.getLocalDateOfTenant())) {
+                final String cashierName = cashier.getStaff() != null ? cashier.getStaff().displayName() : String.valueOf(cashierId);
+                throw new CashierAssignmentExpiredException(cashierName, cashier.getEndDate());
+            }
 
             this.fromApiJsonDeserializer.validateForCashTxnForCashier(command.json());
 
