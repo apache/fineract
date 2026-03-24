@@ -229,4 +229,5 @@
     <include file="parts/0208_trial_balance_summary_with_asset_owner_journal_entry_aggregation_fix.xml" relativeToChangelogFile="true" />
     <include file="parts/0209_add_m_cashier_sessions_table.xml" relativeToChangelogFile="true" />
     <include file="parts/0210_add_cashier_session_id_fk_to_transactions.xml" relativeToChangelogFile="true" />
+    <include file="parts/0211_add_supervisor_note_to_cashier_sessions.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

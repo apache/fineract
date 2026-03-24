@@ -18,10 +18,17 @@
  */
 package org.apache.fineract.organisation.teller.domain;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface CashierTransactionRepository
         extends JpaRepository<CashierTransaction, Long>, JpaSpecificationExecutor<CashierTransaction> {
-    // no added behavior
+
+    @Query("SELECT COALESCE(SUM(ct.txnAmount), 0) FROM CashierTransaction ct WHERE ct.cashier.id = :cashierId AND ct.txnType = :txnType AND ct.txnDate = :sessionDate")
+    BigDecimal sumAmountByCashierAndTxnTypeAndDate(@Param("cashierId") Long cashierId, @Param("txnType") Integer txnType,
+            @Param("sessionDate") LocalDate sessionDate);
 }

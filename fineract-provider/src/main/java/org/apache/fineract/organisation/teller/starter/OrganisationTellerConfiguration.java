@@ -86,7 +86,12 @@ public class OrganisationTellerConfiguration {
     @ConditionalOnMissingBean(CashierSessionWritePlatformService.class)
     public CashierSessionWritePlatformService cashierSessionWritePlatformService(PlatformSecurityContext context,
             CashierSessionRepository cashierSessionRepository, CashierRepository cashierRepository,
-            TellerRepositoryWrapper tellerRepositoryWrapper) {
-        return new CashierSessionWritePlatformServiceImpl(context, cashierSessionRepository, cashierRepository, tellerRepositoryWrapper);
+            TellerRepositoryWrapper tellerRepositoryWrapper, CashierTransactionRepository cashierTransactionRepository,
+            JournalEntryRepository glJournalEntryRepository,
+            FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
+            GLAccountRepositoryWrapper glAccountRepositoryWrapper) {
+        return new CashierSessionWritePlatformServiceImpl(context, cashierSessionRepository, cashierRepository, tellerRepositoryWrapper,
+                cashierTransactionRepository, glJournalEntryRepository, financialActivityAccountRepositoryWrapper,
+                glAccountRepositoryWrapper);
     }
 }

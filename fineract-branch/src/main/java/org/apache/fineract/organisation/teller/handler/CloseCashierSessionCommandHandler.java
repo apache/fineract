@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.teller.handler;
 
+import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
@@ -36,6 +37,8 @@ public class CloseCashierSessionCommandHandler implements NewCommandSourceHandle
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
         final Long sessionId = command.entityId();
-        return cashierSessionWritePlatformService.closeSession(sessionId);
+        final BigDecimal settledAmount = command.bigDecimalValueOfParameterNamed("settledAmount");
+        final String supervisorNote = command.stringValueOfParameterNamed("supervisorNote");
+        return cashierSessionWritePlatformService.closeSession(sessionId, settledAmount, supervisorNote);
     }
 }

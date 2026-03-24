@@ -89,6 +89,9 @@ public class CashierSession extends AbstractPersistableCustom<Long> {
     @Column(name = "currency_code", length = 3, nullable = false)
     private String currencyCode;
 
+    @Column(name = "supervisor_note", length = 500, nullable = true)
+    private String supervisorNote;
+
     @Column(name = "created_by", nullable = false)
     private Long createdBy;
 
