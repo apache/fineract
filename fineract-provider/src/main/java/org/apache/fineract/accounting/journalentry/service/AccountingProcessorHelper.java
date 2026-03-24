@@ -1302,9 +1302,12 @@ public class AccountingProcessorHelper {
     /**
      * Resolves the GL account to use for cash payments based on whether an active cashier session exists.
      * <p>
-     * If the given payment type has {@code isCashPayment == true} and the current user has an open cashier session for
-     * the given office on the transaction date, the {@code CASH_AT_TELLER} (11140) financial-activity GL account is
-     * returned. Otherwise the {@code CASH_AT_MAINVAULT} (11130) financial-activity GL account is returned as fallback.
+     * For cash payment types ({@code isCashPayment == true}):
+     * <ul>
+     * <li>If the current user has an open cashier session for the given office on the transaction date, the
+     * {@code CASH_AT_TELLER} (11140) financial-activity GL account is returned.</li>
+     * <li>Otherwise, the {@code CASH_AT_MAINVAULT} (11130) financial-activity GL account is returned as fallback.</li>
+     * </ul>
      * </p>
      * Returns an empty {@link Optional} when {@code paymentTypeId} is {@code null} or the payment type is not a cash
      * payment, signalling callers to fall back to the product-specific fund-source mapping.
@@ -1315,7 +1318,8 @@ public class AccountingProcessorHelper {
      *            the office for which to look up the cashier session
      * @param transactionDate
      *            the transaction date
-     * @return an {@link Optional} containing the resolved {@link GLAccount}, or empty if not applicable
+     * @return an {@link Optional} containing the resolved {@link GLAccount} (always present for cash payment types,
+     *         empty for non-cash or null payment types)
      */
     public Optional<GLAccount> resolveCashGLAccount(final Long paymentTypeId, final Long officeId, final LocalDate transactionDate) {
         if (paymentTypeId == null) {
