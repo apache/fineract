@@ -40,6 +40,8 @@ import jakarta.ws.rs.core.MediaType;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Locale;
+import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -289,11 +291,17 @@ public class TellerApiResource {
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
-            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
+            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
+            @QueryParam("fromDate") @Parameter(description = "fromDate") final String fromDateStr,
+            @QueryParam("toDate") @Parameter(description = "toDate") final String toDateStr,
+            @QueryParam("dateFormat") @Parameter(description = "dateFormat") final String dateFormat,
+            @QueryParam("locale") @Parameter(description = "locale") final String locale) {
 
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).offset(offset).orderBy(orderBy)
                 .sortOrder(sortOrder).build();
-        return this.readPlatformService.retrieveCashierTransactions(cashierId, false, null, null, currencyCode, searchParameters);
+        final LocalDate fromDate = parseDateParam(fromDateStr, "fromDate", dateFormat, locale);
+        final LocalDate toDate = parseDateParam(toDateStr, "toDate", dateFormat, locale);
+        return this.readPlatformService.retrieveCashierTransactions(cashierId, false, fromDate, toDate, currencyCode, searchParameters);
     }
 
     @GET
@@ -310,12 +318,18 @@ public class TellerApiResource {
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
-            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
+            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
+            @QueryParam("fromDate") @Parameter(description = "fromDate") final String fromDateStr,
+            @QueryParam("toDate") @Parameter(description = "toDate") final String toDateStr,
+            @QueryParam("dateFormat") @Parameter(description = "dateFormat") final String dateFormat,
+            @QueryParam("locale") @Parameter(description = "locale") final String locale) {
 
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).offset(offset).orderBy(orderBy)
                 .sortOrder(sortOrder).build();
+        final LocalDate fromDate = parseDateParam(fromDateStr, "fromDate", dateFormat, locale);
+        final LocalDate toDate = parseDateParam(toDateStr, "toDate", dateFormat, locale);
 
-        return this.readPlatformService.retrieveCashierTransactionsWithSummary(cashierId, false, null, null, currencyCode,
+        return this.readPlatformService.retrieveCashierTransactionsWithSummary(cashierId, false, fromDate, toDate, currencyCode,
                 searchParameters);
     }
 
@@ -365,5 +379,13 @@ public class TellerApiResource {
 
         return this.readPlatformService.fetchTellerJournals(tellerId, cashierDate, dateRangeHolder.getStartDate(),
                 dateRangeHolder.getEndDate());
+    }
+
+    private LocalDate parseDateParam(final String dateStr, final String parameterName, final String dateFormat, final String locale) {
+        if (dateStr == null || dateFormat == null || locale == null) {
+            return null;
+        }
+        final Locale localeObj = JsonParserHelper.localeFromString(locale);
+        return JsonParserHelper.convertFrom(dateStr, parameterName, dateFormat, localeObj);
     }
 }

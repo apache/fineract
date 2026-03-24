@@ -23,8 +23,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -274,10 +276,55 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         sqlValidator.validate(searchParameters.getSortOrder());
         final String nextDay = sqlGenerator.incrementDateByOneDay("c.end_date");
 
+        final String fromDateExpr = fromDate != null ? "?" : "c.start_date";
+        final String toDateExprForCashierTxn = toDate != null ? "?" : "c.end_date";
+        final String toDateExprForOtherTxn = toDate != null ? "?" : nextDay;
+
         final CashierTransactionSummaryMapper ctsm = new CashierTransactionSummaryMapper();
-        final String sql = "SELECT " + ctsm.cashierTxnSummarySchema(nextDay) + " LIMIT 1000";
+        final String sql = "SELECT " + ctsm.cashierTxnSummarySchema(fromDateExpr, toDateExprForCashierTxn, toDateExprForOtherTxn)
+                + " LIMIT 1000";
+
+        final List<Object> summaryParamsList = new ArrayList<>();
+        // cashier_txns section: upper bound uses c.end_date (inclusive date, no +1)
+        summaryParamsList.add(cashierId);
+        summaryParamsList.add(currencyCode);
+        if (fromDate != null) {
+            summaryParamsList.add(fromDate);
+        }
+        if (toDate != null) {
+            summaryParamsList.add(toDate);
+        }
+        // savings section: the summary SQL originally used c.end_date (not nextDay), so use toDate directly
+        summaryParamsList.add(cashierId);
+        summaryParamsList.add(currencyCode);
+        if (fromDate != null) {
+            summaryParamsList.add(fromDate);
+        }
+        if (toDate != null) {
+            summaryParamsList.add(toDate);
+        }
+        // loans section: SQL uses DATE_ADD(c.end_date, 1 DAY) to make the upper bound inclusive of transactions
+        // on the end date itself when transaction_date is a timestamp; mirror that with plusDays(1)
+        summaryParamsList.add(cashierId);
+        summaryParamsList.add(currencyCode);
+        if (fromDate != null) {
+            summaryParamsList.add(fromDate);
+        }
+        if (toDate != null) {
+            summaryParamsList.add(toDate.plusDays(1));
+        }
+        // client section: same reasoning as loans — use plusDays(1) to match nextDay behaviour
+        summaryParamsList.add(cashierId);
+        summaryParamsList.add(currencyCode);
+        if (fromDate != null) {
+            summaryParamsList.add(fromDate);
+        }
+        if (toDate != null) {
+            summaryParamsList.add(toDate.plusDays(1));
+        }
+
         Collection<CashierTransactionTypeTotalsData> cashierTxnTypeTotals = this.jdbcTemplate.query(sql, ctsm, // NOSONAR
-                new Object[] { cashierId, currencyCode, cashierId, currencyCode, cashierId, currencyCode, cashierId, currencyCode });
+                summaryParamsList.toArray());
 
         Iterator<CashierTransactionTypeTotalsData> itr = cashierTxnTypeTotals.iterator();
         BigDecimal allocAmount = new BigDecimal(0);
@@ -321,19 +368,23 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
         final CashierTransactionMapper ctm = new CashierTransactionMapper();
 
+        final String fromDateExpr = fromDate != null ? "?" : "c.start_date";
+        final String toDateExprForCashierTxn = toDate != null ? "?" : "c.end_date";
+        final String toDateExprForOtherTxn = toDate != null ? "?" : nextDay;
+
         String sql = "SELECT * FROM (SELECT " + ctm.cashierTxnSchema() + " WHERE txn.cashier_id = ? AND txn.currency_code = ? "
-                + "AND ((txn.created_date between c.start_date AND c.end_date  ) or txn.txn_type = 101))  cashier_txns " + " union (select "
-                + ctm.savingsTxnSchema() + " where sav_txn.is_reversed = false and c.id = ? and sav.currency_code = ? "
-                + "and sav_txn.transaction_date between c.start_date and " + nextDay
+                + "AND ((txn.created_date between " + fromDateExpr + " AND " + toDateExprForCashierTxn + "  ) or txn.txn_type = 101))  cashier_txns "
+                + " union (select " + ctm.savingsTxnSchema() + " where sav_txn.is_reversed = false and c.id = ? and sav.currency_code = ? "
+                + "and sav_txn.transaction_date between " + fromDateExpr + " and " + toDateExprForOtherTxn
                 + " and renum.enum_value in ('deposit','withdrawal fee', 'Pay Charge', 'withdrawal', 'Annual Fee', 'Waive Charge', 'Interest Posting', 'Overdraft Interest') "
                 + " and (sav_txn.payment_detail_id IS NULL OR payType.is_cash_payment = true) AND acnttrans.id IS NULL ) "
                 + " union (select " + ctm.loansTxnSchema() + " where loan_txn.is_reversed = false and c.id = ? and loan.currency_code = ? "
-                + "and loan_txn.transaction_date between c.start_date and " + nextDay
+                + "and loan_txn.transaction_date between " + fromDateExpr + " and " + toDateExprForOtherTxn
                 + " and renum.enum_value IN ('REPAYMENT_AT_DISBURSEMENT','REPAYMENT', 'RECOVERY_REPAYMENT','DISBURSEMENT', 'CHARGE_PAYMENT', 'WAIVE_CHARGES', 'WAIVE_INTEREST', 'WRITEOFF') "
                 + " and (loan_txn.payment_detail_id IS NULL OR payType.is_cash_payment = true) " + " AND acnttrans.id IS NULL ) "
                 + " union (select " + ctm.clientTxnSchema()
                 + " where cli_txn.is_reversed = false and c.id = ? and cli_txn.currency_code = ? " + "and cli_txn.transaction_date "
-                + " between c.start_date and  " + nextDay + " and renum.enum_value IN ('PAY_CHARGE', 'WAIVE_CHARGE') "
+                + " between " + fromDateExpr + " and  " + toDateExprForOtherTxn + " and renum.enum_value IN ('PAY_CHARGE', 'WAIVE_CHARGE') "
                 + " and (cli_txn.payment_detail_id IS NULL OR payType.is_cash_payment = true) ) " + " order by created_date ";
 
         if (searchParameters.hasLimit()) {
@@ -344,14 +395,46 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
                 sql += sqlGenerator.limit(searchParameters.getLimit());
             }
         }
-        // return this.jdbcTemplate.query(sql, ctm, new Object[] { cashierId,
-        // currencyCode, hierarchySearchString, cashierId, currencyCode,
-        // hierarchySearchString, cashierId, currencyCode,
-        // hierarchySearchString, cashierId, currencyCode, hierarchySearchString
-        // });
-        Object[] params = new Object[] { cashierId, currencyCode, cashierId, currencyCode, cashierId, currencyCode, cashierId,
-                currencyCode, };
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sql, params, ctm);
+
+        final List<Object> paramsList = new ArrayList<>();
+        // cashier_txns section: upper bound is c.end_date (exact date, no +1 needed for allocations)
+        paramsList.add(cashierId);
+        paramsList.add(currencyCode);
+        if (fromDate != null) {
+            paramsList.add(fromDate);
+        }
+        if (toDate != null) {
+            paramsList.add(toDate);
+        }
+        // savings, loans, client sections: SQL uses DATE_ADD(c.end_date, 1 DAY) to ensure transactions
+        // recorded on the end date itself are included; mirror that with plusDays(1) for explicit toDate
+        paramsList.add(cashierId);
+        paramsList.add(currencyCode);
+        if (fromDate != null) {
+            paramsList.add(fromDate);
+        }
+        if (toDate != null) {
+            paramsList.add(toDate.plusDays(1));
+        }
+        // loans section
+        paramsList.add(cashierId);
+        paramsList.add(currencyCode);
+        if (fromDate != null) {
+            paramsList.add(fromDate);
+        }
+        if (toDate != null) {
+            paramsList.add(toDate.plusDays(1));
+        }
+        // client section
+        paramsList.add(cashierId);
+        paramsList.add(currencyCode);
+        if (fromDate != null) {
+            paramsList.add(fromDate);
+        }
+        if (toDate != null) {
+            paramsList.add(toDate.plusDays(1));
+        }
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sql, paramsList.toArray(), ctm);
     }
 
     private static final class CashierMapper implements RowMapper<CashierData> {
@@ -558,7 +641,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     private static final class CashierTransactionSummaryMapper implements RowMapper<CashierTransactionTypeTotalsData> {
 
-        public String cashierTxnSummarySchema(String nextDay) {
+        public String cashierTxnSummarySchema(String fromDateExpr, String toDateExprForCashierTxn, String toDateExprForOtherTxn) {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
@@ -576,7 +659,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append("    left join m_office o on o.id = t.office_id ");
             sqlBuilder.append("    left join m_staff s on s.id = c.staff_id ");
             sqlBuilder.append("    where txn.cashier_id = ? ");
-            sqlBuilder.append(" AND ((  txn.created_date between c.start_date AND c.end_date ) or txn.txn_type = 101) ");
+            sqlBuilder.append(" AND ((  txn.created_date between " + fromDateExpr + " AND " + toDateExprForCashierTxn
+                    + " ) or txn.txn_type = 101) ");
             sqlBuilder.append(" and   txn.currency_code = ? ");
             sqlBuilder.append(" ) cashier_txns ");
             sqlBuilder.append("    UNION ");
@@ -611,7 +695,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append(" or acnttrans.to_savings_transaction_id = sav_txn.id) ");
             sqlBuilder.append("    where sav_txn.is_reversed = false and c.id = ? ");
             sqlBuilder.append(" and sav.currency_code = ? ");
-            sqlBuilder.append("    and sav_txn.transaction_date between c.start_date and c.end_date ");
+            sqlBuilder.append("    and sav_txn.transaction_date between " + fromDateExpr + " and " + toDateExprForCashierTxn);
             sqlBuilder.append("    and (sav_txn.payment_detail_id IS NULL OR payType.is_cash_payment = true) ");
             sqlBuilder.append("    AND acnttrans.id IS NULL  ");
             sqlBuilder.append("    ) ");
@@ -649,7 +733,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append(" or acnttrans.to_loan_transaction_id = loan_txn.id) ");
             sqlBuilder.append("    where loan_txn.is_reversed = false and c.id = ? ");
             sqlBuilder.append(" and loan.currency_code = ? ");
-            sqlBuilder.append("    and loan_txn.transaction_date between c.start_date and " + nextDay);
+            sqlBuilder.append("    and loan_txn.transaction_date between " + fromDateExpr + " and " + toDateExprForOtherTxn);
             sqlBuilder.append("    and (loan_txn.payment_detail_id IS NULL OR payType.is_cash_payment = true) ");
             sqlBuilder.append("    AND acnttrans.id IS NULL  ");
             sqlBuilder.append("    ) ");
@@ -682,7 +766,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append(" left join m_payment_type payType on payType.id = payDetails.payment_type_id ");
             sqlBuilder.append("    where cli_txn.is_reversed = false AND c.id = ?    ");
             sqlBuilder.append(" and cli_txn.currency_code = ? ");
-            sqlBuilder.append("    and cli_txn.transaction_date between c.start_date and " + nextDay);
+            sqlBuilder.append("    and cli_txn.transaction_date between " + fromDateExpr + " and " + toDateExprForOtherTxn);
             sqlBuilder.append(" and (cli_txn.payment_detail_id IS NULL OR payType.is_cash_payment = true)  ");
             sqlBuilder.append("    ) ");
             sqlBuilder.append("    ) txns ");
