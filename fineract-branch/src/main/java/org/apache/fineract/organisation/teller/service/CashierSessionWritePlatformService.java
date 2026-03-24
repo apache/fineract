@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.teller.service;
 
+import java.math.BigDecimal;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface CashierSessionWritePlatformService {
@@ -25,4 +26,6 @@ public interface CashierSessionWritePlatformService {
     CommandProcessingResult openSession(Long tellerId, Long cashierId, String currencyCode);
 
     CommandProcessingResult closeSession(Long sessionId);
+
+    CommandProcessingResult closeSession(Long sessionId, BigDecimal settledAmount, String supervisorNote);
 }

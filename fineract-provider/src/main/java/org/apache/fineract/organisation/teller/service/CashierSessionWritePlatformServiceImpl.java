@@ -18,19 +18,32 @@
  */
 package org.apache.fineract.organisation.teller.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
+import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccount;
+import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
+import org.apache.fineract.accounting.glaccount.domain.GLAccount;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.teller.domain.Cashier;
 import org.apache.fineract.organisation.teller.domain.CashierRepository;
 import org.apache.fineract.organisation.teller.domain.CashierSession;
 import org.apache.fineract.organisation.teller.domain.CashierSessionRepository;
 import org.apache.fineract.organisation.teller.domain.CashierSessionStatus;
+import org.apache.fineract.organisation.teller.domain.CashierTransactionRepository;
+import org.apache.fineract.organisation.teller.domain.CashierTxnType;
 import org.apache.fineract.organisation.teller.domain.Teller;
 import org.apache.fineract.organisation.teller.domain.TellerRepositoryWrapper;
 import org.apache.fineract.organisation.teller.exception.CashierNotFoundException;
@@ -43,10 +56,17 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CashierSessionWritePlatformServiceImpl implements CashierSessionWritePlatformService {
 
+    private static final String GL_CODE_CASH_SHORTAGE_TELLER = "53920";
+    private static final String GL_CODE_MISCELLANEOUS_INCOME = "43210";
+
     private final PlatformSecurityContext context;
     private final CashierSessionRepository cashierSessionRepository;
     private final CashierRepository cashierRepository;
     private final TellerRepositoryWrapper tellerRepositoryWrapper;
+    private final CashierTransactionRepository cashierTransactionRepository;
+    private final JournalEntryRepository glJournalEntryRepository;
+    private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper;
+    private final GLAccountRepositoryWrapper glAccountRepositoryWrapper;
 
     @Override
     @Transactional
@@ -94,12 +114,55 @@ public class CashierSessionWritePlatformServiceImpl implements CashierSessionWri
     @Override
     @Transactional
     public CommandProcessingResult closeSession(final Long sessionId) {
+        return closeSession(sessionId, null, null);
+    }
+
+    @Override
+    @Transactional
+    public CommandProcessingResult closeSession(final Long sessionId, final BigDecimal settledAmount, final String supervisorNote) {
         context.authenticatedUser();
 
         final CashierSession session = cashierSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new CashierSessionNotFoundException(sessionId));
 
-        session.setStatus(CashierSessionStatus.CLOSED);
+        final BigDecimal resolvedSettledAmount = settledAmount != null ? settledAmount : BigDecimal.ZERO;
+
+        // Compute expected cash: openingAllocation + sumCashIn - sumCashOut
+        final Long cashierId = session.getCashier().getId();
+        final LocalDate sessionDate = session.getSessionDate();
+
+        final BigDecimal sumCashIn = cashierTransactionRepository.sumAmountByCashierAndTxnTypeAndDate(cashierId,
+                CashierTxnType.INWARD_CASH_TXN.getId(), sessionDate);
+        final BigDecimal sumCashOut = cashierTransactionRepository.sumAmountByCashierAndTxnTypeAndDate(cashierId,
+                CashierTxnType.OUTWARD_CASH_TXN.getId(), sessionDate);
+
+        final BigDecimal openingAllocation = session.getOpeningAllocation() != null ? session.getOpeningAllocation() : BigDecimal.ZERO;
+        final BigDecimal safeCashIn = sumCashIn != null ? sumCashIn : BigDecimal.ZERO;
+        final BigDecimal safeCashOut = sumCashOut != null ? sumCashOut : BigDecimal.ZERO;
+
+        final BigDecimal expectedCash = openingAllocation.add(safeCashIn).subtract(safeCashOut);
+        final BigDecimal variance = resolvedSettledAmount.subtract(expectedCash);
+
+        // Validate: supervisor note required when variance != 0
+        if (variance.compareTo(BigDecimal.ZERO) != 0
+                && (supervisorNote == null || supervisorNote.isBlank())) {
+            throw new PlatformApiDataValidationException(
+                    "validation.msg.cashierSession.supervisorNote.required",
+                    "A supervisor note is required when a variance exists between settled amount and expected cash.",
+                    "supervisorNote");
+        }
+
+        // Post GL variance journal entry if needed
+        if (variance.compareTo(BigDecimal.ZERO) != 0) {
+            postVarianceJournalEntry(session, variance, supervisorNote);
+        }
+
+        // Update session fields
+        session.setTotalSettled(resolvedSettledAmount);
+        if (variance.compareTo(BigDecimal.ZERO) != 0) {
+            session.setSupervisorNote(supervisorNote);
+        }
+        session.setStatus(CashierSessionStatus.SETTLED);
         session.setClosedAt(LocalDateTime.now());
 
         cashierSessionRepository.save(session);
@@ -107,5 +170,48 @@ public class CashierSessionWritePlatformServiceImpl implements CashierSessionWri
         return new CommandProcessingResultBuilder()
                 .withEntityId(sessionId)
                 .build();
+    }
+
+    private void postVarianceJournalEntry(final CashierSession session, final BigDecimal variance, final String note) {
+
+        final FinancialActivityAccount tellerCashAccount = financialActivityAccountRepositoryWrapper
+                .findByFinancialActivityTypeWithNotFoundDetection(FinancialActivity.CASH_AT_TELLER.getValue());
+        final GLAccount tellerCashGlAccount = tellerCashAccount.getGlAccount();
+
+        final Office office = session.getOffice();
+        final String currencyCode = session.getCurrencyCode();
+        final LocalDate entryDate = session.getSessionDate();
+
+        final String transactionId = Long.toHexString(System.currentTimeMillis() + session.getId());
+
+        final String description = note != null ? note : "Session variance adjustment";
+
+        final GLAccount debitAccount;
+        final GLAccount creditAccount;
+
+        if (variance.compareTo(BigDecimal.ZERO) < 0) {
+            // Short settlement: cashier returned less than expected
+            // DEBIT Cash Shortage - Teller (53920) / CREDIT Teller Cash (11140)
+            debitAccount = glAccountRepositoryWrapper.findOneByGlCodeWithNotFoundDetection(GL_CODE_CASH_SHORTAGE_TELLER);
+            creditAccount = tellerCashGlAccount;
+        } else {
+            // Over settlement: cashier returned more than expected
+            // DEBIT Teller Cash (11140) / CREDIT Miscellaneous Income (43210)
+            debitAccount = tellerCashGlAccount;
+            creditAccount = glAccountRepositoryWrapper.findOneByGlCodeWithNotFoundDetection(GL_CODE_MISCELLANEOUS_INCOME);
+        }
+
+        final BigDecimal absVariance = variance.abs();
+
+        final JournalEntry debitEntry = JournalEntry.createNew(office, null, debitAccount, currencyCode,
+                transactionId, false, entryDate, JournalEntryType.DEBIT, absVariance, description,
+                null, null, null, null, null, null, null);
+
+        final JournalEntry creditEntry = JournalEntry.createNew(office, null, creditAccount, currencyCode,
+                transactionId, false, entryDate, JournalEntryType.CREDIT, absVariance, description,
+                null, null, null, null, null, null, null);
+
+        glJournalEntryRepository.saveAndFlush(debitEntry);
+        glJournalEntryRepository.saveAndFlush(creditEntry);
     }
 }
