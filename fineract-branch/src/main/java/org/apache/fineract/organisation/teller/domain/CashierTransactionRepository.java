@@ -28,7 +28,7 @@ import org.springframework.data.repository.query.Param;
 public interface CashierTransactionRepository
         extends JpaRepository<CashierTransaction, Long>, JpaSpecificationExecutor<CashierTransaction> {
 
-    @Query("SELECT COALESCE(SUM(ct.txnAmount), 0) FROM CashierTransaction ct WHERE ct.cashier.id = :cashierId AND ct.txnType = :txnType AND ct.txnDate >= :sessionDate")
+    @Query("SELECT COALESCE(SUM(ct.txnAmount), 0) FROM CashierTransaction ct WHERE ct.cashier.id = :cashierId AND ct.txnType = :txnType AND ct.txnDate = :sessionDate")
     BigDecimal sumAmountByCashierAndTxnTypeAndDate(@Param("cashierId") Long cashierId, @Param("txnType") Integer txnType,
             @Param("sessionDate") LocalDate sessionDate);
 }

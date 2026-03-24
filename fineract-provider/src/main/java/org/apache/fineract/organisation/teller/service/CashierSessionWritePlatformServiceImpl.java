@@ -142,10 +142,10 @@ public class CashierSessionWritePlatformServiceImpl implements CashierSessionWri
 
         final BigDecimal expectedCash = openingAllocation.add(safeCashIn).subtract(safeCashOut);
         final BigDecimal variance = resolvedSettledAmount.subtract(expectedCash);
+        final boolean hasVariance = variance.compareTo(BigDecimal.ZERO) != 0;
 
         // Validate: supervisor note required when variance != 0
-        if (variance.compareTo(BigDecimal.ZERO) != 0
-                && (supervisorNote == null || supervisorNote.isBlank())) {
+        if (hasVariance && (supervisorNote == null || supervisorNote.isBlank())) {
             throw new PlatformApiDataValidationException(
                     "validation.msg.cashierSession.supervisorNote.required",
                     "A supervisor note is required when a variance exists between settled amount and expected cash.",
@@ -153,13 +153,13 @@ public class CashierSessionWritePlatformServiceImpl implements CashierSessionWri
         }
 
         // Post GL variance journal entry if needed
-        if (variance.compareTo(BigDecimal.ZERO) != 0) {
+        if (hasVariance) {
             postVarianceJournalEntry(session, variance, supervisorNote);
         }
 
         // Update session fields
         session.setTotalSettled(resolvedSettledAmount);
-        if (variance.compareTo(BigDecimal.ZERO) != 0) {
+        if (hasVariance) {
             session.setSupervisorNote(supervisorNote);
         }
         session.setStatus(CashierSessionStatus.SETTLED);
@@ -182,7 +182,7 @@ public class CashierSessionWritePlatformServiceImpl implements CashierSessionWri
         final String currencyCode = session.getCurrencyCode();
         final LocalDate entryDate = session.getSessionDate();
 
-        final String transactionId = Long.toHexString(System.currentTimeMillis() + session.getId());
+        final String transactionId = java.util.UUID.randomUUID().toString().replace("-", "");
 
         final String description = note != null ? note : "Session variance adjustment";
 
