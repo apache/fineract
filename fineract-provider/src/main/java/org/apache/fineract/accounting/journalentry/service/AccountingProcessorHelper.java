@@ -1304,8 +1304,9 @@ public class AccountingProcessorHelper {
      * <p>
      * For cash payment types ({@code isCashPayment == true}):
      * <ul>
-     * <li>If the current user has an open cashier session for the given office on the transaction date, the
-     * {@code CASH_AT_TELLER} (11140) financial-activity GL account is returned.</li>
+     * <li>If the current user has one or more open cashier sessions for the given office on the transaction date (i.e.
+     * the cashier is active at one or more teller windows), the {@code CASH_AT_TELLER} (11140) financial-activity GL
+     * account is returned.</li>
      * <li>Otherwise, the {@code CASH_AT_MAINVAULT} (11130) financial-activity GL account is returned as fallback.</li>
      * </ul>
      * </p>
@@ -1330,9 +1331,9 @@ public class AccountingProcessorHelper {
             return Optional.empty();
         }
         final Long currentUserId = securityContext.authenticatedUser().getId();
-        final Optional<CashierSession> activeSession = cashierSessionRepository.findOpenSessionByUser(currentUserId, officeId,
+        final List<CashierSession> activeSessions = cashierSessionRepository.findOpenSessionByUser(currentUserId, officeId,
                 transactionDate);
-        final int financialActivityId = activeSession.isPresent() ? FinancialActivity.CASH_AT_TELLER.getValue()
+        final int financialActivityId = !activeSessions.isEmpty() ? FinancialActivity.CASH_AT_TELLER.getValue()
                 : FinancialActivity.CASH_AT_MAINVAULT.getValue();
         return Optional.of(financialActivityAccountRepository.findByFinancialActivityTypeWithNotFoundDetection(financialActivityId)
                 .getGlAccount());
