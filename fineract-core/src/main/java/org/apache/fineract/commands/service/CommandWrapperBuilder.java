@@ -2881,6 +2881,24 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder openCashierSession(final Long tellerId, final Long cashierId) {
+        this.actionName = "OPENCASHIERSESSION";
+        this.entityName = "CASHIERSESSION";
+        this.entityId = tellerId;
+        this.subentityId = cashierId;
+        this.href = "/tellers/" + tellerId + "/cashiers/" + cashierId + "/sessions";
+        return this;
+    }
+
+    public CommandWrapperBuilder closeCashierSession(final Long tellerId, final Long cashierId, final Long sessionId) {
+        this.actionName = "CLOSECASHIERSESSION";
+        this.entityName = "CASHIERSESSION";
+        this.entityId = sessionId;
+        this.subentityId = cashierId;
+        this.href = "/tellers/" + tellerId + "/cashiers/" + cashierId + "/sessions/" + sessionId + "/close";
+        return this;
+    }
+
     public CommandWrapperBuilder deleteRole(Long roleId) {
         this.actionName = "DELETE";
         this.entityName = "ROLE";
